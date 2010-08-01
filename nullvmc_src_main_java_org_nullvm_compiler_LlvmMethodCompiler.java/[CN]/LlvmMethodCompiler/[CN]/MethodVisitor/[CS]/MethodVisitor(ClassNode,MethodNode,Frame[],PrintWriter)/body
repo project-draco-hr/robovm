@@ -1,0 +1,31 @@
+{
+  this.classNode=classNode;
+  this.methodNode=methodNode;
+  this.frames=frames;
+  this.out=out;
+  for (  AbstractInsnNode o : methodNode.instructions.toArray()) {
+    if (o instanceof JumpInsnNode) {
+      JumpInsnNode node=(JumpInsnNode)o;
+      labels.add(node.label.getLabel());
+    }
+ else     if (o instanceof TableSwitchInsnNode) {
+      TableSwitchInsnNode node=(TableSwitchInsnNode)o;
+      labels.add(node.dflt.getLabel());
+      for (      LabelNode labelNode : (List<LabelNode>)node.labels) {
+        labels.add(labelNode.getLabel());
+      }
+    }
+ else     if (o instanceof LookupSwitchInsnNode) {
+      LookupSwitchInsnNode node=(LookupSwitchInsnNode)o;
+      labels.add(node.dflt.getLabel());
+      for (      LabelNode labelNode : (List<LabelNode>)node.labels) {
+        labels.add(labelNode.getLabel());
+      }
+    }
+  }
+  for (  TryCatchBlockNode n : (List<TryCatchBlockNode>)methodNode.tryCatchBlocks) {
+    labels.add(n.start.getLabel());
+    labels.add(n.end.getLabel());
+    labels.add(n.handler.getLabel());
+  }
+}

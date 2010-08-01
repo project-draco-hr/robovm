@@ -1,0 +1,29 @@
+{
+switch (opcode) {
+case Opcodes.BIPUSH:
+case Opcodes.SIPUSH:
+{
+      Var res=tmpi("res");
+      out.format("    %s = bitcast i32 %d to i32\n",res,operand);
+      push(res);
+      break;
+    }
+case Opcodes.NEWARRAY:
+{
+    Var length=pop("length");
+    Var res=tmpr("res");
+    if (currentTryCatchBlocks.isEmpty()) {
+      out.format("    %s = call %%jobject* @nvmNewArray(i32 %d, i32 %s)\n",res,operand,length);
+    }
+ else {
+      String successLabel=String.format("NewArraySuccess%d",pc);
+      out.format("    %s = invoke %%jobject* @nvmNewArray(i32 %d, i32 %s) to label %%%s unwind label %%%s\n",res,operand,length,successLabel,currentLandingPad.getLabel());
+      out.format("%s:\n",successLabel);
+    }
+    push(res);
+    break;
+  }
+default :
+throw new RuntimeException("Opcode not implemented: " + opcodeNames[opcode]);
+}
+}

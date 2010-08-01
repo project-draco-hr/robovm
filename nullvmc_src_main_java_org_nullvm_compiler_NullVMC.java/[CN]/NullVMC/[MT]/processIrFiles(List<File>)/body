@@ -1,0 +1,27 @@
+{
+  List<File> result=new ArrayList<File>();
+  for (  File f : files) {
+    if (!f.getName().toLowerCase().endsWith(".ll")) {
+      result.add(f);
+      continue;
+    }
+    File outFile=new File(work,f.getName().substring(0,f.getName().length() - 3) + ".bc");
+    if (outFile.exists() && outFile.lastModified() >= f.lastModified()) {
+      if (verbose) {
+        stdout.println("Skipping unchanged LLVM IR file: " + f);
+      }
+      result.add(outFile);
+      continue;
+    }
+    if (verbose) {
+      stdout.format("Compiling LLVM IR file '%s' to LLVM bitcode file '%s'\n",f,outFile);
+    }
+    String llvmAsPath="llvm-as";
+    if (llvmBinDir != null) {
+      llvmAsPath=new File(llvmBinDir,"llvm-as").getAbsolutePath();
+    }
+    exec(llvmAsPath,"-o=" + outFile.toString(),f);
+    result.add(outFile);
+  }
+  return result;
+}

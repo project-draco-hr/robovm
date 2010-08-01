@@ -1,0 +1,32 @@
+{
+  if (inputs.isEmpty()) {
+    throw new RuntimeException("No input files specified");
+  }
+  List<File> files=new ArrayList<File>();
+  for (  File f : inputs) {
+    if (!f.exists()) {
+      throw new RuntimeException("Input file '" + f + "' not found");
+    }
+    if (f.isDirectory()) {
+      if (verbose) {
+        stdout.format("Searching dir '%s' for supported file types...\n",f);
+      }
+      files.addAll(findFiles(f));
+    }
+ else {
+      files.add(f);
+    }
+  }
+  if (files.isEmpty()) {
+    throw new RuntimeException("No input files found");
+  }
+  stdout.println("Using work directory: " + work);
+  if (clean && work.exists()) {
+    if (verbose) {
+      stdout.println("Cleaning work directory...");
+    }
+    FileUtils.deleteDirectory(work);
+  }
+  work.mkdirs();
+  processFiles(files);
+}

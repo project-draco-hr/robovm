@@ -1,0 +1,30 @@
+{
+  List<File> result=new ArrayList<File>();
+  for (  File f : files) {
+    File outFile=new File(work,f.getName().substring(0,f.getName().lastIndexOf('.')) + ".o");
+    if (outFile.exists() && outFile.lastModified() >= f.lastModified()) {
+      if (verbose) {
+        stdout.println("Skipping unchanged GCC input file: " + f);
+      }
+      result.add(outFile);
+      continue;
+    }
+    if (verbose) {
+      stdout.format("Compiling '%s' to '%s'\n",f,outFile);
+    }
+    List<String> args=new ArrayList<String>();
+    for (    File include : includeDirs) {
+      args.add("-I");
+      args.add(include.getAbsolutePath());
+    }
+    args.add("-I");
+    args.add(new File(System.getProperty("user.home"),".nullvm/include").getAbsolutePath());
+    String gccPath="gcc";
+    if (gccBin != null) {
+      gccPath=gccBin.getAbsolutePath();
+    }
+    exec(gccPath,"-c","-o",outFile,"-g",gccOpts,args,f);
+    result.add(outFile);
+  }
+  return result;
+}

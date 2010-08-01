@@ -1,0 +1,23 @@
+{
+  if (method.localVariables != null && method.instructions.getFirst() instanceof LabelNode) {
+    LabelNode first=(LabelNode)method.instructions.getFirst();
+    List<LocalVariableNode> variableNodes=new ArrayList<LocalVariableNode>();
+    for (    LocalVariableNode n : (List<LocalVariableNode>)method.localVariables) {
+      if (n.start == first) {
+        variableNodes.add(n);
+      }
+    }
+    Collections.sort(variableNodes,new Comparator<LocalVariableNode>(){
+      public int compare(      LocalVariableNode o1,      LocalVariableNode o2){
+        return new Integer(o1.index).compareTo(o2.index);
+      }
+    }
+);
+    List<String> argNames=new ArrayList<String>();
+    for (    LocalVariableNode n : variableNodes) {
+      argNames.add(n.name);
+    }
+    return argNames;
+  }
+  return new ArrayList<String>();
+}

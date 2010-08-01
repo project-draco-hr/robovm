@@ -1,0 +1,62 @@
+{
+  boolean ztatic=opcode == Opcodes.GETSTATIC || opcode == Opcodes.PUTSTATIC;
+  Type t=Type.getType(desc);
+  String llvmType=LlvmUtil.javaTypeToLlvmType(t);
+  Var val=null;
+  if (opcode == Opcodes.PUTSTATIC || opcode == Opcodes.PUTFIELD) {
+    val=t.getSize() == 2 ? pop2("val") : pop("val");
+    if (t.getSort() == Type.BOOLEAN || t.getSort() == Type.BYTE) {
+      Var tmp=tmp(val.getName(),"i8");
+      out.format("    %s = trunc i32 %s to i8\n",tmp,val);
+      val=tmp;
+    }
+ else     if (t.getSort() == Type.SHORT || t.getSort() == Type.CHAR) {
+      Var tmp=tmp(val.getName(),"i16");
+      out.format("    %s = trunc i32 %s to i16\n",tmp,val);
+      val=tmp;
+    }
+  }
+  Var obj=null;
+  if (!ztatic) {
+    obj=pop("obj");
+    checkNull(obj);
+  }
+  Var res=null;
+  String fieldName=LlvmUtil.mangleString(owner) + "_" + LlvmUtil.mangleString(name)+ "__"+ LlvmUtil.mangleString(desc);
+  if (opcode == Opcodes.GETSTATIC) {
+    Var v=new Var("GETSTATIC_" + fieldName,String.format("%s ()*",llvmType));
+    res=tmp("res",llvmType);
+    out.format("    %s = call %s %s()\n",res,llvmType,v);
+  }
+ else   if (opcode == Opcodes.PUTSTATIC) {
+    Var v=new Var("PUTSTATIC_" + fieldName,String.format("void (%s)*",llvmType));
+    out.format("    call void %s(%s %s)\n",v,llvmType,val);
+  }
+ else   if (opcode == Opcodes.GETFIELD) {
+    Var v=new Var("GETFIELD_" + fieldName,String.format("%s (%%jobject*)*",llvmType));
+    res=tmp("res",llvmType);
+    out.format("    %s = call %s %s(%%jobject* %s)\n",res,llvmType,v,obj);
+  }
+ else   if (opcode == Opcodes.PUTFIELD) {
+    Var v=new Var("PUTFIELD_" + fieldName,String.format("void (%%jobject*,%s)*",llvmType));
+    out.format("    call void %s(%%jobject* %s, %s %s)\n",v,obj,llvmType,val);
+  }
+  if (res != null) {
+    if (t.getSort() == Type.BOOLEAN || t.getSort() == Type.CHAR) {
+      Var tmp=tmpi("res");
+      out.format("    %s = zext %s %s to i32\n",tmp,res.getType(),res);
+      res=tmp;
+    }
+ else     if (t.getSort() == Type.BYTE || t.getSort() == Type.SHORT) {
+      Var tmp=tmpi("res");
+      out.format("    %s = sext %s %s to i32\n",tmp,res.getType(),res);
+      res=tmp;
+    }
+    if (t.getSize() == 2) {
+      push2(res);
+    }
+ else {
+      push(res);
+    }
+  }
+}

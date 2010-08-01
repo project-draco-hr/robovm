@@ -1,0 +1,45 @@
+{
+  List<File> result=new ArrayList<File>();
+  for (  File f : files) {
+    if (!f.getName().toLowerCase().endsWith(".class")) {
+      result.add(f);
+      continue;
+    }
+    InputStream in=null;
+    OutputStream out=null;
+    File outFile=null;
+    try {
+      in=new FileInputStream(f);
+      ClassReader cr=new ClassReader(in);
+      outFile=new File(work,cr.getClassName().replace('/','_') + ".ll");
+      if (outFile.exists() && outFile.lastModified() >= f.lastModified()) {
+        if (verbose) {
+          stdout.println("Skipping unchanged class file: " + f);
+        }
+        result.add(outFile);
+        continue;
+      }
+      if (verbose) {
+        stdout.format("Compiling class file '%s' to LLVM IR file '%s'\n",f,outFile);
+      }
+      out=new FileOutputStream(outFile);
+      new Compiler().compile(cr,out);
+      result.add(outFile);
+    }
+ catch (    Throwable t) {
+      FileUtils.deleteQuietly(outFile);
+      if (t instanceof IOException) {
+        throw (IOException)t;
+      }
+      if (t instanceof RuntimeException) {
+        throw (RuntimeException)t;
+      }
+      throw new RuntimeException(t);
+    }
+ finally {
+      IOUtils.closeQuietly(in);
+      IOUtils.closeQuietly(out);
+    }
+  }
+  return result;
+}

@@ -1,0 +1,56 @@
+{
+switch (opcode) {
+case Opcodes.NEW:
+{
+      Var clazz=tmp("clazz","%jclass*");
+      out.format("    %s = call %%jclass* @nvmGetClass(i8* %s, i8* %s, %%jclass* null)\n",clazz,LlvmUtil.getStringReference(type),LlvmUtil.getStringReference(LlvmUtil.mangleString(type)));
+      Var res=tmpr("res");
+      out.format("    %s = call %%jobject* @nvmNewInstance(%%jclass* %s)\n",res,clazz);
+      push(res);
+      break;
+    }
+case Opcodes.ANEWARRAY:
+{
+    Var length=pop("length");
+    Var res=tmpr("res");
+    if (currentTryCatchBlocks.isEmpty()) {
+      out.format("    %s = call %%jobject* @nvmANewArray(i8* %s, i32 %s)\n",res,LlvmUtil.getStringReference(type),length);
+    }
+ else {
+      String successLabel=String.format("ANewArraySuccess%d",pc);
+      out.format("    %s = invoke %%jobject* @nvmANewArray(i8* %s, i32 %s) to label %%%s unwind label %%%s\n",res,LlvmUtil.getStringReference(type),length,successLabel,currentLandingPad.getLabel());
+      out.format("%s:\n",successLabel);
+    }
+    push(res);
+    break;
+  }
+case Opcodes.CHECKCAST:
+{
+  Var obj=pop("obj");
+  Var clazz=tmp("clazz","%jclass*");
+  out.format("    %s = call %%jclass* @nvmGetClass(i8* %s, i8* %s, %%jclass* null)\n",clazz,LlvmUtil.getStringReference(type),LlvmUtil.getStringReference(LlvmUtil.mangleString(type)));
+  if (currentTryCatchBlocks.isEmpty()) {
+    out.format("    call void @nvmCheckcast(%%jobject* %s, %%jclass* %s)\n",obj,clazz);
+  }
+ else {
+    String successLabel=String.format("CheckCastSuccess%d",pc);
+    out.format("    invoke void @nvmCheckcast(%%jobject* %s, %%jclass* %s) to label %%%s unwind label %%%s\n",obj,clazz,successLabel,currentLandingPad.getLabel());
+    out.format("%s:\n",successLabel);
+  }
+  push(obj);
+  break;
+}
+case Opcodes.INSTANCEOF:
+{
+Var obj=pop("obj");
+Var clazz=tmp("clazz","%jclass*");
+Var res=tmpi("res");
+out.format("    %s = call %%jclass* @nvmGetClass(i8* %s, i8* %s)\n",clazz,LlvmUtil.getStringReference(type),LlvmUtil.getStringReference(LlvmUtil.mangleString(type)));
+out.format("    %s = call i32 @nvmInstanceof(%%jobject* %s, %%jclass* %s)\n",res,obj,clazz);
+push(res);
+break;
+}
+default :
+throw new RuntimeException("Opcode not implemented: " + opcodeNames[opcode]);
+}
+}

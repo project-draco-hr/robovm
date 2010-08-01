@@ -1,0 +1,91 @@
+{
+  Type[] args=Type.getArgumentTypes(desc);
+  ArrayUtils.reverse(args);
+  LinkedList<Var> argVars=new LinkedList<Var>();
+  int n=args.length;
+  for (  Type arg : args) {
+    Var p=null;
+    if (arg.getSize() == 2) {
+      p=pop2("p" + (--n));
+    }
+ else {
+      p=pop("p" + (--n));
+    }
+    if (arg.getSort() == Type.BOOLEAN || arg.getSort() == Type.BYTE) {
+      Var tmp=tmp(p.getName(),"i8");
+      out.format("    %s = trunc i32 %s to i8\n",tmp,p);
+      p=tmp;
+    }
+ else     if (arg.getSort() == Type.SHORT || arg.getSort() == Type.CHAR) {
+      Var tmp=tmp(p.getName(),"i16");
+      out.format("    %s = trunc i32 %s to i16\n",tmp,p);
+      p=tmp;
+    }
+    argVars.addFirst(p);
+  }
+  Var clazz=tmp("clazz","%jclass*");
+  if (opcode == Opcodes.INVOKESTATIC) {
+    out.format("    %s = call %%jclass* @nvmGetClass(i8* %s, i8* %s, %%jclass* null)\n",clazz,LlvmUtil.getStringReference(owner),LlvmUtil.getStringReference(LlvmUtil.mangleString(owner)));
+    argVars.addFirst(clazz);
+  }
+ else   if (opcode == Opcodes.INVOKESPECIAL) {
+    Var obj=pop("obj");
+    checkNull(obj);
+    out.format("    %s = call %%jclass* @nvmGetClass(i8* %s, i8* %s, %%jclass* null)\n",clazz,LlvmUtil.getStringReference(owner),LlvmUtil.getStringReference(LlvmUtil.mangleString(owner)));
+    argVars.addFirst(obj);
+  }
+ else {
+    Var obj=pop("obj");
+    checkNull(obj);
+    Var clazzPtr=tmp("classPtr","%jclass**");
+    out.format("    %s = getelementptr %%jobject* %s, i32 0, i32 0\n",clazzPtr,obj);
+    out.format("    %s = load %%jclass** %s\n",clazz,clazzPtr);
+    argVars.addFirst(obj);
+  }
+  String methodName=LlvmUtil.mangleMethod(owner,name,desc);
+  String methodType=LlvmUtil.javaMethodToLlvmFunctionType(name,desc,opcode == Opcodes.INVOKESTATIC);
+  Var method=tmp(methodName,"");
+  Var tmpMethod=tmp(methodName,"i8*");
+  Var caller=tmp("caller","%jclass*");
+  out.format("    %s = load %%jclass** @clazz\n",caller);
+  out.format("    %s = call i8* @j_get_method_impl(%%jclass* %s, i8* %s, i8* %s, %%jclass* %s)\n",tmpMethod,clazz,LlvmUtil.getStringReference(name),LlvmUtil.getStringReference(desc),caller);
+  out.format("    %s = bitcast i8* %s to %s\n",method,tmpMethod,methodType);
+  String successLabel=String.format("InvokeSuccess%d",pc);
+  Type returnType=Type.getReturnType(desc);
+  if (returnType.getSort() == Type.VOID) {
+    if (currentTryCatchBlocks.isEmpty()) {
+      out.format("    call void %s(%s)\n",method,LlvmUtil.varListToParameterList(argVars));
+    }
+ else {
+      out.format("    invoke void %s(%s) to label %%%s unwind label %%%s\n",method,LlvmUtil.varListToParameterList(argVars),successLabel,currentLandingPad.getLabel());
+      out.format("%s:\n",successLabel);
+    }
+  }
+ else {
+    String llvmReturnType=LlvmUtil.javaTypeToLlvmType(returnType);
+    Var res=tmp("res",llvmReturnType);
+    if (currentTryCatchBlocks.isEmpty()) {
+      out.format("    %s = call %s %s(%s)\n",res,llvmReturnType,method,LlvmUtil.varListToParameterList(argVars));
+    }
+ else {
+      out.format("    %s = invoke %s %s(%s) to label %%%s unwind label %%%s\n",res,llvmReturnType,method,LlvmUtil.varListToParameterList(argVars),successLabel,currentLandingPad.getLabel());
+      out.format("%s:\n",successLabel);
+    }
+    if (returnType.getSort() == Type.BOOLEAN || returnType.getSort() == Type.CHAR) {
+      Var tmp=tmpi("res");
+      out.format("    %s = zext %s %s to i32\n",tmp,res.getType(),res);
+      res=tmp;
+    }
+ else     if (returnType.getSort() == Type.BYTE || returnType.getSort() == Type.SHORT) {
+      Var tmp=tmpi("res");
+      out.format("    %s = sext %s %s to i32\n",tmp,res.getType(),res);
+      res=tmp;
+    }
+    if (returnType.getSize() == 2) {
+      push2(res);
+    }
+ else {
+      push(res);
+    }
+  }
+}

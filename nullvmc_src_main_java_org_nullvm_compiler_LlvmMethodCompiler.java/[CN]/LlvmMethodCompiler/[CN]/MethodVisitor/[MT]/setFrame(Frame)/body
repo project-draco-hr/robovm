@@ -1,0 +1,16 @@
+{
+  currentFrame=frame;
+  stack.clear();
+  if (currentFrame != null) {
+    for (int i=0, slot=0; i < currentFrame.getStackSize(); i++) {
+      BasicValue value=(BasicValue)currentFrame.getStack(i);
+      Var v=new Var("s" + slot,LlvmUtil.javaTypeToLlvmType(value));
+      stack.push(v);
+      if (value.getSize() > 1) {
+        stack.push(null);
+      }
+      slot+=value.getSize();
+    }
+  }
+  return currentFrame;
+}

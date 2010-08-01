@@ -1,0 +1,38 @@
+{
+  if (cst instanceof Integer) {
+    Var res=tmpi("res");
+    out.format("    %s = bitcast i32 %d to i32\n",res,(Integer)cst);
+    push(res);
+  }
+ else   if (cst instanceof Long) {
+    Var res=tmpl("res");
+    out.format("    %s = bitcast i64 %d to i64\n",res,(Long)cst);
+    push2(res);
+  }
+ else   if (cst instanceof Float) {
+    Var res=tmpf("res");
+    int bits=Float.floatToIntBits((Float)cst);
+    out.format("    %s = bitcast i32 %d to float\n",res,bits);
+    push(res);
+  }
+ else   if (cst instanceof Double) {
+    Var res=tmpd("res");
+    long bits=Double.doubleToLongBits((Double)cst);
+    out.format("    %s = bitcast i64 %d to double\n",res,bits);
+    push2(res);
+  }
+ else   if (cst instanceof Type) {
+    Type t=(Type)cst;
+    Var res=tmpr("res");
+    out.format("    %s = call %%jobject* @j_ldc_class(i8* %s)\n",res,LlvmUtil.getStringReference(t.getDescriptor()));
+    push(res);
+  }
+ else   if (cst instanceof String) {
+    Var res=tmpr("res");
+    out.format("    %s = call %%jobject* @j_ldc_string_asciiz(i8* %s)\n",res,LlvmUtil.getStringReference((String)cst));
+    push(res);
+  }
+ else {
+    throw new RuntimeException("Unsupported type for LDC: " + cst.getClass());
+  }
+}

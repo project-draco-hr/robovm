@@ -1,0 +1,1070 @@
+{
+switch (opcode) {
+case Opcodes.NOP:
+    out.println("    ; nop");
+  break;
+case Opcodes.ICONST_M1:
+case Opcodes.ICONST_0:
+case Opcodes.ICONST_1:
+case Opcodes.ICONST_2:
+case Opcodes.ICONST_3:
+case Opcodes.ICONST_4:
+case Opcodes.ICONST_5:
+{
+  Var res=tmpi("res");
+  out.format("    %s = bitcast i32 %d to i32\n",res,opcode - Opcodes.ICONST_0);
+  push(res);
+  break;
+}
+case Opcodes.LCONST_0:
+case Opcodes.LCONST_1:
+{
+Var res=tmpl("res");
+out.format("    %s = bitcast i64 %d to i64\n",res,opcode - Opcodes.LCONST_0);
+push2(res);
+break;
+}
+case Opcodes.FCONST_0:
+case Opcodes.FCONST_1:
+case Opcodes.FCONST_2:
+{
+Var res=tmpf("res");
+out.format("    %s = bitcast float %f to float\n",res,(float)(opcode - Opcodes.FCONST_0));
+push(res);
+break;
+}
+case Opcodes.DCONST_0:
+case Opcodes.DCONST_1:
+{
+Var res=tmpd("res");
+out.format("    %s = bitcast double %f to double\n",res,(double)(opcode - Opcodes.DCONST_0));
+push2(res);
+break;
+}
+case Opcodes.IADD:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpi("res");
+out.format("    %s = add i32 %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.LADD:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpl("res");
+out.format("    %s = add i64 %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.FADD:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpf("res");
+out.format("    %s = add float %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.DADD:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpd("res");
+out.format("    %s = add double %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.ISUB:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpi("res");
+out.format("    %s = sub i32 %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.LSUB:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpl("res");
+out.format("    %s = sub i64 %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.FSUB:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpf("res");
+out.format("    %s = sub float %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.DSUB:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpd("res");
+out.format("    %s = sub double %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.IMUL:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpi("res");
+out.format("    %s = mul i32 %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.LMUL:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpl("res");
+out.format("    %s = mul i64 %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.FMUL:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpf("res");
+out.format("    %s = mul float %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.DMUL:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpd("res");
+out.format("    %s = mul double %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.IDIV:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpi("res");
+out.format("    %s = sdiv i32 %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.LDIV:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpl("res");
+out.format("    %s = sdiv i64 %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.FDIV:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpf("res");
+out.format("    %s = fdiv float %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.DDIV:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpd("res");
+out.format("    %s = fdiv double %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.IREM:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpi("res");
+out.format("    %s = srem i32 %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.LREM:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpl("res");
+out.format("    %s = srem i64 %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.FREM:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpf("res");
+out.format("    %s = frem float %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.DREM:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpd("res");
+out.format("    %s = frem double %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.INEG:
+{
+Var op=pop("op");
+Var res=tmpi("res");
+out.format("    %s = sub i32 0, %s\n",res,op);
+push(res);
+break;
+}
+case Opcodes.LNEG:
+{
+Var op=pop2("op");
+Var res=tmpl("res");
+out.format("    %s = sub i64 0, %s\n",res,op);
+push2(res);
+break;
+}
+case Opcodes.FNEG:
+{
+Var op=pop("op");
+Var tmp1=tmpf("tmp1");
+Var tmp2=tmpf("tmp2");
+Var res=tmpf("res");
+out.format("    %s = bitcast float %s to i32\n",tmp1,op);
+out.format("    %s = xor i32 %s, %d\n",tmp2,tmp1,0x80000000);
+out.format("    %s = bitcast i32 %s to float\n",res,tmp2);
+push(res);
+break;
+}
+case Opcodes.DNEG:
+{
+Var op=pop2("op");
+Var tmp1=tmpd("tmp1");
+Var tmp2=tmpd("tmp2");
+Var res=tmpd("res");
+out.format("    %s = bitcast double %s to i64\n",tmp1,op);
+out.format("    %s = xor i64 %s, %d\n",tmp2,tmp1,0x8000000000000000L);
+out.format("    %s = bitcast i64 %s to double\n",res,tmp2);
+push2(res);
+break;
+}
+case Opcodes.ISHL:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var tmp=tmpi("tmp");
+Var res=tmpi("res");
+out.format("    %s = and i32 31, %s\n",tmp,op1);
+out.format("    %s = shl i32 %s, %s\n",res,op2,tmp);
+push(res);
+break;
+}
+case Opcodes.LSHL:
+{
+Var op1=pop("op1");
+Var op2=pop2("op2");
+Var tmp1=tmpi("tmp1");
+Var tmp2=tmpl("tmp2");
+Var res=tmpl("res");
+out.format("    %s = and i32 63, %s\n",tmp1,op1);
+out.format("    %s = zext i32 %s to i64\n",tmp2,tmp1);
+out.format("    %s = shl i64 %s, %s\n",res,op2,tmp2);
+push2(res);
+break;
+}
+case Opcodes.ISHR:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var tmp=tmpi("tmp");
+Var res=tmpi("res");
+out.format("    %s = and i32 31, %s\n",tmp,op1);
+out.format("    %s = ashr i32 %s, %s\n",res,op2,tmp);
+push(res);
+break;
+}
+case Opcodes.LSHR:
+{
+Var op1=pop("op1");
+Var op2=pop2("op2");
+Var tmp1=tmpi("tmp1");
+Var tmp2=tmpl("tmp1");
+Var res=tmpl("res");
+out.format("    %s = and i32 63, %s\n",tmp1,op1);
+out.format("    %s = zext i32 %s to i64\n",tmp2,tmp1);
+out.format("    %s = ashr i64 %s, %s\n",res,op2,tmp2);
+push2(res);
+break;
+}
+case Opcodes.IUSHR:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var tmp=tmpi("tmp");
+Var res=tmpi("res");
+out.format("    %s = and i32 31, %s\n",tmp,op1);
+out.format("    %s = lshr i32 %s, %s\n",res,op2,tmp);
+push(res);
+break;
+}
+case Opcodes.LUSHR:
+{
+Var op1=pop("op1");
+Var op2=pop2("op2");
+Var tmp1=tmpi("tmp1");
+Var tmp2=tmpl("tmp2");
+Var res=tmpl("res");
+out.format("    %s = and i32 63, %s\n",tmp1,op1);
+out.format("    %s = zext i32 %s to i64\n",tmp2,tmp1);
+out.format("    %s = lshr i64 %s, %s\n",res,op2,tmp2);
+push2(res);
+break;
+}
+case Opcodes.IAND:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpi("res");
+out.format("    %s = and i32 %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.LAND:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpl("res");
+out.format("    %s = and i64 %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.IOR:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpi("res");
+out.format("    %s = or i32 %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.LOR:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpl("res");
+out.format("    %s = or i64 %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.IXOR:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var res=tmpi("res");
+out.format("    %s = xor i32 %s, %s\n",res,op2,op1);
+push(res);
+break;
+}
+case Opcodes.LXOR:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var res=tmpl("res");
+out.format("    %s = xor i64 %s, %s\n",res,op2,op1);
+push2(res);
+break;
+}
+case Opcodes.IRETURN:
+{
+Type retType=Type.getReturnType(methodNode.desc);
+Var op=pop("op");
+if (retType.getSort() != Type.INT) {
+Var tmp=tmp("tmp",LlvmUtil.javaTypeToLlvmType(retType));
+;
+out.format("    %s = trunc i32 %s to %s\n",tmp,op,LlvmUtil.javaTypeToLlvmType(retType));
+out.format("    ret %s %s\n",LlvmUtil.javaTypeToLlvmType(retType),tmp);
+}
+ else {
+out.format("    ret %s %s\n",LlvmUtil.javaTypeToLlvmType(retType),op);
+}
+break;
+}
+case Opcodes.LRETURN:
+{
+Var op=pop2("op");
+out.format("    ret i64 %s\n",op);
+break;
+}
+case Opcodes.FRETURN:
+{
+Var op=pop("op");
+out.format("    ret float %s\n",op);
+break;
+}
+case Opcodes.DRETURN:
+{
+Var op=pop2("op");
+out.format("    ret double %s\n",op);
+break;
+}
+case Opcodes.I2L:
+{
+Var op=pop("op");
+Var res=tmpl("tmp");
+out.format("    %s = sext i32 %s to i64\n",res,op);
+push2(res);
+break;
+}
+case Opcodes.I2B:
+{
+Var op=pop("op");
+Var tmp=tmp("tmp","i8");
+Var res=tmpi("res");
+out.format("    %s = trunc i32 %s to i8\n",tmp,op);
+out.format("    %s = sext i8 %s to i32\n",res,tmp);
+push(res);
+break;
+}
+case Opcodes.I2C:
+{
+Var op=pop("op");
+Var tmp=tmp("tmp","i16");
+Var res=tmpi("res");
+out.format("    %s = trunc i32 %s to i16\n",tmp,op);
+out.format("    %s = zext i16 %s to i32\n",res,tmp);
+push(res);
+break;
+}
+case Opcodes.I2S:
+{
+Var op=pop("op");
+Var tmp=tmp("tmp","i16");
+Var res=tmpi("res");
+out.format("    %s = trunc i32 %s to i16\n",tmp,op);
+out.format("    %s = sext i16 %s to i32\n",res,tmp);
+push(res);
+break;
+}
+case Opcodes.I2F:
+{
+Var op=pop("op");
+Var res=tmpf("res");
+out.format("    %s = sitofp i32 %s to float\n",res,op);
+push(res);
+break;
+}
+case Opcodes.I2D:
+{
+Var op=pop("op");
+Var res=tmpd("res");
+out.format("    %s = sitofp i32 %s to double\n",res,op);
+push2(res);
+break;
+}
+case Opcodes.L2I:
+{
+Var op=pop2("op");
+Var res=tmpi("res");
+out.format("    %s = trunc i64 %s to i32\n",res,op);
+push(res);
+break;
+}
+case Opcodes.L2F:
+{
+Var op=pop2("op");
+Var res=tmpf("res");
+out.format("    %s = sitofp i64 %s to float\n",res,op);
+push(res);
+break;
+}
+case Opcodes.L2D:
+{
+Var op=pop2("op");
+Var res=tmpd("res");
+out.format("    %s = sitofp i64 %s to double\n",res,op);
+push2(res);
+break;
+}
+case Opcodes.F2I:
+{
+Var op=pop("op");
+Var eq=tmp("eq","i1");
+Var pinf=tmp("pinf","i1");
+Var ninf=tmp("ninf","i1");
+Var tmp1=tmpi("tmp1");
+Var tmp2=tmpi("tmp2");
+Var fptosi=tmpi("fptosi");
+Var res=tmpi("res");
+out.format("    %s = fcmp oeq float %s, %s\n",eq,op,op);
+out.format("    %s = fcmp oge float %s, %f\n",pinf,op,(float)Integer.MAX_VALUE);
+out.format("    %s = fcmp ole float %s, %f\n",ninf,op,(float)Integer.MIN_VALUE);
+out.format("    %s = fptosi float %s to i32\n",fptosi,op);
+out.format("    %s = select i1 %s, i32 %s, i32 %d\n",tmp1,eq,fptosi,0);
+out.format("    %s = select i1 %s, i32 %d, i32 %s\n",tmp2,pinf,Integer.MAX_VALUE,tmp1);
+out.format("    %s = select i1 %s, i32 %d, i32 %s\n",res,ninf,Integer.MIN_VALUE,tmp2);
+push(res);
+break;
+}
+case Opcodes.F2L:
+{
+Var op=pop("op");
+Var eq=tmp("eq","i1");
+Var pinf=tmp("pinf","i1");
+Var ninf=tmp("ninf","i1");
+Var tmp1=tmpl("tmp1");
+Var tmp2=tmpl("tmp2");
+Var fptosi=tmpl("fptosi");
+Var res=tmpl("res");
+out.format("    %s = fcmp oeq float %s, %s\n",eq,op,op);
+out.format("    %s = fcmp oge float %s, %f\n",pinf,op,(float)Long.MAX_VALUE);
+out.format("    %s = fcmp ole float %s, %f\n",ninf,op,(float)Long.MIN_VALUE);
+out.format("    %s = fptosi float %s to i64\n",fptosi,op);
+out.format("    %s = select i1 %s, i64 %s, i64 %d\n",tmp1,eq,fptosi,0);
+out.format("    %s = select i1 %s, i64 %d, i64 %s\n",tmp2,pinf,Long.MAX_VALUE,tmp1);
+out.format("    %s = select i1 %s, i64 %d, i64 %s\n",res,ninf,Long.MIN_VALUE,tmp2);
+push2(res);
+break;
+}
+case Opcodes.F2D:
+{
+Var op=pop("op");
+Var res=tmpd("res");
+out.format("    %s = fpext float %s to double\n",res,op);
+push2(res);
+break;
+}
+case Opcodes.D2I:
+{
+Var op=pop2("op");
+Var eq=tmp("eq","i1");
+Var pinf=tmp("pinf","i1");
+Var ninf=tmp("ninf","i1");
+Var tmp1=tmpi("tmp1");
+Var tmp2=tmpi("tmp2");
+Var fptosi=tmpi("fptosi");
+Var res=tmpi("res");
+out.format("    %s = fcmp oeq double %s, %s\n",eq,op,op);
+out.format("    %s = fcmp oge double %s, %f\n",pinf,op,(double)Integer.MAX_VALUE);
+out.format("    %s = fcmp ole double %s, %f\n",ninf,op,(double)Integer.MIN_VALUE);
+out.format("    %s = fptosi double %s to i32\n",fptosi,op);
+out.format("    %s = select i1 %s, i32 %s, i32 %d\n",tmp1,eq,fptosi,0);
+out.format("    %s = select i1 %s, i32 %d, i32 %s\n",tmp2,pinf,Integer.MAX_VALUE,tmp1);
+out.format("    %s = select i1 %s, i32 %d, i32 %s\n",res,ninf,Integer.MIN_VALUE,tmp2);
+push(res);
+break;
+}
+case Opcodes.D2L:
+{
+Var op=pop2("op");
+Var eq=tmp("eq","i1");
+Var pinf=tmp("pinf","i1");
+Var ninf=tmp("ninf","i1");
+Var tmp1=tmpl("tmp1");
+Var tmp2=tmpl("tmp2");
+Var fptosi=tmpl("fptosi");
+Var res=tmpl("res");
+out.format("    %s = fcmp oeq double %s, %s\n",eq,op,op);
+out.format("    %s = fcmp oge double %s, %f\n",pinf,op,(float)Long.MAX_VALUE);
+out.format("    %s = fcmp ole double %s, %f\n",ninf,op,(float)Long.MIN_VALUE);
+out.format("    %s = fptosi double %s to i64\n",fptosi,op);
+out.format("    %s = select i1 %s, i64 %s, i64 %d\n",tmp1,eq,fptosi,0);
+out.format("    %s = select i1 %s, i64 %d, i64 %s\n",tmp2,pinf,Long.MAX_VALUE,tmp1);
+out.format("    %s = select i1 %s, i64 %d, i64 %s\n",res,ninf,Long.MIN_VALUE,tmp2);
+push2(res);
+break;
+}
+case Opcodes.D2F:
+{
+Var op=pop2("op");
+Var res=tmpf("res");
+out.format("    %s = fptrunc double %s to float\n",res,op);
+push(res);
+break;
+}
+case Opcodes.LCMP:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var tmp1=tmp("tmp1","i1");
+Var tmp2=tmp("tmp2","i1");
+Var tmp3=tmpi("tmp3");
+Var tmp4=tmpi("tmp4");
+Var res=tmpi("res");
+out.format("    %s = icmp slt i64 %s, %s\n",tmp1,op2,op1);
+out.format("    %s = icmp sgt i64 %s, %s\n",tmp2,op2,op1);
+out.format("    %s = zext i1 %s to i32\n",tmp3,tmp1);
+out.format("    %s = zext i1 %s to i32\n",tmp4,tmp2);
+out.format("    %s = sub i32 %s, %s\n",res,tmp4,tmp3);
+push(res);
+break;
+}
+case Opcodes.FCMPL:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var ugt=tmp("ugt","i1");
+Var olt=tmp("olt","i1");
+Var ugt32=tmpi("ugt32");
+Var olt32=tmpi("olt32");
+Var res=tmpi("res");
+out.format("    %s = fcmp ugt float %s, %s\n",ugt,op1,op2);
+out.format("    %s = fcmp olt float %s, %s\n",olt,op1,op2);
+out.format("    %s = zext i1 %s to i32\n",ugt32,ugt);
+out.format("    %s = zext i1 %s to i32\n",olt32,olt);
+out.format("    %s = sub i32 %s, %s\n",res,olt32,ugt32);
+push(res);
+break;
+}
+case Opcodes.FCMPG:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var ogt=tmp("ogt","i1");
+Var ult=tmp("ult","i1");
+Var ogt32=tmpi("ogt32");
+Var ult32=tmpi("ult32");
+Var res=tmpi("res");
+out.format("    %s = fcmp ogt float %s, %s\n",ogt,op1,op2);
+out.format("    %s = fcmp ult float %s, %s\n",ult,op1,op2);
+out.format("    %s = zext i1 %s to i32\n",ogt32,ogt);
+out.format("    %s = zext i1 %s to i32\n",ult32,ult);
+out.format("    %s = sub i32 %s, %s\n",res,ult32,ogt32);
+push(res);
+break;
+}
+case Opcodes.DCMPL:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var ugt=tmp("ugt","i1");
+Var olt=tmp("olt","i1");
+Var ugt32=tmpi("ugt32");
+Var olt32=tmpi("olt32");
+Var res=tmpi("res");
+out.format("    %s = fcmp ugt double %s, %s\n",ugt,op1,op2);
+out.format("    %s = fcmp olt double %s, %s\n",olt,op1,op2);
+out.format("    %s = zext i1 %s to i32\n",ugt32,ugt);
+out.format("    %s = zext i1 %s to i32\n",olt32,olt);
+out.format("    %s = sub i32 %s, %s\n",res,olt32,ugt32);
+push(res);
+break;
+}
+case Opcodes.DCMPG:
+{
+Var op1=pop2("op1");
+Var op2=pop2("op2");
+Var ogt=tmp("ogt","i1");
+Var ult=tmp("ult","i1");
+Var ogt32=tmpi("ogt32");
+Var ult32=tmpi("ult32");
+Var res=tmpi("res");
+out.format("    %s = fcmp ogt double %s, %s\n",ogt,op1,op2);
+out.format("    %s = fcmp ult double %s, %s\n",ult,op1,op2);
+out.format("    %s = zext i1 %s to i32\n",ogt32,ogt);
+out.format("    %s = zext i1 %s to i32\n",ult32,ult);
+out.format("    %s = sub i32 %s, %s\n",res,ult32,ogt32);
+push(res);
+break;
+}
+case Opcodes.RETURN:
+out.println("    ret void");
+break;
+case Opcodes.ARETURN:
+{
+Var op=pop("op");
+out.format("    ret %%jobject* %s\n",op);
+break;
+}
+case Opcodes.ACONST_NULL:
+{
+Var res=tmpr("res");
+out.format("    %s = inttoptr i32 0 to %%jobject*\n",res);
+push(res);
+break;
+}
+case Opcodes.ARRAYLENGTH:
+{
+Var o=pop("o");
+Var res=tmpi("res");
+checkNull(o);
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",res,o);
+push(res);
+break;
+}
+case Opcodes.IALOAD:
+{
+Var index=pop("index");
+Var o=pop("o");
+Var res=tmpi("res");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    %s = call i32 @j_iaload(%%jobject* %s, i32 %s)\n",res,o,index);
+push(res);
+break;
+}
+case Opcodes.IASTORE:
+{
+Var value=pop("value");
+Var index=pop("index");
+Var o=pop("o");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    call void @j_iastore(%%jobject* %s, i32 %s, i32 %s)\n",o,index,value);
+break;
+}
+case Opcodes.FALOAD:
+{
+Var index=pop("index");
+Var o=pop("o");
+Var res=tmpf("res");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    %s = call float @j_faload(%%jobject* %s, i32 %s)\n",res,o,index);
+push(res);
+break;
+}
+case Opcodes.FASTORE:
+{
+Var value=pop("value");
+Var index=pop("index");
+Var o=pop("o");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    call void @j_fastore(%%jobject* %s, i32 %s, float %s)\n",o,index,value);
+break;
+}
+case Opcodes.BALOAD:
+{
+Var index=pop("index");
+Var o=pop("o");
+Var res=tmpi("res");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    %s = call i32 @j_baload(%%jobject* %s, i32 %s)\n",res,o,index);
+push(res);
+break;
+}
+case Opcodes.BASTORE:
+{
+Var value=pop("value");
+Var index=pop("index");
+Var o=pop("o");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    call void @j_bastore(%%jobject* %s, i32 %s, i32 %s)\n",o,index,value);
+break;
+}
+case Opcodes.CALOAD:
+{
+Var index=pop("index");
+Var o=pop("o");
+Var res=tmpi("res");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    %s = call i32 @j_caload(%%jobject* %s, i32 %s)\n",res,o,index);
+push(res);
+break;
+}
+case Opcodes.CASTORE:
+{
+Var value=pop("value");
+Var index=pop("index");
+Var o=pop("o");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    call void @j_castore(%%jobject* %s, i32 %s, i32 %s)\n",o,index,value);
+break;
+}
+case Opcodes.SALOAD:
+{
+Var index=pop("index");
+Var o=pop("o");
+Var res=tmpi("res");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    %s = call i32 @j_saload(%%jobject* %s, i32 %s)\n",res,o,index);
+push(res);
+break;
+}
+case Opcodes.SASTORE:
+{
+Var value=pop("value");
+Var index=pop("index");
+Var o=pop("o");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    call void @j_sastore(%%jobject* %s, i32 %s, i32 %s)\n",o,index,value);
+break;
+}
+case Opcodes.LALOAD:
+{
+Var index=pop("index");
+Var o=pop("o");
+Var res=tmpl("res");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    %s = call i64 @j_laload(%%jobject* %s, i32 %s)\n",res,o,index);
+push2(res);
+break;
+}
+case Opcodes.LASTORE:
+{
+Var value=pop2("value");
+Var index=pop("index");
+Var o=pop("o");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    call void @j_lastore(%%jobject* %s, i32 %s, i64 %s)\n",o,index,value);
+break;
+}
+case Opcodes.DALOAD:
+{
+Var index=pop("index");
+Var o=pop("o");
+Var res=tmpd("res");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    %s = call double @j_daload(%%jobject* %s, i32 %s)\n",res,o,index);
+push2(res);
+break;
+}
+case Opcodes.DASTORE:
+{
+Var value=pop2("value");
+Var index=pop("index");
+Var o=pop("o");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    call void @j_dastore(%%jobject* %s, i32 %s, double %s)\n",o,index,value);
+break;
+}
+case Opcodes.AALOAD:
+{
+Var index=pop("index");
+Var o=pop("o");
+Var res=tmpr("res");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    %s = call %%jobject* @j_aaload(%%jobject* %s, i32 %s)\n",res,o,index);
+push(res);
+break;
+}
+case Opcodes.AASTORE:
+{
+Var value=pop("value");
+Var index=pop("index");
+Var o=pop("o");
+checkNull(o);
+Var length=tmpi("length");
+out.format("    %s = call i32 @j_arraylength(%%jobject* %s)\n",length,o);
+checkBounds(length,index);
+out.format("    call void @j_aastore(%%jobject* %s, i32 %s, %%jobject* %s)\n",o,index,value);
+break;
+}
+case Opcodes.POP:
+pop("op");
+out.println("    ; pop");
+break;
+case Opcodes.POP2:
+pop2("op");
+out.println("    ; pop2");
+break;
+case Opcodes.SWAP:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+push(op1);
+push(op2);
+break;
+}
+case Opcodes.DUP:
+{
+Var op=pop("op");
+push(op);
+push(op);
+break;
+}
+case Opcodes.DUP_X1:
+{
+Var op1=pop("op1");
+Var op2=pop("op2");
+push(op1);
+push(op2);
+push(op1);
+break;
+}
+case Opcodes.DUP_X2:
+{
+Var op1=pop("op1");
+if (isSingleWordOnTopOfStack()) {
+Var op2=pop("op2");
+Var op3=pop("op3");
+push(op1);
+push(op3);
+push(op2);
+push(op1);
+}
+ else {
+Var op2=pop2("op2");
+push(op1);
+push2(op2);
+push(op1);
+}
+break;
+}
+case Opcodes.DUP2:
+{
+if (isSingleWordOnTopOfStack()) {
+Var op1=pop("op1");
+Var op2=pop("op2");
+push(op2);
+push(op1);
+push(op2);
+push(op1);
+}
+ else {
+Var op=pop2("op");
+push2(op);
+push2(op);
+}
+break;
+}
+case Opcodes.DUP2_X1:
+{
+if (isSingleWordOnTopOfStack()) {
+Var op1=pop("op1");
+Var op2=pop("op2");
+Var op3=pop("op3");
+push(op2);
+push(op1);
+push(op3);
+push(op2);
+push(op1);
+}
+ else {
+Var op1=pop2("op1");
+Var op2=pop("op2");
+push2(op1);
+push(op2);
+push2(op1);
+}
+break;
+}
+case Opcodes.DUP2_X2:
+{
+if (isSingleWordOnTopOfStack()) {
+Var op1=pop("op1");
+Var op2=pop("op2");
+if (isSingleWordOnTopOfStack()) {
+Var op3=pop("op3");
+Var op4=pop("op4");
+push(op2);
+push(op1);
+push(op4);
+push(op3);
+push(op2);
+push(op1);
+}
+ else {
+Var op3=pop2("op3");
+push(op2);
+push(op1);
+push2(op3);
+push(op2);
+push(op1);
+}
+}
+ else {
+Var op1=pop2("op1");
+if (isSingleWordOnTopOfStack()) {
+Var op2=pop("op2");
+Var op3=pop("op3");
+push2(op1);
+push(op3);
+push(op2);
+push2(op1);
+}
+ else {
+Var op2=pop2("op2");
+push2(op1);
+push2(op2);
+push2(op1);
+}
+}
+break;
+}
+case Opcodes.ATHROW:
+{
+Var throwable=pop("throwable");
+checkNull(throwable);
+if (currentTryCatchBlocks.isEmpty()) {
+out.format("    call void @nvmThrow(%%jobject* %s)\n",throwable);
+out.format("    unreachable\n");
+}
+ else {
+out.format("    store %s %s, %s* %s\n",throwablePtr.getType(),throwable,throwablePtr.getType(),throwablePtr);
+out.format("    br label %%%sMatch\n",currentLandingPad.getLabel());
+}
+break;
+}
+case Opcodes.MONITORENTER:
+{
+Var o=pop("o");
+checkNull(o);
+out.format("    call void @j_monitorenter(%%jobject* %s)\n",o);
+break;
+}
+case Opcodes.MONITOREXIT:
+{
+Var o=pop("o");
+checkNull(o);
+out.format("    call void @j_monitorexit(%%jobject* %s)\n",o);
+break;
+}
+default :
+throw new RuntimeException("Opcode not implemented: " + opcodeNames[opcode]);
+}
+}

@@ -1,0 +1,16 @@
+{
+  String successLabel=String.format("CheckBoundsSuccess%d",pc);
+  String failureLabel=String.format("CheckBoundsFailure%d",pc);
+  Var cond=tmp("cond","i1");
+  out.format("    %s = icmp ult i32 %s, %s\n",cond,index,length);
+  out.format("    br i1 %s, label %%%s, label %%%s\n",cond,successLabel,failureLabel);
+  out.format("%s:\n",failureLabel);
+  if (currentTryCatchBlocks.isEmpty()) {
+    out.format("    call void @nvmThrowArrayIndexOutOfBoundsException(i32 %s)\n",index);
+    out.format("    unreachable\n");
+  }
+ else {
+    out.format("    invoke void @nvmThrowArrayIndexOutOfBoundsException(i32 %s) to label %%%s unwind label %%%s\n",index,successLabel,currentLandingPad.getLabel());
+  }
+  out.format("%s:\n",successLabel);
+}
