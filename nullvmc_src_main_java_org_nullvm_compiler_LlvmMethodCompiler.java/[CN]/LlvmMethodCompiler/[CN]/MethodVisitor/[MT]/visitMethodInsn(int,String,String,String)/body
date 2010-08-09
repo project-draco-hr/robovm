@@ -23,33 +23,24 @@
     }
     argVars.addFirst(p);
   }
-  Var clazz=tmp("clazz","%jclass*");
-  if (opcode == Opcodes.INVOKESTATIC) {
-    out.format("    %s = call %%jclass* @nvmGetClass(i8* %s, i8* %s, %%jclass* null)\n",clazz,LlvmUtil.getStringReference(owner),LlvmUtil.getStringReference(LlvmUtil.mangleString(owner)));
-    argVars.addFirst(clazz);
-  }
- else   if (opcode == Opcodes.INVOKESPECIAL) {
+  if (opcode != Opcodes.INVOKESTATIC) {
     Var obj=pop("obj");
     checkNull(obj);
-    out.format("    %s = call %%jclass* @nvmGetClass(i8* %s, i8* %s, %%jclass* null)\n",clazz,LlvmUtil.getStringReference(owner),LlvmUtil.getStringReference(LlvmUtil.mangleString(owner)));
     argVars.addFirst(obj);
   }
- else {
-    Var obj=pop("obj");
-    checkNull(obj);
-    Var clazzPtr=tmp("classPtr","%jclass**");
-    out.format("    %s = getelementptr %%jobject* %s, i32 0, i32 0\n",clazzPtr,obj);
-    out.format("    %s = load %%jclass** %s\n",clazz,clazzPtr);
-    argVars.addFirst(obj);
+  String method=null;
+  if (owner.equals(classNode.name)) {
+    MethodNode mnode=LlvmUtil.findMethodNode(classNode,name,desc);
+    if (mnode != null && ((classNode.access & Opcodes.ACC_STATIC) > 0 || "<init>".equals(mnode.name) || (mnode.access & Opcodes.ACC_PRIVATE) > 0 || (mnode.access & Opcodes.ACC_FINAL) > 0 || (opcode == Opcodes.INVOKESTATIC && (mnode.access & Opcodes.ACC_STATIC) > 0))) {
+      method="@" + LlvmUtil.mangleMethod(owner,name,desc);
+    }
   }
-  String methodName=LlvmUtil.mangleMethod(owner,name,desc);
-  String methodType=LlvmUtil.javaMethodToLlvmFunctionType(name,desc,opcode == Opcodes.INVOKESTATIC);
-  Var method=tmp(methodName,"");
-  Var tmpMethod=tmp(methodName,"i8*");
-  Var caller=tmp("caller","%jclass*");
-  out.format("    %s = load %%jclass** @clazz\n",caller);
-  out.format("    %s = call i8* @j_get_method_impl(%%jclass* %s, i8* %s, i8* %s, %%jclass* %s)\n",tmpMethod,clazz,LlvmUtil.getStringReference(name),LlvmUtil.getStringReference(desc),caller);
-  out.format("    %s = bitcast i8* %s to %s\n",method,tmpMethod,methodType);
+  if (method == null) {
+    String function=opcodeNames[opcode] + "_" + LlvmUtil.mangleMethod(owner,name,desc);
+    Var v=tmp(function,LlvmUtil.functionType(desc,opcode == Opcodes.INVOKESTATIC));
+    out.format("    %s = load %s** @%s\n",v,v.getType(),function);
+    method=v.toString();
+  }
   String successLabel=String.format("InvokeSuccess%d",pc);
   Type returnType=Type.getReturnType(desc);
   if (returnType.getSort() == Type.VOID) {

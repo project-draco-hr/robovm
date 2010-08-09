@@ -1,14 +1,12 @@
 {
-  Var lengths=tmp("lengths",String.format("[%d x i32]",dims));
-  out.format("    %s = alloca %s\n",lengths,lengths.getType());
   for (int i=0; i < dims; i++) {
     Var ptr=tmp("ptr","i32*");
     Var length=pop("length" + (dims - i - 1));
-    out.format("    %s = getelementptr %s* %s, i32 0, i32 %d\n",ptr,lengths.getType(),lengths,dims - i - 1);
+    out.format("    %s = getelementptr %s* %s, i32 0, i32 %d\n",ptr,multiANewArrayLengths.getType(),multiANewArrayLengths,dims - i - 1);
     out.format("    store i32 %s, i32* %s\n",length,ptr);
   }
   Var lengthsi32=tmp("lengths","i32*");
-  out.format("    %s = bitcast %s* %s to i32*\n",lengthsi32,lengths.getType(),lengths);
+  out.format("    %s = bitcast %s* %s to i32*\n",lengthsi32,multiANewArrayLengths.getType(),multiANewArrayLengths);
   Var res=tmpr("res");
   if (currentTryCatchBlocks.isEmpty()) {
     out.format("    %s = call %%jobject* @nvmMultiANewArray(i8* %s, i32 %d, i32* %s)\n",res,LlvmUtil.getStringReference(desc),dims,lengthsi32);

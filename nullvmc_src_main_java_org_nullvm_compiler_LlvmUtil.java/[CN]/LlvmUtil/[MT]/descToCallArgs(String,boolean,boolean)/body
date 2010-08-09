@@ -1,10 +1,6 @@
 {
-  String returnType=javaTypeToLlvmType(Type.getReturnType(desc));
   List<String> args=new ArrayList<String>();
-  if (ztatic) {
-    args.add("%jclass*" + (omitArgNames ? "" : " %class"));
-  }
- else {
+  if (!ztatic) {
     args.add("%jobject*" + (omitArgNames ? "" : " " + new Var("arg0","%jobject*")));
   }
   int i=ztatic ? 0 : 1;
@@ -12,10 +8,5 @@
     args.add(LlvmUtil.javaTypeToLlvmType(arg) + (omitArgNames ? "" : " " + new Var("arg" + i,LlvmUtil.javaTypeToLlvmType(arg))));
     i++;
   }
-  if (!skipName) {
-    return String.format("%s @%s(%s)",returnType,mangleMethod(owner,name,desc),join(args));
-  }
- else {
-    return String.format("%s (%s)",returnType,join(args));
-  }
+  return args;
 }

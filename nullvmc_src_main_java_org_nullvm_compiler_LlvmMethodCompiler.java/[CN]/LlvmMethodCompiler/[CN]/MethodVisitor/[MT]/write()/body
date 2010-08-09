@@ -4,8 +4,6 @@
     out.format("    %s = alloca %s\n",throwablePtr,throwablePtr.getType());
   }
   Set<String> accessors=new HashSet<String>();
-  getters=new HashMap<String,Var>();
-  setters=new HashMap<String,Var>();
   for (AbstractInsnNode insn=methodNode.instructions.getFirst(); insn != null; insn=insn.getNext()) {
     if (insn instanceof FieldInsnNode) {
       FieldInsnNode n=(FieldInsnNode)insn;
@@ -44,6 +42,17 @@
         }
       }
     }
+  }
+  int maxDims=-1;
+  for (AbstractInsnNode insn=methodNode.instructions.getFirst(); insn != null; insn=insn.getNext()) {
+    if (insn instanceof MultiANewArrayInsnNode) {
+      MultiANewArrayInsnNode n=(MultiANewArrayInsnNode)insn;
+      maxDims=Math.max(maxDims,n.dims);
+    }
+  }
+  if (maxDims != -1) {
+    multiANewArrayLengths=tmp("multiANewArrayLengths",String.format("[%d x i32]",maxDims));
+    out.format("    %s = alloca %s\n",multiANewArrayLengths,multiANewArrayLengths.getType());
   }
   for (AbstractInsnNode insn=methodNode.instructions.getFirst(); insn != null; insn=insn.getNext()) {
     if (nextFrame() != null) {

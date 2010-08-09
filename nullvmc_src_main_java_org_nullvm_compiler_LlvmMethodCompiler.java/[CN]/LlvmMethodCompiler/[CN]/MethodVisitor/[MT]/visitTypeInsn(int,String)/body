@@ -27,14 +27,15 @@ case Opcodes.ANEWARRAY:
 case Opcodes.CHECKCAST:
 {
   Var obj=pop("obj");
-  Var clazz=tmp("clazz","%jclass*");
-  out.format("    %s = call %%jclass* @nvmGetClass(i8* %s, i8* %s, %%jclass* null)\n",clazz,LlvmUtil.getStringReference(type),LlvmUtil.getStringReference(LlvmUtil.mangleString(type)));
+  String function="CHECKCAST_" + LlvmUtil.mangleString(type);
+  Var v=tmp(function,"void (%jobject*)");
+  out.format("    %s = load %s** @%s\n",v,v.getType(),function);
   if (currentTryCatchBlocks.isEmpty()) {
-    out.format("    call void @nvmCheckcast(%%jobject* %s, %%jclass* %s)\n",obj,clazz);
+    out.format("    call void %s(%%jobject* %s)\n",v,obj);
   }
  else {
     String successLabel=String.format("CheckCastSuccess%d",pc);
-    out.format("    invoke void @nvmCheckcast(%%jobject* %s, %%jclass* %s) to label %%%s unwind label %%%s\n",obj,clazz,successLabel,currentLandingPad.getLabel());
+    out.format("    invoke void %s(%%jobject* %s) to label %%%s unwind label %%%s\n",v,obj,successLabel,currentLandingPad.getLabel());
     out.format("%s:\n",successLabel);
   }
   push(obj);
@@ -43,10 +44,18 @@ case Opcodes.CHECKCAST:
 case Opcodes.INSTANCEOF:
 {
 Var obj=pop("obj");
-Var clazz=tmp("clazz","%jclass*");
+String function="INSTANCEOF_" + LlvmUtil.mangleString(type);
+Var v=tmp(function,"i32 (%jobject*)");
+out.format("    %s = load %s** @%s\n",v,v.getType(),function);
 Var res=tmpi("res");
-out.format("    %s = call %%jclass* @nvmGetClass(i8* %s, i8* %s)\n",clazz,LlvmUtil.getStringReference(type),LlvmUtil.getStringReference(LlvmUtil.mangleString(type)));
-out.format("    %s = call i32 @nvmInstanceof(%%jobject* %s, %%jclass* %s)\n",res,obj,clazz);
+if (currentTryCatchBlocks.isEmpty()) {
+  out.format("    %s = call i32 %s(%%jobject* %s)\n",res,v,obj);
+}
+ else {
+  String successLabel=String.format("InstanceOfSuccess%d",pc);
+  out.format("    %s = invoke i32 %s(%%jobject* %s) to label %%%s unwind label %%%s\n",res,v,obj,successLabel,currentLandingPad.getLabel());
+  out.format("%s:\n",successLabel);
+}
 push(res);
 break;
 }
