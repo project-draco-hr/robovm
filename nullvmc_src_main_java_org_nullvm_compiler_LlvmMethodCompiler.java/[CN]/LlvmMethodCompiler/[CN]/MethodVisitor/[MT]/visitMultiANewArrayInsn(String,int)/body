@@ -9,11 +9,11 @@
   out.format("    %s = bitcast %s* %s to i32*\n",lengthsi32,multiANewArrayLengths.getType(),multiANewArrayLengths);
   Var res=tmpr("res");
   if (currentTryCatchBlocks.isEmpty()) {
-    out.format("    %s = call %%jobject* @nvmMultiANewArray(i8* %s, i32 %d, i32* %s)\n",res,LlvmUtil.getStringReference(desc),dims,lengthsi32);
+    out.format("    %s = call %%Object* @nvmMultiANewArray(i8* %s, i32 %d, i32* %s)\n",res,LlvmUtil.getStringReference(desc),dims,lengthsi32);
   }
  else {
     String successLabel=String.format("NewArraySuccess%d",pc);
-    out.format("    %s = invoke %%jobject* @nvmMultiANewArray(i8* %s, i32 %d, i32* %s) to label %%%s unwind label %%%s\n",res,LlvmUtil.getStringReference(desc),dims,lengthsi32,successLabel,currentLandingPad.getLabel());
+    out.format("    %s = invoke %%Object* @nvmMultiANewArray(i8* %s, i32 %d, i32* %s) to label %%%s unwind label %%%s\n",res,LlvmUtil.getStringReference(desc),dims,lengthsi32,successLabel,currentLandingPad.getLabel());
     out.format("%s:\n",successLabel);
   }
   push(res);

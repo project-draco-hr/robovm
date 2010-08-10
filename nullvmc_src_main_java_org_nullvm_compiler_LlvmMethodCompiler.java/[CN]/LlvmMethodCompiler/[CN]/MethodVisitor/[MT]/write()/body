@@ -1,6 +1,6 @@
 {
   if (!methodNode.tryCatchBlocks.isEmpty()) {
-    throwablePtr=new Var("throwable","%jobject*");
+    throwablePtr=new Var("throwable","%Object*");
     out.format("    %s = alloca %s\n",throwablePtr,throwablePtr.getType());
   }
   Set<String> accessors=new HashSet<String>();
@@ -28,7 +28,7 @@
  else       if (n.getOpcode() == Opcodes.PUTFIELD) {
         String setter="PUTFIELD_" + fieldName;
         if (!accessors.contains(setter)) {
-          Var v=new Var(setter,String.format("void (%%jobject*,%s)*",llvmType));
+          Var v=new Var(setter,String.format("void (%%Object*,%s)*",llvmType));
           out.format("    %s = load %s* @%s\n",v,v.getType(),setter);
           accessors.add(setter);
         }
@@ -36,7 +36,7 @@
  else       if (n.getOpcode() == Opcodes.GETFIELD) {
         String getter="GETFIELD_" + fieldName;
         if (!accessors.contains(getter)) {
-          Var v=new Var(getter,String.format("%s (%%jobject*)*",llvmType));
+          Var v=new Var(getter,String.format("%s (%%Object*)*",llvmType));
           out.format("    %s = load %s* @%s\n",v,v.getType(),getter);
           accessors.add(getter);
         }
@@ -89,7 +89,7 @@
     Var ehptr=tmp("ehptr","i8*");
     out.format("    %s = call i8* @llvm.eh.exception()\n",ehptr);
     Var throwable=tmpr("throwable");
-    out.format("    %s = call %%jobject* @j_get_throwable(i8* %s)\n",throwable,ehptr);
+    out.format("    %s = call %%Object* @j_get_throwable(i8* %s)\n",throwable,ehptr);
     Var sel=tmp("sel","i64");
     out.format("    %s = call i64 (i8*, i8*, ...)* @llvm.eh.selector.i64(i8* %s, " + "i8* bitcast (i32 (i32, i32, i64, i8*, i8*)* @j_eh_personality to i8*), i32 1)\n",sel,ehptr);
     out.format("    store %s %s, %s* %s\n",throwablePtr.getType(),throwable,throwablePtr.getType(),throwablePtr);
@@ -106,11 +106,11 @@
  else {
         Var condi32=tmpi("cond");
         Var cond=tmp("cond","i1");
-        Var clazz=tmp("clazz","%jclass*");
-        out.format("    %s = load %%jclass** @\"%s_%%jclass*\"\n",clazz,LlvmUtil.mangleString(type));
+        Var clazz=tmp("clazz","%Class*");
+        out.format("    %s = load %%Class** @\"%s_%%Class*\"\n",clazz,LlvmUtil.mangleString(type));
         throwable=tmpr("throwable");
         out.format("    %s = load %s* %s\n",throwable,throwablePtr.getType(),throwablePtr);
-        out.format("    %s = call i32 @j_eh_match_throwable(%%jobject* %s, %%jclass* %s)\n",condi32,throwable,clazz);
+        out.format("    %s = call i32 @j_eh_match_throwable(%%Object* %s, %%Class* %s)\n",condi32,throwable,clazz);
         out.format("    %s = trunc i32 %s to i1\n",cond,condi32);
         out.format("    br i1 %s, label %%%s%s, label %%%sNot%s\n",cond,lpad.getLabel(),LlvmUtil.mangleString(type),lpad.getLabel(),LlvmUtil.mangleString(type));
         out.format("%s%s:\n",lpad.getLabel(),LlvmUtil.mangleString(type));
@@ -126,7 +126,7 @@
     if (!alwaysMatches) {
       throwable=tmpr("throwable");
       out.format("    %s = load %s* %s\n",throwable,throwablePtr.getType(),throwablePtr);
-      out.format("    call void @nvmThrow(%%jobject* %s)\n",throwable);
+      out.format("    call void @nvmThrow(%%Object* %s)\n",throwable);
       out.format("    unreachable\n");
     }
   }
