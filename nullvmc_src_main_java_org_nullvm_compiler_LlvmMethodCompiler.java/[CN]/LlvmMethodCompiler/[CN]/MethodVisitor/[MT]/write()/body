@@ -12,7 +12,7 @@
       if (n.getOpcode() == Opcodes.PUTSTATIC) {
         String setter="PUTSTATIC_" + fieldName;
         if (!accessors.contains(setter)) {
-          Var v=new Var(setter,String.format("void (%s)*",llvmType));
+          Var v=new Var(setter,String.format("void (%%Env*, %s)*",llvmType));
           out.format("    %s = load %s* @%s\n",v,v.getType(),setter);
           accessors.add(setter);
         }
@@ -20,7 +20,7 @@
  else       if (n.getOpcode() == Opcodes.GETSTATIC) {
         String getter="GETSTATIC_" + fieldName;
         if (!accessors.contains(getter)) {
-          Var v=new Var(getter,String.format("%s ()*",llvmType));
+          Var v=new Var(getter,String.format("%s (%%Env*)*",llvmType));
           out.format("    %s = load %s* @%s\n",v,v.getType(),getter);
           accessors.add(getter);
         }
@@ -28,7 +28,7 @@
  else       if (n.getOpcode() == Opcodes.PUTFIELD) {
         String setter="PUTFIELD_" + fieldName;
         if (!accessors.contains(setter)) {
-          Var v=new Var(setter,String.format("void (%%Object*,%s)*",llvmType));
+          Var v=new Var(setter,String.format("void (%%Env*, %%Object*, %s)*",llvmType));
           out.format("    %s = load %s* @%s\n",v,v.getType(),setter);
           accessors.add(setter);
         }
@@ -36,7 +36,7 @@
  else       if (n.getOpcode() == Opcodes.GETFIELD) {
         String getter="GETFIELD_" + fieldName;
         if (!accessors.contains(getter)) {
-          Var v=new Var(getter,String.format("%s (%%Object*)*",llvmType));
+          Var v=new Var(getter,String.format("%s (%%Env*, %%Object*)*",llvmType));
           out.format("    %s = load %s* @%s\n",v,v.getType(),getter);
           accessors.add(getter);
         }
@@ -126,7 +126,7 @@
     if (!alwaysMatches) {
       throwable=tmpr("throwable");
       out.format("    %s = load %s* %s\n",throwable,throwablePtr.getType(),throwablePtr);
-      out.format("    call void @nvmThrow(%%Object* %s)\n",throwable);
+      out.format("    call void @_nvmBcThrow(%%Env* %s, %%Object* %s)\n",new Var("env","%Env*"),throwable);
       out.format("    unreachable\n");
     }
   }

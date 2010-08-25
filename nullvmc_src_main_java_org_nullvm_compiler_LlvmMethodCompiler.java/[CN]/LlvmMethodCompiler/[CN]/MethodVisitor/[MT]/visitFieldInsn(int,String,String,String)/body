@@ -21,25 +21,26 @@
     obj=pop("obj");
     checkNull(obj);
   }
+  Var env=new Var("env","%Env*");
   Var res=null;
   String fieldName=LlvmUtil.mangleString(owner) + "_" + LlvmUtil.mangleString(name)+ "__"+ LlvmUtil.mangleString(desc);
   if (opcode == Opcodes.GETSTATIC) {
-    Var v=new Var("GETSTATIC_" + fieldName,String.format("%s ()*",llvmType));
+    Var v=new Var("GETSTATIC_" + fieldName,String.format("%s (%%Env*)*",llvmType));
     res=tmp("res",llvmType);
-    out.format("    %s = call %s %s()\n",res,llvmType,v);
+    out.format("    %s = call %s %s(%%Env* %s)\n",res,llvmType,v,env);
   }
  else   if (opcode == Opcodes.PUTSTATIC) {
-    Var v=new Var("PUTSTATIC_" + fieldName,String.format("void (%s)*",llvmType));
-    out.format("    call void %s(%s %s)\n",v,llvmType,val);
+    Var v=new Var("PUTSTATIC_" + fieldName,String.format("void (%%Env*, %s)*",llvmType));
+    out.format("    call void %s(%%Env* %s, %s %s)\n",v,env,llvmType,val);
   }
  else   if (opcode == Opcodes.GETFIELD) {
-    Var v=new Var("GETFIELD_" + fieldName,String.format("%s (%%Object*)*",llvmType));
+    Var v=new Var("GETFIELD_" + fieldName,String.format("%s (%%Env*, %%Object*)*",llvmType));
     res=tmp("res",llvmType);
-    out.format("    %s = call %s %s(%%Object* %s)\n",res,llvmType,v,obj);
+    out.format("    %s = call %s %s(%%Env* %s, %%Object* %s)\n",res,llvmType,v,env,obj);
   }
  else   if (opcode == Opcodes.PUTFIELD) {
-    Var v=new Var("PUTFIELD_" + fieldName,String.format("void (%%Object*,%s)*",llvmType));
-    out.format("    call void %s(%%Object* %s, %s %s)\n",v,obj,llvmType,val);
+    Var v=new Var("PUTFIELD_" + fieldName,String.format("void (%%Env*, %%Object*, %s)*",llvmType));
+    out.format("    call void %s(%%Env* %s, %%Object* %s, %s %s)\n",v,env,obj,llvmType,val);
   }
   if (res != null) {
     if (t.getSort() == Type.BOOLEAN || t.getSort() == Type.CHAR) {

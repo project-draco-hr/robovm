@@ -10,14 +10,15 @@ case Opcodes.SIPUSH:
     }
 case Opcodes.NEWARRAY:
 {
+    String[] types={"Boolean","Char","Float","Double","Byte","Short","Int","Long"};
     Var length=pop("length");
     Var res=tmpr("res");
     if (currentTryCatchBlocks.isEmpty()) {
-      out.format("    %s = call %%Object* @nvmNewArray(i32 %d, i32 %s)\n",res,operand,length);
+      out.format("    %s = call %%Object* @_nvmBcNew%sArray(%%Env* %s, i32 %s)\n",res,types[operand - Opcodes.T_BOOLEAN],new Var("env","%Env*"),length);
     }
  else {
       String successLabel=String.format("NewArraySuccess%d",pc);
-      out.format("    %s = invoke %%Object* @nvmNewArray(i32 %d, i32 %s) to label %%%s unwind label %%%s\n",res,operand,length,successLabel,currentLandingPad.getLabel());
+      out.format("    %s = invoke %%Object* @_nvmBcNew%sArray(%%Env* %s, i32 %s) to label %%%s unwind label %%%s\n",res,types[operand - Opcodes.T_BOOLEAN],new Var("env","%Env*"),length,successLabel,currentLandingPad.getLabel());
       out.format("%s:\n",successLabel);
     }
     push(res);

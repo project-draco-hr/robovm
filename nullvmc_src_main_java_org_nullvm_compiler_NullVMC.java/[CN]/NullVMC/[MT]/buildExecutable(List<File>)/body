@@ -26,5 +26,11 @@
   if (gccBin != null) {
     gccPath=gccBin.getAbsolutePath();
   }
+  if (!skipMainStub) {
+    if (mainClass != null) {
+      args.add("-DNULLVM_MAIN_CLASS=" + mainClass);
+    }
+    files.add(new File(work,"main.c"));
+  }
   exec(gccPath,"-o",output,"-g","-Wl,--version-script",new File(work,"symbols.map"),gccOpts,"-rdynamic",args,files,"-lnullvm","-lm","-ldl","-lpthread","-Wl,--whole-archive",libArgs,"-Wl,--no-whole-archive","-Wl,-Bstatic","-lgc","-Wl,-Bdynamic");
 }
