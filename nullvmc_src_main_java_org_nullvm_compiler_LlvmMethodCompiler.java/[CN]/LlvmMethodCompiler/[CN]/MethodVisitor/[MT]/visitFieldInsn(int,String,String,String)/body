@@ -4,7 +4,7 @@
   String llvmType=LlvmUtil.javaTypeToLlvmType(t);
   Var val=null;
   if (opcode == Opcodes.PUTSTATIC || opcode == Opcodes.PUTFIELD) {
-    val=t.getSize() == 2 ? pop2("val") : pop("val");
+    val=t.getSize() == 2 ? pop2("val") : pop1("val");
     if (t.getSort() == Type.BOOLEAN || t.getSort() == Type.BYTE) {
       Var tmp=tmp(val.getName(),"i8");
       out.format("    %s = trunc i32 %s to i8\n",tmp,val);
@@ -18,46 +18,65 @@
   }
   Var obj=null;
   if (!ztatic) {
-    obj=pop("obj");
+    obj=pop1("obj");
     checkNull(obj);
   }
   Var env=new Var("env","%Env*");
   Var res=null;
   String fieldName=LlvmUtil.mangleString(owner) + "_" + LlvmUtil.mangleString(name)+ "__"+ LlvmUtil.mangleString(desc);
-  if (opcode == Opcodes.GETSTATIC) {
-    Var v=new Var("GETSTATIC_" + fieldName,String.format("%s (%%Env*)*",llvmType));
-    res=tmp("res",llvmType);
-    out.format("    %s = call %s %s(%%Env* %s)\n",res,llvmType,v,env);
-  }
- else   if (opcode == Opcodes.PUTSTATIC) {
-    Var v=new Var("PUTSTATIC_" + fieldName,String.format("void (%%Env*, %s)*",llvmType));
-    out.format("    call void %s(%%Env* %s, %s %s)\n",v,env,llvmType,val);
-  }
- else   if (opcode == Opcodes.GETFIELD) {
-    Var v=new Var("GETFIELD_" + fieldName,String.format("%s (%%Env*, %%Object*)*",llvmType));
-    res=tmp("res",llvmType);
-    out.format("    %s = call %s %s(%%Env* %s, %%Object* %s)\n",res,llvmType,v,env,obj);
-  }
- else   if (opcode == Opcodes.PUTFIELD) {
-    Var v=new Var("PUTFIELD_" + fieldName,String.format("void (%%Env*, %%Object*, %s)*",llvmType));
-    out.format("    call void %s(%%Env* %s, %%Object* %s, %s %s)\n",v,env,obj,llvmType,val);
-  }
-  if (res != null) {
-    if (t.getSort() == Type.BOOLEAN || t.getSort() == Type.CHAR) {
-      Var tmp=tmpi("res");
-      out.format("    %s = zext %s %s to i32\n",tmp,res.getType(),res);
-      res=tmp;
-    }
- else     if (t.getSort() == Type.BYTE || t.getSort() == Type.SHORT) {
-      Var tmp=tmpi("res");
-      out.format("    %s = sext %s %s to i32\n",tmp,res.getType(),res);
-      res=tmp;
-    }
-    if (t.getSize() == 2) {
-      push2(res);
-    }
+  String prefix=(new String[]{"GetStatic","PutStatic","GetField","PutField"})[opcode - Opcodes.GETSTATIC];
+  String varName=prefix + "_" + fieldName;
+  String ftype="";
+switch (opcode) {
+case Opcodes.GETSTATIC:
+    ftype=String.format("%s (i8*, %%Env*)*",llvmType);
+  break;
+case Opcodes.PUTSTATIC:
+ftype=String.format("void (i8*, %%Env*, %s)*",llvmType);
+break;
+case Opcodes.GETFIELD:
+ftype=String.format("%s (i8*, %%Env*, %%Object*)*",llvmType);
+break;
+case Opcodes.PUTFIELD:
+ftype=String.format("void (i8*, %%Env*, %%Object*, %s)*",llvmType);
+break;
+}
+Var resolveInfoI8=tmp("resolveInfoI8","i8*");
+out.format("    %s = bitcast %%%s* @%s to i8*\n",resolveInfoI8,prefix,varName);
+Var fptr=tmp("fptr",ftype + "*");
+out.format("    %s = bitcast %%%s* @%s to %s\n",fptr,prefix,varName,fptr.getType());
+Var f=tmp("f",ftype);
+out.format("    %s = load %s %s\n",f,fptr.getType(),fptr);
+if (opcode == Opcodes.GETSTATIC) {
+res=tmp("res",llvmType);
+out.format("    %s = call %s %s(i8* %s, %%Env* %s)\n",res,llvmType,f,resolveInfoI8,env);
+}
+ else if (opcode == Opcodes.PUTSTATIC) {
+out.format("    call void %s(i8* %s, %%Env* %s, %s %s)\n",f,resolveInfoI8,env,llvmType,val);
+}
+ else if (opcode == Opcodes.GETFIELD) {
+res=tmp("res",llvmType);
+out.format("    %s = call %s %s(i8* %s, %%Env* %s, %%Object* %s)\n",res,llvmType,f,resolveInfoI8,env,obj);
+}
+ else if (opcode == Opcodes.PUTFIELD) {
+out.format("    call void %s(i8* %s, %%Env* %s, %%Object* %s, %s %s)\n",f,resolveInfoI8,env,obj,llvmType,val);
+}
+if (res != null) {
+if (t.getSort() == Type.BOOLEAN || t.getSort() == Type.CHAR) {
+Var tmp=tmpi("res");
+out.format("    %s = zext %s %s to i32\n",tmp,res.getType(),res);
+res=tmp;
+}
+ else if (t.getSort() == Type.BYTE || t.getSort() == Type.SHORT) {
+Var tmp=tmpi("res");
+out.format("    %s = sext %s %s to i32\n",tmp,res.getType(),res);
+res=tmp;
+}
+if (t.getSize() == 2) {
+push2(res);
+}
  else {
-      push(res);
-    }
-  }
+push1(res);
+}
+}
 }

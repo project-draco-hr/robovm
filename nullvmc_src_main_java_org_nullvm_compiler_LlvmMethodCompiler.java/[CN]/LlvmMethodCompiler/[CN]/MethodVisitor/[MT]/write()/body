@@ -5,43 +5,6 @@
   }
   Set<String> accessors=new HashSet<String>();
   for (AbstractInsnNode insn=methodNode.instructions.getFirst(); insn != null; insn=insn.getNext()) {
-    if (insn instanceof FieldInsnNode) {
-      FieldInsnNode n=(FieldInsnNode)insn;
-      String fieldName=LlvmUtil.mangleString(n.owner) + "_" + LlvmUtil.mangleString(n.name)+ "__"+ LlvmUtil.mangleString(n.desc);
-      String llvmType=LlvmUtil.javaTypeToLlvmType(Type.getType(n.desc));
-      if (n.getOpcode() == Opcodes.PUTSTATIC) {
-        String setter="PUTSTATIC_" + fieldName;
-        if (!accessors.contains(setter)) {
-          Var v=new Var(setter,String.format("void (%%Env*, %s)*",llvmType));
-          out.format("    %s = load %s* @%s\n",v,v.getType(),setter);
-          accessors.add(setter);
-        }
-      }
- else       if (n.getOpcode() == Opcodes.GETSTATIC) {
-        String getter="GETSTATIC_" + fieldName;
-        if (!accessors.contains(getter)) {
-          Var v=new Var(getter,String.format("%s (%%Env*)*",llvmType));
-          out.format("    %s = load %s* @%s\n",v,v.getType(),getter);
-          accessors.add(getter);
-        }
-      }
- else       if (n.getOpcode() == Opcodes.PUTFIELD) {
-        String setter="PUTFIELD_" + fieldName;
-        if (!accessors.contains(setter)) {
-          Var v=new Var(setter,String.format("void (%%Env*, %%Object*, %s)*",llvmType));
-          out.format("    %s = load %s* @%s\n",v,v.getType(),setter);
-          accessors.add(setter);
-        }
-      }
- else       if (n.getOpcode() == Opcodes.GETFIELD) {
-        String getter="GETFIELD_" + fieldName;
-        if (!accessors.contains(getter)) {
-          Var v=new Var(getter,String.format("%s (%%Env*, %%Object*)*",llvmType));
-          out.format("    %s = load %s* @%s\n",v,v.getType(),getter);
-          accessors.add(getter);
-        }
-      }
-    }
   }
   int maxDims=-1;
   for (AbstractInsnNode insn=methodNode.instructions.getFirst(); insn != null; insn=insn.getNext()) {
@@ -118,7 +81,7 @@
         out.format("    %s = load %s* %s\n",throwable,throwablePtr.getType(),throwablePtr);
         setFrame(handler.getFrame());
         stack.pop();
-        push(throwable);
+        push1(throwable);
         out.format("    br label %%%s\n",handler.getLabel());
         out.format("%sNot%s:\n",lpad.getLabel(),LlvmUtil.mangleString(type));
       }

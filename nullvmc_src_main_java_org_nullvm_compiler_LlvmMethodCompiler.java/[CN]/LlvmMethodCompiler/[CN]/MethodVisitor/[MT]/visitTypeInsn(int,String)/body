@@ -15,12 +15,12 @@ case Opcodes.NEW:
         out.format("    %s = invoke %%Object* %s(%%Env* %s) to label %%%s unwind label %%%s\n",res,v,env,successLabel,currentLandingPad.getLabel());
         out.format("%s:\n",successLabel);
       }
-      push(res);
+      push1(res);
       break;
     }
 case Opcodes.ANEWARRAY:
 {
-    Var length=pop("length");
+    Var length=pop1("length");
     Var res=tmpr("res");
     Var caller=tmp("caller","%Class*");
     out.format("    %s = load %%Class** @clazz\n",caller);
@@ -32,13 +32,13 @@ case Opcodes.ANEWARRAY:
       out.format("    %s = invoke %%Object* @_nvmBcNewObjectArray(%%Env* %s, i32 %s, i8* %s, %s %s) to label %%%s unwind label %%%s\n",res,new Var("env","%Env*"),length,LlvmUtil.getStringReference("[" + type),caller.getType(),caller,successLabel,currentLandingPad.getLabel());
       out.format("%s:\n",successLabel);
     }
-    push(res);
+    push1(res);
     break;
   }
 case Opcodes.CHECKCAST:
 {
   Var env=new Var("env","%Env*");
-  Var obj=pop("obj");
+  Var obj=pop1("obj");
   String function="CHECKCAST_" + LlvmUtil.mangleString(type);
   Var v=tmp(function,"void (%Env*, %Object*)");
   out.format("    %s = load %s** @%s\n",v,v.getType(),function);
@@ -50,13 +50,13 @@ case Opcodes.CHECKCAST:
     out.format("    invoke void %s(%%Env* %s, %%Object* %s) to label %%%s unwind label %%%s\n",v,env,obj,successLabel,currentLandingPad.getLabel());
     out.format("%s:\n",successLabel);
   }
-  push(obj);
+  push1(obj);
   break;
 }
 case Opcodes.INSTANCEOF:
 {
 Var env=new Var("env","%Env*");
-Var obj=pop("obj");
+Var obj=pop1("obj");
 String function="INSTANCEOF_" + LlvmUtil.mangleString(type);
 Var v=tmp(function,"i32 (%Env*, %Object*)");
 out.format("    %s = load %s** @%s\n",v,v.getType(),function);
@@ -69,7 +69,7 @@ if (currentTryCatchBlocks.isEmpty()) {
   out.format("    %s = invoke i32 %s(%%Env* %s, %%Object* %s) to label %%%s unwind label %%%s\n",res,v,env,obj,successLabel,currentLandingPad.getLabel());
   out.format("%s:\n",successLabel);
 }
-push(res);
+push1(res);
 break;
 }
 default :

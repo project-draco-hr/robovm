@@ -1,7 +1,7 @@
 {
   for (int i=0; i < dims; i++) {
     Var ptr=tmp("ptr","i32*");
-    Var length=pop("length" + (dims - i - 1));
+    Var length=pop1("length" + (dims - i - 1));
     out.format("    %s = getelementptr %s* %s, i32 0, i32 %d\n",ptr,multiANewArrayLengths.getType(),multiANewArrayLengths,dims - i - 1);
     out.format("    store i32 %s, i32* %s\n",length,ptr);
   }
@@ -18,5 +18,5 @@
     out.format("    %s = invoke %%Object* @_nvmBcNewMultiArray(%%Env* %s, i32 %d, i32* %s, i8* %s, %%Class* %s) to label %%%s unwind label %%%s\n",res,new Var("env","%Env*"),dims,lengthsi32,LlvmUtil.getStringReference(desc),caller,successLabel,currentLandingPad.getLabel());
     out.format("%s:\n",successLabel);
   }
-  push(res);
+  push1(res);
 }

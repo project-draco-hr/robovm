@@ -2,7 +2,7 @@
   if (cst instanceof Integer) {
     Var res=tmpi("res");
     out.format("    %s = bitcast i32 %d to i32\n",res,(Integer)cst);
-    push(res);
+    push1(res);
   }
  else   if (cst instanceof Long) {
     Var res=tmpl("res");
@@ -13,7 +13,7 @@
     Var res=tmpf("res");
     int bits=Float.floatToIntBits((Float)cst);
     out.format("    %s = bitcast i32 %d to float\n",res,bits);
-    push(res);
+    push1(res);
   }
  else   if (cst instanceof Double) {
     Var res=tmpd("res");
@@ -25,12 +25,12 @@
     Type t=(Type)cst;
     Var res=tmpr("res");
     out.format("    %s = call %%Object* @j_ldc_class(i8* %s)\n",res,LlvmUtil.getStringReference(t.getDescriptor()));
-    push(res);
+    push1(res);
   }
  else   if (cst instanceof String) {
     Var res=tmpr("res");
     out.format("    %s = call %%Object* @_nvmBcNewStringAscii(%%Env* %s, i8* %s)\n",res,new Var("env","%Env*"),LlvmUtil.getStringReference((String)cst));
-    push(res);
+    push1(res);
   }
  else {
     throw new RuntimeException("Unsupported type for LDC: " + cst.getClass());
