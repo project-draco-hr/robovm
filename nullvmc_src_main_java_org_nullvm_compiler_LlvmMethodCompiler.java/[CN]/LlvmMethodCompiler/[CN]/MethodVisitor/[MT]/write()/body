@@ -52,7 +52,7 @@
     Var ehptr=tmp("ehptr","i8*");
     out.format("    %s = call i8* @llvm.eh.exception()\n",ehptr);
     Var throwable=tmpr("throwable");
-    out.format("    %s = call %%Object* @j_get_throwable(i8* %s)\n",throwable,ehptr);
+    out.format("    %s = call %%Object* @_nvmBcExceptionClear(%%Env* %s)\n",throwable,new Var("env","%Env*"));
     Var sel=tmp("sel","i64");
     out.format("    %s = call i64 (i8*, i8*, ...)* @llvm.eh.selector.i64(i8* %s, " + "i8* bitcast (i32 (i32, i32, i64, i8*, i8*)* @j_eh_personality to i8*), i32 1)\n",sel,ehptr);
     out.format("    store %s %s, %s* %s\n",throwablePtr.getType(),throwable,throwablePtr.getType(),throwablePtr);
@@ -73,7 +73,7 @@
         out.format("    %s = load %%Class** @\"%s_%%Class*\"\n",clazz,LlvmUtil.mangleString(type));
         throwable=tmpr("throwable");
         out.format("    %s = load %s* %s\n",throwable,throwablePtr.getType(),throwablePtr);
-        out.format("    %s = call i32 @j_eh_match_throwable(%%Object* %s, %%Class* %s)\n",condi32,throwable,clazz);
+        out.format("    %s = call i32 @_nvmBcExceptionMatch(%%Env* %s, %%Object* %s, %%Class* %s)\n",condi32,new Var("env","%Env*"),throwable,clazz);
         out.format("    %s = trunc i32 %s to i1\n",cond,condi32);
         out.format("    br i1 %s, label %%%s%s, label %%%sNot%s\n",cond,lpad.getLabel(),LlvmUtil.mangleString(type),lpad.getLabel(),LlvmUtil.mangleString(type));
         out.format("%s%s:\n",lpad.getLabel(),LlvmUtil.mangleString(type));

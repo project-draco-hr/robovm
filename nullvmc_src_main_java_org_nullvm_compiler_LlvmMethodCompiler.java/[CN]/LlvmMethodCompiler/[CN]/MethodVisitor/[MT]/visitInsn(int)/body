@@ -1054,14 +1054,28 @@ case Opcodes.MONITORENTER:
 {
 Var o=pop1("o");
 checkNull(o);
-out.format("    call void @j_monitorenter(%%Object* %s)\n",o);
+if (currentTryCatchBlocks.isEmpty()) {
+out.format("    call void @_nvmBcMonitorEnter(%%Env* %s, %%Object* %s)\n",new Var("env","%Env*"),o);
+}
+ else {
+String successLabel=String.format("MonitorEnterSuccess%d",pc);
+out.format("    invoke void @_nvmBcMonitorEnter(%%Env* %s, %%Object* %s) to label %%%s unwind label %%%s\n",new Var("env","%Env*"),o,successLabel,currentLandingPad.getLabel());
+out.format("%s:\n",successLabel);
+}
 break;
 }
 case Opcodes.MONITOREXIT:
 {
 Var o=pop1("o");
 checkNull(o);
-out.format("    call void @j_monitorexit(%%Object* %s)\n",o);
+if (currentTryCatchBlocks.isEmpty()) {
+out.format("    call void @_nvmBcMonitorExit(%%Env* %s, %%Object* %s)\n",new Var("env","%Env*"),o);
+}
+ else {
+String successLabel=String.format("MonitorExitSuccess%d",pc);
+out.format("    invoke void @_nvmBcMonitorExit(%%Env* %s, %%Object* %s) to label %%%s unwind label %%%s\n",new Var("env","%Env*"),o,successLabel,currentLandingPad.getLabel());
+out.format("%s:\n",successLabel);
+}
 break;
 }
 default :
