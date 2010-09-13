@@ -26,13 +26,18 @@
     Var caller=tmp("caller","%Class*");
     out.format("    %s = load %%Class** @clazz\n",caller);
     Var res=tmpr("res");
-    if (currentTryCatchBlocks.isEmpty()) {
-      out.format("    %s = call %%Object* @_nvmBcGetClassObject(%%Env* %s, i8* %s, %%Class* %s)\n",res,new Var("env","%Env*"),LlvmUtil.getStringReference(t.getInternalName()),caller);
+    if (t.getInternalName().equals(classNode.name)) {
+      out.format("    %s = bitcast %%Class* %s to %%Object*\n",res,caller);
     }
  else {
-      String successLabel=String.format("LdcClassSuccess%d",pc);
-      out.format("    %s = invoke %%Object* @_nvmBcGetClassObject(%%Env* %s, i8* %s, %%Class* %s) to label %%%s unwind label %%%s\n",res,new Var("env","%Env*"),LlvmUtil.getStringReference(t.getInternalName()),caller,successLabel,currentLandingPad.getLabel());
-      out.format("%s:\n",successLabel);
+      if (currentTryCatchBlocks.isEmpty()) {
+        out.format("    %s = call %%Object* @_nvmBcLdcClass(%%Env* %s, i8* %s, %%Class* %s)\n",res,new Var("env","%Env*"),LlvmUtil.getStringReference(t.getInternalName()),caller);
+      }
+ else {
+        String successLabel=String.format("LdcClassSuccess%d",pc);
+        out.format("    %s = invoke %%Object* @_nvmBcLdcClass(%%Env* %s, i8* %s, %%Class* %s) to label %%%s unwind label %%%s\n",res,new Var("env","%Env*"),LlvmUtil.getStringReference(t.getInternalName()),caller,successLabel,currentLandingPad.getLabel());
+        out.format("%s:\n",successLabel);
+      }
     }
     push1(res);
   }
