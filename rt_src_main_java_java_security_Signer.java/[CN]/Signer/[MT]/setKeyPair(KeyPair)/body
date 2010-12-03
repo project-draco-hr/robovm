@@ -1,0 +1,26 @@
+{
+  if (pair == null) {
+    throw new NullPointerException();
+  }
+  if ((pair.getPrivate() == null) || (pair.getPublic() == null)) {
+    throw new InvalidParameterException();
+  }
+  SecurityManager sm=System.getSecurityManager();
+  if (sm != null) {
+    sm.checkSecurityAccess("setSignerKeyPair");
+  }
+  final PublicKey pk=pair.getPublic();
+  try {
+    AccessController.doPrivileged(new PrivilegedExceptionAction<Void>(){
+      public Void run() throws KeyManagementException {
+        setPublicKey(pk);
+        return null;
+      }
+    }
+);
+  }
+ catch (  PrivilegedActionException e) {
+    throw new KeyException(e.getException());
+  }
+  this.privateKey=pair.getPrivate();
+}

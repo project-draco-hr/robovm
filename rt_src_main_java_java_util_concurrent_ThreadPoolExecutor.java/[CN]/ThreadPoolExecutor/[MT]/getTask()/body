@@ -1,0 +1,28 @@
+{
+  boolean timedOut=false;
+  retry:   for (; ; ) {
+    int c=ctl.get();
+    int rs=runStateOf(c);
+    if (rs >= SHUTDOWN && (rs >= STOP || workQueue.isEmpty())) {
+      decrementWorkerCount();
+      return null;
+    }
+    boolean timed;
+    for (; ; ) {
+      int wc=workerCountOf(c);
+      timed=allowCoreThreadTimeOut || wc > corePoolSize;
+      if (wc <= maximumPoolSize && !(timedOut && timed))       break;
+      if (compareAndDecrementWorkerCount(c))       return null;
+      c=ctl.get();
+      if (runStateOf(c) != rs)       continue retry;
+    }
+    try {
+      Runnable r=timed ? workQueue.poll(keepAliveTime,TimeUnit.NANOSECONDS) : workQueue.take();
+      if (r != null)       return r;
+      timedOut=true;
+    }
+ catch (    InterruptedException retry) {
+      timedOut=false;
+    }
+  }
+}

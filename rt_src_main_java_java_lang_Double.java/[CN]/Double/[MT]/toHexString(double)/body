@@ -1,0 +1,61 @@
+{
+  if (d != d) {
+    return "NaN";
+  }
+  if (d == POSITIVE_INFINITY) {
+    return "Infinity";
+  }
+  if (d == NEGATIVE_INFINITY) {
+    return "-Infinity";
+  }
+  long bitValue=doubleToLongBits(d);
+  boolean negative=(bitValue & 0x8000000000000000L) != 0;
+  long exponent=(bitValue & 0x7FF0000000000000L) >>> 52;
+  long significand=bitValue & 0x000FFFFFFFFFFFFFL;
+  if (exponent == 0 && significand == 0) {
+    return (negative ? "-0x0.0p0" : "0x0.0p0");
+  }
+  StringBuilder hexString=new StringBuilder(10);
+  if (negative) {
+    hexString.append("-0x");
+  }
+ else {
+    hexString.append("0x");
+  }
+  if (exponent == 0) {
+    hexString.append("0.");
+    int fractionDigits=13;
+    while ((significand != 0) && ((significand & 0xF) == 0)) {
+      significand>>>=4;
+      fractionDigits--;
+    }
+    String hexSignificand=Long.toHexString(significand);
+    if (significand != 0 && fractionDigits > hexSignificand.length()) {
+      int digitDiff=fractionDigits - hexSignificand.length();
+      while (digitDiff-- != 0) {
+        hexString.append('0');
+      }
+    }
+    hexString.append(hexSignificand);
+    hexString.append("p-1022");
+  }
+ else {
+    hexString.append("1.");
+    int fractionDigits=13;
+    while ((significand != 0) && ((significand & 0xF) == 0)) {
+      significand>>>=4;
+      fractionDigits--;
+    }
+    String hexSignificand=Long.toHexString(significand);
+    if (significand != 0 && fractionDigits > hexSignificand.length()) {
+      int digitDiff=fractionDigits - hexSignificand.length();
+      while (digitDiff-- != 0) {
+        hexString.append('0');
+      }
+    }
+    hexString.append(hexSignificand);
+    hexString.append('p');
+    hexString.append(Long.toString(exponent - 1023));
+  }
+  return hexString.toString();
+}

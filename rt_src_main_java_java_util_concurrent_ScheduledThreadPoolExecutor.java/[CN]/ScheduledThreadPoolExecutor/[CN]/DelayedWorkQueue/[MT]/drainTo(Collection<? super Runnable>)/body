@@ -1,0 +1,18 @@
+{
+  if (c == null)   throw new NullPointerException();
+  if (c == this)   throw new IllegalArgumentException();
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    RunnableScheduledFuture first;
+    int n=0;
+    while ((first=pollExpired()) != null) {
+      c.add(first);
+      ++n;
+    }
+    return n;
+  }
+  finally {
+    lock.unlock();
+  }
+}

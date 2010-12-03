@@ -1,0 +1,36 @@
+{
+  if (Float.isNaN(start) || Double.isNaN(direction)) {
+    return Float.NaN;
+  }
+  if (0 == start && 0 == direction) {
+    return new Float(direction);
+  }
+  if ((start == Float.MIN_VALUE && direction < start) || (start == -Float.MIN_VALUE && direction > start)) {
+    return (start > 0 ? 0f : -0f);
+  }
+  if (Float.isInfinite(start) && (direction != start)) {
+    return (start > 0 ? Float.MAX_VALUE : -Float.MAX_VALUE);
+  }
+  if ((start == Float.MAX_VALUE && direction > start) || (start == -Float.MAX_VALUE && direction < start)) {
+    return (start > 0 ? Float.POSITIVE_INFINITY : Float.NEGATIVE_INFINITY);
+  }
+  if (direction > start) {
+    if (start > 0) {
+      return Float.intBitsToFloat(Float.floatToIntBits(start) + 1);
+    }
+    if (start < 0) {
+      return Float.intBitsToFloat(Float.floatToIntBits(start) - 1);
+    }
+    return +Float.MIN_VALUE;
+  }
+  if (direction < start) {
+    if (start > 0) {
+      return Float.intBitsToFloat(Float.floatToIntBits(start) - 1);
+    }
+    if (start < 0) {
+      return Float.intBitsToFloat(Float.floatToIntBits(start) + 1);
+    }
+    return -Float.MIN_VALUE;
+  }
+  return Double.valueOf(direction).floatValue();
+}

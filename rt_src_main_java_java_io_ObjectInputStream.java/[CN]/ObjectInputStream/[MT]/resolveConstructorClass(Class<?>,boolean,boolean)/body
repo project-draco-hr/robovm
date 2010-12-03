@@ -1,0 +1,29 @@
+{
+  Class<?> constructorClass=objectClass;
+  if (wasSerializable) {
+    while (constructorClass != null && ObjectStreamClass.isSerializable(constructorClass)) {
+      constructorClass=constructorClass.getSuperclass();
+    }
+  }
+  Constructor<?> constructor=null;
+  if (constructorClass != null) {
+    try {
+      constructor=constructorClass.getDeclaredConstructor(ObjectStreamClass.EMPTY_CONSTRUCTOR_PARAM_TYPES);
+    }
+ catch (    NoSuchMethodException nsmEx) {
+    }
+  }
+  if (constructor == null) {
+    throw new InvalidClassException(constructorClass.getName(),Messages.getString("luni.C4"));
+  }
+  int constructorModifiers=constructor.getModifiers();
+  if (Modifier.isPrivate(constructorModifiers) || (wasExternalizable && !Modifier.isPublic(constructorModifiers))) {
+    throw new InvalidClassException(constructorClass.getName(),Messages.getString("luni.C4"));
+  }
+  if (!Modifier.isPublic(constructorModifiers) && !Modifier.isProtected(constructorModifiers)) {
+    if (!inSamePackage(constructorClass,objectClass)) {
+      throw new InvalidClassException(constructorClass.getName(),Messages.getString("luni.C4"));
+    }
+  }
+  return constructorClass;
+}

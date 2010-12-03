@@ -1,0 +1,27 @@
+{
+  HashSet<Object> fact=new HashSet<Object>();
+  Provider[] pp=Security.getProviders();
+  if ((pp == null) || (pp.length == 0)) {
+    return fact;
+  }
+  HashSet<String> props=new HashSet<String>();
+  for (int i=0; i < pp.length; i++) {
+    String prName=pp[i].getName();
+    Enumeration<Object> keys=pp[i].keys();
+    while (keys.hasMoreElements()) {
+      String s=(String)keys.nextElement();
+      if (s.startsWith(service)) {
+        String prop=pp[i].getProperty(s);
+        try {
+          if (props.add(prName.concat(prop))) {
+            fact.add(newInstance(prop,pp[i]));
+          }
+        }
+ catch (        SaslException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+  return fact;
+}

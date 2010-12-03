@@ -1,0 +1,37 @@
+{
+synchronized (readLock) {
+    int readCount=0;
+    try {
+      begin();
+      int timeout=isBlocking() ? 0 : DEFAULT_TIMEOUT;
+      int start=readBuffer.position();
+      int length=readBuffer.remaining();
+      if (readBuffer.isDirect()) {
+        long address=AddressUtil.getDirectBufferAddress(readBuffer);
+        if (isConnected()) {
+          readCount=networkSystem.recvConnectedDatagramDirect(fd,null,address,start,length,timeout,false);
+        }
+ else {
+          readCount=networkSystem.receiveDatagramDirect(fd,null,address,start,length,timeout,false);
+        }
+      }
+ else {
+        byte[] target=readBuffer.array();
+        start+=readBuffer.arrayOffset();
+        if (isConnected()) {
+          readCount=networkSystem.recvConnectedDatagram(fd,null,target,start,length,timeout,false);
+        }
+ else {
+          readCount=networkSystem.receiveDatagram(fd,null,target,start,length,timeout,false);
+        }
+      }
+      return readCount;
+    }
+ catch (    InterruptedIOException e) {
+      return 0;
+    }
+ finally {
+      end(readCount > 0);
+    }
+  }
+}

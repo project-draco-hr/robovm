@@ -1,0 +1,24 @@
+{
+  int msbHash=(int)(mostSigBits ^ (mostSigBits >>> 32));
+  int lsbHash=(int)(leastSigBits ^ (leastSigBits >>> 32));
+  hash=msbHash ^ lsbHash;
+  if ((leastSigBits & 0x8000000000000000L) == 0) {
+    variant=0;
+  }
+ else   if ((leastSigBits & 0x4000000000000000L) != 0) {
+    variant=(int)((leastSigBits & 0xE000000000000000L) >>> 61);
+  }
+ else {
+    variant=2;
+  }
+  version=(int)((mostSigBits & 0x000000000000F000) >>> 12);
+  if (variant != 2 && version != 1) {
+    return;
+  }
+  long timeLow=(mostSigBits & 0xFFFFFFFF00000000L) >>> 32;
+  long timeMid=(mostSigBits & 0x00000000FFFF0000L) << 16;
+  long timeHigh=(mostSigBits & 0x0000000000000FFFL) << 48;
+  timestamp=timeLow | timeMid | timeHigh;
+  clockSequence=(int)((leastSigBits & 0x3FFF000000000000L) >>> 48);
+  node=(leastSigBits & 0x0000FFFFFFFFFFFFL);
+}

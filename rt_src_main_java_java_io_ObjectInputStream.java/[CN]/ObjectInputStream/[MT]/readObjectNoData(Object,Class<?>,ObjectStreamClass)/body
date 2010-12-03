@@ -1,0 +1,24 @@
+{
+  if (!classDesc.isSerializable()) {
+    return;
+  }
+  if (classDesc.hasMethodReadObjectNoData()) {
+    final Method readMethod=classDesc.getMethodReadObjectNoData();
+    try {
+      readMethod.invoke(object,new Object[0]);
+    }
+ catch (    InvocationTargetException e) {
+      Throwable ex=e.getTargetException();
+      if (ex instanceof RuntimeException) {
+        throw (RuntimeException)ex;
+      }
+ else       if (ex instanceof Error) {
+        throw (Error)ex;
+      }
+      throw (ObjectStreamException)ex;
+    }
+catch (    IllegalAccessException e) {
+      throw new RuntimeException(e.toString());
+    }
+  }
+}

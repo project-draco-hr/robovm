@@ -1,0 +1,49 @@
+{
+  checkReadPrimitiveTypes();
+  if (primitiveData.available() > 0) {
+    OptionalDataException e=new OptionalDataException();
+    e.length=primitiveData.available();
+    throw e;
+  }
+  do {
+    byte tc=nextTC();
+switch (tc) {
+case TC_CLASS:
+      return readNewClass(unshared);
+case TC_CLASSDESC:
+    return readNewClassDesc(unshared);
+case TC_ARRAY:
+  return readNewArray(unshared);
+case TC_OBJECT:
+return readNewObject(unshared);
+case TC_STRING:
+return readNewString(unshared);
+case TC_LONGSTRING:
+return readNewLongString(unshared);
+case TC_ENUM:
+return readEnum(unshared);
+case TC_REFERENCE:
+if (unshared) {
+readNewHandle();
+throw new InvalidObjectException(Messages.getString("luni.BE"));
+}
+return readCyclicReference();
+case TC_NULL:
+return null;
+case TC_EXCEPTION:
+Exception exc=readException();
+throw new WriteAbortedException(Messages.getString("luni.BD"),exc);
+case TC_RESET:
+resetState();
+break;
+case TC_ENDBLOCKDATA:
+pushbackTC();
+OptionalDataException e=new OptionalDataException();
+e.eof=true;
+throw e;
+default :
+throw new StreamCorruptedException(Messages.getString("luni.BC",Integer.toHexString(tc & 0xff)));
+}
+}
+ while (true);
+}

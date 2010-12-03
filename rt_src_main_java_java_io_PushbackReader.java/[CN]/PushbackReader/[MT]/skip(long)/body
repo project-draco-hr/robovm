@@ -1,0 +1,28 @@
+{
+  if (count < 0) {
+    throw new IllegalArgumentException();
+  }
+synchronized (lock) {
+    if (buf == null) {
+      throw new IOException(Messages.getString("luni.24"));
+    }
+    if (count == 0) {
+      return 0;
+    }
+    long inSkipped;
+    int availableFromBuffer=buf.length - pos;
+    if (availableFromBuffer > 0) {
+      long requiredFromIn=count - availableFromBuffer;
+      if (requiredFromIn <= 0) {
+        pos+=count;
+        return count;
+      }
+      pos+=availableFromBuffer;
+      inSkipped=in.skip(requiredFromIn);
+    }
+ else {
+      inSkipped=in.skip(count);
+    }
+    return inSkipped + availableFromBuffer;
+  }
+}

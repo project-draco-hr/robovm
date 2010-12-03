@@ -1,0 +1,82 @@
+{
+  if (logger != null) {
+    logger.println("SSLRecordProtocol.unwrap: BEGIN [");
+  }
+  int type=in.readUint8();
+  if ((type < ContentType.CHANGE_CIPHER_SPEC) || (type > ContentType.APPLICATION_DATA)) {
+    if (logger != null) {
+      logger.println("Non v3.1 message type:" + type);
+    }
+    if (type >= 0x80) {
+      int length=(type & 0x7f) << 8 | in.read();
+      byte[] fragment=in.read(length);
+      handshakeProtocol.unwrapSSLv2(fragment);
+      if (logger != null) {
+        logger.println("SSLRecordProtocol:unwrap ] END, SSLv2 type");
+      }
+      return ContentType.HANDSHAKE;
+    }
+    throw new AlertException(AlertProtocol.UNEXPECTED_MESSAGE,new SSLProtocolException("Unexpected message type has been received: " + type));
+  }
+  if (logger != null) {
+    logger.println("Got the message of type: " + type);
+  }
+  if (version != null) {
+    if ((in.read() != version[0]) || (in.read() != version[1])) {
+      throw new AlertException(AlertProtocol.UNEXPECTED_MESSAGE,new SSLProtocolException("Unexpected message type has been received: " + type));
+    }
+  }
+ else {
+    in.skip(2);
+  }
+  int length=in.readUint16();
+  if (logger != null) {
+    logger.println("TLSCiphertext.fragment[" + length + "]: ...");
+  }
+  if (length > MAX_CIPHERED_DATA_LENGTH) {
+    throw new AlertException(AlertProtocol.RECORD_OVERFLOW,new SSLProtocolException("Received message is too big."));
+  }
+  byte[] fragment=in.read(length);
+  if (logger != null) {
+    logger.print(fragment);
+  }
+  if (activeReadState != null) {
+    fragment=activeReadState.decrypt((byte)type,fragment);
+    if (logger != null) {
+      logger.println("TLSPlaintext.fragment:");
+      logger.print(fragment);
+    }
+  }
+  if (fragment.length > MAX_DATA_LENGTH) {
+    throw new AlertException(AlertProtocol.DECOMPRESSION_FAILURE,new SSLProtocolException("Decompressed plain data is too big."));
+  }
+switch (type) {
+case ContentType.CHANGE_CIPHER_SPEC:
+    handshakeProtocol.receiveChangeCipherSpec();
+  setSession(handshakeProtocol.getSession());
+if (logger != null) {
+  logger.println("activeReadState = pendingConnectionState");
+}
+activeReadState=pendingConnectionState;
+break;
+case ContentType.ALERT:
+alert(fragment[0],fragment[1]);
+break;
+case ContentType.HANDSHAKE:
+handshakeProtocol.unwrap(fragment);
+break;
+case ContentType.APPLICATION_DATA:
+if (logger != null) {
+logger.println("TLSCiphertext.unwrap: APP DATA[" + length + "]:");
+logger.println(new String(fragment));
+}
+appData.append(fragment);
+break;
+default :
+throw new AlertException(AlertProtocol.UNEXPECTED_MESSAGE,new SSLProtocolException("Unexpected message type has been received: " + type));
+}
+if (logger != null) {
+logger.println("SSLRecordProtocol:unwrap ] END, type: " + type);
+}
+return type;
+}

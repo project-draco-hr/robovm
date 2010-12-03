@@ -1,0 +1,18 @@
+{
+  if (offset > source.length || offset < 0) {
+    throw new ArrayIndexOutOfBoundsException(Messages.getString("nio.0C",offset));
+  }
+  if (length < 0 || offset > source.length - length) {
+    throw new ArrayIndexOutOfBoundsException(Messages.getString("nio.0D",length));
+  }
+  if (0 == length) {
+    return;
+  }
+  if (channel instanceof SelectableChannel) {
+    if (!((SelectableChannel)channel).isBlocking()) {
+      throw new IllegalBlockingModeException();
+    }
+  }
+  ByteBuffer buffer=ByteBuffer.wrap(source,offset,length);
+  channel.write(buffer);
+}

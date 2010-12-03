@@ -1,0 +1,21 @@
+{
+  if (inStream == null) {
+    throw new CertificateException(Messages.getString("security.153"));
+  }
+  try {
+    if (!inStream.markSupported()) {
+      inStream=new RestoringInputStream(inStream);
+    }
+    inStream.mark(1);
+    if (inStream.read() == '-') {
+      return getCertificate(decodePEM(inStream,CERT_BOUND_SUFFIX));
+    }
+ else {
+      inStream.reset();
+      return getCertificate(inStream);
+    }
+  }
+ catch (  IOException e) {
+    throw new CertificateException(e);
+  }
+}

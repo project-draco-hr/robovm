@@ -1,0 +1,18 @@
+{
+  final E[] items=this.items;
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    Object[] a=new Object[count];
+    int k=0;
+    int i=takeIndex;
+    while (k < count) {
+      a[k++]=items[i];
+      i=inc(i);
+    }
+    return a;
+  }
+  finally {
+    lock.unlock();
+  }
+}

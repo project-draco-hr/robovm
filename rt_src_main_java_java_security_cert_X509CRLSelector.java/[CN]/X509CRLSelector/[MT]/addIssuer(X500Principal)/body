@@ -1,0 +1,20 @@
+{
+  if (issuer == null) {
+    throw new NullPointerException(Messages.getString("security.61"));
+  }
+  if (issuerNames == null) {
+    issuerNames=new ArrayList<String>();
+  }
+  String name=issuer.getName(X500Principal.CANONICAL);
+  if (!issuerNames.contains(name)) {
+    issuerNames.add(name);
+  }
+  if (issuerPrincipals == null) {
+    issuerPrincipals=new ArrayList<X500Principal>(issuerNames.size());
+  }
+  int size=issuerNames.size() - 1;
+  for (int i=issuerPrincipals.size(); i < size; i++) {
+    issuerPrincipals.add(new X500Principal(issuerNames.get(i)));
+  }
+  issuerPrincipals.add(issuer);
+}

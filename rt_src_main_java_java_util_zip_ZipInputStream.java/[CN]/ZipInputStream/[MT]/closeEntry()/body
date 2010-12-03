@@ -1,0 +1,57 @@
+{
+  if (closed) {
+    throw new IOException(Messages.getString("archive.1E"));
+  }
+  if (currentEntry == null) {
+    return;
+  }
+  if (currentEntry instanceof java.util.jar.JarEntry) {
+    Attributes temp=((JarEntry)currentEntry).getAttributes();
+    if (temp != null && temp.containsKey("hidden")) {
+      return;
+    }
+  }
+  Exception failure=null;
+  try {
+    skip(Long.MAX_VALUE);
+  }
+ catch (  Exception e) {
+    failure=e;
+  }
+  int inB, out;
+  if (currentEntry.compressionMethod == DEFLATED) {
+    inB=inf.getTotalIn();
+    out=inf.getTotalOut();
+  }
+ else {
+    inB=inRead;
+    out=inRead;
+  }
+  int diff=entryIn - inB;
+  if (diff != 0) {
+    ((PushbackInputStream)in).unread(buf,len - diff,diff);
+  }
+  try {
+    readAndVerifyDataDescriptor(inB,out);
+  }
+ catch (  Exception e) {
+    if (failure == null) {
+      failure=e;
+    }
+  }
+  inf.reset();
+  lastRead=inRead=entryIn=len=0;
+  crc.reset();
+  currentEntry=null;
+  if (failure != null) {
+    if (failure instanceof IOException) {
+      throw (IOException)failure;
+    }
+ else     if (failure instanceof RuntimeException) {
+      throw (RuntimeException)failure;
+    }
+    AssertionError error=new AssertionError();
+    error.initCause(failure);
+    throw error;
+  }
+}

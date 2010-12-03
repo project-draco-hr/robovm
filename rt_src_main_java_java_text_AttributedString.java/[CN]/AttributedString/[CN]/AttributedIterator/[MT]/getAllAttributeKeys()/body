@@ -1,0 +1,17 @@
+{
+  if (begin == 0 && end == attrString.text.length() && attributesAllowed == null) {
+    return attrString.attributeMap.keySet();
+  }
+  Set<AttributedIterator.Attribute> result=new HashSet<Attribute>((attrString.attributeMap.size() * 4 / 3) + 1);
+  Iterator<Map.Entry<Attribute,List<Range>>> it=attrString.attributeMap.entrySet().iterator();
+  while (it.hasNext()) {
+    Map.Entry<Attribute,List<Range>> entry=it.next();
+    if (attributesAllowed == null || attributesAllowed.contains(entry.getKey())) {
+      List<Range> ranges=entry.getValue();
+      if (inRange(ranges)) {
+        result.add(entry.getKey());
+      }
+    }
+  }
+  return result;
+}

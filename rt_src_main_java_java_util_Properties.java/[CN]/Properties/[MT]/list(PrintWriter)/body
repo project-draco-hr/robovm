@@ -1,0 +1,27 @@
+{
+  if (writer == null) {
+    throw new NullPointerException();
+  }
+  StringBuilder buffer=new StringBuilder(80);
+  Enumeration<?> keys=propertyNames();
+  while (keys.hasMoreElements()) {
+    String key=(String)keys.nextElement();
+    buffer.append(key);
+    buffer.append('=');
+    String property=(String)super.get(key);
+    Properties def=defaults;
+    while (property == null) {
+      property=(String)def.get(key);
+      def=def.defaults;
+    }
+    if (property.length() > 40) {
+      buffer.append(property.substring(0,37));
+      buffer.append("...");
+    }
+ else {
+      buffer.append(property);
+    }
+    writer.println(buffer.toString());
+    buffer.setLength(0);
+  }
+}

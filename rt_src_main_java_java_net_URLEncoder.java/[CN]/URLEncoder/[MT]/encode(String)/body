@@ -1,0 +1,21 @@
+{
+  StringBuilder buf=new StringBuilder(s.length() + 16);
+  for (int i=0; i < s.length(); i++) {
+    char ch=s.charAt(i);
+    if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')|| ".-*_".indexOf(ch) > -1) {
+      buf.append(ch);
+    }
+ else     if (ch == ' ') {
+      buf.append('+');
+    }
+ else {
+      byte[] bytes=new String(new char[]{ch}).getBytes();
+      for (int j=0; j < bytes.length; j++) {
+        buf.append('%');
+        buf.append(digits.charAt((bytes[j] & 0xf0) >> 4));
+        buf.append(digits.charAt(bytes[j] & 0xf));
+      }
+    }
+  }
+  return buf.toString();
+}

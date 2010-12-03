@@ -1,0 +1,27 @@
+{
+  openCheck();
+  if (count == 0) {
+    return 0;
+  }
+  if (count < 0) {
+    throw new IOException(Messages.getString("luni.AC"));
+  }
+  if (fd == FileDescriptor.in) {
+    long skipped=0, numRead;
+    int chunk=count < 8192 ? (int)count : 8192;
+    byte[] buffer=new byte[chunk];
+    for (long i=count / chunk; i >= 0; i--) {
+      numRead=fileSystem.ttyRead(buffer,0,chunk);
+      skipped+=numRead;
+      if (numRead < chunk) {
+        return skipped;
+      }
+    }
+    return skipped;
+  }
+synchronized (repositioningLock) {
+    final long currentPosition=fileSystem.seek(fd.descriptor,0L,IFileSystem.SEEK_CUR);
+    final long newPosition=fileSystem.seek(fd.descriptor,currentPosition + count,IFileSystem.SEEK_SET);
+    return newPosition - currentPosition;
+  }
+}

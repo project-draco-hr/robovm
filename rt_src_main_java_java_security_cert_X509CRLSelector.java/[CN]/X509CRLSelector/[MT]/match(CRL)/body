@@ -1,0 +1,36 @@
+{
+  if (!(crl instanceof X509CRL)) {
+    return false;
+  }
+  X509CRL crlist=(X509CRL)crl;
+  if ((issuerNames != null) && !(issuerNames.contains(crlist.getIssuerX500Principal().getName(X500Principal.CANONICAL)))) {
+    return false;
+  }
+  if ((minCRL != null) || (maxCRL != null)) {
+    try {
+      byte[] bytes=crlist.getExtensionValue("2.5.29.20");
+      bytes=(byte[])ASN1OctetString.getInstance().decode(bytes);
+      BigInteger crlNumber=new BigInteger((byte[])ASN1Integer.getInstance().decode(bytes));
+      if ((minCRL != null) && (crlNumber.compareTo(minCRL) < 0)) {
+        return false;
+      }
+      if ((maxCRL != null) && (crlNumber.compareTo(maxCRL) > 0)) {
+        return false;
+      }
+    }
+ catch (    IOException e) {
+      return false;
+    }
+  }
+  if (dateAndTime != -1) {
+    Date thisUp=crlist.getThisUpdate();
+    Date nextUp=crlist.getNextUpdate();
+    if ((thisUp == null) || (nextUp == null)) {
+      return false;
+    }
+    if ((dateAndTime < thisUp.getTime()) || (dateAndTime > nextUp.getTime())) {
+      return false;
+    }
+  }
+  return true;
+}

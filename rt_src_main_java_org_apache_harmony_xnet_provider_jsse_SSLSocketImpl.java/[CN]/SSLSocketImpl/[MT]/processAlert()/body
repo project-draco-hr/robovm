@@ -1,0 +1,23 @@
+{
+  if (!alertProtocol.hasAlert()) {
+    return;
+  }
+  if (alertProtocol.isFatalAlert()) {
+    alertProtocol.setProcessed();
+    String description="Fatal alert received " + alertProtocol.getAlertDescription();
+    shutdown();
+    throw new SSLException(description);
+  }
+  if (logger != null) {
+    logger.println("Warning alert received: " + alertProtocol.getAlertDescription());
+  }
+switch (alertProtocol.getDescriptionCode()) {
+case AlertProtocol.CLOSE_NOTIFY:
+    alertProtocol.setProcessed();
+  appDataIS.setEnd();
+close();
+return;
+default :
+alertProtocol.setProcessed();
+}
+}

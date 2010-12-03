@@ -1,0 +1,37 @@
+{
+  BigInteger x;
+  BigInteger y;
+  BigInteger n_minus_1=n.subtract(BigInteger.ONE);
+  int bitLength=n_minus_1.bitLength();
+  int k=n_minus_1.getLowestSetBit();
+  BigInteger q=n_minus_1.shiftRight(k);
+  Random rnd=new Random();
+  for (int i=0; i < t; i++) {
+    if (i < primes.length) {
+      x=BIprimes[i];
+    }
+ else {
+      do {
+        x=new BigInteger(bitLength,rnd);
+      }
+ while ((x.compareTo(n) >= BigInteger.EQUALS) || (x.sign == 0) || x.isOne());
+    }
+    y=x.modPow(q,n);
+    if (y.isOne() || y.equals(n_minus_1)) {
+      continue;
+    }
+    for (int j=1; j < k; j++) {
+      if (y.equals(n_minus_1)) {
+        continue;
+      }
+      y=y.multiply(y).mod(n);
+      if (y.isOne()) {
+        return false;
+      }
+    }
+    if (!y.equals(n_minus_1)) {
+      return false;
+    }
+  }
+  return true;
+}

@@ -1,0 +1,30 @@
+{
+synchronized (CRL_CACHE) {
+    inStream.mark(CRL_CACHE_SEED_LENGTH);
+    byte[] buff=readBytes(inStream,CRL_CACHE_SEED_LENGTH);
+    inStream.reset();
+    if (buff == null) {
+      throw new CRLException(Messages.getString("security.152"));
+    }
+    long hash=CRL_CACHE.getHash(buff);
+    if (CRL_CACHE.contains(hash)) {
+      byte[] encoding=new byte[BerInputStream.getLength(buff)];
+      if (encoding.length < CRL_CACHE_SEED_LENGTH) {
+        throw new CRLException(Messages.getString("security.15B4"));
+      }
+      inStream.read(encoding);
+      CRL res=(CRL)CRL_CACHE.get(hash,encoding);
+      if (res != null) {
+        return res;
+      }
+      res=new X509CRLImpl(encoding);
+      CRL_CACHE.put(hash,encoding,res);
+      return res;
+    }
+ else {
+      X509CRL res=new X509CRLImpl(inStream);
+      CRL_CACHE.put(hash,res.getEncoded(),res);
+      return res;
+    }
+  }
+}

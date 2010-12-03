@@ -1,0 +1,34 @@
+{
+  boolean isStale=true;
+  if (!socket.isClosed()) {
+    isStale=false;
+    try {
+      if (inputStream.available() <= 0) {
+        int soTimeout=socket.getSoTimeout();
+        try {
+          socket.setSoTimeout(1);
+          inputStream.mark(1);
+          int byteRead=inputStream.read();
+          if (byteRead == -1) {
+            isStale=true;
+          }
+ else {
+            inputStream.reset();
+          }
+        }
+  finally {
+          socket.setSoTimeout(soTimeout);
+        }
+      }
+    }
+ catch (    InterruptedIOException e) {
+      if (!isSocketTimeoutException(e)) {
+        throw e;
+      }
+    }
+catch (    IOException e) {
+      isStale=true;
+    }
+  }
+  return isStale;
+}

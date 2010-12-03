@@ -1,0 +1,39 @@
+{
+  return new AbstractSet<Map.Entry<K,V>>(){
+    @Override public boolean contains(    Object object){
+      if (object instanceof Map.Entry) {
+        Map.Entry<?,?> entry=(Map.Entry<?,?>)object;
+        return containsKey(entry.getKey()) && containsValue(entry.getValue());
+      }
+      return false;
+    }
+    @Override public int size(){
+      return 1;
+    }
+    @Override public Iterator<Map.Entry<K,V>> iterator(){
+      return new Iterator<Map.Entry<K,V>>(){
+        boolean hasNext=true;
+        public boolean hasNext(){
+          return hasNext;
+        }
+        public Map.Entry<K,V> next(){
+          if (!hasNext) {
+            throw new NoSuchElementException();
+          }
+          hasNext=false;
+          return new MapEntry<K,V>(k,v){
+            @Override public V setValue(            V value){
+              throw new UnsupportedOperationException();
+            }
+          }
+;
+        }
+        public void remove(){
+          throw new UnsupportedOperationException();
+        }
+      }
+;
+    }
+  }
+;
+}

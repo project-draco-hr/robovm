@@ -1,0 +1,32 @@
+{
+  if (null == certs) {
+    return null;
+  }
+  X500Principal prevIssuer=null;
+  ArrayList<Certificate> list=new ArrayList<Certificate>(certs.length);
+  ArrayList<CodeSigner> asigners=new ArrayList<CodeSigner>();
+  for (  Certificate element : certs) {
+    if (!(element instanceof X509Certificate)) {
+      continue;
+    }
+    X509Certificate x509=(X509Certificate)element;
+    if (null != prevIssuer) {
+      X500Principal subj=x509.getSubjectX500Principal();
+      if (!prevIssuer.equals(subj)) {
+        addCodeSigner(asigners,list);
+        list.clear();
+      }
+    }
+    prevIssuer=x509.getIssuerX500Principal();
+    list.add(x509);
+  }
+  if (!list.isEmpty()) {
+    addCodeSigner(asigners,list);
+  }
+  if (asigners.isEmpty()) {
+    return null;
+  }
+  CodeSigner[] tmp=new CodeSigner[asigners.size()];
+  asigners.toArray(tmp);
+  return tmp;
+}

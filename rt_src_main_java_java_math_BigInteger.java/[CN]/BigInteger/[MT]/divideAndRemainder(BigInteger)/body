@@ -1,0 +1,28 @@
+{
+  int divisorSign=divisor.sign;
+  if (divisorSign == 0) {
+    throw new ArithmeticException(Messages.getString("math.17"));
+  }
+  int divisorLen=divisor.numberLength;
+  int[] divisorDigits=divisor.digits;
+  if (divisorLen == 1) {
+    return Division.divideAndRemainderByInteger(this,divisorDigits[0],divisorSign);
+  }
+  int[] thisDigits=digits;
+  int thisLen=numberLength;
+  int cmp=(thisLen != divisorLen) ? ((thisLen > divisorLen) ? 1 : -1) : Elementary.compareArrays(thisDigits,divisorDigits,thisLen);
+  if (cmp < 0) {
+    return new BigInteger[]{ZERO,this};
+  }
+  int thisSign=sign;
+  int quotientLength=thisLen - divisorLen + 1;
+  int remainderLength=divisorLen;
+  int quotientSign=((thisSign == divisorSign) ? 1 : -1);
+  int quotientDigits[]=new int[quotientLength];
+  int remainderDigits[]=Division.divide(quotientDigits,quotientLength,thisDigits,thisLen,divisorDigits,divisorLen);
+  BigInteger result0=new BigInteger(quotientSign,quotientLength,quotientDigits);
+  BigInteger result1=new BigInteger(thisSign,remainderLength,remainderDigits);
+  result0.cutOffLeadingZeroes();
+  result1.cutOffLeadingZeroes();
+  return new BigInteger[]{result0,result1};
+}

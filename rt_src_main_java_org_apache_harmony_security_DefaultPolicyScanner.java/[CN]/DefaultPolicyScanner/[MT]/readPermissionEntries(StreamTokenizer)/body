@@ -1,0 +1,51 @@
+{
+  Collection<PermissionEntry> permissions=new HashSet<PermissionEntry>();
+  parsing:   while (true) {
+switch (st.nextToken()) {
+case StreamTokenizer.TT_WORD:
+      if (Util.equalsIgnoreCase("permission",st.sval)) {
+        PermissionEntry pe=new PermissionEntry();
+        int tok=st.nextToken();
+        if (tok == StreamTokenizer.TT_WORD || tok == '"') {
+          pe.klass=st.sval;
+          if (st.nextToken() == '"') {
+            pe.name=st.sval;
+            st.nextToken();
+          }
+          if (st.ttype == ',') {
+            st.nextToken();
+          }
+          if (st.ttype == '"') {
+            pe.actions=st.sval;
+            if (st.nextToken() == ',') {
+              st.nextToken();
+            }
+          }
+          if (st.ttype == StreamTokenizer.TT_WORD && Util.equalsIgnoreCase("signedby",st.sval)) {
+            if (st.nextToken() == '"') {
+              pe.signers=st.sval;
+            }
+ else {
+              handleUnexpectedToken(st);
+            }
+          }
+ else {
+            st.pushBack();
+          }
+          permissions.add(pe);
+          continue parsing;
+        }
+      }
+    handleUnexpectedToken(st,Messages.getString("security.8E"));
+  break;
+case ';':
+break;
+case '}':
+break parsing;
+default :
+handleUnexpectedToken(st);
+break;
+}
+}
+return permissions;
+}

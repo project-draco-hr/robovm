@@ -1,0 +1,19 @@
+{
+  if (c == null) {
+    throw new NullPointerException(Messages.getString("crypto.13"));
+  }
+  try {
+    ByteArrayOutputStream bos=new ByteArrayOutputStream();
+    ObjectOutputStream oos=new ObjectOutputStream(bos);
+    oos.writeObject(object);
+    oos.flush();
+    AlgorithmParameters ap=c.getParameters();
+    this.encodedParams=(ap == null) ? null : ap.getEncoded();
+    this.paramsAlg=(ap == null) ? null : ap.getAlgorithm();
+    this.sealAlg=c.getAlgorithm();
+    this.encryptedContent=c.doFinal(bos.toByteArray());
+  }
+ catch (  BadPaddingException e) {
+    throw new IOException(e.toString());
+  }
+}

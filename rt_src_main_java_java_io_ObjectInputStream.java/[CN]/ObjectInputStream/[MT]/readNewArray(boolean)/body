@@ -1,0 +1,74 @@
+{
+  ObjectStreamClass classDesc=readClassDesc();
+  if (classDesc == null) {
+    throw new InvalidClassException(Messages.getString("luni.C1"));
+  }
+  Integer newHandle=nextHandle();
+  int size=input.readInt();
+  Class<?> arrayClass=classDesc.forClass();
+  Class<?> componentType=arrayClass.getComponentType();
+  Object result=Array.newInstance(componentType,size);
+  registerObjectRead(result,newHandle,unshared);
+  if (componentType.isPrimitive()) {
+    if (componentType == Integer.TYPE) {
+      int[] intArray=(int[])result;
+      for (int i=0; i < size; i++) {
+        intArray[i]=input.readInt();
+      }
+    }
+ else     if (componentType == Byte.TYPE) {
+      byte[] byteArray=(byte[])result;
+      input.readFully(byteArray,0,size);
+    }
+ else     if (componentType == Character.TYPE) {
+      char[] charArray=(char[])result;
+      for (int i=0; i < size; i++) {
+        charArray[i]=input.readChar();
+      }
+    }
+ else     if (componentType == Short.TYPE) {
+      short[] shortArray=(short[])result;
+      for (int i=0; i < size; i++) {
+        shortArray[i]=input.readShort();
+      }
+    }
+ else     if (componentType == Boolean.TYPE) {
+      boolean[] booleanArray=(boolean[])result;
+      for (int i=0; i < size; i++) {
+        booleanArray[i]=input.readBoolean();
+      }
+    }
+ else     if (componentType == Long.TYPE) {
+      long[] longArray=(long[])result;
+      for (int i=0; i < size; i++) {
+        longArray[i]=input.readLong();
+      }
+    }
+ else     if (componentType == Float.TYPE) {
+      float[] floatArray=(float[])result;
+      for (int i=0; i < size; i++) {
+        floatArray[i]=input.readFloat();
+      }
+    }
+ else     if (componentType == Double.TYPE) {
+      double[] doubleArray=(double[])result;
+      for (int i=0; i < size; i++) {
+        doubleArray[i]=input.readDouble();
+      }
+    }
+ else {
+      throw new ClassNotFoundException(Messages.getString("luni.C2",classDesc.getName()));
+    }
+  }
+ else {
+    Object[] objectArray=(Object[])result;
+    for (int i=0; i < size; i++) {
+      objectArray[i]=readObject();
+    }
+  }
+  if (enableResolve) {
+    result=resolveObject(result);
+    registerObjectRead(result,newHandle,false);
+  }
+  return result;
+}

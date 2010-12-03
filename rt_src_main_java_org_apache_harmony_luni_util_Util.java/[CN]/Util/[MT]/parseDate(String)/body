@@ -1,0 +1,72 @@
+{
+  int offset=0, length=string.length(), state=0;
+  int year=-1, month=-1, date=-1;
+  int hour=-1, minute=-1, second=-1;
+  final int PAD=0, LETTERS=1, NUMBERS=2;
+  StringBuilder buffer=new StringBuilder();
+  while (offset <= length) {
+    char next=offset < length ? string.charAt(offset) : '\r';
+    offset++;
+    int nextState;
+    if ((next >= 'a' && next <= 'z') || (next >= 'A' && next <= 'Z'))     nextState=LETTERS;
+ else     if (next >= '0' && next <= '9')     nextState=NUMBERS;
+ else     if (" ,-:\r\t".indexOf(next) == -1)     throw new IllegalArgumentException();
+ else     nextState=PAD;
+    if (state == NUMBERS && nextState != NUMBERS) {
+      int digit=Integer.parseInt(buffer.toString());
+      buffer.setLength(0);
+      if (digit >= 70) {
+        if (year != -1 || (next != ' ' && next != ',' && next != '\r'))         throw new IllegalArgumentException();
+        year=digit;
+      }
+ else       if (next == ':') {
+        if (hour == -1)         hour=digit;
+ else         if (minute == -1)         minute=digit;
+ else         throw new IllegalArgumentException();
+      }
+ else       if (next == ' ' || next == ',' || next == '-' || next == '\r') {
+        if (hour != -1 && minute == -1)         minute=digit;
+ else         if (minute != -1 && second == -1)         second=digit;
+ else         if (date == -1)         date=digit;
+ else         if (year == -1)         year=digit;
+ else         throw new IllegalArgumentException();
+      }
+ else       if (year == -1 && month != -1 && date != -1)       year=digit;
+ else       throw new IllegalArgumentException();
+    }
+ else     if (state == LETTERS && nextState != LETTERS) {
+      String text=buffer.toString().toUpperCase();
+      buffer.setLength(0);
+      if (text.length() < 3)       throw new IllegalArgumentException();
+      if (parse(text,WEEKDAYS) != -1) {
+      }
+ else       if (month == -1 && (month=parse(text,MONTHS)) != -1) {
+      }
+ else       if (text.equals("GMT")) {
+      }
+ else       throw new IllegalArgumentException();
+    }
+    if (nextState == LETTERS || nextState == NUMBERS)     buffer.append(next);
+    state=nextState;
+  }
+  if (year != -1 && month != -1 && date != -1) {
+    if (hour == -1)     hour=0;
+    if (minute == -1)     minute=0;
+    if (second == -1)     second=0;
+    Calendar cal=Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+    int current=cal.get(Calendar.YEAR) - 80;
+    if (year < 100) {
+      year+=current / 100 * 100;
+      if (year < current)       year+=100;
+    }
+    cal.set(Calendar.YEAR,year);
+    cal.set(Calendar.MONTH,month);
+    cal.set(Calendar.DATE,date);
+    cal.set(Calendar.HOUR_OF_DAY,hour);
+    cal.set(Calendar.MINUTE,minute);
+    cal.set(Calendar.SECOND,second);
+    cal.set(Calendar.MILLISECOND,0);
+    return cal.getTime().getTime();
+  }
+  throw new IllegalArgumentException();
+}

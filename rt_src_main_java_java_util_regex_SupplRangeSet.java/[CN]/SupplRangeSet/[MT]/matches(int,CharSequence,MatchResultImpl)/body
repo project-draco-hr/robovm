@@ -1,0 +1,17 @@
+{
+  int strLength=matchResult.getRightBound();
+  int offset=-1;
+  if (stringIndex < strLength) {
+    char high=testString.charAt(stringIndex++);
+    if (contains(high) && (offset=next.matches(stringIndex,testString,matchResult)) > 0) {
+      return offset;
+    }
+    if (stringIndex < strLength) {
+      char low=testString.charAt(stringIndex++);
+      if (Character.isSurrogatePair(high,low) && contains(Character.toCodePoint(high,low))) {
+        return next.matches(stringIndex,testString,matchResult);
+      }
+    }
+  }
+  return -1;
+}

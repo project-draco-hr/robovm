@@ -1,0 +1,36 @@
+{
+  Class<?> implementationClass=getClass();
+  Class<?> thisClass=ObjectOutputStream.class;
+  if (implementationClass != thisClass) {
+    boolean mustCheck=false;
+    try {
+      Method method=implementationClass.getMethod("putFields",ObjectStreamClass.EMPTY_CONSTRUCTOR_PARAM_TYPES);
+      mustCheck=method.getDeclaringClass() != thisClass;
+    }
+ catch (    NoSuchMethodException e) {
+    }
+    if (!mustCheck) {
+      try {
+        Method method=implementationClass.getMethod("writeUnshared",ObjectStreamClass.UNSHARED_PARAM_TYPES);
+        mustCheck=method.getDeclaringClass() != thisClass;
+      }
+ catch (      NoSuchMethodException e) {
+      }
+    }
+    if (mustCheck) {
+      SecurityManager sm=System.getSecurityManager();
+      if (sm != null) {
+        sm.checkPermission(ObjectStreamConstants.SUBCLASS_IMPLEMENTATION_PERMISSION);
+      }
+    }
+  }
+  this.output=(output instanceof DataOutputStream) ? (DataOutputStream)output : new DataOutputStream(output);
+  this.enableReplace=false;
+  this.protocolVersion=PROTOCOL_VERSION_2;
+  this.subclassOverridingImplementation=false;
+  resetState();
+  this.nestedException=new StreamCorruptedException();
+  primitiveTypes=this.output;
+  writeStreamHeader();
+  primitiveTypes=null;
+}

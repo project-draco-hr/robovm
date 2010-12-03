@@ -1,0 +1,35 @@
+{
+  int diffScale=this.scale - subtrahend.scale;
+  if (this.isZero()) {
+    if (diffScale <= 0) {
+      return subtrahend.negate();
+    }
+    if (subtrahend.isZero()) {
+      return this;
+    }
+  }
+ else   if (subtrahend.isZero()) {
+    if (diffScale >= 0) {
+      return this;
+    }
+  }
+  if (diffScale == 0) {
+    if (Math.max(this.bitLength,subtrahend.bitLength) + 1 < 64) {
+      return valueOf(this.smallValue - subtrahend.smallValue,this.scale);
+    }
+    return new BigDecimal(this.getUnscaledValue().subtract(subtrahend.getUnscaledValue()),this.scale);
+  }
+ else   if (diffScale > 0) {
+    if (diffScale < LONG_TEN_POW.length && Math.max(this.bitLength,subtrahend.bitLength + LONG_TEN_POW_BIT_LENGTH[diffScale]) + 1 < 64) {
+      return valueOf(this.smallValue - subtrahend.smallValue * LONG_TEN_POW[diffScale],this.scale);
+    }
+    return new BigDecimal(this.getUnscaledValue().subtract(Multiplication.multiplyByTenPow(subtrahend.getUnscaledValue(),diffScale)),this.scale);
+  }
+ else {
+    diffScale=-diffScale;
+    if (diffScale < LONG_TEN_POW.length && Math.max(this.bitLength + LONG_TEN_POW_BIT_LENGTH[diffScale],subtrahend.bitLength) + 1 < 64) {
+      return valueOf(this.smallValue * LONG_TEN_POW[diffScale] - subtrahend.smallValue,subtrahend.scale);
+    }
+    return new BigDecimal(Multiplication.multiplyByTenPow(this.getUnscaledValue(),diffScale).subtract(subtrahend.getUnscaledValue()),subtrahend.scale);
+  }
+}

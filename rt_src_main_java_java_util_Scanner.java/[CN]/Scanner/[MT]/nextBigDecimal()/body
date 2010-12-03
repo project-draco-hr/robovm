@@ -1,0 +1,22 @@
+{
+  checkClosed();
+  Object obj=cacheHasNextValue;
+  cacheHasNextValue=null;
+  if (obj instanceof BigDecimal) {
+    findStartIndex=cachehasNextIndex;
+    return (BigDecimal)obj;
+  }
+  Pattern floatPattern=getFloatPattern();
+  String floatString=next(floatPattern);
+  floatString=removeLocaleInfoFromFloat(floatString);
+  BigDecimal bigDecimalValue;
+  try {
+    bigDecimalValue=new BigDecimal(floatString);
+  }
+ catch (  NumberFormatException e) {
+    matchSuccessful=false;
+    recoverPreviousStatus();
+    throw new InputMismatchException();
+  }
+  return bigDecimalValue;
+}

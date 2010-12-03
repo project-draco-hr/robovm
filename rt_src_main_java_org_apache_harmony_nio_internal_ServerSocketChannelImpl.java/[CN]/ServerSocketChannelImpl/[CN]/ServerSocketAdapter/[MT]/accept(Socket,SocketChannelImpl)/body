@@ -1,0 +1,21 @@
+{
+  boolean connectOK=false;
+  try {
+synchronized (this) {
+      super.implAccept(aSocket);
+      sockChannel.setConnected();
+      sockChannel.setBound(true);
+    }
+    SecurityManager sm=System.getSecurityManager();
+    if (sm != null) {
+      sm.checkAccept(aSocket.getInetAddress().getHostAddress(),aSocket.getPort());
+    }
+    connectOK=true;
+  }
+  finally {
+    if (!connectOK) {
+      aSocket.close();
+    }
+  }
+  return aSocket;
+}

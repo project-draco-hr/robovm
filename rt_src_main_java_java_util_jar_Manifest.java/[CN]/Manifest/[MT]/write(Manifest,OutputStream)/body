@@ -1,0 +1,28 @@
+{
+  CharsetEncoder encoder=ThreadLocalCache.utf8Encoder.get();
+  ByteBuffer buffer=ThreadLocalCache.byteBuffer.get();
+  String version=manifest.mainAttributes.getValue(Attributes.Name.MANIFEST_VERSION);
+  if (version != null) {
+    writeEntry(out,Attributes.Name.MANIFEST_VERSION,version,encoder,buffer);
+    Iterator<?> entries=manifest.mainAttributes.keySet().iterator();
+    while (entries.hasNext()) {
+      Attributes.Name name=(Attributes.Name)entries.next();
+      if (!name.equals(Attributes.Name.MANIFEST_VERSION)) {
+        writeEntry(out,name,manifest.mainAttributes.getValue(name),encoder,buffer);
+      }
+    }
+  }
+  out.write(LINE_SEPARATOR);
+  Iterator<String> i=manifest.getEntries().keySet().iterator();
+  while (i.hasNext()) {
+    String key=i.next();
+    writeEntry(out,NAME_ATTRIBUTE,key,encoder,buffer);
+    Attributes attrib=manifest.entries.get(key);
+    Iterator<?> entries=attrib.keySet().iterator();
+    while (entries.hasNext()) {
+      Attributes.Name name=(Attributes.Name)entries.next();
+      writeEntry(out,name,attrib.getValue(name),encoder,buffer);
+    }
+    out.write(LINE_SEPARATOR);
+  }
+}

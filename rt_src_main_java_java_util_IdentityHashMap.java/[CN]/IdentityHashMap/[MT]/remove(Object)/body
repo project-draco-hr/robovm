@@ -1,0 +1,39 @@
+{
+  if (key == null) {
+    key=NULL_OBJECT;
+  }
+  boolean hashedOk;
+  int index, next, hash;
+  Object result, object;
+  index=next=findIndex(key,elementData);
+  if (elementData[index] != key) {
+    return null;
+  }
+  result=elementData[index + 1];
+  int length=elementData.length;
+  while (true) {
+    next=(next + 2) % length;
+    object=elementData[next];
+    if (object == null) {
+      break;
+    }
+    hash=getModuloHash(object,length);
+    hashedOk=hash > index;
+    if (next < index) {
+      hashedOk=hashedOk || (hash <= next);
+    }
+ else {
+      hashedOk=hashedOk && (hash <= next);
+    }
+    if (!hashedOk) {
+      elementData[index]=object;
+      elementData[index + 1]=elementData[next + 1];
+      index=next;
+    }
+  }
+  size--;
+  modCount++;
+  elementData[index]=null;
+  elementData[index + 1]=null;
+  return massageValue(result);
+}

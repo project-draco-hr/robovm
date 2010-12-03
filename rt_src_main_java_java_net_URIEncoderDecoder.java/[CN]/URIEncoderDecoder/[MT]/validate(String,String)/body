@@ -1,0 +1,24 @@
+{
+  for (int i=0; i < s.length(); ) {
+    char ch=s.charAt(i);
+    if (ch == '%') {
+      do {
+        if (i + 2 >= s.length()) {
+          throw new URISyntaxException(s,Messages.getString("luni.7D"),i);
+        }
+        int d1=Character.digit(s.charAt(i + 1),16);
+        int d2=Character.digit(s.charAt(i + 2),16);
+        if (d1 == -1 || d2 == -1) {
+          throw new URISyntaxException(s,Messages.getString("luni.7E",s.substring(i,i + 3)),i);
+        }
+        i+=3;
+      }
+ while (i < s.length() && s.charAt(i) == '%');
+      continue;
+    }
+    if (!((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')|| legal.indexOf(ch) > -1 || (ch > 127 && !Character.isSpaceChar(ch) && !Character.isISOControl(ch)))) {
+      throw new URISyntaxException(s,Messages.getString("luni.7F"),i);
+    }
+    i++;
+  }
+}

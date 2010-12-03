@@ -1,0 +1,44 @@
+{
+  int resSign=(val.sign == 0) ? 1 : val.sign;
+  int intCount=n >> 5;
+  int bitN=n & 31;
+  int resLength=Math.max(intCount + 1,val.numberLength) + 1;
+  int resDigits[]=new int[resLength];
+  int i;
+  int bitNumber=1 << bitN;
+  System.arraycopy(val.digits,0,resDigits,0,val.numberLength);
+  if (val.sign < 0) {
+    if (intCount >= val.numberLength) {
+      resDigits[intCount]=bitNumber;
+    }
+ else {
+      int firstNonZeroDigit=val.getFirstNonzeroDigit();
+      if (intCount > firstNonZeroDigit) {
+        resDigits[intCount]^=bitNumber;
+      }
+ else       if (intCount < firstNonZeroDigit) {
+        resDigits[intCount]=-bitNumber;
+        for (i=intCount + 1; i < firstNonZeroDigit; i++) {
+          resDigits[i]=-1;
+        }
+        resDigits[i]=resDigits[i]--;
+      }
+ else {
+        i=intCount;
+        resDigits[i]=-((-resDigits[intCount]) ^ bitNumber);
+        if (resDigits[i] == 0) {
+          for (i++; resDigits[i] == -1; i++) {
+            resDigits[i]=0;
+          }
+          resDigits[i]++;
+        }
+      }
+    }
+  }
+ else {
+    resDigits[intCount]^=bitNumber;
+  }
+  BigInteger result=new BigInteger(resSign,resLength,resDigits);
+  result.cutOffLeadingZeroes();
+  return result;
+}

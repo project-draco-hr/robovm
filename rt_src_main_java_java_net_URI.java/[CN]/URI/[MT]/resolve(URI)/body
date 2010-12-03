@@ -1,0 +1,30 @@
+{
+  if (relative.absolute || opaque) {
+    return relative;
+  }
+  URI result;
+  if (relative.path.equals("") && relative.scheme == null && relative.authority == null && relative.query == null && relative.fragment != null) {
+    result=duplicate();
+    result.fragment=relative.fragment;
+    return result;
+  }
+  if (relative.authority != null) {
+    result=relative.duplicate();
+    result.scheme=scheme;
+    result.absolute=absolute;
+  }
+ else {
+    result=duplicate();
+    result.fragment=relative.fragment;
+    result.query=relative.query;
+    if (relative.path.startsWith("/")) {
+      result.path=relative.path;
+    }
+ else {
+      int endindex=path.lastIndexOf('/') + 1;
+      result.path=normalize(path.substring(0,endindex) + relative.path);
+    }
+    result.setSchemeSpecificPart();
+  }
+  return result;
+}

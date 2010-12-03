@@ -1,0 +1,12 @@
+{
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    E x;
+    while ((x=unlinkLast()) == null)     notEmpty.await();
+    return x;
+  }
+  finally {
+    lock.unlock();
+  }
+}

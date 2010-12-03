@@ -1,0 +1,54 @@
+{
+  SSLEngineResult.HandshakeStatus status;
+  int type;
+  try {
+    while (!(status=handshakeProtocol.getStatus()).equals(SSLEngineResult.HandshakeStatus.FINISHED)) {
+      if (logger != null) {
+        String s=(status.equals(SSLEngineResult.HandshakeStatus.NEED_WRAP)) ? "NEED_WRAP" : (status.equals(SSLEngineResult.HandshakeStatus.NEED_UNWRAP)) ? "NEED_UNWRAP" : "STATUS: OTHER!";
+        logger.println("SSLSocketImpl: HS status: " + s + " "+ status);
+      }
+      if (status.equals(SSLEngineResult.HandshakeStatus.NEED_WRAP)) {
+        output.write(handshakeProtocol.wrap());
+      }
+ else       if (status.equals(SSLEngineResult.HandshakeStatus.NEED_UNWRAP)) {
+switch (type=recordProtocol.unwrap()) {
+case ContentType.HANDSHAKE:
+case ContentType.CHANGE_CIPHER_SPEC:
+          break;
+case ContentType.APPLICATION_DATA:
+        break;
+case ContentType.ALERT:
+      processAlert();
+    if (socket_was_closed) {
+      return;
+    }
+  break;
+default :
+reportFatalAlert(AlertProtocol.UNEXPECTED_MESSAGE,new SSLException("Unexpected message of type " + type + " has been got"));
+}
+}
+ else {
+reportFatalAlert(AlertProtocol.INTERNAL_ERROR,new SSLException("Handshake passed unexpected status: " + status));
+}
+if (alertProtocol.hasAlert()) {
+output.write(alertProtocol.wrap());
+alertProtocol.setProcessed();
+}
+}
+}
+ catch (EndOfSourceException e) {
+appDataIS.setEnd();
+throw new IOException("Connection was closed");
+}
+catch (AlertException e) {
+reportFatalAlert(e.getDescriptionCode(),e.getReason());
+}
+session=recordProtocol.getSession();
+if (listeners != null) {
+HandshakeCompletedEvent event=new HandshakeCompletedEvent(this,session);
+int size=listeners.size();
+for (int i=0; i < size; i++) {
+listeners.get(i).handshakeCompleted(event);
+}
+}
+}

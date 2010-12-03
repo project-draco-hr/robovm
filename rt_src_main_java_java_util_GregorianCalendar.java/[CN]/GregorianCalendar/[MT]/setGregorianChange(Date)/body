@@ -1,0 +1,21 @@
+{
+  gregorianCutover=date.getTime();
+  GregorianCalendar cal=new GregorianCalendar(TimeZone.GMT);
+  cal.setTime(date);
+  changeYear=cal.get(YEAR);
+  if (cal.get(ERA) == BC) {
+    changeYear=1 - changeYear;
+  }
+  julianSkew=((changeYear - 2000) / 400) + julianError() - ((changeYear - 2000) / 100);
+  isCached=false;
+  int dayOfYear=cal.get(DAY_OF_YEAR);
+  if (dayOfYear < julianSkew) {
+    currentYearSkew=dayOfYear - 1;
+    lastYearSkew=julianSkew - dayOfYear + 1;
+  }
+ else {
+    lastYearSkew=0;
+    currentYearSkew=julianSkew;
+  }
+  isCached=false;
+}

@@ -1,0 +1,33 @@
+{
+  Comparable<? super K> key=comparable(okey);
+  for (; ; ) {
+    Node<K,V> b=findPredecessor(key);
+    Node<K,V> n=b.next;
+    for (; ; ) {
+      if (n == null)       return null;
+      Node<K,V> f=n.next;
+      if (n != b.next)       break;
+      Object v=n.value;
+      if (v == null) {
+        n.helpDelete(b,f);
+        break;
+      }
+      if (v == n || b.value == null)       break;
+      int c=key.compareTo(n.key);
+      if (c < 0)       return null;
+      if (c > 0) {
+        b=n;
+        n=f;
+        continue;
+      }
+      if (value != null && !value.equals(v))       return null;
+      if (!n.casValue(v,null))       break;
+      if (!n.appendMarker(f) || !b.casNext(n,f))       findNode(key);
+ else {
+        findPredecessor(key);
+        if (head.right == null)         tryReduceLevel();
+      }
+      return (V)v;
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  strmHandler=streamHandlers.get(protocol);
+  if (strmHandler != null) {
+    return;
+  }
+  if (streamHandlerFactory != null) {
+    strmHandler=streamHandlerFactory.createURLStreamHandler(protocol);
+    if (strmHandler != null) {
+      streamHandlers.put(protocol,strmHandler);
+      return;
+    }
+  }
+  String packageList=AccessController.doPrivileged(new PriviAction<String>("java.protocol.handler.pkgs"));
+  if (packageList != null) {
+    StringTokenizer st=new StringTokenizer(packageList,"|");
+    while (st.hasMoreTokens()) {
+      String className=st.nextToken() + "." + protocol+ ".Handler";
+      try {
+        strmHandler=(URLStreamHandler)Class.forName(className,true,ClassLoader.getSystemClassLoader()).newInstance();
+        if (strmHandler != null) {
+          streamHandlers.put(protocol,strmHandler);
+        }
+        return;
+      }
+ catch (      IllegalAccessException e) {
+      }
+catch (      InstantiationException e) {
+      }
+catch (      ClassNotFoundException e) {
+      }
+    }
+  }
+  String className="org.apache.harmony.luni.internal.net.www.protocol." + protocol + ".Handler";
+  try {
+    strmHandler=(URLStreamHandler)Class.forName(className).newInstance();
+  }
+ catch (  IllegalAccessException e) {
+  }
+catch (  InstantiationException e) {
+  }
+catch (  ClassNotFoundException e) {
+  }
+  if (strmHandler != null) {
+    streamHandlers.put(protocol,strmHandler);
+  }
+}

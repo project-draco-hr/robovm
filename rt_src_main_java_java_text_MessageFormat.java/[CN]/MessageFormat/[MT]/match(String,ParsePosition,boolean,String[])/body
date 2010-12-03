@@ -1,0 +1,25 @@
+{
+  int length=string.length(), offset=position.getIndex(), token=-1;
+  while (offset < length && Character.isWhitespace(string.charAt(offset))) {
+    offset++;
+  }
+  for (int i=tokens.length; --i >= 0; ) {
+    if (string.regionMatches(true,offset,tokens[i],0,tokens[i].length())) {
+      token=i;
+      break;
+    }
+  }
+  if (token == -1) {
+    return -1;
+  }
+  offset+=tokens[token].length();
+  while (offset < length && Character.isWhitespace(string.charAt(offset))) {
+    offset++;
+  }
+  char ch;
+  if (offset < length && ((ch=string.charAt(offset)) == '}' || (!last && ch == ','))) {
+    position.setIndex(offset + 1);
+    return token;
+  }
+  return -1;
+}

@@ -1,0 +1,45 @@
+{
+  ZipFile archive=null;
+  try {
+    archive=new ZipFile(input);
+    File strippedFile=output;
+    if (verbose) {
+      stdout.format("Creating stripped archive file '%s'\n",strippedFile);
+    }
+    ZipOutputStream out=null;
+    try {
+      out=new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(strippedFile)));
+      Enumeration<? extends ZipEntry> entries=archive.entries();
+      while (entries.hasMoreElements()) {
+        ZipEntry entry=entries.nextElement();
+        ZipEntry newEntry=new ZipEntry(entry.getName());
+        newEntry.setTime(entry.getTime());
+        out.putNextEntry(newEntry);
+        InputStream in=null;
+        try {
+          if (!entry.getName().toLowerCase().endsWith(".class")) {
+            in=archive.getInputStream(entry);
+          }
+ else {
+            in=new ByteArrayInputStream(new byte[0]);
+          }
+          IOUtils.copy(in,out);
+          out.closeEntry();
+        }
+  finally {
+          IOUtils.closeQuietly(in);
+        }
+      }
+    }
+  finally {
+      IOUtils.closeQuietly(out);
+    }
+  }
+  finally {
+    try {
+      archive.close();
+    }
+ catch (    Throwable t) {
+    }
+  }
+}

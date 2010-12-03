@@ -1,0 +1,42 @@
+{
+  Runnable task=w.firstTask;
+  w.firstTask=null;
+  boolean completedAbruptly=true;
+  try {
+    while (task != null || (task=getTask()) != null) {
+      w.lock();
+      clearInterruptsForTaskRun();
+      try {
+        beforeExecute(w.thread,task);
+        Throwable thrown=null;
+        try {
+          task.run();
+        }
+ catch (        RuntimeException x) {
+          thrown=x;
+          throw x;
+        }
+catch (        Error x) {
+          thrown=x;
+          throw x;
+        }
+catch (        Throwable x) {
+          thrown=x;
+          throw new Error(x);
+        }
+ finally {
+          afterExecute(task,thrown);
+        }
+      }
+  finally {
+        task=null;
+        w.completedTasks++;
+        w.unlock();
+      }
+    }
+    completedAbruptly=false;
+  }
+  finally {
+    processWorkerExit(w,completedAbruptly);
+  }
+}

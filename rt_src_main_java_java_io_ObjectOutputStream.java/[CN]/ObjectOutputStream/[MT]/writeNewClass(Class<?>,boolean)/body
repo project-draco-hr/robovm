@@ -1,0 +1,15 @@
+{
+  output.writeByte(TC_CLASS);
+  ObjectStreamClass clDesc=ObjectStreamClass.lookupStreamClass(object);
+  if (clDesc.isEnum()) {
+    writeEnumDesc(object,clDesc,unshared);
+  }
+ else {
+    writeClassDesc(clDesc,unshared);
+  }
+  Integer handle=nextHandle();
+  if (!unshared) {
+    objectsWritten.put(object,handle);
+  }
+  return handle;
+}

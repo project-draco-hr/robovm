@@ -1,0 +1,45 @@
+{
+  if ((status == FLUSH) || (!endOfInput && status == END)) {
+    throw new IllegalStateException();
+  }
+  CoderResult result=null;
+  while (true) {
+    CodingErrorAction action=null;
+    try {
+      result=decodeLoop(in,out);
+    }
+ catch (    BufferOverflowException ex) {
+      throw new CoderMalfunctionError(ex);
+    }
+catch (    BufferUnderflowException ex) {
+      throw new CoderMalfunctionError(ex);
+    }
+    if (result.isUnderflow()) {
+      int remaining=in.remaining();
+      status=endOfInput ? END : ONGOING;
+      if (endOfInput && remaining > 0) {
+        result=CoderResult.malformedForLength(remaining);
+      }
+ else {
+        return result;
+      }
+    }
+    if (result.isOverflow()) {
+      return result;
+    }
+    action=malformAction;
+    if (result.isUnmappable()) {
+      action=unmapAction;
+    }
+    if (action == CodingErrorAction.REPLACE) {
+      if (out.remaining() < replace.length()) {
+        return CoderResult.OVERFLOW;
+      }
+      out.put(replace);
+    }
+ else {
+      if (action != CodingErrorAction.IGNORE)       return result;
+    }
+    in.position(in.position() + result.length());
+  }
+}

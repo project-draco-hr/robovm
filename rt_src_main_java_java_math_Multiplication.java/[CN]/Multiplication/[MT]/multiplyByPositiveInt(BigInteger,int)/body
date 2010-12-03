@@ -1,0 +1,20 @@
+{
+  int resSign=val.sign;
+  if (resSign == 0) {
+    return BigInteger.ZERO;
+  }
+  int aNumberLength=val.numberLength;
+  int[] aDigits=val.digits;
+  if (aNumberLength == 1) {
+    long res=unsignedMultAddAdd(aDigits[0],factor,0,0);
+    int resLo=(int)res;
+    int resHi=(int)(res >>> 32);
+    return ((resHi == 0) ? new BigInteger(resSign,resLo) : new BigInteger(resSign,2,new int[]{resLo,resHi}));
+  }
+  int resLength=aNumberLength + 1;
+  int resDigits[]=new int[resLength];
+  resDigits[aNumberLength]=multiplyByInt(resDigits,aDigits,aNumberLength,factor);
+  BigInteger result=new BigInteger(resSign,resLength,resDigits);
+  result.cutOffLeadingZeroes();
+  return result;
+}

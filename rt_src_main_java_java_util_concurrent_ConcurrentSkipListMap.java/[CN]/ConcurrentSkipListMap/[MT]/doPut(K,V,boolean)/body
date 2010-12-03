@@ -1,0 +1,34 @@
+{
+  Comparable<? super K> key=comparable(kkey);
+  for (; ; ) {
+    Node<K,V> b=findPredecessor(key);
+    Node<K,V> n=b.next;
+    for (; ; ) {
+      if (n != null) {
+        Node<K,V> f=n.next;
+        if (n != b.next)         break;
+        Object v=n.value;
+        if (v == null) {
+          n.helpDelete(b,f);
+          break;
+        }
+        if (v == n || b.value == null)         break;
+        int c=key.compareTo(n.key);
+        if (c > 0) {
+          b=n;
+          n=f;
+          continue;
+        }
+        if (c == 0) {
+          if (onlyIfAbsent || n.casValue(v,value))           return (V)v;
+ else           break;
+        }
+      }
+      Node<K,V> z=new Node<K,V>(kkey,value,n);
+      if (!b.casNext(n,z))       break;
+      int level=randomLevel();
+      if (level > 0)       insertIndex(z,level);
+      return null;
+    }
+  }
+}

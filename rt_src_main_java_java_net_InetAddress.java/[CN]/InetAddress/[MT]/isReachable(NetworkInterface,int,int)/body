@@ -1,0 +1,22 @@
+{
+  if (0 > ttl || 0 > timeout) {
+    throw new IllegalArgumentException(Messages.getString("luni.61"));
+  }
+  boolean reachable=false;
+  if (null == netif) {
+    reachable=NETIMPL.isReachableByICMP(this,null,ttl,timeout);
+    if (!reachable) {
+      reachable=isReachableByTCP(this,null,timeout);
+    }
+  }
+ else {
+    if (null == netif.addresses) {
+      return false;
+    }
+    reachable=isReachableByICMPUseMultiThread(netif,ttl,timeout);
+    if (!reachable) {
+      reachable=isReachableByTCPUseMultiThread(netif,ttl,timeout);
+    }
+  }
+  return reachable;
+}

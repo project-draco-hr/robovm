@@ -1,0 +1,75 @@
+{
+  output.writeByte(TC_ARRAY);
+  writeClassDesc(arrayClDesc,false);
+  Integer handle=nextHandle();
+  if (!unshared) {
+    objectsWritten.put(array,handle);
+  }
+  if (componentType.isPrimitive()) {
+    if (componentType == Integer.TYPE) {
+      int[] intArray=(int[])array;
+      output.writeInt(intArray.length);
+      for (int i=0; i < intArray.length; i++) {
+        output.writeInt(intArray[i]);
+      }
+    }
+ else     if (componentType == Byte.TYPE) {
+      byte[] byteArray=(byte[])array;
+      output.writeInt(byteArray.length);
+      output.write(byteArray,0,byteArray.length);
+    }
+ else     if (componentType == Character.TYPE) {
+      char[] charArray=(char[])array;
+      output.writeInt(charArray.length);
+      for (int i=0; i < charArray.length; i++) {
+        output.writeChar(charArray[i]);
+      }
+    }
+ else     if (componentType == Short.TYPE) {
+      short[] shortArray=(short[])array;
+      output.writeInt(shortArray.length);
+      for (int i=0; i < shortArray.length; i++) {
+        output.writeShort(shortArray[i]);
+      }
+    }
+ else     if (componentType == Boolean.TYPE) {
+      boolean[] booleanArray=(boolean[])array;
+      output.writeInt(booleanArray.length);
+      for (int i=0; i < booleanArray.length; i++) {
+        output.writeBoolean(booleanArray[i]);
+      }
+    }
+ else     if (componentType == Long.TYPE) {
+      long[] longArray=(long[])array;
+      output.writeInt(longArray.length);
+      for (int i=0; i < longArray.length; i++) {
+        output.writeLong(longArray[i]);
+      }
+    }
+ else     if (componentType == Float.TYPE) {
+      float[] floatArray=(float[])array;
+      output.writeInt(floatArray.length);
+      for (int i=0; i < floatArray.length; i++) {
+        output.writeFloat(floatArray[i]);
+      }
+    }
+ else     if (componentType == Double.TYPE) {
+      double[] doubleArray=(double[])array;
+      output.writeInt(doubleArray.length);
+      for (int i=0; i < doubleArray.length; i++) {
+        output.writeDouble(doubleArray[i]);
+      }
+    }
+ else {
+      throw new InvalidClassException(Messages.getString("luni.C2",arrayClass.getName()));
+    }
+  }
+ else {
+    Object[] objectArray=(Object[])array;
+    output.writeInt(objectArray.length);
+    for (int i=0; i < objectArray.length; i++) {
+      writeObject(objectArray[i]);
+    }
+  }
+  return handle;
+}

@@ -1,0 +1,31 @@
+{
+  reset();
+  int length=(int)(in.remaining() * averChars);
+  CharBuffer output=CharBuffer.allocate(length);
+  CoderResult result=null;
+  while (true) {
+    result=decode(in,output,false);
+    checkCoderResult(result);
+    if (result.isUnderflow()) {
+      break;
+    }
+ else     if (result.isOverflow()) {
+      output=allocateMore(output);
+    }
+  }
+  result=decode(in,output,true);
+  checkCoderResult(result);
+  while (true) {
+    result=flush(output);
+    checkCoderResult(result);
+    if (result.isOverflow()) {
+      output=allocateMore(output);
+    }
+ else {
+      break;
+    }
+  }
+  output.flip();
+  status=FLUSH;
+  return output;
+}

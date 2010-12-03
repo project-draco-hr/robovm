@@ -1,0 +1,201 @@
+{
+  if (!(certificate instanceof X509Certificate)) {
+    return false;
+  }
+  X509Certificate cert=(X509Certificate)certificate;
+  if ((certificateEquals != null) && !certificateEquals.equals(cert)) {
+    return false;
+  }
+  if ((serialNumber != null) && !serialNumber.equals(cert.getSerialNumber())) {
+    return false;
+  }
+  if ((issuer != null) && !issuer.equals(cert.getIssuerX500Principal())) {
+    return false;
+  }
+  if ((subject != null) && !subject.equals(cert.getSubjectX500Principal())) {
+    return false;
+  }
+  if ((subjectKeyIdentifier != null) && !Arrays.equals(subjectKeyIdentifier,getExtensionValue(cert,"2.5.29.14"))) {
+    return false;
+  }
+  if ((authorityKeyIdentifier != null) && !Arrays.equals(authorityKeyIdentifier,getExtensionValue(cert,"2.5.29.35"))) {
+    return false;
+  }
+  if (certificateValid != null) {
+    try {
+      cert.checkValidity(certificateValid);
+    }
+ catch (    CertificateExpiredException e) {
+      return false;
+    }
+catch (    CertificateNotYetValidException e) {
+      return false;
+    }
+  }
+  if (privateKeyValid != null) {
+    try {
+      byte[] bytes=getExtensionValue(cert,"2.5.29.16");
+      if (bytes == null) {
+        return false;
+      }
+      PrivateKeyUsagePeriod pkup=(PrivateKeyUsagePeriod)PrivateKeyUsagePeriod.ASN1.decode(bytes);
+      Date notBefore=pkup.getNotBefore();
+      Date notAfter=pkup.getNotAfter();
+      if ((notBefore == null) && (notAfter == null)) {
+        return false;
+      }
+      if ((notBefore != null) && notBefore.compareTo(privateKeyValid) > 0) {
+        return false;
+      }
+      if ((notAfter != null) && notAfter.compareTo(privateKeyValid) < 0) {
+        return false;
+      }
+    }
+ catch (    IOException e) {
+      return false;
+    }
+  }
+  if (subjectPublicKeyAlgID != null) {
+    try {
+      byte[] encoding=cert.getPublicKey().getEncoded();
+      AlgorithmIdentifier ai=((SubjectPublicKeyInfo)SubjectPublicKeyInfo.ASN1.decode(encoding)).getAlgorithmIdentifier();
+      if (!subjectPublicKeyAlgID.equals(ai.getAlgorithm())) {
+        return false;
+      }
+    }
+ catch (    IOException e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+  if (subjectPublicKey != null) {
+    if (!Arrays.equals(subjectPublicKey,cert.getPublicKey().getEncoded())) {
+      return false;
+    }
+  }
+  if (keyUsage != null) {
+    boolean[] ku=cert.getKeyUsage();
+    if (ku != null) {
+      int i=0;
+      int min_length=(ku.length < keyUsage.length) ? ku.length : keyUsage.length;
+      for (; i < min_length; i++) {
+        if (keyUsage[i] && !ku[i]) {
+          return false;
+        }
+      }
+      for (; i < keyUsage.length; i++) {
+        if (keyUsage[i]) {
+          return false;
+        }
+      }
+    }
+  }
+  if (extendedKeyUsage != null) {
+    try {
+      List keyUsage=cert.getExtendedKeyUsage();
+      if (keyUsage != null) {
+        if (!keyUsage.containsAll(extendedKeyUsage)) {
+          return false;
+        }
+      }
+    }
+ catch (    CertificateParsingException e) {
+      return false;
+    }
+  }
+  if (pathLen != -1) {
+    int p_len=cert.getBasicConstraints();
+    if ((pathLen < 0) && (p_len >= 0)) {
+      return false;
+    }
+    if ((pathLen > 0) && (pathLen > p_len)) {
+      return false;
+    }
+  }
+  if (subjectAltNames != null) {
+    PASSED:     try {
+      byte[] bytes=getExtensionValue(cert,"2.5.29.17");
+      if (bytes == null) {
+        return false;
+      }
+      List sans=((GeneralNames)GeneralNames.ASN1.decode(bytes)).getNames();
+      if ((sans == null) || (sans.size() == 0)) {
+        return false;
+      }
+      boolean[][] map=new boolean[9][];
+      for (int i=0; i < 9; i++) {
+        map[i]=(subjectAltNames[i] == null) ? new boolean[0] : new boolean[subjectAltNames[i].size()];
+      }
+      Iterator it=sans.iterator();
+      while (it.hasNext()) {
+        GeneralName name=(GeneralName)it.next();
+        int tag=name.getTag();
+        for (int i=0; i < map[tag].length; i++) {
+          if (((GeneralName)subjectAltNames[tag].get(i)).equals(name)) {
+            if (!matchAllNames) {
+              break PASSED;
+            }
+            map[tag][i]=true;
+          }
+        }
+      }
+      if (!matchAllNames) {
+        return false;
+      }
+      for (int tag=0; tag < 9; tag++) {
+        for (int name=0; name < map[tag].length; name++) {
+          if (!map[tag][name]) {
+            return false;
+          }
+        }
+      }
+    }
+ catch (    IOException e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+  if (nameConstraints != null) {
+    if (!nameConstraints.isAcceptable(cert)) {
+      return false;
+    }
+  }
+  if (policies != null) {
+    byte[] bytes=getExtensionValue(cert,"2.5.29.32");
+    if (bytes == null) {
+      return false;
+    }
+    if (policies.size() == 0) {
+      return true;
+    }
+    PASSED:     try {
+      List policyInformations=((CertificatePolicies)CertificatePolicies.ASN1.decode(bytes)).getPolicyInformations();
+      Iterator it=policyInformations.iterator();
+      while (it.hasNext()) {
+        if (policies.contains(((PolicyInformation)it.next()).getPolicyIdentifier())) {
+          break PASSED;
+        }
+      }
+      return false;
+    }
+ catch (    IOException e) {
+      return false;
+    }
+  }
+  if (pathToNames != null) {
+    byte[] bytes=getExtensionValue(cert,"2.5.29.30");
+    if (bytes != null) {
+      NameConstraints nameConstraints;
+      try {
+        nameConstraints=(NameConstraints)NameConstraints.ASN1.decode(bytes);
+      }
+ catch (      IOException e) {
+        return false;
+      }
+      if (!nameConstraints.isAcceptable(pathToNames)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}

@@ -1,0 +1,52 @@
+{
+  if (lastException != null) {
+    throw lastException;
+  }
+  if (keyStore != null) {
+    isGetKeyStore=true;
+    return keyStore;
+  }
+  try {
+    final KeyStore ks;
+    final char[] passwd;
+    ks=(providerForKeyStore == null ? KeyStore.getInstance(typeForKeyStore) : KeyStore.getInstance(typeForKeyStore,providerForKeyStore));
+    if (protParameter instanceof PasswordProtection) {
+      passwd=((PasswordProtection)protParameter).getPassword();
+    }
+ else     if (protParameter instanceof CallbackHandlerProtection) {
+      passwd=KeyStoreSpi.getPasswordFromCallBack(protParameter);
+    }
+ else {
+      throw new KeyStoreException(Messages.getString("security.35"));
+    }
+    AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
+      public Object run() throws Exception {
+        if (fileForLoad != null) {
+          FileInputStream fis=null;
+          try {
+            fis=new FileInputStream(fileForLoad);
+            ks.load(fis,passwd);
+          }
+  finally {
+            if (fis != null) {
+              fis.close();
+            }
+          }
+        }
+ else {
+          ks.load(new TmpLSParameter(protParameter));
+        }
+        return null;
+      }
+    }
+,accControlContext);
+    isGetKeyStore=true;
+    return ks;
+  }
+ catch (  KeyStoreException e) {
+    throw lastException=e;
+  }
+catch (  Exception e) {
+    throw lastException=new KeyStoreException(e);
+  }
+}

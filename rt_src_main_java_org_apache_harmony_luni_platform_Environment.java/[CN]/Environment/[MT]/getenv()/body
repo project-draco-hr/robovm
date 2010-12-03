@@ -1,0 +1,16 @@
+{
+  if (null == envMap) {
+    HashMap<String,String> newEnvMap=new EnvironmentMap();
+    byte[] bytes=getEnvBytes();
+    if (bytes == null) {
+      throw new Error("Failed to get environment variables.");
+    }
+    String[] envStrings=new String(bytes).split("\0");
+    for (int i=0; i < envStrings.length; i++) {
+      int separator=envStrings[i].indexOf("=",1);
+      newEnvMap.put(envStrings[i].substring(0,separator),envStrings[i].substring(separator + 1));
+    }
+    envMap=Collections.unmodifiableMap(newEnvMap);
+  }
+  return envMap;
+}

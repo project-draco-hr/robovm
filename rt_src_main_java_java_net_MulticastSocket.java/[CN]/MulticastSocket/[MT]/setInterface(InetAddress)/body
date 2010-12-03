@@ -1,0 +1,31 @@
+{
+  checkClosedAndBind(false);
+  if (addr == null) {
+    throw new NullPointerException();
+  }
+  if (addr.isAnyLocalAddress()) {
+    impl.setOption(SocketOptions.IP_MULTICAST_IF,InetAddress.ANY);
+  }
+ else   if (addr instanceof Inet4Address) {
+    impl.setOption(SocketOptions.IP_MULTICAST_IF,addr);
+    interfaceSet=addr;
+  }
+  NetworkInterface theInterface=NetworkInterface.getByInetAddress(addr);
+  if ((theInterface != null) && (theInterface.getIndex() != 0)) {
+    try {
+      impl.setOption(SocketOptions.IP_MULTICAST_IF2,Integer.valueOf(theInterface.getIndex()));
+    }
+ catch (    SocketException e) {
+    }
+  }
+ else   if (addr.isAnyLocalAddress()) {
+    try {
+      impl.setOption(SocketOptions.IP_MULTICAST_IF2,Integer.valueOf(0));
+    }
+ catch (    SocketException e) {
+    }
+  }
+ else   if (addr instanceof Inet6Address) {
+    throw new SocketException(Messages.getString("luni.6A"));
+  }
+}

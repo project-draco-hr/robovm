@@ -1,0 +1,28 @@
+{
+  this.isSecondPassVisited=true;
+  if (next != null) {
+    if (!next.isSecondPassVisited) {
+      JointSet set=next.processBackRefReplacement();
+      if (set != null) {
+        next.isSecondPassVisited=true;
+        next=(AbstractSet)set;
+      }
+      next.processSecondPass();
+    }
+  }
+  if (innerSet != null) {
+    if (!innerSet.isSecondPassVisited) {
+      JointSet set=innerSet.processBackRefReplacement();
+      if (set != null) {
+        innerSet.isSecondPassVisited=true;
+        innerSet=(AbstractSet)set;
+      }
+      innerSet.processSecondPass();
+    }
+ else {
+      if (innerSet instanceof SingleSet && ((FSet)((JointSet)innerSet).fSet).isBackReferenced) {
+        innerSet=innerSet.next;
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  QNode s=null;
+  boolean isData=(e != null);
+  for (; ; ) {
+    QNode t=tail;
+    QNode h=head;
+    if (t == null || h == null)     continue;
+    if (h == t || t.isData == isData) {
+      QNode tn=t.next;
+      if (t != tail)       continue;
+      if (tn != null) {
+        advanceTail(t,tn);
+        continue;
+      }
+      if (timed && nanos <= 0)       return null;
+      if (s == null)       s=new QNode(e,isData);
+      if (!t.casNext(null,s))       continue;
+      advanceTail(t,s);
+      Object x=awaitFulfill(s,e,timed,nanos);
+      if (x == s) {
+        clean(t,s);
+        return null;
+      }
+      if (!s.isOffList()) {
+        advanceHead(t,s);
+        if (x != null)         s.item=s;
+        s.waiter=null;
+      }
+      return (x != null) ? x : e;
+    }
+ else {
+      QNode m=h.next;
+      if (t != tail || m == null || h != head)       continue;
+      Object x=m.item;
+      if (isData == (x != null) || x == m || !m.casItem(x,e)) {
+        advanceHead(h,m);
+        continue;
+      }
+      advanceHead(h,m);
+      LockSupport.unpark(m.waiter);
+      return (x != null) ? x : e;
+    }
+  }
+}

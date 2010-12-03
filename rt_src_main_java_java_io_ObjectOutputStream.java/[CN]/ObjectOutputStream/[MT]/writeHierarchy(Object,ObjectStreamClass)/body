@@ -1,0 +1,45 @@
+{
+  if (object == null) {
+    throw new NotActiveException();
+  }
+  if (classDesc.getSuperclass() != null) {
+    writeHierarchy(object,classDesc.getSuperclass());
+  }
+  currentObject=object;
+  currentClass=classDesc;
+  boolean executed=false;
+  try {
+    if (classDesc.hasMethodWriteObject()) {
+      final Method method=classDesc.getMethodWriteObject();
+      try {
+        method.invoke(object,new Object[]{this});
+        executed=true;
+      }
+ catch (      InvocationTargetException e) {
+        Throwable ex=e.getTargetException();
+        if (ex instanceof RuntimeException) {
+          throw (RuntimeException)ex;
+        }
+ else         if (ex instanceof Error) {
+          throw (Error)ex;
+        }
+        throw (IOException)ex;
+      }
+catch (      IllegalAccessException e) {
+        throw new RuntimeException(e.toString());
+      }
+    }
+    if (executed) {
+      drain();
+      output.writeByte(TC_ENDBLOCKDATA);
+    }
+ else {
+      defaultWriteObject();
+    }
+  }
+  finally {
+    currentObject=null;
+    currentClass=null;
+    currentPutField=null;
+  }
+}

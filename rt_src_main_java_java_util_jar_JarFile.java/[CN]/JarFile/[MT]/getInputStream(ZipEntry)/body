@@ -1,0 +1,32 @@
+{
+  if (manifestEntry != null) {
+    getManifest();
+  }
+  if (verifier != null) {
+    verifier.setManifest(getManifest());
+    if (manifest != null) {
+      verifier.mainAttributesEnd=manifest.getMainAttributesEnd();
+    }
+    if (verifier.readCertificates()) {
+      verifier.removeMetaEntries();
+      if (manifest != null) {
+        manifest.removeChunks();
+      }
+      if (!verifier.isSignedJar()) {
+        verifier=null;
+      }
+    }
+  }
+  InputStream in=super.getInputStream(ze);
+  if (in == null) {
+    return null;
+  }
+  if (verifier == null || ze.getSize() == -1) {
+    return in;
+  }
+  JarVerifier.VerifierEntry entry=verifier.initEntry(ze.getName());
+  if (entry == null) {
+    return in;
+  }
+  return new JarFileInputStream(in,ze,entry);
+}

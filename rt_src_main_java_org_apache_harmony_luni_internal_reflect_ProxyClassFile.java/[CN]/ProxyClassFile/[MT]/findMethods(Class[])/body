@@ -1,0 +1,22 @@
+{
+  if (ObjectEqualsMethod == null) {
+    try {
+      ObjectEqualsMethod=Object.class.getMethod("equals",new Class[]{Object.class});
+      ObjectHashCodeMethod=Object.class.getMethod("hashCode",new Class[0]);
+      ObjectToStringMethod=Object.class.getMethod("toString",new Class[0]);
+    }
+ catch (    NoSuchMethodException ex) {
+      throw new InternalError();
+    }
+  }
+  ArrayList<ProxyMethod> allMethods=new ArrayList<ProxyMethod>(25);
+  allMethods.add(new ProxyMethod(Object.class,ObjectEqualsMethod));
+  allMethods.add(new ProxyMethod(Object.class,ObjectHashCodeMethod));
+  allMethods.add(new ProxyMethod(Object.class,ObjectToStringMethod));
+  HashSet<Class<?>> interfacesSeen=new HashSet<Class<?>>();
+  for (  Class<?> element : interfaces) {
+    findMethods(element,allMethods,interfacesSeen);
+  }
+  proxyMethods=new ProxyMethod[allMethods.size()];
+  allMethods.toArray(proxyMethods);
+}

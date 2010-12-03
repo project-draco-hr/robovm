@@ -1,0 +1,20 @@
+{
+  if (c == null)   throw new NullPointerException();
+  if (c == this)   throw new IllegalArgumentException();
+  if (maxElements <= 0)   return 0;
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    int n=0;
+    while (n < maxElements) {
+      E first=q.peek();
+      if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0)       break;
+      c.add(q.poll());
+      ++n;
+    }
+    return n;
+  }
+  finally {
+    lock.unlock();
+  }
+}

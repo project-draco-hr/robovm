@@ -1,0 +1,25 @@
+{
+synchronized (lock) {
+    int read=super.read(buffer,offset,count);
+    if (read == -1) {
+      return -1;
+    }
+    for (int i=0; i < read; i++) {
+      char ch=buffer[offset + i];
+      if (ch == '\r') {
+        lineNumber++;
+        lastWasCR=true;
+      }
+ else       if (ch == '\n') {
+        if (!lastWasCR) {
+          lineNumber++;
+        }
+        lastWasCR=false;
+      }
+ else {
+        lastWasCR=false;
+      }
+    }
+    return read;
+  }
+}

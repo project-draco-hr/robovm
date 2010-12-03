@@ -1,0 +1,26 @@
+{
+  Iterator it=c.iterator();
+  int ssize=c.size();
+  lock.lock();
+  try {
+    int size=size();
+    checkIndexInclusive(index,size);
+    E[] data;
+    E[] old=getData();
+    int nSize=size + ssize;
+    data=newElementArray(nSize);
+    System.arraycopy(old,0,data,0,index);
+    int i=index;
+    while (it.hasNext()) {
+      data[i++]=(E)it.next();
+    }
+    if (size > index) {
+      System.arraycopy(old,index,data,index + ssize,size - index);
+    }
+    setData(data);
+  }
+  finally {
+    lock.unlock();
+  }
+  return true;
+}

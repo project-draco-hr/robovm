@@ -1,0 +1,30 @@
+{
+  StringBuilder result=new StringBuilder();
+  int startIndex=0;
+  int flags=formatToken.getFlags();
+  if (formatToken.isFlagSet(FormatToken.FLAG_MINUS) && !formatToken.isWidthSet()) {
+    throw new MissingFormatWidthException("-" + formatToken.getConversionType());
+  }
+  if (arg instanceof Formattable) {
+    int flag=0;
+    if (FormatToken.FLAGS_UNSET != (flags & ~FormatToken.FLAG_MINUS & ~FormatToken.FLAG_SHARP)) {
+      throw new IllegalFormatFlagsException(formatToken.getStrFlags());
+    }
+    if (formatToken.isFlagSet(FormatToken.FLAG_MINUS)) {
+      flag|=FormattableFlags.LEFT_JUSTIFY;
+    }
+    if (formatToken.isFlagSet(FormatToken.FLAG_SHARP)) {
+      flag|=FormattableFlags.ALTERNATE;
+    }
+    if (Character.isUpperCase(formatToken.getConversionType())) {
+      flag|=FormattableFlags.UPPERCASE;
+    }
+    ((Formattable)arg).formatTo(formatter,flag,formatToken.getWidth(),formatToken.getPrecision());
+    return null;
+  }
+  if (FormatToken.FLAGS_UNSET != flags && FormatToken.FLAG_MINUS != flags) {
+    throw new FormatFlagsConversionMismatchException(formatToken.getStrFlags(),formatToken.getConversionType());
+  }
+  result.append(arg);
+  return padding(result,startIndex);
+}

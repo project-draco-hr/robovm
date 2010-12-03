@@ -1,0 +1,49 @@
+{
+  int iNeg=negative.getFirstNonzeroDigit();
+  int iPos=positive.getFirstNonzeroDigit();
+  int i;
+  int limit;
+  if (iPos >= negative.numberLength) {
+    return negative;
+  }
+  int resLength=negative.numberLength;
+  int resDigits[]=new int[resLength];
+  if (iNeg < iPos) {
+    for (i=iNeg; i < iPos; i++) {
+      resDigits[i]=negative.digits[i];
+    }
+  }
+ else   if (iPos < iNeg) {
+    i=iPos;
+    resDigits[i]=-positive.digits[i];
+    limit=Math.min(positive.numberLength,iNeg);
+    for (i++; i < limit; i++) {
+      resDigits[i]=~positive.digits[i];
+    }
+    if (i != positive.numberLength) {
+      resDigits[i]=~(-negative.digits[i] | positive.digits[i]);
+    }
+ else {
+      for (; i < iNeg; i++) {
+        resDigits[i]=-1;
+      }
+      resDigits[i]=negative.digits[i] - 1;
+    }
+    i++;
+  }
+ else {
+    i=iPos;
+    resDigits[i]=-(-negative.digits[i] | positive.digits[i]);
+    i++;
+  }
+  limit=Math.min(negative.numberLength,positive.numberLength);
+  for (; i < limit; i++) {
+    resDigits[i]=negative.digits[i] & ~positive.digits[i];
+  }
+  for (; i < negative.numberLength; i++) {
+    resDigits[i]=negative.digits[i];
+  }
+  BigInteger result=new BigInteger(-1,resLength,resDigits);
+  result.cutOffLeadingZeroes();
+  return result;
+}

@@ -1,0 +1,40 @@
+{
+  seed=new int[HASH_OFFSET + EXTRAFRAME_OFFSET];
+  copies=new int[2 * FRAME_LENGTH + EXTRAFRAME_OFFSET];
+  nextBytes=new byte[DIGEST_LENGTH];
+  seedLength=ois.readLong();
+  counter=ois.readLong();
+  state=ois.readInt();
+  seed[BYTES_OFFSET]=ois.readInt();
+  int nRemaining=(seed[BYTES_OFFSET] + 3) >> 2;
+  if (state != NEXT_BYTES) {
+    for (int i=0; i < nRemaining; i++) {
+      seed[i]=ois.readInt();
+    }
+    for (int i=0; i < EXTRAFRAME_OFFSET; i++) {
+      seed[HASH_OFFSET + i]=ois.readInt();
+    }
+  }
+ else {
+    if (seed[BYTES_OFFSET] >= MAX_BYTES) {
+      seed[FRAME_LENGTH]=ois.readInt();
+      seed[FRAME_LENGTH + 1]=ois.readInt();
+      seed[FRAME_LENGTH + 14]=ois.readInt();
+      seed[FRAME_LENGTH + 15]=ois.readInt();
+    }
+    for (int i=0; i < FRAME_LENGTH; i++) {
+      seed[i]=ois.readInt();
+    }
+    for (int i=0; i < nRemaining; i++) {
+      copies[FRAME_LENGTH + EXTRAFRAME_OFFSET + i]=ois.readInt();
+    }
+    for (int i=0; i < EXTRAFRAME_OFFSET; i++) {
+      copies[i]=ois.readInt();
+    }
+    for (int i=0; i < EXTRAFRAME_OFFSET; i++) {
+      seed[HASH_OFFSET + i]=ois.readInt();
+    }
+  }
+  nextBIndex=ois.readInt();
+  ois.read(nextBytes,nextBIndex,HASHBYTES_TO_USE - nextBIndex);
+}

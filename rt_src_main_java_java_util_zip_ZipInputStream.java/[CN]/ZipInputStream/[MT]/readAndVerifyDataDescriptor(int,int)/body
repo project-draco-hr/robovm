@@ -1,0 +1,17 @@
+{
+  if (hasDD) {
+    in.read(hdrBuf,0,EXTHDR);
+    if (getLong(hdrBuf,0) != EXTSIG) {
+      throw new ZipException(Messages.getString("archive.1F"));
+    }
+    currentEntry.crc=getLong(hdrBuf,EXTCRC);
+    currentEntry.compressedSize=getLong(hdrBuf,EXTSIZ);
+    currentEntry.size=getLong(hdrBuf,EXTLEN);
+  }
+  if (currentEntry.crc != crc.getValue()) {
+    throw new ZipException(Messages.getString("archive.20"));
+  }
+  if (currentEntry.compressedSize != inB || currentEntry.size != out) {
+    throw new ZipException(Messages.getString("archive.21"));
+  }
+}

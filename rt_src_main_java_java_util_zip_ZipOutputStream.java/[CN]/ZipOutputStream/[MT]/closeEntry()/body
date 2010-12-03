@@ -1,0 +1,74 @@
+{
+  if (cDir == null) {
+    throw new IOException(Messages.getString("archive.1E"));
+  }
+  if (currentEntry == null) {
+    return;
+  }
+  if (currentEntry.getMethod() == DEFLATED) {
+    super.finish();
+  }
+  if (currentEntry.getMethod() == STORED) {
+    if (crc.getValue() != currentEntry.crc) {
+      throw new ZipException(Messages.getString("archive.20"));
+    }
+    if (currentEntry.size != crc.tbytes) {
+      throw new ZipException(Messages.getString("archive.21"));
+    }
+  }
+  curOffset=LOCHDR;
+  if (currentEntry.getMethod() != STORED) {
+    curOffset+=EXTHDR;
+    writeLong(out,EXTSIG);
+    writeLong(out,currentEntry.crc=crc.getValue());
+    writeLong(out,currentEntry.compressedSize=def.getTotalOut());
+    writeLong(out,currentEntry.size=def.getTotalIn());
+  }
+  writeLong(cDir,CENSIG);
+  writeShort(cDir,ZIPLocalHeaderVersionNeeded);
+  writeShort(cDir,ZIPLocalHeaderVersionNeeded);
+  writeShort(cDir,currentEntry.getMethod() == STORED ? 0 : ZIPDataDescriptorFlag);
+  writeShort(cDir,currentEntry.getMethod());
+  writeShort(cDir,currentEntry.time);
+  writeShort(cDir,currentEntry.modDate);
+  writeLong(cDir,crc.getValue());
+  if (currentEntry.getMethod() == DEFLATED) {
+    curOffset+=writeLong(cDir,def.getTotalOut());
+    writeLong(cDir,def.getTotalIn());
+  }
+ else {
+    curOffset+=writeLong(cDir,crc.tbytes);
+    writeLong(cDir,crc.tbytes);
+  }
+  curOffset+=writeShort(cDir,nameLength);
+  if (currentEntry.extra != null) {
+    curOffset+=writeShort(cDir,currentEntry.extra.length);
+  }
+ else {
+    writeShort(cDir,0);
+  }
+  String c;
+  if ((c=currentEntry.getComment()) != null) {
+    writeShort(cDir,c.length());
+  }
+ else {
+    writeShort(cDir,0);
+  }
+  writeShort(cDir,0);
+  writeShort(cDir,0);
+  writeLong(cDir,0);
+  writeLong(cDir,offset);
+  cDir.write(nameBytes);
+  nameBytes=null;
+  if (currentEntry.extra != null) {
+    cDir.write(currentEntry.extra);
+  }
+  offset+=curOffset;
+  if (c != null) {
+    cDir.write(c.getBytes());
+  }
+  currentEntry=null;
+  crc.reset();
+  def.reset();
+  done=false;
+}

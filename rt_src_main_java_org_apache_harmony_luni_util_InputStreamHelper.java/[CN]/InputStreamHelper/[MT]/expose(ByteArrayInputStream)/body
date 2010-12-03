@@ -1,0 +1,23 @@
+{
+  byte[] buffer, buf;
+  int pos;
+synchronized (bais) {
+    int available=bais.available();
+    try {
+      buf=(byte[])BAIS_BUF.get(bais);
+      pos=BAIS_POS.getInt(bais);
+    }
+ catch (    IllegalAccessException iae) {
+      throw new InternalError(iae.getLocalizedMessage());
+    }
+    if (pos == 0 && available == buf.length) {
+      buffer=buf;
+    }
+ else {
+      buffer=new byte[available];
+      System.arraycopy(buf,pos,buffer,0,available);
+    }
+    bais.skip(available);
+  }
+  return buffer;
+}

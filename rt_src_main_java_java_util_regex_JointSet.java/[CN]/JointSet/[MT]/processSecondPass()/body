@@ -1,0 +1,25 @@
+{
+  this.isSecondPassVisited=true;
+  if (fSet != null && !fSet.isSecondPassVisited) {
+    fSet.processSecondPass();
+  }
+  if (children != null) {
+    int childrenSize=children.size();
+    for (int i=0; i < childrenSize; i++) {
+      AbstractSet child=(AbstractSet)children.get(i);
+      JointSet set=child.processBackRefReplacement();
+      if (set != null) {
+        child.isSecondPassVisited=true;
+        children.remove(i);
+        children.add(i,set);
+        child=(AbstractSet)set;
+      }
+      if (!child.isSecondPassVisited) {
+        child.processSecondPass();
+      }
+    }
+  }
+  if (next != null) {
+    super.processSecondPass();
+  }
+}

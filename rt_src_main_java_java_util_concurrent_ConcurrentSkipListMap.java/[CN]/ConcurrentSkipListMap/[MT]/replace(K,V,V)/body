@@ -1,0 +1,13 @@
+{
+  if (oldValue == null || newValue == null)   throw new NullPointerException();
+  Comparable<? super K> k=comparable(key);
+  for (; ; ) {
+    Node<K,V> n=findNode(k);
+    if (n == null)     return false;
+    Object v=n.value;
+    if (v != null) {
+      if (!oldValue.equals(v))       return false;
+      if (n.casValue(v,newValue))       return true;
+    }
+  }
+}

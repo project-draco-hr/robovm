@@ -1,0 +1,20 @@
+{
+  if (publicKey == null) {
+    String alg_oid=algorithmID.getAlgorithm();
+    try {
+      String alg=AlgNameMapper.map2AlgName(alg_oid);
+      if (alg == null) {
+        alg=alg_oid;
+      }
+      publicKey=KeyFactory.getInstance(alg).generatePublic(new X509EncodedKeySpec(getEncoded()));
+    }
+ catch (    InvalidKeySpecException e) {
+    }
+catch (    NoSuchAlgorithmException e) {
+    }
+    if (publicKey == null) {
+      publicKey=new X509PublicKey(alg_oid,getEncoded(),subjectPublicKey);
+    }
+  }
+  return publicKey;
+}

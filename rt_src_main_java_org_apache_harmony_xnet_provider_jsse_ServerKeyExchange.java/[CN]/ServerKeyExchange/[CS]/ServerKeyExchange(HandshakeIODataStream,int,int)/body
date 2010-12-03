@@ -1,0 +1,31 @@
+{
+  int size=in.readUint16();
+  bytes1=in.read(size);
+  par1=new BigInteger(1,bytes1);
+  this.length=2 + bytes1.length;
+  size=in.readUint16();
+  bytes2=in.read(size);
+  par2=new BigInteger(1,bytes2);
+  this.length+=2 + bytes2.length;
+  if (keyExchange != CipherSuite.KeyExchange_RSA_EXPORT) {
+    size=in.readUint16();
+    bytes3=in.read(size);
+    par3=new BigInteger(1,bytes3);
+    this.length+=2 + bytes3.length;
+  }
+ else {
+    par3=null;
+    bytes3=null;
+  }
+  if (keyExchange != CipherSuite.KeyExchange_DH_anon_EXPORT && keyExchange != CipherSuite.KeyExchange_DH_anon) {
+    size=in.readUint16();
+    hash=in.read(size);
+    this.length+=2 + hash.length;
+  }
+ else {
+    hash=null;
+  }
+  if (this.length != length) {
+    fatalAlert(AlertProtocol.DECODE_ERROR,"DECODE ERROR: incorrect ServerKeyExchange");
+  }
+}

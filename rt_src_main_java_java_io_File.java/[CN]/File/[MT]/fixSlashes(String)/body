@@ -1,0 +1,34 @@
+{
+  int uncIndex=1;
+  int length=origPath.length(), newLength=0;
+  if (separatorChar == '/') {
+    uncIndex=0;
+  }
+ else   if (length > 2 && origPath.charAt(1) == ':') {
+    uncIndex=2;
+  }
+  boolean foundSlash=false;
+  char newPath[]=origPath.toCharArray();
+  for (int i=0; i < length; i++) {
+    char pathChar=newPath[i];
+    if ((separatorChar == '\\' && pathChar == '\\') || pathChar == '/') {
+      if ((foundSlash && i == uncIndex) || !foundSlash) {
+        newPath[newLength++]=separatorChar;
+        foundSlash=true;
+      }
+    }
+ else {
+      if (pathChar == ':' && uncIndex > 0 && (newLength == 2 || (newLength == 3 && newPath[1] == separatorChar)) && newPath[0] == separatorChar) {
+        newPath[0]=newPath[newLength - 1];
+        newLength=1;
+        uncIndex=2;
+      }
+      newPath[newLength++]=pathChar;
+      foundSlash=false;
+    }
+  }
+  if (foundSlash && (newLength > (uncIndex + 1) || (newLength == 2 && newPath[0] != separatorChar))) {
+    newLength--;
+  }
+  return new String(newPath,0,newLength);
+}

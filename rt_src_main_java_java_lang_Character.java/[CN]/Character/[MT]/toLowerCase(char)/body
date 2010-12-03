@@ -1,0 +1,29 @@
+{
+  if ('A' <= c && c <= 'Z') {
+    return (char)(c + ('a' - 'A'));
+  }
+  if (c < 192) {
+    return c;
+  }
+  if (c < 1000) {
+    return (char)lowercaseValuesCache[c - 192];
+  }
+  int result=BinarySearch.binarySearchRange(lowercaseKeys,c);
+  if (result >= 0) {
+    boolean by2=false;
+    char start=lowercaseKeys.charAt(result);
+    char end=lowercaseValues[result * 2];
+    if ((start & 0x8000) != (end & 0x8000)) {
+      end^=0x8000;
+      by2=true;
+    }
+    if (c <= end) {
+      if (by2 && (c & 1) != (start & 1)) {
+        return c;
+      }
+      char mapping=lowercaseValues[result * 2 + 1];
+      return (char)(c + mapping);
+    }
+  }
+  return c;
+}

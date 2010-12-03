@@ -1,0 +1,20 @@
+{
+  StringBuilder pattern=new StringBuilder();
+  pattern.append('0');
+  if (formatToken.getPrecision() > 0) {
+    pattern.append('.');
+    char[] zeros=new char[formatToken.getPrecision()];
+    Arrays.fill(zeros,'0');
+    pattern.append(zeros);
+  }
+  pattern.append('E');
+  pattern.append("+00");
+  decimalFormat.applyPattern(pattern.toString());
+  String formattedString=decimalFormat.format(argument);
+  result.append(formattedString.replace('E','e'));
+  if (formatToken.isFlagSet(FormatToken.FLAG_SHARP) && 0 == formatToken.getPrecision()) {
+    int indexOfE=result.indexOf("e");
+    char dot=decimalFormat.getDecimalFormatSymbols().getDecimalSeparator();
+    result.insert(indexOfE,dot);
+  }
+}

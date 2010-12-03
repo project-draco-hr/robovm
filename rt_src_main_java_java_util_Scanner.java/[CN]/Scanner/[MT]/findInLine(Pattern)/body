@@ -1,0 +1,47 @@
+{
+  checkClosed();
+  checkNull(pattern);
+  int horizonLineSeparator=0;
+  matcher.usePattern(MULTI_LINE_TERMINATOR);
+  matcher.region(findStartIndex,bufferLength);
+  boolean findComplete=false;
+  int terminatorLength=0;
+  while (!findComplete) {
+    if (matcher.find()) {
+      horizonLineSeparator=matcher.start();
+      terminatorLength=matcher.end() - matcher.start();
+      findComplete=true;
+    }
+ else {
+      if (!inputExhausted) {
+        readMore();
+        resetMatcher();
+      }
+ else {
+        horizonLineSeparator=bufferLength;
+        findComplete=true;
+      }
+    }
+  }
+  matcher.usePattern(pattern);
+  int oldLimit=buffer.limit();
+  buffer.limit(horizonLineSeparator + terminatorLength);
+  matcher.region(findStartIndex,horizonLineSeparator + terminatorLength);
+  if (matcher.find()) {
+    findStartIndex=matcher.end();
+    if (horizonLineSeparator == matcher.end()) {
+      findStartIndex+=terminatorLength;
+    }
+    if (horizonLineSeparator != bufferLength && (horizonLineSeparator + terminatorLength == matcher.end())) {
+      buffer.limit(oldLimit);
+      matchSuccessful=false;
+      return null;
+    }
+    matchSuccessful=true;
+    buffer.limit(oldLimit);
+    return matcher.group();
+  }
+  buffer.limit(oldLimit);
+  matchSuccessful=false;
+  return null;
+}

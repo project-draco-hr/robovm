@@ -1,0 +1,25 @@
+{
+  if (uuid == null) {
+    throw new NullPointerException();
+  }
+  int[] position=new int[5];
+  int lastPosition=1;
+  int startPosition=0;
+  int i=0;
+  for (; i < position.length && lastPosition > 0; i++) {
+    position[i]=uuid.indexOf("-",startPosition);
+    lastPosition=position[i];
+    startPosition=position[i] + 1;
+  }
+  if (i != position.length || lastPosition != -1) {
+    throw new IllegalArgumentException(Messages.getString("luni.47") + uuid);
+  }
+  long m1=Long.parseLong(uuid.substring(0,position[0]),16);
+  long m2=Long.parseLong(uuid.substring(position[0] + 1,position[1]),16);
+  long m3=Long.parseLong(uuid.substring(position[1] + 1,position[2]),16);
+  long lsb1=Long.parseLong(uuid.substring(position[2] + 1,position[3]),16);
+  long lsb2=Long.parseLong(uuid.substring(position[3] + 1),16);
+  long msb=(m1 << 32) | (m2 << 16) | m3;
+  long lsb=(lsb1 << 48) | lsb2;
+  return new UUID(msb,lsb);
+}

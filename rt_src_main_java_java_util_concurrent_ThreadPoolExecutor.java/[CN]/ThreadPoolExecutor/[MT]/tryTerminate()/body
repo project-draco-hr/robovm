@@ -1,0 +1,27 @@
+{
+  for (; ; ) {
+    int c=ctl.get();
+    if (isRunning(c) || runStateAtLeast(c,TIDYING) || (runStateOf(c) == SHUTDOWN && !workQueue.isEmpty()))     return;
+    if (workerCountOf(c) != 0) {
+      interruptIdleWorkers(ONLY_ONE);
+      return;
+    }
+    final ReentrantLock mainLock=this.mainLock;
+    mainLock.lock();
+    try {
+      if (ctl.compareAndSet(c,ctlOf(TIDYING,0))) {
+        try {
+          terminated();
+        }
+  finally {
+          ctl.set(ctlOf(TERMINATED,0));
+          termination.signalAll();
+        }
+        return;
+      }
+    }
+  finally {
+      mainLock.unlock();
+    }
+  }
+}

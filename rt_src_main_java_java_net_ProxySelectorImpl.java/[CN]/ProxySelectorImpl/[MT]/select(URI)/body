@@ -1,0 +1,26 @@
+{
+  if (null == uri) {
+    throw new IllegalArgumentException(Messages.getString("luni.4D"));
+  }
+  String scheme=uri.getScheme();
+  if (null == scheme) {
+    throw new IllegalArgumentException();
+  }
+  String host=uri.getHost();
+  Proxy proxy=Proxy.NO_PROXY;
+  if ("http".equals(scheme)) {
+    proxy=selectHttpProxy(host);
+  }
+ else   if ("https".equals(scheme)) {
+    proxy=selectHttpsProxy();
+  }
+ else   if ("ftp".equals(scheme)) {
+    proxy=selectFtpProxy(host);
+  }
+ else   if ("socket".equals(scheme)) {
+    proxy=selectSocksProxy();
+  }
+  List<Proxy> proxyList=new ArrayList<Proxy>(1);
+  proxyList.add(proxy);
+  return proxyList;
+}

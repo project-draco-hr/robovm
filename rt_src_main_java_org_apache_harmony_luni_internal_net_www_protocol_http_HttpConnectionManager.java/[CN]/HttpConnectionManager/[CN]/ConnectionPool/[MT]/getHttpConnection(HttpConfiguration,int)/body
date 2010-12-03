@@ -1,0 +1,25 @@
+{
+  List<HttpConnection> connections=freeConnectionMap.get(config);
+  if (keepAlive && connections == null) {
+    connections=new ArrayList<HttpConnection>();
+    freeConnectionMap.put(config,connections);
+  }
+  if (!keepAlive || connections.isEmpty()) {
+    HttpConnection connection=new HttpConnection(config,connectTimeout);
+    return connection;
+  }
+ else {
+    HttpConnection connection=connections.get(0);
+    connections.remove(0);
+    if (!connection.isStale()) {
+      SecurityManager security=System.getSecurityManager();
+      if (security != null) {
+        security.checkConnect(connection.getSocket().getInetAddress().getHostName(),connection.getSocket().getPort());
+      }
+      return connection;
+    }
+ else {
+      return getHttpConnection(config,connectTimeout);
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  boolean failed=true;
+  try {
+    boolean interrupted=false;
+    for (; ; ) {
+      final Node p=node.predecessor();
+      if (p == head && tryAcquire(arg)) {
+        setHead(node);
+        p.next=null;
+        failed=false;
+        return interrupted;
+      }
+      if (shouldParkAfterFailedAcquire(p,node) && parkAndCheckInterrupt())       interrupted=true;
+    }
+  }
+  finally {
+    if (failed)     cancelAcquire(node);
+  }
+}

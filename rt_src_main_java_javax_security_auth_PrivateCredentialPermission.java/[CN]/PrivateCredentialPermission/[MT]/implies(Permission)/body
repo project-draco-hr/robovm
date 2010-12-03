@@ -1,0 +1,27 @@
+{
+  if (permission == null || this.getClass() != permission.getClass()) {
+    return false;
+  }
+  PrivateCredentialPermission that=(PrivateCredentialPermission)permission;
+  if (!("*".equals(credentialClass) || credentialClass.equals(that.getCredentialClass()))) {
+    return false;
+  }
+  if (that.offset == 0) {
+    return true;
+  }
+  CredOwner[] thisCo=set;
+  CredOwner[] thatCo=that.set;
+  int thisPrincipalsSize=offset;
+  int thatPrincipalsSize=that.offset;
+  for (int i=0, j; i < thisPrincipalsSize; i++) {
+    for (j=0; j < thatPrincipalsSize; j++) {
+      if (thisCo[i].implies(thatCo[j])) {
+        break;
+      }
+    }
+    if (j == thatCo.length) {
+      return false;
+    }
+  }
+  return true;
+}

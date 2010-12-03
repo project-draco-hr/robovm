@@ -1,0 +1,65 @@
+{
+  if (!(p instanceof FilePermission)) {
+    return 0;
+  }
+  FilePermission fp=(FilePermission)p;
+  int matchedMask=mask & fp.mask;
+  if (matchedMask == 0) {
+    return 0;
+  }
+  if (includeAll) {
+    return matchedMask;
+  }
+  if (fp.includeAll) {
+    return 0;
+  }
+  int thisLength=canonPath.length();
+  if (allSubdir && thisLength == 2 && !fp.canonPath.equals(File.separator)) {
+    return matchedMask;
+  }
+  if (fp.allSubdir && !allSubdir) {
+    return 0;
+  }
+  if (fp.allDir && !allSubdir && !allDir) {
+    return 0;
+  }
+  boolean includeDir=false;
+  int pLength=fp.canonPath.length();
+  if (allDir || allSubdir) {
+    thisLength--;
+  }
+  if (fp.allDir || fp.allSubdir) {
+    pLength--;
+  }
+  for (int i=0; i < pLength; i++) {
+    char pChar=fp.canonPath.charAt(i);
+    if (i >= thisLength) {
+      if (i == thisLength) {
+        if (allSubdir) {
+          return matchedMask;
+        }
+        if (allDir) {
+          includeDir=true;
+        }
+      }
+      if (!includeDir) {
+        return 0;
+      }
+      if (pChar == File.separatorChar) {
+        return 0;
+      }
+    }
+ else {
+      if (canonPath.charAt(i) != pChar) {
+        return 0;
+      }
+    }
+  }
+  if (pLength == thisLength) {
+    if (allSubdir) {
+      return fp.allSubdir || fp.allDir ? matchedMask : 0;
+    }
+    return allDir == fp.allDir ? matchedMask : 0;
+  }
+  return includeDir ? matchedMask : 0;
+}

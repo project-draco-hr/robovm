@@ -1,0 +1,18 @@
+{
+  long lengthInBits;
+  MArray[bytesToProcess]=(byte)0x80;
+  for (int i=bytesToProcess + 1; i < BlockSizeInBytes; i++) {
+    MArray[i]=(byte)0;
+  }
+  lengthInBits=(bytesToProcess + bytesProcessed) * 8;
+  if ((bytesToProcess + 9) > BlockSizeInBytes) {
+    this.processBuffer();
+    for (int i=0; i < BlockSizeInBytes; i++) {
+      MArray[i]=(byte)0;
+    }
+  }
+  for (int i=1; i < 9; i++) {
+    MArray[BlockSizeInBytes - i]=(byte)(lengthInBits & 0xff);
+    lengthInBits=lengthInBits >>> 8;
+  }
+}

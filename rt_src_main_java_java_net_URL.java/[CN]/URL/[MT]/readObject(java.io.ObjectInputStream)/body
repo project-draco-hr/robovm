@@ -1,0 +1,28 @@
+{
+  try {
+    stream.defaultReadObject();
+    if (host != null && authority == null) {
+      fixURL(true);
+    }
+ else     if (authority != null) {
+      int index;
+      if ((index=authority.lastIndexOf('@')) > -1) {
+        userInfo=authority.substring(0,index);
+      }
+      if (file != null && (index=file.indexOf('?')) > -1) {
+        query=file.substring(index + 1);
+        path=file.substring(0,index);
+      }
+ else {
+        path=file;
+      }
+    }
+    setupStreamHandler();
+    if (strmHandler == null) {
+      throw new IOException(Messages.getString("luni.9C",protocol));
+    }
+  }
+ catch (  ClassNotFoundException e) {
+    throw new IOException(e.toString());
+  }
+}

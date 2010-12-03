@@ -1,0 +1,36 @@
+{
+  retry:   for (; ; ) {
+    int c=ctl.get();
+    int rs=runStateOf(c);
+    if (rs >= SHUTDOWN && !(rs == SHUTDOWN && firstTask == null && !workQueue.isEmpty()))     return false;
+    for (; ; ) {
+      int wc=workerCountOf(c);
+      if (wc >= CAPACITY || wc >= (core ? corePoolSize : maximumPoolSize))       return false;
+      if (compareAndIncrementWorkerCount(c))       break retry;
+      c=ctl.get();
+      if (runStateOf(c) != rs)       continue retry;
+    }
+  }
+  Worker w=new Worker(firstTask);
+  Thread t=w.thread;
+  final ReentrantLock mainLock=this.mainLock;
+  mainLock.lock();
+  try {
+    int c=ctl.get();
+    int rs=runStateOf(c);
+    if (t == null || (rs >= SHUTDOWN && !(rs == SHUTDOWN && firstTask == null))) {
+      decrementWorkerCount();
+      tryTerminate();
+      return false;
+    }
+    workers.add(w);
+    int s=workers.size();
+    if (s > largestPoolSize)     largestPoolSize=s;
+  }
+  finally {
+    mainLock.unlock();
+  }
+  t.start();
+  if (runStateOf(ctl.get()) == STOP && !t.isInterrupted())   t.interrupt();
+  return true;
+}

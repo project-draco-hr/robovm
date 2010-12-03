@@ -1,0 +1,37 @@
+{
+  if (map == null)   throw new NullPointerException();
+  HeadIndex<K,V> h=head;
+  Node<K,V> basepred=h.node;
+  ArrayList<Index<K,V>> preds=new ArrayList<Index<K,V>>();
+  for (int i=0; i <= h.level; ++i)   preds.add(null);
+  Index<K,V> q=h;
+  for (int i=h.level; i > 0; --i) {
+    preds.set(i,q);
+    q=q.down;
+  }
+  Iterator<? extends Map.Entry<? extends K,? extends V>> it=map.entrySet().iterator();
+  while (it.hasNext()) {
+    Map.Entry<? extends K,? extends V> e=it.next();
+    int j=randomLevel();
+    if (j > h.level)     j=h.level + 1;
+    K k=e.getKey();
+    V v=e.getValue();
+    if (k == null || v == null)     throw new NullPointerException();
+    Node<K,V> z=new Node<K,V>(k,v,null);
+    basepred.next=z;
+    basepred=z;
+    if (j > 0) {
+      Index<K,V> idx=null;
+      for (int i=1; i <= j; ++i) {
+        idx=new Index<K,V>(z,idx,null);
+        if (i > h.level)         h=new HeadIndex<K,V>(h.node,h,idx,i);
+        if (i < preds.size()) {
+          preds.get(i).right=idx;
+          preds.set(i,idx);
+        }
+ else         preds.add(idx);
+      }
+    }
+  }
+  head=h;
+}

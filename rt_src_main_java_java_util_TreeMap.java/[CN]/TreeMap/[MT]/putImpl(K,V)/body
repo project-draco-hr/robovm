@@ -1,0 +1,201 @@
+{
+  if (root == null) {
+    root=createNode(key,value);
+    size=1;
+    modCount++;
+    return null;
+  }
+  Comparable<K> object=comparator == null ? toComparable((K)key) : null;
+  K keyK=(K)key;
+  Node<K,V> node=root;
+  Node<K,V> prevNode=null;
+  int result=0;
+  while (node != null) {
+    prevNode=node;
+    K[] keys=node.keys;
+    int left_idx=node.left_idx;
+    result=cmp(object,keyK,keys[left_idx]);
+    if (result < 0) {
+      node=node.left;
+    }
+ else     if (result == 0) {
+      V res=node.values[left_idx];
+      node.values[left_idx]=value;
+      return res;
+    }
+ else {
+      int right_idx=node.right_idx;
+      if (left_idx != right_idx) {
+        result=cmp(object,keyK,keys[right_idx]);
+      }
+      if (result > 0) {
+        node=node.right;
+      }
+ else       if (result == 0) {
+        V res=node.values[right_idx];
+        node.values[right_idx]=value;
+        return res;
+      }
+ else {
+        int low=left_idx + 1, mid=0, high=right_idx - 1;
+        while (low <= high) {
+          mid=(low + high) >>> 1;
+          result=cmp(object,keyK,keys[mid]);
+          if (result > 0) {
+            low=mid + 1;
+          }
+ else           if (result == 0) {
+            V res=node.values[mid];
+            node.values[mid]=value;
+            return res;
+          }
+ else {
+            high=mid - 1;
+          }
+        }
+        result=low;
+        break;
+      }
+    }
+  }
+  size++;
+  modCount++;
+  if (node == null) {
+    if (prevNode == null) {
+      root=createNode(key,value);
+    }
+ else     if (prevNode.size < Node.NODE_SIZE) {
+      if (result < 0) {
+        appendFromLeft(prevNode,key,value);
+      }
+ else {
+        appendFromRight(prevNode,key,value);
+      }
+    }
+ else {
+      Node<K,V> newNode=createNode(key,value);
+      if (result < 0) {
+        attachToLeft(prevNode,newNode);
+      }
+ else {
+        attachToRight(prevNode,newNode);
+      }
+      balance(newNode);
+    }
+  }
+ else {
+    if (node.size < Node.NODE_SIZE) {
+      int left_idx=node.left_idx;
+      int right_idx=node.right_idx;
+      if (left_idx == 0 || ((right_idx != Node.NODE_SIZE - 1) && (right_idx - result <= result - left_idx))) {
+        int right_idxPlus1=right_idx + 1;
+        System.arraycopy(node.keys,result,node.keys,result + 1,right_idxPlus1 - result);
+        System.arraycopy(node.values,result,node.values,result + 1,right_idxPlus1 - result);
+        node.right_idx=right_idxPlus1;
+        node.keys[result]=key;
+        node.values[result]=value;
+      }
+ else {
+        int left_idxMinus1=left_idx - 1;
+        System.arraycopy(node.keys,left_idx,node.keys,left_idxMinus1,result - left_idx);
+        System.arraycopy(node.values,left_idx,node.values,left_idxMinus1,result - left_idx);
+        node.left_idx=left_idxMinus1;
+        node.keys[result - 1]=key;
+        node.values[result - 1]=value;
+      }
+      node.size++;
+    }
+ else {
+      Node<K,V> previous=node.prev;
+      Node<K,V> nextNode=node.next;
+      boolean removeFromStart;
+      boolean attachFromLeft=false;
+      Node<K,V> attachHere=null;
+      if (previous == null) {
+        if (nextNode != null && nextNode.size < Node.NODE_SIZE) {
+          removeFromStart=false;
+        }
+ else {
+          removeFromStart=true;
+          attachFromLeft=true;
+          attachHere=node;
+        }
+      }
+ else       if (nextNode == null) {
+        if (previous.size < Node.NODE_SIZE) {
+          removeFromStart=true;
+        }
+ else {
+          removeFromStart=false;
+          attachFromLeft=false;
+          attachHere=node;
+        }
+      }
+ else {
+        if (previous.size < Node.NODE_SIZE) {
+          if (nextNode.size < Node.NODE_SIZE) {
+            removeFromStart=previous.size < nextNode.size;
+          }
+ else {
+            removeFromStart=true;
+          }
+        }
+ else {
+          if (nextNode.size < Node.NODE_SIZE) {
+            removeFromStart=false;
+          }
+ else {
+            if (node.right == null) {
+              attachHere=node;
+              attachFromLeft=false;
+              removeFromStart=false;
+            }
+ else {
+              attachHere=nextNode;
+              attachFromLeft=true;
+              removeFromStart=false;
+            }
+          }
+        }
+      }
+      K movedKey;
+      V movedValue;
+      if (removeFromStart) {
+        movedKey=node.keys[0];
+        movedValue=node.values[0];
+        int resMunus1=result - 1;
+        System.arraycopy(node.keys,1,node.keys,0,resMunus1);
+        System.arraycopy(node.values,1,node.values,0,resMunus1);
+        node.keys[resMunus1]=key;
+        node.values[resMunus1]=value;
+      }
+ else {
+        movedKey=node.keys[Node.NODE_SIZE - 1];
+        movedValue=node.values[Node.NODE_SIZE - 1];
+        System.arraycopy(node.keys,result,node.keys,result + 1,Node.NODE_SIZE - 1 - result);
+        System.arraycopy(node.values,result,node.values,result + 1,Node.NODE_SIZE - 1 - result);
+        node.keys[result]=key;
+        node.values[result]=value;
+      }
+      if (attachHere == null) {
+        if (removeFromStart) {
+          appendFromRight(previous,movedKey,movedValue);
+        }
+ else {
+          appendFromLeft(nextNode,movedKey,movedValue);
+        }
+      }
+ else {
+        Node<K,V> newNode=createNode(movedKey,movedValue);
+        if (attachFromLeft) {
+          attachToLeft(attachHere,newNode);
+        }
+ else {
+          attachToRight(attachHere,newNode);
+        }
+        balance(newNode);
+      }
+    }
+  }
+  return null;
+}

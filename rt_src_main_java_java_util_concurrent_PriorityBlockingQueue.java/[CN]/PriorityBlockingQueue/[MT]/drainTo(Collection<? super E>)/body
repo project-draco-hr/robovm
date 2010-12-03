@@ -1,0 +1,18 @@
+{
+  if (c == null)   throw new NullPointerException();
+  if (c == this)   throw new IllegalArgumentException();
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    int n=0;
+    E e;
+    while ((e=q.poll()) != null) {
+      c.add(e);
+      ++n;
+    }
+    return n;
+  }
+  finally {
+    lock.unlock();
+  }
+}

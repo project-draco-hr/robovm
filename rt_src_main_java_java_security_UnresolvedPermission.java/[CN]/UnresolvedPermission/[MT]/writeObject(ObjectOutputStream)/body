@@ -1,0 +1,20 @@
+{
+  out.defaultWriteObject();
+  if (targetCerts == null) {
+    out.writeInt(0);
+  }
+ else {
+    out.writeInt(targetCerts.length);
+    for (int i=0; i < targetCerts.length; i++) {
+      try {
+        byte[] enc=targetCerts[i].getEncoded();
+        out.writeUTF(targetCerts[i].getType());
+        out.writeInt(enc.length);
+        out.write(enc);
+      }
+ catch (      CertificateEncodingException cee) {
+        throw ((IOException)new NotSerializableException(Messages.getString("security.30",targetCerts[i])).initCause(cee));
+      }
+    }
+  }
+}

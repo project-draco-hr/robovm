@@ -1,0 +1,18 @@
+{
+  if (collection.isEmpty()) {
+    return false;
+  }
+  if (collection instanceof EnumSet) {
+    EnumSet<?> set=(EnumSet<?>)collection;
+    if (!isValidType(set.elementClass)) {
+      throw new ClassCastException();
+    }
+    MiniEnumSet<?> miniSet=(MiniEnumSet<?>)set;
+    long oldBits=bits;
+    long newBits=oldBits | miniSet.bits;
+    bits=newBits;
+    size=Long.bitCount(newBits);
+    return (oldBits != newBits);
+  }
+  return super.addAll(collection);
+}

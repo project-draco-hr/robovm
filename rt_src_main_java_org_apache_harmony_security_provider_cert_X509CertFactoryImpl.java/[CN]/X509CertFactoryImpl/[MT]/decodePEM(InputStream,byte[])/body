@@ -1,0 +1,72 @@
+{
+  int ch;
+  for (int i=1; i < pemBegin.length; i++) {
+    if (pemBegin[i] != (ch=inStream.read())) {
+      throw new IOException("Incorrect PEM encoding: '-----BEGIN" + ((boundary_suffix == null) ? "" : new String(boundary_suffix)) + "' is expected as opening delimiter boundary.");
+    }
+  }
+  if (boundary_suffix == null) {
+    while ((ch=inStream.read()) != '\n') {
+      if (ch == -1) {
+        throw new IOException(Messages.getString("security.156"));
+      }
+    }
+  }
+ else {
+    for (int i=0; i < boundary_suffix.length; i++) {
+      if (boundary_suffix[i] != inStream.read()) {
+        throw new IOException(Messages.getString("security.15B",new String(boundary_suffix)));
+      }
+    }
+    if ((ch=inStream.read()) == '\r') {
+      ch=inStream.read();
+    }
+    if (ch != '\n') {
+      throw new IOException(Messages.getString("security.15B2"));
+    }
+  }
+  int size=1024;
+  byte[] buff=new byte[size];
+  int index=0;
+  while ((ch=inStream.read()) != '-') {
+    if (ch == -1) {
+      throw new IOException(Messages.getString("security.157"));
+    }
+    buff[index++]=(byte)ch;
+    if (index == size) {
+      byte[] newbuff=new byte[size + 1024];
+      System.arraycopy(buff,0,newbuff,0,size);
+      buff=newbuff;
+      size+=1024;
+    }
+  }
+  if (buff[index - 1] != '\n') {
+    throw new IOException(Messages.getString("security.158"));
+  }
+  for (int i=1; i < pemClose.length; i++) {
+    if (pemClose[i] != inStream.read()) {
+      throw new IOException(Messages.getString("security.15B1",((boundary_suffix == null) ? "" : new String(boundary_suffix))));
+    }
+  }
+  if (boundary_suffix == null) {
+    while (((ch=inStream.read()) != -1) && (ch != '\n') && (ch != '\r')) {
+    }
+  }
+ else {
+    for (int i=0; i < boundary_suffix.length; i++) {
+      if (boundary_suffix[i] != inStream.read()) {
+        throw new IOException(Messages.getString("security.15B1",new String(boundary_suffix)));
+      }
+    }
+  }
+  inStream.mark(1);
+  while (((ch=inStream.read()) != -1) && (ch == '\n' || ch == '\r')) {
+    inStream.mark(1);
+  }
+  inStream.reset();
+  buff=Base64.decode(buff,index);
+  if (buff == null) {
+    throw new IOException(Messages.getString("security.159"));
+  }
+  return buff;
+}

@@ -1,0 +1,27 @@
+{
+  cleanUp();
+  int firstTombstone=-1;
+  for (int index=key.hash & mask; ; index=next(index)) {
+    Object k=table[index];
+    if (k == key.reference) {
+      table[index + 1]=value;
+      return;
+    }
+    if (k == null) {
+      if (firstTombstone == -1) {
+        table[index]=key.reference;
+        table[index + 1]=value;
+        size++;
+        return;
+      }
+      table[firstTombstone]=key.reference;
+      table[firstTombstone + 1]=value;
+      tombstones--;
+      size++;
+      return;
+    }
+    if (firstTombstone == -1 && k == TOMBSTONE) {
+      firstTombstone=index;
+    }
+  }
+}

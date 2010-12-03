@@ -1,0 +1,21 @@
+{
+  if (deadline == null)   throw new NullPointerException();
+  long abstime=deadline.getTime();
+  if (Thread.interrupted())   throw new InterruptedException();
+  Node node=addConditionWaiter();
+  long savedState=fullyRelease(node);
+  boolean timedout=false;
+  int interruptMode=0;
+  while (!isOnSyncQueue(node)) {
+    if (System.currentTimeMillis() > abstime) {
+      timedout=transferAfterCancelledWait(node);
+      break;
+    }
+    LockSupport.parkUntil(abstime);
+    if ((interruptMode=checkInterruptWhileWaiting(node)) != 0)     break;
+  }
+  if (acquireQueued(node,savedState) && interruptMode != THROW_IE)   interruptMode=REINTERRUPT;
+  if (node.nextWaiter != null)   unlinkCancelledWaiters();
+  if (interruptMode != 0)   reportInterruptAfterWait(interruptMode);
+  return !timedout;
+}

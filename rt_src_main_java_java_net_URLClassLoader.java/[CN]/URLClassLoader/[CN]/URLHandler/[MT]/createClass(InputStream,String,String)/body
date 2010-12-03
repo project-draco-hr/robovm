@@ -1,0 +1,32 @@
+{
+  if (is == null) {
+    return null;
+  }
+  byte[] clBuf=null;
+  try {
+    clBuf=getBytes(is);
+  }
+ catch (  IOException e) {
+    return null;
+  }
+ finally {
+    try {
+      is.close();
+    }
+ catch (    IOException e) {
+    }
+  }
+  if (packageName != null) {
+    String packageDotName=packageName.replace('/','.');
+    Package packageObj=getPackage(packageDotName);
+    if (packageObj == null) {
+      definePackage(packageDotName,null,null,null,null,null,null,null);
+    }
+ else {
+      if (packageObj.isSealed()) {
+        throw new SecurityException(Messages.getString("luni.A1"));
+      }
+    }
+  }
+  return defineClass(origName,clBuf,0,clBuf.length,new CodeSource(codeSourceUrl,(Certificate[])null));
+}

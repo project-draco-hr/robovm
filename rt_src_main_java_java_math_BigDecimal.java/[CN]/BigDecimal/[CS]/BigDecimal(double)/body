@@ -1,0 +1,46 @@
+{
+  if (Double.isInfinite(val) || Double.isNaN(val)) {
+    throw new NumberFormatException(Messages.getString("math.03"));
+  }
+  long bits=Double.doubleToLongBits(val);
+  long mantisa;
+  int trailingZeros;
+  scale=1075 - (int)((bits >> 52) & 0x7FFL);
+  mantisa=(scale == 1075) ? (bits & 0xFFFFFFFFFFFFFL) << 1 : (bits & 0xFFFFFFFFFFFFFL) | 0x10000000000000L;
+  if (mantisa == 0) {
+    scale=0;
+    precision=1;
+  }
+  if (scale > 0) {
+    trailingZeros=Math.min(scale,Long.numberOfTrailingZeros(mantisa));
+    mantisa>>>=trailingZeros;
+    scale-=trailingZeros;
+  }
+  if ((bits >> 63) != 0) {
+    mantisa=-mantisa;
+  }
+  int mantisaBits=bitLength(mantisa);
+  if (scale < 0) {
+    bitLength=mantisaBits == 0 ? 0 : mantisaBits - scale;
+    if (bitLength < 64) {
+      smallValue=mantisa << (-scale);
+    }
+ else {
+      intVal=BigInteger.valueOf(mantisa).shiftLeft(-scale);
+    }
+    scale=0;
+  }
+ else   if (scale > 0) {
+    if (scale < LONG_FIVE_POW.length && mantisaBits + LONG_FIVE_POW_BIT_LENGTH[scale] < 64) {
+      smallValue=mantisa * LONG_FIVE_POW[scale];
+      bitLength=bitLength(smallValue);
+    }
+ else {
+      setUnscaledValue(Multiplication.multiplyByFivePow(BigInteger.valueOf(mantisa),scale));
+    }
+  }
+ else {
+    smallValue=mantisa;
+    bitLength=mantisaBits;
+  }
+}

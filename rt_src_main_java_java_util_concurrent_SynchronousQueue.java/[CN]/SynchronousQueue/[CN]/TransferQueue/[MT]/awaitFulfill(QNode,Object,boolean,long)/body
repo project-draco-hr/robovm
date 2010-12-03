@@ -1,0 +1,23 @@
+{
+  long lastTime=(timed) ? System.nanoTime() : 0;
+  Thread w=Thread.currentThread();
+  int spins=((head.next == s) ? (timed ? maxTimedSpins : maxUntimedSpins) : 0);
+  for (; ; ) {
+    if (w.isInterrupted())     s.tryCancel(e);
+    Object x=s.item;
+    if (x != e)     return x;
+    if (timed) {
+      long now=System.nanoTime();
+      nanos-=now - lastTime;
+      lastTime=now;
+      if (nanos <= 0) {
+        s.tryCancel(e);
+        continue;
+      }
+    }
+    if (spins > 0)     --spins;
+ else     if (s.waiter == null)     s.waiter=w;
+ else     if (!timed)     LockSupport.park();
+ else     if (nanos > spinForTimeoutThreshold)     LockSupport.parkNanos(nanos);
+  }
+}

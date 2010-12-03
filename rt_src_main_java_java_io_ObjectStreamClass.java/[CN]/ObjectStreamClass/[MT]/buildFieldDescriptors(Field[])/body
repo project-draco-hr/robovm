@@ -1,0 +1,46 @@
+{
+  final Field f=ObjectStreamClass.fieldSerialPersistentFields(this.forClass());
+  boolean useReflectFields=f == null;
+  ObjectStreamField[] _fields=null;
+  if (!useReflectFields) {
+    AccessController.doPrivileged(new PriviAction<Object>(f));
+    try {
+      _fields=(ObjectStreamField[])f.get(null);
+    }
+ catch (    IllegalAccessException ex) {
+      throw new RuntimeException(ex);
+    }
+  }
+ else {
+    List<ObjectStreamField> serializableFields=new ArrayList<ObjectStreamField>(declaredFields.length);
+    for (int i=0; i < declaredFields.length; i++) {
+      Field declaredField=declaredFields[i];
+      int modifiers=declaredField.getModifiers();
+      boolean shouldBeSerialized=!(Modifier.isStatic(modifiers) || Modifier.isTransient(modifiers));
+      if (shouldBeSerialized) {
+        ObjectStreamField field=new ObjectStreamField(declaredField.getName(),declaredField.getType());
+        serializableFields.add(field);
+      }
+    }
+    if (serializableFields.size() == 0) {
+      _fields=NO_FIELDS;
+    }
+ else {
+      _fields=new ObjectStreamField[serializableFields.size()];
+      _fields=serializableFields.toArray(_fields);
+    }
+  }
+  ObjectStreamField.sortFields(_fields);
+  int primOffset=0, objectOffset=0;
+  for (int i=0; i < _fields.length; i++) {
+    Class<?> type=_fields[i].getType();
+    if (type.isPrimitive()) {
+      _fields[i].offset=primOffset;
+      primOffset+=primitiveSize(type);
+    }
+ else {
+      _fields[i].offset=objectOffset++;
+    }
+  }
+  fields=_fields;
+}

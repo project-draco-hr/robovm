@@ -1,0 +1,17 @@
+{
+  final String defaultClass=AccessController.doPrivileged(new PolicyUtils.SecurityPropertyAccessor(POLICY_PROVIDER));
+  if (defaultClass == null) {
+    return new DefaultPolicy();
+  }
+  return AccessController.doPrivileged(new PrivilegedAction<Policy>(){
+    public Policy run(){
+      try {
+        return (Policy)Class.forName(defaultClass,true,ClassLoader.getSystemClassLoader()).newInstance();
+      }
+ catch (      Exception e) {
+        return new DefaultPolicy();
+      }
+    }
+  }
+);
+}

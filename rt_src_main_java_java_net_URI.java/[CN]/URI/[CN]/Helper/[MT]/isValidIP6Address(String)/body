@@ -1,0 +1,96 @@
+{
+  int length=ipAddress.length();
+  boolean doubleColon=false;
+  int numberOfColons=0;
+  int numberOfPeriods=0;
+  String word="";
+  char c=0;
+  char prevChar=0;
+  int offset=0;
+  if (length < 2) {
+    return false;
+  }
+  for (int i=0; i < length; i++) {
+    prevChar=c;
+    c=ipAddress.charAt(i);
+switch (c) {
+case '[':
+      if (i != 0) {
+        return false;
+      }
+    if (ipAddress.charAt(length - 1) != ']') {
+      return false;
+    }
+  if ((ipAddress.charAt(1) == ':') && (ipAddress.charAt(2) != ':')) {
+    return false;
+  }
+offset=1;
+if (length < 4) {
+return false;
+}
+break;
+case ']':
+if (i != length - 1) {
+return false;
+}
+if (ipAddress.charAt(0) != '[') {
+return false;
+}
+break;
+case '.':
+numberOfPeriods++;
+if (numberOfPeriods > 3) {
+return false;
+}
+if (!isValidIP4Word(word)) {
+return false;
+}
+if (numberOfColons != 6 && !doubleColon) {
+return false;
+}
+if (numberOfColons == 7 && ipAddress.charAt(0 + offset) != ':' && ipAddress.charAt(1 + offset) != ':') {
+return false;
+}
+word="";
+break;
+case ':':
+numberOfColons++;
+if (numberOfColons > 7) {
+return false;
+}
+if (numberOfPeriods > 0) {
+return false;
+}
+if (prevChar == ':') {
+if (doubleColon) {
+return false;
+}
+doubleColon=true;
+}
+word="";
+break;
+default :
+if (word.length() > 3) {
+return false;
+}
+if (!isValidHexChar(c)) {
+return false;
+}
+word+=c;
+}
+}
+if (numberOfPeriods > 0) {
+if (numberOfPeriods != 3 || !isValidIP4Word(word)) {
+return false;
+}
+}
+ else {
+if (numberOfColons != 7 && !doubleColon) {
+return false;
+}
+if (word == "" && ipAddress.charAt(length - 1 - offset) != ':' && ipAddress.charAt(length - 2 - offset) != ':') {
+return false;
+}
+}
+return true;
+}

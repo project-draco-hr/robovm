@@ -1,0 +1,25 @@
+{
+  try {
+    netImpl.connect(fd,trafficClass,socksGetServerAddress(),socksGetServerPort());
+  }
+ catch (  Exception e) {
+    throw new IOException(Messages.getString("luni.0E",e));
+  }
+  if (lastConnectedAddress == null) {
+    throw new SocketException(Messages.getString("luni.0F"));
+  }
+  socksSendRequest(Socks4Message.COMMAND_BIND,lastConnectedAddress,lastConnectedPort);
+  Socks4Message reply=socksReadReply();
+  if (reply.getCommandOrResult() != Socks4Message.RETURN_SUCCESS) {
+    throw new IOException(reply.getErrorString(reply.getCommandOrResult()));
+  }
+  if (reply.getIP() == 0) {
+    address=socksGetServerAddress();
+  }
+ else {
+    byte[] replyBytes=new byte[4];
+    NetUtil.intToBytes(reply.getIP(),replyBytes,0);
+    address=InetAddress.getByAddress(replyBytes);
+  }
+  localport=reply.getPort();
+}

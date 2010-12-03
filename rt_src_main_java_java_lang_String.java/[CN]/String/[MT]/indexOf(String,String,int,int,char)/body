@@ -1,0 +1,30 @@
+{
+  char[] haystack=haystackString.value;
+  int haystackOffset=haystackString.offset;
+  int haystackLength=haystackString.count;
+  char[] needle=needleString.value;
+  int needleOffset=needleString.offset;
+  int needleLength=needleString.count;
+  int needleLengthMinus1=needleLength - 1;
+  int haystackEnd=haystackOffset + haystackLength;
+  outer_loop:   for (int i=haystackOffset + needleLengthMinus1; i < haystackEnd; ) {
+    if (lastChar == haystack[i]) {
+      for (int j=0; j < needleLengthMinus1; ++j) {
+        if (needle[j + needleOffset] != haystack[i + j - needleLengthMinus1]) {
+          int skip=1;
+          if ((cache & (1 << haystack[i])) == 0) {
+            skip+=j;
+          }
+          i+=Math.max(md2,skip);
+          continue outer_loop;
+        }
+      }
+      return i - needleLengthMinus1 - haystackOffset;
+    }
+    if ((cache & (1 << haystack[i])) == 0) {
+      i+=needleLengthMinus1;
+    }
+    i++;
+  }
+  return -1;
+}

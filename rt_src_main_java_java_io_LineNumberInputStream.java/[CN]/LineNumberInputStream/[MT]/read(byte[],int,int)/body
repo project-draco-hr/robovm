@@ -1,0 +1,25 @@
+{
+  if (offset > buffer.length || offset < 0) {
+    throw new ArrayIndexOutOfBoundsException(Messages.getString("luni.12",offset));
+  }
+  if (length < 0 || length > buffer.length - offset) {
+    throw new ArrayIndexOutOfBoundsException(Messages.getString("luni.18",length));
+  }
+  for (int i=0; i < length; i++) {
+    int currentChar;
+    try {
+      currentChar=read();
+    }
+ catch (    IOException e) {
+      if (i != 0) {
+        return i;
+      }
+      throw e;
+    }
+    if (currentChar == -1) {
+      return i == 0 ? -1 : i;
+    }
+    buffer[offset + i]=(byte)currentChar;
+  }
+  return length;
+}

@@ -1,0 +1,51 @@
+{
+  if (classDesc == null) {
+    writeNull();
+    return null;
+  }
+  Integer handle=null;
+  if (!unshared) {
+    handle=dumpCycle(classDesc);
+  }
+  if (handle == null) {
+    Class<?> classToWrite=classDesc.forClass();
+    Integer previousHandle=null;
+    if (unshared) {
+      previousHandle=objectsWritten.get(classDesc);
+    }
+    handle=nextHandle();
+    objectsWritten.put(classDesc,handle);
+    if (classDesc.isProxy()) {
+      output.writeByte(TC_PROXYCLASSDESC);
+      Class<?>[] interfaces=classToWrite.getInterfaces();
+      output.writeInt(interfaces.length);
+      for (int i=0; i < interfaces.length; i++) {
+        output.writeUTF(interfaces[i].getName());
+      }
+      annotateProxyClass(classToWrite);
+      output.writeByte(TC_ENDBLOCKDATA);
+      writeClassDesc(proxyClassDesc,false);
+      if (unshared) {
+        removeUnsharedReference(classDesc,previousHandle);
+      }
+      return handle;
+    }
+    output.writeByte(TC_CLASSDESC);
+    if (protocolVersion == PROTOCOL_VERSION_1) {
+      writeNewClassDesc(classDesc);
+    }
+ else {
+      primitiveTypes=output;
+      writeClassDescriptor(classDesc);
+      primitiveTypes=null;
+    }
+    annotateClass(classToWrite);
+    drain();
+    output.writeByte(TC_ENDBLOCKDATA);
+    writeClassDesc(classDesc.getSuperclass(),unshared);
+    if (unshared) {
+      removeUnsharedReference(classDesc,previousHandle);
+    }
+  }
+  return handle;
+}

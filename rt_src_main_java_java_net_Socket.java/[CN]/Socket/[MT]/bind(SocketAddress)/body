@@ -1,0 +1,28 @@
+{
+  checkClosedAndCreate(true);
+  if (isBound()) {
+    throw new BindException(Messages.getString("luni.71"));
+  }
+  int port=0;
+  InetAddress addr=InetAddress.ANY;
+  if (localAddr != null) {
+    if (!(localAddr instanceof InetSocketAddress)) {
+      throw new IllegalArgumentException(Messages.getString("luni.49",localAddr.getClass()));
+    }
+    InetSocketAddress inetAddr=(InetSocketAddress)localAddr;
+    if ((addr=inetAddr.getAddress()) == null) {
+      throw new SocketException(Messages.getString("luni.1A",inetAddr.getHostName()));
+    }
+    port=inetAddr.getPort();
+  }
+synchronized (this) {
+    try {
+      impl.bind(addr,port);
+      isBound=true;
+    }
+ catch (    IOException e) {
+      impl.close();
+      throw e;
+    }
+  }
+}

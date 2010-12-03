@@ -1,0 +1,19 @@
+{
+  if (keyStore == null) {
+    throw new NullPointerException(Messages.getString("security.41"));
+  }
+  if (keyStore.size() == 0) {
+    throw new InvalidAlgorithmParameterException(Messages.getString("security.6A"));
+  }
+  trustAnchors=new HashSet<TrustAnchor>();
+  for (Enumeration i=keyStore.aliases(); i.hasMoreElements(); ) {
+    String alias=(String)i.nextElement();
+    if (keyStore.isCertificateEntry(alias)) {
+      Certificate c=keyStore.getCertificate(alias);
+      if (c instanceof X509Certificate) {
+        trustAnchors.add(new TrustAnchor((X509Certificate)c,null));
+      }
+    }
+  }
+  checkTrustAnchors(trustAnchors);
+}

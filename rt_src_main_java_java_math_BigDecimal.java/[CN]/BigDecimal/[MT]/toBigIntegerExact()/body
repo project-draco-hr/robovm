@@ -1,0 +1,19 @@
+{
+  if ((scale == 0) || (isZero())) {
+    return getUnscaledValue();
+  }
+ else   if (scale < 0) {
+    return getUnscaledValue().multiply(Multiplication.powerOf10(-(long)scale));
+  }
+ else {
+    BigInteger[] integerAndFraction;
+    if ((scale > aproxPrecision()) || (scale > getUnscaledValue().getLowestSetBit())) {
+      throw new ArithmeticException(Messages.getString("math.08"));
+    }
+    integerAndFraction=getUnscaledValue().divideAndRemainder(Multiplication.powerOf10(scale));
+    if (integerAndFraction[1].signum() != 0) {
+      throw new ArithmeticException(Messages.getString("math.08"));
+    }
+    return integerAndFraction[0];
+  }
+}

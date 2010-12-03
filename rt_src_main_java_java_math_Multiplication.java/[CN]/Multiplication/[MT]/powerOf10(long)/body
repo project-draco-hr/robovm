@@ -1,0 +1,36 @@
+{
+  int intExp=(int)exp;
+  if (exp < bigTenPows.length) {
+    return bigTenPows[intExp];
+  }
+ else   if (exp <= 50) {
+    return BigInteger.TEN.pow(intExp);
+  }
+ else   if (exp <= 1000) {
+    return bigFivePows[1].pow(intExp).shiftLeft(intExp);
+  }
+  long byteArraySize=1 + (long)(exp / 2.4082399653118496);
+  if (byteArraySize > Runtime.getRuntime().freeMemory()) {
+    throw new ArithmeticException(Messages.getString("math.01"));
+  }
+  if (exp <= Integer.MAX_VALUE) {
+    return bigFivePows[1].pow(intExp).shiftLeft(intExp);
+  }
+  BigInteger powerOfFive=bigFivePows[1].pow(Integer.MAX_VALUE);
+  BigInteger res=powerOfFive;
+  long longExp=exp - Integer.MAX_VALUE;
+  intExp=(int)(exp % Integer.MAX_VALUE);
+  while (longExp > Integer.MAX_VALUE) {
+    res=res.multiply(powerOfFive);
+    longExp-=Integer.MAX_VALUE;
+  }
+  res=res.multiply(bigFivePows[1].pow(intExp));
+  res=res.shiftLeft(Integer.MAX_VALUE);
+  longExp=exp - Integer.MAX_VALUE;
+  while (longExp > Integer.MAX_VALUE) {
+    res=res.shiftLeft(Integer.MAX_VALUE);
+    longExp-=Integer.MAX_VALUE;
+  }
+  res=res.shiftLeft(intExp);
+  return res;
+}

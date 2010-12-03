@@ -1,0 +1,15 @@
+{
+  Signature result;
+synchronized (engine) {
+    engine.getInstance(algorithm,provider,null);
+    if (engine.spi instanceof Signature) {
+      result=(Signature)engine.spi;
+      result.algorithm=algorithm;
+      result.provider=provider;
+    }
+ else {
+      result=new SignatureImpl((SignatureSpi)engine.spi,provider,algorithm);
+    }
+  }
+  return result;
+}

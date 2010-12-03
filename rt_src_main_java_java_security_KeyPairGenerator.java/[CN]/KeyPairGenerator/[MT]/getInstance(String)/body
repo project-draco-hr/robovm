@@ -1,0 +1,17 @@
+{
+  if (algorithm == null) {
+    throw new NullPointerException(Messages.getString("security.01"));
+  }
+  KeyPairGenerator result;
+synchronized (engine) {
+    engine.getInstance(algorithm,null);
+    if (engine.spi instanceof KeyPairGenerator) {
+      result=(KeyPairGenerator)engine.spi;
+      result.algorithm=algorithm;
+      result.provider=engine.provider;
+      return result;
+    }
+    result=new KeyPairGeneratorImpl((KeyPairGeneratorSpi)engine.spi,engine.provider,algorithm);
+    return result;
+  }
+}

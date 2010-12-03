@@ -1,0 +1,34 @@
+{
+  Index<K,V> q=head;
+  for (; ; ) {
+    Index<K,V> d, r;
+    if ((r=q.right) != null) {
+      if (r.indexesDeletedNode()) {
+        q.unlink(r);
+        q=head;
+      }
+ else       q=r;
+    }
+ else     if ((d=q.down) != null) {
+      q=d;
+    }
+ else {
+      Node<K,V> b=q.node;
+      Node<K,V> n=b.next;
+      for (; ; ) {
+        if (n == null)         return (b.isBaseHeader()) ? null : b;
+        Node<K,V> f=n.next;
+        if (n != b.next)         break;
+        Object v=n.value;
+        if (v == null) {
+          n.helpDelete(b,f);
+          break;
+        }
+        if (v == n || b.value == null)         break;
+        b=n;
+        n=f;
+      }
+      q=head;
+    }
+  }
+}

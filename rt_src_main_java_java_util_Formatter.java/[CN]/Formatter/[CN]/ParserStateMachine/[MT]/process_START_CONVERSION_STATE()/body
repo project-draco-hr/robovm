@@ -1,0 +1,40 @@
+{
+  if (Character.isDigit(currentChar)) {
+    int position=format.position() - 1;
+    int number=parseInt(format);
+    char nextChar=0;
+    if (format.hasRemaining()) {
+      nextChar=format.get();
+    }
+    if ('$' == nextChar) {
+      int argIndex=number;
+      if (argIndex > 0) {
+        token.setArgIndex(argIndex - 1);
+      }
+ else       if (argIndex == FormatToken.UNSET) {
+        throw new MissingFormatArgumentException(getFormatString());
+      }
+      state=FLAGS_STATE;
+    }
+ else {
+      if ('0' == currentChar) {
+        state=FLAGS_STATE;
+        format.position(position);
+      }
+ else {
+        state=WIDTH_STATE;
+        format.position(format.position() - 1);
+        token.setWidth(number);
+      }
+    }
+    currentChar=nextChar;
+  }
+ else   if ('<' == currentChar) {
+    state=FLAGS_STATE;
+    token.setArgIndex(FormatToken.LAST_ARGUMENT_INDEX);
+  }
+ else {
+    state=FLAGS_STATE;
+    format.position(format.position() - 1);
+  }
+}

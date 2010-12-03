@@ -1,0 +1,21 @@
+{
+  if (mode != ENCRYPT_MODE && mode != DECRYPT_MODE) {
+    throw new IllegalStateException(Messages.getString("crypto.1C"));
+  }
+  if (input == null) {
+    throw new IllegalArgumentException(Messages.getString("crypto.1D"));
+  }
+  if (output == null) {
+    throw new IllegalArgumentException(Messages.getString("crypto.1F"));
+  }
+  if (outputOffset < 0) {
+    throw new IllegalArgumentException(Messages.getString("crypto.20"));
+  }
+  if (inputOffset < 0 || inputLen < 0 || inputLen > input.length || inputOffset > input.length - inputLen) {
+    throw new IllegalArgumentException(Messages.getString("crypto.21"));
+  }
+  if (input.length == 0) {
+    return 0;
+  }
+  return spiImpl.engineUpdate(input,inputOffset,inputLen,output,outputOffset);
+}

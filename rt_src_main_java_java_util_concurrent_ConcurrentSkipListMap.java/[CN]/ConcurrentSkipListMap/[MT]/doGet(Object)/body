@@ -1,0 +1,39 @@
+{
+  Comparable<? super K> key=comparable(okey);
+  Node<K,V> bound=null;
+  Index<K,V> q=head;
+  Index<K,V> r=q.right;
+  Node<K,V> n;
+  K k;
+  int c;
+  for (; ; ) {
+    Index<K,V> d;
+    if (r != null && (n=r.node) != bound && (k=n.key) != null) {
+      if ((c=key.compareTo(k)) > 0) {
+        q=r;
+        r=r.right;
+        continue;
+      }
+ else       if (c == 0) {
+        Object v=n.value;
+        return (v != null) ? (V)v : getUsingFindNode(key);
+      }
+ else       bound=n;
+    }
+    if ((d=q.down) != null) {
+      q=d;
+      r=d.right;
+    }
+ else     break;
+  }
+  for (n=q.node.next; n != null; n=n.next) {
+    if ((k=n.key) != null) {
+      if ((c=key.compareTo(k)) == 0) {
+        Object v=n.value;
+        return (v != null) ? (V)v : getUsingFindNode(key);
+      }
+ else       if (c < 0)       break;
+    }
+  }
+  return null;
+}

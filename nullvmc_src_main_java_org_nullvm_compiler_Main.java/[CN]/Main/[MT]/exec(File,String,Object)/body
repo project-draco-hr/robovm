@@ -1,0 +1,22 @@
+{
+  CommandLine commandLine=CommandLine.parse(cmd);
+  for (  Object a : args) {
+    if (a instanceof Collection) {
+      for (      Object o : (Collection<Object>)a) {
+        commandLine.addArgument(o instanceof File ? ((File)o).getAbsolutePath() : o.toString());
+      }
+    }
+ else {
+      commandLine.addArgument(a instanceof File ? ((File)a).getAbsolutePath() : a.toString());
+    }
+  }
+  if (verbose) {
+    stdout.println(commandLine.toString());
+  }
+  Executor executor=new DefaultExecutor();
+  if (wd != null) {
+    executor.setWorkingDirectory(wd);
+  }
+  executor.setExitValue(0);
+  executor.execute(commandLine);
+}

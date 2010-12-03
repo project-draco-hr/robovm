@@ -1,0 +1,48 @@
+{
+  int index=intArray[BYTES_OFFSET];
+  int i=fromByte;
+  int maxWord;
+  int nBytes;
+  int wordIndex=index >> 2;
+  int byteIndex=index & 0x03;
+  intArray[BYTES_OFFSET]=(index + toByte - fromByte + 1) & 077;
+  if (byteIndex != 0) {
+    for (; (i <= toByte) && (byteIndex < 4); i++) {
+      intArray[wordIndex]|=(byteInput[i] & 0xFF) << ((3 - byteIndex) << 3);
+      byteIndex++;
+    }
+    if (byteIndex == 4) {
+      wordIndex++;
+      if (wordIndex == 16) {
+        computeHash(intArray);
+        wordIndex=0;
+      }
+    }
+    if (i > toByte) {
+      return;
+    }
+  }
+  maxWord=(toByte - i + 1) >> 2;
+  for (int k=0; k < maxWord; k++) {
+    intArray[wordIndex]=(((int)byteInput[i] & 0xFF) << 24) | (((int)byteInput[i + 1] & 0xFF) << 16) | (((int)byteInput[i + 2] & 0xFF) << 8)| (((int)byteInput[i + 3] & 0xFF));
+    i+=4;
+    wordIndex++;
+    if (wordIndex < 16) {
+      continue;
+    }
+    computeHash(intArray);
+    wordIndex=0;
+  }
+  nBytes=toByte - i + 1;
+  if (nBytes != 0) {
+    int w=((int)byteInput[i] & 0xFF) << 24;
+    if (nBytes != 1) {
+      w|=((int)byteInput[i + 1] & 0xFF) << 16;
+      if (nBytes != 2) {
+        w|=((int)byteInput[i + 2] & 0xFF) << 8;
+      }
+    }
+    intArray[wordIndex]=w;
+  }
+  return;
+}

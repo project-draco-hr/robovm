@@ -1,0 +1,33 @@
+{
+  if (uri == null) {
+    throw new NullPointerException(Msg.getString("KA019"));
+  }
+  List<HttpCookie> cookies=storeMap.get(uri);
+  if (cookies == null) {
+    cookies=new ArrayList<HttpCookie>();
+  }
+ else {
+    for (    HttpCookie cookie : cookies) {
+      if (cookie.hasExpired()) {
+        cookies.remove(cookie);
+      }
+    }
+  }
+  Set<URI> uris=storeMap.keySet();
+  for (  URI u : uris) {
+    if (!u.equals(uri)) {
+      List<HttpCookie> listCookie=storeMap.get(u);
+      for (      HttpCookie cookie : listCookie) {
+        if (HttpCookie.domainMatches(cookie.getDomain(),uri.getHost())) {
+          if (cookie.hasExpired()) {
+            listCookie.remove(cookie);
+          }
+ else           if (!(cookie.hasExpired() || cookies.contains(cookie))) {
+            cookies.add(cookie);
+          }
+        }
+      }
+    }
+  }
+  return cookies;
+}

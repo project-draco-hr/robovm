@@ -1,0 +1,32 @@
+{
+  if (remoteAddr == null) {
+    throw new IllegalArgumentException(Messages.getString("luni.5D"));
+  }
+  if (!(remoteAddr instanceof InetSocketAddress)) {
+    throw new IllegalArgumentException(Messages.getString("luni.49",remoteAddr.getClass()));
+  }
+  InetSocketAddress inetAddr=(InetSocketAddress)remoteAddr;
+  if (inetAddr.getAddress() == null) {
+    throw new SocketException(Messages.getString("luni.1A",inetAddr.getHostName()));
+  }
+synchronized (lock) {
+    checkClosedAndBind(true);
+    SecurityManager security=System.getSecurityManager();
+    if (security != null) {
+      if (inetAddr.getAddress().isMulticastAddress()) {
+        security.checkMulticast(inetAddr.getAddress());
+      }
+ else {
+        security.checkConnect(inetAddr.getAddress().getHostName(),inetAddr.getPort());
+      }
+    }
+    try {
+      impl.connect(inetAddr.getAddress(),inetAddr.getPort());
+    }
+ catch (    Exception e) {
+    }
+    address=inetAddr.getAddress();
+    port=inetAddr.getPort();
+    isConnected=true;
+  }
+}

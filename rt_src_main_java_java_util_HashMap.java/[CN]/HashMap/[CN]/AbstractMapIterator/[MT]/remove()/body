@@ -1,0 +1,17 @@
+{
+  checkConcurrentMod();
+  if (currentEntry == null) {
+    throw new IllegalStateException();
+  }
+  if (prevEntry == null) {
+    int index=currentEntry.origKeyHash & (associatedMap.elementData.length - 1);
+    associatedMap.elementData[index]=associatedMap.elementData[index].next;
+  }
+ else {
+    prevEntry.next=currentEntry.next;
+  }
+  currentEntry=null;
+  expectedModCount++;
+  associatedMap.modCount++;
+  associatedMap.elementCount--;
+}

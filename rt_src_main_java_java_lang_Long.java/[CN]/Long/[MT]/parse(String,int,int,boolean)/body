@@ -1,0 +1,25 @@
+{
+  long max=Long.MIN_VALUE / radix;
+  long result=0, length=string.length();
+  while (offset < length) {
+    int digit=Character.digit(string.charAt(offset++),radix);
+    if (digit == -1) {
+      throw new NumberFormatException(string);
+    }
+    if (max > result) {
+      throw new NumberFormatException(string);
+    }
+    long next=result * radix - digit;
+    if (next > result) {
+      throw new NumberFormatException(string);
+    }
+    result=next;
+  }
+  if (!negative) {
+    result=-result;
+    if (result < 0) {
+      throw new NumberFormatException(string);
+    }
+  }
+  return result;
+}

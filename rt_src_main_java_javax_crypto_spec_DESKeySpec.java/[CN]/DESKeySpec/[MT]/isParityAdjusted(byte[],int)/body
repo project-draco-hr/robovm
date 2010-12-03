@@ -1,0 +1,19 @@
+{
+  if (key == null) {
+    throw new InvalidKeyException(Messages.getString("crypto.2F"));
+  }
+  if (key.length - offset < DES_KEY_LEN) {
+    throw new InvalidKeyException(Messages.getString("crypto.40"));
+  }
+  int byteKey=0;
+  for (int i=offset; i < DES_KEY_LEN; i++) {
+    byteKey=key[i];
+    byteKey^=byteKey >> 1;
+    byteKey^=byteKey >> 2;
+    byteKey^=byteKey >> 4;
+    if ((byteKey & 1) == 0) {
+      return false;
+    }
+  }
+  return true;
+}

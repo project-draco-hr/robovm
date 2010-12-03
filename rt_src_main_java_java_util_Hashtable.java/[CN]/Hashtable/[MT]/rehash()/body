@@ -1,0 +1,29 @@
+{
+  int length=(elementData.length << 1) + 1;
+  if (length == 0) {
+    length=1;
+  }
+  int newFirst=length;
+  int newLast=-1;
+  Entry<K,V>[] newData=newElementArray(length);
+  for (int i=lastSlot + 1; --i >= firstSlot; ) {
+    Entry<K,V> entry=elementData[i];
+    while (entry != null) {
+      int index=(entry.getKeyHash() & 0x7FFFFFFF) % length;
+      if (index < newFirst) {
+        newFirst=index;
+      }
+      if (index > newLast) {
+        newLast=index;
+      }
+      Entry<K,V> next=entry.next;
+      entry.next=newData[index];
+      newData[index]=entry;
+      entry=next;
+    }
+  }
+  firstSlot=newFirst;
+  lastSlot=newLast;
+  elementData=newData;
+  computeMaxSize();
+}

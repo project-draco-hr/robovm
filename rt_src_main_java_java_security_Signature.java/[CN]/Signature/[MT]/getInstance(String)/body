@@ -1,0 +1,18 @@
+{
+  if (algorithm == null) {
+    throw new NullPointerException(Messages.getString("security.01"));
+  }
+  Signature result;
+synchronized (engine) {
+    engine.getInstance(algorithm,null);
+    if (engine.spi instanceof Signature) {
+      result=(Signature)engine.spi;
+      result.algorithm=algorithm;
+      result.provider=engine.provider;
+    }
+ else {
+      result=new SignatureImpl((SignatureSpi)engine.spi,engine.provider,algorithm);
+    }
+  }
+  return result;
+}

@@ -1,0 +1,44 @@
+{
+  StringBuilder buf=new StringBuilder(200);
+  buf.append("ProtectionDomain\n");
+  buf.append("CodeSource=").append(codeSource == null ? "<null>" : codeSource.toString()).append("\n");
+  buf.append("ClassLoader=").append(classLoader == null ? "<null>" : classLoader.toString()).append("\n");
+  if (principals == null || principals.length == 0) {
+    buf.append("<no principals>\n");
+  }
+ else {
+    buf.append("Principals: <\n");
+    for (int i=0; i < principals.length; i++) {
+      buf.append("\t").append(principals[i] == null ? "<null>" : principals[i].toString()).append("\n");
+    }
+    buf.append(">");
+  }
+  buf.append("Permissions:\n");
+  if (permissions == null) {
+    buf.append("\t\t<no static permissions>\n");
+  }
+ else {
+    buf.append("\t\tstatic: ").append(permissions.toString()).append("\n");
+  }
+  if (dynamicPerms) {
+    if (Policy.isSet()) {
+      if (canGetPolicy()) {
+        PermissionCollection perms;
+        perms=Policy.getAccessiblePolicy().getPermissions(this);
+        if (perms == null) {
+          buf.append("\t\t<no dynamic permissions>\n");
+        }
+ else {
+          buf.append("\t\tdynamic: ").append(perms.toString()).append("\n");
+        }
+      }
+ else {
+        buf.append("\t\t<no rights to retrieve dynamic permissions>\n");
+      }
+    }
+ else {
+      buf.append("\t\t<no dynamic permissions>\n");
+    }
+  }
+  return buf.toString();
+}

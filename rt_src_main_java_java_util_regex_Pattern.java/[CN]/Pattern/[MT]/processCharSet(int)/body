@@ -1,0 +1,34 @@
+{
+  boolean isSupplCodePoint=Character.isSupplementaryCodePoint(ch);
+  if (hasFlag(Pattern.CASE_INSENSITIVE)) {
+    if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+      return new CICharSet((char)ch);
+    }
+ else     if (hasFlag(Pattern.UNICODE_CASE) && ch > 128) {
+      if (isSupplCodePoint) {
+        return new UCISupplCharSet(ch);
+      }
+ else       if (Lexer.isLowSurrogate(ch)) {
+        return new LowSurrogateCharSet((char)ch);
+      }
+ else       if (Lexer.isHighSurrogate(ch)) {
+        return new HighSurrogateCharSet((char)ch);
+      }
+ else {
+        return new UCICharSet((char)ch);
+      }
+    }
+  }
+  if (isSupplCodePoint) {
+    return new SupplCharSet(ch);
+  }
+ else   if (Lexer.isLowSurrogate(ch)) {
+    return new LowSurrogateCharSet((char)ch);
+  }
+ else   if (Lexer.isHighSurrogate(ch)) {
+    return new HighSurrogateCharSet((char)ch);
+  }
+ else {
+    return new CharSet((char)ch);
+  }
+}

@@ -1,0 +1,21 @@
+{
+  checkAccess();
+synchronized (this.childrenThreadsLock) {
+synchronized (this.childrenGroupsLock) {
+      if (this.isDestroyed) {
+        throw new IllegalThreadStateException("Thread group was already destroyed: " + (this.name != null ? this.name : "n/a"));
+      }
+      if (this.numThreads > 0) {
+        throw new IllegalThreadStateException("Thread group still contains threads: " + (this.name != null ? this.name : "n/a"));
+      }
+      int toDestroy=numGroups;
+      for (int i=0; i < toDestroy; i++) {
+        this.childrenGroups[0].destroy();
+      }
+      if (parent != null) {
+        parent.remove(this);
+      }
+      this.isDestroyed=true;
+    }
+  }
+}

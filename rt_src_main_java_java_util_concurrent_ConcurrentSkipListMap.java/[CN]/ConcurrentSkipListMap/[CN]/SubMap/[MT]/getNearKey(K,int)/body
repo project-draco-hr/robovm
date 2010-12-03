@@ -1,0 +1,30 @@
+{
+  if (isDescending) {
+    if ((rel & m.LT) == 0)     rel|=m.LT;
+ else     rel&=~m.LT;
+  }
+  if (tooLow(key)) {
+    if ((rel & m.LT) == 0) {
+      ConcurrentSkipListMap.Node<K,V> n=loNode();
+      if (isBeforeEnd(n))       return n.key;
+    }
+    return null;
+  }
+  if (tooHigh(key)) {
+    if ((rel & m.LT) != 0) {
+      ConcurrentSkipListMap.Node<K,V> n=hiNode();
+      if (n != null) {
+        K last=n.key;
+        if (inBounds(last))         return last;
+      }
+    }
+    return null;
+  }
+  for (; ; ) {
+    Node<K,V> n=m.findNear(key,rel);
+    if (n == null || !inBounds(n.key))     return null;
+    K k=n.key;
+    V v=n.getValidValue();
+    if (v != null)     return k;
+  }
+}

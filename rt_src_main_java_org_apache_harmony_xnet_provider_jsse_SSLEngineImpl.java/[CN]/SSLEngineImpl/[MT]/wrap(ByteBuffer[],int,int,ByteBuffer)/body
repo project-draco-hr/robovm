@@ -1,0 +1,98 @@
+{
+  if (engine_was_shutteddown) {
+    return new SSLEngineResult(SSLEngineResult.Status.CLOSED,SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING,0,0);
+  }
+  if ((srcs == null) || (dst == null)) {
+    throw new IllegalStateException("Some of the input parameters are null");
+  }
+  if (dst.isReadOnly()) {
+    throw new ReadOnlyBufferException();
+  }
+  if (!handshake_started) {
+    beginHandshake();
+  }
+  SSLEngineResult.HandshakeStatus handshakeStatus=getHandshakeStatus();
+  if ((session == null || engine_was_closed) && (handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_UNWRAP) || handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_TASK))) {
+    return new SSLEngineResult(getEngineStatus(),handshakeStatus,0,0);
+  }
+  int capacity=dst.remaining();
+  int produced=0;
+  if (alertProtocol.hasAlert()) {
+    if (capacity < recordProtocol.getRecordSize(2)) {
+      return new SSLEngineResult(SSLEngineResult.Status.BUFFER_OVERFLOW,handshakeStatus,0,0);
+    }
+    byte[] alert_data=alertProtocol.wrap();
+    dst.put(alert_data);
+    if (alertProtocol.isFatalAlert()) {
+      alertProtocol.setProcessed();
+      if (session != null) {
+        session.invalidate();
+      }
+      shutdown();
+      return new SSLEngineResult(SSLEngineResult.Status.CLOSED,SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING,0,alert_data.length);
+    }
+ else {
+      alertProtocol.setProcessed();
+      if (close_notify_was_sent && close_notify_was_received) {
+        shutdown();
+        return new SSLEngineResult(SSLEngineResult.Status.CLOSED,SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING,0,alert_data.length);
+      }
+      return new SSLEngineResult(getEngineStatus(),getHandshakeStatus(),0,alert_data.length);
+    }
+  }
+  if (capacity < recordProtocol.getMinRecordSize()) {
+    if (logger != null) {
+      logger.println("Capacity of the destination(" + capacity + ") < MIN_PACKET_SIZE("+ recordProtocol.getMinRecordSize()+ ")");
+    }
+    return new SSLEngineResult(SSLEngineResult.Status.BUFFER_OVERFLOW,handshakeStatus,0,0);
+  }
+  try {
+    if (!handshakeStatus.equals(SSLEngineResult.HandshakeStatus.NEED_WRAP)) {
+      dataStream.setSourceBuffers(srcs,offset,len);
+      if ((capacity < SSLRecordProtocol.MAX_SSL_PACKET_SIZE) && (capacity < recordProtocol.getRecordSize(dataStream.available()))) {
+        if (logger != null) {
+          logger.println("The destination buffer(" + capacity + ") can not take the resulting packet("+ recordProtocol.getRecordSize(dataStream.available())+ ")");
+        }
+        return new SSLEngineResult(SSLEngineResult.Status.BUFFER_OVERFLOW,handshakeStatus,0,0);
+      }
+      if (remaining_wrapped_data == null) {
+        remaining_wrapped_data=recordProtocol.wrap(ContentType.APPLICATION_DATA,dataStream);
+      }
+      if (capacity < remaining_wrapped_data.length) {
+        return new SSLEngineResult(SSLEngineResult.Status.BUFFER_OVERFLOW,handshakeStatus,dataStream.consumed(),0);
+      }
+ else {
+        dst.put(remaining_wrapped_data);
+        produced=remaining_wrapped_data.length;
+        remaining_wrapped_data=null;
+        return new SSLEngineResult(getEngineStatus(),handshakeStatus,dataStream.consumed(),produced);
+      }
+    }
+ else {
+      if (remaining_hsh_data == null) {
+        remaining_hsh_data=handshakeProtocol.wrap();
+      }
+      if (capacity < remaining_hsh_data.length) {
+        return new SSLEngineResult(SSLEngineResult.Status.BUFFER_OVERFLOW,handshakeStatus,0,0);
+      }
+ else {
+        dst.put(remaining_hsh_data);
+        produced=remaining_hsh_data.length;
+        remaining_hsh_data=null;
+        handshakeStatus=handshakeProtocol.getStatus();
+        if (handshakeStatus.equals(SSLEngineResult.HandshakeStatus.FINISHED)) {
+          session=recordProtocol.getSession();
+        }
+      }
+      return new SSLEngineResult(getEngineStatus(),getHandshakeStatus(),0,produced);
+    }
+  }
+ catch (  AlertException e) {
+    alertProtocol.alert(AlertProtocol.FATAL,e.getDescriptionCode());
+    engine_was_closed=true;
+    if (session != null) {
+      session.invalidate();
+    }
+    throw e.getReason();
+  }
+}

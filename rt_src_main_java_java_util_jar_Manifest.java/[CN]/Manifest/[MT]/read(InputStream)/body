@@ -1,0 +1,20 @@
+{
+  byte[] buf;
+  try {
+    buf=InputStreamHelper.expose(is);
+  }
+ catch (  UnsupportedOperationException uoe) {
+    buf=readFully(is);
+  }
+  if (buf.length == 0) {
+    return;
+  }
+  byte b=buf[buf.length - 1];
+  if (0 == b || 26 == b) {
+    buf[buf.length - 1]='\n';
+  }
+  im=new InitManifest(buf,mainAttributes,null);
+  mainEnd=im.getPos();
+  im.initEntries(entries,chunks);
+  im=null;
+}

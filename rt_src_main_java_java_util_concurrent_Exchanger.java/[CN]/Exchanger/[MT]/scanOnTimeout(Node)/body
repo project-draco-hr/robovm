@@ -1,0 +1,18 @@
+{
+  Object y;
+  for (int j=arena.length - 1; j >= 0; --j) {
+    Slot slot=arena[j];
+    if (slot != null) {
+      while ((y=slot.get()) != null) {
+        if (slot.compareAndSet(y,null)) {
+          Node you=(Node)y;
+          if (you.compareAndSet(null,node.item)) {
+            LockSupport.unpark(you.waiter);
+            return you.item;
+          }
+        }
+      }
+    }
+  }
+  return CANCEL;
+}

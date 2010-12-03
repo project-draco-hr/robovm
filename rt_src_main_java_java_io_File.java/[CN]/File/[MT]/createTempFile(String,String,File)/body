@@ -1,0 +1,20 @@
+{
+  if (prefix.length() < 3) {
+    throw new IllegalArgumentException(Messages.getString("luni.B5"));
+  }
+  String newSuffix=suffix == null ? ".tmp" : suffix;
+  File tmpDirFile;
+  if (directory == null) {
+    String tmpDir=AccessController.doPrivileged(new PriviAction<String>("java.io.tmpdir","."));
+    tmpDirFile=new File(tmpDir);
+  }
+ else {
+    tmpDirFile=directory;
+  }
+  File result;
+  do {
+    result=genTempFile(prefix,newSuffix,tmpDirFile);
+  }
+ while (!result.createNewFile());
+  return result;
+}

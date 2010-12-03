@@ -1,0 +1,16 @@
+{
+  if (null == locale) {
+    throw new NullPointerException();
+  }
+  if (buildinLocales == null) {
+    initBuildInLocales(com.ibm.icu.text.DecimalFormatSymbols.getAvailableLocales());
+  }
+  if (buildinLocales.contains(locale)) {
+    return new DecimalFormatSymbols(locale);
+  }
+  DecimalFormatSymbolsProvider provider=(DecimalFormatSymbolsProvider)LocaleServiceProviderLoader.getProviderByLocale(providersCache,locale,PROVIDER_CONFIGURATION_FILE_NAME);
+  if (provider != null) {
+    return provider.getInstance(locale);
+  }
+  return new DecimalFormatSymbols();
+}

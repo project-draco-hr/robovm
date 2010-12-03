@@ -1,0 +1,24 @@
+{
+  long diffScale=subtrahend.scale - (long)this.scale;
+  int thisSignum;
+  BigDecimal leftOperand;
+  BigInteger tempBI;
+  if ((subtrahend.isZero()) || (this.isZero()) || (mc.getPrecision() == 0)) {
+    return subtract(subtrahend).round(mc);
+  }
+  if (subtrahend.aproxPrecision() < diffScale - 1) {
+    if (mc.getPrecision() < this.aproxPrecision()) {
+      thisSignum=this.signum();
+      if (thisSignum != subtrahend.signum()) {
+        tempBI=Multiplication.multiplyByPositiveInt(this.getUnscaledValue(),10).add(BigInteger.valueOf(thisSignum));
+      }
+ else {
+        tempBI=this.getUnscaledValue().subtract(BigInteger.valueOf(thisSignum));
+        tempBI=Multiplication.multiplyByPositiveInt(tempBI,10).add(BigInteger.valueOf(thisSignum * 9));
+      }
+      leftOperand=new BigDecimal(tempBI,this.scale + 1);
+      return leftOperand.round(mc);
+    }
+  }
+  return subtract(subtrahend).round(mc);
+}

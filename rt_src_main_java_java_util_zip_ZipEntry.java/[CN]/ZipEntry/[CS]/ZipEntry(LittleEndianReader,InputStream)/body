@@ -1,0 +1,41 @@
+{
+  byte[] hdrBuf=ler.hdrBuf;
+  myReadFully(in,hdrBuf);
+  long sig=(hdrBuf[0] & 0xff) | ((hdrBuf[1] & 0xff) << 8) | ((hdrBuf[2] & 0xff) << 16)| ((hdrBuf[3] << 24) & 0xffffffffL);
+  if (sig != CENSIG) {
+    throw new ZipException(Messages.getString("archive.3A"));
+  }
+  compressionMethod=(hdrBuf[10] & 0xff) | ((hdrBuf[11] & 0xff) << 8);
+  time=(hdrBuf[12] & 0xff) | ((hdrBuf[13] & 0xff) << 8);
+  modDate=(hdrBuf[14] & 0xff) | ((hdrBuf[15] & 0xff) << 8);
+  crc=(hdrBuf[16] & 0xff) | ((hdrBuf[17] & 0xff) << 8) | ((hdrBuf[18] & 0xff) << 16)| ((hdrBuf[19] << 24) & 0xffffffffL);
+  compressedSize=(hdrBuf[20] & 0xff) | ((hdrBuf[21] & 0xff) << 8) | ((hdrBuf[22] & 0xff) << 16)| ((hdrBuf[23] << 24) & 0xffffffffL);
+  size=(hdrBuf[24] & 0xff) | ((hdrBuf[25] & 0xff) << 8) | ((hdrBuf[26] & 0xff) << 16)| ((hdrBuf[27] << 24) & 0xffffffffL);
+  nameLen=(hdrBuf[28] & 0xff) | ((hdrBuf[29] & 0xff) << 8);
+  int extraLen=(hdrBuf[30] & 0xff) | ((hdrBuf[31] & 0xff) << 8);
+  int commentLen=(hdrBuf[32] & 0xff) | ((hdrBuf[33] & 0xff) << 8);
+  mLocalHeaderRelOffset=(hdrBuf[42] & 0xff) | ((hdrBuf[43] & 0xff) << 8) | ((hdrBuf[44] & 0xff) << 16)| ((hdrBuf[45] << 24) & 0xffffffffL);
+  byte[] nameBytes=new byte[nameLen];
+  myReadFully(in,nameBytes);
+  byte[] commentBytes=null;
+  if (commentLen > 0) {
+    commentBytes=new byte[commentLen];
+    myReadFully(in,commentBytes);
+  }
+  if (extraLen > 0) {
+    extra=new byte[extraLen];
+    myReadFully(in,extra);
+  }
+  try {
+    name=new String(nameBytes,"ISO-8859-1");
+    if (commentBytes != null) {
+      comment=new String(commentBytes,"ISO-8859-1");
+    }
+ else {
+      comment=null;
+    }
+  }
+ catch (  UnsupportedEncodingException uee) {
+    throw new InternalError(uee.getMessage());
+  }
+}

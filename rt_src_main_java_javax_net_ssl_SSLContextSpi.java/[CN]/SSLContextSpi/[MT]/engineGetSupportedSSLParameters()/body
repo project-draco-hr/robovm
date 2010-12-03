@@ -1,0 +1,27 @@
+{
+  SSLParameters supportSSLParameters=new SSLParameters();
+  SocketFactory sslSocketFactory=SSLSocketFactory.getDefault();
+  if (sslSocketFactory == null)   return null;
+  SSLSocket sslSocket=null;
+  try {
+    sslSocket=(SSLSocket)sslSocketFactory.createSocket();
+    if (sslSocket == null)     return null;
+    supportSSLParameters.setCipherSuites(sslSocket.getSupportedCipherSuites());
+    supportSSLParameters.setProtocols(sslSocket.getSupportedProtocols());
+  }
+ catch (  IOException e1) {
+    e1.printStackTrace();
+    throw new UnsupportedOperationException("the supported SSL parameters could not be obtained");
+  }
+ finally {
+    try {
+      if (sslSocket != null) {
+        sslSocket.close();
+      }
+    }
+ catch (    IOException e) {
+      e.printStackTrace();
+    }
+  }
+  return supportSSLParameters;
+}

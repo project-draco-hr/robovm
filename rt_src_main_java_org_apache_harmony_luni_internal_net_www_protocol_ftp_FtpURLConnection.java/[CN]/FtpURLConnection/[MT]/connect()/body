@@ -1,0 +1,36 @@
+{
+  List<Proxy> proxyList=null;
+  if (null != proxy) {
+    proxyList=new ArrayList<Proxy>(1);
+    proxyList.add(proxy);
+  }
+ else {
+    proxyList=NetUtil.getProxyList(uri);
+  }
+  if (null == proxyList) {
+    currentProxy=null;
+    connectInternal();
+  }
+ else {
+    ProxySelector selector=ProxySelector.getDefault();
+    Iterator<Proxy> iter=proxyList.iterator();
+    boolean connectOK=false;
+    String failureReason="";
+    while (iter.hasNext() && !connectOK) {
+      currentProxy=iter.next();
+      try {
+        connectInternal();
+        connectOK=true;
+      }
+ catch (      IOException ioe) {
+        failureReason=ioe.getLocalizedMessage();
+        if (null != selector && Proxy.NO_PROXY != currentProxy) {
+          selector.connectFailed(uri,currentProxy.address(),ioe);
+        }
+      }
+    }
+    if (!connectOK) {
+      throw new IOException(Messages.getString("luni.1D",failureReason));
+    }
+  }
+}

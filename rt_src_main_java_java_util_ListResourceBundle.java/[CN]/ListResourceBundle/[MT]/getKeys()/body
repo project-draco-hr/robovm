@@ -1,0 +1,53 @@
+{
+  initializeTable();
+  if (parent != null) {
+    return new Enumeration<String>(){
+      Iterator<String> local=table.keySet().iterator();
+      Enumeration<String> pEnum=parent.getKeys();
+      String nextElement;
+      private boolean findNext(){
+        if (nextElement != null) {
+          return true;
+        }
+        while (pEnum.hasMoreElements()) {
+          String next=pEnum.nextElement();
+          if (!table.containsKey(next)) {
+            nextElement=next;
+            return true;
+          }
+        }
+        return false;
+      }
+      public boolean hasMoreElements(){
+        if (local.hasNext()) {
+          return true;
+        }
+        return findNext();
+      }
+      public String nextElement(){
+        if (local.hasNext()) {
+          return local.next();
+        }
+        if (findNext()) {
+          String result=nextElement;
+          nextElement=null;
+          return result;
+        }
+        return pEnum.nextElement();
+      }
+    }
+;
+  }
+ else {
+    return new Enumeration<String>(){
+      Iterator<String> it=table.keySet().iterator();
+      public boolean hasMoreElements(){
+        return it.hasNext();
+      }
+      public String nextElement(){
+        return it.next();
+      }
+    }
+;
+  }
+}

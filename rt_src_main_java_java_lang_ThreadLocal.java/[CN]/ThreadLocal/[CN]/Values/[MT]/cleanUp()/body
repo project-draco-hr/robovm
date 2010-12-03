@@ -1,0 +1,24 @@
+{
+  if (rehash()) {
+    return;
+  }
+  if (size == 0) {
+    return;
+  }
+  int index=clean;
+  Object[] table=this.table;
+  for (int counter=table.length; counter > 0; counter>>=1, index=next(index)) {
+    Object k=table[index];
+    if (k == TOMBSTONE || k == null) {
+      continue;
+    }
+    @SuppressWarnings("unchecked") Reference<ThreadLocal<?>> reference=(Reference<ThreadLocal<?>>)k;
+    if (reference.get() == null) {
+      table[index]=TOMBSTONE;
+      table[index + 1]=null;
+      tombstones++;
+      size--;
+    }
+  }
+  clean=index;
+}

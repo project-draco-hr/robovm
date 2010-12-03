@@ -1,0 +1,33 @@
+{
+  EmulatedFieldsForDumping originalCurrentPutField=currentPutField;
+  currentPutField=null;
+  output.writeByte(TC_ENUM);
+  while (theClass != null && !theClass.isEnum()) {
+    theClass=theClass.getSuperclass();
+  }
+  ObjectStreamClass classDesc=ObjectStreamClass.lookup(theClass);
+  writeEnumDesc(theClass,classDesc,unshared);
+  Integer previousHandle=null;
+  if (unshared) {
+    previousHandle=objectsWritten.get(object);
+  }
+  Integer handle=nextHandle();
+  objectsWritten.put(object,handle);
+  ObjectStreamField[] fields=classDesc.getSuperclass().fields();
+  Class<?> declaringClass=classDesc.getSuperclass().forClass();
+  if (null != fields && fields.length > 1) {
+    String str=(String)accessor.getObject(object,fields[1].getFieldID(accessor,declaringClass));
+    Integer strhandle=null;
+    if (!unshared) {
+      strhandle=dumpCycle(str);
+    }
+    if (null == strhandle) {
+      writeNewString(str,unshared);
+    }
+  }
+  if (unshared) {
+    removeUnsharedReference(object,previousHandle);
+  }
+  currentPutField=originalCurrentPutField;
+  return handle;
+}

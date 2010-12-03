@@ -1,0 +1,24 @@
+{
+  if (certs == null) {
+    this.certs=new X509Certificate[0];
+    encoded_certs=new byte[0][0];
+    length=3;
+    return;
+  }
+  this.certs=certs;
+  if (encoded_certs == null) {
+    encoded_certs=new byte[certs.length][];
+    for (int i=0; i < certs.length; i++) {
+      try {
+        encoded_certs[i]=certs[i].getEncoded();
+      }
+ catch (      CertificateEncodingException e) {
+        fatalAlert(AlertProtocol.INTERNAL_ERROR,"INTERNAL ERROR",e);
+      }
+    }
+  }
+  length=3 + 3 * encoded_certs.length;
+  for (int i=0; i < encoded_certs.length; i++) {
+    length+=encoded_certs[i].length;
+  }
+}

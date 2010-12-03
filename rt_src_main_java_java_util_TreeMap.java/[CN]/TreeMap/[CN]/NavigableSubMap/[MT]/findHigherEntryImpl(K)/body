@@ -1,0 +1,56 @@
+{
+  Comparable<K> object=m.comparator == null ? toComparable((K)key) : null;
+  K keyK=(K)key;
+  Node<K,V> node=m.root;
+  Node<K,V> foundNode=null;
+  int foundIndex=0;
+  while (node != null) {
+    K[] keys=node.keys;
+    int right_idx=node.right_idx;
+    int result=cmp(object,keyK,keys[right_idx]);
+    if (result >= 0) {
+      node=node.right;
+    }
+ else {
+      foundNode=node;
+      foundIndex=right_idx;
+      int left_idx=node.left_idx;
+      if (left_idx != right_idx) {
+        result=cmp(object,key,keys[left_idx]);
+      }
+      if (result < 0) {
+        foundNode=node;
+        foundIndex=left_idx;
+        node=node.left;
+      }
+ else {
+        foundNode=node;
+        foundIndex=right_idx;
+        int low=left_idx + 1, mid=0, high=right_idx - 1;
+        while (low <= high) {
+          mid=(low + high) >> 1;
+          result=cmp(object,key,keys[mid]);
+          if (result < 0) {
+            foundNode=node;
+            foundIndex=mid;
+            high=mid - 1;
+          }
+ else {
+            low=mid + 1;
+          }
+          if (low == high && high == mid) {
+            break;
+          }
+        }
+        break;
+      }
+    }
+  }
+  if (foundNode != null && cmp(object,keyK,foundNode.keys[foundIndex]) >= 0) {
+    foundNode=null;
+  }
+  if (foundNode != null) {
+    return createEntry(foundNode,foundIndex);
+  }
+  return null;
+}

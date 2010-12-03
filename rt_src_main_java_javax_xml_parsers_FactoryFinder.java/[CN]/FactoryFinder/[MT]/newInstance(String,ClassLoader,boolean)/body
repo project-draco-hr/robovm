@@ -1,0 +1,36 @@
+{
+  try {
+    Class providerClass;
+    if (cl == null) {
+      providerClass=Class.forName(className);
+    }
+ else {
+      try {
+        providerClass=cl.loadClass(className);
+      }
+ catch (      ClassNotFoundException x) {
+        if (doFallback) {
+          cl=FactoryFinder.class.getClassLoader();
+          if (cl != null) {
+            providerClass=cl.loadClass(className);
+          }
+ else {
+            providerClass=Class.forName(className);
+          }
+        }
+ else {
+          throw x;
+        }
+      }
+    }
+    Object instance=providerClass.newInstance();
+    if (debug)     dPrint("created new instance of " + providerClass + " using ClassLoader: "+ cl);
+    return instance;
+  }
+ catch (  ClassNotFoundException x) {
+    throw new ConfigurationError("Provider " + className + " not found",x);
+  }
+catch (  Exception x) {
+    throw new ConfigurationError("Provider " + className + " could not be instantiated: "+ x,x);
+  }
+}

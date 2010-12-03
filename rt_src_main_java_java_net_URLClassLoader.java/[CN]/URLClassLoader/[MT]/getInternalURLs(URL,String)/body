@@ -1,0 +1,23 @@
+{
+  StringTokenizer tokenizer=new StringTokenizer(classpath);
+  ArrayList<URL> addedURLs=new ArrayList<URL>();
+  String file=root.getFile();
+  int jarIndex=file.lastIndexOf("!/") - 1;
+  int index=file.lastIndexOf("/",jarIndex) + 1;
+  if (index == 0) {
+    index=file.lastIndexOf(System.getProperty("file.separator"),jarIndex) + 1;
+  }
+  file=file.substring(0,index);
+  while (tokenizer.hasMoreElements()) {
+    String element=tokenizer.nextToken();
+    if (!element.equals("")) {
+      try {
+        URL url=new URL(new URL(file),element);
+        addedURLs.add(createSearchURL(url));
+      }
+ catch (      MalformedURLException e) {
+      }
+    }
+  }
+  return addedURLs;
+}

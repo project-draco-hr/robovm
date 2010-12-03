@@ -1,0 +1,22 @@
+{
+  for (; ; ) {
+    Node<K,V> b=findPredecessor(key);
+    Node<K,V> n=b.next;
+    for (; ; ) {
+      if (n == null)       return null;
+      Node<K,V> f=n.next;
+      if (n != b.next)       break;
+      Object v=n.value;
+      if (v == null) {
+        n.helpDelete(b,f);
+        break;
+      }
+      if (v == n || b.value == null)       break;
+      int c=key.compareTo(n.key);
+      if (c == 0)       return n;
+      if (c < 0)       return null;
+      b=n;
+      n=f;
+    }
+  }
+}

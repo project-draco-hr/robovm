@@ -1,0 +1,26 @@
+{
+  tagOffset=offset;
+  tag=read();
+  length=read();
+  if (length != 0x80) {
+    if ((length & 0x80) != 0) {
+      int numOctets=length & 0x7F;
+      if (numOctets > 5) {
+        throw new ASN1Exception(Messages.getString("security.113",tagOffset));
+      }
+      length=read();
+      for (int i=1; i < numOctets; i++) {
+        int ch=read();
+        length=(length << 8) + ch;
+      }
+      if (length > 0xFFFFFF) {
+        throw new ASN1Exception(Messages.getString("security.113",tagOffset));
+      }
+    }
+  }
+ else {
+    length=INDEFINIT_LENGTH;
+  }
+  contentOffset=offset;
+  return tag;
+}

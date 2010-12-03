@@ -1,0 +1,15 @@
+{
+  if (cs == null) {
+    return null;
+  }
+  ProtectionDomain pd;
+synchronized (pds) {
+    if ((pd=pds.get(cs)) != null) {
+      return pd;
+    }
+    PermissionCollection perms=getPermissions(cs);
+    pd=new ProtectionDomain(cs,perms,this,null);
+    pds.put(cs,pd);
+  }
+  return pd;
+}

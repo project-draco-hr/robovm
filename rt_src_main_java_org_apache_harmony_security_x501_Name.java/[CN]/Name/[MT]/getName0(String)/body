@@ -1,0 +1,35 @@
+{
+  StringBuffer name=new StringBuffer();
+  for (int i=rdn.size() - 1; i >= 0; i--) {
+    List atavList=(List)rdn.get(i);
+    if (X500Principal.CANONICAL == format) {
+      List sortedList=new LinkedList(atavList);
+      Collections.sort(sortedList,new AttributeTypeAndValueComparator());
+      atavList=sortedList;
+    }
+    Iterator it=atavList.iterator();
+    while (it.hasNext()) {
+      AttributeTypeAndValue _ava=(AttributeTypeAndValue)it.next();
+      _ava.appendName(format,name);
+      if (it.hasNext()) {
+        if (X500Principal.RFC1779 == format) {
+          name.append(" + ");
+        }
+ else {
+          name.append('+');
+        }
+      }
+    }
+    if (i != 0) {
+      name.append(',');
+      if (format == X500Principal.RFC1779) {
+        name.append(' ');
+      }
+    }
+  }
+  String sName=name.toString();
+  if (X500Principal.CANONICAL.equals(format)) {
+    sName=sName.toLowerCase(Locale.US);
+  }
+  return sName;
+}

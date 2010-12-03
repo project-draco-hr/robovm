@@ -1,0 +1,46 @@
+{
+  String serviceId="META-INF/services/" + factoryId;
+  InputStream is=null;
+  ClassLoader cl=SecuritySupport.getContextClassLoader();
+  if (cl != null) {
+    is=SecuritySupport.getResourceAsStream(cl,serviceId);
+    if (is == null) {
+      cl=FactoryFinder.class.getClassLoader();
+      is=SecuritySupport.getResourceAsStream(cl,serviceId);
+    }
+  }
+ else {
+    cl=FactoryFinder.class.getClassLoader();
+    is=SecuritySupport.getResourceAsStream(cl,serviceId);
+  }
+  if (is == null) {
+    return null;
+  }
+  if (debug)   debugPrintln("found jar resource=" + serviceId + " using ClassLoader: "+ cl);
+  BufferedReader rd;
+  try {
+    rd=new BufferedReader(new InputStreamReader(is,"UTF-8"),DEFAULT_LINE_LENGTH);
+  }
+ catch (  java.io.UnsupportedEncodingException e) {
+    rd=new BufferedReader(new InputStreamReader(is),DEFAULT_LINE_LENGTH);
+  }
+  String factoryClassName=null;
+  try {
+    factoryClassName=rd.readLine();
+  }
+ catch (  IOException x) {
+    return null;
+  }
+ finally {
+    try {
+      rd.close();
+    }
+ catch (    IOException exc) {
+    }
+  }
+  if (factoryClassName != null && !"".equals(factoryClassName)) {
+    if (debug)     debugPrintln("found in resource, value=" + factoryClassName);
+    return newInstance(factoryClassName,cl);
+  }
+  return null;
+}

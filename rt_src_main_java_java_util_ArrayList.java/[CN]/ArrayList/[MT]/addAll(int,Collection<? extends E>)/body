@@ -1,0 +1,42 @@
+{
+  if (location < 0 || location > size) {
+    throw new IndexOutOfBoundsException(Messages.getString("luni.0A",Integer.valueOf(location),Integer.valueOf(size)));
+  }
+  Object[] dumparray=collection.toArray();
+  int growSize=dumparray.length;
+  if (growSize == 0) {
+    return false;
+  }
+  if (location == 0) {
+    growAtFront(growSize);
+    firstIndex-=growSize;
+  }
+ else   if (location == size) {
+    if (firstIndex + size > array.length - growSize) {
+      growAtEnd(growSize);
+    }
+  }
+ else {
+    if (array.length - size < growSize) {
+      growForInsert(location,growSize);
+    }
+ else     if (firstIndex + size > array.length - growSize || (firstIndex > 0 && location < size / 2)) {
+      int newFirst=firstIndex - growSize;
+      if (newFirst < 0) {
+        int index=location + firstIndex;
+        System.arraycopy(array,index,array,index - newFirst,size - location);
+        newFirst=0;
+      }
+      System.arraycopy(array,firstIndex,array,newFirst,location);
+      firstIndex=newFirst;
+    }
+ else {
+      int index=location + firstIndex;
+      System.arraycopy(array,index,array,index + growSize,size - location);
+    }
+  }
+  System.arraycopy(dumparray,0,this.array,location + firstIndex,growSize);
+  size+=growSize;
+  modCount++;
+  return true;
+}

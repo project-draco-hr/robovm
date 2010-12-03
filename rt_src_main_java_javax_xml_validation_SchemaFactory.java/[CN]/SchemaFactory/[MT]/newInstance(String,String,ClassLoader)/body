@@ -1,0 +1,16 @@
+{
+  if (schemaLanguage == null) {
+    throw new NullPointerException();
+  }
+  if (factoryClassName == null) {
+    throw new IllegalArgumentException("factoryClassName cannot be null.");
+  }
+  if (classLoader == null) {
+    classLoader=SecuritySupport.getContextClassLoader();
+  }
+  SchemaFactory f=new SchemaFactoryFinder(classLoader).createInstance(factoryClassName);
+  if (f == null || !f.isSchemaLanguageSupported(schemaLanguage)) {
+    throw new IllegalArgumentException(schemaLanguage);
+  }
+  return f;
+}

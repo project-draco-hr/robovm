@@ -1,0 +1,32 @@
+{
+  int bytesWritten;
+  boolean completed=false;
+synchronized (repositioningLock) {
+    if (buffer.isDirect()) {
+      DirectBuffer directBuffer=(DirectBuffer)buffer;
+      long address=directBuffer.getEffectiveAddress().toLong();
+      try {
+        begin();
+        bytesWritten=(int)fileSystem.writeDirect(handle,address,buffer.position(),buffer.remaining());
+        completed=true;
+      }
+  finally {
+        end(completed);
+      }
+    }
+ else {
+      try {
+        begin();
+        bytesWritten=(int)fileSystem.write(handle,buffer.array(),buffer.arrayOffset() + buffer.position(),buffer.remaining());
+        completed=true;
+      }
+  finally {
+        end(completed);
+      }
+    }
+    if (bytesWritten > 0) {
+      buffer.position(buffer.position() + bytesWritten);
+    }
+  }
+  return bytesWritten;
+}

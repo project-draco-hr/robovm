@@ -1,0 +1,34 @@
+{
+  int mcPrecision=mc.getPrecision();
+  if (aproxPrecision() - mcPrecision <= 0 || mcPrecision == 0) {
+    return;
+  }
+  int discardedPrecision=precision() - mcPrecision;
+  if ((discardedPrecision <= 0)) {
+    return;
+  }
+  if (this.bitLength < 64) {
+    smallRound(mc,discardedPrecision);
+    return;
+  }
+  BigInteger sizeOfFraction=Multiplication.powerOf10(discardedPrecision);
+  BigInteger[] integerAndFraction=getUnscaledValue().divideAndRemainder(sizeOfFraction);
+  long newScale=(long)scale - discardedPrecision;
+  int compRem;
+  BigDecimal tempBD;
+  if (integerAndFraction[1].signum() != 0) {
+    compRem=(integerAndFraction[1].abs().shiftLeftOneBit().compareTo(sizeOfFraction));
+    compRem=roundingBehavior(integerAndFraction[0].testBit(0) ? 1 : 0,integerAndFraction[1].signum() * (5 + compRem),mc.getRoundingMode());
+    if (compRem != 0) {
+      integerAndFraction[0]=integerAndFraction[0].add(BigInteger.valueOf(compRem));
+    }
+    tempBD=new BigDecimal(integerAndFraction[0]);
+    if (tempBD.precision() > mcPrecision) {
+      integerAndFraction[0]=integerAndFraction[0].divide(BigInteger.TEN);
+      newScale--;
+    }
+  }
+  scale=toIntScale(newScale);
+  precision=mcPrecision;
+  setUnscaledValue(integerAndFraction[0]);
+}

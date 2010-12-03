@@ -1,0 +1,9 @@
+{
+  long id=Thread.currentThread().getId();
+  int hash=(((int)(id ^ (id >>> 32))) ^ 0x811c9dc5) * 0x01000193;
+  int m=max.get();
+  int nbits=(((0xfffffc00 >> m) & 4) | ((0x000001f8 >>> m) & 2) | ((0xffff00f2 >>> m) & 1));
+  int index;
+  while ((index=hash & ((1 << nbits) - 1)) > m)   hash=(hash >>> nbits) | (hash << (33 - nbits));
+  return index;
+}

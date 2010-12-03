@@ -1,0 +1,26 @@
+{
+  if (checkName && threadName == null) {
+    throw new NullPointerException();
+  }
+synchronized (Thread.class) {
+    this.id=++counter;
+    if (threadName == null) {
+      threadName="Thread-" + this.id;
+    }
+  }
+  Thread currentThread=Thread.currentThread();
+  if (group == null) {
+    group=currentThread.threadGroup;
+  }
+  if (group.isDestroyed()) {
+    throw new IllegalThreadStateException("Group already destroyed");
+  }
+  this.name=threadName;
+  this.threadGroup=group;
+  this.target=runnable;
+  this.priority=currentThread.getPriority();
+  this.contextClassLoader=currentThread.contextClassLoader;
+  if (currentThread.inheritableValues != null) {
+    this.inheritableValues=new ThreadLocal.Values(currentThread.inheritableValues);
+  }
+}

@@ -1,0 +1,20 @@
+{
+  this.m=m;
+  if (this.m <= 0) {
+    throw new IllegalArgumentException(Messages.getString("security.75"));
+  }
+  this.rp=rp;
+  if (this.rp == null) {
+    throw new NullPointerException(Messages.getString("security.76"));
+  }
+  int rp_bc=this.rp.bitCount();
+  if ((this.rp.bitLength() != (m + 1)) || (rp_bc != TPB_LEN && rp_bc != PPB_LEN) || (!this.rp.testBit(0) || !this.rp.testBit(m))) {
+    throw new IllegalArgumentException(Messages.getString("security.77"));
+  }
+  ks=new int[rp_bc - 2];
+  BigInteger rpTmp=rp.clearBit(0);
+  for (int i=ks.length - 1; i >= 0; i--) {
+    ks[i]=rpTmp.getLowestSetBit();
+    rpTmp=rpTmp.clearBit(ks[i]);
+  }
+}

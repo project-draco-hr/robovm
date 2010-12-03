@@ -1,0 +1,19 @@
+{
+  if (!input.hasRemaining()) {
+    return;
+  }
+  byte[] tmp;
+  if (input.hasArray()) {
+    tmp=input.array();
+    int offset=input.arrayOffset();
+    int position=input.position();
+    int limit=input.limit();
+    engineUpdate(tmp,offset + position,limit - position);
+    input.position(limit);
+  }
+ else {
+    tmp=new byte[input.limit() - input.position()];
+    input.get(tmp);
+    engineUpdate(tmp,0,tmp.length);
+  }
+}

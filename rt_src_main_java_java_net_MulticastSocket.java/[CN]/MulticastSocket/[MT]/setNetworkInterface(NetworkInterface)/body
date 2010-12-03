@@ -1,0 +1,47 @@
+{
+  checkClosedAndBind(false);
+  if (netInterface == null) {
+    throw new SocketException(Messages.getString("luni.6B"));
+  }
+  InetAddress firstAddress=netInterface.getFirstAddress();
+  if (firstAddress == null) {
+    throw new SocketException(Messages.getString("luni.67"));
+  }
+  if (netInterface.getIndex() == NetworkInterface.UNSET_INTERFACE_INDEX) {
+    impl.setOption(SocketOptions.IP_MULTICAST_IF,InetAddress.ANY);
+    try {
+      impl.setOption(SocketOptions.IP_MULTICAST_IF2,Integer.valueOf(NetworkInterface.NO_INTERFACE_INDEX));
+    }
+ catch (    SocketException e) {
+    }
+  }
+  Enumeration<InetAddress> theAddresses=netInterface.getInetAddresses();
+  boolean found=false;
+  firstAddress=null;
+  while ((theAddresses.hasMoreElements()) && (found != true)) {
+    InetAddress theAddress=theAddresses.nextElement();
+    if (theAddress instanceof Inet4Address) {
+      firstAddress=theAddress;
+      found=true;
+    }
+  }
+  if (netInterface.getIndex() == NetworkInterface.NO_INTERFACE_INDEX) {
+    if (firstAddress != null) {
+      impl.setOption(SocketOptions.IP_MULTICAST_IF,firstAddress);
+    }
+ else {
+      throw new SocketException(Messages.getString("luni.67"));
+    }
+  }
+ else {
+    if (firstAddress != null) {
+      impl.setOption(SocketOptions.IP_MULTICAST_IF,firstAddress);
+    }
+    try {
+      impl.setOption(SocketOptions.IP_MULTICAST_IF2,Integer.valueOf(netInterface.getIndex()));
+    }
+ catch (    SocketException e) {
+    }
+  }
+  interfaceSet=null;
+}

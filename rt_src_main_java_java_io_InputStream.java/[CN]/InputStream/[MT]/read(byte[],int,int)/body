@@ -1,0 +1,24 @@
+{
+  if (offset > b.length || offset < 0) {
+    throw new ArrayIndexOutOfBoundsException(Messages.getString("luni.12",offset));
+  }
+  if (length < 0 || length > b.length - offset) {
+    throw new ArrayIndexOutOfBoundsException(Messages.getString("luni.18",length));
+  }
+  for (int i=0; i < length; i++) {
+    int c;
+    try {
+      if ((c=read()) == -1) {
+        return i == 0 ? -1 : i;
+      }
+    }
+ catch (    IOException e) {
+      if (i != 0) {
+        return i;
+      }
+      throw e;
+    }
+    b[offset + i]=(byte)c;
+  }
+  return length;
+}

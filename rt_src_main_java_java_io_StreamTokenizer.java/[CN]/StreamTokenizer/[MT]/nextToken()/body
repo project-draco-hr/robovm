@@ -1,0 +1,201 @@
+{
+  if (pushBackToken) {
+    pushBackToken=false;
+    if (ttype != TT_UNKNOWN) {
+      return ttype;
+    }
+  }
+  sval=null;
+  int currentChar=peekChar == -2 ? read() : peekChar;
+  if (lastCr && currentChar == '\n') {
+    lastCr=false;
+    currentChar=read();
+  }
+  if (currentChar == -1) {
+    return (ttype=TT_EOF);
+  }
+  byte currentType=currentChar > 255 ? TOKEN_WORD : tokenTypes[currentChar];
+  while ((currentType & TOKEN_WHITE) != 0) {
+    if (currentChar == '\r') {
+      lineNumber++;
+      if (isEOLSignificant) {
+        lastCr=true;
+        peekChar=-2;
+        return (ttype=TT_EOL);
+      }
+      if ((currentChar=read()) == '\n') {
+        currentChar=read();
+      }
+    }
+ else     if (currentChar == '\n') {
+      lineNumber++;
+      if (isEOLSignificant) {
+        peekChar=-2;
+        return (ttype=TT_EOL);
+      }
+      currentChar=read();
+    }
+ else {
+      currentChar=read();
+    }
+    if (currentChar == -1) {
+      return (ttype=TT_EOF);
+    }
+    currentType=currentChar > 255 ? TOKEN_WORD : tokenTypes[currentChar];
+  }
+  if ((currentType & TOKEN_DIGIT) != 0) {
+    StringBuilder digits=new StringBuilder(20);
+    boolean haveDecimal=false, checkJustNegative=currentChar == '-';
+    while (true) {
+      if (currentChar == '.') {
+        haveDecimal=true;
+      }
+      digits.append((char)currentChar);
+      currentChar=read();
+      if ((currentChar < '0' || currentChar > '9') && (haveDecimal || currentChar != '.')) {
+        break;
+      }
+    }
+    peekChar=currentChar;
+    if (checkJustNegative && digits.length() == 1) {
+      return (ttype='-');
+    }
+    try {
+      nval=Double.valueOf(digits.toString()).doubleValue();
+    }
+ catch (    NumberFormatException e) {
+      nval=0;
+    }
+    return (ttype=TT_NUMBER);
+  }
+  if ((currentType & TOKEN_WORD) != 0) {
+    StringBuilder word=new StringBuilder(20);
+    while (true) {
+      word.append((char)currentChar);
+      currentChar=read();
+      if (currentChar == -1 || (currentChar < 256 && (tokenTypes[currentChar] & (TOKEN_WORD | TOKEN_DIGIT)) == 0)) {
+        break;
+      }
+    }
+    peekChar=currentChar;
+    sval=forceLowercase ? word.toString().toLowerCase() : word.toString();
+    return (ttype=TT_WORD);
+  }
+  if (currentType == TOKEN_QUOTE) {
+    int matchQuote=currentChar;
+    StringBuilder quoteString=new StringBuilder();
+    int peekOne=read();
+    while (peekOne >= 0 && peekOne != matchQuote && peekOne != '\r' && peekOne != '\n') {
+      boolean readPeek=true;
+      if (peekOne == '\\') {
+        int c1=read();
+        if (c1 <= '7' && c1 >= '0') {
+          int digitValue=c1 - '0';
+          c1=read();
+          if (c1 > '7' || c1 < '0') {
+            readPeek=false;
+          }
+ else {
+            digitValue=digitValue * 8 + (c1 - '0');
+            c1=read();
+            if (digitValue > 037 || c1 > '7' || c1 < '0') {
+              readPeek=false;
+            }
+ else {
+              digitValue=digitValue * 8 + (c1 - '0');
+            }
+          }
+          if (!readPeek) {
+            quoteString.append((char)digitValue);
+            peekOne=c1;
+          }
+ else {
+            peekOne=digitValue;
+          }
+        }
+ else {
+switch (c1) {
+case 'a':
+            peekOne=0x7;
+          break;
+case 'b':
+        peekOne=0x8;
+      break;
+case 'f':
+    peekOne=0xc;
+  break;
+case 'n':
+peekOne=0xA;
+break;
+case 'r':
+peekOne=0xD;
+break;
+case 't':
+peekOne=0x9;
+break;
+case 'v':
+peekOne=0xB;
+break;
+default :
+peekOne=c1;
+}
+}
+}
+if (readPeek) {
+quoteString.append((char)peekOne);
+peekOne=read();
+}
+}
+if (peekOne == matchQuote) {
+peekOne=read();
+}
+peekChar=peekOne;
+ttype=matchQuote;
+sval=quoteString.toString();
+return ttype;
+}
+if (currentChar == '/' && (slashSlashComments || slashStarComments)) {
+if ((currentChar=read()) == '*' && slashStarComments) {
+int peekOne=read();
+while (true) {
+currentChar=peekOne;
+peekOne=read();
+if (currentChar == -1) {
+peekChar=-1;
+return (ttype=TT_EOF);
+}
+if (currentChar == '\r') {
+if (peekOne == '\n') {
+peekOne=read();
+}
+lineNumber++;
+}
+ else if (currentChar == '\n') {
+lineNumber++;
+}
+ else if (currentChar == '*' && peekOne == '/') {
+peekChar=read();
+return nextToken();
+}
+}
+}
+ else if (currentChar == '/' && slashSlashComments) {
+while ((currentChar=read()) >= 0 && currentChar != '\r' && currentChar != '\n') {
+}
+peekChar=currentChar;
+return nextToken();
+}
+ else if (currentType != TOKEN_COMMENT) {
+peekChar=currentChar;
+return (ttype='/');
+}
+}
+if (currentType == TOKEN_COMMENT) {
+while ((currentChar=read()) >= 0 && currentChar != '\r' && currentChar != '\n') {
+}
+peekChar=currentChar;
+return nextToken();
+}
+peekChar=read();
+return (ttype=currentChar);
+}

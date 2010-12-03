@@ -1,0 +1,27 @@
+{
+  if (AlgNameMapper.isOID(this.algName)) {
+    this.oid=AlgNameMapper.normalize(this.algName);
+    this.algName=AlgNameMapper.map2AlgName(this.oid);
+    if (this.algName == null) {
+      this.algName=this.oid;
+    }
+  }
+ else {
+    String stdName=AlgNameMapper.getStandardName(this.algName);
+    this.oid=AlgNameMapper.map2OID(this.algName);
+    if (this.oid == null) {
+      if (stdName == null) {
+        return false;
+      }
+      this.oid=AlgNameMapper.map2OID(stdName);
+      if (this.oid == null) {
+        return false;
+      }
+      this.algName=stdName;
+    }
+ else     if (stdName != null) {
+      this.algName=stdName;
+    }
+  }
+  return true;
+}

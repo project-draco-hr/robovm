@@ -1,0 +1,34 @@
+{
+  if (this == object) {
+    return true;
+  }
+  if (object instanceof Map) {
+    Map<?,?> map=(Map<?,?>)object;
+    if (size() != map.size()) {
+      return false;
+    }
+    try {
+      for (      Entry<K,V> entry : entrySet()) {
+        K key=entry.getKey();
+        V mine=entry.getValue();
+        Object theirs=map.get(key);
+        if (mine == null) {
+          if (theirs != null || !map.containsKey(key)) {
+            return false;
+          }
+        }
+ else         if (!mine.equals(theirs)) {
+          return false;
+        }
+      }
+    }
+ catch (    NullPointerException ignored) {
+      return false;
+    }
+catch (    ClassCastException ignored) {
+      return false;
+    }
+    return true;
+  }
+  return false;
+}

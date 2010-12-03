@@ -1,0 +1,43 @@
+{
+  if (object == null && mustResolve) {
+    throw new NotActiveException();
+  }
+  ArrayList<ObjectStreamClass> streamClassList=new ArrayList<ObjectStreamClass>(32);
+  ObjectStreamClass nextStreamClass=classDesc;
+  while (nextStreamClass != null) {
+    streamClassList.add(0,nextStreamClass);
+    nextStreamClass=nextStreamClass.getSuperclass();
+  }
+  if (object == null) {
+    Iterator<ObjectStreamClass> streamIt=streamClassList.iterator();
+    while (streamIt.hasNext()) {
+      ObjectStreamClass streamClass=streamIt.next();
+      readObjectForClass(null,streamClass);
+    }
+  }
+ else {
+    ArrayList<Class<?>> classList=new ArrayList<Class<?>>(32);
+    Class<?> nextClass=object.getClass();
+    while (nextClass != null) {
+      Class<?> testClass=nextClass.getSuperclass();
+      if (testClass != null) {
+        classList.add(0,nextClass);
+      }
+      nextClass=testClass;
+    }
+    int lastIndex=0;
+    for (int i=0; i < classList.size(); i++) {
+      Class<?> superclass=classList.get(i);
+      int index=findStreamSuperclass(superclass,streamClassList,lastIndex);
+      if (index == -1) {
+        readObjectNoData(object,superclass,ObjectStreamClass.lookupStreamClass(superclass));
+      }
+ else {
+        for (int j=lastIndex; j <= index; j++) {
+          readObjectForClass(object,streamClassList.get(j));
+        }
+        lastIndex=index + 1;
+      }
+    }
+  }
+}

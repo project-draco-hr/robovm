@@ -1,0 +1,63 @@
+{
+  String signatureFile=certFile.substring(0,certFile.lastIndexOf('.')) + ".SF";
+  byte[] sfBytes=metaEntries.get(signatureFile);
+  if (sfBytes == null) {
+    return;
+  }
+  byte[] manifest=metaEntries.get(JarFile.MANIFEST_NAME);
+  if (manifest == null) {
+    return;
+  }
+  byte[] sBlockBytes=metaEntries.get(certFile);
+  try {
+    Certificate[] signerCertChain=JarUtils.verifySignature(new ByteArrayInputStream(sfBytes),new ByteArrayInputStream(sBlockBytes));
+    if (null == metaEntries) {
+      return;
+    }
+    if (signerCertChain != null) {
+      certificates.put(signatureFile,signerCertChain);
+    }
+  }
+ catch (  IOException e) {
+    return;
+  }
+catch (  GeneralSecurityException e) {
+    throw new SecurityException(Messages.getString("archive.31",jarName,signatureFile));
+  }
+  Attributes attributes=new Attributes();
+  HashMap<String,Attributes> entries=new HashMap<String,Attributes>();
+  try {
+    InitManifest im=new InitManifest(sfBytes,attributes,Attributes.Name.SIGNATURE_VERSION);
+    im.initEntries(entries,null);
+  }
+ catch (  IOException e) {
+    return;
+  }
+  boolean createdBySigntool=false;
+  String createdBy=attributes.getValue("Created-By");
+  if (createdBy != null) {
+    createdBySigntool=createdBy.indexOf("signtool") != -1;
+  }
+  if (mainAttributesEnd > 0 && !createdBySigntool) {
+    String digestAttribute="-Digest-Manifest-Main-Attributes";
+    if (!verify(attributes,digestAttribute,manifest,0,mainAttributesEnd,false,true)) {
+      throw new SecurityException(Messages.getString("archive.31",jarName,signatureFile));
+    }
+  }
+  String digestAttribute=createdBySigntool ? "-Digest" : "-Digest-Manifest";
+  if (!verify(attributes,digestAttribute,manifest,0,manifest.length,false,false)) {
+    Iterator<Map.Entry<String,Attributes>> it=entries.entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry<String,Attributes> entry=it.next();
+      Manifest.Chunk chunk=man.getChunk(entry.getKey());
+      if (chunk == null) {
+        return;
+      }
+      if (!verify(entry.getValue(),"-Digest",manifest,chunk.start,chunk.end,createdBySigntool,false)) {
+        throw new SecurityException(Messages.getString("archive.32",new Object[]{signatureFile,entry.getKey(),jarName}));
+      }
+    }
+  }
+  metaEntries.put(signatureFile,null);
+  signatures.put(signatureFile,entries);
+}

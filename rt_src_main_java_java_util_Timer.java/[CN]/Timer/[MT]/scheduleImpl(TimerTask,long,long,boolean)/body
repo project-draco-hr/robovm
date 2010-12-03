@@ -1,0 +1,23 @@
+{
+synchronized (impl) {
+    if (impl.cancelled) {
+      throw new IllegalStateException(Messages.getString("luni.41"));
+    }
+    long when=delay + System.currentTimeMillis();
+    if (when < 0) {
+      throw new IllegalArgumentException(Messages.getString("luni.42"));
+    }
+synchronized (task.lock) {
+      if (task.isScheduled()) {
+        throw new IllegalStateException(Messages.getString("luni.43"));
+      }
+      if (task.cancelled) {
+        throw new IllegalStateException(Messages.getString("luni.44"));
+      }
+      task.when=when;
+      task.period=period;
+      task.fixedRate=fixed;
+    }
+    impl.insertTask(task);
+  }
+}

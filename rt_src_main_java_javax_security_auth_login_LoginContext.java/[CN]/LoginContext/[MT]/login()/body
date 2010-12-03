@@ -1,0 +1,20 @@
+{
+  PrivilegedExceptionAction<Void> action=new PrivilegedExceptionAction<Void>(){
+    public Void run() throws LoginException {
+      loginImpl();
+      return null;
+    }
+  }
+;
+  try {
+    if (userProvidedConfig) {
+      AccessController.doPrivileged(action,userContext);
+    }
+ else {
+      AccessController.doPrivileged(action);
+    }
+  }
+ catch (  PrivilegedActionException ex) {
+    throw (LoginException)ex.getException();
+  }
+}

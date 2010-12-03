@@ -1,0 +1,35 @@
+{
+  super("DSA");
+  AlgorithmIdentifier ai;
+  ThreeIntegerSequence threeInts=null;
+  SubjectPublicKeyInfo subjectPublicKeyInfo=null;
+  byte encoding[]=keySpec.getEncoded();
+  String alg, algName;
+  try {
+    subjectPublicKeyInfo=(SubjectPublicKeyInfo)SubjectPublicKeyInfo.ASN1.decode(encoding);
+  }
+ catch (  IOException e) {
+    throw new InvalidKeySpecException(Messages.getString("security.19A",e));
+  }
+  try {
+    y=new BigInteger((byte[])ASN1Integer.getInstance().decode(subjectPublicKeyInfo.getSubjectPublicKey()));
+  }
+ catch (  IOException e) {
+    throw new InvalidKeySpecException(Messages.getString("security.19B",e));
+  }
+  ai=subjectPublicKeyInfo.getAlgorithmIdentifier();
+  try {
+    threeInts=(ThreeIntegerSequence)ThreeIntegerSequence.ASN1.decode(ai.getParameters());
+  }
+ catch (  IOException e) {
+    throw new InvalidKeySpecException(Messages.getString("security.19B",e));
+  }
+  p=new BigInteger(threeInts.p);
+  q=new BigInteger(threeInts.q);
+  g=new BigInteger(threeInts.g);
+  params=(DSAParams)(new DSAParameterSpec(p,q,g));
+  setEncoding(encoding);
+  alg=ai.getAlgorithm();
+  algName=AlgNameMapper.map2AlgName(alg);
+  setAlgorithm(algName == null ? alg : algName);
+}

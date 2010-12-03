@@ -1,0 +1,27 @@
+{
+  Class driverClass;
+  if (classLoader == null) {
+    driverClass=Class.forName(className);
+  }
+ else {
+    try {
+      driverClass=classLoader.loadClass(className);
+    }
+ catch (    ClassNotFoundException x) {
+      if (DO_FALLBACK) {
+        classLoader=NewInstance.class.getClassLoader();
+        if (classLoader != null) {
+          driverClass=classLoader.loadClass(className);
+        }
+ else {
+          driverClass=Class.forName(className);
+        }
+      }
+ else {
+        throw x;
+      }
+    }
+  }
+  Object instance=driverClass.newInstance();
+  return instance;
+}

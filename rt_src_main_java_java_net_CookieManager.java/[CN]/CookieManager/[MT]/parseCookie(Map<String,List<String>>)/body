@@ -1,0 +1,18 @@
+{
+  List<HttpCookie> cookies=new ArrayList<HttpCookie>();
+  for (  Map.Entry<String,List<String>> entry : responseHeaders.entrySet()) {
+    String key=entry.getKey();
+    if (key != null && (key.equalsIgnoreCase(VERSION_ZERO_HEADER) || key.equalsIgnoreCase(VERSION_ONE_HEADER))) {
+      for (      String cookieStr : entry.getValue()) {
+        try {
+          for (          HttpCookie cookie : HttpCookie.parse(cookieStr)) {
+            cookies.add(cookie);
+          }
+        }
+ catch (        IllegalArgumentException e) {
+        }
+      }
+    }
+  }
+  return cookies;
+}

@@ -1,0 +1,16 @@
+{
+  for (; ; ) {
+    int s=getState();
+    if (s == RAN)     return;
+    if (s == CANCELLED) {
+      releaseShared(0);
+      return;
+    }
+    if (compareAndSetState(s,RAN)) {
+      result=v;
+      releaseShared(0);
+      done();
+      return;
+    }
+  }
+}

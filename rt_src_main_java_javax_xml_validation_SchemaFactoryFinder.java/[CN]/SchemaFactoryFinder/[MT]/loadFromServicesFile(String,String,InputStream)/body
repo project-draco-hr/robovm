@@ -1,0 +1,48 @@
+{
+  if (debug)   debugPrintln("Reading " + resourceName);
+  BufferedReader rd;
+  try {
+    rd=new BufferedReader(new InputStreamReader(in,"UTF-8"),DEFAULT_LINE_LENGTH);
+  }
+ catch (  java.io.UnsupportedEncodingException e) {
+    rd=new BufferedReader(new InputStreamReader(in),DEFAULT_LINE_LENGTH);
+  }
+  String factoryClassName=null;
+  SchemaFactory resultFactory=null;
+  while (true) {
+    try {
+      factoryClassName=rd.readLine();
+    }
+ catch (    IOException x) {
+      break;
+    }
+    if (factoryClassName != null) {
+      int hashIndex=factoryClassName.indexOf('#');
+      if (hashIndex != -1) {
+        factoryClassName=factoryClassName.substring(0,hashIndex);
+      }
+      factoryClassName=factoryClassName.trim();
+      if (factoryClassName.length() == 0) {
+        continue;
+      }
+      try {
+        SchemaFactory foundFactory=(SchemaFactory)createInstance(factoryClassName);
+        if (foundFactory.isSchemaLanguageSupported(schemaLanguage)) {
+          resultFactory=foundFactory;
+          break;
+        }
+      }
+ catch (      Exception e) {
+      }
+    }
+ else {
+      break;
+    }
+  }
+  try {
+    rd.close();
+  }
+ catch (  IOException exc) {
+  }
+  return resultFactory;
+}

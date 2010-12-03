@@ -1,0 +1,23 @@
+{
+  if (offset + length > buffer.length) {
+    throw new ASN1Exception(Messages.getString("security.13B"));
+  }
+  if (in == null) {
+    offset+=length;
+  }
+ else {
+    int bytesRead=in.read(buffer,offset,length);
+    if (bytesRead != length) {
+      int c=bytesRead;
+      do {
+        if (c < 1 || bytesRead > length) {
+          throw new ASN1Exception(Messages.getString("security.13C"));
+        }
+        c=in.read(buffer,offset + bytesRead,length - bytesRead);
+        bytesRead+=c;
+      }
+ while (bytesRead != length);
+    }
+    offset+=length;
+  }
+}

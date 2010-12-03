@@ -1,0 +1,94 @@
+{
+  int codeAttributeOffset=contentsOffset;
+  int contentsLength=contents.length;
+  if (contentsOffset + 20 + 100 >= contentsLength) {
+    System.arraycopy(contents,0,(contents=new byte[contentsLength + INCREMENT_SIZE]),0,contentsLength);
+  }
+  writeUnsignedShort(constantPool.literalIndex(CodeName));
+  contentsOffset+=12;
+  int codeStartOffset=contentsOffset;
+  writeUnsignedByte(OPC_aload_0);
+  writeUnsignedByte(OPC_getfield);
+  if (ProxyHandlerField == null) {
+    try {
+      ProxyHandlerField=Proxy.class.getDeclaredField("h");
+    }
+ catch (    NoSuchFieldException e) {
+      throw new InternalError();
+    }
+  }
+  writeUnsignedShort(constantPool.literalIndex(ProxyHandlerField));
+  writeUnsignedByte(OPC_aload_0);
+  Method method=pMethod.method;
+  Class[] argTypes=method.getParameterTypes();
+  writeUnsignedByte(OPC_getstatic);
+  writeUnsignedShort(constantPool.literalIndex(typeName,getFieldNamebyMethodName(pMethod.method.getName(),index),Method.class));
+  int maxLocals=genInvokeArgs(argTypes);
+  writeUnsignedByte(OPC_invokeinterface);
+  if (HandlerInvokeMethod == null) {
+    try {
+      HandlerInvokeMethod=InvocationHandler.class.getMethod("invoke",new Class[]{Object.class,Method.class,Object[].class});
+    }
+ catch (    NoSuchMethodException e) {
+      throw new InternalError();
+    }
+  }
+  writeUnsignedShort(constantPool.literalIndex(HandlerInvokeMethod));
+  writeUnsignedByte(4);
+  writeUnsignedByte(0);
+  genCastReturnType(method.getReturnType());
+  int codeLength=contentsOffset - codeStartOffset;
+  Class[] checkedExceptions=pMethod.getCheckedExceptions();
+  int checkedLength=checkedExceptions.length;
+  if (checkedLength > 0) {
+    int codeEndIndex=contentsOffset - codeStartOffset;
+    writeUnsignedByte(OPC_athrow);
+    genStoreArg(maxLocals);
+    writeUnsignedByte(OPC_new);
+    writeUnsignedShort(constantPool.typeIndex("java/lang/reflect/UndeclaredThrowableException"));
+    writeUnsignedByte(OPC_dup);
+    genLoadArg(maxLocals);
+    maxLocals++;
+    writeUnsignedByte(OPC_invokespecial);
+    if (UndeclaredThrowableExceptionConstructor == null) {
+      try {
+        UndeclaredThrowableExceptionConstructor=UndeclaredThrowableException.class.getConstructor(new Class[]{Throwable.class});
+      }
+ catch (      NoSuchMethodException e) {
+        throw new InternalError();
+      }
+    }
+    writeUnsignedShort(constantPool.literalIndex(UndeclaredThrowableExceptionConstructor));
+    writeUnsignedByte(OPC_athrow);
+    codeLength=contentsOffset - codeStartOffset;
+    writeUnsignedShort(checkedLength + 1);
+    for (int i=0; i < checkedLength; i++) {
+      writeUnsignedShort(0);
+      writeUnsignedShort(codeEndIndex);
+      writeUnsignedShort(codeEndIndex);
+      writeUnsignedShort(constantPool.typeIndex(checkedExceptions[i].getName()));
+    }
+    writeUnsignedShort(0);
+    writeUnsignedShort(codeEndIndex);
+    writeUnsignedShort(codeEndIndex + 1);
+    writeUnsignedShort(constantPool.typeIndex("java/lang/Throwable"));
+  }
+ else {
+    writeUnsignedShort(0);
+  }
+  writeUnsignedShort(0);
+  int codeAttributeLength=contentsOffset - (codeAttributeOffset + 6);
+  contents[codeAttributeOffset + 2]=(byte)(codeAttributeLength >> 24);
+  contents[codeAttributeOffset + 3]=(byte)(codeAttributeLength >> 16);
+  contents[codeAttributeOffset + 4]=(byte)(codeAttributeLength >> 8);
+  contents[codeAttributeOffset + 5]=(byte)codeAttributeLength;
+  int maxStack=maxLocals + 10;
+  contents[codeAttributeOffset + 6]=(byte)(maxStack >> 8);
+  contents[codeAttributeOffset + 7]=(byte)maxStack;
+  contents[codeAttributeOffset + 8]=(byte)(maxLocals >> 8);
+  contents[codeAttributeOffset + 9]=(byte)maxLocals;
+  contents[codeAttributeOffset + 10]=(byte)(codeLength >> 24);
+  contents[codeAttributeOffset + 11]=(byte)(codeLength >> 16);
+  contents[codeAttributeOffset + 12]=(byte)(codeLength >> 8);
+  contents[codeAttributeOffset + 13]=(byte)codeLength;
+}

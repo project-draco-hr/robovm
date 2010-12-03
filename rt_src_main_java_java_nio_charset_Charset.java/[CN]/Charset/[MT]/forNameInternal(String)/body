@@ -1,0 +1,49 @@
+{
+  Charset cs=cachedCharsetTable.get(charsetName);
+  if (null != cs) {
+    return cs;
+  }
+  if (null == charsetName) {
+    throw new IllegalArgumentException();
+  }
+  checkCharsetName(charsetName);
+  if (_builtInProvider == null) {
+    _builtInProvider=new CharsetProviderImpl();
+  }
+  cs=_builtInProvider.charsetForName(charsetName);
+  if (null != cs) {
+    cacheCharset(cs,charsetName);
+    return cs;
+  }
+  ClassLoader contextClassLoader=getContextClassLoader();
+  Enumeration<URL> e=null;
+  try {
+    if (null != contextClassLoader) {
+      e=contextClassLoader.getResources(PROVIDER_CONFIGURATION_FILE_NAME);
+    }
+ else {
+      getSystemClassLoader();
+      if (systemClassLoader == null) {
+        e=new Vector<URL>().elements();
+      }
+ else {
+        e=systemClassLoader.getResources(PROVIDER_CONFIGURATION_FILE_NAME);
+      }
+    }
+    while (e.hasMoreElements()) {
+      inForNameInternal=true;
+      cs=searchConfiguredCharsets(charsetName,contextClassLoader,e.nextElement());
+      inForNameInternal=false;
+      if (null != cs) {
+        cacheCharset(cs,charsetName);
+        return cs;
+      }
+    }
+  }
+ catch (  IOException ex) {
+  }
+ finally {
+    inForNameInternal=false;
+  }
+  return null;
+}

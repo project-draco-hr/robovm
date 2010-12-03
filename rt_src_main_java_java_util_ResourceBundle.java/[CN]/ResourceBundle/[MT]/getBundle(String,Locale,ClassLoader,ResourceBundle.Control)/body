@@ -1,0 +1,32 @@
+{
+  boolean expired=false;
+  String bundleName=control.toBundleName(baseName,targetLocale);
+  Object cacheKey=loader != null ? (Object)loader : (Object)"null";
+  Hashtable<String,ResourceBundle> loaderCache;
+synchronized (cache) {
+    loaderCache=cache.get(cacheKey);
+    if (loaderCache == null) {
+      loaderCache=new Hashtable<String,ResourceBundle>();
+      cache.put(cacheKey,loaderCache);
+    }
+  }
+  ResourceBundle result=loaderCache.get(bundleName);
+  if (result != null) {
+    long time=control.getTimeToLive(baseName,targetLocale);
+    if (time == 0 || time == Control.TTL_NO_EXPIRATION_CONTROL || time + result.lastLoadTime < System.currentTimeMillis()) {
+      if (MISSING == result) {
+        throw new MissingResourceException(null,bundleName + '_' + targetLocale,EMPTY_STRING);
+      }
+      return result;
+    }
+    expired=true;
+  }
+  ResourceBundle ret=processGetBundle(baseName,targetLocale,loader,control,expired,result);
+  if (null != ret) {
+    loaderCache.put(bundleName,ret);
+    ret.lastLoadTime=System.currentTimeMillis();
+    return ret;
+  }
+  loaderCache.put(bundleName,MISSING);
+  throw new MissingResourceException(null,bundleName + '_' + targetLocale,EMPTY_STRING);
+}

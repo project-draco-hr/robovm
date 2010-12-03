@@ -1,0 +1,33 @@
+{
+  HeadIndex<K,V> h=head;
+  int max=h.level;
+  if (level <= max) {
+    Index<K,V> idx=null;
+    for (int i=1; i <= level; ++i)     idx=new Index<K,V>(z,idx,null);
+    addIndex(idx,h,level);
+  }
+ else {
+    level=max + 1;
+    Index<K,V>[] idxs=(Index<K,V>[])new Index[level + 1];
+    Index<K,V> idx=null;
+    for (int i=1; i <= level; ++i)     idxs[i]=idx=new Index<K,V>(z,idx,null);
+    HeadIndex<K,V> oldh;
+    int k;
+    for (; ; ) {
+      oldh=head;
+      int oldLevel=oldh.level;
+      if (level <= oldLevel) {
+        k=level;
+        break;
+      }
+      HeadIndex<K,V> newh=oldh;
+      Node<K,V> oldbase=oldh.node;
+      for (int j=oldLevel + 1; j <= level; ++j)       newh=new HeadIndex<K,V>(oldbase,newh,idxs[j],j);
+      if (casHead(oldh,newh)) {
+        k=oldLevel;
+        break;
+      }
+    }
+    addIndex(idxs[k],oldh,k);
+  }
+}

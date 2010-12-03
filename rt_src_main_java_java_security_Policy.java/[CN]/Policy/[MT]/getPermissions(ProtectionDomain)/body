@@ -1,0 +1,24 @@
+{
+  Permissions permissions=new Permissions();
+  if (domain != null) {
+    try {
+      PermissionCollection cds=getPermissions(domain.getCodeSource());
+      if (cds != Policy.UNSUPPORTED_EMPTY_COLLECTION) {
+        Enumeration<Permission> elements=cds.elements();
+        while (elements.hasMoreElements()) {
+          permissions.add(elements.nextElement());
+        }
+      }
+    }
+ catch (    NullPointerException e) {
+    }
+    PermissionCollection pds=domain.getPermissions();
+    if (pds != null) {
+      Enumeration<Permission> pdElements=pds.elements();
+      while (pdElements.hasMoreElements()) {
+        permissions.add(pdElements.nextElement());
+      }
+    }
+  }
+  return permissions;
+}

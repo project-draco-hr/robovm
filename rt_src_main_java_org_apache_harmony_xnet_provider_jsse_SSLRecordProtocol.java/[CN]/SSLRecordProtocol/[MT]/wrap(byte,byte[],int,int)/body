@@ -1,0 +1,21 @@
+{
+  if (logger != null) {
+    logger.println("SSLRecordProtocol.wrap: TLSPlaintext.fragment[" + len + "]:");
+    logger.print(fragment,offset,len);
+  }
+  if (len > MAX_DATA_LENGTH) {
+    throw new AlertException(AlertProtocol.INTERNAL_ERROR,new SSLProtocolException("The provided chunk of data is too big: " + len + " > MAX_DATA_LENGTH == "+ MAX_DATA_LENGTH));
+  }
+  byte[] ciphered_fragment=fragment;
+  if (activeWriteState != null) {
+    ciphered_fragment=activeWriteState.encrypt(content_type,fragment,offset,len);
+    if (ciphered_fragment.length > MAX_CIPHERED_DATA_LENGTH) {
+      throw new AlertException(AlertProtocol.INTERNAL_ERROR,new SSLProtocolException("The ciphered data increased more than on 1024 bytes"));
+    }
+    if (logger != null) {
+      logger.println("SSLRecordProtocol.wrap: TLSCiphertext.fragment[" + ciphered_fragment.length + "]:");
+      logger.print(ciphered_fragment);
+    }
+  }
+  return packetize(content_type,version,ciphered_fragment);
+}

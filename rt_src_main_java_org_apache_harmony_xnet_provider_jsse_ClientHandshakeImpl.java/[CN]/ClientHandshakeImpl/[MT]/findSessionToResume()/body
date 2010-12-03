@@ -1,0 +1,26 @@
+{
+  String host;
+  int port;
+  if (engineOwner != null) {
+    host=engineOwner.getPeerHost();
+    port=engineOwner.getPeerPort();
+  }
+ else {
+    host=socketOwner.getInetAddress().getHostName();
+    port=socketOwner.getPort();
+  }
+  if (host == null || port == -1) {
+    return null;
+  }
+  byte[] id;
+  SSLSession ses;
+  SSLSessionContext context=parameters.getClientSessionContext();
+  for (Enumeration<?> en=context.getIds(); en.hasMoreElements(); ) {
+    id=(byte[])en.nextElement();
+    ses=context.getSession(id);
+    if (host.equals(ses.getPeerHost()) && port == ses.getPeerPort()) {
+      return (SSLSessionImpl)((SSLSessionImpl)ses).clone();
+    }
+  }
+  return null;
+}

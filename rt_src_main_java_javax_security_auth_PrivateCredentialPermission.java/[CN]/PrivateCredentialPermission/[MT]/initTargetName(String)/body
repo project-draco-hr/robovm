@@ -1,0 +1,49 @@
+{
+  if (name == null) {
+    throw new NullPointerException(Messages.getString("auth.0E"));
+  }
+  name=name.trim();
+  if (name.length() == 0) {
+    throw new IllegalArgumentException(Messages.getString("auth.0F"));
+  }
+  int beg=name.indexOf(' ');
+  if (beg == -1) {
+    throw new IllegalArgumentException(Messages.getString("auth.10"));
+  }
+  credentialClass=name.substring(0,beg);
+  beg++;
+  int count=0;
+  int nameLength=name.length();
+  for (int i, j=0; beg < nameLength; beg=j + 2, count++) {
+    i=name.indexOf(' ',beg);
+    j=name.indexOf('"',i + 2);
+    if (i == -1 || j == -1 || name.charAt(i + 1) != '"') {
+      throw new IllegalArgumentException(Messages.getString("auth.10"));
+    }
+  }
+  if (count < 1) {
+    throw new IllegalArgumentException(Messages.getString("auth.10"));
+  }
+  beg=name.indexOf(' ');
+  beg++;
+  String principalClass;
+  String principalName;
+  set=new CredOwner[count];
+  for (int index=0, i, j; index < count; beg=j + 2, index++) {
+    i=name.indexOf(' ',beg);
+    j=name.indexOf('"',i + 2);
+    principalClass=name.substring(beg,i);
+    principalName=name.substring(i + 2,j);
+    CredOwner element=new CredOwner(principalClass,principalName);
+    boolean found=false;
+    for (int ii=0; ii < offset; ii++) {
+      if (set[ii].equals(element)) {
+        found=true;
+        break;
+      }
+    }
+    if (!found) {
+      set[offset++]=element;
+    }
+  }
+}

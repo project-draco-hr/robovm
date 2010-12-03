@@ -1,0 +1,18 @@
+{
+  if (!namespaces) {
+    if (contentHandler != null) {
+      contentHandler.endElement("","",qName.intern());
+    }
+    return;
+  }
+  String names[]=processName(qName,false,false);
+  if (contentHandler != null) {
+    contentHandler.endElement(names[0],names[1],names[2]);
+    Enumeration prefixes=nsSupport.getDeclaredPrefixes();
+    while (prefixes.hasMoreElements()) {
+      String prefix=(String)prefixes.nextElement();
+      contentHandler.endPrefixMapping(prefix);
+    }
+  }
+  nsSupport.popContext();
+}

@@ -1,0 +1,20 @@
+{
+  if (localAddr != null) {
+    if (!(localAddr instanceof InetSocketAddress)) {
+      throw new IllegalArgumentException(Messages.getString("luni.49",localAddr.getClass()));
+    }
+    checkListen(((InetSocketAddress)localAddr).getPort());
+  }
+  impl=factory != null ? factory.createDatagramSocketImpl() : new PlainDatagramSocketImpl();
+  impl.create();
+  if (localAddr != null) {
+    try {
+      bind(localAddr);
+    }
+ catch (    SocketException e) {
+      close();
+      throw e;
+    }
+  }
+  setBroadcast(true);
+}

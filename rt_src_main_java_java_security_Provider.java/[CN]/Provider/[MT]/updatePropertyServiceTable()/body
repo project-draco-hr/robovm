@@ -1,0 +1,115 @@
+{
+  Object _key;
+  Object _value;
+  Provider.Service s;
+  String serviceName;
+  String algorithm;
+  if (changedProperties == null || changedProperties.isEmpty()) {
+    return;
+  }
+  for (Iterator<Map.Entry<Object,Object>> it=changedProperties.entrySet().iterator(); it.hasNext(); ) {
+    Map.Entry<Object,Object> entry=it.next();
+    _key=entry.getKey();
+    _value=entry.getValue();
+    if (_key == null || _value == null || !(_key instanceof String) || !(_value instanceof String)) {
+      continue;
+    }
+    String key=(String)_key;
+    String value=(String)_value;
+    if (key.startsWith("Provider")) {
+      continue;
+    }
+    int i;
+    if (key.startsWith("Alg.Alias.")) {
+      String aliasName;
+      String service_alias=key.substring(10);
+      i=service_alias.indexOf('.');
+      serviceName=service_alias.substring(0,i);
+      aliasName=service_alias.substring(i + 1);
+      algorithm=value;
+      String algUp=algorithm.toUpperCase();
+      Object o=null;
+      if (propertyServiceTable == null) {
+        propertyServiceTable=new TwoKeyHashMap<String,String,Service>(128);
+      }
+ else {
+        o=propertyServiceTable.get(serviceName,algUp);
+      }
+      if (o != null) {
+        s=(Provider.Service)o;
+        s.aliases.add(aliasName);
+        if (propertyAliasTable == null) {
+          propertyAliasTable=new TwoKeyHashMap<String,String,Service>(256);
+        }
+        propertyAliasTable.put(serviceName,aliasName.toUpperCase(),s);
+      }
+ else {
+        String className=(String)changedProperties.get(serviceName + "." + algorithm);
+        if (className != null) {
+          List<String> l=new ArrayList<String>();
+          l.add(aliasName);
+          s=new Provider.Service(this,serviceName,algorithm,className,l,new HashMap<String,String>());
+          propertyServiceTable.put(serviceName,algUp,s);
+          if (propertyAliasTable == null) {
+            propertyAliasTable=new TwoKeyHashMap<String,String,Service>(256);
+          }
+          propertyAliasTable.put(serviceName,aliasName.toUpperCase(),s);
+        }
+      }
+      continue;
+    }
+    int j=key.indexOf('.');
+    if (j == -1) {
+      continue;
+    }
+    i=key.indexOf(' ');
+    if (i == -1) {
+      serviceName=key.substring(0,j);
+      algorithm=key.substring(j + 1);
+      String alg=algorithm.toUpperCase();
+      Object o=null;
+      if (propertyServiceTable != null) {
+        o=propertyServiceTable.get(serviceName,alg);
+      }
+      if (o != null) {
+        s=(Provider.Service)o;
+        s.className=value;
+      }
+ else {
+        s=new Provider.Service(this,serviceName,algorithm,value,new ArrayList<String>(),new HashMap<String,String>());
+        if (propertyServiceTable == null) {
+          propertyServiceTable=new TwoKeyHashMap<String,String,Service>(128);
+        }
+        propertyServiceTable.put(serviceName,alg,s);
+      }
+    }
+ else {
+      serviceName=key.substring(0,j);
+      algorithm=key.substring(j + 1,i);
+      String attribute=key.substring(i + 1);
+      String alg=algorithm.toUpperCase();
+      Object o=null;
+      if (propertyServiceTable != null) {
+        o=propertyServiceTable.get(serviceName,alg);
+      }
+      if (o != null) {
+        s=(Provider.Service)o;
+        s.attributes.put(attribute,value);
+      }
+ else {
+        String className=(String)changedProperties.get(serviceName + "." + algorithm);
+        if (className != null) {
+          Map<String,String> m=new HashMap<String,String>();
+          m.put(attribute,value);
+          s=new Provider.Service(this,serviceName,algorithm,className,new ArrayList<String>(),m);
+          if (propertyServiceTable == null) {
+            propertyServiceTable=new TwoKeyHashMap<String,String,Service>(128);
+          }
+          propertyServiceTable.put(serviceName,alg,s);
+        }
+      }
+    }
+  }
+  servicesChanged();
+  changedProperties.clear();
+}

@@ -1,0 +1,33 @@
+{
+synchronized (lock) {
+    if (data == null) {
+      throw new IOException(Messages.getString("luni.CF"));
+    }
+    if (lastReader != null && !lastReader.isAlive()) {
+      throw new IOException(Messages.getString("luni.CE"));
+    }
+    lastWriter=Thread.currentThread();
+    try {
+      while (data != null && out == in) {
+        lock.notifyAll();
+        wait(1000);
+        if (lastReader != null && !lastReader.isAlive()) {
+          throw new IOException(Messages.getString("luni.CE"));
+        }
+      }
+    }
+ catch (    InterruptedException e) {
+      throw new InterruptedIOException();
+    }
+    if (data != null) {
+      if (in == -1) {
+        in=0;
+      }
+      data[in++]=oneChar;
+      if (in == data.length) {
+        in=0;
+      }
+      return;
+    }
+  }
+}

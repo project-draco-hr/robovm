@@ -1,0 +1,39 @@
+{
+  super();
+  int options=0;
+  fd=new FileDescriptor();
+  if (mode.equals("r")) {
+    isReadOnly=true;
+    fd.readOnly=true;
+    options=IFileSystem.O_RDONLY;
+  }
+ else   if (mode.equals("rw") || mode.equals("rws") || mode.equals("rwd")) {
+    isReadOnly=false;
+    options=IFileSystem.O_RDWR;
+    if (mode.equals("rws")) {
+      syncMetadata=true;
+    }
+ else     if (mode.equals("rwd")) {
+      options=IFileSystem.O_RDWRSYNC;
+    }
+  }
+ else {
+    throw new IllegalArgumentException(Messages.getString("luni.A2"));
+  }
+  SecurityManager security=System.getSecurityManager();
+  if (security != null) {
+    security.checkRead(file.getPath());
+    if (!isReadOnly) {
+      security.checkWrite(file.getPath());
+    }
+  }
+  fd.descriptor=fileSystem.open(file.properPath(true),options);
+  channel=FileChannelFactory.getFileChannel(this,fd.descriptor,options);
+  if (syncMetadata) {
+    try {
+      fd.sync();
+    }
+ catch (    IOException e) {
+    }
+  }
+}

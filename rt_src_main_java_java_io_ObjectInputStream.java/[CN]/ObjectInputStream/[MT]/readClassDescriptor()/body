@@ -1,0 +1,14 @@
+{
+  ObjectStreamClass newClassDesc=new ObjectStreamClass();
+  String name=input.readUTF();
+  if (name.length() == 0) {
+    throw new IOException(Messages.getString("luni.07"));
+  }
+  newClassDesc.setName(name);
+  newClassDesc.setSerialVersionUID(input.readLong());
+  newClassDesc.setFlags(input.readByte());
+  descriptorHandle=(null == descriptorHandle ? nextHandle() : descriptorHandle);
+  registerObjectRead(newClassDesc,descriptorHandle,false);
+  readFieldDescriptors(newClassDesc);
+  return newClassDesc;
+}

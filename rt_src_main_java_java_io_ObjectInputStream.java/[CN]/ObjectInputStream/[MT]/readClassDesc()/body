@@ -1,0 +1,20 @@
+{
+  byte tc=nextTC();
+switch (tc) {
+case TC_CLASSDESC:
+    return readNewClassDesc(false);
+case TC_PROXYCLASSDESC:
+  Class<?> proxyClass=readNewProxyClassDesc();
+ObjectStreamClass streamClass=ObjectStreamClass.lookup(proxyClass);
+streamClass.setLoadFields(new ObjectStreamField[0]);
+registerObjectRead(streamClass,nextHandle(),false);
+checkedSetSuperClassDesc(streamClass,readClassDesc());
+return streamClass;
+case TC_REFERENCE:
+return (ObjectStreamClass)readCyclicReference();
+case TC_NULL:
+return null;
+default :
+throw new StreamCorruptedException(Messages.getString("luni.BC",Integer.toHexString(tc & 0xff)));
+}
+}

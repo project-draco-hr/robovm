@@ -1,0 +1,37 @@
+{
+  List<Object> list=(List<Object>)lst;
+  int size=list.size();
+  if (size == 0) {
+    return;
+  }
+  int normdist;
+  if (dist > 0) {
+    normdist=dist % size;
+  }
+ else {
+    normdist=size - ((dist % size) * (-1));
+  }
+  if (normdist == 0 || normdist == size) {
+    return;
+  }
+  if (list instanceof RandomAccess) {
+    Object temp=list.get(0);
+    int index=0, beginIndex=0;
+    for (int i=0; i < size; i++) {
+      index=(index + normdist) % size;
+      temp=list.set(index,temp);
+      if (index == beginIndex) {
+        index=++beginIndex;
+        temp=list.get(beginIndex);
+      }
+    }
+  }
+ else {
+    int divideIndex=(size - normdist) % size;
+    List<Object> sublist1=list.subList(0,divideIndex);
+    List<Object> sublist2=list.subList(divideIndex,size);
+    reverse(sublist1);
+    reverse(sublist2);
+    reverse(list);
+  }
+}

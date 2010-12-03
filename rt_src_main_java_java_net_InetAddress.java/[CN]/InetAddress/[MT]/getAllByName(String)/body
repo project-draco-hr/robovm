@@ -1,0 +1,57 @@
+{
+  if (host == null || 0 == host.length()) {
+    return new InetAddress[]{preferIPv6Addresses() ? Inet6Address.LOOPBACK : LOOPBACK};
+  }
+  if (isHostName(host)) {
+    SecurityManager security=System.getSecurityManager();
+    if (security != null) {
+      security.checkConnect(host,-1);
+    }
+    if (Socket.preferIPv4Stack()) {
+      return getAliasesByNameImpl(host);
+    }
+    InetAddress[] returnedAddresses=getAliasesByNameImpl(host);
+    InetAddress[] orderedAddresses=null;
+    if (returnedAddresses != null) {
+      orderedAddresses=new InetAddress[returnedAddresses.length];
+      int curPosition=0;
+      if (InetAddress.preferIPv6Addresses()) {
+        for (int i=0; i < returnedAddresses.length; i++) {
+          if (returnedAddresses[i] instanceof Inet6Address) {
+            orderedAddresses[curPosition]=returnedAddresses[i];
+            curPosition++;
+          }
+        }
+        for (int i=0; i < returnedAddresses.length; i++) {
+          if (returnedAddresses[i] instanceof Inet4Address) {
+            orderedAddresses[curPosition]=returnedAddresses[i];
+            curPosition++;
+          }
+        }
+      }
+ else {
+        for (int i=0; i < returnedAddresses.length; i++) {
+          if (returnedAddresses[i] instanceof Inet4Address) {
+            orderedAddresses[curPosition]=returnedAddresses[i];
+            curPosition++;
+          }
+        }
+        for (int i=0; i < returnedAddresses.length; i++) {
+          if (returnedAddresses[i] instanceof Inet6Address) {
+            orderedAddresses[curPosition]=returnedAddresses[i];
+            curPosition++;
+          }
+        }
+      }
+    }
+    return orderedAddresses;
+  }
+  byte[] hBytes=Inet6Util.createByteArrayFromIPAddressString(host);
+  if (hBytes.length == 4) {
+    return (new InetAddress[]{new Inet4Address(hBytes)});
+  }
+ else   if (hBytes.length == 16) {
+    return (new InetAddress[]{new Inet6Address(hBytes)});
+  }
+  return (new InetAddress[]{new InetAddress(hBytes)});
+}

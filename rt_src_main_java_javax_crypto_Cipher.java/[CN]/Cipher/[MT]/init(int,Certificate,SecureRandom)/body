@@ -1,0 +1,30 @@
+{
+  if (opmode != ENCRYPT_MODE && opmode != DECRYPT_MODE && opmode != UNWRAP_MODE && opmode != WRAP_MODE) {
+    throw new InvalidParameterException(Messages.getString("crypto.19"));
+  }
+  if (certificate instanceof X509Certificate) {
+    Set<String> ce=((X509Certificate)certificate).getCriticalExtensionOIDs();
+    boolean critical=false;
+    if (ce != null && !ce.isEmpty()) {
+      for (      String oid : ce) {
+        if (oid.equals("2.5.29.15")) {
+          critical=true;
+          break;
+        }
+      }
+      if (critical) {
+        boolean[] keyUsage=((X509Certificate)certificate).getKeyUsage();
+        if (keyUsage != null) {
+          if (opmode == ENCRYPT_MODE && (!keyUsage[7])) {
+            throw new InvalidKeyException(Messages.getString("crypto.1A"));
+          }
+ else           if (opmode == DECRYPT_MODE && (!keyUsage[8])) {
+            throw new InvalidKeyException(Messages.getString("crypto.1B"));
+          }
+        }
+      }
+    }
+  }
+  spiImpl.engineInit(opmode,certificate.getPublicKey(),random);
+  mode=opmode;
+}

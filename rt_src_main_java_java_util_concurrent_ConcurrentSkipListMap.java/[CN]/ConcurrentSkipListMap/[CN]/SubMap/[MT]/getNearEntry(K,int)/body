@@ -1,0 +1,15 @@
+{
+  if (isDescending) {
+    if ((rel & m.LT) == 0)     rel|=m.LT;
+ else     rel&=~m.LT;
+  }
+  if (tooLow(key))   return ((rel & m.LT) != 0) ? null : lowestEntry();
+  if (tooHigh(key))   return ((rel & m.LT) != 0) ? highestEntry() : null;
+  for (; ; ) {
+    Node<K,V> n=m.findNear(key,rel);
+    if (n == null || !inBounds(n.key))     return null;
+    K k=n.key;
+    V v=n.getValidValue();
+    if (v != null)     return new AbstractMap.SimpleImmutableEntry<K,V>(k,v);
+  }
+}

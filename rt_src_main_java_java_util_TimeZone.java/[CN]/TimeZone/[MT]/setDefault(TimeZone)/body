@@ -1,0 +1,32 @@
+{
+  if (timezone != null) {
+    setICUDefaultTimeZone(timezone);
+    Default=timezone;
+    return;
+  }
+  String zone=AccessController.doPrivileged(new PriviAction<String>("user.timezone"));
+  if (zone != null && zone.contains("\n")) {
+    zone=zone.substring(0,zone.indexOf("\n"));
+  }
+  if (zone == null || zone.length() == 0) {
+    int[] tzinfo=new int[10];
+    boolean[] isCustomTimeZone=new boolean[1];
+    String zoneId=getCustomTimeZone(tzinfo,isCustomTimeZone);
+    if (isCustomTimeZone[0]) {
+switch (tzinfo[1]) {
+case 0:
+        Default=new SimpleTimeZone(tzinfo[0],zoneId);
+      break;
+default :
+    Default=new SimpleTimeZone(tzinfo[0],zoneId,tzinfo[5],tzinfo[4],tzinfo[3],tzinfo[2],tzinfo[9],tzinfo[8],tzinfo[7],tzinfo[6],tzinfo[1]);
+}
+}
+ else {
+Default=getTimeZone(zoneId);
+}
+}
+ else {
+Default=getTimeZone(zone);
+}
+setICUDefaultTimeZone(Default);
+}

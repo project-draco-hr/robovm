@@ -1,0 +1,30 @@
+{
+  if (buf == null) {
+    throw new IOException(Messages.getString("luni.24"));
+  }
+  if (offset > buffer.length || offset < 0) {
+    throw new ArrayIndexOutOfBoundsException(Messages.getString("luni.12",offset));
+  }
+  if (length < 0 || length > buffer.length - offset) {
+    throw new ArrayIndexOutOfBoundsException(Messages.getString("luni.18",length));
+  }
+  int copiedBytes=0, copyLength=0, newOffset=offset;
+  if (pos < buf.length) {
+    copyLength=(buf.length - pos >= length) ? length : buf.length - pos;
+    System.arraycopy(buf,pos,buffer,newOffset,copyLength);
+    newOffset+=copyLength;
+    copiedBytes+=copyLength;
+    pos+=copyLength;
+  }
+  if (copyLength == length) {
+    return length;
+  }
+  int inCopied=in.read(buffer,newOffset,length - copiedBytes);
+  if (inCopied > 0) {
+    return inCopied + copiedBytes;
+  }
+  if (copiedBytes == 0) {
+    return inCopied;
+  }
+  return copiedBytes;
+}

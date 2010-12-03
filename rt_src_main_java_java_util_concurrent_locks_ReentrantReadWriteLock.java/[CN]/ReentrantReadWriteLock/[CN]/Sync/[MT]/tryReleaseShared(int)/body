@@ -1,0 +1,22 @@
+{
+  Thread current=Thread.currentThread();
+  if (firstReader == current) {
+    if (firstReaderHoldCount == 1)     firstReader=null;
+ else     firstReaderHoldCount--;
+  }
+ else {
+    HoldCounter rh=cachedHoldCounter;
+    if (rh == null || rh.tid != current.getId())     rh=readHolds.get();
+    int count=rh.count;
+    if (count <= 1) {
+      readHolds.remove();
+      if (count <= 0)       throw unmatchedUnlockException();
+    }
+    --rh.count;
+  }
+  for (; ; ) {
+    int c=getState();
+    int nextc=c - SHARED_UNIT;
+    if (compareAndSetState(c,nextc))     return nextc == 0;
+  }
+}

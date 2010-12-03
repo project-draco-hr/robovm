@@ -1,0 +1,34 @@
+{
+  int i, j;
+  int lastWord;
+  long nBits=messageLength << 3;
+  engineUpdate((byte)0x80);
+  i=0;
+  lastWord=(buffer[BYTES_OFFSET] + 3) >> 2;
+  if (buffer[BYTES_OFFSET] != 0) {
+    if (lastWord < 15) {
+      i=lastWord;
+    }
+ else {
+      if (lastWord == 15) {
+        buffer[15]=0;
+      }
+      SHA1Impl.computeHash(buffer);
+      i=0;
+    }
+  }
+  Arrays.fill(buffer,i,14,0);
+  buffer[14]=(int)(nBits >>> 32);
+  buffer[15]=(int)(nBits & 0xFFFFFFFF);
+  SHA1Impl.computeHash(buffer);
+  j=offset;
+  for (i=HASH_OFFSET; i < HASH_OFFSET + 5; i++) {
+    int k=buffer[i];
+    digest[j]=(byte)(k >>> 24);
+    digest[j + 1]=(byte)(k >>> 16);
+    digest[j + 2]=(byte)(k >>> 8);
+    digest[j + 3]=(byte)(k);
+    j+=4;
+  }
+  engineReset();
+}

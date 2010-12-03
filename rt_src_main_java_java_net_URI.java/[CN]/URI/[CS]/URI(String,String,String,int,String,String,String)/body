@@ -1,0 +1,43 @@
+{
+  if (scheme == null && userinfo == null && host == null && path == null && query == null && fragment == null) {
+    this.path="";
+    return;
+  }
+  if (scheme != null && path != null && path.length() > 0 && path.charAt(0) != '/') {
+    throw new URISyntaxException(path,Messages.getString("luni.82"));
+  }
+  StringBuilder uri=new StringBuilder();
+  if (scheme != null) {
+    uri.append(scheme);
+    uri.append(':');
+  }
+  if (userinfo != null || host != null || port != -1) {
+    uri.append("//");
+  }
+  if (userinfo != null) {
+    uri.append(quoteComponent(userinfo,someLegal));
+    uri.append('@');
+  }
+  if (host != null) {
+    if (host.indexOf(':') != -1 && host.indexOf(']') == -1 && host.indexOf('[') == -1) {
+      host="[" + host + "]";
+    }
+    uri.append(host);
+  }
+  if (port != -1) {
+    uri.append(':');
+    uri.append(port);
+  }
+  if (path != null) {
+    uri.append(quoteComponent(path,"/@" + someLegal));
+  }
+  if (query != null) {
+    uri.append('?');
+    uri.append(quoteComponent(query,allLegal));
+  }
+  if (fragment != null) {
+    uri.append('#');
+    uri.append(quoteComponent(fragment,allLegal));
+  }
+  new Helper().parseURI(uri.toString(),true);
+}

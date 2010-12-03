@@ -1,0 +1,27 @@
+{
+  JarFile jar=null;
+  if (getUseCaches()) {
+synchronized (jarCache) {
+      jarFile=jarCache.get(jarFileURL);
+    }
+    if (jarFile == null) {
+      jar=openJarFile();
+synchronized (jarCache) {
+        jarFile=jarCache.get(jarFileURL);
+        if (jarFile == null) {
+          jarCache.put(jarFileURL,jar);
+          jarFile=jar;
+        }
+ else {
+          jar.close();
+        }
+      }
+    }
+  }
+ else {
+    jarFile=openJarFile();
+  }
+  if (jarFile == null) {
+    throw new IOException();
+  }
+}

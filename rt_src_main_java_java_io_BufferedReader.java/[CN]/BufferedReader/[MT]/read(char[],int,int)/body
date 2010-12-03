@@ -1,0 +1,38 @@
+{
+synchronized (lock) {
+    if (isClosed()) {
+      throw new IOException(Messages.getString("luni.A5"));
+    }
+    if (offset < 0 || offset > buffer.length - length || length < 0) {
+      throw new IndexOutOfBoundsException();
+    }
+    int outstanding=length;
+    while (outstanding > 0) {
+      int available=end - pos;
+      if (available > 0) {
+        int count=available >= outstanding ? outstanding : available;
+        System.arraycopy(buf,pos,buffer,offset,count);
+        pos+=count;
+        offset+=count;
+        outstanding-=count;
+      }
+      if (outstanding == 0 || (outstanding < length && !in.ready())) {
+        break;
+      }
+      if ((mark == -1 || (pos - mark >= markLimit)) && outstanding >= buf.length) {
+        int count=in.read(buffer,offset,outstanding);
+        if (count > 0) {
+          offset+=count;
+          outstanding-=count;
+          mark=-1;
+        }
+        break;
+      }
+      if (fillBuf() == -1) {
+        break;
+      }
+    }
+    int count=length - outstanding;
+    return (count > 0 || count == length) ? count : -1;
+  }
+}

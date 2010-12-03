@@ -1,0 +1,29 @@
+{
+  if (!input.hasRemaining()) {
+    return;
+  }
+  byte[] tmp;
+  if (input.hasArray()) {
+    tmp=input.array();
+    int offset=input.arrayOffset();
+    int position=input.position();
+    int limit=input.limit();
+    try {
+      engineUpdate(tmp,offset + position,limit - position);
+    }
+ catch (    SignatureException e) {
+      throw new RuntimeException(e);
+    }
+    input.position(limit);
+  }
+ else {
+    tmp=new byte[input.limit() - input.position()];
+    input.get(tmp);
+    try {
+      engineUpdate(tmp,0,tmp.length);
+    }
+ catch (    SignatureException e) {
+      throw new RuntimeException(e);
+    }
+  }
+}

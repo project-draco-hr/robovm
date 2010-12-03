@@ -1,0 +1,26 @@
+{
+  if (!handshake_started) {
+    startHandshake();
+  }
+  if (logger != null) {
+    logger.println("SSLSocket.writeAppData: " + len + " "+ SSLRecordProtocol.MAX_DATA_LENGTH);
+  }
+  try {
+    if (len < SSLRecordProtocol.MAX_DATA_LENGTH) {
+      output.write(recordProtocol.wrap(ContentType.APPLICATION_DATA,data,offset,len));
+    }
+ else {
+      while (len >= SSLRecordProtocol.MAX_DATA_LENGTH) {
+        output.write(recordProtocol.wrap(ContentType.APPLICATION_DATA,data,offset,SSLRecordProtocol.MAX_DATA_LENGTH));
+        offset+=SSLRecordProtocol.MAX_DATA_LENGTH;
+        len-=SSLRecordProtocol.MAX_DATA_LENGTH;
+      }
+      if (len > 0) {
+        output.write(recordProtocol.wrap(ContentType.APPLICATION_DATA,data,offset,len));
+      }
+    }
+  }
+ catch (  AlertException e) {
+    reportFatalAlert(e.getDescriptionCode(),e.getReason());
+  }
+}

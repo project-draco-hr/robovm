@@ -1,0 +1,62 @@
+{
+  if (transformation == null || "".equals(transformation)) {
+    throw new NoSuchAlgorithmException(Messages.getString("crypto.17",transformation));
+  }
+  String[] transf=checkTransformation(transformation);
+  boolean needSetPadding=false;
+  boolean needSetMode=false;
+  if (transf[1] == null && transf[2] == null) {
+    if (provider == null) {
+      engine.getInstance(transf[0],null);
+    }
+ else {
+      engine.getInstance(transf[0],provider,null);
+    }
+  }
+ else {
+    String[] searhOrder={transf[0] + "/" + transf[1]+ "/"+ transf[2],transf[0] + "/" + transf[1],transf[0] + "//" + transf[2],transf[0]};
+    int i;
+    for (i=0; i < searhOrder.length; i++) {
+      try {
+        if (provider == null) {
+          engine.getInstance(searhOrder[i],null);
+        }
+ else {
+          engine.getInstance(searhOrder[i],provider,null);
+        }
+        break;
+      }
+ catch (      NoSuchAlgorithmException e) {
+        if (i == searhOrder.length - 1) {
+          throw new NoSuchAlgorithmException(transformation);
+        }
+      }
+    }
+switch (i) {
+case 1:
+      needSetPadding=true;
+    break;
+case 2:
+  needSetMode=true;
+break;
+case 3:
+needSetPadding=true;
+needSetMode=true;
+}
+}
+CipherSpi cspi;
+try {
+cspi=(CipherSpi)engine.spi;
+}
+ catch (ClassCastException e) {
+throw new NoSuchAlgorithmException(e);
+}
+Cipher c=new Cipher(cspi,engine.provider,transformation);
+if (needSetMode) {
+c.spiImpl.engineSetMode(transf[1]);
+}
+if (needSetPadding) {
+c.spiImpl.engineSetPadding(transf[2]);
+}
+return c;
+}

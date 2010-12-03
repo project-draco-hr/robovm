@@ -1,0 +1,20 @@
+{
+  FileDescriptor fd=new FileDescriptor();
+  int traffic=0;
+  boolean reached=false;
+  NETIMPL.createStreamSocket(fd,NetUtil.preferIPv4Stack());
+  try {
+    if (null != source) {
+      NETIMPL.bind(fd,source,0);
+    }
+    NETIMPL.connectStreamWithTimeoutSocket(fd,7,timeout,traffic,dest);
+    reached=true;
+  }
+ catch (  IOException e) {
+    if (ERRMSG_CONNECTION_REFUSED.equals(e.getMessage())) {
+      reached=true;
+    }
+  }
+  NETIMPL.socketClose(fd);
+  return reached;
+}

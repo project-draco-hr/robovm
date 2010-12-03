@@ -1,0 +1,60 @@
+{
+  int outRemaining=out.remaining();
+  int pos=in.position();
+  int limit=in.limit();
+  try {
+    while (pos < limit - 1) {
+      if (outRemaining == 0) {
+        return CoderResult.OVERFLOW;
+      }
+      int b1=in.get() & 0xFF;
+      int b2=in.get() & 0xFF;
+      if (endian == UNKNOWN) {
+        endian=getDetectedEndian(b1,b2);
+        if (endian == NOT_DETECTED) {
+          endian=getDefaultEndian();
+          if (endian == ANY) {
+            endian=BIG;
+          }
+        }
+ else {
+          if (getDefaultEndian() == ANY) {
+            pos+=2;
+            continue;
+          }
+        }
+      }
+      int jchar=(endian == BIG) ? (b1 << 8) | b2 : (b2 << 8) | b1;
+      if (jchar >= 0xD800 && jchar <= 0xDFFF) {
+        if (jchar >= 0xDC00) {
+          return CoderResult.malformedForLength(2);
+        }
+        if (outRemaining < 2) {
+          return CoderResult.OVERFLOW;
+        }
+        if (pos + 3 >= limit) {
+          return CoderResult.UNDERFLOW;
+        }
+        int b3=in.get() & 0xFF;
+        int b4=in.get() & 0xFF;
+        int jchar2=(endian == BIG) ? (b3 << 8) | b4 : (b4 << 8) | b3;
+        if (jchar2 < 0xDC00) {
+          return CoderResult.malformedForLength(4);
+        }
+        out.put((char)jchar);
+        out.put((char)jchar2);
+        outRemaining-=2;
+        pos+=4;
+      }
+ else {
+        out.put((char)jchar);
+        outRemaining--;
+        pos+=2;
+      }
+    }
+    return CoderResult.UNDERFLOW;
+  }
+  finally {
+    in.position(pos);
+  }
+}

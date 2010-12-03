@@ -1,0 +1,54 @@
+{
+  int length=template.length();
+  StringBuffer buffer=new StringBuffer();
+  ParsePosition position=new ParsePosition(0);
+  Vector<String> localStrings=new Vector<String>();
+  int argCount=0;
+  int[] args=new int[10];
+  int maxArg=-1;
+  Vector<Format> localFormats=new Vector<Format>();
+  while (position.getIndex() < length) {
+    if (Format.upTo(template,position,buffer,'{')) {
+      int arg=0;
+      int offset=position.getIndex();
+      if (offset >= length) {
+        throw new IllegalArgumentException(Messages.getString("text.19"));
+      }
+      char ch;
+      while ((ch=template.charAt(offset++)) != '}' && ch != ',') {
+        if (ch < '0' && ch > '9') {
+          throw new IllegalArgumentException(Messages.getString("text.19"));
+        }
+        arg=arg * 10 + (ch - '0');
+        if (arg < 0 || offset >= length) {
+          throw new IllegalArgumentException(Messages.getString("text.19"));
+        }
+      }
+      offset--;
+      position.setIndex(offset);
+      localFormats.addElement(parseVariable(template,position));
+      if (argCount >= args.length) {
+        int[] newArgs=new int[args.length * 2];
+        System.arraycopy(args,0,newArgs,0,args.length);
+        args=newArgs;
+      }
+      args[argCount++]=arg;
+      if (arg > maxArg) {
+        maxArg=arg;
+      }
+    }
+    localStrings.addElement(buffer.toString());
+    buffer.setLength(0);
+  }
+  this.strings=new String[localStrings.size()];
+  for (int i=0; i < localStrings.size(); i++) {
+    this.strings[i]=localStrings.elementAt(i);
+  }
+  argumentNumbers=args;
+  this.formats=new Format[argCount];
+  for (int i=0; i < argCount; i++) {
+    this.formats[i]=localFormats.elementAt(i);
+  }
+  maxOffset=argCount - 1;
+  maxArgumentIndex=maxArg;
+}

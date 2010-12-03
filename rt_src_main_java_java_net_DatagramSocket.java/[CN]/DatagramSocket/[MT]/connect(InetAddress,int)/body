@@ -1,0 +1,32 @@
+{
+  if (anAddress == null || aPort < 0 || aPort > 65535) {
+    throw new IllegalArgumentException(Messages.getString("luni.38"));
+  }
+synchronized (lock) {
+    if (isClosed()) {
+      return;
+    }
+    try {
+      checkClosedAndBind(true);
+    }
+ catch (    SocketException e) {
+    }
+    SecurityManager security=System.getSecurityManager();
+    if (security != null) {
+      if (anAddress.isMulticastAddress()) {
+        security.checkMulticast(anAddress);
+      }
+ else {
+        security.checkConnect(anAddress.getHostName(),aPort);
+      }
+    }
+    try {
+      impl.connect(anAddress,aPort);
+    }
+ catch (    SocketException e) {
+    }
+    address=anAddress;
+    port=aPort;
+    isConnected=true;
+  }
+}

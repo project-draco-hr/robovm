@@ -1,0 +1,30 @@
+{
+  boolean setOutput=(primitiveTypes == output);
+  if (setOutput) {
+    primitiveTypes=null;
+  }
+  if (subclassOverridingImplementation && !unshared) {
+    writeObjectOverride(object);
+  }
+ else {
+    try {
+      drain();
+      writeObjectInternal(object,unshared,true,true);
+      if (setOutput) {
+        primitiveTypes=output;
+      }
+    }
+ catch (    IOException ioEx1) {
+      if (nestedLevels == 0 && ioEx1 != nestedException) {
+        try {
+          writeNewException(ioEx1);
+        }
+ catch (        IOException ioEx2) {
+          nestedException.fillInStackTrace();
+          throw nestedException;
+        }
+      }
+      throw ioEx1;
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  StringBuffer buffer=new StringBuffer();
+  for (int i=0; i <= maxOffset; i++) {
+    appendQuoted(buffer,strings[i]);
+    buffer.append('{');
+    buffer.append(argumentNumbers[i]);
+    Format format=formats[i];
+    String pattern=null;
+    if (format instanceof ChoiceFormat) {
+      buffer.append(",choice,");
+      pattern=((ChoiceFormat)format).toPattern();
+    }
+ else     if (format instanceof DecimalFormat) {
+      pattern=decodeDecimalFormat(buffer,format);
+    }
+ else     if (format instanceof SimpleDateFormat) {
+      pattern=decodeSimpleDateFormat(buffer,format);
+    }
+ else     if (format != null) {
+      throw new IllegalArgumentException(Messages.getString("text.17"));
+    }
+    if (pattern != null) {
+      boolean quote=false;
+      int index=0, length=pattern.length(), count=0;
+      while (index < length) {
+        char ch=pattern.charAt(index++);
+        if (ch == '\'') {
+          quote=!quote;
+        }
+        if (!quote) {
+          if (ch == '{') {
+            count++;
+          }
+          if (ch == '}') {
+            if (count > 0) {
+              count--;
+            }
+ else {
+              buffer.append("'}");
+              ch='\'';
+            }
+          }
+        }
+        buffer.append(ch);
+      }
+    }
+    buffer.append('}');
+  }
+  if (maxOffset + 1 < strings.length) {
+    appendQuoted(buffer,strings[maxOffset + 1]);
+  }
+  return buffer.toString();
+}

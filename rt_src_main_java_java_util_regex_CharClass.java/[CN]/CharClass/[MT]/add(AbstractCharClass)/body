@@ -1,0 +1,97 @@
+{
+  if (!mayContainSupplCodepoints && cc.mayContainSupplCodepoints) {
+    mayContainSupplCodepoints=true;
+  }
+  if (!invertedSurrogates) {
+    if (cc.altSurrogates) {
+      lowHighSurrogates.xor(cc.getLowHighSurrogates());
+      lowHighSurrogates.and(cc.getLowHighSurrogates());
+      altSurrogates=!altSurrogates;
+      invertedSurrogates=true;
+    }
+ else {
+      lowHighSurrogates.or(cc.getLowHighSurrogates());
+    }
+  }
+ else {
+    if (cc.altSurrogates) {
+      lowHighSurrogates.and(cc.getLowHighSurrogates());
+    }
+ else {
+      lowHighSurrogates.andNot(cc.getLowHighSurrogates());
+    }
+  }
+  if (!hideBits && cc.getBits() != null) {
+    if (!inverted) {
+      if (cc.isNegative()) {
+        bits.xor(cc.getBits());
+        bits.and(cc.getBits());
+        alt=!alt;
+        inverted=true;
+      }
+ else {
+        bits.or(cc.getBits());
+      }
+    }
+ else {
+      if (cc.isNegative()) {
+        bits.and(cc.getBits());
+      }
+ else {
+        bits.andNot(cc.getBits());
+      }
+    }
+  }
+ else {
+    final boolean curAlt=alt;
+    if (nonBitSet == null) {
+      if (curAlt && !inverted && bits.isEmpty()) {
+        nonBitSet=new AbstractCharClass(){
+          public boolean contains(          int ch){
+            return cc.contains(ch);
+          }
+        }
+;
+      }
+ else {
+        if (curAlt) {
+          nonBitSet=new AbstractCharClass(){
+            public boolean contains(            int ch){
+              return !((curAlt ^ bits.get(ch)) || ((curAlt ^ inverted) ^ cc.contains(ch)));
+            }
+          }
+;
+        }
+ else {
+          nonBitSet=new AbstractCharClass(){
+            public boolean contains(            int ch){
+              return (curAlt ^ bits.get(ch)) || ((curAlt ^ inverted) ^ cc.contains(ch));
+            }
+          }
+;
+        }
+      }
+      hideBits=true;
+    }
+ else {
+      final AbstractCharClass nb=nonBitSet;
+      if (curAlt) {
+        nonBitSet=new AbstractCharClass(){
+          public boolean contains(          int ch){
+            return !(curAlt ^ (nb.contains(ch) || cc.contains(ch)));
+          }
+        }
+;
+      }
+ else {
+        nonBitSet=new AbstractCharClass(){
+          public boolean contains(          int ch){
+            return curAlt ^ (nb.contains(ch) || cc.contains(ch));
+          }
+        }
+;
+      }
+    }
+  }
+  return this;
+}

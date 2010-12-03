@@ -1,0 +1,12 @@
+{
+  Class<T> clazz=getDeclaringClass();
+  int clazzModifiers=clazz.getModifiers();
+  if (clazz.isArray() || Modifier.isAbstract(clazzModifiers) || Modifier.isInterface(clazzModifiers)|| clazz.isPrimitive()) {
+    throw new InstantiationException("Class " + clazz.getName() + " cannot be instantiated");
+  }
+  Class<?>[] pTypes=getParameterTypes(false);
+  if (args.length != pTypes.length) {
+    throw new IllegalArgumentException("Wrong number of arguments");
+  }
+  return (T)internalNewInstance(method,pTypes,args);
+}

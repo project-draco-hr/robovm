@@ -1,0 +1,23 @@
+{
+  chars.clear();
+  int read=0;
+  try {
+    read=in.read(bytes.array());
+  }
+ catch (  IOException e) {
+    chars.limit(0);
+    throw e;
+  }
+  if (read == -1) {
+    chars.limit(0);
+    return;
+  }
+  bytes.limit(read);
+  boolean endOfInput=read < DEFAULT_BUFFER_SIZE;
+  CoderResult result=decoder.decode(bytes,chars,endOfInput);
+  if (result.isError()) {
+    throw new IOException(result.toString());
+  }
+  bytes.clear();
+  chars.flip();
+}

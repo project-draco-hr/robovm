@@ -1,0 +1,21 @@
+{
+  try {
+    Class spiClass;
+    if (classLoader == null) {
+      spiClass=Class.forName(className);
+    }
+ else {
+      spiClass=classLoader.loadClass(className);
+    }
+    if (debug) {
+      debugPrintln("Loaded " + className + " from "+ which(spiClass));
+    }
+    return spiClass.newInstance();
+  }
+ catch (  ClassNotFoundException x) {
+    throw new ConfigurationError("Provider " + className + " not found",x);
+  }
+catch (  Exception x) {
+    throw new ConfigurationError("Provider " + className + " could not be instantiated: "+ x,x);
+  }
+}

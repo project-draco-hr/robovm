@@ -1,0 +1,47 @@
+{
+  EmulatedFieldsForDumping originalCurrentPutField=currentPutField;
+  currentPutField=null;
+  boolean externalizable=clDesc.isExternalizable();
+  boolean serializable=clDesc.isSerializable();
+  if (!externalizable && !serializable) {
+    throw new NotSerializableException(theClass.getName());
+  }
+  output.writeByte(TC_OBJECT);
+  writeClassDesc(clDesc,false);
+  Integer previousHandle=null;
+  if (unshared) {
+    previousHandle=objectsWritten.get(object);
+  }
+  Integer handle=nextHandle();
+  objectsWritten.put(object,handle);
+  currentObject=object;
+  currentClass=clDesc;
+  try {
+    if (externalizable) {
+      boolean noBlockData=protocolVersion == PROTOCOL_VERSION_1;
+      if (noBlockData) {
+        primitiveTypes=output;
+      }
+      ((Externalizable)object).writeExternal(this);
+      if (noBlockData) {
+        primitiveTypes=null;
+      }
+ else {
+        drain();
+        output.writeByte(TC_ENDBLOCKDATA);
+      }
+    }
+ else {
+      writeHierarchy(object,currentClass);
+    }
+  }
+  finally {
+    if (unshared) {
+      removeUnsharedReference(object,previousHandle);
+    }
+    currentObject=null;
+    currentClass=null;
+    currentPutField=originalCurrentPutField;
+  }
+  return handle;
+}

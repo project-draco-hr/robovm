@@ -1,0 +1,22 @@
+{
+  if (!isInitialized) {
+    init();
+  }
+  Collection<Permission> pc=new HashSet<Permission>();
+  Iterator<PolicyEntry> it=set.iterator();
+  if (subject != null) {
+    int size=subject.getPrincipals().size();
+    Principal[] p=new Principal[size];
+    subject.getPrincipals().toArray(p);
+    if (cs == null) {
+      cs=emptySource;
+    }
+    while (it.hasNext()) {
+      PolicyEntry ge=it.next();
+      if (ge.impliesCodeSource(cs) && ge.impliesPrincipals(p)) {
+        pc.addAll(ge.getPermissions());
+      }
+    }
+  }
+  return PolicyUtils.toPermissionCollection(pc);
+}

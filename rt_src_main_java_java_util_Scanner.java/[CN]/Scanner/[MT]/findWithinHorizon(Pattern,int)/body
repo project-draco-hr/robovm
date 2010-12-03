@@ -1,0 +1,46 @@
+{
+  checkClosed();
+  checkNull(pattern);
+  if (horizon < 0) {
+    throw new IllegalArgumentException(Messages.getString("luni.DE"));
+  }
+  matcher.usePattern(pattern);
+  String result=null;
+  int findEndIndex=0;
+  int horizonEndIndex=0;
+  if (horizon == 0) {
+    horizonEndIndex=Integer.MAX_VALUE;
+  }
+ else {
+    horizonEndIndex=findStartIndex + horizon;
+  }
+  while (true) {
+    findEndIndex=bufferLength;
+    findEndIndex=Math.min(horizonEndIndex,bufferLength);
+    boolean isHorizonInBuffer=(horizonEndIndex <= bufferLength);
+    matcher.region(findStartIndex,findEndIndex);
+    if (matcher.find()) {
+      if (isHorizonInBuffer || inputExhausted) {
+        result=matcher.group();
+        break;
+      }
+    }
+ else {
+      if (isHorizonInBuffer || inputExhausted) {
+        break;
+      }
+    }
+    if (!inputExhausted) {
+      readMore();
+      resetMatcher();
+    }
+  }
+  if (null != result) {
+    findStartIndex=matcher.end();
+    matchSuccessful=true;
+  }
+ else {
+    matchSuccessful=false;
+  }
+  return result;
+}

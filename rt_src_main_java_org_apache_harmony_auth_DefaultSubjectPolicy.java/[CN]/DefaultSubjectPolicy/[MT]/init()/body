@@ -1,0 +1,15 @@
+{
+  set=new HashSet<PolicyEntry>();
+  Properties system=new Properties(AccessController.doPrivileged(new PolicyUtils.SystemKit()));
+  system.setProperty("/",File.separator);
+  URL[] policyLocations=PolicyUtils.getPolicyURLs(system,AUTH_SECURITY_POLICY,POLICY_URL_PREFIX);
+  for (  URL url : policyLocations) {
+    try {
+      set.addAll(parser.parse(url,system));
+    }
+ catch (    Exception e) {
+      e.printStackTrace();
+    }
+  }
+  isInitialized=true;
+}

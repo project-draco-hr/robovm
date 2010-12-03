@@ -1,0 +1,27 @@
+{
+  lock();
+  try {
+    int c=count - 1;
+    HashEntry<K,V>[] tab=table;
+    int index=hash & (tab.length - 1);
+    HashEntry<K,V> first=tab[index];
+    HashEntry<K,V> e=first;
+    while (e != null && (e.hash != hash || !key.equals(e.key)))     e=e.next;
+    V oldValue=null;
+    if (e != null) {
+      V v=e.value;
+      if (value == null || value.equals(v)) {
+        oldValue=v;
+        ++modCount;
+        HashEntry<K,V> newFirst=e.next;
+        for (HashEntry<K,V> p=first; p != e; p=p.next)         newFirst=new HashEntry<K,V>(p.key,p.hash,newFirst,p.value);
+        tab[index]=newFirst;
+        count=c;
+      }
+    }
+    return oldValue;
+  }
+  finally {
+    unlock();
+  }
+}

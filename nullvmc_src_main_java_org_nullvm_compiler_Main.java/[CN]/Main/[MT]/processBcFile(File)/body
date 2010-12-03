@@ -1,0 +1,26 @@
+{
+  File outFile=new File(f.getParentFile(),f.getName().substring(0,f.getName().length() - 3) + ".s");
+  if (!clean && outFile.exists() && outFile.lastModified() >= f.lastModified()) {
+    if (verbose) {
+      stdout.println("Skipping unchanged LLVM bitcode file: " + f);
+    }
+    return processGccFile(outFile);
+  }
+  if (verbose) {
+    stdout.format("Compiling LLVM bitcode file '%s' to assembler file '%s'\n",f,outFile);
+  }
+  String llcPath="llc";
+  String optPath="opt";
+  String llvmLinkPath="llvm-link";
+  if (llvmBinDir != null) {
+    llcPath=new File(llvmBinDir,"llc").getAbsolutePath();
+    optPath=new File(llvmBinDir,"opt").getAbsolutePath();
+    llvmLinkPath=new File(llvmBinDir,"llvm-link").getAbsolutePath();
+  }
+  File outLinkedFile=new File(f.getParentFile(),f.getName().substring(0,f.getName().length() - 3) + ".linked.bc");
+  exec(llvmLinkPath,"-o=" + outLinkedFile.toString(),f,opcodesFile);
+  File outOptedFile=new File(f.getParentFile(),f.getName().substring(0,f.getName().length() - 3) + ".opted.bc");
+  exec(optPath,optOpts,"-mem2reg","-always-inline","-o=" + outOptedFile.toString(),outLinkedFile);
+  exec(llcPath,llcOpts,"-o=" + outFile.toString(),outOptedFile);
+  return processGccFile(outFile);
+}

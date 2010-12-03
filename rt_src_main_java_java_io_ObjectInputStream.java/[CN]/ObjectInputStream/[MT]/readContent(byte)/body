@@ -1,0 +1,32 @@
+{
+switch (tc) {
+case TC_BLOCKDATA:
+    return readBlockData();
+case TC_BLOCKDATALONG:
+  return readBlockDataLong();
+case TC_CLASS:
+return readNewClass(false);
+case TC_CLASSDESC:
+return readNewClassDesc(false);
+case TC_ARRAY:
+return readNewArray(false);
+case TC_OBJECT:
+return readNewObject(false);
+case TC_STRING:
+return readNewString(false);
+case TC_LONGSTRING:
+return readNewLongString(false);
+case TC_REFERENCE:
+return readCyclicReference();
+case TC_NULL:
+return null;
+case TC_EXCEPTION:
+Exception exc=readException();
+throw new WriteAbortedException(Messages.getString("luni.BD"),exc);
+case TC_RESET:
+resetState();
+return null;
+default :
+throw new StreamCorruptedException(Messages.getString("luni.BC",Integer.toHexString(tc & 0xff)));
+}
+}

@@ -1,0 +1,27 @@
+{
+  if (bufferLength >= buffer.capacity()) {
+    expandBuffer();
+  }
+  int oldPosition=buffer.position();
+  int oldBufferLength=bufferLength;
+  int readCount=0;
+  try {
+    buffer.limit(buffer.capacity());
+    buffer.position(oldBufferLength);
+    while ((readCount=input.read(buffer)) == 0) {
+    }
+  }
+ catch (  IOException e) {
+    bufferLength=buffer.position();
+    readCount=-1;
+    lastIOException=e;
+  }
+  buffer.flip();
+  buffer.position(oldPosition);
+  if (-1 == readCount) {
+    inputExhausted=true;
+  }
+ else {
+    bufferLength=readCount + bufferLength;
+  }
+}

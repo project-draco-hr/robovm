@@ -1,0 +1,47 @@
+{
+  poll();
+  if (keySet == null) {
+    keySet=new AbstractSet<K>(){
+      @Override public boolean contains(      Object object){
+        return containsKey(object);
+      }
+      @Override public int size(){
+        return WeakHashMap.this.size();
+      }
+      @Override public void clear(){
+        WeakHashMap.this.clear();
+      }
+      @Override public boolean remove(      Object key){
+        if (containsKey(key)) {
+          WeakHashMap.this.remove(key);
+          return true;
+        }
+        return false;
+      }
+      @Override public Iterator<K> iterator(){
+        return new HashIterator<K>(new Entry.Type<K,K,V>(){
+          public K get(          Map.Entry<K,V> entry){
+            return entry.getKey();
+          }
+        }
+);
+      }
+      @Override public Object[] toArray(){
+        Collection<K> coll=new ArrayList<K>(size());
+        for (Iterator<K> iter=iterator(); iter.hasNext(); ) {
+          coll.add(iter.next());
+        }
+        return coll.toArray();
+      }
+      @Override public <T>T[] toArray(      T[] contents){
+        Collection<K> coll=new ArrayList<K>(size());
+        for (Iterator<K> iter=iterator(); iter.hasNext(); ) {
+          coll.add(iter.next());
+        }
+        return coll.toArray(contents);
+      }
+    }
+;
+  }
+  return keySet;
+}

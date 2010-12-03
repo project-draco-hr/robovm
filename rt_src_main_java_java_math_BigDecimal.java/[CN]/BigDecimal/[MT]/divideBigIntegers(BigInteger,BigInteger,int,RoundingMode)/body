@@ -1,0 +1,28 @@
+{
+  BigInteger[] quotAndRem=scaledDividend.divideAndRemainder(scaledDivisor);
+  BigInteger quotient=quotAndRem[0];
+  BigInteger remainder=quotAndRem[1];
+  if (remainder.signum() == 0) {
+    return new BigDecimal(quotient,scale);
+  }
+  int sign=scaledDividend.signum() * scaledDivisor.signum();
+  int compRem;
+  if (scaledDivisor.bitLength() < 63) {
+    long rem=remainder.longValue();
+    long divisor=scaledDivisor.longValue();
+    compRem=longCompareTo(Math.abs(rem) << 1,Math.abs(divisor));
+    compRem=roundingBehavior(quotient.testBit(0) ? 1 : 0,sign * (5 + compRem),roundingMode);
+  }
+ else {
+    compRem=remainder.abs().shiftLeftOneBit().compareTo(scaledDivisor.abs());
+    compRem=roundingBehavior(quotient.testBit(0) ? 1 : 0,sign * (5 + compRem),roundingMode);
+  }
+  if (compRem != 0) {
+    if (quotient.bitLength() < 63) {
+      return valueOf(quotient.longValue() + compRem,scale);
+    }
+    quotient=quotient.add(BigInteger.valueOf(compRem));
+    return new BigDecimal(quotient,scale);
+  }
+  return new BigDecimal(quotient,scale);
+}

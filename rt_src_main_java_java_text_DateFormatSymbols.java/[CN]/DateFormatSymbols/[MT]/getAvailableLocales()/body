@@ -1,0 +1,14 @@
+{
+  Locale[] icuLocales=com.ibm.icu.text.DateFormatSymbols.getAvailableLocales();
+  if (buildinLocales == null) {
+    initBuildInLocales(icuLocales);
+  }
+  Locale[] providerLocales=LocaleServiceProviderLoader.getProviderSupportLocales(providersCache,PROVIDER_CONFIGURATION_FILE_NAME);
+  if (providerLocales == null) {
+    return icuLocales;
+  }
+  Locale[] locales=new Locale[icuLocales.length + providerLocales.length];
+  System.arraycopy(icuLocales,0,locales,0,icuLocales.length);
+  System.arraycopy(providerLocales,0,locales,icuLocales.length,providerLocales.length);
+  return locales;
+}

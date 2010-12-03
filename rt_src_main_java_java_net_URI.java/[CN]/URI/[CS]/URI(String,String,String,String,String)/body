@@ -1,0 +1,26 @@
+{
+  if (scheme != null && path != null && path.length() > 0 && path.charAt(0) != '/') {
+    throw new URISyntaxException(path,Messages.getString("luni.82"));
+  }
+  StringBuilder uri=new StringBuilder();
+  if (scheme != null) {
+    uri.append(scheme);
+    uri.append(':');
+  }
+  if (authority != null) {
+    uri.append("//");
+    uri.append(quoteComponent(authority,"@[]" + someLegal));
+  }
+  if (path != null) {
+    uri.append(quoteComponent(path,"/@" + someLegal));
+  }
+  if (query != null) {
+    uri.append('?');
+    uri.append(quoteComponent(query,allLegal));
+  }
+  if (fragment != null) {
+    uri.append('#');
+    uri.append(quoteComponent(fragment,allLegal));
+  }
+  new Helper().parseURI(uri.toString(),false);
+}

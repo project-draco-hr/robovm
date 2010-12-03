@@ -1,0 +1,21 @@
+{
+  Node<E> h=head;
+  Node<E> p=h;
+  for (int hops=0; ; hops++) {
+    E item=p.getItem();
+    if (item != null && p.casItem(item,null)) {
+      if (hops >= HOPS) {
+        Node<E> q=p.getNext();
+        updateHead(h,(q != null) ? q : p);
+      }
+      return item;
+    }
+    Node<E> next=succ(p);
+    if (next == null) {
+      updateHead(h,p);
+      break;
+    }
+    p=next;
+  }
+  return null;
+}

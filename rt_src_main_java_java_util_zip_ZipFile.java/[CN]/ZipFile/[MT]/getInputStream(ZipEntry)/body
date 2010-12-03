@@ -1,0 +1,20 @@
+{
+  entry=getEntry(entry.getName());
+  if (entry == null) {
+    return null;
+  }
+  RandomAccessFile raf=mRaf;
+synchronized (raf) {
+    RAFStream rafstrm=new RAFStream(raf,entry.mLocalHeaderRelOffset + 28);
+    int localExtraLenOrWhatever=ler.readShortLE(rafstrm);
+    rafstrm.skip(entry.nameLen + localExtraLenOrWhatever);
+    rafstrm.mLength=rafstrm.mOffset + entry.compressedSize;
+    if (entry.compressionMethod == ZipEntry.DEFLATED) {
+      int bufSize=Math.max(1024,(int)Math.min(entry.getSize(),65535L));
+      return new ZipInflaterInputStream(rafstrm,new Inflater(true),bufSize,entry);
+    }
+ else {
+      return rafstrm;
+    }
+  }
+}

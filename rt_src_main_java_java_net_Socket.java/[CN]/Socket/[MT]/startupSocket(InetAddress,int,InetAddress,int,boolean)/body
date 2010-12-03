@@ -1,0 +1,22 @@
+{
+  if (localPort < 0 || localPort > 65535) {
+    throw new IllegalArgumentException(Messages.getString("luni.77"));
+  }
+  InetAddress addr=localAddress == null ? InetAddress.ANY : localAddress;
+synchronized (this) {
+    impl.create(streaming);
+    isCreated=true;
+    try {
+      if (!streaming || !NetUtil.usingSocks(proxy)) {
+        impl.bind(addr,localPort);
+      }
+      isBound=true;
+      impl.connect(dstAddress,dstPort);
+      isConnected=true;
+    }
+ catch (    IOException e) {
+      impl.close();
+      throw e;
+    }
+  }
+}

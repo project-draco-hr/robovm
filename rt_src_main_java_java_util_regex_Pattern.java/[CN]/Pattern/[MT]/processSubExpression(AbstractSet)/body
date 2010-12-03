@@ -1,0 +1,54 @@
+{
+  AbstractSet cur;
+  if (lexemes.isLetter() && !lexemes.isNextSpecial() && Lexer.isLetter(lexemes.lookAhead())) {
+    if (hasFlag(Pattern.CANON_EQ)) {
+      cur=processDecomposedChar(last);
+      if (!lexemes.isEmpty() && (lexemes.peek() != Lexer.CHAR_RIGHT_PARENTHESIS || last instanceof FinalSet) && lexemes.peek() != Lexer.CHAR_VERTICAL_BAR && !lexemes.isLetter()) {
+        cur=processQuantifier(last,cur);
+      }
+    }
+ else     if (lexemes.isHighSurrogate() || lexemes.isLowSurrogate()) {
+      AbstractSet term=processTerminal(last);
+      cur=processQuantifier(last,term);
+    }
+ else {
+      cur=processSequence(last);
+    }
+  }
+ else   if (lexemes.peek() == Lexer.CHAR_RIGHT_PARENTHESIS) {
+    if (last instanceof FinalSet) {
+      throw new PatternSyntaxException(Messages.getString("regex.09"),lexemes.toString(),lexemes.getIndex());
+    }
+ else {
+      cur=new EmptySet(last);
+    }
+  }
+ else {
+    AbstractSet term=processTerminal(last);
+    cur=processQuantifier(last,term);
+  }
+  if (!lexemes.isEmpty() && (lexemes.peek() != Lexer.CHAR_RIGHT_PARENTHESIS || last instanceof FinalSet) && lexemes.peek() != Lexer.CHAR_VERTICAL_BAR) {
+    AbstractSet next=processSubExpression(last);
+    if (cur instanceof LeafQuantifierSet && !(cur instanceof CompositeQuantifierSet) && !(cur instanceof GroupQuantifierSet)&& !(cur instanceof AltQuantifierSet)&& !next.first(((LeafQuantifierSet)cur).getInnerSet())) {
+      cur=new UnifiedQuantifierSet((LeafQuantifierSet)cur);
+    }
+    if (((char)next.getType()) == '+') {
+      cur.setNext(((LeafQuantifierSet)next).getInnerSet());
+    }
+ else {
+      cur.setNext(next);
+    }
+  }
+ else   if (cur != null) {
+    cur.setNext(last);
+  }
+ else {
+    return null;
+  }
+  if (((char)cur.getType()) == '+') {
+    return ((QuantifierSet)cur).getInnerSet();
+  }
+ else {
+    return cur;
+  }
+}

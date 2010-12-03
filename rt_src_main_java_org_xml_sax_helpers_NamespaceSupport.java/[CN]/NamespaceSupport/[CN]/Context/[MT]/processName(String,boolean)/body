@@ -1,0 +1,48 @@
+{
+  String name[];
+  Hashtable table;
+  if (isAttribute) {
+    table=attributeNameTable;
+  }
+ else {
+    table=elementNameTable;
+  }
+  name=(String[])table.get(qName);
+  if (name != null) {
+    return name;
+  }
+  name=new String[3];
+  name[2]=qName.intern();
+  int index=qName.indexOf(':');
+  if (index == -1) {
+    if (isAttribute) {
+      if (qName == "xmlns" && namespaceDeclUris)       name[0]=NSDECL;
+ else       name[0]="";
+    }
+ else     if (defaultNS == null) {
+      name[0]="";
+    }
+ else {
+      name[0]=defaultNS;
+    }
+    name[1]=name[2];
+  }
+ else {
+    String prefix=qName.substring(0,index);
+    String local=qName.substring(index + 1);
+    String uri;
+    if ("".equals(prefix)) {
+      uri=defaultNS;
+    }
+ else {
+      uri=(String)prefixTable.get(prefix);
+    }
+    if (uri == null || (!isAttribute && "xmlns".equals(prefix))) {
+      return null;
+    }
+    name[0]=uri;
+    name[1]=local.intern();
+  }
+  table.put(name[2],name);
+  return name;
+}

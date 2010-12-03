@@ -1,0 +1,12 @@
+{
+  Thread w=Thread.currentThread();
+  int spins=SPINS;
+  for (; ; ) {
+    Object v=node.get();
+    if (v != null)     return v;
+ else     if (spins > 0)     --spins;
+ else     if (node.waiter == null)     node.waiter=w;
+ else     if (w.isInterrupted())     tryCancel(node,slot);
+ else     LockSupport.park();
+  }
+}

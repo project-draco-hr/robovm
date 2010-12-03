@@ -1,0 +1,20 @@
+{
+  if (map instanceof EnumMap) {
+    initialization((EnumMap<K,V>)map);
+  }
+ else {
+    if (0 == map.size()) {
+      throw new IllegalArgumentException();
+    }
+    Iterator<K> iter=map.keySet().iterator();
+    K enumKey=iter.next();
+    Class clazz=enumKey.getClass();
+    if (clazz.isEnum()) {
+      initialization(clazz);
+    }
+ else {
+      initialization(clazz.getSuperclass());
+    }
+    putAllImpl(map);
+  }
+}

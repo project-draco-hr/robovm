@@ -1,0 +1,27 @@
+{
+  byte[] bytes=dns.toLowerCase().getBytes("UTF-8");
+  boolean first_letter=true;
+  for (int i=0; i < bytes.length; i++) {
+    byte ch=bytes[i];
+    if (first_letter) {
+      if ((bytes.length > 2) && (ch == '*') && (bytes[1] == '.')) {
+        first_letter=false;
+        continue;
+      }
+      if ((ch > 'z' || ch < 'a') && (ch < '0' || ch > '9')) {
+        throw new IOException(Messages.getString("security.184",(char)ch,dns));
+      }
+      first_letter=false;
+      continue;
+    }
+    if (!((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || (ch == '-')|| (ch == '.'))) {
+      throw new IOException(Messages.getString("security.185",dns));
+    }
+    if (ch == '.') {
+      if (bytes[i - 1] == '-') {
+        throw new IOException(Messages.getString("security.186",dns));
+      }
+      first_letter=true;
+    }
+  }
+}

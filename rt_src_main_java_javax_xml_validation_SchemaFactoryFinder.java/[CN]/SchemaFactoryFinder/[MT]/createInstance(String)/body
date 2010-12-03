@@ -1,0 +1,23 @@
+{
+  try {
+    if (debug)     debugPrintln("instanciating " + className);
+    Class clazz;
+    if (classLoader != null)     clazz=classLoader.loadClass(className);
+ else     clazz=Class.forName(className);
+    if (debug)     debugPrintln("loaded it from " + which(clazz));
+    Object o=clazz.newInstance();
+    if (o instanceof SchemaFactory)     return (SchemaFactory)o;
+    if (debug)     debugPrintln(className + " is not assignable to " + SERVICE_CLASS.getName());
+  }
+ catch (  VirtualMachineError vme) {
+    throw vme;
+  }
+catch (  ThreadDeath td) {
+    throw td;
+  }
+catch (  Throwable t) {
+    debugPrintln("failed to instanciate " + className);
+    if (debug)     t.printStackTrace();
+  }
+  return null;
+}

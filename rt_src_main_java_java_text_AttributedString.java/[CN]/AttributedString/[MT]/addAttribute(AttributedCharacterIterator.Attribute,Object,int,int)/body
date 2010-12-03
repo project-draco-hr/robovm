@@ -1,0 +1,75 @@
+{
+  if (null == attribute) {
+    throw new NullPointerException();
+  }
+  if (start < 0 || end > text.length() || start >= end) {
+    throw new IllegalArgumentException();
+  }
+  if (value == null) {
+    return;
+  }
+  List<Range> ranges=attributeMap.get(attribute);
+  if (ranges == null) {
+    ranges=new ArrayList<Range>(1);
+    ranges.add(new Range(start,end,value));
+    attributeMap.put(attribute,ranges);
+    return;
+  }
+  ListIterator<Range> it=ranges.listIterator();
+  while (it.hasNext()) {
+    Range range=it.next();
+    if (end <= range.start) {
+      it.previous();
+      break;
+    }
+ else     if (start < range.end || (start == range.end && value.equals(range.value))) {
+      Range r1=null, r3;
+      it.remove();
+      r1=new Range(range.start,start,range.value);
+      r3=new Range(end,range.end,range.value);
+      while (end > range.end && it.hasNext()) {
+        range=it.next();
+        if (end <= range.end) {
+          if (end > range.start || (end == range.start && value.equals(range.value))) {
+            it.remove();
+            r3=new Range(end,range.end,range.value);
+            break;
+          }
+        }
+ else {
+          it.remove();
+        }
+      }
+      if (value.equals(r1.value)) {
+        if (value.equals(r3.value)) {
+          it.add(new Range(r1.start < start ? r1.start : start,r3.end > end ? r3.end : end,r1.value));
+        }
+ else {
+          it.add(new Range(r1.start < start ? r1.start : start,end,r1.value));
+          if (r3.start < r3.end) {
+            it.add(r3);
+          }
+        }
+      }
+ else {
+        if (value.equals(r3.value)) {
+          if (r1.start < r1.end) {
+            it.add(r1);
+          }
+          it.add(new Range(start,r3.end > end ? r3.end : end,r3.value));
+        }
+ else {
+          if (r1.start < r1.end) {
+            it.add(r1);
+          }
+          it.add(new Range(start,end,value));
+          if (r3.start < r3.end) {
+            it.add(r3);
+          }
+        }
+      }
+      return;
+    }
+  }
+  it.add(new Range(start,end,value));
+}

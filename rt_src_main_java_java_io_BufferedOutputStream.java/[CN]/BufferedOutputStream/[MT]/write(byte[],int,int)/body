@@ -1,0 +1,25 @@
+{
+  byte[] internalBuffer=buf;
+  if (internalBuffer != null && length >= internalBuffer.length) {
+    flushInternal();
+    out.write(buffer,offset,length);
+    return;
+  }
+  if (buffer == null) {
+    throw new NullPointerException(Messages.getString("luni.11"));
+  }
+  if (offset < 0 || offset > buffer.length - length) {
+    throw new ArrayIndexOutOfBoundsException(Messages.getString("luni.12",offset));
+  }
+  if (length < 0) {
+    throw new ArrayIndexOutOfBoundsException(Messages.getString("luni.18",length));
+  }
+  if (internalBuffer == null) {
+    throw new IOException(Messages.getString("luni.24"));
+  }
+  if (length >= (internalBuffer.length - count)) {
+    flushInternal();
+  }
+  System.arraycopy(buffer,offset,internalBuffer,count,length);
+  count+=length;
+}

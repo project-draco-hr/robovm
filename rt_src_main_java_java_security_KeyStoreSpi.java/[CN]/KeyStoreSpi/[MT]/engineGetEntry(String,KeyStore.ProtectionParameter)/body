@@ -1,0 +1,40 @@
+{
+  if (!engineContainsAlias(alias)) {
+    return null;
+  }
+  if (engineIsCertificateEntry(alias)) {
+    return new KeyStore.TrustedCertificateEntry(engineGetCertificate(alias));
+  }
+  char[] passW=null;
+  if (protParam != null) {
+    if (protParam instanceof KeyStore.PasswordProtection) {
+      try {
+        passW=((KeyStore.PasswordProtection)protParam).getPassword();
+      }
+ catch (      IllegalStateException ee) {
+        throw new KeyStoreException(Messages.getString("security.36"),ee);
+      }
+    }
+ else     if (protParam instanceof KeyStore.CallbackHandlerProtection) {
+      passW=getPasswordFromCallBack(protParam);
+    }
+ else {
+      throw new UnrecoverableEntryException(Messages.getString("security.37",protParam.toString()));
+    }
+  }
+  if (engineIsKeyEntry(alias)) {
+    try {
+      Key key=engineGetKey(alias,passW);
+      if (key instanceof PrivateKey) {
+        return new KeyStore.PrivateKeyEntry((PrivateKey)key,engineGetCertificateChain(alias));
+      }
+      if (key instanceof SecretKey) {
+        return new KeyStore.SecretKeyEntry((SecretKey)key);
+      }
+    }
+ catch (    UnrecoverableKeyException e) {
+      throw new KeyStoreException(e);
+    }
+  }
+  throw new NoSuchAlgorithmException(Messages.getString("security.38"));
+}

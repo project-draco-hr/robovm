@@ -1,0 +1,19 @@
+{
+  String id=calendar.getTimeZone().getID();
+  if (!tzId.equals(id)) {
+    tzId=id;
+    icuFormat.setTimeZone(com.ibm.icu.util.TimeZone.getTimeZone(tzId));
+  }
+  StringBuffer result=null;
+  Format.Field attribute=fieldPos.getFieldAttribute();
+  if (attribute instanceof DateFormat.Field) {
+    com.ibm.icu.text.DateFormat.Field icuAttribute=toICUField((DateFormat.Field)attribute);
+    int field=fieldPos.getField();
+    FieldPosition icuFieldPos=new FieldPosition(icuAttribute,field);
+    result=icuFormat.format(date,buffer,icuFieldPos);
+    fieldPos.setBeginIndex(icuFieldPos.getBeginIndex());
+    fieldPos.setEndIndex(icuFieldPos.getEndIndex());
+    return result;
+  }
+  return icuFormat.format(date,buffer,fieldPos);
+}

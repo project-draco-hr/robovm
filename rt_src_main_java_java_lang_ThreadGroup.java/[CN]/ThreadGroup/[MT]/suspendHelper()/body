@@ -1,0 +1,21 @@
+{
+  checkAccess();
+  boolean suspendCurrent=false;
+synchronized (this.childrenThreadsLock) {
+    Thread current=Thread.currentThread();
+    for (int i=0; i < numThreads; i++) {
+      if (this.childrenThreads[i] == current) {
+        suspendCurrent=true;
+      }
+ else {
+        this.childrenThreads[i].suspend();
+      }
+    }
+  }
+synchronized (this.childrenGroupsLock) {
+    for (int i=0; i < numGroups; i++) {
+      suspendCurrent|=this.childrenGroups[i].suspendHelper();
+    }
+  }
+  return suspendCurrent;
+}

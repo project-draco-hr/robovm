@@ -1,0 +1,33 @@
+{
+  super(stream);
+  if (verify) {
+    verifier=new JarVerifier("JarInputStream");
+  }
+  if ((mEntry=getNextJarEntry()) == null) {
+    return;
+  }
+  String name=Util.toASCIIUpperCase(mEntry.getName());
+  if (name.equals(JarFile.META_DIR)) {
+    mEntry=null;
+    closeEntry();
+    mEntry=getNextJarEntry();
+    name=mEntry.getName().toUpperCase();
+  }
+  if (name.equals(JarFile.MANIFEST_NAME)) {
+    mEntry=null;
+    manifest=new Manifest(this,verify);
+    closeEntry();
+    if (verify) {
+      verifier.setManifest(manifest);
+      if (manifest != null) {
+        verifier.mainAttributesEnd=manifest.getMainAttributesEnd();
+      }
+    }
+  }
+ else {
+    Attributes temp=new Attributes(3);
+    temp.map.put("hidden",null);
+    mEntry.setAttributes(temp);
+    verifier=null;
+  }
+}

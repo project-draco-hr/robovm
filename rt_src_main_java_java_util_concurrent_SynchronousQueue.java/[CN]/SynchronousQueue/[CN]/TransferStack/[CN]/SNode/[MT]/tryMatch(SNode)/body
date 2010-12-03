@@ -1,0 +1,11 @@
+{
+  if (match == null && matchUpdater.compareAndSet(this,null,s)) {
+    Thread w=waiter;
+    if (w != null) {
+      waiter=null;
+      LockSupport.unpark(w);
+    }
+    return true;
+  }
+  return match == s;
+}

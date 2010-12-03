@@ -1,0 +1,24 @@
+{
+  int begOffset=offset;
+  int endOffset=begOffset + length;
+  ASN1Type type=collection.type;
+  if (isVerify) {
+    while (endOffset > offset) {
+      next();
+      type.decode(this);
+    }
+  }
+ else {
+    int seqTagOffset=tagOffset;
+    ArrayList values=new ArrayList();
+    while (endOffset > offset) {
+      next();
+      values.add(type.decode(this));
+    }
+    content=values;
+    tagOffset=seqTagOffset;
+  }
+  if (offset != endOffset) {
+    throw new ASN1Exception(Messages.getString("security.134",begOffset));
+  }
+}

@@ -1,0 +1,21 @@
+{
+  encoded[offset++]=(byte)tag;
+  if (length > 127) {
+    int eLen=length >> 8;
+    byte numOctets=1;
+    for (; eLen > 0; eLen=eLen >> 8) {
+      numOctets++;
+    }
+    encoded[offset]=(byte)(numOctets | 0x80);
+    offset++;
+    eLen=length;
+    int numOffset=offset + numOctets - 1;
+    for (int i=0; i < numOctets; i++, eLen=eLen >> 8) {
+      encoded[numOffset - i]=(byte)eLen;
+    }
+    offset+=numOctets;
+  }
+ else {
+    encoded[offset++]=(byte)length;
+  }
+}

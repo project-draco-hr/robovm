@@ -1,0 +1,26 @@
+{
+  checkAccess();
+  Object[] immediateCollection=enumeratingThreads ? (Object[])childrenThreads : (Object[])childrenGroups;
+  Object syncLock=enumeratingThreads ? childrenThreadsLock : childrenGroupsLock;
+synchronized (syncLock) {
+    for (int i=enumeratingThreads ? numThreads : numGroups; --i >= 0; ) {
+      if (!enumeratingThreads || ((Thread)immediateCollection[i]).isAlive()) {
+        if (enumerationIndex >= enumeration.length) {
+          return enumerationIndex;
+        }
+        enumeration[enumerationIndex++]=immediateCollection[i];
+      }
+    }
+  }
+  if (recurse) {
+synchronized (this.childrenGroupsLock) {
+      for (int i=0; i < numGroups; i++) {
+        if (enumerationIndex >= enumeration.length) {
+          return enumerationIndex;
+        }
+        enumerationIndex=childrenGroups[i].enumerateGeneric(enumeration,recurse,enumerationIndex,enumeratingThreads);
+      }
+    }
+  }
+  return enumerationIndex;
+}

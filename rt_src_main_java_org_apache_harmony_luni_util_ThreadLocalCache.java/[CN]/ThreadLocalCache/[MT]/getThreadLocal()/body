@@ -1,0 +1,13 @@
+{
+  ThreadLocal<T> tls=storage.get();
+  if (tls == null) {
+    tls=new ThreadLocal<T>(){
+      public T initialValue(){
+        return ThreadLocalCache.this.initialValue();
+      }
+    }
+;
+    storage=new SoftReference<ThreadLocal<T>>(tls);
+  }
+  return tls;
+}

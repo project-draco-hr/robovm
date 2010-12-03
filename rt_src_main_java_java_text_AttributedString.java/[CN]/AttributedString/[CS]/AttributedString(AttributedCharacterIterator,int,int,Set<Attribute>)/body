@@ -1,0 +1,30 @@
+{
+  if (start < iterator.getBeginIndex() || end > iterator.getEndIndex() || start > end) {
+    throw new IllegalArgumentException();
+  }
+  if (attributes == null) {
+    return;
+  }
+  StringBuilder buffer=new StringBuilder();
+  iterator.setIndex(start);
+  while (iterator.getIndex() < end) {
+    buffer.append(iterator.current());
+    iterator.next();
+  }
+  text=buffer.toString();
+  attributeMap=new HashMap<Attribute,List<Range>>((attributes.size() * 4 / 3) + 1);
+  Iterator<Attribute> it=attributes.iterator();
+  while (it.hasNext()) {
+    AttributedCharacterIterator.Attribute attribute=it.next();
+    iterator.setIndex(start);
+    while (iterator.getIndex() < end) {
+      Object value=iterator.getAttribute(attribute);
+      int runStart=iterator.getRunStart(attribute);
+      int limit=iterator.getRunLimit(attribute);
+      if ((value instanceof Annotation && runStart >= start && limit <= end) || (value != null && !(value instanceof Annotation))) {
+        addAttribute(attribute,value,(runStart < start ? start : runStart) - start,(limit > end ? end : limit) - start);
+      }
+      iterator.setIndex(limit);
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  Vector exceptions=null;
+  if (!namespaces) {
+    if (contentHandler != null) {
+      attAdapter.setAttributeList(qAtts);
+      contentHandler.startElement("","",qName.intern(),attAdapter);
+    }
+    return;
+  }
+  nsSupport.pushContext();
+  int length=qAtts.getLength();
+  for (int i=0; i < length; i++) {
+    String attQName=qAtts.getName(i);
+    if (!attQName.startsWith("xmlns"))     continue;
+    String prefix;
+    int n=attQName.indexOf(':');
+    if (n == -1 && attQName.length() == 5) {
+      prefix="";
+    }
+ else     if (n != 5) {
+      continue;
+    }
+ else     prefix=attQName.substring(n + 1);
+    String value=qAtts.getValue(i);
+    if (!nsSupport.declarePrefix(prefix,value)) {
+      reportError("Illegal Namespace prefix: " + prefix);
+      continue;
+    }
+    if (contentHandler != null)     contentHandler.startPrefixMapping(prefix,value);
+  }
+  atts.clear();
+  for (int i=0; i < length; i++) {
+    String attQName=qAtts.getName(i);
+    String type=qAtts.getType(i);
+    String value=qAtts.getValue(i);
+    if (attQName.startsWith("xmlns")) {
+      String prefix;
+      int n=attQName.indexOf(':');
+      if (n == -1 && attQName.length() == 5) {
+        prefix="";
+      }
+ else       if (n != 5) {
+        prefix=null;
+      }
+ else {
+        prefix=attQName.substring(6);
+      }
+      if (prefix != null) {
+        if (prefixes) {
+          if (uris)           atts.addAttribute(nsSupport.XMLNS,prefix,attQName.intern(),type,value);
+ else           atts.addAttribute("","",attQName.intern(),type,value);
+        }
+        continue;
+      }
+    }
+    try {
+      String attName[]=processName(attQName,true,true);
+      atts.addAttribute(attName[0],attName[1],attName[2],type,value);
+    }
+ catch (    SAXException e) {
+      if (exceptions == null)       exceptions=new Vector();
+      exceptions.addElement(e);
+      atts.addAttribute("",attQName,attQName,type,value);
+    }
+  }
+  if (exceptions != null && errorHandler != null) {
+    for (int i=0; i < exceptions.size(); i++)     errorHandler.error((SAXParseException)(exceptions.elementAt(i)));
+  }
+  if (contentHandler != null) {
+    String name[]=processName(qName,false,false);
+    contentHandler.startElement(name[0],name[1],name[2],atts);
+  }
+}

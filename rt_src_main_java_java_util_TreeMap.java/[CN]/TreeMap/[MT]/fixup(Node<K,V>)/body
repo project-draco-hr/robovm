@@ -1,0 +1,74 @@
+{
+  Node<K,V> w;
+  while (x != root && !x.color) {
+    if (x == x.parent.left) {
+      w=x.parent.right;
+      if (w == null) {
+        x=x.parent;
+        continue;
+      }
+      if (w.color) {
+        w.color=false;
+        x.parent.color=true;
+        leftRotate(x.parent);
+        w=x.parent.right;
+        if (w == null) {
+          x=x.parent;
+          continue;
+        }
+      }
+      if ((w.left == null || !w.left.color) && (w.right == null || !w.right.color)) {
+        w.color=true;
+        x=x.parent;
+      }
+ else {
+        if (w.right == null || !w.right.color) {
+          w.left.color=false;
+          w.color=true;
+          rightRotate(w);
+          w=x.parent.right;
+        }
+        w.color=x.parent.color;
+        x.parent.color=false;
+        w.right.color=false;
+        leftRotate(x.parent);
+        x=root;
+      }
+    }
+ else {
+      w=x.parent.left;
+      if (w == null) {
+        x=x.parent;
+        continue;
+      }
+      if (w.color) {
+        w.color=false;
+        x.parent.color=true;
+        rightRotate(x.parent);
+        w=x.parent.left;
+        if (w == null) {
+          x=x.parent;
+          continue;
+        }
+      }
+      if ((w.left == null || !w.left.color) && (w.right == null || !w.right.color)) {
+        w.color=true;
+        x=x.parent;
+      }
+ else {
+        if (w.left == null || !w.left.color) {
+          w.right.color=false;
+          w.color=true;
+          leftRotate(w);
+          w=x.parent.left;
+        }
+        w.color=x.parent.color;
+        x.parent.color=false;
+        w.left.color=false;
+        rightRotate(x.parent);
+        x=root;
+      }
+    }
+  }
+  x.color=false;
+}

@@ -1,0 +1,33 @@
+{
+  checkClosed();
+  matcher.usePattern(LINE_PATTERN);
+  matcher.region(findStartIndex,bufferLength);
+  String result=null;
+  while (true) {
+    if (matcher.find()) {
+      if (inputExhausted || matcher.end() != bufferLength || bufferLength < buffer.capacity()) {
+        matchSuccessful=true;
+        findStartIndex=matcher.end();
+        result=matcher.group();
+        break;
+      }
+    }
+ else {
+      if (inputExhausted) {
+        matchSuccessful=false;
+        throw new NoSuchElementException();
+      }
+    }
+    if (!inputExhausted) {
+      readMore();
+      resetMatcher();
+    }
+  }
+  if (null != result) {
+    Matcher terminatorMatcher=LINE_TERMINATOR.matcher(result);
+    if (terminatorMatcher.find()) {
+      result=result.substring(0,terminatorMatcher.start());
+    }
+  }
+  return result;
+}

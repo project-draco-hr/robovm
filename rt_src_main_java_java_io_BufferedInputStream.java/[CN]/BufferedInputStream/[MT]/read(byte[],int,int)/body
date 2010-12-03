@@ -1,0 +1,61 @@
+{
+  byte[] localBuf=buf;
+  if (localBuf == null) {
+    throw new IOException(Messages.getString("luni.24"));
+  }
+  if (offset > buffer.length - length || offset < 0 || length < 0) {
+    throw new IndexOutOfBoundsException();
+  }
+  if (length == 0) {
+    return 0;
+  }
+  InputStream localIn=in;
+  if (localIn == null) {
+    throw new IOException(Messages.getString("luni.24"));
+  }
+  int required;
+  if (pos < count) {
+    int copylength=count - pos >= length ? length : count - pos;
+    System.arraycopy(localBuf,pos,buffer,offset,copylength);
+    pos+=copylength;
+    if (copylength == length || localIn.available() == 0) {
+      return copylength;
+    }
+    offset+=copylength;
+    required=length - copylength;
+  }
+ else {
+    required=length;
+  }
+  while (true) {
+    int read;
+    if (markpos == -1 && required >= localBuf.length) {
+      read=localIn.read(buffer,offset,required);
+      if (read == -1) {
+        return required == length ? -1 : length - required;
+      }
+    }
+ else {
+      if (fillbuf(localIn,localBuf) == -1) {
+        return required == length ? -1 : length - required;
+      }
+      if (localBuf != buf) {
+        localBuf=buf;
+        if (localBuf == null) {
+          throw new IOException(Messages.getString("luni.24"));
+        }
+      }
+      read=count - pos >= required ? required : count - pos;
+      System.arraycopy(localBuf,pos,buffer,offset,read);
+      pos+=read;
+    }
+    required-=read;
+    if (required == 0) {
+      return length;
+    }
+    if (localIn.available() == 0) {
+      return length - required;
+    }
+    offset+=read;
+  }
+}

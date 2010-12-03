@@ -1,0 +1,26 @@
+{
+  if (c.size() == 0) {
+    return 0;
+  }
+  lock.lock();
+  try {
+    E[] old=getData();
+    int size=old.length;
+    E[] toAdd=newElementArray(c.size());
+    int i=0;
+    for (Iterator it=c.iterator(); it.hasNext(); ) {
+      E o=(E)it.next();
+      if (indexOf(o) < 0) {
+        toAdd[i++]=o;
+      }
+    }
+    E[] data=newElementArray(size + i);
+    System.arraycopy(old,0,data,0,size);
+    System.arraycopy(toAdd,0,data,size,i);
+    setData(data);
+    return i;
+  }
+  finally {
+    lock.unlock();
+  }
+}

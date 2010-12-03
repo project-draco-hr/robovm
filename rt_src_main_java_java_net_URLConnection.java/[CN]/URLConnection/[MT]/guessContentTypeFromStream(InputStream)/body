@@ -1,0 +1,59 @@
+{
+  if (!is.markSupported()) {
+    return null;
+  }
+  is.mark(64);
+  byte[] bytes=new byte[64];
+  int length=is.read(bytes);
+  is.reset();
+  if (length == -1) {
+    return null;
+  }
+  String encoding="ASCII";
+  int start=0;
+  if (length > 1) {
+    if ((bytes[0] == (byte)0xFF) && (bytes[1] == (byte)0xFE)) {
+      encoding="UTF-16LE";
+      start=2;
+      length-=length & 1;
+    }
+    if ((bytes[0] == (byte)0xFE) && (bytes[1] == (byte)0xFF)) {
+      encoding="UTF-16BE";
+      start=2;
+      length-=length & 1;
+    }
+    if (length > 2) {
+      if ((bytes[0] == (byte)0xEF) && (bytes[1] == (byte)0xBB) && (bytes[2] == (byte)0xBF)) {
+        encoding="UTF-8";
+        start=3;
+      }
+      if (length > 3) {
+        if ((bytes[0] == (byte)0x00) && (bytes[1] == (byte)0x00) && (bytes[2] == (byte)0xFE)&& (bytes[3] == (byte)0xFF)) {
+          encoding="UTF-32BE";
+          start=4;
+          length-=length & 3;
+        }
+        if ((bytes[0] == (byte)0xFF) && (bytes[1] == (byte)0xFE) && (bytes[2] == (byte)0x00)&& (bytes[3] == (byte)0x00)) {
+          encoding="UTF-32LE";
+          start=4;
+          length-=length & 3;
+        }
+      }
+    }
+  }
+  String header=new String(bytes,start,length - start,encoding);
+  if (header.startsWith("PK")) {
+    return "application/zip";
+  }
+  if (header.startsWith("GI")) {
+    return "image/gif";
+  }
+  String textHeader=header.trim().toUpperCase();
+  if (textHeader.startsWith("<!DOCTYPE HTML") || textHeader.startsWith("<HTML") || textHeader.startsWith("<HEAD")|| textHeader.startsWith("<BODY")|| textHeader.startsWith("<HEAD")) {
+    return "text/html";
+  }
+  if (textHeader.startsWith("<?XML")) {
+    return "application/xml";
+  }
+  return null;
+}

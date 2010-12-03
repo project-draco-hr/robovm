@@ -1,0 +1,22 @@
+{
+  if (o == this)   return true;
+  if (!(o instanceof Set))   return false;
+  Set<?> set=(Set<?>)(o);
+  Iterator<?> it=set.iterator();
+  Object[] elements=al.getArray();
+  int len=elements.length;
+  boolean[] matched=new boolean[len];
+  int k=0;
+  outer:   while (it.hasNext()) {
+    if (++k > len)     return false;
+    Object x=it.next();
+    for (int i=0; i < len; ++i) {
+      if (!matched[i] && eq(x,elements[i])) {
+        matched[i]=true;
+        continue outer;
+      }
+    }
+    return false;
+  }
+  return k == len;
+}

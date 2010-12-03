@@ -1,0 +1,19 @@
+{
+  if (c == null)   throw new NullPointerException();
+  if (c == this)   throw new IllegalArgumentException();
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    int n=0;
+    for (; ; ) {
+      E first=q.peek();
+      if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0)       break;
+      c.add(q.poll());
+      ++n;
+    }
+    return n;
+  }
+  finally {
+    lock.unlock();
+  }
+}

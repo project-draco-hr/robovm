@@ -1,0 +1,16 @@
+{
+  if (host == null || 0 == host.length()) {
+    return InetAddress.LOOPBACK;
+  }
+  if (host.equals("0")) {
+    return InetAddress.ANY;
+  }
+  if (isHostName(host)) {
+    SecurityManager security=System.getSecurityManager();
+    if (security != null) {
+      security.checkConnect(host,-1);
+    }
+    return lookupHostByName(host);
+  }
+  return createHostNameFromIPAddress(host);
+}

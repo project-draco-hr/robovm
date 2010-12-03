@@ -1,0 +1,38 @@
+{
+  String prefixName;
+  String file=url.getFile();
+  if (url.getFile().endsWith("!/")) {
+    prefixName="";
+  }
+ else {
+    int sepIdx=file.lastIndexOf("!/");
+    if (sepIdx == -1) {
+      return null;
+    }
+    sepIdx+=2;
+    prefixName=file.substring(sepIdx);
+  }
+  try {
+    URL jarURL=((JarURLConnection)url.openConnection()).getJarFileURL();
+    JarURLConnection juc=(JarURLConnection)new URL("jar","",jarURL.toExternalForm() + "!/").openConnection();
+    JarFile jf=juc.getJarFile();
+    URLJarHandler jarH=new URLJarHandler(url,jarURL,jf,prefixName);
+    if (jarH.getIndex() == null) {
+      try {
+        Manifest manifest=jf.getManifest();
+        if (manifest != null) {
+          String classpath=manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
+          if (classpath != null) {
+            searchList.addAll(0,getInternalURLs(url,classpath));
+          }
+        }
+      }
+ catch (      IOException e) {
+      }
+    }
+    return jarH;
+  }
+ catch (  IOException e) {
+  }
+  return null;
+}

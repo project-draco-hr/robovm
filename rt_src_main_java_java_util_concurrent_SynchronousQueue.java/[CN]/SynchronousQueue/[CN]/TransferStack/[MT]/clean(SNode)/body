@@ -1,0 +1,13 @@
+{
+  s.item=null;
+  s.waiter=null;
+  SNode past=s.next;
+  if (past != null && past.isCancelled())   past=past.next;
+  SNode p;
+  while ((p=head) != null && p != past && p.isCancelled())   casHead(p,p.next);
+  while (p != null && p != past) {
+    SNode n=p.next;
+    if (n != null && n.isCancelled())     p.casNext(n,n.next);
+ else     p=n;
+  }
+}

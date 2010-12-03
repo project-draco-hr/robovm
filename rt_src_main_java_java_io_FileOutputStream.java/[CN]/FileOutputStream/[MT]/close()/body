@@ -1,0 +1,18 @@
+{
+  if (fd == null) {
+    return;
+  }
+  if (channel != null) {
+synchronized (channel) {
+      if (channel.isOpen() && fd.descriptor >= 0) {
+        channel.close();
+      }
+    }
+  }
+synchronized (this) {
+    if (fd.descriptor >= 0 && innerFD) {
+      fileSystem.close(fd.descriptor);
+      fd.descriptor=-1;
+    }
+  }
+}

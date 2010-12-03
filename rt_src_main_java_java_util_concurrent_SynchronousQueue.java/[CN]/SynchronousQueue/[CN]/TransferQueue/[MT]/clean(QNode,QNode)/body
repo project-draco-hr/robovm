@@ -1,0 +1,31 @@
+{
+  s.waiter=null;
+  while (pred.next == s) {
+    QNode h=head;
+    QNode hn=h.next;
+    if (hn != null && hn.isCancelled()) {
+      advanceHead(h,hn);
+      continue;
+    }
+    QNode t=tail;
+    if (t == h)     return;
+    QNode tn=t.next;
+    if (t != tail)     continue;
+    if (tn != null) {
+      advanceTail(t,tn);
+      continue;
+    }
+    if (s != t) {
+      QNode sn=s.next;
+      if (sn == s || pred.casNext(s,sn))       return;
+    }
+    QNode dp=cleanMe;
+    if (dp != null) {
+      QNode d=dp.next;
+      QNode dn;
+      if (d == null || d == dp || !d.isCancelled() || (d != t && (dn=d.next) != null && dn != d && dp.casNext(d,dn)))       casCleanMe(dp,null);
+      if (dp == pred)       return;
+    }
+ else     if (casCleanMe(null,pred))     return;
+  }
+}

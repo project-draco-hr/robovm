@@ -1,0 +1,21 @@
+{
+  if (off > buf.length || nbytes < 0 || off < 0 || buf.length - off < nbytes) {
+    throw new ArrayIndexOutOfBoundsException();
+  }
+  if (nbytes == 0) {
+    return 0;
+  }
+  if (streamHandle == -1) {
+    throw new IllegalStateException();
+  }
+  if (needsInput()) {
+    return 0;
+  }
+  boolean neededDict=needsDictionary;
+  needsDictionary=false;
+  int result=inflateImpl(buf,off,nbytes,streamHandle);
+  if (needsDictionary && neededDict) {
+    throw new DataFormatException(Messages.getString("archive.27"));
+  }
+  return result;
+}

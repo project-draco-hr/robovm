@@ -1,0 +1,18 @@
+{
+  if (!compareAndSetState(READY,RUNNING))   return;
+  runner=Thread.currentThread();
+  if (getState() == RUNNING) {
+    V result;
+    try {
+      result=callable.call();
+    }
+ catch (    Throwable ex) {
+      setException(ex);
+      return;
+    }
+    set(result);
+  }
+ else {
+    releaseShared(0);
+  }
+}

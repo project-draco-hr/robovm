@@ -1,0 +1,86 @@
+{
+  if (field < 0 || field >= FIELD_COUNT) {
+    throw new IllegalArgumentException();
+  }
+  if (ALL_STYLES != style && SHORT != style && LONG != style) {
+    throw new IllegalArgumentException();
+  }
+  complete();
+  DateFormatSymbols symbol=new DateFormatSymbols(locale);
+  Map<String,Integer> ret=new HashMap<String,Integer>();
+switch (field) {
+case MONTH:
+    String[] months;
+switch (style) {
+case LONG:
+    months=symbol.getMonths();
+  break;
+case SHORT:
+months=symbol.getShortMonths();
+break;
+case ALL_STYLES:
+months=symbol.getMonths();
+for (int i=0; i < months.length; i++) {
+if (!months[i].equals("") && months[i] != null) {
+ret.put(months[i],i);
+}
+}
+months=symbol.getShortMonths();
+break;
+default :
+throw new IllegalArgumentException();
+}
+for (int i=0; i < months.length; i++) {
+if (!months[i].equals("") && months[i] != null) {
+ret.put(months[i],i);
+}
+}
+break;
+case DAY_OF_WEEK:
+String[] weekDays;
+switch (style) {
+case LONG:
+weekDays=symbol.getWeekdays();
+break;
+case SHORT:
+weekDays=symbol.getShortWeekdays();
+break;
+case ALL_STYLES:
+weekDays=symbol.getWeekdays();
+for (int i=0; i < weekDays.length; i++) {
+if (!weekDays[i].equals("") && weekDays[i] != null) {
+ret.put(weekDays[i],i);
+}
+}
+weekDays=symbol.getWeekdays();
+break;
+default :
+throw new IllegalArgumentException();
+}
+for (int i=0; i < weekDays.length; i++) {
+if (!weekDays[i].equals("") && weekDays[i] != null) {
+ret.put(weekDays[i],i);
+}
+}
+break;
+case AM_PM:
+String[] amPms=symbol.getAmPmStrings();
+for (int i=0; i < amPms.length; i++) {
+if (!amPms[i].equals("") && amPms[i] != null) {
+ret.put(amPms[i],i);
+}
+}
+break;
+case ERA:
+String[] eras=symbol.getEras();
+for (int i=0; i < eras.length; i++) {
+if (!eras[i].equals("") && eras[i] != null) {
+ret.put(eras[i],i);
+}
+}
+break;
+default :
+ret=null;
+}
+return ret;
+}

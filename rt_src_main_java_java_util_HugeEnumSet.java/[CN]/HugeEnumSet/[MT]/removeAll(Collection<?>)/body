@@ -1,0 +1,24 @@
+{
+  if (collection.isEmpty()) {
+    return false;
+  }
+  if (collection instanceof EnumSet) {
+    EnumSet<?> set=(EnumSet<?>)collection;
+    if (!isValidType(set.elementClass)) {
+      return false;
+    }
+    HugeEnumSet<E> hugeSet=(HugeEnumSet<E>)set;
+    boolean changed=false;
+    for (int i=0; i < bits.length; i++) {
+      long oldBits=bits[i];
+      long newBits=oldBits & ~hugeSet.bits[i];
+      if (oldBits != newBits) {
+        bits[i]=newBits;
+        size+=Long.bitCount(newBits) - Long.bitCount(oldBits);
+        changed=true;
+      }
+    }
+    return changed;
+  }
+  return super.removeAll(collection);
+}

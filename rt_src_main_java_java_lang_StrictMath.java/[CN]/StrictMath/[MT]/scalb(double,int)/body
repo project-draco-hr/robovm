@@ -1,0 +1,37 @@
+{
+  if (Double.isNaN(d) || Double.isInfinite(d) || 0 == d) {
+    return d;
+  }
+  long bits=Double.doubleToLongBits(d);
+  Long sign=bits & DOUBLE_SIGN_MASK;
+  long factor=(int)((Double.doubleToLongBits(d) & DOUBLE_EXPONENT_MASK) >> DOUBLE_MANTISSA_BITS) - DOUBLE_EXPONENT_BIAS + scaleFactor;
+  int subNormalFactor=Long.numberOfLeadingZeros(bits & ~DOUBLE_SIGN_MASK) - DOUBLE_EXPONENT_BITS;
+  if (subNormalFactor < 0) {
+    subNormalFactor=0;
+  }
+  if (Math.abs(d) < Double.MIN_NORMAL) {
+    factor=factor - subNormalFactor;
+  }
+  if (factor > Double.MAX_EXPONENT) {
+    return (d > 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY);
+  }
+  long result;
+  if (factor < -DOUBLE_EXPONENT_BIAS) {
+    long digits=factor + DOUBLE_EXPONENT_BIAS + subNormalFactor;
+    if (Math.abs(d) < Double.MIN_NORMAL) {
+      result=shiftLongBits(bits & DOUBLE_MANTISSA_MASK,digits);
+    }
+ else {
+      result=shiftLongBits(bits & DOUBLE_MANTISSA_MASK | 0x0010000000000000L,digits - 1);
+    }
+  }
+ else {
+    if (Math.abs(d) >= Double.MIN_NORMAL) {
+      result=((factor + DOUBLE_EXPONENT_BIAS) << DOUBLE_MANTISSA_BITS) | (bits & DOUBLE_MANTISSA_MASK);
+    }
+ else {
+      result=((factor + DOUBLE_EXPONENT_BIAS) << DOUBLE_MANTISSA_BITS) | ((bits << (subNormalFactor + 1)) & DOUBLE_MANTISSA_MASK);
+    }
+  }
+  return Double.longBitsToDouble(result | sign);
+}

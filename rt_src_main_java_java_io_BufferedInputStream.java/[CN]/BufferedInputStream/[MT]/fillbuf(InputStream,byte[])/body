@@ -1,0 +1,28 @@
+{
+  if (markpos == -1 || (pos - markpos >= marklimit)) {
+    int result=localIn.read(localBuf);
+    if (result > 0) {
+      markpos=-1;
+      pos=0;
+      count=result == -1 ? 0 : result;
+    }
+    return result;
+  }
+  if (markpos == 0 && marklimit > localBuf.length) {
+    int newLength=localBuf.length * 2;
+    if (newLength > marklimit) {
+      newLength=marklimit;
+    }
+    byte[] newbuf=new byte[newLength];
+    System.arraycopy(localBuf,0,newbuf,0,localBuf.length);
+    localBuf=buf=newbuf;
+  }
+ else   if (markpos > 0) {
+    System.arraycopy(localBuf,markpos,localBuf,0,localBuf.length - markpos);
+  }
+  pos-=markpos;
+  count=markpos=0;
+  int bytesread=localIn.read(localBuf,pos,localBuf.length - pos);
+  count=bytesread <= 0 ? pos : pos + bytesread;
+  return bytesread;
+}

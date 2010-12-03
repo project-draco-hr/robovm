@@ -1,0 +1,60 @@
+{
+  if (this.sign == 0) {
+    return new byte[]{0};
+  }
+  BigInteger temp=this;
+  int bitLen=bitLength();
+  int iThis=getFirstNonzeroDigit();
+  int bytesLen=(bitLen >> 3) + 1;
+  byte[] bytes=new byte[bytesLen];
+  int firstByteNumber=0;
+  int highBytes;
+  int digitIndex=0;
+  int bytesInInteger=4;
+  int digit;
+  int hB;
+  if (bytesLen - (numberLength << 2) == 1) {
+    bytes[0]=(byte)((sign < 0) ? -1 : 0);
+    highBytes=4;
+    firstByteNumber++;
+  }
+ else {
+    hB=bytesLen & 3;
+    highBytes=(hB == 0) ? 4 : hB;
+  }
+  digitIndex=iThis;
+  bytesLen-=iThis << 2;
+  if (sign < 0) {
+    digit=-temp.digits[digitIndex];
+    digitIndex++;
+    if (digitIndex == numberLength) {
+      bytesInInteger=highBytes;
+    }
+    for (int i=0; i < bytesInInteger; i++, digit>>=8) {
+      bytes[--bytesLen]=(byte)digit;
+    }
+    while (bytesLen > firstByteNumber) {
+      digit=~temp.digits[digitIndex];
+      digitIndex++;
+      if (digitIndex == numberLength) {
+        bytesInInteger=highBytes;
+      }
+      for (int i=0; i < bytesInInteger; i++, digit>>=8) {
+        bytes[--bytesLen]=(byte)digit;
+      }
+    }
+  }
+ else {
+    while (bytesLen > firstByteNumber) {
+      digit=temp.digits[digitIndex];
+      digitIndex++;
+      if (digitIndex == numberLength) {
+        bytesInInteger=highBytes;
+      }
+      for (int i=0; i < bytesInInteger; i++, digit>>=8) {
+        bytes[--bytesLen]=(byte)digit;
+      }
+    }
+  }
+  return bytes;
+}

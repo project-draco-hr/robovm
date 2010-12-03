@@ -1,0 +1,27 @@
+{
+  if (!initialized) {
+synchronized (this) {
+      if (!initialized) {
+        refresh();
+      }
+    }
+  }
+  Collection<Permission> pc=cache.get(pd);
+  if (pc == null) {
+synchronized (cache) {
+      pc=cache.get(pd);
+      if (pc == null) {
+        pc=new HashSet<Permission>();
+        Iterator<PolicyEntry> it=grants.iterator();
+        while (it.hasNext()) {
+          PolicyEntry ge=(PolicyEntry)it.next();
+          if (ge.impliesPrincipals(pd == null ? null : pd.getPrincipals()) && ge.impliesCodeSource(pd == null ? null : pd.getCodeSource())) {
+            pc.addAll(ge.getPermissions());
+          }
+        }
+        cache.put(pd,pc);
+      }
+    }
+  }
+  return PolicyUtils.toPermissionCollection(pc);
+}

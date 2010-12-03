@@ -1,0 +1,20 @@
+{
+  if (offset < 0 || offset > buffer.length) {
+    throw new ArrayIndexOutOfBoundsException(Messages.getString("luni.12",offset));
+  }
+  if (len < 0 || len > buffer.length - offset) {
+    throw new ArrayIndexOutOfBoundsException(Messages.getString("luni.18",len));
+  }
+synchronized (lock) {
+    if (isClosed()) {
+      throw new IOException(Messages.getString("luni.A9"));
+    }
+    if (pos < this.count) {
+      int bytesRead=pos + len > this.count ? this.count - pos : len;
+      System.arraycopy(this.buf,pos,buffer,offset,bytesRead);
+      pos+=bytesRead;
+      return bytesRead;
+    }
+    return -1;
+  }
+}

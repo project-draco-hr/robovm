@@ -1,0 +1,63 @@
+{
+  if (key == null || !(key instanceof String)) {
+    return;
+  }
+  String k=(String)key;
+  if (k.startsWith("Provider.")) {
+    return;
+  }
+  Provider.Service s;
+  String serviceName;
+  String algorithm=null;
+  String attribute=null;
+  int i;
+  if (k.startsWith("Alg.Alias.")) {
+    String aliasName;
+    String service_alias=k.substring(10);
+    i=service_alias.indexOf('.');
+    serviceName=service_alias.substring(0,i);
+    aliasName=service_alias.substring(i + 1);
+    if (propertyAliasTable != null) {
+      propertyAliasTable.remove(serviceName,aliasName.toUpperCase());
+    }
+    if (propertyServiceTable != null) {
+      for (Iterator<Service> it=propertyServiceTable.values().iterator(); it.hasNext(); ) {
+        s=it.next();
+        if (s.aliases.contains(aliasName)) {
+          s.aliases.remove(aliasName);
+          return;
+        }
+      }
+    }
+    return;
+  }
+  int j=k.indexOf('.');
+  if (j == -1) {
+    return;
+  }
+  i=k.indexOf(' ');
+  if (i == -1) {
+    serviceName=k.substring(0,j);
+    algorithm=k.substring(j + 1);
+    if (propertyServiceTable != null) {
+      Provider.Service ser=propertyServiceTable.remove(serviceName,algorithm.toUpperCase());
+      if (ser != null && propertyAliasTable != null && ser.aliases != null) {
+        for (Iterator<String> it=ser.aliases.iterator(); it.hasNext(); ) {
+          propertyAliasTable.remove(serviceName,(it.next()).toUpperCase());
+        }
+      }
+    }
+  }
+ else {
+    attribute=k.substring(i + 1);
+    serviceName=k.substring(0,j);
+    algorithm=k.substring(j + 1,i);
+    if (propertyServiceTable != null) {
+      Object o=propertyServiceTable.get(serviceName,algorithm.toUpperCase());
+      if (o != null) {
+        s=(Provider.Service)o;
+        s.attributes.remove(attribute);
+      }
+    }
+  }
+}

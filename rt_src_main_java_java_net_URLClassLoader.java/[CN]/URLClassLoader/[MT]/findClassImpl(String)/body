@@ -1,0 +1,21 @@
+{
+  String partialName=className.replace('.','/');
+  final String classFileName=new StringBuilder(partialName).append(".class").toString();
+  String packageName=null;
+  int position=partialName.lastIndexOf('/');
+  if ((position=partialName.lastIndexOf('/')) != -1) {
+    packageName=partialName.substring(0,position);
+  }
+  int n=0;
+  while (true) {
+    URLHandler handler=getHandler(n++);
+    if (handler == null) {
+      break;
+    }
+    Class<?> res=handler.findClass(packageName,classFileName,className);
+    if (res != null) {
+      return res;
+    }
+  }
+  return null;
+}

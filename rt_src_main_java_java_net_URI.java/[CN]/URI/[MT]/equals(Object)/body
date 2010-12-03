@@ -1,0 +1,72 @@
+{
+  if (!(o instanceof URI)) {
+    return false;
+  }
+  URI uri=(URI)o;
+  if (uri.fragment == null && fragment != null || uri.fragment != null && fragment == null) {
+    return false;
+  }
+ else   if (uri.fragment != null && fragment != null) {
+    if (!equalsHexCaseInsensitive(uri.fragment,fragment)) {
+      return false;
+    }
+  }
+  if (uri.scheme == null && scheme != null || uri.scheme != null && scheme == null) {
+    return false;
+  }
+ else   if (uri.scheme != null && scheme != null) {
+    if (!uri.scheme.equalsIgnoreCase(scheme)) {
+      return false;
+    }
+  }
+  if (uri.opaque && opaque) {
+    return equalsHexCaseInsensitive(uri.schemespecificpart,schemespecificpart);
+  }
+ else   if (!uri.opaque && !opaque) {
+    if (!equalsHexCaseInsensitive(path,uri.path)) {
+      return false;
+    }
+    if (uri.query != null && query == null || uri.query == null && query != null) {
+      return false;
+    }
+ else     if (uri.query != null && query != null) {
+      if (!equalsHexCaseInsensitive(uri.query,query)) {
+        return false;
+      }
+    }
+    if (uri.authority != null && authority == null || uri.authority == null && authority != null) {
+      return false;
+    }
+ else     if (uri.authority != null && authority != null) {
+      if (uri.host != null && host == null || uri.host == null && host != null) {
+        return false;
+      }
+ else       if (uri.host == null && host == null) {
+        return equalsHexCaseInsensitive(uri.authority,authority);
+      }
+ else {
+        if (!host.equalsIgnoreCase(uri.host)) {
+          return false;
+        }
+        if (port != uri.port) {
+          return false;
+        }
+        if (uri.userinfo != null && userinfo == null || uri.userinfo == null && userinfo != null) {
+          return false;
+        }
+ else         if (uri.userinfo != null && userinfo != null) {
+          return equalsHexCaseInsensitive(userinfo,uri.userinfo);
+        }
+ else {
+          return true;
+        }
+      }
+    }
+ else {
+      return true;
+    }
+  }
+ else {
+    return false;
+  }
+}

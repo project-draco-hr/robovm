@@ -1,0 +1,85 @@
+{
+  ResourceBundle bundle=null;
+  String bundleName=base + locale;
+  Object cacheKey=loader != null ? (Object)loader : (Object)"null";
+  Hashtable<String,ResourceBundle> loaderCache;
+synchronized (cache) {
+    loaderCache=cache.get(cacheKey);
+    if (loaderCache == null) {
+      loaderCache=new Hashtable<String,ResourceBundle>();
+      cache.put(cacheKey,loaderCache);
+    }
+  }
+  ResourceBundle result=loaderCache.get(bundleName);
+  if (result != null) {
+    if (result == MISSINGBASE) {
+      return null;
+    }
+    if (result == MISSING) {
+      if (!loadBase) {
+        return null;
+      }
+      String extension=strip(locale);
+      if (extension == null) {
+        return null;
+      }
+      return handleGetBundle(base,extension,loadBase,loader);
+    }
+    return result;
+  }
+  try {
+    Class<?> bundleClass=Class.forName(bundleName,true,loader);
+    if (ResourceBundle.class.isAssignableFrom(bundleClass)) {
+      bundle=(ResourceBundle)bundleClass.newInstance();
+    }
+  }
+ catch (  LinkageError e) {
+  }
+catch (  Exception e) {
+  }
+  if (bundle != null) {
+    bundle.setLocale(locale);
+  }
+ else {
+    final String fileName=bundleName.replace('.','/');
+    InputStream stream=AccessController.doPrivileged(new PrivilegedAction<InputStream>(){
+      public InputStream run(){
+        return loader == null ? ClassLoader.getSystemResourceAsStream(fileName + ".properties") : loader.getResourceAsStream(fileName + ".properties");
+      }
+    }
+);
+    if (stream != null) {
+      try {
+        try {
+          bundle=new PropertyResourceBundle(new InputStreamReader(stream));
+        }
+  finally {
+          stream.close();
+        }
+        bundle.setLocale(locale);
+      }
+ catch (      IOException e) {
+      }
+    }
+  }
+  String extension=strip(locale);
+  if (bundle != null) {
+    if (extension != null) {
+      ResourceBundle parent=handleGetBundle(base,extension,true,loader);
+      if (parent != null) {
+        bundle.setParent(parent);
+      }
+    }
+    loaderCache.put(bundleName,bundle);
+    return bundle;
+  }
+  if (extension != null && (loadBase || extension.length() > 0)) {
+    bundle=handleGetBundle(base,extension,loadBase,loader);
+    if (bundle != null) {
+      loaderCache.put(bundleName,bundle);
+      return bundle;
+    }
+  }
+  loaderCache.put(bundleName,loadBase ? MISSINGBASE : MISSING);
+  return null;
+}

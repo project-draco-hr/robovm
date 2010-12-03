@@ -1,0 +1,43 @@
+{
+  if (pos1 < 0 || pos2 < 0 || pos2 < pos1) {
+    throw new IndexOutOfBoundsException(Messages.getString("luni.37"));
+  }
+  int last=actualArrayLength << OFFSET;
+  if (pos1 >= last || pos1 == pos2) {
+    return new BitSet(0);
+  }
+  if (pos2 > last) {
+    pos2=last;
+  }
+  int idx1=pos1 >> OFFSET;
+  int idx2=(pos2 - 1) >> OFFSET;
+  long factor1=(~0L) << (pos1 & RIGHT_BITS);
+  long factor2=(~0L) >>> (ELM_SIZE - (pos2 & RIGHT_BITS));
+  if (idx1 == idx2) {
+    long result=(bits[idx1] & (factor1 & factor2)) >>> (pos1 % ELM_SIZE);
+    if (result == 0) {
+      return new BitSet(0);
+    }
+    return new BitSet(new long[]{result},needClear,1,true);
+  }
+  long[] newbits=new long[idx2 - idx1 + 1];
+  newbits[0]=bits[idx1] & factor1;
+  newbits[newbits.length - 1]=bits[idx2] & factor2;
+  for (int i=1; i < idx2 - idx1; i++) {
+    newbits[i]=bits[idx1 + i];
+  }
+  int numBitsToShift=pos1 & RIGHT_BITS;
+  int actualLen=newbits.length;
+  if (numBitsToShift != 0) {
+    for (int i=0; i < newbits.length; i++) {
+      newbits[i]=newbits[i] >>> (numBitsToShift);
+      if (i != newbits.length - 1) {
+        newbits[i]|=newbits[i + 1] << (ELM_SIZE - (numBitsToShift));
+      }
+      if (newbits[i] != 0) {
+        actualLen=i + 1;
+      }
+    }
+  }
+  return new BitSet(newbits,needClear,actualLen,newbits[actualLen - 1] != 0);
+}

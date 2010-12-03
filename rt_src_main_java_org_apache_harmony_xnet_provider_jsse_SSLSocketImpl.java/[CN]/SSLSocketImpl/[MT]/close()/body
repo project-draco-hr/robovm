@@ -1,0 +1,19 @@
+{
+  if (logger != null) {
+    logger.println("SSLSocket.close " + socket_was_closed);
+  }
+  if (!socket_was_closed) {
+    if (handshake_started) {
+      alertProtocol.alert(AlertProtocol.WARNING,AlertProtocol.CLOSE_NOTIFY);
+      try {
+        output.write(alertProtocol.wrap());
+      }
+ catch (      IOException ex) {
+      }
+      alertProtocol.setProcessed();
+    }
+    shutdown();
+    closeTransportLayer();
+    socket_was_closed=true;
+  }
+}

@@ -1,0 +1,33 @@
+{
+  checkRange(startKey);
+  Comparator<? super K> cmp=backingMap.comparator;
+  if (cmp == null) {
+    Comparable<K> object=toComparable(endKey);
+    if (hasStart && object.compareTo(startKey) < 0) {
+      throw new IllegalArgumentException();
+    }
+    if (hasEnd && object.compareTo(endKey) > 0) {
+      throw new IllegalArgumentException();
+    }
+  }
+ else {
+    if (hasStart && backingMap.comparator().compare(endKey,this.startKey) < 0) {
+      throw new IllegalArgumentException();
+    }
+    if (hasEnd && backingMap.comparator().compare(endKey,this.endKey) > 0) {
+      throw new IllegalArgumentException();
+    }
+  }
+  Comparator<? super K> c=backingMap.comparator();
+  if (c == null) {
+    if (toComparable(startKey).compareTo(endKey) <= 0) {
+      return new SubMap<K,V>(startKey,backingMap,endKey);
+    }
+  }
+ else {
+    if (c.compare(startKey,endKey) <= 0) {
+      return new SubMap<K,V>(startKey,backingMap,endKey);
+    }
+  }
+  throw new IllegalArgumentException();
+}

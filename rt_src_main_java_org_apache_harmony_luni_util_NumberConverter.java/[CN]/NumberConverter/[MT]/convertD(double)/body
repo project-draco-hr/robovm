@@ -1,0 +1,31 @@
+{
+  int p=1023 + 52;
+  long signMask=0x8000000000000000L;
+  long eMask=0x7FF0000000000000L;
+  long fMask=0x000FFFFFFFFFFFFFL;
+  long inputNumberBits=Double.doubleToLongBits(inputNumber);
+  String signString=(inputNumberBits & signMask) == 0 ? "" : "-";
+  int e=(int)((inputNumberBits & eMask) >> 52);
+  long f=inputNumberBits & fMask;
+  boolean mantissaIsZero=f == 0;
+  int pow=0, numBits=52;
+  if (e == 2047)   return mantissaIsZero ? signString + "Infinity" : "NaN";
+  if (e == 0) {
+    if (mantissaIsZero)     return signString + "0.0";
+    if (f == 1)     return signString + "4.9E-324";
+    pow=1 - p;
+    long ff=f;
+    while ((ff & 0x0010000000000000L) == 0) {
+      ff=ff << 1;
+      numBits--;
+    }
+  }
+ else {
+    f=f | 0x0010000000000000L;
+    pow=e - p;
+  }
+  if (-59 < pow && pow < 6 || (pow == -59 && !mantissaIsZero))   longDigitGenerator(f,pow,e == 0,mantissaIsZero,numBits);
+ else   bigIntDigitGeneratorInstImpl(f,pow,e == 0,mantissaIsZero,numBits);
+  if (inputNumber >= 1e7D || inputNumber <= -1e7D || (inputNumber > -1e-3D && inputNumber < 1e-3D))   return signString + freeFormatExponential();
+  return signString + freeFormat();
+}

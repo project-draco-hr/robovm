@@ -1,0 +1,27 @@
+{
+  short numFields=input.readShort();
+  ObjectStreamField[] fields=new ObjectStreamField[numFields];
+  cDesc.setLoadFields(fields);
+  for (short i=0; i < numFields; i++) {
+    char typecode=(char)input.readByte();
+    String fieldName=input.readUTF();
+    boolean isPrimType=ObjectStreamClass.isPrimitiveType(typecode);
+    String classSig;
+    if (isPrimType) {
+      classSig=String.valueOf(typecode);
+    }
+ else {
+      boolean old=enableResolve;
+      try {
+        enableResolve=false;
+        classSig=(String)readObject();
+      }
+  finally {
+        enableResolve=old;
+      }
+    }
+    classSig=formatClassSig(classSig);
+    ObjectStreamField f=new ObjectStreamField(classSig,fieldName);
+    fields[i]=f;
+  }
+}

@@ -1,0 +1,20 @@
+{
+  int spins=TIMED_SPINS;
+  long lastTime=0;
+  Thread w=null;
+  for (; ; ) {
+    Object v=node.get();
+    if (v != null)     return v;
+    long now=System.nanoTime();
+    if (w == null)     w=Thread.currentThread();
+ else     nanos-=now - lastTime;
+    lastTime=now;
+    if (nanos > 0) {
+      if (spins > 0)       --spins;
+ else       if (node.waiter == null)       node.waiter=w;
+ else       if (w.isInterrupted())       tryCancel(node,slot);
+ else       LockSupport.parkNanos(nanos);
+    }
+ else     if (tryCancel(node,slot) && !w.isInterrupted())     return scanOnTimeout(node);
+  }
+}

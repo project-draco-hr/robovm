@@ -1,0 +1,86 @@
+{
+  if (object == null) {
+    writeNull();
+    return null;
+  }
+  Integer handle=null;
+  if (!unshared) {
+    handle=dumpCycle(object);
+    if (handle != null) {
+      return handle;
+    }
+  }
+  Class<?> objClass=object.getClass();
+  ObjectStreamClass clDesc=ObjectStreamClass.lookupStreamClass(objClass);
+  nestedLevels++;
+  try {
+    if (!(enableReplace && computeStreamReplacement)) {
+      if (objClass == ObjectStreamClass.CLASSCLASS) {
+        return writeNewClass((Class<?>)object,unshared);
+      }
+      if (objClass == ObjectStreamClass.OBJECTSTREAMCLASSCLASS) {
+        return writeClassDesc((ObjectStreamClass)object,unshared);
+      }
+    }
+    if (clDesc.isSerializable() && computeClassBasedReplacement) {
+      if (clDesc.hasMethodWriteReplace()) {
+        Method methodWriteReplace=clDesc.getMethodWriteReplace();
+        Object replObj=null;
+        try {
+          replObj=methodWriteReplace.invoke(object,(Object[])null);
+        }
+ catch (        IllegalAccessException iae) {
+          replObj=object;
+        }
+catch (        InvocationTargetException ite) {
+          Throwable target=ite.getTargetException();
+          if (target instanceof ObjectStreamException) {
+            throw (ObjectStreamException)target;
+          }
+ else           if (target instanceof Error) {
+            throw (Error)target;
+          }
+ else {
+            throw (RuntimeException)target;
+          }
+        }
+        if (replObj != object) {
+          Integer replacementHandle=writeObjectInternal(replObj,false,false,computeStreamReplacement);
+          if (replacementHandle != null) {
+            objectsWritten.put(object,replacementHandle);
+          }
+          return replacementHandle;
+        }
+      }
+    }
+    if (enableReplace && computeStreamReplacement) {
+      Object streamReplacement=replaceObject(object);
+      if (streamReplacement != object) {
+        Integer replacementHandle=writeObjectInternal(streamReplacement,false,computeClassBasedReplacement,false);
+        if (replacementHandle != null) {
+          objectsWritten.put(object,replacementHandle);
+        }
+        return replacementHandle;
+      }
+    }
+    if (objClass == ObjectStreamClass.CLASSCLASS) {
+      return writeNewClass((Class<?>)object,unshared);
+    }
+    if (objClass == ObjectStreamClass.OBJECTSTREAMCLASSCLASS) {
+      return writeClassDesc((ObjectStreamClass)object,unshared);
+    }
+    if (objClass == ObjectStreamClass.STRINGCLASS) {
+      return writeNewString((String)object,unshared);
+    }
+    if (objClass.isArray()) {
+      return writeNewArray(object,objClass,clDesc,objClass.getComponentType(),unshared);
+    }
+    if (object instanceof Enum) {
+      return writeNewEnum(object,objClass,unshared);
+    }
+    return writeNewObject(object,objClass,clDesc,unshared);
+  }
+  finally {
+    nestedLevels--;
+  }
+}

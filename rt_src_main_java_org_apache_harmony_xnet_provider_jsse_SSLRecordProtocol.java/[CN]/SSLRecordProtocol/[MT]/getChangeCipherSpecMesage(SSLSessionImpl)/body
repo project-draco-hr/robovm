@@ -1,0 +1,17 @@
+{
+  byte[] change_cipher_spec_message;
+  if (activeWriteState == null) {
+    change_cipher_spec_message=new byte[]{ContentType.CHANGE_CIPHER_SPEC,version[0],version[1],0,1,1};
+  }
+ else {
+    change_cipher_spec_message=packetize(ContentType.CHANGE_CIPHER_SPEC,version,activeWriteState.encrypt(ContentType.CHANGE_CIPHER_SPEC,change_cipher_spec_byte,0,1));
+  }
+  setSession(session);
+  activeWriteState=pendingConnectionState;
+  if (logger != null) {
+    logger.println("SSLRecordProtocol.getChangeCipherSpecMesage");
+    logger.println("activeWriteState = pendingConnectionState");
+    logger.print(change_cipher_spec_message);
+  }
+  return change_cipher_spec_message;
+}

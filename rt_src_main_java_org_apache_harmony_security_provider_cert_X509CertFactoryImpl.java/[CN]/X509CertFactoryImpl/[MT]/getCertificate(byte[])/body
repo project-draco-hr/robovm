@@ -1,0 +1,17 @@
+{
+  if (encoding.length < CERT_CACHE_SEED_LENGTH) {
+    throw new CertificateException(Messages.getString("security.152"));
+  }
+synchronized (CERT_CACHE) {
+    long hash=CERT_CACHE.getHash(encoding);
+    if (CERT_CACHE.contains(hash)) {
+      Certificate res=(Certificate)CERT_CACHE.get(hash,encoding);
+      if (res != null) {
+        return res;
+      }
+    }
+    Certificate res=new X509CertImpl(encoding);
+    CERT_CACHE.put(hash,encoding,res);
+    return res;
+  }
+}

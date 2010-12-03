@@ -1,0 +1,57 @@
+{
+  final SecurityPropertyAccessor security=new SecurityPropertyAccessor(null);
+  final List<URL> urls=new ArrayList<URL>();
+  boolean dynamicOnly=false;
+  URL dynamicURL=null;
+  if (!Util.equalsIgnoreCase(FALSE,AccessController.doPrivileged(security.key(POLICY_ALLOW_DYNAMIC)))) {
+    String location=system.getProperty(systemUrlKey);
+    if (location != null) {
+      if (location.startsWith("=")) {
+        dynamicOnly=true;
+        location=location.substring(1);
+      }
+      try {
+        location=expandURL(location,system);
+        final File f=new File(location);
+        dynamicURL=AccessController.doPrivileged(new PrivilegedExceptionAction<URL>(){
+          public URL run() throws Exception {
+            if (f.exists()) {
+              return f.toURI().toURL();
+            }
+ else {
+              return null;
+            }
+          }
+        }
+);
+        if (dynamicURL == null) {
+          dynamicURL=new URL(location);
+        }
+      }
+ catch (      Exception e) {
+      }
+    }
+  }
+  if (!dynamicOnly) {
+    int i=1;
+    while (true) {
+      String location=AccessController.doPrivileged(security.key(new StringBuilder(securityUrlPrefix).append(i++).toString()));
+      if (location == null) {
+        break;
+      }
+      try {
+        location=expandURL(location,system);
+        URL anURL=new URL(location);
+        if (anURL != null) {
+          urls.add(anURL);
+        }
+      }
+ catch (      Exception e) {
+      }
+    }
+  }
+  if (dynamicURL != null) {
+    urls.add(dynamicURL);
+  }
+  return urls.toArray(new URL[urls.size()]);
+}

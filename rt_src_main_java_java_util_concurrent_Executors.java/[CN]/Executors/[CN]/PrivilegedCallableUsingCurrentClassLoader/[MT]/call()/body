@@ -1,0 +1,25 @@
+{
+  try {
+    return AccessController.doPrivileged(new PrivilegedExceptionAction<T>(){
+      public T run() throws Exception {
+        ClassLoader savedcl=null;
+        Thread t=Thread.currentThread();
+        try {
+          ClassLoader cl=t.getContextClassLoader();
+          if (ccl != cl) {
+            t.setContextClassLoader(ccl);
+            savedcl=cl;
+          }
+          return task.call();
+        }
+  finally {
+          if (savedcl != null)           t.setContextClassLoader(savedcl);
+        }
+      }
+    }
+,acc);
+  }
+ catch (  PrivilegedActionException e) {
+    throw e.getException();
+  }
+}

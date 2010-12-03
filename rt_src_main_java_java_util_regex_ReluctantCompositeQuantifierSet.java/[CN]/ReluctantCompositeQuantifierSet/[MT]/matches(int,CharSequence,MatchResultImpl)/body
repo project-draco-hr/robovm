@@ -1,0 +1,30 @@
+{
+  int min=quantifier.min();
+  int max=quantifier.max();
+  int i=0;
+  int shift=0;
+  for (; i < min; i++) {
+    if (stringIndex + leaf.charCount() > matchResult.getRightBound()) {
+      matchResult.hitEnd=true;
+      return -1;
+    }
+    shift=leaf.accepts(stringIndex,testString);
+    if (shift < 1) {
+      return -1;
+    }
+    stringIndex+=shift;
+  }
+  do {
+    shift=next.matches(stringIndex,testString,matchResult);
+    if (shift >= 0) {
+      return shift;
+    }
+    if (stringIndex + leaf.charCount() <= matchResult.getRightBound()) {
+      shift=leaf.accepts(stringIndex,testString);
+      stringIndex+=shift;
+      i++;
+    }
+  }
+ while (shift >= 1 && i <= max);
+  return -1;
+}

@@ -1,0 +1,26 @@
+{
+  SecurityManager security=System.getSecurityManager();
+  if (security != null) {
+    security.checkRead(path);
+  }
+  if (path.length() == 0) {
+    return null;
+  }
+  byte[] bs=properPath(true);
+  if (!isDirectoryImpl(bs) || !existsImpl(bs) || isWriteOnlyImpl(bs)) {
+    return null;
+  }
+  byte[][] implList=listImpl(bs);
+  if (implList == null) {
+    return new File[0];
+  }
+  List<File> tempResult=new ArrayList<File>();
+  for (int index=0; index < implList.length; index++) {
+    String aName=Util.toString(implList[index]);
+    File aFile=new File(this,aName);
+    if (filter == null || filter.accept(aFile)) {
+      tempResult.add(aFile);
+    }
+  }
+  return tempResult.toArray(new File[tempResult.size()]);
+}

@@ -1,0 +1,13 @@
+{
+  long lockEnd=lock.position() + lock.size();
+  for (Iterator<FileLock> keyItr=locks.iterator(); keyItr.hasNext(); ) {
+    FileLock existingLock=keyItr.next();
+    if (existingLock.position() > lockEnd) {
+      break;
+    }
+    if (existingLock.overlaps(lock.position(),lock.size())) {
+      throw new OverlappingFileLockException();
+    }
+  }
+  locks.add(lock);
+}

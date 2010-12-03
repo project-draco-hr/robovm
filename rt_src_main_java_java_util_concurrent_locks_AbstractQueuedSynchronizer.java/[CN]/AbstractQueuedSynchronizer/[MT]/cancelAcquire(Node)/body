@@ -1,0 +1,22 @@
+{
+  if (node == null)   return;
+  node.thread=null;
+  Node pred=node.prev;
+  while (pred.waitStatus > 0)   node.prev=pred=pred.prev;
+  Node predNext=pred.next;
+  node.waitStatus=Node.CANCELLED;
+  if (node == tail && compareAndSetTail(node,pred)) {
+    compareAndSetNext(pred,predNext,null);
+  }
+ else {
+    int ws;
+    if (pred != head && ((ws=pred.waitStatus) == Node.SIGNAL || (ws <= 0 && compareAndSetWaitStatus(pred,ws,Node.SIGNAL))) && pred.thread != null) {
+      Node next=node.next;
+      if (next != null && next.waitStatus <= 0)       compareAndSetNext(pred,predNext,next);
+    }
+ else {
+      unparkSuccessor(node);
+    }
+    node.next=node;
+  }
+}

@@ -1,0 +1,49 @@
+{
+  int a=arrW[HASH_OFFSET];
+  int b=arrW[HASH_OFFSET + 1];
+  int c=arrW[HASH_OFFSET + 2];
+  int d=arrW[HASH_OFFSET + 3];
+  int e=arrW[HASH_OFFSET + 4];
+  int temp;
+  for (int t=16; t < 80; t++) {
+    temp=arrW[t - 3] ^ arrW[t - 8] ^ arrW[t - 14]^ arrW[t - 16];
+    arrW[t]=(temp << 1) | (temp >>> 31);
+  }
+  for (int t=0; t < 20; t++) {
+    temp=((a << 5) | (a >>> 27)) + ((b & c) | ((~b) & d)) + (e + arrW[t] + 0x5A827999);
+    e=d;
+    d=c;
+    c=(b << 30) | (b >>> 2);
+    b=a;
+    a=temp;
+  }
+  for (int t=20; t < 40; t++) {
+    temp=(((a << 5) | (a >>> 27))) + (b ^ c ^ d) + (e + arrW[t] + 0x6ED9EBA1);
+    e=d;
+    d=c;
+    c=(b << 30) | (b >>> 2);
+    b=a;
+    a=temp;
+  }
+  for (int t=40; t < 60; t++) {
+    temp=((a << 5) | (a >>> 27)) + ((b & c) | (b & d) | (c & d)) + (e + arrW[t] + 0x8F1BBCDC);
+    e=d;
+    d=c;
+    c=(b << 30) | (b >>> 2);
+    b=a;
+    a=temp;
+  }
+  for (int t=60; t < 80; t++) {
+    temp=(((a << 5) | (a >>> 27))) + (b ^ c ^ d) + (e + arrW[t] + 0xCA62C1D6);
+    e=d;
+    d=c;
+    c=(b << 30) | (b >>> 2);
+    b=a;
+    a=temp;
+  }
+  arrW[HASH_OFFSET]+=a;
+  arrW[HASH_OFFSET + 1]+=b;
+  arrW[HASH_OFFSET + 2]+=c;
+  arrW[HASH_OFFSET + 3]+=d;
+  arrW[HASH_OFFSET + 4]+=e;
+}

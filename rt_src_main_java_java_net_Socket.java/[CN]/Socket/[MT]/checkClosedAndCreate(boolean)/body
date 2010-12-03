@@ -1,0 +1,29 @@
+{
+  if (isClosed()) {
+    throw new SocketException(Messages.getString("luni.0C"));
+  }
+  if (!create) {
+    if (!isConnected()) {
+      throw new SocketException(Messages.getString("luni.78"));
+    }
+    return;
+  }
+  if (isCreated) {
+    return;
+  }
+synchronized (this) {
+    if (isCreated) {
+      return;
+    }
+    try {
+      impl.create(true);
+    }
+ catch (    SocketException e) {
+      throw e;
+    }
+catch (    IOException e) {
+      throw new SocketException(e.toString());
+    }
+    isCreated=true;
+  }
+}

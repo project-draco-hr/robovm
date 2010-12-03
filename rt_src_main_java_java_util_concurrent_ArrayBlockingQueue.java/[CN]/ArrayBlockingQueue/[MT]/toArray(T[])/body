@@ -1,0 +1,19 @@
+{
+  final E[] items=this.items;
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    if (a.length < count)     a=(T[])java.lang.reflect.Array.newInstance(a.getClass().getComponentType(),count);
+    int k=0;
+    int i=takeIndex;
+    while (k < count) {
+      a[k++]=(T)items[i];
+      i=inc(i);
+    }
+    if (a.length > count)     a[count]=null;
+    return a;
+  }
+  finally {
+    lock.unlock();
+  }
+}

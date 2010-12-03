@@ -1,0 +1,29 @@
+{
+  if (key == null)   throw new NullPointerException();
+  for (; ; ) {
+    Index<K,V> q=head;
+    Index<K,V> r=q.right;
+    for (; ; ) {
+      if (r != null) {
+        Node<K,V> n=r.node;
+        K k=n.key;
+        if (n.value == null) {
+          if (!q.unlink(r))           break;
+          r=q.right;
+          continue;
+        }
+        if (key.compareTo(k) > 0) {
+          q=r;
+          r=r.right;
+          continue;
+        }
+      }
+      Index<K,V> d=q.down;
+      if (d != null) {
+        q=d;
+        r=d.right;
+      }
+ else       return q.node;
+    }
+  }
+}

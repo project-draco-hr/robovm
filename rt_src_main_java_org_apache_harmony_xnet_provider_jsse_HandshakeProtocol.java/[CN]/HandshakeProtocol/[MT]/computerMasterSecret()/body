@@ -1,0 +1,19 @@
+{
+  byte[] seed=new byte[64];
+  System.arraycopy(clientHello.getRandom(),0,seed,0,32);
+  System.arraycopy(serverHello.getRandom(),0,seed,32,32);
+  session.master_secret=new byte[48];
+  if (serverHello.server_version[1] == 1) {
+    try {
+      PRF.computePRF(session.master_secret,preMasterSecret,master_secret_bytes,seed);
+    }
+ catch (    GeneralSecurityException e) {
+      fatalAlert(AlertProtocol.INTERNAL_ERROR,"PRF error",e);
+    }
+  }
+ else {
+    PRF.computePRF_SSLv3(session.master_secret,preMasterSecret,seed);
+  }
+  Arrays.fill(preMasterSecret,(byte)0);
+  preMasterSecret=null;
+}

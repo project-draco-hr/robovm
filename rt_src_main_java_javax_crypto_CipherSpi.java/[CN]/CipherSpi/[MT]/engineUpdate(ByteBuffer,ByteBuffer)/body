@@ -1,0 +1,36 @@
+{
+  if (input == null) {
+    throw new NullPointerException(Messages.getString("crypto.0C"));
+  }
+  if (output == null) {
+    throw new NullPointerException(Messages.getString("crypto.0D"));
+  }
+  int position=input.position();
+  int limit=input.limit();
+  if ((limit - position) <= 0) {
+    return 0;
+  }
+  byte[] bInput;
+  byte[] bOutput;
+  if (input.hasArray()) {
+    bInput=input.array();
+    int offset=input.arrayOffset();
+    bOutput=engineUpdate(bInput,offset + position,limit - position);
+    input.position(limit);
+  }
+ else {
+    bInput=new byte[limit - position];
+    input.get(bInput);
+    bOutput=engineUpdate(bInput,0,limit - position);
+  }
+  if (output.remaining() < bOutput.length) {
+    throw new ShortBufferException(Messages.getString("crypto.0E"));
+  }
+  try {
+    output.put(bOutput);
+  }
+ catch (  java.nio.BufferOverflowException e) {
+    throw new ShortBufferException(Messages.getString("crypto.0F",e));
+  }
+  return bOutput.length;
+}

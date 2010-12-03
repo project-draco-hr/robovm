@@ -1,0 +1,39 @@
+{
+  poll();
+  return new AbstractSet<Map.Entry<K,V>>(){
+    @Override public int size(){
+      return WeakHashMap.this.size();
+    }
+    @Override public void clear(){
+      WeakHashMap.this.clear();
+    }
+    @Override public boolean remove(    Object object){
+      if (contains(object)) {
+        WeakHashMap.this.remove(((Map.Entry<?,?>)object).getKey());
+        return true;
+      }
+      return false;
+    }
+    @Override public boolean contains(    Object object){
+      if (object instanceof Map.Entry) {
+        Entry<?,?> entry=getEntry(((Map.Entry<?,?>)object).getKey());
+        if (entry != null) {
+          Object key=entry.get();
+          if (key != null || entry.isNull) {
+            return object.equals(entry);
+          }
+        }
+      }
+      return false;
+    }
+    @Override public Iterator<Map.Entry<K,V>> iterator(){
+      return new HashIterator<Map.Entry<K,V>>(new Entry.Type<Map.Entry<K,V>,K,V>(){
+        public Map.Entry<K,V> get(        Map.Entry<K,V> entry){
+          return entry;
+        }
+      }
+);
+    }
+  }
+;
+}

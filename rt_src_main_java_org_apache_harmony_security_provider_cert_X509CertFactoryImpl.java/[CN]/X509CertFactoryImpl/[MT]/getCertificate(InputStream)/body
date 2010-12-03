@@ -1,0 +1,31 @@
+{
+synchronized (CERT_CACHE) {
+    inStream.mark(CERT_CACHE_SEED_LENGTH);
+    byte[] buff=readBytes(inStream,CERT_CACHE_SEED_LENGTH);
+    inStream.reset();
+    if (buff == null) {
+      throw new CertificateException(Messages.getString("security.152"));
+    }
+    long hash=CERT_CACHE.getHash(buff);
+    if (CERT_CACHE.contains(hash)) {
+      byte[] encoding=new byte[BerInputStream.getLength(buff)];
+      if (encoding.length < CERT_CACHE_SEED_LENGTH) {
+        throw new CertificateException(Messages.getString("security.15B3"));
+      }
+      inStream.read(encoding);
+      Certificate res=(Certificate)CERT_CACHE.get(hash,encoding);
+      if (res != null) {
+        return res;
+      }
+      res=new X509CertImpl(encoding);
+      CERT_CACHE.put(hash,encoding,res);
+      return res;
+    }
+ else {
+      inStream.reset();
+      Certificate res=new X509CertImpl(inStream);
+      CERT_CACHE.put(hash,res.getEncoded(),res);
+      return res;
+    }
+  }
+}

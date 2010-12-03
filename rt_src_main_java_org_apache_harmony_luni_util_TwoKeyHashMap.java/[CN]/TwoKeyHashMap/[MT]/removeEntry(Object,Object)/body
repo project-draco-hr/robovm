@@ -1,0 +1,33 @@
+{
+  if (key1 == null && key2 == null) {
+    int index=arrSize;
+    if (arr[index] != null) {
+      Entry<E,K,V> ret=arr[index];
+      arr[index]=null;
+      size--;
+      modCount++;
+      return ret;
+    }
+    return null;
+  }
+  int hash=key1.hashCode() + key2.hashCode();
+  int index=(hash & 0x7fffffff) % arrSize;
+  Entry<E,K,V> e=arr[index];
+  Entry<E,K,V> prev=e;
+  while (e != null) {
+    if (hash == e.hash && key1.equals(e.getKey1()) && key2.equals(e.getKey2())) {
+      if (prev == e) {
+        arr[index]=e.next;
+      }
+ else {
+        prev.next=e.next;
+      }
+      size--;
+      modCount++;
+      return e;
+    }
+    prev=e;
+    e=e.next;
+  }
+  return null;
+}

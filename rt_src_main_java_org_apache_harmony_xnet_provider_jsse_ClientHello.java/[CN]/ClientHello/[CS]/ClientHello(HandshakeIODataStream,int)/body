@@ -1,0 +1,31 @@
+{
+  client_version=new byte[2];
+  client_version[0]=(byte)in.readUint8();
+  client_version[1]=(byte)in.readUint8();
+  in.read(random,0,32);
+  int size=in.read();
+  session_id=new byte[size];
+  in.read(session_id,0,size);
+  int l=in.readUint16();
+  if ((l & 0x01) == 0x01) {
+    fatalAlert(AlertProtocol.DECODE_ERROR,"DECODE ERROR: incorrect ClientHello");
+  }
+  size=l >> 1;
+  cipher_suites=new CipherSuite[size];
+  for (int i=0; i < size; i++) {
+    byte b0=(byte)in.read();
+    byte b1=(byte)in.read();
+    cipher_suites[i]=CipherSuite.getByCode(b0,b1);
+  }
+  size=in.read();
+  compression_methods=new byte[size];
+  in.read(compression_methods,0,size);
+  this.length=38 + session_id.length + (cipher_suites.length << 1)+ compression_methods.length;
+  if (this.length > length) {
+    fatalAlert(AlertProtocol.DECODE_ERROR,"DECODE ERROR: incorrect ClientHello");
+  }
+  if (this.length < length) {
+    in.skip(length - this.length);
+    this.length=length;
+  }
+}

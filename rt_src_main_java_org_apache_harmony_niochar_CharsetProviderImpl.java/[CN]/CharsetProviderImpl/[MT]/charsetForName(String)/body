@@ -1,0 +1,26 @@
+{
+  Object arr[]=cache.get(charsetName.toUpperCase());
+  if (arr == null) {
+    return null;
+  }
+  if (arr[CHARSET_INSTANCE] == null) {
+    final String className=packageName + "." + (String)arr[CHARSET_CLASS];
+    final String canonicalName=((String[])arr[CHARSET_ALIASES])[0];
+    final String aliases[]=(String[])arr[CHARSET_ALIASES];
+    arr[CHARSET_INSTANCE]=AccessController.doPrivileged(new PrivilegedAction<Object>(){
+      public Object run(){
+        try {
+          Class<?> cls=Class.forName(className);
+          Constructor<?> ctor=cls.getConstructor(new Class[]{String.class,String[].class});
+          ctor.setAccessible(true);
+          return ctor.newInstance(new Object[]{canonicalName,aliases});
+        }
+ catch (        Exception e) {
+          return null;
+        }
+      }
+    }
+);
+  }
+  return (Charset)arr[CHARSET_INSTANCE];
+}

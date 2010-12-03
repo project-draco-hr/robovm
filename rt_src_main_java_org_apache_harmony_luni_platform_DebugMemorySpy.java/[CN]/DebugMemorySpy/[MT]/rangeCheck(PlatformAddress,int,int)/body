@@ -1,0 +1,19 @@
+{
+  AddressWrapper wrapper=(AddressWrapper)memoryInUse.get(address);
+  if (wrapper != null) {
+    PlatformAddress accessStart=address.offsetBytes(offset);
+    PlatformAddress accessEnd=accessStart.offsetBytes(length);
+    PlatformAddress allocStart=wrapper.shadow;
+    PlatformAddress allocEnd=allocStart.offsetBytes(address.size);
+    boolean under=(accessStart.compareTo(allocStart)) == -1;
+    boolean over=(accessEnd.compareTo(allocEnd)) == 1;
+    if (under || over) {
+      System.err.println("Memory Spy! Access out of allocated range");
+      System.err.println("\tAlloc range  : [" + allocStart + " ... "+ allocEnd+ "]");
+      System.err.println("\tAccess range : [" + accessStart + " ... "+ accessEnd+ "]");
+      if (stackDump) {
+        Thread.dumpStack();
+      }
+    }
+  }
+}

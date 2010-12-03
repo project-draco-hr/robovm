@@ -1,0 +1,16 @@
+{
+  final ReentrantLock lock=ArrayBlockingQueue.this.lock;
+  lock.lock();
+  try {
+    int i=lastRet;
+    if (i == -1)     throw new IllegalStateException();
+    lastRet=-1;
+    int ti=takeIndex;
+    removeAt(i);
+    nextIndex=(i == ti) ? takeIndex : i;
+    checkNext();
+  }
+  finally {
+    lock.unlock();
+  }
+}

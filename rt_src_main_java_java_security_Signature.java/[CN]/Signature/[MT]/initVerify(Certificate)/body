@@ -1,0 +1,22 @@
+{
+  if (certificate instanceof X509Certificate) {
+    Set ce=((X509Certificate)certificate).getCriticalExtensionOIDs();
+    boolean critical=false;
+    if (ce != null && !ce.isEmpty()) {
+      for (Iterator i=ce.iterator(); i.hasNext(); ) {
+        if ("2.5.29.15".equals(i.next())) {
+          critical=true;
+          break;
+        }
+      }
+      if (critical) {
+        boolean[] keyUsage=((X509Certificate)certificate).getKeyUsage();
+        if ((keyUsage != null) && (!keyUsage[0])) {
+          throw new InvalidKeyException(Messages.getString("security.26"));
+        }
+      }
+    }
+  }
+  engineInitVerify(certificate.getPublicKey());
+  state=VERIFY;
+}

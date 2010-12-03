@@ -1,0 +1,14 @@
+{
+  Thread current=Thread.currentThread();
+  int c=getState();
+  int w=exclusiveCount(c);
+  if (c != 0) {
+    if (w == 0 || current != getExclusiveOwnerThread())     return false;
+    if (w + exclusiveCount(acquires) > MAX_COUNT)     throw new Error("Maximum lock count exceeded");
+    setState(c + acquires);
+    return true;
+  }
+  if (writerShouldBlock() || !compareAndSetState(c,c + acquires))   return false;
+  setExclusiveOwnerThread(current);
+  return true;
+}

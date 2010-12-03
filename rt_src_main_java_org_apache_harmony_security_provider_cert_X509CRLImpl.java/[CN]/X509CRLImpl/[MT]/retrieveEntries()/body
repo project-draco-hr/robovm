@@ -1,0 +1,20 @@
+{
+  entriesRetrieved=true;
+  List rcerts=tbsCertList.getRevokedCertificates();
+  if (rcerts == null) {
+    return;
+  }
+  entriesSize=rcerts.size();
+  entries=new ArrayList(entriesSize);
+  X500Principal rcertIssuer=null;
+  for (int i=0; i < entriesSize; i++) {
+    TBSCertList.RevokedCertificate rcert=(TBSCertList.RevokedCertificate)rcerts.get(i);
+    X500Principal iss=rcert.getIssuer();
+    if (iss != null) {
+      rcertIssuer=iss;
+      isIndirectCRL=true;
+      nonIndirectEntriesSize=i;
+    }
+    entries.add(new X509CRLEntryImpl(rcert,rcertIssuer));
+  }
+}

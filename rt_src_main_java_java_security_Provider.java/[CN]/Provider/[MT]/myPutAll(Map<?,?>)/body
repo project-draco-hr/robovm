@@ -1,0 +1,24 @@
+{
+  if (changedProperties == null) {
+    changedProperties=new Properties();
+  }
+  Iterator<? extends Map.Entry<?,?>> it=t.entrySet().iterator();
+  Object key;
+  Object value;
+  while (it.hasNext()) {
+    Map.Entry<?,?> entry=it.next();
+    key=entry.getKey();
+    if (key instanceof String && ((String)key).startsWith("Provider.")) {
+      continue;
+    }
+    value=entry.getValue();
+    super.put(key,value);
+    if (changedProperties.remove(key) == null) {
+      removeFromPropertyServiceTable(key);
+    }
+    changedProperties.put(key,value);
+  }
+  if (providerNumber != -1) {
+    Services.setNeedRefresh();
+  }
+}

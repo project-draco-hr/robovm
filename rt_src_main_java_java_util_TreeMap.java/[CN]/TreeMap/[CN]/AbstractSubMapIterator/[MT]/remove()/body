@@ -1,0 +1,45 @@
+{
+  if (expectedModCount == subMap.m.modCount) {
+    if (expectedModCount == subMap.m.modCount) {
+      K key=(node != null) ? node.keys[offset] : null;
+      if (lastNode != null) {
+        int idx=lastOffset;
+        if (idx == lastNode.left_idx) {
+          subMap.m.removeLeftmost(lastNode);
+        }
+ else         if (idx == lastNode.right_idx) {
+          subMap.m.removeRightmost(lastNode);
+        }
+ else {
+          int lastRight=lastNode.right_idx;
+          key=subMap.m.removeMiddleElement(lastNode,idx);
+          if (key == null && lastRight > lastNode.right_idx) {
+            offset--;
+          }
+        }
+        if (null != key) {
+          Entry<K,V> entry=subMap.m.find(key);
+          if (this.subMap.isInRange(key)) {
+            node=entry.node;
+            offset=entry.index;
+            boundaryPair=getBoundaryNode();
+          }
+ else {
+            node=null;
+          }
+        }
+        if (node != null && !this.subMap.isInRange(node.keys[offset])) {
+          node=null;
+        }
+        lastNode=null;
+        expectedModCount++;
+      }
+ else {
+        throw new IllegalStateException();
+      }
+    }
+  }
+ else {
+    throw new ConcurrentModificationException();
+  }
+}

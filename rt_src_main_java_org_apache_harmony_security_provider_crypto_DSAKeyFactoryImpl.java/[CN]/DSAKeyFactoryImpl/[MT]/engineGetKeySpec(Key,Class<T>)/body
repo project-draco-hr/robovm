@@ -1,0 +1,39 @@
+{
+  BigInteger p, q, g, x, y;
+  if (key != null) {
+    if (keySpec == null) {
+      throw new NullPointerException(Messages.getString("security.19E"));
+    }
+    if (key instanceof DSAPrivateKey) {
+      DSAPrivateKey privateKey=(DSAPrivateKey)key;
+      if (keySpec.equals(DSAPrivateKeySpec.class)) {
+        x=privateKey.getX();
+        DSAParams params=privateKey.getParams();
+        p=params.getP();
+        q=params.getQ();
+        g=params.getG();
+        return (T)(new DSAPrivateKeySpec(x,p,q,g));
+      }
+      if (keySpec.equals(PKCS8EncodedKeySpec.class)) {
+        return (T)(new PKCS8EncodedKeySpec(key.getEncoded()));
+      }
+      throw new InvalidKeySpecException(Messages.getString("security.19C"));
+    }
+    if (key instanceof DSAPublicKey) {
+      DSAPublicKey publicKey=(DSAPublicKey)key;
+      if (keySpec.equals(DSAPublicKeySpec.class)) {
+        y=publicKey.getY();
+        DSAParams params=publicKey.getParams();
+        p=params.getP();
+        q=params.getQ();
+        g=params.getG();
+        return (T)(new DSAPublicKeySpec(y,p,q,g));
+      }
+      if (keySpec.equals(X509EncodedKeySpec.class)) {
+        return (T)(new X509EncodedKeySpec(key.getEncoded()));
+      }
+      throw new InvalidKeySpecException(Messages.getString("security.19D"));
+    }
+  }
+  throw new InvalidKeySpecException(Messages.getString("security.19F"));
+}

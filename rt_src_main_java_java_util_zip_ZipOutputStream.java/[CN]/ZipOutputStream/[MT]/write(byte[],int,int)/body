@@ -1,0 +1,15 @@
+{
+  if ((off < 0 || (nbytes < 0) || off > buffer.length) || (buffer.length - off < nbytes)) {
+    throw new IndexOutOfBoundsException();
+  }
+  if (currentEntry == null) {
+    throw new ZipException(Messages.getString("archive.2C"));
+  }
+  if (currentEntry.getMethod() == STORED) {
+    out.write(buffer,off,nbytes);
+  }
+ else {
+    super.write(buffer,off,nbytes);
+  }
+  crc.update(buffer,off,nbytes);
+}

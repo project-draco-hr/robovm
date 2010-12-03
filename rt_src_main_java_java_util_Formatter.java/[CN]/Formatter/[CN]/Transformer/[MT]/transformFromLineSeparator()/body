@@ -1,0 +1,21 @@
+{
+  if (formatToken.isPrecisionSet()) {
+    throw new IllegalFormatPrecisionException(formatToken.getPrecision());
+  }
+  if (formatToken.isWidthSet()) {
+    throw new IllegalFormatWidthException(formatToken.getWidth());
+  }
+  int flags=formatToken.getFlags();
+  if (FormatToken.FLAGS_UNSET != flags) {
+    throw new IllegalFormatFlagsException(formatToken.getStrFlags());
+  }
+  if (null == lineSeparator) {
+    lineSeparator=AccessController.doPrivileged(new PrivilegedAction<String>(){
+      public String run(){
+        return System.getProperty("line.separator");
+      }
+    }
+);
+  }
+  return lineSeparator;
+}

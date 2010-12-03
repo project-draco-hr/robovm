@@ -1,0 +1,58 @@
+{
+  if (in == null) {
+    throw new NullPointerException();
+  }
+  if (builder == null) {
+    DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+    factory.setValidating(true);
+    try {
+      builder=factory.newDocumentBuilder();
+    }
+ catch (    ParserConfigurationException e) {
+      throw new Error(e);
+    }
+    builder.setErrorHandler(new ErrorHandler(){
+      public void warning(      SAXParseException e) throws SAXException {
+        throw e;
+      }
+      public void error(      SAXParseException e) throws SAXException {
+        throw e;
+      }
+      public void fatalError(      SAXParseException e) throws SAXException {
+        throw e;
+      }
+    }
+);
+    builder.setEntityResolver(new EntityResolver(){
+      public InputSource resolveEntity(      String publicId,      String systemId) throws SAXException, IOException {
+        if (systemId.equals(PROP_DTD_NAME)) {
+          InputSource result=new InputSource(new StringReader(PROP_DTD));
+          result.setSystemId(PROP_DTD_NAME);
+          return result;
+        }
+        throw new SAXException("Invalid DOCTYPE declaration: " + systemId);
+      }
+    }
+);
+  }
+  try {
+    Document doc=builder.parse(in);
+    NodeList entries=doc.getElementsByTagName("entry");
+    if (entries == null) {
+      return;
+    }
+    int entriesListLength=entries.getLength();
+    for (int i=0; i < entriesListLength; i++) {
+      Element entry=(Element)entries.item(i);
+      String key=entry.getAttribute("key");
+      String value=entry.getTextContent();
+      put(key,value);
+    }
+  }
+ catch (  IOException e) {
+    throw e;
+  }
+catch (  SAXException e) {
+    throw new InvalidPropertiesFormatException(e);
+  }
+}

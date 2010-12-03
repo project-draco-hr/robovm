@@ -1,0 +1,30 @@
+{
+  Node me=new Node(item);
+  int index=hashIndex();
+  int fails=0;
+  for (; ; ) {
+    Object y;
+    Slot slot=arena[index];
+    if (slot == null)     createSlot(index);
+ else     if ((y=slot.get()) != null && slot.compareAndSet(y,null)) {
+      Node you=(Node)y;
+      if (you.compareAndSet(null,item)) {
+        LockSupport.unpark(you.waiter);
+        return you.item;
+      }
+    }
+ else     if (y == null && slot.compareAndSet(null,me)) {
+      if (index == 0)       return timed ? awaitNanos(me,slot,nanos) : await(me,slot);
+      Object v=spinWait(me,slot);
+      if (v != CANCEL)       return v;
+      me=new Node(item);
+      int m=max.get();
+      if (m > (index>>>=1))       max.compareAndSet(m,m - 1);
+    }
+ else     if (++fails > 1) {
+      int m=max.get();
+      if (fails > 3 && m < FULL && max.compareAndSet(m,m + 1))       index=m + 1;
+ else       if (--index < 0)       index=m;
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  this.m=m;
+  if (this.m <= 0) {
+    throw new IllegalArgumentException(Messages.getString("security.75"));
+  }
+  this.ks=new int[ks.length];
+  System.arraycopy(ks,0,this.ks,0,this.ks.length);
+  if (this.ks.length != TPB_MID_LEN && this.ks.length != PPB_MID_LEN) {
+    throw new IllegalArgumentException(Messages.getString("security.78"));
+  }
+  boolean checkFailed=false;
+  int prev=this.m;
+  for (int i=0; i < this.ks.length; i++) {
+    if (this.ks[i] < prev) {
+      prev=this.ks[i];
+      continue;
+    }
+    checkFailed=true;
+    break;
+  }
+  if (checkFailed || prev < 1) {
+    throw new IllegalArgumentException(Messages.getString("security.79"));
+  }
+  BigInteger rpTmp=BigInteger.ONE.setBit(this.m);
+  for (int i=0; i < this.ks.length; i++) {
+    rpTmp=rpTmp.setBit(this.ks[i]);
+  }
+  rp=rpTmp;
+}

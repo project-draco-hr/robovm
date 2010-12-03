@@ -1,0 +1,14 @@
+{
+  if (charClassWithSurrogates == null) {
+    final BitSet lHS=getLowHighSurrogates();
+    charClassWithSurrogates=new AbstractCharClass(){
+      public boolean contains(      int ch){
+        int index=ch - Character.MIN_SURROGATE;
+        return ((index >= 0) && (index < AbstractCharClass.SURROGATE_CARDINALITY)) ? this.altSurrogates ^ lHS.get(index) : false;
+      }
+    }
+;
+    charClassWithSurrogates.setNegative(this.altSurrogates);
+  }
+  return charClassWithSurrogates;
+}

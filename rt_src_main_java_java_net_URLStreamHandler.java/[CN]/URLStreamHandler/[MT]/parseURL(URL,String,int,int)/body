@@ -1,0 +1,134 @@
+{
+  if (end < start || end < 0) {
+    if (end <= Integer.MIN_VALUE + 1 && (start >= str.length() || start < 0) || str.startsWith("//",start) && str.indexOf('/',start + 2) == -1) {
+      throw new StringIndexOutOfBoundsException(end);
+    }
+    if (this != u.strmHandler) {
+      throw new SecurityException();
+    }
+    return;
+  }
+  String parseString=str.substring(start,end);
+  end-=start;
+  int fileIdx=0;
+  String host=u.getHost();
+  int port=u.getPort();
+  String ref=u.getRef();
+  String file=u.getPath();
+  String query=u.getQuery();
+  String authority=u.getAuthority();
+  String userInfo=u.getUserInfo();
+  int refIdx=parseString.indexOf('#',0);
+  if (parseString.startsWith("//") && !parseString.startsWith("////")) {
+    int hostIdx=2, portIdx=-1;
+    port=-1;
+    fileIdx=parseString.indexOf('/',hostIdx);
+    int questionMarkIndex=parseString.indexOf('?',hostIdx);
+    if ((questionMarkIndex != -1) && ((fileIdx == -1) || (fileIdx > questionMarkIndex))) {
+      fileIdx=questionMarkIndex;
+    }
+    if (fileIdx == -1) {
+      fileIdx=end;
+      file="";
+    }
+    int hostEnd=fileIdx;
+    if (refIdx != -1 && refIdx < fileIdx) {
+      hostEnd=refIdx;
+    }
+    int userIdx=parseString.lastIndexOf('@',hostEnd);
+    authority=parseString.substring(hostIdx,hostEnd);
+    if (userIdx > -1) {
+      userInfo=parseString.substring(hostIdx,userIdx);
+      hostIdx=userIdx + 1;
+    }
+    portIdx=parseString.indexOf(':',userIdx == -1 ? hostIdx : userIdx);
+    int endOfIPv6Addr=parseString.indexOf(']');
+    if (endOfIPv6Addr != -1) {
+      try {
+        if (parseString.length() > endOfIPv6Addr + 1) {
+          char c=parseString.charAt(endOfIPv6Addr + 1);
+          if (c == ':') {
+            portIdx=endOfIPv6Addr + 1;
+          }
+ else {
+            portIdx=-1;
+          }
+        }
+ else {
+          portIdx=-1;
+        }
+      }
+ catch (      Exception e) {
+      }
+    }
+    if (portIdx == -1 || portIdx > fileIdx) {
+      host=parseString.substring(hostIdx,hostEnd);
+    }
+ else {
+      host=parseString.substring(hostIdx,portIdx);
+      String portString=parseString.substring(portIdx + 1,hostEnd);
+      if (portString.length() == 0) {
+        port=-1;
+      }
+ else {
+        port=Integer.parseInt(portString);
+      }
+    }
+  }
+  if (refIdx > -1) {
+    ref=parseString.substring(refIdx + 1,end);
+  }
+  int fileEnd=(refIdx == -1 ? end : refIdx);
+  int queryIdx=parseString.lastIndexOf('?',fileEnd);
+  boolean canonicalize=false;
+  if (queryIdx > -1) {
+    query=parseString.substring(queryIdx + 1,fileEnd);
+    if (queryIdx == 0 && file != null) {
+      if (file.equals("")) {
+        file="/";
+      }
+ else       if (file.startsWith("/")) {
+        canonicalize=true;
+      }
+      int last=file.lastIndexOf('/') + 1;
+      file=file.substring(0,last);
+    }
+    fileEnd=queryIdx;
+  }
+ else   if (refIdx != 0) {
+    query=null;
+  }
+  if (fileIdx > -1) {
+    if (fileIdx < end && parseString.charAt(fileIdx) == '/') {
+      file=parseString.substring(fileIdx,fileEnd);
+    }
+ else     if (fileEnd > fileIdx) {
+      if (file == null) {
+        file="";
+      }
+ else       if (file.equals("")) {
+        file="/";
+      }
+ else       if (file.startsWith("/")) {
+        canonicalize=true;
+      }
+      int last=file.lastIndexOf('/') + 1;
+      if (last == 0) {
+        file=parseString.substring(fileIdx,fileEnd);
+      }
+ else {
+        file=file.substring(0,last) + parseString.substring(fileIdx,fileEnd);
+      }
+    }
+  }
+  if (file == null) {
+    file="";
+  }
+  if (host == null) {
+    host="";
+  }
+  if (canonicalize) {
+    file=URLUtil.canonicalizePath(file);
+  }
+  setURL(u,u.getProtocol(),host,port,authority,userInfo,file,query,ref);
+}

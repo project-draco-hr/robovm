@@ -1,0 +1,59 @@
+{
+  if (filter == null) {
+    throw new NullPointerException(Messages.getString("security.2A"));
+  }
+  if (filter.isEmpty()) {
+    return null;
+  }
+  java.util.List<Provider> result=Services.getProvidersList();
+  Set<Entry<String,String>> keys=filter.entrySet();
+  Map.Entry<String,String> entry;
+  for (Iterator<Entry<String,String>> it=keys.iterator(); it.hasNext(); ) {
+    entry=it.next();
+    String key=entry.getKey();
+    String val=entry.getValue();
+    String attribute=null;
+    int i=key.indexOf(' ');
+    int j=key.indexOf('.');
+    if (j == -1) {
+      throw new InvalidParameterException(Messages.getString("security.2B"));
+    }
+    if (i == -1) {
+      if (val.length() != 0) {
+        throw new InvalidParameterException(Messages.getString("security.2B"));
+      }
+    }
+ else {
+      if (val.length() == 0) {
+        throw new InvalidParameterException(Messages.getString("security.2B"));
+      }
+      attribute=key.substring(i + 1);
+      if (attribute.trim().length() == 0) {
+        throw new InvalidParameterException(Messages.getString("security.2B"));
+      }
+      key=key.substring(0,i);
+    }
+    String serv=key.substring(0,j);
+    String alg=key.substring(j + 1);
+    if (serv.length() == 0 || alg.length() == 0) {
+      throw new InvalidParameterException(Messages.getString("security.2B"));
+    }
+    Provider p;
+    for (int k=0; k < result.size(); k++) {
+      try {
+        p=result.get(k);
+      }
+ catch (      IndexOutOfBoundsException e) {
+        break;
+      }
+      if (!p.implementsAlg(serv,alg,attribute,val)) {
+        result.remove(p);
+        k--;
+      }
+    }
+  }
+  if (result.size() > 0) {
+    return result.toArray(new Provider[result.size()]);
+  }
+  return null;
+}

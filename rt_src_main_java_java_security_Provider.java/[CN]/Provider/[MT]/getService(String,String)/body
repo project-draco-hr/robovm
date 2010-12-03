@@ -1,0 +1,32 @@
+{
+  if (type == null || algorithm == null) {
+    throw new NullPointerException();
+  }
+  if (type.equals(lastServiceName) && algorithm.equalsIgnoreCase(lastAlgorithm)) {
+    return returnedService;
+  }
+  String alg=algorithm.toUpperCase();
+  Object o=null;
+  if (serviceTable != null) {
+    o=serviceTable.get(type,alg);
+  }
+  if (o == null && aliasTable != null) {
+    o=aliasTable.get(type,alg);
+  }
+  if (o == null) {
+    updatePropertyServiceTable();
+  }
+  if (o == null && propertyServiceTable != null) {
+    o=propertyServiceTable.get(type,alg);
+  }
+  if (o == null && propertyAliasTable != null) {
+    o=propertyAliasTable.get(type,alg);
+  }
+  if (o != null) {
+    lastServiceName=type;
+    lastAlgorithm=algorithm;
+    returnedService=(Provider.Service)o;
+    return returnedService;
+  }
+  return null;
+}

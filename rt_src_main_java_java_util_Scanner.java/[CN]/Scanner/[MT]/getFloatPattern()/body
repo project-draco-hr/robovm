@@ -1,0 +1,18 @@
+{
+  decimalFormat=(DecimalFormat)NumberFormat.getInstance(locale);
+  StringBuilder digit=new StringBuilder("([0-9]|(\\p{javaDigit}))");
+  StringBuilder nonZeroDigit=new StringBuilder("[\\p{javaDigit}&&[^0]]");
+  StringBuilder numeral=getNumeral(digit,nonZeroDigit);
+  String decimalSeparator="\\" + decimalFormat.getDecimalFormatSymbols().getDecimalSeparator();
+  StringBuilder decimalNumeral=new StringBuilder("(").append(numeral).append("|").append(numeral).append(decimalSeparator).append(digit).append("*+|").append(decimalSeparator).append(digit).append("++)");
+  StringBuilder exponent=new StringBuilder("([eE][+-]?").append(digit).append("+)?");
+  StringBuilder decimal=new StringBuilder("(([-+]?").append(decimalNumeral).append("(").append(exponent).append("?)").append(")|(").append(addPositiveSign(decimalNumeral)).append("(").append(exponent).append("?)").append(")|(").append(addNegativeSign(decimalNumeral)).append("(").append(exponent).append("?)").append("))");
+  StringBuilder hexFloat=new StringBuilder("([-+]?0[xX][0-9a-fA-F]*").append("\\.").append("[0-9a-fA-F]+([pP][-+]?[0-9]+)?)");
+  String localNaN=decimalFormat.getDecimalFormatSymbols().getNaN();
+  String localeInfinity=decimalFormat.getDecimalFormatSymbols().getInfinity();
+  StringBuilder nonNumber=new StringBuilder("(NaN|\\Q").append(localNaN).append("\\E|Infinity|\\Q").append(localeInfinity).append("\\E)");
+  StringBuilder singedNonNumber=new StringBuilder("((([-+]?(").append(nonNumber).append(")))|(").append(addPositiveSign(nonNumber)).append(")|(").append(addNegativeSign(nonNumber)).append("))");
+  StringBuilder floatString=new StringBuilder().append(decimal).append("|").append(hexFloat).append("|").append(singedNonNumber);
+  Pattern floatPattern=Pattern.compile(floatString.toString());
+  return floatPattern;
+}

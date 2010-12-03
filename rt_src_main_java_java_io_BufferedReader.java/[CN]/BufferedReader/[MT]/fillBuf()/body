@@ -1,0 +1,31 @@
+{
+  if (mark == -1 || (pos - mark >= markLimit)) {
+    int result=in.read(buf,0,buf.length);
+    if (result > 0) {
+      mark=-1;
+      pos=0;
+      end=result;
+    }
+    return result;
+  }
+  if (mark == 0 && markLimit > buf.length) {
+    int newLength=buf.length * 2;
+    if (newLength > markLimit) {
+      newLength=markLimit;
+    }
+    char[] newbuf=new char[newLength];
+    System.arraycopy(buf,0,newbuf,0,buf.length);
+    buf=newbuf;
+  }
+ else   if (mark > 0) {
+    System.arraycopy(buf,mark,buf,0,buf.length - mark);
+    pos-=mark;
+    end-=mark;
+    mark=0;
+  }
+  int count=in.read(buf,pos,buf.length - pos);
+  if (count != -1) {
+    end+=count;
+  }
+  return count;
+}

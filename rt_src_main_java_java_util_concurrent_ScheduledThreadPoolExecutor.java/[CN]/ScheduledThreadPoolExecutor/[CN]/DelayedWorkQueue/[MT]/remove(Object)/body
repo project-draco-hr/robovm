@@ -1,0 +1,20 @@
+{
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    int i=indexOf(x);
+    if (i < 0)     return false;
+    setIndex(queue[i],-1);
+    int s=--size;
+    RunnableScheduledFuture replacement=queue[s];
+    queue[s]=null;
+    if (s != i) {
+      siftDown(i,replacement);
+      if (queue[i] == replacement)       siftUp(i,replacement);
+    }
+    return true;
+  }
+  finally {
+    lock.unlock();
+  }
+}

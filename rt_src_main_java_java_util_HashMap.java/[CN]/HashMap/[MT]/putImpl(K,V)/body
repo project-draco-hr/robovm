@@ -1,0 +1,28 @@
+{
+  Entry<K,V> entry;
+  if (key == null) {
+    entry=findNullKeyEntry();
+    if (entry == null) {
+      modCount++;
+      entry=createHashedEntry(null,0,0);
+      if (++elementCount > threshold) {
+        rehash();
+      }
+    }
+  }
+ else {
+    int hash=computeHashCode(key);
+    int index=hash & (elementData.length - 1);
+    entry=findNonNullKeyEntry(key,index,hash);
+    if (entry == null) {
+      modCount++;
+      entry=createHashedEntry(key,index,hash);
+      if (++elementCount > threshold) {
+        rehash();
+      }
+    }
+  }
+  V result=entry.value;
+  entry.value=value;
+  return result;
+}

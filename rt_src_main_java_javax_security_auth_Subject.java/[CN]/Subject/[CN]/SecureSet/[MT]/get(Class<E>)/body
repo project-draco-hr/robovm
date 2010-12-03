@@ -1,0 +1,38 @@
+{
+  if (c == null) {
+    throw new NullPointerException();
+  }
+  AbstractSet<E> s=new AbstractSet<E>(){
+    private LinkedList<E> elements=new LinkedList<E>();
+    @Override public boolean add(    E o){
+      if (!c.isAssignableFrom(o.getClass())) {
+        throw new IllegalArgumentException(Messages.getString("auth.0C",c.getName()));
+      }
+      if (elements.contains(o)) {
+        return false;
+      }
+      elements.add(o);
+      return true;
+    }
+    @Override public Iterator<E> iterator(){
+      return elements.iterator();
+    }
+    @Override public boolean retainAll(    Collection<?> c){
+      if (c == null) {
+        throw new NullPointerException();
+      }
+      return super.retainAll(c);
+    }
+    @Override public int size(){
+      return elements.size();
+    }
+  }
+;
+  for (Iterator<SST> it=iterator(); it.hasNext(); ) {
+    SST o=it.next();
+    if (c.isAssignableFrom(o.getClass())) {
+      s.add(c.cast(o));
+    }
+  }
+  return s;
+}

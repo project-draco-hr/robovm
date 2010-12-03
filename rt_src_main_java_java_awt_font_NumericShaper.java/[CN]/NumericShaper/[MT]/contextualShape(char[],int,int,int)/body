@@ -1,0 +1,31 @@
+{
+  char maxDigit=(char)0x0039;
+  char minDigit=(char)0x0030;
+  int currIndex;
+  if (((1 << contextIndex) & fRanges) == 0) {
+    currIndex=INDEX_EUROPEAN;
+  }
+ else {
+    currIndex=contextIndex;
+  }
+  for (int ind=start; ind < start + count; ind++) {
+    if (minDigit <= text[ind] && text[ind] <= maxDigit) {
+      if (currIndex != INDEX_ETHIOPIC || text[ind] != '0') {
+        text[ind]=(char)(digitsLowRanges[currIndex] + text[ind]);
+      }
+    }
+ else {
+      if (isCharStrong(text[ind])) {
+        int index=getCharIndex(text[ind]);
+        if (currIndex != index) {
+          if (((1 << index) & fRanges) != 0) {
+            currIndex=index;
+          }
+ else {
+            currIndex=INDEX_EUROPEAN;
+          }
+        }
+      }
+    }
+  }
+}

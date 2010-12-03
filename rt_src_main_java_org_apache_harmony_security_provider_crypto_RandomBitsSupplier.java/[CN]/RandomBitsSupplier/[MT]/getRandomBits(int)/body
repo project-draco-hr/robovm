@@ -1,0 +1,19 @@
+{
+  if (numBytes <= 0) {
+    throw new IllegalArgumentException(Messages.getString("security.195",numBytes));
+  }
+  if (!serviceAvailable) {
+    throw new ProviderException(Messages.getString("security.196"));
+  }
+  byte[] randomBits;
+  if (bis != null) {
+    randomBits=getUnixDeviceRandom(numBytes);
+  }
+ else {
+    randomBits=new byte[numBytes];
+    if (!getUnixSystemRandom(randomBits,numBytes)) {
+      throw new ProviderException(Messages.getString("security.196"));
+    }
+  }
+  return randomBits;
+}

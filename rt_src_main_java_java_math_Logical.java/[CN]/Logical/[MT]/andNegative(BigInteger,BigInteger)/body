@@ -1,0 +1,44 @@
+{
+  int iLonger=longer.getFirstNonzeroDigit();
+  int iShorter=shorter.getFirstNonzeroDigit();
+  if (iLonger >= shorter.numberLength) {
+    return longer;
+  }
+  int resLength;
+  int resDigits[];
+  int i=Math.max(iShorter,iLonger);
+  int digit;
+  if (iShorter > iLonger) {
+    digit=-shorter.digits[i] & ~longer.digits[i];
+  }
+ else   if (iShorter < iLonger) {
+    digit=~shorter.digits[i] & -longer.digits[i];
+  }
+ else {
+    digit=-shorter.digits[i] & -longer.digits[i];
+  }
+  if (digit == 0) {
+    for (i++; i < shorter.numberLength && (digit=~(longer.digits[i] | shorter.digits[i])) == 0; i++)     ;
+    if (digit == 0) {
+      for (; i < longer.numberLength && (digit=~longer.digits[i]) == 0; i++)       ;
+      if (digit == 0) {
+        resLength=longer.numberLength + 1;
+        resDigits=new int[resLength];
+        resDigits[resLength - 1]=1;
+        BigInteger result=new BigInteger(-1,resLength,resDigits);
+        return result;
+      }
+    }
+  }
+  resLength=longer.numberLength;
+  resDigits=new int[resLength];
+  resDigits[i]=-digit;
+  for (i++; i < shorter.numberLength; i++) {
+    resDigits[i]=longer.digits[i] | shorter.digits[i];
+  }
+  for (; i < longer.numberLength; i++) {
+    resDigits[i]=longer.digits[i];
+  }
+  BigInteger result=new BigInteger(-1,resLength,resDigits);
+  return result;
+}

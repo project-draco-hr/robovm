@@ -1,0 +1,23 @@
+{
+  icuTZ=getICUTimeZone(name);
+  if (icuTZ instanceof com.ibm.icu.util.SimpleTimeZone) {
+    isSimple=true;
+    com.ibm.icu.util.SimpleTimeZone tz=(com.ibm.icu.util.SimpleTimeZone)icuTZ;
+    tz.setRawOffset(offset);
+    tz.setStartRule(startMonth,startDay,startDayOfWeek,startTime);
+    tz.setEndRule(endMonth,endDay,endDayOfWeek,endTime);
+    tz.setDSTSavings(daylightSavings);
+  }
+ else {
+    isSimple=false;
+  }
+  setID(name);
+  rawOffset=offset;
+  if (daylightSavings <= 0) {
+    throw new IllegalArgumentException(Messages.getString("luni.3B",daylightSavings));
+  }
+  dstSavings=daylightSavings;
+  setStartRule(startMonth,startDay,startDayOfWeek,startTime);
+  setEndRule(endMonth,endDay,endDayOfWeek,endTime);
+  useDaylight=daylightSavings > 0 || icuTZ.useDaylightTime();
+}

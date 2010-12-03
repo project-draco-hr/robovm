@@ -1,0 +1,84 @@
+{
+  int cbRemaining=cb.remaining();
+  if (CharsetProviderImpl.hasLoadedNatives() && bb.isDirect() && bb.hasRemaining()&& cb.hasArray()) {
+    int cbPos=cb.position();
+    int bbPos=bb.position();
+    int[] res={bb.remaining(),cbRemaining,0,0};
+    nDecode(cb.array(),cb.arrayOffset() + cbPos,bb.remaining(),AddressUtil.getDirectBufferAddress(bb),bbPos,res);
+    bb.position(bbPos + bb.remaining() - res[0]);
+    cb.position(cbPos + cbRemaining - res[1]);
+    if (res[2] != 0) {
+      return CoderResult.unmappableForLength(res[2]);
+    }
+ else {
+      if (res[3] != 0)       return CoderResult.OVERFLOW;
+    }
+  }
+ else {
+    while (bb.hasRemaining()) {
+      if (cbRemaining == 0)       return CoderResult.OVERFLOW;
+      char in=(char)(bb.get() & 0xFF);
+      if (in >= 26) {
+        int index=decodeIndex[in & 0xFF];
+        if (index < 0 && arrDecode0.charAt(in & 0xFF) == '\u0000' || !bb.hasRemaining()) {
+          if (arrDecode0.charAt(in & 0xFF) == '\u0000') {
+            bb.position(bb.position() - 1);
+            if (index > 0 && bb.remaining() == 1) {
+              return CoderResult.UNDERFLOW;
+            }
+            return CoderResult.unmappableForLength(1);
+          }
+ else {
+            cb.put(arrDecode0.charAt(in & 0xFF));
+            return CoderResult.UNDERFLOW;
+          }
+        }
+        int variable=0;
+        byte b2=0;
+        if (index < 0) {
+          variable=0;
+          index=in & 0xFF;
+        }
+ else {
+          variable=index >> 4;
+          index<<=8;
+          b2=bb.get();
+          index+=(b2 & 0xFF);
+          index=index - (variable << 12);
+        }
+        char resultChar='\u0000';
+switch (variable) {
+case 0:
+          resultChar=arrDecode0.charAt(index);
+        break;
+case 1:
+      resultChar=arrDecode1.charAt(index);
+    break;
+case 2:
+  resultChar=arrDecode2.charAt(index);
+break;
+case 3:
+resultChar=arrDecode3.charAt(index);
+break;
+}
+if (resultChar != '\u0000') {
+cb.put(resultChar);
+}
+ else {
+bb.position(bb.position() - 2);
+if (arrDecode0.charAt(b2 & 0xFF) == '\u0000') {
+return CoderResult.unmappableForLength(2);
+}
+ else {
+return CoderResult.unmappableForLength(1);
+}
+}
+}
+ else {
+cb.put((char)(in & 0xFF));
+}
+cbRemaining--;
+}
+}
+return CoderResult.UNDERFLOW;
+}

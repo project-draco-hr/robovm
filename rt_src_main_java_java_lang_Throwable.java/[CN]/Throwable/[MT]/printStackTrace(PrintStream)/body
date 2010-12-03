@@ -1,0 +1,23 @@
+{
+  err.println(toString());
+  StackTraceElement[] stack=getInternalStackTrace();
+  for (  java.lang.StackTraceElement element : stack) {
+    err.println("\tat " + element);
+  }
+  StackTraceElement[] parentStack=stack;
+  Throwable throwable=getCause();
+  while (throwable != null) {
+    err.print("Caused by: ");
+    err.println(throwable);
+    StackTraceElement[] currentStack=throwable.getInternalStackTrace();
+    int duplicates=countDuplicates(currentStack,parentStack);
+    for (int i=0; i < currentStack.length - duplicates; i++) {
+      err.println("\tat " + currentStack[i]);
+    }
+    if (duplicates > 0) {
+      err.println("\t... " + duplicates + " more");
+    }
+    parentStack=currentStack;
+    throwable=throwable.getCause();
+  }
+}

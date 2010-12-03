@@ -1,0 +1,71 @@
+{
+  if (this.replacement != null && this.replacement.equals(replacement)) {
+    if (replacementParts == null) {
+      return processedRepl;
+    }
+ else {
+      StringBuilder sb=new StringBuilder();
+      for (int i=0; i < replacementParts.size(); i++) {
+        sb.append(replacementParts.get(i));
+      }
+      return sb.toString();
+    }
+  }
+ else {
+    this.replacement=replacement;
+    char[] repl=replacement.toCharArray();
+    StringBuilder res=new StringBuilder();
+    replacementParts=null;
+    int index=0;
+    int replacementPos=0;
+    boolean nextBackSlashed=false;
+    while (index < repl.length) {
+      if (repl[index] == '\\' && !nextBackSlashed) {
+        nextBackSlashed=true;
+        index++;
+      }
+      if (nextBackSlashed) {
+        res.append(repl[index]);
+        nextBackSlashed=false;
+      }
+ else {
+        if (repl[index] == '$') {
+          if (replacementParts == null) {
+            replacementParts=new ArrayList();
+          }
+          try {
+            final int gr=Integer.parseInt(new String(repl,++index,1));
+            if (replacementPos != res.length()) {
+              replacementParts.add(res.subSequence(replacementPos,res.length()));
+              replacementPos=res.length();
+            }
+            replacementParts.add(new Object(){
+              private final int grN=gr;
+              public String toString(){
+                return group(grN);
+              }
+            }
+);
+            String group=group(gr);
+            replacementPos+=group.length();
+            res.append(group);
+          }
+ catch (          IndexOutOfBoundsException iob) {
+            throw iob;
+          }
+catch (          Exception e) {
+            throw new IllegalArgumentException(Messages.getString("regex.00"));
+          }
+        }
+ else {
+          res.append(repl[index]);
+        }
+      }
+      index++;
+    }
+    if (replacementParts != null && replacementPos != res.length()) {
+      replacementParts.add(res.subSequence(replacementPos,res.length()));
+    }
+    return res.toString();
+  }
+}

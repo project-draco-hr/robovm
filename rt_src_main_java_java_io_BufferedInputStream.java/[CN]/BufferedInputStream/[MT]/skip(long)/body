@@ -1,0 +1,34 @@
+{
+  byte[] localBuf=buf;
+  InputStream localIn=in;
+  if (localBuf == null) {
+    throw new IOException(Messages.getString("luni.24"));
+  }
+  if (amount < 1) {
+    return 0;
+  }
+  if (localIn == null) {
+    throw new IOException(Messages.getString("luni.24"));
+  }
+  if (count - pos >= amount) {
+    pos+=amount;
+    return amount;
+  }
+  long read=count - pos;
+  pos=count;
+  if (markpos != -1) {
+    if (amount <= marklimit) {
+      if (fillbuf(localIn,localBuf) == -1) {
+        return read;
+      }
+      if (count - pos >= amount - read) {
+        pos+=amount - read;
+        return amount;
+      }
+      read+=(count - pos);
+      pos=count;
+      return read;
+    }
+  }
+  return read + localIn.skip(amount - read);
+}

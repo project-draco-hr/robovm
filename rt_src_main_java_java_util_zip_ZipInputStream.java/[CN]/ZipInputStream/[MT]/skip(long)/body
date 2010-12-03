@@ -1,0 +1,16 @@
+{
+  if (value < 0) {
+    throw new IllegalArgumentException();
+  }
+  long skipped=0;
+  byte[] b=new byte[(int)Math.min(value,2048L)];
+  while (skipped != value) {
+    long rem=value - skipped;
+    int x=read(b,0,(int)(b.length > rem ? rem : b.length));
+    if (x == -1) {
+      return skipped;
+    }
+    skipped+=x;
+  }
+  return skipped;
+}

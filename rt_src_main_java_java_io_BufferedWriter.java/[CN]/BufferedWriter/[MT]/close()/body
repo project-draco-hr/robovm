@@ -1,0 +1,27 @@
+{
+synchronized (lock) {
+    if (isClosed()) {
+      return;
+    }
+    Throwable thrown=null;
+    try {
+      flushInternal();
+    }
+ catch (    Throwable e) {
+      thrown=e;
+    }
+    buf=null;
+    try {
+      out.close();
+    }
+ catch (    Throwable e) {
+      if (thrown == null) {
+        thrown=e;
+      }
+    }
+    out=null;
+    if (thrown != null) {
+      SneakyThrow.sneakyThrow(thrown);
+    }
+  }
+}

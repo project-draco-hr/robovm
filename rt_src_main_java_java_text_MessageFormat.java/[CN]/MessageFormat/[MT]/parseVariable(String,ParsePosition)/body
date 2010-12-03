@@ -1,0 +1,66 @@
+{
+  int length=string.length(), offset=position.getIndex();
+  char ch;
+  if (offset >= length || ((ch=string.charAt(offset++)) != '}' && ch != ',')) {
+    throw new IllegalArgumentException(Messages.getString("text.15"));
+  }
+  position.setIndex(offset);
+  if (ch == '}') {
+    return null;
+  }
+  int type=match(string,position,false,new String[]{"time","date","number","choice"});
+  if (type == -1) {
+    throw new IllegalArgumentException(Messages.getString("text.16"));
+  }
+  StringBuffer buffer=new StringBuffer();
+  ch=string.charAt(position.getIndex() - 1);
+switch (type) {
+case 0:
+case 1:
+    if (ch == '}') {
+      return type == 1 ? DateFormat.getDateInstance(DateFormat.DEFAULT,locale) : DateFormat.getTimeInstance(DateFormat.DEFAULT,locale);
+    }
+  int dateStyle=match(string,position,true,new String[]{"full","long","medium","short"});
+if (dateStyle == -1) {
+  Format.upToWithQuotes(string,position,buffer,'}','{');
+  return new SimpleDateFormat(buffer.toString(),locale);
+}
+switch (dateStyle) {
+case 0:
+dateStyle=DateFormat.FULL;
+break;
+case 1:
+dateStyle=DateFormat.LONG;
+break;
+case 2:
+dateStyle=DateFormat.MEDIUM;
+break;
+case 3:
+dateStyle=DateFormat.SHORT;
+break;
+}
+return type == 1 ? DateFormat.getDateInstance(dateStyle,locale) : DateFormat.getTimeInstance(dateStyle,locale);
+case 2:
+if (ch == '}') {
+return NumberFormat.getInstance();
+}
+int numberStyle=match(string,position,true,new String[]{"currency","percent","integer"});
+if (numberStyle == -1) {
+Format.upToWithQuotes(string,position,buffer,'}','{');
+return new DecimalFormat(buffer.toString(),new DecimalFormatSymbols(locale));
+}
+switch (numberStyle) {
+case 0:
+return NumberFormat.getCurrencyInstance(locale);
+case 1:
+return NumberFormat.getPercentInstance(locale);
+}
+return NumberFormat.getIntegerInstance(locale);
+}
+try {
+Format.upToWithQuotes(string,position,buffer,'}','{');
+}
+ catch (IllegalArgumentException e) {
+}
+return new ChoiceFormat(buffer.toString());
+}

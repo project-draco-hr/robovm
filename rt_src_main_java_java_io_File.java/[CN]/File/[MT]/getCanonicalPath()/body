@@ -1,0 +1,76 @@
+{
+  byte[] result=properPath(false);
+  String absPath=Util.toUTF8String(result);
+  String canonPath=FileCanonPathCache.get(absPath);
+  if (canonPath != null) {
+    return canonPath;
+  }
+  if (separatorChar == '/') {
+    result=resolveLink(result,result.length,false);
+    result=resolve(result);
+  }
+  int numSeparators=1;
+  for (int i=0; i < result.length; i++) {
+    if (result[i] == separatorChar) {
+      numSeparators++;
+    }
+  }
+  int sepLocations[]=new int[numSeparators];
+  int rootLoc=0;
+  if (separatorChar != '/') {
+    if (result[0] == '\\') {
+      rootLoc=(result.length > 1 && result[1] == '\\') ? 1 : 0;
+    }
+ else {
+      rootLoc=2;
+    }
+  }
+  byte newResult[]=new byte[result.length + 1];
+  int newLength=0, lastSlash=0, foundDots=0;
+  sepLocations[lastSlash]=rootLoc;
+  for (int i=0; i <= result.length; i++) {
+    if (i < rootLoc) {
+      newResult[newLength++]=result[i];
+    }
+ else {
+      if (i == result.length || result[i] == separatorChar) {
+        if (i == result.length && foundDots == 0) {
+          break;
+        }
+        if (foundDots == 1) {
+          foundDots=0;
+          continue;
+        }
+        if (foundDots > 1) {
+          lastSlash=lastSlash > (foundDots - 1) ? lastSlash - (foundDots - 1) : 0;
+          newLength=sepLocations[lastSlash] + 1;
+          foundDots=0;
+          continue;
+        }
+        sepLocations[++lastSlash]=newLength;
+        newResult[newLength++]=(byte)separatorChar;
+        continue;
+      }
+      if (result[i] == '.') {
+        foundDots++;
+        continue;
+      }
+      if (foundDots > 0) {
+        for (int j=0; j < foundDots; j++) {
+          newResult[newLength++]=(byte)'.';
+        }
+      }
+      newResult[newLength++]=result[i];
+      foundDots=0;
+    }
+  }
+  if (newLength > (rootLoc + 1) && newResult[newLength - 1] == separatorChar) {
+    newLength--;
+  }
+  newResult[newLength]=0;
+  newResult=getCanonImpl(newResult);
+  newLength=newResult.length;
+  canonPath=Util.toUTF8String(newResult,0,newLength);
+  FileCanonPathCache.put(absPath,canonPath);
+  return canonPath;
+}

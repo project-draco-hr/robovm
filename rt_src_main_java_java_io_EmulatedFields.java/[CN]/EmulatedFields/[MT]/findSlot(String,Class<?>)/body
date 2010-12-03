@@ -1,0 +1,35 @@
+{
+  boolean isPrimitive=fieldType != null && fieldType.isPrimitive();
+  for (int i=0; i < slotsToSerialize.length; i++) {
+    ObjectSlot slot=slotsToSerialize[i];
+    if (slot.field.getName().equals(fieldName)) {
+      if (isPrimitive) {
+        if (slot.field.getType() == fieldType) {
+          return slot;
+        }
+      }
+ else {
+        if (fieldType == null) {
+          return slot;
+        }
+        if (slot.field.getType().isAssignableFrom(fieldType)) {
+          return slot;
+        }
+      }
+    }
+  }
+  if (declaredFields != null) {
+    for (int i=0; i < declaredFields.length; i++) {
+      ObjectStreamField field=declaredFields[i];
+      if (field.getName().equals(fieldName)) {
+        if (isPrimitive ? field.getType() == fieldType : fieldType == null || field.getType().isAssignableFrom(fieldType)) {
+          ObjectSlot slot=new ObjectSlot();
+          slot.field=field;
+          slot.defaulted=true;
+          return slot;
+        }
+      }
+    }
+  }
+  return null;
+}

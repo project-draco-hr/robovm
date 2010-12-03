@@ -1,0 +1,22 @@
+{
+  wasEncoded=true;
+  this.hexString=hexString;
+  this.encoded=encoded;
+  try {
+    DerInputStream in=new DerInputStream(encoded);
+    tag=in.tag;
+    if (DirectoryString.ASN1.checkTag(tag)) {
+      this.rawString=(String)DirectoryString.ASN1.decode(in);
+      this.escapedString=makeEscaped(rawString);
+    }
+ else {
+      this.rawString=hexString;
+      this.escapedString=hexString;
+    }
+  }
+ catch (  IOException e) {
+    IllegalArgumentException iae=new IllegalArgumentException();
+    iae.initCause(e);
+    throw iae;
+  }
+}

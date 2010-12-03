@@ -1,0 +1,33 @@
+{
+  if (endDayOfWeek == 0) {
+    endMode=DOM_MODE;
+  }
+ else   if (endDayOfWeek < 0) {
+    endDayOfWeek=-endDayOfWeek;
+    if (endDay < 0) {
+      endDay=-endDay;
+      endMode=DOW_LE_DOM_MODE;
+    }
+ else {
+      endMode=DOW_GE_DOM_MODE;
+    }
+  }
+ else {
+    endMode=DOW_IN_MONTH_MODE;
+  }
+  useDaylight=startDay != 0 && endDay != 0;
+  if (endDay != 0) {
+    checkRange(endMonth,endMode == DOM_MODE ? 1 : endDayOfWeek,endTime);
+    if (endMode != DOW_IN_MONTH_MODE) {
+      checkDay(endMonth,endDay);
+    }
+ else {
+      if (endDay < -5 || endDay > 5) {
+        throw new IllegalArgumentException(Messages.getString("luni.40",endDay));
+      }
+    }
+  }
+  if (endMode != DOM_MODE) {
+    endDayOfWeek--;
+  }
+}

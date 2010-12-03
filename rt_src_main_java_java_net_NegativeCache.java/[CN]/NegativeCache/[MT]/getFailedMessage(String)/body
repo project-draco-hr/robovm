@@ -1,0 +1,29 @@
+{
+  checkCacheExists();
+  NegCacheElement element=negCache.get(hostName);
+  if (element != null) {
+    String ttlValue=AccessController.doPrivileged(new PriviAction<String>("networkaddress.cache.negative.ttl"));
+    int ttl=10;
+    try {
+      if (ttlValue != null) {
+        ttl=Integer.decode(ttlValue).intValue();
+      }
+    }
+ catch (    NumberFormatException e) {
+    }
+    if (ttl == 0) {
+      negCache.clear();
+      element=null;
+    }
+ else     if (ttl != -1) {
+      if (element.timeAdded + (ttl * 1000) < System.currentTimeMillis()) {
+        negCache.remove(hostName);
+        element=null;
+      }
+    }
+  }
+  if (element != null) {
+    return element.hostName;
+  }
+  return null;
+}

@@ -1,0 +1,117 @@
+{
+  if (type.isPrimitive()) {
+    writeUnsignedByte(OPC_new);
+    writeUnsignedShort(constantPool.typeIndex(typeWrapperName(type)));
+    writeUnsignedByte(OPC_dup);
+    if (argByteOffset > 255) {
+      writeUnsignedByte(OPC_wide);
+    }
+    if (type == long.class) {
+switch (argByteOffset) {
+case 0:
+        writeUnsignedByte(OPC_lload_0);
+      break;
+case 1:
+    writeUnsignedByte(OPC_lload_1);
+  break;
+case 2:
+writeUnsignedByte(OPC_lload_2);
+break;
+case 3:
+writeUnsignedByte(OPC_lload_3);
+break;
+default :
+writeUnsignedByte(OPC_lload);
+if (argByteOffset > 255) {
+writeUnsignedShort(argByteOffset);
+}
+ else {
+writeUnsignedByte(argByteOffset);
+}
+}
+argByteOffset+=2;
+}
+ else if (type == float.class) {
+switch (argByteOffset) {
+case 0:
+writeUnsignedByte(OPC_fload_0);
+break;
+case 1:
+writeUnsignedByte(OPC_fload_1);
+break;
+case 2:
+writeUnsignedByte(OPC_fload_2);
+break;
+case 3:
+writeUnsignedByte(OPC_fload_3);
+break;
+default :
+writeUnsignedByte(OPC_fload);
+if (argByteOffset > 255) {
+writeUnsignedShort(argByteOffset);
+}
+ else {
+writeUnsignedByte(argByteOffset);
+}
+}
+argByteOffset++;
+}
+ else if (type == double.class) {
+switch (argByteOffset) {
+case 0:
+writeUnsignedByte(OPC_dload_0);
+break;
+case 1:
+writeUnsignedByte(OPC_dload_1);
+break;
+case 2:
+writeUnsignedByte(OPC_dload_2);
+break;
+case 3:
+writeUnsignedByte(OPC_dload_3);
+break;
+default :
+writeUnsignedByte(OPC_dload);
+if (argByteOffset > 255) {
+writeUnsignedShort(argByteOffset);
+}
+ else {
+writeUnsignedByte(argByteOffset);
+}
+}
+argByteOffset+=2;
+}
+ else {
+switch (argByteOffset) {
+case 0:
+writeUnsignedByte(OPC_iload_0);
+break;
+case 1:
+writeUnsignedByte(OPC_iload_1);
+break;
+case 2:
+writeUnsignedByte(OPC_iload_2);
+break;
+case 3:
+writeUnsignedByte(OPC_iload_3);
+break;
+default :
+writeUnsignedByte(OPC_iload);
+if (argByteOffset > 255) {
+writeUnsignedShort(argByteOffset);
+}
+ else {
+writeUnsignedByte(argByteOffset);
+}
+}
+argByteOffset++;
+}
+writeUnsignedByte(OPC_invokespecial);
+writeUnsignedShort(constantPool.literalIndex(typeInitMethod(type)));
+}
+ else {
+genLoadArg(argByteOffset);
+argByteOffset++;
+}
+return argByteOffset;
+}

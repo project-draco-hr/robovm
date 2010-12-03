@@ -1,0 +1,30 @@
+{
+  try {
+    int content_mac_length=len + hash_size;
+    int padding_length=is_block_cipher ? ((8 - (++content_mac_length & 0x07)) & 0x07) : 0;
+    byte[] res=new byte[content_mac_length + padding_length];
+    System.arraycopy(fragment,offset,res,0,len);
+    mac_material_header[0]=type;
+    mac_material_header[3]=(byte)((0x00FF00 & len) >> 8);
+    mac_material_header[4]=(byte)(0x0000FF & len);
+    encMac.update(write_seq_num);
+    encMac.update(mac_material_header);
+    encMac.update(fragment,offset,len);
+    encMac.doFinal(res,len);
+    if (is_block_cipher) {
+      Arrays.fill(res,content_mac_length - 1,res.length,(byte)(padding_length));
+    }
+    if (logger != null) {
+      logger.println("SSLRecordProtocol.do_encryption: Generic" + (is_block_cipher ? "BlockCipher with padding[" + padding_length + "]:" : "StreamCipher:"));
+      logger.print(res);
+    }
+    byte[] rez=new byte[encCipher.getOutputSize(res.length)];
+    encCipher.update(res,0,res.length,rez);
+    incSequenceNumber(write_seq_num);
+    return rez;
+  }
+ catch (  GeneralSecurityException e) {
+    e.printStackTrace();
+    throw new AlertException(AlertProtocol.INTERNAL_ERROR,new SSLProtocolException("Error during the encryption"));
+  }
+}

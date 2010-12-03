@@ -1,0 +1,68 @@
+{
+  checkNotNull(source);
+  checkOpen();
+  InetSocketAddress isa=(InetSocketAddress)socketAddress;
+  if (null == isa.getAddress()) {
+    throw new IOException();
+  }
+  if (isConnected()) {
+    if (!connectAddress.equals(isa)) {
+      throw new IllegalArgumentException();
+    }
+  }
+ else {
+    SecurityManager sm=System.getSecurityManager();
+    if (sm != null) {
+      if (isa.getAddress().isMulticastAddress()) {
+        sm.checkMulticast(isa.getAddress());
+      }
+ else {
+        sm.checkConnect(isa.getAddress().getHostAddress(),isa.getPort());
+      }
+    }
+  }
+  int sendCount=0;
+  try {
+    begin();
+    byte[] array=null;
+    int length=source.remaining();
+    int oldposition=source.position();
+    int start=oldposition;
+    if (source.isDirect()) {
+synchronized (writeLock) {
+        long data_address=AddressUtil.getDirectBufferAddress(source);
+        if (isConnected()) {
+          sendCount=networkSystem.sendConnectedDatagramDirect(fd,data_address,start,length,false);
+        }
+ else {
+          sendCount=networkSystem.sendDatagramDirect(fd,data_address,start,length,isa.getPort(),false,trafficClass,isa.getAddress());
+        }
+      }
+    }
+ else {
+      if (source.hasArray()) {
+        array=source.array();
+        start+=source.arrayOffset();
+      }
+ else {
+        array=new byte[length];
+        source.get(array);
+        start=0;
+      }
+synchronized (writeLock) {
+        if (isConnected()) {
+          sendCount=networkSystem.sendConnectedDatagram(fd,array,start,length,false);
+        }
+ else {
+          sendCount=networkSystem.sendDatagram(fd,array,start,length,isa.getPort(),false,trafficClass,isa.getAddress());
+        }
+      }
+    }
+    source.position(oldposition + sendCount);
+    isBound=true;
+    return sendCount;
+  }
+  finally {
+    end(sendCount >= 0);
+  }
+}

@@ -1,0 +1,16 @@
+{
+  super();
+  SecurityManager security=System.getSecurityManager();
+  if (security != null) {
+    String filePath=(null == file ? null : file.getPath());
+    security.checkRead(filePath);
+  }
+  if (file == null) {
+    throw new NullPointerException(Messages.getString("luni.4D"));
+  }
+  fd=new FileDescriptor();
+  fd.readOnly=true;
+  fd.descriptor=fileSystem.open(file.properPath(true),IFileSystem.O_RDONLY);
+  innerFD=true;
+  channel=FileChannelFactory.getFileChannel(this,fd.descriptor,IFileSystem.O_RDONLY);
+}

@@ -1,0 +1,23 @@
+{
+  BigInteger p, q, y;
+  int n1;
+  if (publicKey == null || !(publicKey instanceof DSAPublicKey)) {
+    throw new InvalidKeyException(Messages.getString("security.16C"));
+  }
+  DSAParams params=((DSAPublicKey)publicKey).getParams();
+  p=params.getP();
+  q=params.getQ();
+  y=((DSAPublicKey)publicKey).getY();
+  n1=p.bitLength();
+  if (p.compareTo(BigInteger.valueOf(1)) != 1 || n1 < 512 || n1 > 1024 || (n1 & 077) != 0) {
+    throw new InvalidKeyException(Messages.getString("security.169"));
+  }
+  if (q.signum() != 1 || q.bitLength() != 160) {
+    throw new InvalidKeyException(Messages.getString("security.16A"));
+  }
+  if (y.signum() != 1) {
+    throw new InvalidKeyException(Messages.getString("security.16D"));
+  }
+  dsaKey=(DSAKey)publicKey;
+  msgDigest.reset();
+}

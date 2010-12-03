@@ -1,0 +1,44 @@
+{
+  StringBuilder tokenBuilder=new StringBuilder(token);
+  boolean negative=removeLocaleSign(tokenBuilder);
+  String groupSeparator=String.valueOf(decimalFormat.getDecimalFormatSymbols().getGroupingSeparator());
+  int separatorIndex=-1;
+  while (-1 != (separatorIndex=tokenBuilder.indexOf(groupSeparator))) {
+    tokenBuilder.delete(separatorIndex,separatorIndex + 1);
+  }
+  String decimalSeparator=String.valueOf(decimalFormat.getDecimalFormatSymbols().getDecimalSeparator());
+  separatorIndex=tokenBuilder.indexOf(decimalSeparator);
+  StringBuilder result=new StringBuilder("");
+  if (DataType.INT == type) {
+    for (int i=0; i < tokenBuilder.length(); i++) {
+      if (-1 != Character.digit(tokenBuilder.charAt(i),Character.MAX_RADIX)) {
+        result.append(tokenBuilder.charAt(i));
+      }
+    }
+  }
+  if (DataType.FLOAT == type) {
+    if (tokenBuilder.toString().equals(decimalFormat.getDecimalFormatSymbols().getNaN())) {
+      result.append("NaN");
+    }
+ else     if (tokenBuilder.toString().equals(decimalFormat.getDecimalFormatSymbols().getInfinity())) {
+      result.append("Infinity");
+    }
+ else {
+      for (int i=0; i < tokenBuilder.length(); i++) {
+        if (-1 != Character.digit(tokenBuilder.charAt(i),10)) {
+          result.append(Character.digit(tokenBuilder.charAt(i),10));
+        }
+      }
+    }
+  }
+  if (0 == result.length()) {
+    result=tokenBuilder;
+  }
+  if (-1 != separatorIndex) {
+    result.insert(separatorIndex,".");
+  }
+  if (negative) {
+    result.insert(0,'-');
+  }
+  return result.toString();
+}

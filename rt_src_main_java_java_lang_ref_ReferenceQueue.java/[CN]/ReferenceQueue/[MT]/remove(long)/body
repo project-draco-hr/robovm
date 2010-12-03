@@ -1,0 +1,26 @@
+{
+  if (timeout < 0) {
+    throw new IllegalArgumentException();
+  }
+  Reference<? extends T> ref;
+synchronized (this) {
+    if (empty) {
+      wait(timeout);
+      if (empty) {
+        return null;
+      }
+    }
+    ref=references[head++];
+    ref.dequeue();
+    if (head == references.length) {
+      head=0;
+    }
+    if (head == tail) {
+      empty=true;
+    }
+ else {
+      notifyAll();
+    }
+  }
+  return ref;
+}

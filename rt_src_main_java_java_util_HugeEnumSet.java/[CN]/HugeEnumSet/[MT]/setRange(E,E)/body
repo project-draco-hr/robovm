@@ -1,0 +1,29 @@
+{
+  int startOrdinal=start.ordinal();
+  int startIndex=startOrdinal / BIT_IN_LONG;
+  int startInBits=startOrdinal % BIT_IN_LONG;
+  int endOrdinal=end.ordinal();
+  int endIndex=endOrdinal / BIT_IN_LONG;
+  int endInBits=endOrdinal % BIT_IN_LONG;
+  if (startIndex == endIndex) {
+    long range=(-1L >>> (BIT_IN_LONG - (endInBits - startInBits + 1))) << startInBits;
+    size-=Long.bitCount(bits[startIndex]);
+    bits[startIndex]|=range;
+    size+=Long.bitCount(bits[startIndex]);
+  }
+ else {
+    long range=(-1L >>> startInBits) << startInBits;
+    size-=Long.bitCount(bits[startIndex]);
+    bits[startIndex]|=range;
+    size+=Long.bitCount(bits[startIndex]);
+    range=-1L >>> (BIT_IN_LONG - (endInBits + 1));
+    size-=Long.bitCount(bits[endIndex]);
+    bits[endIndex]|=range;
+    size+=Long.bitCount(bits[endIndex]);
+    for (int i=(startIndex + 1); i <= (endIndex - 1); i++) {
+      size-=Long.bitCount(bits[i]);
+      bits[i]=-1L;
+      size+=Long.bitCount(bits[i]);
+    }
+  }
+}

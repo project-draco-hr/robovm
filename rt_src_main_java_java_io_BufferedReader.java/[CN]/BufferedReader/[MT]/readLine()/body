@@ -1,0 +1,69 @@
+{
+synchronized (lock) {
+    if (isClosed()) {
+      throw new IOException(Messages.getString("luni.A5"));
+    }
+    if (pos == end && fillBuf() == -1) {
+      return null;
+    }
+    for (int charPos=pos; charPos < end; charPos++) {
+      char ch=buf[charPos];
+      if (ch > '\r') {
+        continue;
+      }
+      if (ch == '\n') {
+        String res=new String(buf,pos,charPos - pos);
+        pos=charPos + 1;
+        return res;
+      }
+ else       if (ch == '\r') {
+        String res=new String(buf,pos,charPos - pos);
+        pos=charPos + 1;
+        if (((pos < end) || (fillBuf() != -1)) && (buf[pos] == '\n')) {
+          pos++;
+        }
+        return res;
+      }
+    }
+    char eol='\0';
+    StringBuilder result=new StringBuilder(80);
+    result.append(buf,pos,end - pos);
+    while (true) {
+      pos=end;
+      if (eol == '\n') {
+        return result.toString();
+      }
+      if (fillBuf() == -1) {
+        return result.length() > 0 || eol != '\0' ? result.toString() : null;
+      }
+      for (int charPos=pos; charPos < end; charPos++) {
+        char c=buf[charPos];
+        if (eol == '\0') {
+          if ((c == '\n' || c == '\r')) {
+            eol=c;
+          }
+        }
+ else         if (eol == '\r' && c == '\n') {
+          if (charPos > pos) {
+            result.append(buf,pos,charPos - pos - 1);
+          }
+          pos=charPos + 1;
+          return result.toString();
+        }
+ else {
+          if (charPos > pos) {
+            result.append(buf,pos,charPos - pos - 1);
+          }
+          pos=charPos;
+          return result.toString();
+        }
+      }
+      if (eol == '\0') {
+        result.append(buf,pos,end - pos);
+      }
+ else {
+        result.append(buf,pos,end - pos - 1);
+      }
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  boolean quote=false;
+  int next, last=-1, count=0;
+  calendar.setTime(date);
+  if (field != null) {
+    field.clear();
+  }
+  final int patternLength=pattern.length();
+  for (int i=0; i < patternLength; i++) {
+    next=(pattern.charAt(i));
+    if (next == '\'') {
+      if (count > 0) {
+        append(buffer,field,fields,(char)last,count);
+        count=0;
+      }
+      if (last == next) {
+        buffer.append('\'');
+        last=-1;
+      }
+ else {
+        last=next;
+      }
+      quote=!quote;
+      continue;
+    }
+    if (!quote && (last == next || (next >= 'a' && next <= 'z') || (next >= 'A' && next <= 'Z'))) {
+      if (last == next) {
+        count++;
+      }
+ else {
+        if (count > 0) {
+          append(buffer,field,fields,(char)last,count);
+        }
+        last=next;
+        count=1;
+      }
+    }
+ else {
+      if (count > 0) {
+        append(buffer,field,fields,(char)last,count);
+        count=0;
+      }
+      last=-1;
+      buffer.append((char)next);
+    }
+  }
+  if (count > 0) {
+    append(buffer,field,fields,(char)last,count);
+  }
+  return buffer;
+}

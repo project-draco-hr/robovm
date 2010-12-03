@@ -1,0 +1,26 @@
+{
+  boolean resolve=PolicyUtils.canExpandProperties();
+  Reader r=new BufferedReader(new InputStreamReader(AccessController.doPrivileged(new PolicyUtils.URLLoader(location))));
+  Collection<GrantEntry> grantEntries=new HashSet<GrantEntry>();
+  List<KeystoreEntry> keystores=new ArrayList<KeystoreEntry>();
+  try {
+    scanner.scanStream(r,grantEntries,keystores);
+  }
+  finally {
+    r.close();
+  }
+  KeyStore ks=initKeyStore(keystores,location,system,resolve);
+  Collection<PolicyEntry> result=new HashSet<PolicyEntry>();
+  for (Iterator<GrantEntry> iter=grantEntries.iterator(); iter.hasNext(); ) {
+    DefaultPolicyScanner.GrantEntry ge=iter.next();
+    try {
+      PolicyEntry pe=resolveGrant(ge,ks,system,resolve);
+      if (!pe.isVoid()) {
+        result.add(pe);
+      }
+    }
+ catch (    Exception e) {
+    }
+  }
+  return result;
+}

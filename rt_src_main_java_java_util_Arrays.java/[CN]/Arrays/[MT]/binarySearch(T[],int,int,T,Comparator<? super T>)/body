@@ -1,0 +1,29 @@
+{
+  checkIndexForBinarySearch(array.length,startIndex,endIndex);
+  if (comparator == null) {
+    return binarySearch(array,startIndex,endIndex,object);
+  }
+  int low=startIndex, mid=-1, high=endIndex - 1, result=0;
+  while (low <= high) {
+    mid=(low + high) >>> 1;
+    if ((result=comparator.compare(array[mid],object)) < 0) {
+      low=mid + 1;
+    }
+ else     if (result == 0) {
+      return mid;
+    }
+ else {
+      high=mid - 1;
+    }
+  }
+  if (mid < 0) {
+    int insertPoint=endIndex;
+    for (int index=startIndex; index < endIndex; index++) {
+      if (comparator.compare(object,array[index]) < 0) {
+        insertPoint=index;
+      }
+    }
+    return -insertPoint - 1;
+  }
+  return -mid - (result >= 0 ? 1 : 2);
+}

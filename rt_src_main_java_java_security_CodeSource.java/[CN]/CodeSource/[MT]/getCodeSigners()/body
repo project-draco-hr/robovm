@@ -1,0 +1,49 @@
+{
+  if (signers != null) {
+    CodeSigner[] tmp=new CodeSigner[signers.length];
+    System.arraycopy(signers,0,tmp,0,tmp.length);
+    return tmp;
+  }
+  if (certs == null || factory != null) {
+    return null;
+  }
+  X500Principal prevIssuer=null;
+  ArrayList<Certificate> list=new ArrayList<Certificate>(certs.length);
+  ArrayList<CodeSigner> asigners=new ArrayList<CodeSigner>();
+  for (int i=0; i < certs.length; i++) {
+    if (!(certs[i] instanceof X509Certificate)) {
+      continue;
+    }
+    X509Certificate x509=(X509Certificate)certs[i];
+    if (prevIssuer == null) {
+      prevIssuer=x509.getIssuerX500Principal();
+      list.add(x509);
+    }
+ else {
+      X500Principal subj=x509.getSubjectX500Principal();
+      if (!prevIssuer.equals(subj)) {
+        CertPath cpath=makeCertPath(list);
+        if (cpath != null) {
+          asigners.add(new CodeSigner(cpath,null));
+        }
+        list.clear();
+      }
+      prevIssuer=x509.getSubjectX500Principal();
+      list.add(x509);
+    }
+  }
+  if (!list.isEmpty()) {
+    CertPath cpath=makeCertPath(list);
+    if (cpath != null) {
+      asigners.add(new CodeSigner(cpath,null));
+    }
+  }
+  if (asigners.isEmpty()) {
+    return null;
+  }
+  signers=new CodeSigner[asigners.size()];
+  asigners.toArray(signers);
+  CodeSigner[] tmp=new CodeSigner[asigners.size()];
+  System.arraycopy(signers,0,tmp,0,tmp.length);
+  return tmp;
+}

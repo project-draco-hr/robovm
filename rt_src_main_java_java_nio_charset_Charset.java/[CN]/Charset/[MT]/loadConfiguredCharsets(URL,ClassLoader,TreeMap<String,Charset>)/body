@@ -1,0 +1,41 @@
+{
+  BufferedReader reader=null;
+  try {
+    InputStream is=configFile.openStream();
+    reader=new BufferedReader(new InputStreamReader(is,PROVIDER_CONFIGURATION_FILE_ENCODING));
+    String providerClassName=reader.readLine();
+    while (null != providerClassName) {
+      providerClassName=trimClassName(providerClassName);
+      if (providerClassName.length() > 0) {
+        Object cp=null;
+        try {
+          Class<?> c=Class.forName(providerClassName,true,contextClassLoader);
+          cp=c.newInstance();
+        }
+ catch (        Exception ex) {
+          try {
+            getSystemClassLoader();
+            Class<?> c=Class.forName(providerClassName,true,systemClassLoader);
+            cp=c.newInstance();
+          }
+ catch (          Exception e) {
+            throw new Error(e.getMessage(),e);
+          }
+        }
+        addCharsets((CharsetProvider)cp,charsets);
+      }
+      providerClassName=reader.readLine();
+    }
+  }
+ catch (  IOException ex) {
+  }
+ finally {
+    try {
+      if (null != reader) {
+        reader.close();
+      }
+    }
+ catch (    IOException ex) {
+    }
+  }
+}

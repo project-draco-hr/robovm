@@ -1,0 +1,50 @@
+{
+  systemProperties=new Properties();
+  String platformEncoding=null;
+  String fileEncoding, osEncoding=null;
+  String definedFileEncoding=getEncoding(FileEncoding);
+  String definedOSEncoding=getEncoding(OSEncoding);
+  if (definedFileEncoding != null) {
+    fileEncoding=definedFileEncoding;
+    if (definedOSEncoding == null) {
+      platformEncoding=getEncoding(PlatformEncoding);
+      osEncoding=platformEncoding;
+    }
+ else {
+      getEncoding(InitLocale);
+    }
+  }
+ else {
+    platformEncoding=getEncoding(PlatformEncoding);
+    fileEncoding=platformEncoding;
+  }
+  if (osEncoding == null) {
+    osEncoding=definedOSEncoding;
+  }
+  if (osEncoding != null) {
+    systemProperties.put("os.encoding",osEncoding);
+  }
+  systemProperties.put("file.encoding",fileEncoding);
+  systemProperties.put("java.version","1.5 subset");
+  systemProperties.put("java.specification.version","1.5");
+  systemProperties.put("java.specification.vendor","Sun Microsystems Inc.");
+  systemProperties.put("java.specification.name","Java Platform API Specification");
+  systemProperties.put("com.ibm.oti.configuration","clear");
+  systemProperties.put("com.ibm.oti.configuration.dir","jclClear");
+  String[] list=getPropertyList();
+  for (int i=0; i < list.length; i+=2) {
+    String key=list[i];
+    if (key == null) {
+      break;
+    }
+    systemProperties.put(key,list[i + 1]);
+  }
+  String consoleEncoding=(String)systemProperties.get("console.encoding");
+  if (consoleEncoding == null) {
+    if (platformEncoding == null) {
+      platformEncoding=getEncoding(PlatformEncoding);
+    }
+    consoleEncoding=platformEncoding;
+    systemProperties.put("console.encoding",consoleEncoding);
+  }
+}

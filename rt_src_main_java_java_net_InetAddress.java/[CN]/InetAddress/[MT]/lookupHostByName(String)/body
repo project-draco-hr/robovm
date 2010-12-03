@@ -1,0 +1,38 @@
+{
+  int ttl=-1;
+  String ttlValue=AccessController.doPrivileged(new PriviAction<String>("networkaddress.cache.ttl"));
+  try {
+    if (ttlValue != null) {
+      ttl=Integer.decode(ttlValue).intValue();
+    }
+  }
+ catch (  NumberFormatException e) {
+  }
+  CacheElement element=null;
+  if (ttl == 0) {
+    Cache.clear();
+  }
+ else {
+    element=Cache.get(host);
+    if (element != null && ttl > 0 && element.timeAdded + (ttl * 1000) < System.currentTimeMillis()) {
+      element=null;
+    }
+  }
+  if (element != null) {
+    return element.inetAddress();
+  }
+  String failedMessage=NegativeCache.getFailedMessage(host);
+  if (failedMessage != null) {
+    throw new UnknownHostException(host);
+  }
+  InetAddress anInetAddress;
+  try {
+    anInetAddress=getHostByNameImpl(host,preferIPv6Addresses());
+  }
+ catch (  UnknownHostException e) {
+    NegativeCache.put(host,e.getMessage());
+    throw (UnknownHostException)new UnknownHostException(host).initCause(e);
+  }
+  Cache.add(anInetAddress);
+  return anInetAddress;
+}

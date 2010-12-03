@@ -1,0 +1,31 @@
+{
+  Object instanceBeingRead=this.currentObject;
+  if (instanceBeingRead == null && nestedLevels == 0) {
+    throw new NotActiveException();
+  }
+  if (object == null) {
+    throw new InvalidObjectException(Messages.getString("luni.C6"));
+  }
+  InputValidationDesc desc=new InputValidationDesc();
+  desc.validator=object;
+  desc.priority=priority;
+  if (validations == null) {
+    validations=new InputValidationDesc[1];
+    validations[0]=desc;
+  }
+ else {
+    int i=0;
+    for (; i < validations.length; i++) {
+      InputValidationDesc validation=validations[i];
+      if (priority >= validation.priority) {
+        break;
+      }
+    }
+    InputValidationDesc[] oldValidations=validations;
+    int currentSize=oldValidations.length;
+    validations=new InputValidationDesc[currentSize + 1];
+    System.arraycopy(oldValidations,0,validations,0,i);
+    System.arraycopy(oldValidations,i,validations,i + 1,currentSize - i);
+    validations[i]=desc;
+  }
+}

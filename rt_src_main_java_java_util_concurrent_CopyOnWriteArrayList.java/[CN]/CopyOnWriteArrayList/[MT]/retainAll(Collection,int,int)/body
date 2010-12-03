@@ -1,0 +1,35 @@
+{
+  Object[] old=getData();
+  if (size == 0) {
+    return 0;
+  }
+  if (c.size() == 0) {
+    E[] data;
+    if (size == old.length) {
+      data=newElementArray(0);
+    }
+ else {
+      data=newElementArray(old.length - size);
+      System.arraycopy(old,0,data,0,start);
+      System.arraycopy(old,start + size,data,start,old.length - start - size);
+    }
+    setData(data);
+    return size;
+  }
+  Object[] temp=new Object[size];
+  int pos=0;
+  for (int i=start; i < (start + size); i++) {
+    if (c.contains(old[i])) {
+      temp[pos++]=old[i];
+    }
+  }
+  if (pos == size) {
+    return 0;
+  }
+  E[] data=newElementArray(pos + old.length - size);
+  System.arraycopy(old,0,data,0,start);
+  System.arraycopy(temp,0,data,start,pos);
+  System.arraycopy(old,start + size,data,start + pos,old.length - start - size);
+  setData(data);
+  return (size - pos);
+}

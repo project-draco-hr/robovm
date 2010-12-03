@@ -1,0 +1,22 @@
+{
+  io_stream.append(bytes);
+  io_stream.mark();
+  try {
+    clientHello=new ClientHello(io_stream);
+  }
+ catch (  IOException e) {
+    io_stream.reset();
+    return;
+  }
+  if (nonBlocking) {
+    delegatedTasks.add(new DelegatedTask(new PrivilegedExceptionAction<Void>(){
+      public Void run() throws Exception {
+        processClientHello();
+        return null;
+      }
+    }
+,this,AccessController.getContext()));
+    return;
+  }
+  processClientHello();
+}

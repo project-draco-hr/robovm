@@ -1,0 +1,38 @@
+{
+  ObjectInputStream.GetField fields=stream.readFields();
+  patternChars=new char[10];
+  currencySymbol=(String)fields.get("currencySymbol","");
+  setDecimalSeparator(fields.get("decimalSeparator",'.'));
+  setDigit(fields.get("digit",'#'));
+  setGroupingSeparator(fields.get("groupingSeparator",','));
+  infinity=(String)fields.get("infinity","");
+  intlCurrencySymbol=(String)fields.get("intlCurrencySymbol","");
+  setMinusSign(fields.get("minusSign",'-'));
+  NaN=(String)fields.get("NaN","");
+  setPatternSeparator(fields.get("patternSeparator",';'));
+  setPercent(fields.get("percent",'%'));
+  setPerMill(fields.get("perMill",'\u2030'));
+  setZeroDigit(fields.get("zeroDigit",'0'));
+  locale=(Locale)fields.get("locale",null);
+  int serialVersionOnStream=fields.get("serialVersionOnStream",0);
+  if (serialVersionOnStream == 0) {
+    setMonetaryDecimalSeparator(getDecimalSeparator());
+    setExponential('E');
+  }
+ else {
+    setMonetaryDecimalSeparator(fields.get("monetarySeparator",'.'));
+    setExponential(fields.get("exponential",'E'));
+  }
+  if (serialVersionOnStream < 3) {
+    setExponentSeparator(String.valueOf(getExponential()));
+  }
+ else {
+    setExponentSeparator((String)fields.get("exponentialSeparator","E"));
+  }
+  try {
+    currency=Currency.getInstance(intlCurrencySymbol);
+  }
+ catch (  IllegalArgumentException e) {
+    currency=null;
+  }
+}

@@ -1,0 +1,18 @@
+{
+  for (; ; ) {
+    Node<K,V> b=head.node;
+    Node<K,V> n=b.next;
+    if (n == null)     return null;
+    Node<K,V> f=n.next;
+    if (n != b.next)     continue;
+    Object v=n.value;
+    if (v == null) {
+      n.helpDelete(b,f);
+      continue;
+    }
+    if (!n.casValue(v,null))     continue;
+    if (!n.appendMarker(f) || !b.casNext(n,f))     findFirst();
+    clearIndexToFirst();
+    return new AbstractMap.SimpleImmutableEntry<K,V>(n.key,(V)v);
+  }
+}

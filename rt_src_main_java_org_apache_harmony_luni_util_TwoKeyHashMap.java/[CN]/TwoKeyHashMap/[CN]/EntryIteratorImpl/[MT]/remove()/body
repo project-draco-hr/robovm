@@ -1,0 +1,24 @@
+{
+  if (returned_index == -1) {
+    throw new IllegalStateException();
+  }
+  if (modCount != startModCount) {
+    throw new ConcurrentModificationException();
+  }
+  Entry<E,K,V> p=null;
+  Entry<E,K,V> e=arr[returned_index];
+  while (e != returned_entry) {
+    p=e;
+    e=e.next;
+  }
+  if (p != null) {
+    p.next=returned_entry.next;
+  }
+ else {
+    arr[returned_index]=returned_entry.next;
+  }
+  size--;
+  modCount++;
+  startModCount++;
+  returned_index=-1;
+}

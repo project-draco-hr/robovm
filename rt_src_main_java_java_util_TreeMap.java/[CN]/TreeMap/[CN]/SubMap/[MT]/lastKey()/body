@@ -1,0 +1,34 @@
+{
+  if (backingMap.size > 0 && !(startKey.equals(endKey))) {
+    if (!hasEnd) {
+      Node<K,V> node=maximum(backingMap.root);
+      if (node != null && checkLowerBound(node.keys[node.right_idx])) {
+        return node.keys[node.right_idx];
+      }
+    }
+ else {
+      setLastKey();
+      if (lastKeyNode != null) {
+        Comparable<K> object=backingMap.comparator == null ? toComparable((K)endKey) : null;
+        if (backingMap.cmp(object,endKey,lastKeyNode.keys[lastKeyIndex]) != 0) {
+          return lastKeyNode.keys[lastKeyIndex];
+        }
+ else {
+          if (lastKeyIndex != lastKeyNode.left_idx) {
+            object=backingMap.comparator == null ? toComparable((K)startKey) : null;
+            if (backingMap.cmp(object,startKey,lastKeyNode.keys[lastKeyIndex - 1]) <= 0) {
+              return lastKeyNode.keys[lastKeyIndex - 1];
+            }
+          }
+ else {
+            Node<K,V> last=lastKeyNode.prev;
+            if (last != null) {
+              return last.keys[last.right_idx];
+            }
+          }
+        }
+      }
+    }
+  }
+  throw new NoSuchElementException();
+}

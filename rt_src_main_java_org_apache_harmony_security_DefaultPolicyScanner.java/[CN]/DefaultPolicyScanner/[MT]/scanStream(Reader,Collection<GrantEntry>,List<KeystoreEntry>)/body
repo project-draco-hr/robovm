@@ -1,0 +1,25 @@
+{
+  StreamTokenizer st=configure(new StreamTokenizer(r));
+  parsing:   while (true) {
+switch (st.nextToken()) {
+case StreamTokenizer.TT_EOF:
+      break parsing;
+case StreamTokenizer.TT_WORD:
+    if (Util.equalsIgnoreCase("keystore",st.sval)) {
+      keystoreEntries.add(readKeystoreEntry(st));
+    }
+ else     if (Util.equalsIgnoreCase("grant",st.sval)) {
+      grantEntries.add(readGrantEntry(st));
+    }
+ else {
+      handleUnexpectedToken(st,Messages.getString("security.89"));
+    }
+  break;
+case ';':
+break;
+default :
+handleUnexpectedToken(st);
+break;
+}
+}
+}

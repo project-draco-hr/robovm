@@ -1,0 +1,31 @@
+{
+  if (isDescending) {
+    K tk=fromKey;
+    fromKey=toKey;
+    toKey=tk;
+    boolean ti=fromInclusive;
+    fromInclusive=toInclusive;
+    toInclusive=ti;
+  }
+  if (lo != null) {
+    if (fromKey == null) {
+      fromKey=lo;
+      fromInclusive=loInclusive;
+    }
+ else {
+      int c=m.compare(fromKey,lo);
+      if (c < 0 || (c == 0 && !loInclusive && fromInclusive))       throw new IllegalArgumentException("key out of range");
+    }
+  }
+  if (hi != null) {
+    if (toKey == null) {
+      toKey=hi;
+      toInclusive=hiInclusive;
+    }
+ else {
+      int c=m.compare(toKey,hi);
+      if (c > 0 || (c == 0 && !hiInclusive && toInclusive))       throw new IllegalArgumentException("key out of range");
+    }
+  }
+  return new SubMap<K,V>(m,fromKey,fromInclusive,toKey,toInclusive,isDescending);
+}

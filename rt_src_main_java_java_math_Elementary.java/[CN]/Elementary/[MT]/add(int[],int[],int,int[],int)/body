@@ -1,0 +1,33 @@
+{
+  int i;
+  long carry=(a[0] & 0xFFFFFFFFL) + (b[0] & 0xFFFFFFFFL);
+  res[0]=(int)carry;
+  carry>>=32;
+  if (aSize >= bSize) {
+    for (i=1; i < bSize; i++) {
+      carry+=(a[i] & 0xFFFFFFFFL) + (b[i] & 0xFFFFFFFFL);
+      res[i]=(int)carry;
+      carry>>=32;
+    }
+    for (; i < aSize; i++) {
+      carry+=a[i] & 0xFFFFFFFFL;
+      res[i]=(int)carry;
+      carry>>=32;
+    }
+  }
+ else {
+    for (i=1; i < aSize; i++) {
+      carry+=(a[i] & 0xFFFFFFFFL) + (b[i] & 0xFFFFFFFFL);
+      res[i]=(int)carry;
+      carry>>=32;
+    }
+    for (; i < bSize; i++) {
+      carry+=b[i] & 0xFFFFFFFFL;
+      res[i]=(int)carry;
+      carry>>=32;
+    }
+  }
+  if (carry != 0) {
+    res[i]=(int)carry;
+  }
+}

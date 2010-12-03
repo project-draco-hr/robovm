@@ -1,0 +1,75 @@
+{
+  while (true) {
+    TimerTask task;
+synchronized (this) {
+      if (cancelled) {
+        return;
+      }
+      if (tasks.isEmpty()) {
+        if (finished) {
+          return;
+        }
+        try {
+          this.wait();
+        }
+ catch (        InterruptedException ignored) {
+        }
+        continue;
+      }
+      long currentTime=System.currentTimeMillis();
+      task=tasks.minimum();
+      long timeToSleep;
+synchronized (task.lock) {
+        if (task.cancelled) {
+          tasks.delete(0);
+          continue;
+        }
+        timeToSleep=task.when - currentTime;
+      }
+      if (timeToSleep > 0) {
+        try {
+          this.wait(timeToSleep);
+        }
+ catch (        InterruptedException ignored) {
+        }
+        continue;
+      }
+synchronized (task.lock) {
+        int pos=0;
+        if (tasks.minimum().when != task.when) {
+          pos=tasks.getTask(task);
+        }
+        if (task.cancelled) {
+          tasks.delete(tasks.getTask(task));
+          continue;
+        }
+        task.setScheduledTime(task.when);
+        tasks.delete(pos);
+        if (task.period >= 0) {
+          if (task.fixedRate) {
+            task.when=task.when + task.period;
+          }
+ else {
+            task.when=System.currentTimeMillis() + task.period;
+          }
+          insertTask(task);
+        }
+ else {
+          task.when=0;
+        }
+      }
+    }
+    boolean taskCompletedNormally=false;
+    try {
+      task.run();
+      taskCompletedNormally=true;
+    }
+  finally {
+      if (!taskCompletedNormally) {
+synchronized (this) {
+          cancelled=true;
+        }
+      }
+    }
+  }
+}

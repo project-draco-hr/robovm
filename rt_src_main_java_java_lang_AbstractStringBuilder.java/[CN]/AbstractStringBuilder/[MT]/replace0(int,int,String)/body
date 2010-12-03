@@ -1,0 +1,41 @@
+{
+  if (start >= 0) {
+    if (end > count) {
+      end=count;
+    }
+    if (end > start) {
+      int stringLength=string.length();
+      int diff=end - start - stringLength;
+      if (diff > 0) {
+        if (!shared) {
+          System.arraycopy(value,end,value,start + stringLength,count - end);
+        }
+ else {
+          char[] newData=new char[value.length];
+          System.arraycopy(value,0,newData,0,start);
+          System.arraycopy(value,end,newData,start + stringLength,count - end);
+          value=newData;
+          shared=false;
+        }
+      }
+ else       if (diff < 0) {
+        move(-diff,end);
+      }
+ else       if (shared) {
+        value=value.clone();
+        shared=false;
+      }
+      string.getChars(0,stringLength,value,start);
+      count-=diff;
+      return;
+    }
+    if (start == end) {
+      if (string == null) {
+        throw new NullPointerException();
+      }
+      insert0(start,string);
+      return;
+    }
+  }
+  throw new StringIndexOutOfBoundsException();
+}

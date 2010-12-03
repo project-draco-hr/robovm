@@ -1,0 +1,24 @@
+{
+  if (testString instanceof String) {
+    int startStr=matchResult.getLeftBound();
+    String testStr=(String)testString;
+    while (lastIndex >= strIndex) {
+      lastIndex=testStr.lastIndexOf(low,lastIndex);
+      if (lastIndex < 0 || lastIndex < strIndex) {
+        return -1;
+      }
+      if (lastIndex > startStr) {
+        if (Character.isHighSurrogate(testStr.charAt(lastIndex - 1))) {
+          lastIndex-=2;
+          continue;
+        }
+      }
+      if (next.matches(lastIndex + 1,testString,matchResult) >= 0) {
+        return lastIndex;
+      }
+      lastIndex--;
+    }
+    return -1;
+  }
+  return super.findBack(strIndex,lastIndex,testString,matchResult);
+}

@@ -1,0 +1,20 @@
+{
+  final AtomicInteger count=this.count;
+  if (count.get() == 0)   return null;
+  E x=null;
+  int c=-1;
+  final ReentrantLock takeLock=this.takeLock;
+  takeLock.lock();
+  try {
+    if (count.get() > 0) {
+      x=dequeue();
+      c=count.getAndDecrement();
+      if (c > 1)       notEmpty.signal();
+    }
+  }
+  finally {
+    takeLock.unlock();
+  }
+  if (c == capacity)   signalNotFull();
+  return x;
+}

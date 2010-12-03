@@ -1,0 +1,28 @@
+{
+  int[] valDigits=val.digits;
+  int valLen=val.numberLength;
+  int valSign=val.sign;
+  if (valLen == 1) {
+    long a=(valDigits[0] & 0xffffffffL);
+    long b=(divisor & 0xffffffffL);
+    long quo=a / b;
+    long rem=a % b;
+    if (valSign != divisorSign) {
+      quo=-quo;
+    }
+    if (valSign < 0) {
+      rem=-rem;
+    }
+    return new BigInteger[]{BigInteger.valueOf(quo),BigInteger.valueOf(rem)};
+  }
+  int quotientLength=valLen;
+  int quotientSign=((valSign == divisorSign) ? 1 : -1);
+  int quotientDigits[]=new int[quotientLength];
+  int remainderDigits[];
+  remainderDigits=new int[]{Division.divideArrayByInt(quotientDigits,valDigits,valLen,divisor)};
+  BigInteger result0=new BigInteger(quotientSign,quotientLength,quotientDigits);
+  BigInteger result1=new BigInteger(valSign,1,remainderDigits);
+  result0.cutOffLeadingZeroes();
+  result1.cutOffLeadingZeroes();
+  return new BigInteger[]{result0,result1};
+}

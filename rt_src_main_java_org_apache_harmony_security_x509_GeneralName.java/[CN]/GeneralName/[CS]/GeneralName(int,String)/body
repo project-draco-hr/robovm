@@ -1,0 +1,34 @@
+{
+  if (name == null) {
+    throw new IOException(Messages.getString("security.28"));
+  }
+  this.tag=tag;
+switch (tag) {
+case OTHER_NAME:
+case X400_ADDR:
+case EDIP_NAME:
+    throw new IOException(Messages.getString("security.180",tag));
+case DNS_NAME:
+  checkDNS(name);
+this.name=name;
+break;
+case UR_ID:
+checkURI(name);
+this.name=name;
+break;
+case RFC822_NAME:
+this.name=name;
+break;
+case REG_ID:
+this.name=oidStrToInts(name);
+break;
+case DIR_NAME:
+this.name=new Name(name);
+break;
+case IP_ADDR:
+this.name=ipStrToBytes(name);
+break;
+default :
+throw new IOException(Messages.getString("security.181",tag));
+}
+}

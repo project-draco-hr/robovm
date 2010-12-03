@@ -1,0 +1,21 @@
+{
+  int count=0;
+  byte[] byteBufferArray=new byte[DEFAULT_BUFFER_SZIE];
+  while (!hasGotLine(byteBufferArray,count)) {
+    byte b=(byte)in.read();
+    if (b == END_OF_STREAM) {
+      return;
+    }
+    byteBufferArray[count++]=b;
+    if (count >= byteBufferArray.length) {
+      byte[] tmpBuffer=byteBufferArray;
+      byteBufferArray=new byte[byteBufferArray.length * 2];
+      System.arraycopy(tmpBuffer,0,byteBufferArray,0,tmpBuffer.length);
+    }
+  }
+  ByteBuffer byteBuffer=ByteBuffer.allocate(count - CR.length);
+  byteBuffer.clear();
+  byteBuffer.put(byteBufferArray,0,count - CR.length);
+  byteBuffer.flip();
+  line=charSet.decode(byteBuffer);
+}

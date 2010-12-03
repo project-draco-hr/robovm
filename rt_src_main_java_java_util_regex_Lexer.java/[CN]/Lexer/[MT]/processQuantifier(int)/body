@@ -1,0 +1,52 @@
+{
+  StringBuilder sb=new StringBuilder(4);
+  int min=-1;
+  int max=Integer.MAX_VALUE;
+  while (index < pattern.length && (ch=pattern[nextIndex()]) != '}') {
+    if (ch == ',' && min < 0) {
+      try {
+        min=Integer.parseInt(sb.toString(),10);
+        sb.delete(0,sb.length());
+      }
+ catch (      NumberFormatException nfe) {
+        throw new PatternSyntaxException(Messages.getString("regex.17"),this.toString(),index);
+      }
+    }
+ else {
+      sb.append((char)ch);
+    }
+  }
+  if (ch != '}') {
+    throw new PatternSyntaxException(Messages.getString("regex.17"),this.toString(),index);
+  }
+  if (sb.length() > 0) {
+    try {
+      max=Integer.parseInt(sb.toString(),10);
+      if (min < 0)       min=max;
+    }
+ catch (    NumberFormatException nfe) {
+      throw new PatternSyntaxException(Messages.getString("regex.17"),this.toString(),index);
+    }
+  }
+ else   if (min < 0) {
+    throw new PatternSyntaxException(Messages.getString("regex.17"),this.toString(),index);
+  }
+  if ((min | max | max - min) < 0) {
+    throw new PatternSyntaxException(Messages.getString("regex.17"),this.toString(),index);
+  }
+  char mod=(index < pattern.length) ? pattern[index] : '*';
+switch (mod) {
+case '+':
+    lookAhead=Lexer.QUANT_COMP_P;
+  nextIndex();
+break;
+case '?':
+lookAhead=Lexer.QUANT_COMP_R;
+nextIndex();
+break;
+default :
+lookAhead=Lexer.QUANT_COMP;
+break;
+}
+return new Quantifier(min,max);
+}

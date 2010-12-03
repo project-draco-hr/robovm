@@ -1,0 +1,21 @@
+{
+  output.writeUTF(classDesc.getName());
+  output.writeLong(classDesc.getSerialVersionUID());
+  byte flags=classDesc.getFlags();
+  boolean externalizable=classDesc.isExternalizable();
+  if (externalizable) {
+    if (protocolVersion == PROTOCOL_VERSION_1) {
+      flags&=NOT_SC_BLOCK_DATA;
+    }
+ else {
+      flags|=SC_BLOCK_DATA;
+    }
+  }
+  output.writeByte(flags);
+  if ((SC_ENUM | SC_SERIALIZABLE) != classDesc.getFlags()) {
+    writeFieldDescriptors(classDesc,externalizable);
+  }
+ else {
+    output.writeShort(0);
+  }
+}

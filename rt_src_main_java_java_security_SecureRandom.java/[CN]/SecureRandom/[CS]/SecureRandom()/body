@@ -1,0 +1,19 @@
+{
+  super(0);
+  Provider.Service service=findService();
+  if (service == null) {
+    this.provider=null;
+    this.secureRandomSpi=new SHA1PRNG_SecureRandomImpl();
+    this.algorithm="SHA1PRNG";
+  }
+ else {
+    try {
+      this.provider=service.getProvider();
+      this.secureRandomSpi=(SecureRandomSpi)service.newInstance(null);
+      this.algorithm=service.getAlgorithm();
+    }
+ catch (    Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+}

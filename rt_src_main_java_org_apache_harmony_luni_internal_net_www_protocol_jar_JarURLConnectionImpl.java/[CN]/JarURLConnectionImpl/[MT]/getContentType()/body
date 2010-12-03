@@ -1,0 +1,22 @@
+{
+  if (url.getFile().endsWith("!/")) {
+    return "x-java/jar";
+  }
+  String cType=null;
+  String entryName=getEntryName();
+  if (entryName != null) {
+    cType=guessContentTypeFromName(entryName);
+  }
+ else {
+    try {
+      connect();
+      cType=jarFileURLConnection.getContentType();
+    }
+ catch (    IOException ioe) {
+    }
+  }
+  if (cType == null) {
+    cType="content/unknown";
+  }
+  return cType;
+}

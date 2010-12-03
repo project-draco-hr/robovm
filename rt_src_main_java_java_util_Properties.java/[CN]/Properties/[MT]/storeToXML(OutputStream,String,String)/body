@@ -1,0 +1,41 @@
+{
+  if (os == null || encoding == null) {
+    throw new NullPointerException();
+  }
+  String encodingCanonicalName;
+  try {
+    encodingCanonicalName=Charset.forName(encoding).name();
+  }
+ catch (  IllegalCharsetNameException e) {
+    System.out.println("Warning: encoding name " + encoding + " is illegal, using UTF-8 as default encoding");
+    encodingCanonicalName="UTF-8";
+  }
+catch (  UnsupportedCharsetException e) {
+    System.out.println("Warning: encoding " + encoding + " is not supported, using UTF-8 as default encoding");
+    encodingCanonicalName="UTF-8";
+  }
+  PrintStream printStream=new PrintStream(os,false,encodingCanonicalName);
+  printStream.print("<?xml version=\"1.0\" encoding=\"");
+  printStream.print(encodingCanonicalName);
+  printStream.println("\"?>");
+  printStream.print("<!DOCTYPE properties SYSTEM \"");
+  printStream.print(PROP_DTD_NAME);
+  printStream.println("\">");
+  printStream.println("<properties>");
+  if (comment != null) {
+    printStream.print("<comment>");
+    printStream.print(substitutePredefinedEntries(comment));
+    printStream.println("</comment>");
+  }
+  for (  Map.Entry<Object,Object> entry : entrySet()) {
+    String keyValue=(String)entry.getKey();
+    String entryValue=(String)entry.getValue();
+    printStream.print("<entry key=\"");
+    printStream.print(substitutePredefinedEntries(keyValue));
+    printStream.print("\">");
+    printStream.print(substitutePredefinedEntries(entryValue));
+    printStream.println("</entry>");
+  }
+  printStream.println("</properties>");
+  printStream.flush();
+}

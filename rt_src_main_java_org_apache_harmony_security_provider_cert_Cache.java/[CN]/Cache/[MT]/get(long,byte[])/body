@@ -1,0 +1,18 @@
+{
+  hash|=getSuffHash(encoding);
+  int idx=-1 * Arrays.binarySearch(hashes_idx,hash) - 1;
+  if (idx == cache_size) {
+    return null;
+  }
+  while ((hashes_idx[idx] & HASH_MASK) == hash) {
+    int i=(int)(hashes_idx[idx] & INDEX_MASK) - 1;
+    if (Arrays.equals(encoding,encodings[i])) {
+      return cache[i];
+    }
+    idx++;
+    if (idx == cache_size) {
+      return null;
+    }
+  }
+  return null;
+}

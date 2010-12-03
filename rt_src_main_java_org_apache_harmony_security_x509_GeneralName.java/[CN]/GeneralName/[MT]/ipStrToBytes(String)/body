@@ -1,0 +1,112 @@
+{
+  boolean isIPv4=(ip.indexOf('.') > 0);
+  int num_components=(isIPv4) ? 4 : 16;
+  if (ip.indexOf('/') > 0) {
+    num_components*=2;
+  }
+  byte[] result=new byte[num_components];
+  byte[] ip_bytes=ip.getBytes("UTF-8");
+  int component=0;
+  boolean reading_second_bound=false;
+  if (isIPv4) {
+    int i=0;
+    while (i < ip_bytes.length) {
+      int digits=0;
+      int value=0;
+      while ((i < ip_bytes.length) && (ip_bytes[i] >= '0') && (ip_bytes[i] <= '9')) {
+        digits++;
+        if (digits > 3) {
+          throw new IOException(Messages.getString("security.18B",ip));
+        }
+        value=10 * value + (ip_bytes[i] - 48);
+        i++;
+      }
+      if (digits == 0) {
+        throw new IOException(Messages.getString("security.18C",ip));
+      }
+      result[component]=(byte)value;
+      component++;
+      if (i >= ip_bytes.length) {
+        break;
+      }
+      if ((ip_bytes[i] != '.' && ip_bytes[i] != '/')) {
+        throw new IOException(Messages.getString("security.18C",ip));
+      }
+      if (ip_bytes[i] == '/') {
+        if (reading_second_bound) {
+          throw new IOException(Messages.getString("security.18C",ip));
+        }
+        if (component != 4) {
+          throw new IOException(Messages.getString("security.18D",ip));
+        }
+        reading_second_bound=true;
+      }
+      if (component > ((reading_second_bound) ? 7 : 3)) {
+        throw new IOException(Messages.getString("security.18D",ip));
+      }
+      i++;
+    }
+    if (component != num_components) {
+      throw new IOException(Messages.getString("security.18D",ip));
+    }
+  }
+ else {
+    if (ip_bytes.length != 39 && ip_bytes.length != 79) {
+      throw new IOException(Messages.getString("security.18E",ip));
+    }
+    int value=0;
+    boolean second_hex=false;
+    boolean expect_delimiter=false;
+    for (int i=0; i < ip_bytes.length; i++) {
+      byte bytik=ip_bytes[i];
+      if ((bytik >= '0') && (bytik <= '9')) {
+        value=(bytik - 48);
+      }
+ else       if ((bytik >= 'A') && (bytik <= 'F')) {
+        value=(bytik - 55);
+      }
+ else       if ((bytik >= 'a') && (bytik <= 'f')) {
+        value=(bytik - 87);
+      }
+ else       if (second_hex) {
+        throw new IOException(Messages.getString("security.18E",ip));
+      }
+ else       if ((bytik == ':') || (bytik == '/')) {
+        if (component % 2 == 1) {
+          throw new IOException(Messages.getString("security.18E",ip));
+        }
+        if (bytik == '/') {
+          if (reading_second_bound) {
+            throw new IOException(Messages.getString("security.18E",ip));
+          }
+          if (component != 16) {
+            throw new IOException(Messages.getString("security.18F",ip));
+          }
+          reading_second_bound=true;
+        }
+        expect_delimiter=false;
+        continue;
+      }
+ else {
+        throw new IOException(Messages.getString("security.18E",ip));
+      }
+      if (expect_delimiter) {
+        throw new IOException(Messages.getString("security.18E",ip));
+      }
+      if (!second_hex) {
+        result[component]=(byte)(value << 4);
+        second_hex=true;
+      }
+ else {
+        result[component]=(byte)((result[component] & 0xFF) | value);
+        expect_delimiter=(component % 2 == 1);
+        second_hex=false;
+        component++;
+      }
+    }
+    if (second_hex || (component % 2 == 1)) {
+      throw new IOException(Messages.getString("security.18E",ip));
+    }
+  }
+  return result;
+}

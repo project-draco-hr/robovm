@@ -1,0 +1,37 @@
+{
+  if (Float.isNaN(d) || Float.isInfinite(d) || 0 == d) {
+    return d;
+  }
+  int bits=Float.floatToIntBits(d);
+  int sign=bits & FLOAT_SIGN_MASK;
+  int factor=((bits & FLOAT_EXPONENT_MASK) >> FLOAT_MANTISSA_BITS) - FLOAT_EXPONENT_BIAS + scaleFactor;
+  int subNormalFactor=Integer.numberOfLeadingZeros(bits & ~FLOAT_SIGN_MASK) - FLOAT_NON_MANTISSA_BITS;
+  if (subNormalFactor < 0) {
+    subNormalFactor=0;
+  }
+ else {
+    factor=factor - subNormalFactor;
+  }
+  if (factor > Float.MAX_EXPONENT) {
+    return (d > 0 ? Float.POSITIVE_INFINITY : Float.NEGATIVE_INFINITY);
+  }
+  int result;
+  if (factor <= -FLOAT_EXPONENT_BIAS) {
+    int digits=factor + FLOAT_EXPONENT_BIAS + subNormalFactor;
+    if (Math.abs(d) < Float.MIN_NORMAL) {
+      result=shiftIntBits(bits & FLOAT_MANTISSA_MASK,digits);
+    }
+ else {
+      result=shiftIntBits(bits & FLOAT_MANTISSA_MASK | 0x00800000,digits - 1);
+    }
+  }
+ else {
+    if (Math.abs(d) >= Float.MIN_NORMAL) {
+      result=((factor + FLOAT_EXPONENT_BIAS) << FLOAT_MANTISSA_BITS) | (bits & FLOAT_MANTISSA_MASK);
+    }
+ else {
+      result=((factor + FLOAT_EXPONENT_BIAS) << FLOAT_MANTISSA_BITS) | ((bits << (subNormalFactor + 1)) & FLOAT_MANTISSA_MASK);
+    }
+  }
+  return Float.intBitsToFloat(result | sign);
+}

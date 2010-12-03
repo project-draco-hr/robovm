@@ -1,0 +1,57 @@
+{
+  String className=null;
+  ClassLoader loader=NewInstance.getClassLoader();
+  try {
+    className=SecuritySupport.getSystemProperty(property);
+  }
+ catch (  Exception e) {
+  }
+  if (className == null || className.length() == 0) {
+    String service="META-INF/services/" + property;
+    InputStream is=null;
+    className=null;
+    ClassLoader cl=SecuritySupport.getContextClassLoader();
+    if (cl != null) {
+      is=SecuritySupport.getResourceAsStream(cl,service);
+      if (is == null) {
+        cl=XMLReaderFactory.class.getClassLoader();
+        is=SecuritySupport.getResourceAsStream(cl,service);
+      }
+    }
+ else {
+      cl=XMLReaderFactory.class.getClassLoader();
+      is=SecuritySupport.getResourceAsStream(cl,service);
+    }
+    if (is != null) {
+      BufferedReader rd;
+      try {
+        rd=new BufferedReader(new InputStreamReader(is,"UTF-8"),DEFAULT_LINE_LENGTH);
+      }
+ catch (      java.io.UnsupportedEncodingException e) {
+        rd=new BufferedReader(new InputStreamReader(is),DEFAULT_LINE_LENGTH);
+      }
+      try {
+        className=rd.readLine();
+      }
+ catch (      Exception x) {
+      }
+ finally {
+        try {
+          rd.close();
+        }
+ catch (        IOException exc) {
+        }
+      }
+    }
+  }
+  if (className == null) {
+    className="org.apache.xerces.parsers.SAXParser";
+  }
+  if (className != null)   return loadClass(loader,className);
+  try {
+    return new ParserAdapter(ParserFactory.makeParser());
+  }
+ catch (  Exception e) {
+    throw new SAXException("Can't create default XMLReader; " + "is system property org.xml.sax.driver set?");
+  }
+}

@@ -1,0 +1,38 @@
+{
+synchronized (this) {
+    if (!isOpen()) {
+      throw new ClosedChannelException();
+    }
+    if (status == SOCKET_STATUS_CONNECTED) {
+      return true;
+    }
+    if (status != SOCKET_STATUS_PENDING) {
+      throw new NoConnectionPendingException();
+    }
+  }
+  int result=EOF;
+  boolean finished=false;
+  try {
+    begin();
+    result=networkSystem.connectWithTimeout(fd,isBlocking() ? -1 : 0,trafficClass,connectAddress.getAddress(),connectAddress.getPort(),HY_PORT_SOCKET_STEP_CHECK,connectContext);
+    finished=(result == CONNECT_SUCCESS);
+    isBound=finished;
+    localAddress=networkSystem.getSocketLocalAddress(fd,false);
+  }
+ catch (  ConnectException e) {
+    if (isOpen()) {
+      close();
+      finished=true;
+    }
+    throw e;
+  }
+ finally {
+    end(finished);
+  }
+synchronized (this) {
+    status=(finished ? SOCKET_STATUS_CONNECTED : status);
+    isBound=finished;
+    if (!isBlocking())     implConfigureBlocking(false);
+  }
+  return finished;
+}

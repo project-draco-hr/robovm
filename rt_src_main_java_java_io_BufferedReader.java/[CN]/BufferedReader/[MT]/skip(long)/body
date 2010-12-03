@@ -1,0 +1,31 @@
+{
+  if (amount < 0) {
+    throw new IllegalArgumentException();
+  }
+synchronized (lock) {
+    if (isClosed()) {
+      throw new IOException(Messages.getString("luni.A5"));
+    }
+    if (amount < 1) {
+      return 0;
+    }
+    if (end - pos >= amount) {
+      pos+=amount;
+      return amount;
+    }
+    long read=end - pos;
+    pos=end;
+    while (read < amount) {
+      if (fillBuf() == -1) {
+        return read;
+      }
+      if (end - pos >= amount - read) {
+        pos+=amount - read;
+        return amount;
+      }
+      read+=(end - pos);
+      pos=end;
+    }
+    return amount;
+  }
+}

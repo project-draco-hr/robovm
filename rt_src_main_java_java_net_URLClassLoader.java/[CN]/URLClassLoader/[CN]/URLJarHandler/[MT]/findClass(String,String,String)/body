@@ -1,0 +1,34 @@
+{
+  String entryName=prefixName + name;
+  JarEntry entry=jf.getJarEntry(entryName);
+  if (entry != null) {
+    try {
+      Manifest manifest=jf.getManifest();
+      return createClass(entry,manifest,packageName,origName);
+    }
+ catch (    IOException e) {
+    }
+  }
+  if (index != null) {
+    ArrayList<URL> urls;
+    if (packageName == null) {
+      urls=index.get(name);
+    }
+ else {
+      urls=index.get(packageName);
+    }
+    if (urls != null) {
+      urls.remove(url);
+      for (      URL url : urls) {
+        URLHandler h=getSubHandler(url);
+        if (h != null) {
+          Class<?> res=h.findClass(packageName,name,origName);
+          if (res != null) {
+            return res;
+          }
+        }
+      }
+    }
+  }
+  return null;
+}

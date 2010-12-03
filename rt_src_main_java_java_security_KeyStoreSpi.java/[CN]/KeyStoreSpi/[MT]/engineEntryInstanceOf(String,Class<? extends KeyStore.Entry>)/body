@@ -1,0 +1,21 @@
+{
+  if (!engineContainsAlias(alias)) {
+    return false;
+  }
+  try {
+    if (engineIsCertificateEntry(alias)) {
+      return entryClass.isAssignableFrom(Class.forName("java.security.KeyStore$TrustedCertificateEntry"));
+    }
+    if (engineIsKeyEntry(alias)) {
+      if (entryClass.isAssignableFrom(Class.forName("java.security.KeyStore$PrivateKeyEntry"))) {
+        return engineGetCertificate(alias) != null;
+      }
+      if (entryClass.isAssignableFrom(Class.forName("java.security.KeyStore$SecretKeyEntry"))) {
+        return engineGetCertificate(alias) == null;
+      }
+    }
+  }
+ catch (  ClassNotFoundException ignore) {
+  }
+  return false;
+}

@@ -1,0 +1,35 @@
+{
+  checkClosed();
+  if (null == b) {
+    throw new NullPointerException();
+  }
+  if (off < 0 || len < 0 || len > b.length - off) {
+    throw new IndexOutOfBoundsException();
+  }
+  if (!available) {
+    return EOF;
+  }
+  int count=0;
+  while (count < len && !def.finished()) {
+    if (def.needsInput()) {
+      int readed=in.read(buf);
+      if (EOF == readed) {
+        def.finish();
+      }
+ else {
+        def.setInput(buf,0,readed);
+      }
+    }
+    int readed=def.deflate(buf,0,Math.min(buf.length,len - count));
+    if (EOF == readed) {
+      break;
+    }
+    System.arraycopy(buf,0,b,off + count,readed);
+    count+=readed;
+  }
+  if (0 == count) {
+    count=EOF;
+    available=false;
+  }
+  return count;
+}

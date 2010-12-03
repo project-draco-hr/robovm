@@ -1,0 +1,53 @@
+{
+  if (string == null) {
+    return new Object[0];
+  }
+  ParsePosition internalPos=new ParsePosition(0);
+  int offset=position.getIndex();
+  Object[] result=new Object[maxArgumentIndex + 1];
+  for (int i=0; i <= maxOffset; i++) {
+    String sub=strings[i];
+    if (!string.startsWith(sub,offset)) {
+      position.setErrorIndex(offset);
+      return null;
+    }
+    offset+=sub.length();
+    Object parse;
+    Format format=formats[i];
+    if (format == null) {
+      if (i + 1 < strings.length) {
+        int next=string.indexOf(strings[i + 1],offset);
+        if (next == -1) {
+          position.setErrorIndex(offset);
+          return null;
+        }
+        parse=string.substring(offset,next);
+        offset=next;
+      }
+ else {
+        parse=string.substring(offset);
+        offset=string.length();
+      }
+    }
+ else {
+      internalPos.setIndex(offset);
+      parse=format.parseObject(string,internalPos);
+      if (internalPos.getErrorIndex() != -1) {
+        position.setErrorIndex(offset);
+        return null;
+      }
+      offset=internalPos.getIndex();
+    }
+    result[argumentNumbers[i]]=parse;
+  }
+  if (maxOffset + 1 < strings.length) {
+    String sub=strings[maxOffset + 1];
+    if (!string.startsWith(sub,offset)) {
+      position.setErrorIndex(offset);
+      return null;
+    }
+    offset+=sub.length();
+  }
+  position.setIndex(offset);
+  return result;
+}

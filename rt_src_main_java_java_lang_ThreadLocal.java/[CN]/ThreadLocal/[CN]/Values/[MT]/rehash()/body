@@ -1,0 +1,31 @@
+{
+  if (tombstones + size < maximumLoad) {
+    return false;
+  }
+  int capacity=table.length >> 1;
+  int newCapacity=capacity;
+  if (size > (capacity >> 1)) {
+    newCapacity=capacity << 1;
+  }
+  Object[] oldTable=this.table;
+  initializeTable(newCapacity);
+  this.tombstones=0;
+  if (size == 0) {
+    return true;
+  }
+  for (int i=oldTable.length - 2; i >= 0; i-=2) {
+    Object k=oldTable[i];
+    if (k == null || k == TOMBSTONE) {
+      continue;
+    }
+    @SuppressWarnings("unchecked") Reference<ThreadLocal<?>> reference=(Reference<ThreadLocal<?>>)k;
+    ThreadLocal<?> key=reference.get();
+    if (key != null) {
+      add(key,oldTable[i + 1]);
+    }
+ else {
+      size--;
+    }
+  }
+  return true;
+}

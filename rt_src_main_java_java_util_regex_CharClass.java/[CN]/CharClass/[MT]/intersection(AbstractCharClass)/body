@@ -1,0 +1,105 @@
+{
+  if (!mayContainSupplCodepoints && clazz.mayContainSupplCodepoints) {
+    mayContainSupplCodepoints=true;
+  }
+  if (clazz.hasUCI())   this.hasUCI=true;
+  if (altSurrogates ^ clazz.altSurrogates) {
+    if (altSurrogates) {
+      lowHighSurrogates.xor(clazz.getLowHighSurrogates());
+      lowHighSurrogates.and(clazz.getLowHighSurrogates());
+      altSurrogates=false;
+    }
+ else {
+      lowHighSurrogates.andNot(clazz.getLowHighSurrogates());
+    }
+  }
+ else {
+    if (altSurrogates) {
+      lowHighSurrogates.or(clazz.getLowHighSurrogates());
+    }
+ else {
+      lowHighSurrogates.and(clazz.getLowHighSurrogates());
+    }
+  }
+  if (!hideBits && clazz.getBits() != null) {
+    if (alt ^ clazz.isNegative()) {
+      if (alt) {
+        bits.xor(clazz.getBits());
+        bits.and(clazz.getBits());
+        alt=false;
+      }
+ else {
+        bits.andNot(clazz.getBits());
+      }
+    }
+ else {
+      if (alt) {
+        bits.or(clazz.getBits());
+      }
+ else {
+        bits.and(clazz.getBits());
+      }
+    }
+  }
+ else {
+    final boolean curAlt=alt;
+    if (nonBitSet == null) {
+      if (!inverted && bits.isEmpty()) {
+        if (curAlt) {
+          nonBitSet=new AbstractCharClass(){
+            public boolean contains(            int ch){
+              return !clazz.contains(ch);
+            }
+          }
+;
+        }
+ else {
+          nonBitSet=new AbstractCharClass(){
+            public boolean contains(            int ch){
+              return clazz.contains(ch);
+            }
+          }
+;
+        }
+      }
+ else {
+        if (curAlt) {
+          nonBitSet=new AbstractCharClass(){
+            public boolean contains(            int ch){
+              return !(clazz.contains(ch) && (curAlt ^ bits.get(ch)));
+            }
+          }
+;
+        }
+ else {
+          nonBitSet=new AbstractCharClass(){
+            public boolean contains(            int ch){
+              return clazz.contains(ch) && (curAlt ^ bits.get(ch));
+            }
+          }
+;
+        }
+      }
+      hideBits=true;
+    }
+ else {
+      final AbstractCharClass nb=nonBitSet;
+      if (curAlt) {
+        nonBitSet=new AbstractCharClass(){
+          public boolean contains(          int ch){
+            return !((curAlt ^ nb.contains(ch)) && clazz.contains(ch));
+          }
+        }
+;
+      }
+ else {
+        nonBitSet=new AbstractCharClass(){
+          public boolean contains(          int ch){
+            return (curAlt ^ nb.contains(ch)) && clazz.contains(ch);
+          }
+        }
+;
+      }
+    }
+  }
+}

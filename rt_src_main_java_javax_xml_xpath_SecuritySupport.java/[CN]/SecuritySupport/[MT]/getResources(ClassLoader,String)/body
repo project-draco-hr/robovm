@@ -1,0 +1,20 @@
+{
+  try {
+    return (Enumeration)AccessController.doPrivileged(new PrivilegedExceptionAction(){
+      public Object run() throws IOException {
+        Enumeration enumeration;
+        if (cl == null) {
+          enumeration=ClassLoader.getSystemResources(name);
+        }
+ else {
+          enumeration=cl.getResources(name);
+        }
+        return enumeration;
+      }
+    }
+);
+  }
+ catch (  PrivilegedActionException e) {
+    throw (IOException)e.getException();
+  }
+}

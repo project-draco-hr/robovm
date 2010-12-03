@@ -1,0 +1,29 @@
+{
+  if (!encodings.contains(encoding)) {
+    throw new CertificateException(Messages.getString("security.15F",encoding));
+  }
+  try {
+    if (encodingsArr[0].equals(encoding)) {
+      return (X509CertPathImpl)ASN1.decode(in);
+    }
+ else {
+      ContentInfo ci=(ContentInfo)ContentInfo.ASN1.decode(in);
+      SignedData sd=ci.getSignedData();
+      if (sd == null) {
+        throw new CertificateException(Messages.getString("security.160"));
+      }
+      List certs=sd.getCertificates();
+      if (certs == null) {
+        certs=new ArrayList();
+      }
+      List result=new ArrayList();
+      for (int i=0; i < certs.size(); i++) {
+        result.add(new X509CertImpl((Certificate)certs.get(i)));
+      }
+      return new X509CertPathImpl(result,PKCS7,ci.getEncoded());
+    }
+  }
+ catch (  IOException e) {
+    throw new CertificateException(Messages.getString("security.15E",e.getMessage()));
+  }
+}

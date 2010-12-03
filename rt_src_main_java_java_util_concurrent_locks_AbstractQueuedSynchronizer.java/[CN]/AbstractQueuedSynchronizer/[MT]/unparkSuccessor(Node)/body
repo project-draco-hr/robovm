@@ -1,0 +1,10 @@
+{
+  int ws=node.waitStatus;
+  if (ws < 0)   compareAndSetWaitStatus(node,ws,0);
+  Node s=node.next;
+  if (s == null || s.waitStatus > 0) {
+    s=null;
+    for (Node t=tail; t != null && t != node; t=t.prev)     if (t.waitStatus <= 0)     s=t;
+  }
+  if (s != null)   LockSupport.unpark(s.thread);
+}

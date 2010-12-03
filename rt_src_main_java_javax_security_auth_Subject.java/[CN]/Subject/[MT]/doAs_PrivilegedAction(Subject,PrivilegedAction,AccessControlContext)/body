@@ -1,0 +1,18 @@
+{
+  AccessControlContext newContext;
+  final SubjectDomainCombiner combiner;
+  if (subject == null) {
+    combiner=null;
+  }
+ else {
+    combiner=new SubjectDomainCombiner(subject);
+  }
+  PrivilegedAction dccAction=new PrivilegedAction(){
+    public Object run(){
+      return new AccessControlContext(context,combiner);
+    }
+  }
+;
+  newContext=(AccessControlContext)AccessController.doPrivileged(dccAction);
+  return AccessController.doPrivileged(action,newContext);
+}

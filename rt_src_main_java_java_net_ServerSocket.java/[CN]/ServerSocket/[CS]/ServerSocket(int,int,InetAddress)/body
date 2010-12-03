@@ -1,0 +1,19 @@
+{
+  super();
+  checkListen(aport);
+  impl=factory != null ? factory.createSocketImpl() : new PlainServerSocketImpl();
+  InetAddress addr=localAddr == null ? InetAddress.ANY : localAddr;
+synchronized (this) {
+    impl.create(true);
+    isCreated=true;
+    try {
+      impl.bind(addr,aport);
+      isBound=true;
+      impl.listen(backlog > 0 ? backlog : defaultBacklog());
+    }
+ catch (    IOException e) {
+      close();
+      throw e;
+    }
+  }
+}

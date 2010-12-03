@@ -1,0 +1,24 @@
+{
+  this.isTLS=isTLS;
+  this.isRSA=isRSA;
+  if (length == 0) {
+    this.length=0;
+    exchange_keys=new byte[0];
+  }
+ else {
+    int size;
+    if (isRSA && !isTLS) {
+      size=length;
+      this.length=size;
+    }
+ else {
+      size=in.readUint16();
+      this.length=2 + size;
+    }
+    exchange_keys=new byte[size];
+    in.read(exchange_keys,0,size);
+    if (this.length != length) {
+      fatalAlert(AlertProtocol.DECODE_ERROR,"DECODE ERROR: incorrect ClientKeyExchange");
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  if (0 <= location && location <= elementCount) {
+    int size=collection.size();
+    if (size == 0) {
+      return false;
+    }
+    int required=size - (elementData.length - elementCount);
+    if (required > 0) {
+      growBy(required);
+    }
+    int count=elementCount - location;
+    if (count > 0) {
+      System.arraycopy(elementData,location,elementData,location + size,count);
+    }
+    Iterator<? extends E> it=collection.iterator();
+    while (it.hasNext()) {
+      elementData[location++]=it.next();
+    }
+    elementCount+=size;
+    modCount++;
+    return true;
+  }
+  throw new ArrayIndexOutOfBoundsException(location);
+}

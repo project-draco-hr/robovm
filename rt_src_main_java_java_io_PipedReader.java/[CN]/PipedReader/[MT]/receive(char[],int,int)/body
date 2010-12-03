@@ -1,0 +1,57 @@
+{
+synchronized (lock) {
+    if (data == null) {
+      throw new IOException(Messages.getString("luni.CF"));
+    }
+    if (lastReader != null && !lastReader.isAlive()) {
+      throw new IOException(Messages.getString("luni.CE"));
+    }
+    lastWriter=Thread.currentThread();
+    while (count > 0) {
+      try {
+        while (data != null && out == in) {
+          lock.notifyAll();
+          wait(1000);
+          if (lastReader != null && !lastReader.isAlive()) {
+            throw new IOException(Messages.getString("luni.CE"));
+          }
+        }
+      }
+ catch (      InterruptedException e) {
+        throw new InterruptedIOException();
+      }
+      if (data == null) {
+        break;
+      }
+      if (in == -1) {
+        in=0;
+      }
+      if (in >= out) {
+        int length=data.length - in;
+        if (count < length) {
+          length=count;
+        }
+        System.arraycopy(chars,offset,data,in,length);
+        offset+=length;
+        count-=length;
+        in+=length;
+        if (in == data.length) {
+          in=0;
+        }
+      }
+      if (count > 0 && in != out) {
+        int length=out - in;
+        if (count < length) {
+          length=count;
+        }
+        System.arraycopy(chars,offset,data,in,length);
+        offset+=length;
+        count-=length;
+        in+=length;
+      }
+    }
+    if (count == 0) {
+      return;
+    }
+  }
+}

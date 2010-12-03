@@ -1,0 +1,19 @@
+{
+  if (e == null)   throw new NullPointerException();
+  final E[] items=this.items;
+  final ReentrantLock lock=this.lock;
+  lock.lockInterruptibly();
+  try {
+    try {
+      while (count == items.length)       notFull.await();
+    }
+ catch (    InterruptedException ie) {
+      notFull.signal();
+      throw ie;
+    }
+    insert(e);
+  }
+  finally {
+    lock.unlock();
+  }
+}

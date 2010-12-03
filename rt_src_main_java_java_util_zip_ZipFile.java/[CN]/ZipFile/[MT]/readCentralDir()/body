@@ -1,0 +1,50 @@
+{
+  long scanOffset=mRaf.length() - ENDHDR;
+  if (scanOffset < 0) {
+    throw new ZipException(Messages.getString("archive.37"));
+  }
+  long stopOffset=scanOffset - 65536;
+  if (stopOffset < 0) {
+    stopOffset=0;
+  }
+  while (true) {
+    mRaf.seek(scanOffset);
+    if (ZipEntry.readIntLE(mRaf) == 101010256L) {
+      break;
+    }
+    scanOffset--;
+    if (scanOffset < stopOffset) {
+      throw new ZipException(Messages.getString("archive.38"));
+    }
+  }
+  RAFStream rafs=new RAFStream(mRaf,mRaf.getFilePointer());
+  BufferedInputStream bin=new BufferedInputStream(rafs,ENDHDR);
+  int diskNumber=ler.readShortLE(bin);
+  int diskWithCentralDir=ler.readShortLE(bin);
+  int numEntries=ler.readShortLE(bin);
+  int totalNumEntries=ler.readShortLE(bin);
+  ler.readIntLE(bin);
+  long centralDirOffset=ler.readIntLE(bin);
+  ler.readShortLE(bin);
+  if (numEntries != totalNumEntries || diskNumber != 0 || diskWithCentralDir != 0) {
+    throw new ZipException(Messages.getString("archive.39"));
+  }
+  scanOffset=centralDirOffset;
+  stopOffset=scanOffset + 6;
+  while (true) {
+    mRaf.seek(scanOffset);
+    if (ZipEntry.readIntLE(mRaf) == CENSIG) {
+      break;
+    }
+    scanOffset++;
+    if (scanOffset > stopOffset) {
+      throw new ZipException(Messages.getString("archive.3A"));
+    }
+  }
+  rafs=new RAFStream(mRaf,scanOffset);
+  bin=new BufferedInputStream(rafs,4096);
+  for (int i=0; i < numEntries; i++) {
+    ZipEntry newEntry=new ZipEntry(ler,bin);
+    mEntries.put(newEntry.getName(),newEntry);
+  }
+}

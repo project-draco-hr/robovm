@@ -1,0 +1,72 @@
+{
+  int startIndex=0;
+  boolean isNegative=false;
+  StringBuilder result=new StringBuilder();
+  BigInteger bigInt=(BigInteger)arg;
+  char currentConversionType=formatToken.getConversionType();
+  if (formatToken.isFlagSet(FormatToken.FLAG_MINUS) || formatToken.isFlagSet(FormatToken.FLAG_ZERO)) {
+    if (!formatToken.isWidthSet()) {
+      throw new MissingFormatWidthException(formatToken.getStrFlags());
+    }
+  }
+  if (formatToken.isFlagSet(FormatToken.FLAG_ADD) && formatToken.isFlagSet(FormatToken.FLAG_SPACE)) {
+    throw new IllegalFormatFlagsException(formatToken.getStrFlags());
+  }
+  if (formatToken.isFlagSet(FormatToken.FLAG_ZERO) && formatToken.isFlagSet(FormatToken.FLAG_MINUS)) {
+    throw new IllegalFormatFlagsException(formatToken.getStrFlags());
+  }
+  if (formatToken.isPrecisionSet()) {
+    throw new IllegalFormatPrecisionException(formatToken.getPrecision());
+  }
+  if ('d' != currentConversionType && formatToken.isFlagSet(FormatToken.FLAG_COMMA)) {
+    throw new FormatFlagsConversionMismatchException(formatToken.getStrFlags(),currentConversionType);
+  }
+  if (formatToken.isFlagSet(FormatToken.FLAG_SHARP) && 'd' == currentConversionType) {
+    throw new FormatFlagsConversionMismatchException(formatToken.getStrFlags(),currentConversionType);
+  }
+  if (null == bigInt) {
+    return transformFromNull();
+  }
+  isNegative=(bigInt.compareTo(BigInteger.ZERO) < 0);
+  if ('d' == currentConversionType) {
+    NumberFormat numberFormat=getNumberFormat();
+    boolean readableName=formatToken.isFlagSet(FormatToken.FLAG_COMMA);
+    numberFormat.setGroupingUsed(readableName);
+    result.append(numberFormat.format(bigInt));
+  }
+ else   if ('o' == currentConversionType) {
+    result.append(bigInt.toString(8));
+  }
+ else {
+    result.append(bigInt.toString(16));
+  }
+  if (formatToken.isFlagSet(FormatToken.FLAG_SHARP)) {
+    startIndex=isNegative ? 1 : 0;
+    if ('o' == currentConversionType) {
+      result.insert(startIndex,"0");
+      startIndex+=1;
+    }
+ else     if ('x' == currentConversionType || 'X' == currentConversionType) {
+      result.insert(startIndex,"0x");
+      startIndex+=2;
+    }
+  }
+  if (!isNegative) {
+    if (formatToken.isFlagSet(FormatToken.FLAG_ADD)) {
+      result.insert(0,'+');
+      startIndex+=1;
+    }
+    if (formatToken.isFlagSet(FormatToken.FLAG_SPACE)) {
+      result.insert(0,' ');
+      startIndex+=1;
+    }
+  }
+  if (isNegative && formatToken.isFlagSet(FormatToken.FLAG_PARENTHESIS)) {
+    result=wrapParentheses(result);
+    return result.toString();
+  }
+  if (isNegative && formatToken.isFlagSet(FormatToken.FLAG_ZERO)) {
+    startIndex++;
+  }
+  return padding(result,startIndex);
+}

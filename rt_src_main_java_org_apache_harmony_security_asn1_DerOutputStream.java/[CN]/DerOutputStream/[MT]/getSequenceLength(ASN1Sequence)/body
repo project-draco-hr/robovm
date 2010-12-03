@@ -1,0 +1,28 @@
+{
+  ASN1Type[] type=sequence.type;
+  Object[] values=new Object[type.length];
+  int[] compLens=new int[type.length];
+  sequence.getValues(content,values);
+  push(compLens,values);
+  int seqLen=0;
+  for (int i=0; i < type.length; i++) {
+    if (values[i] == null) {
+      if (sequence.OPTIONAL[i]) {
+        continue;
+      }
+ else {
+        throw new RuntimeException();
+      }
+    }
+    if (sequence.DEFAULT[i] != null && sequence.DEFAULT[i].equals(values[i])) {
+      values[i]=null;
+      continue;
+    }
+    content=values[i];
+    type[i].setEncodingContent(this);
+    compLens[i]=length;
+    values[i]=content;
+    seqLen+=type[i].getEncodedLength(this);
+  }
+  length=seqLen;
+}

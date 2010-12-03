@@ -1,0 +1,13 @@
+{
+  CipherSuite[] cipher_suites;
+  if (isResuming) {
+    cipher_suites=new CipherSuite[]{session.cipherSuite};
+  }
+ else {
+    cipher_suites=parameters.enabledCipherSuites;
+  }
+  clientHello=new ClientHello(parameters.getSecureRandom(),session.protocol.version,session.id,cipher_suites);
+  session.clientRandom=clientHello.random;
+  send(clientHello);
+  status=NEED_UNWRAP;
+}

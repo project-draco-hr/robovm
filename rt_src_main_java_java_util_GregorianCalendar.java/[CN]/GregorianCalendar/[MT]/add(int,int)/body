@@ -1,0 +1,88 @@
+{
+  if (value == 0) {
+    return;
+  }
+  if (field < 0 || field >= ZONE_OFFSET) {
+    throw new IllegalArgumentException();
+  }
+  isCached=false;
+  if (field == ERA) {
+    complete();
+    if (fields[ERA] == AD) {
+      if (value >= 0) {
+        return;
+      }
+      set(ERA,BC);
+    }
+ else {
+      if (value <= 0) {
+        return;
+      }
+      set(ERA,AD);
+    }
+    complete();
+    return;
+  }
+  if (field == YEAR || field == MONTH) {
+    complete();
+    if (field == MONTH) {
+      int month=fields[MONTH] + value;
+      if (month < 0) {
+        value=(month - 11) / 12;
+        month=12 + (month % 12);
+      }
+ else {
+        value=month / 12;
+      }
+      set(MONTH,month % 12);
+    }
+    set(YEAR,fields[YEAR] + value);
+    int days=daysInMonth(isLeapYear(fields[YEAR]),fields[MONTH]);
+    if (fields[DATE] > days) {
+      set(DATE,days);
+    }
+    complete();
+    return;
+  }
+  long multiplier=0;
+  getTimeInMillis();
+switch (field) {
+case MILLISECOND:
+    time+=value;
+  break;
+case SECOND:
+time+=value * 1000L;
+break;
+case MINUTE:
+time+=value * 60000L;
+break;
+case HOUR:
+case HOUR_OF_DAY:
+time+=value * 3600000L;
+break;
+case AM_PM:
+multiplier=43200000L;
+break;
+case DATE:
+case DAY_OF_YEAR:
+case DAY_OF_WEEK:
+multiplier=86400000L;
+break;
+case WEEK_OF_YEAR:
+case WEEK_OF_MONTH:
+case DAY_OF_WEEK_IN_MONTH:
+multiplier=604800000L;
+break;
+}
+if (multiplier > 0) {
+int zoneOffset=getTimeZone().getRawOffset();
+int offset=getOffset(time + zoneOffset);
+time+=value * multiplier;
+int newOffset=getOffset(time + zoneOffset);
+if (newOffset != offset) {
+time+=offset - newOffset;
+}
+}
+areFieldsSet=false;
+complete();
+}

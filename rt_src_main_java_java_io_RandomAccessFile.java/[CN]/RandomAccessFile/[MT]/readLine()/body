@@ -1,0 +1,28 @@
+{
+  StringBuilder line=new StringBuilder(80);
+  boolean foundTerminator=false;
+  long unreadPosition=0;
+  while (true) {
+    int nextByte=read();
+switch (nextByte) {
+case -1:
+      return line.length() != 0 ? line.toString() : null;
+case (byte)'\r':
+    if (foundTerminator) {
+      seek(unreadPosition);
+      return line.toString();
+    }
+  foundTerminator=true;
+unreadPosition=getFilePointer();
+break;
+case (byte)'\n':
+return line.toString();
+default :
+if (foundTerminator) {
+seek(unreadPosition);
+return line.toString();
+}
+line.append((char)nextByte);
+}
+}
+}

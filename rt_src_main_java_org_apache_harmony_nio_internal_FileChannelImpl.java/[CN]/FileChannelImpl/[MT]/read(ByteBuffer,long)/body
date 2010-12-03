@@ -1,0 +1,24 @@
+{
+  if (null == buffer) {
+    throw new NullPointerException();
+  }
+  if (position < 0) {
+    throw new IllegalArgumentException();
+  }
+  openCheck();
+  if (!buffer.hasRemaining()) {
+    return 0;
+  }
+synchronized (repositioningLock) {
+    int bytesRead=0;
+    long preReadPosition=position();
+    position(position);
+    try {
+      bytesRead=read(buffer);
+    }
+  finally {
+      position(preReadPosition);
+    }
+    return bytesRead;
+  }
+}

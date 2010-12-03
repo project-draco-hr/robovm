@@ -1,0 +1,23 @@
+{
+  int strLength=matchResult.getRightBound();
+  int startStr=matchResult.getLeftBound();
+  while (startSearch >= stringIndex) {
+    if (startSearch < strLength) {
+      char low=testString.charAt(startSearch);
+      if (Character.isLowSurrogate(low)) {
+        if (startSearch > startStr) {
+          char high=testString.charAt(startSearch - 1);
+          if (Character.isHighSurrogate(high)) {
+            startSearch--;
+            continue;
+          }
+        }
+      }
+    }
+    if (next.matches(startSearch,testString,matchResult) >= 0) {
+      return startSearch;
+    }
+    startSearch--;
+  }
+  return -1;
+}

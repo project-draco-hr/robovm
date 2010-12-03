@@ -1,0 +1,36 @@
+{
+  if (defaultSocketFactory != null) {
+    return defaultSocketFactory;
+  }
+  if (defaultName == null) {
+    AccessController.doPrivileged(new PrivilegedAction<Void>(){
+      public Void run(){
+        defaultName=Security.getProperty("ssl.SocketFactory.provider");
+        if (defaultName != null) {
+          ClassLoader cl=Thread.currentThread().getContextClassLoader();
+          if (cl == null) {
+            cl=ClassLoader.getSystemClassLoader();
+          }
+          try {
+            final Class<?> sfc=Class.forName(defaultName,true,cl);
+            defaultSocketFactory=(SocketFactory)sfc.newInstance();
+          }
+ catch (          Exception e) {
+          }
+        }
+        return null;
+      }
+    }
+);
+  }
+  if (defaultSocketFactory == null) {
+    SSLContext context=DefaultSSLContext.getContext();
+    if (context != null) {
+      defaultSocketFactory=context.getSocketFactory();
+    }
+  }
+  if (defaultSocketFactory == null) {
+    defaultSocketFactory=new DefaultSSLSocketFactory("No SSLSocketFactory installed");
+  }
+  return defaultSocketFactory;
+}

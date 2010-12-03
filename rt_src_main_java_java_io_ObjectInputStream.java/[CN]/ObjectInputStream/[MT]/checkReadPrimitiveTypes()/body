@@ -1,0 +1,32 @@
+{
+  if (primitiveData == input || primitiveData.available() > 0) {
+    return;
+  }
+  do {
+    int next=0;
+    if (hasPushbackTC) {
+      hasPushbackTC=false;
+    }
+ else {
+      next=input.read();
+      pushbackTC=(byte)next;
+    }
+switch (pushbackTC) {
+case TC_BLOCKDATA:
+      primitiveData=new ByteArrayInputStream(readBlockData());
+    return;
+case TC_BLOCKDATALONG:
+  primitiveData=new ByteArrayInputStream(readBlockDataLong());
+return;
+case TC_RESET:
+resetState();
+break;
+default :
+if (next != -1) {
+pushbackTC();
+}
+return;
+}
+}
+ while (true);
+}

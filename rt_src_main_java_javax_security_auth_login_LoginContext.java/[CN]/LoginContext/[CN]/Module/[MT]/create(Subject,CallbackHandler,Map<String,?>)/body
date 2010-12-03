@@ -1,0 +1,23 @@
+{
+  String klassName=entry.getLoginModuleName();
+  if (klass == null) {
+    try {
+      klass=Class.forName(klassName,false,contextClassLoader);
+    }
+ catch (    ClassNotFoundException ex) {
+      throw (LoginException)new LoginException(Messages.getString("auth.39",klassName)).initCause(ex);
+    }
+  }
+  if (module == null) {
+    try {
+      module=(LoginModule)klass.newInstance();
+    }
+ catch (    IllegalAccessException ex) {
+      throw (LoginException)new LoginException(Messages.getString("auth.3A",klassName)).initCause(ex);
+    }
+catch (    InstantiationException ex) {
+      throw (LoginException)new LoginException(Messages.getString("auth.3A",klassName)).initCause(ex);
+    }
+    module.initialize(subject,callbackHandler,sharedState,entry.getOptions());
+  }
+}

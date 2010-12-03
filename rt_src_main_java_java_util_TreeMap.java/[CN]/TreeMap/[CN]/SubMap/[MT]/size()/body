@@ -1,0 +1,51 @@
+{
+  Node<K,V> from, to;
+  int fromIndex, toIndex;
+  if (hasStart) {
+    setFirstKey();
+    from=firstKeyNode;
+    fromIndex=firstKeyIndex;
+  }
+ else {
+    from=minimum(backingMap.root);
+    fromIndex=from == null ? 0 : from.left_idx;
+  }
+  if (from == null) {
+    return 0;
+  }
+  if (hasEnd) {
+    setLastKey();
+    to=lastKeyNode;
+    toIndex=lastKeyIndex;
+    Comparable<K> object=backingMap.comparator == null ? toComparable((K)endKey) : null;
+    if (to == null) {
+      return 0;
+    }
+ else     if (backingMap.cmp(object,endKey,to.keys[toIndex]) != 0) {
+      if (toIndex != to.keys.length) {
+        toIndex++;
+      }
+ else {
+        to=to.next;
+        toIndex=to == null ? 0 : to.left_idx;
+      }
+    }
+  }
+ else {
+    to=maximum(backingMap.root);
+    toIndex=to == null ? 0 : to.right_idx;
+  }
+  if (to == null) {
+    return 0;
+  }
+  if (from == to) {
+    return toIndex - fromIndex + (hasEnd ? 0 : 1);
+  }
+  int sum=0;
+  while (from != to) {
+    sum+=(from.right_idx - fromIndex + 1);
+    from=from.next;
+    fromIndex=from.left_idx;
+  }
+  return sum + toIndex - fromIndex + (hasEnd ? 0 : 1);
+}

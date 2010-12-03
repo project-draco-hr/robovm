@@ -1,0 +1,23 @@
+{
+  if (logger != null) {
+    logger.println("SSLServerSocketImpl.accept ..");
+  }
+  SSLSocketImpl s=new SSLSocketImpl((SSLParameters)sslParameters.clone());
+  implAccept(s);
+  SecurityManager sm=System.getSecurityManager();
+  if (sm != null) {
+    try {
+      sm.checkAccept(s.getInetAddress().getHostAddress(),s.getPort());
+    }
+ catch (    SecurityException e) {
+      s.close();
+      throw e;
+    }
+  }
+  s.init();
+  s.startHandshake();
+  if (logger != null) {
+    logger.println("SSLServerSocketImpl: accepted, initialized");
+  }
+  return s;
+}

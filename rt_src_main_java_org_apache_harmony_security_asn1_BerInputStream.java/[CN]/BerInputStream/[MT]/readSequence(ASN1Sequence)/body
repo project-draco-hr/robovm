@@ -1,0 +1,56 @@
+{
+  if (tag != ASN1Constants.TAG_C_SEQUENCE) {
+    throw new ASN1Exception(Messages.getString("security.12F",tagOffset,Integer.toHexString(tag)));
+  }
+  int begOffset=offset;
+  int endOffset=begOffset + length;
+  ASN1Type[] type=sequence.type;
+  int i=0;
+  if (isVerify) {
+    for (; (offset < endOffset) && (i < type.length); i++) {
+      next();
+      while (!type[i].checkTag(tag)) {
+        if (!sequence.OPTIONAL[i] || (i == type.length - 1)) {
+          throw new ASN1Exception(Messages.getString("security.130",tagOffset));
+        }
+        i++;
+      }
+      type[i].decode(this);
+    }
+    for (; i < type.length; i++) {
+      if (!sequence.OPTIONAL[i]) {
+        throw new ASN1Exception(Messages.getString("security.131",tagOffset));
+      }
+    }
+  }
+ else {
+    int seqTagOffset=tagOffset;
+    Object[] values=new Object[type.length];
+    for (; (offset < endOffset) && (i < type.length); i++) {
+      next();
+      while (!type[i].checkTag(tag)) {
+        if (!sequence.OPTIONAL[i] || (i == type.length - 1)) {
+          throw new ASN1Exception(Messages.getString("security.132",tagOffset));
+        }
+        if (sequence.DEFAULT[i] != null) {
+          values[i]=sequence.DEFAULT[i];
+        }
+        i++;
+      }
+      values[i]=type[i].decode(this);
+    }
+    for (; i < type.length; i++) {
+      if (!sequence.OPTIONAL[i]) {
+        throw new ASN1Exception(Messages.getString("security.133",tagOffset));
+      }
+      if (sequence.DEFAULT[i] != null) {
+        values[i]=sequence.DEFAULT[i];
+      }
+    }
+    content=values;
+    tagOffset=seqTagOffset;
+  }
+  if (offset != endOffset) {
+    throw new ASN1Exception(Messages.getString("security.134",begOffset));
+  }
+}

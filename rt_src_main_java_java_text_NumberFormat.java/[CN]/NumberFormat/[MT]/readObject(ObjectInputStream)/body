@@ -1,0 +1,23 @@
+{
+  ObjectInputStream.GetField fields=stream.readFields();
+  groupingUsed=fields.get("groupingUsed",true);
+  parseIntegerOnly=fields.get("parseIntegerOnly",false);
+  if (fields.get("serialVersionOnStream",0) == 0) {
+    maximumFractionDigits=fields.get("maxFractionDigits",(byte)3);
+    maximumIntegerDigits=fields.get("maxIntegerDigits",(byte)40);
+    minimumFractionDigits=fields.get("minFractionDigits",(byte)0);
+    minimumIntegerDigits=fields.get("minIntegerDigits",(byte)1);
+  }
+ else {
+    maximumFractionDigits=fields.get("maximumFractionDigits",3);
+    maximumIntegerDigits=fields.get("maximumIntegerDigits",40);
+    minimumFractionDigits=fields.get("minimumFractionDigits",0);
+    minimumIntegerDigits=fields.get("minimumIntegerDigits",1);
+  }
+  if (minimumIntegerDigits > maximumIntegerDigits || minimumFractionDigits > maximumFractionDigits) {
+    throw new InvalidObjectException(Messages.getString("text.00"));
+  }
+  if (minimumIntegerDigits < 0 || maximumIntegerDigits < 0 || minimumFractionDigits < 0 || maximumFractionDigits < 0) {
+    throw new InvalidObjectException(Messages.getString("text.01"));
+  }
+}

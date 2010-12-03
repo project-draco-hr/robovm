@@ -1,0 +1,28 @@
+{
+  try {
+    String classnameAsResource=clazz.getName().replace('.','/') + ".class";
+    ClassLoader loader=clazz.getClassLoader();
+    URL it;
+    if (loader != null) {
+      it=loader.getResource(classnameAsResource);
+    }
+ else {
+      it=ClassLoader.getSystemResource(classnameAsResource);
+    }
+    if (it != null) {
+      return it.toString();
+    }
+  }
+ catch (  VirtualMachineError vme) {
+    throw vme;
+  }
+catch (  ThreadDeath td) {
+    throw td;
+  }
+catch (  Throwable t) {
+    if (debug) {
+      t.printStackTrace();
+    }
+  }
+  return "unknown location";
+}

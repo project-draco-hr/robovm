@@ -1,0 +1,17 @@
+{
+  if (type == null) {
+    throw new NullPointerException();
+  }
+  try {
+synchronized (engine) {
+      engine.getInstance(type,provider,params);
+      return new PolicyDelegate((PolicySpi)engine.spi,provider,type,params);
+    }
+  }
+ catch (  NoSuchAlgorithmException e) {
+    if (e.getCause() == null) {
+      throw e;
+    }
+    throw new IllegalArgumentException(Messages.getString("security.1A7",params.toString()));
+  }
+}

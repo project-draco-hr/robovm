@@ -1,0 +1,34 @@
+{
+  if (charClass.hasLowHighSurrogates()) {
+    AbstractCharClass surrogates=charClass.getSurrogates();
+    LowHighSurrogateRangeSet lowHighSurrRangeSet=new LowHighSurrogateRangeSet(surrogates);
+    if (charClass.mayContainSupplCodepoints()) {
+      if (!charClass.hasUCI()) {
+        return new CompositeRangeSet(new SupplRangeSet(charClass.getWithoutSurrogates()),lowHighSurrRangeSet);
+      }
+ else {
+        return new CompositeRangeSet(new UCISupplRangeSet(charClass.getWithoutSurrogates()),lowHighSurrRangeSet);
+      }
+    }
+    if (!charClass.hasUCI()) {
+      return new CompositeRangeSet(new RangeSet(charClass.getWithoutSurrogates()),lowHighSurrRangeSet);
+    }
+ else {
+      return new CompositeRangeSet(new UCIRangeSet(charClass.getWithoutSurrogates()),lowHighSurrRangeSet);
+    }
+  }
+  if (charClass.mayContainSupplCodepoints()) {
+    if (!charClass.hasUCI()) {
+      return new SupplRangeSet(charClass);
+    }
+ else {
+      return new UCISupplRangeSet(charClass);
+    }
+  }
+  if (!charClass.hasUCI()) {
+    return new RangeSet(charClass);
+  }
+ else {
+    return new UCIRangeSet(charClass);
+  }
+}

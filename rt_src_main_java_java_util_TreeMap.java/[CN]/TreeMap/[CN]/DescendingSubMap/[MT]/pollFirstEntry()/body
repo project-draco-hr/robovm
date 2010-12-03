@@ -1,0 +1,20 @@
+{
+  TreeMap.Entry<K,V> node=null;
+  if (fromStart) {
+    node=loInclusive ? this.m.findFloorEntry(lo) : this.m.findLowerEntry(lo);
+  }
+ else {
+    node=this.m.findBiggestEntry();
+  }
+  if (node != null && fromStart && (loInclusive ? this.m.keyCompare(lo,node.key) < 0 : this.m.keyCompare(lo,node.key) <= 0)) {
+    node=null;
+  }
+  if (node != null && toEnd && (hiInclusive ? this.m.keyCompare(hi,node.key) > 0 : this.m.keyCompare(hi,node.key) >= 0)) {
+    node=null;
+  }
+  SimpleImmutableEntry<K,V> result=m.newImmutableEntry(node);
+  if (null != node) {
+    m.remove(node.key);
+  }
+  return result;
+}

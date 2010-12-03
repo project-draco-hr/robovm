@@ -1,0 +1,26 @@
+{
+  String canonicalName;
+  try {
+    int address=0;
+    if (ipaddress.length == 4) {
+      address=bytesToInt(ipaddress,0);
+      if (address == 0) {
+        return inetNtoaImpl(address);
+      }
+    }
+    canonicalName=getHostByAddrImpl(ipaddress).hostName;
+  }
+ catch (  UnknownHostException e) {
+    return Inet6Util.createIPAddrStringFromByteArray(ipaddress);
+  }
+  SecurityManager security=System.getSecurityManager();
+  try {
+    if (security != null && isHostName(canonicalName)) {
+      security.checkConnect(canonicalName,-1);
+    }
+  }
+ catch (  SecurityException e) {
+    return Inet6Util.createIPAddrStringFromByteArray(ipaddress);
+  }
+  return canonicalName;
+}

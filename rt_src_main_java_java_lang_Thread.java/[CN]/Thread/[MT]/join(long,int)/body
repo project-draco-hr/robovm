@@ -1,0 +1,19 @@
+{
+  if (millis < 0 || nanos < 0 || nanos > 999999) {
+    throw new IllegalArgumentException();
+  }
+ else   if (millis == 0 && nanos == 0) {
+    join();
+  }
+ else {
+    long end=System.nanoTime() + 1000000 * millis + (long)nanos;
+    long rest;
+    while (isAlive()) {
+      wait(millis,nanos);
+      rest=end - System.nanoTime();
+      if (rest <= 0)       break;
+      nanos=(int)(rest % 1000000);
+      millis=rest / 1000000;
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  long nanos=unit.toNanos(timeout);
+  final ReentrantLock lock=this.lock;
+  lock.lockInterruptibly();
+  try {
+    for (; ; ) {
+      E first=q.peek();
+      if (first == null) {
+        if (nanos <= 0)         return null;
+ else         nanos=available.awaitNanos(nanos);
+      }
+ else {
+        long delay=first.getDelay(TimeUnit.NANOSECONDS);
+        if (delay <= 0)         return q.poll();
+        if (nanos <= 0)         return null;
+        if (nanos < delay || leader != null)         nanos=available.awaitNanos(nanos);
+ else {
+          Thread thisThread=Thread.currentThread();
+          leader=thisThread;
+          try {
+            long timeLeft=available.awaitNanos(delay);
+            nanos-=delay - timeLeft;
+          }
+  finally {
+            if (leader == thisThread)             leader=null;
+          }
+        }
+      }
+    }
+  }
+  finally {
+    if (leader == null && q.peek() != null)     available.signal();
+    lock.unlock();
+  }
+}

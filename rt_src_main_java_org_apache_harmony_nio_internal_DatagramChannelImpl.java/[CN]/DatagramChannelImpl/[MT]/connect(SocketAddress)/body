@@ -1,0 +1,29 @@
+{
+  checkOpen();
+  if (connected) {
+    throw new IllegalStateException();
+  }
+  InetSocketAddress inetSocketAddress=SocketChannelImpl.validateAddress(address);
+  SecurityManager sm=System.getSecurityManager();
+  if (null != sm) {
+    if (inetSocketAddress.getAddress().isMulticastAddress()) {
+      sm.checkMulticast(inetSocketAddress.getAddress());
+    }
+ else {
+      sm.checkConnect(inetSocketAddress.getAddress().getHostName(),inetSocketAddress.getPort());
+    }
+  }
+  try {
+    begin();
+    networkSystem.connectDatagram(fd,inetSocketAddress.getPort(),trafficClass,inetSocketAddress.getAddress());
+  }
+ catch (  ConnectException e) {
+  }
+ finally {
+    end(true);
+  }
+  connectAddress=inetSocketAddress;
+  connected=true;
+  isBound=true;
+  return this;
+}

@@ -1,0 +1,68 @@
+{
+  Matcher matcher=HEAD_PATTERN.matcher(header);
+  List<HttpCookie> list=null;
+  HttpCookie cookie=null;
+  String headerString=header;
+  int version=0;
+  if (matcher.find()) {
+    String cookieHead=matcher.group();
+    if ("set-cookie2:".equalsIgnoreCase(cookieHead)) {
+      version=1;
+    }
+    headerString=header.substring(cookieHead.length());
+  }
+  matcher=NAME_PATTERN.matcher(headerString);
+  if (matcher.lookingAt()) {
+    list=new ArrayList<HttpCookie>();
+    cookie=new HttpCookie(matcher.group(1),matcher.group(2));
+    cookie.setVersion(version);
+    String nameGroup=matcher.group();
+    if (isCommaDelim(cookie)) {
+      headerString=headerString.substring(nameGroup.indexOf(COMMA_STR));
+    }
+ else {
+      headerString=headerString.substring(nameGroup.length());
+    }
+    list.add(cookie);
+  }
+ else {
+    throw new IllegalArgumentException();
+  }
+  while (!(headerString.length() == 0)) {
+    matcher=cookie.getVersion() == 1 ? ATTR_PATTERN1.matcher(headerString) : ATTR_PATTERN0.matcher(headerString);
+    if (matcher.lookingAt()) {
+      String attrName=matcher.group(1).trim();
+      if (attrName.length() == 0) {
+        headerString=headerString.substring(1);
+        continue;
+      }
+      if (attrName.equalsIgnoreCase("port") || attrName.equalsIgnoreCase("expires")) {
+        int start=matcher.regionStart();
+        matcher=ATTR_PATTERN0.matcher(headerString);
+        matcher.region(start,headerString.length());
+        matcher.lookingAt();
+      }
+ else       if (cookie.getVersion() == 1 && attrName.startsWith(COMMA_STR)) {
+        headerString=headerString.substring(1);
+        matcher=NAME_PATTERN.matcher(headerString);
+        if (matcher.lookingAt()) {
+          cookie=new HttpCookie(matcher.group(1),matcher.group(2));
+          list.add(cookie);
+          headerString=headerString.substring(matcher.group().length());
+          continue;
+        }
+      }
+      Setter setter=cookie.attributeSet.get(attrName.toLowerCase());
+      if (null == setter) {
+        throw new IllegalArgumentException();
+      }
+      if (!setter.isSet()) {
+        String attrValue=matcher.group(2);
+        setter.validate(attrValue,cookie);
+        setter.setValue(matcher.group(2),cookie);
+      }
+      headerString=headerString.substring(matcher.end());
+    }
+  }
+  return list;
+}

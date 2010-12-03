@@ -1,0 +1,32 @@
+{
+  if (valuesCollection == null) {
+    if (!this.toEnd && !this.fromStart) {
+      valuesCollection=super.values();
+    }
+ else {
+      Map.Entry<K,V> startEntry;
+      if (loInclusive) {
+        startEntry=fromStart ? m.ceilingEntry(this.lo) : theSmallestEntry();
+      }
+ else {
+        startEntry=fromStart ? m.findHigherEntry(this.lo) : theSmallestEntry();
+      }
+      if (startEntry == null) {
+        K key=m.isEmpty() ? this.lo : m.firstKey();
+        valuesCollection=new SubMapValuesCollection<K,V>(new SubMap<K,V>(key,true,this.m,key,true));
+        return valuesCollection;
+      }
+      Map.Entry<K,V> lastEntry;
+      lastEntry=toEnd ? m.ceilingEntry(this.hi) : null;
+      if (lastEntry != null) {
+        if (hiInclusive && lastEntry.getKey().equals(this.hi)) {
+          lastEntry=m.higherEntry(this.hi);
+        }
+      }
+      K startK=startEntry == null ? null : startEntry.getKey();
+      K lastK=lastEntry == null ? null : lastEntry.getKey();
+      valuesCollection=new SubMapValuesCollection<K,V>(new SubMap<K,V>(startK,true,this.m,lastK,lastK == null ? false : toEnd));
+    }
+  }
+  return valuesCollection;
+}

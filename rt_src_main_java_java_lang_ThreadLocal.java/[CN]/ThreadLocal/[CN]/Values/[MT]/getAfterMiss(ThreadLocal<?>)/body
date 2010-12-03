@@ -1,0 +1,47 @@
+{
+  Object[] table=this.table;
+  int index=key.hash & mask;
+  if (table[index] == null) {
+    Object value=key.initialValue();
+    if (this.table == table && table[index] == null) {
+      table[index]=key.reference;
+      table[index + 1]=value;
+      size++;
+      cleanUp();
+      return value;
+    }
+    put(key,value);
+    return value;
+  }
+  int firstTombstone=-1;
+  for (index=next(index); ; index=next(index)) {
+    Object reference=table[index];
+    if (reference == key.reference) {
+      return table[index + 1];
+    }
+    if (reference == null) {
+      Object value=key.initialValue();
+      if (this.table == table) {
+        if (firstTombstone > -1 && table[firstTombstone] == TOMBSTONE) {
+          table[firstTombstone]=key.reference;
+          table[firstTombstone + 1]=value;
+          tombstones--;
+          size++;
+          return value;
+        }
+        if (table[index] == null) {
+          table[index]=key.reference;
+          table[index + 1]=value;
+          size++;
+          cleanUp();
+          return value;
+        }
+      }
+      put(key,value);
+      return value;
+    }
+    if (firstTombstone == -1 && reference == TOMBSTONE) {
+      firstTombstone=index;
+    }
+  }
+}

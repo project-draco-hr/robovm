@@ -1,0 +1,40 @@
+{
+  int length=rawString.length();
+  if (length == 0) {
+    return rawString;
+  }
+  StringBuilder buf=new StringBuilder(length * 2);
+  int index=0;
+  if (rawString.charAt(0) == '#') {
+    buf.append('\\');
+    buf.append('#');
+    index++;
+  }
+  int bufLength;
+  for (; index < length; index++) {
+    char ch=rawString.charAt(index);
+switch (ch) {
+case ' ':
+      bufLength=buf.length();
+    if (bufLength == 0 || buf.charAt(bufLength - 1) == ' ') {
+      break;
+    }
+  buf.append(' ');
+break;
+case '"':
+case '\\':
+case ',':
+case '+':
+case '<':
+case '>':
+case ';':
+buf.append('\\');
+default :
+buf.append(ch);
+}
+}
+for (bufLength=buf.length() - 1; bufLength > -1 && buf.charAt(bufLength) == ' '; bufLength--) {
+}
+buf.setLength(bufLength + 1);
+return buf.toString();
+}

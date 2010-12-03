@@ -1,0 +1,24 @@
+{
+  if (isResuming) {
+    if (serverFinished == null) {
+      unexpectedMessage();
+    }
+ else {
+      changeCipherSpecReceived=true;
+    }
+  }
+ else {
+    if ((parameters.getNeedClientAuth() && clientCert == null) || clientKeyExchange == null || (clientCert != null && !clientKeyExchange.isEmpty() && certificateVerify == null)) {
+      unexpectedMessage();
+    }
+ else {
+      changeCipherSpecReceived=true;
+    }
+    if (serverHello.server_version[1] == 1) {
+      computerReferenceVerifyDataTLS("client finished");
+    }
+ else {
+      computerReferenceVerifyDataSSLv3(SSLv3Constants.client);
+    }
+  }
+}

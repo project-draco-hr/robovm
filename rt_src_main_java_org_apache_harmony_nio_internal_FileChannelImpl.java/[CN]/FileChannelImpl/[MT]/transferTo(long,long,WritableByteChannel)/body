@@ -1,0 +1,29 @@
+{
+  openCheck();
+  if (!target.isOpen()) {
+    throw new ClosedChannelException();
+  }
+  if (target instanceof ReadOnlyFileChannel) {
+    throw new NonWritableChannelException();
+  }
+  if (position < 0 || count < 0) {
+    throw new IllegalArgumentException();
+  }
+  if (count == 0 || position >= size()) {
+    return 0;
+  }
+  ByteBuffer buffer=null;
+  count=Math.min(count,size() - position);
+  if (target instanceof SocketChannelImpl) {
+    return kernelTransfer(handle,((SocketChannelImpl)target).getFD(),position,count);
+  }
+  try {
+    buffer=map(MapMode.READ_ONLY,position,count);
+    return target.write(buffer);
+  }
+  finally {
+    if (buffer != null) {
+      ((DirectBuffer)buffer).free();
+    }
+  }
+}

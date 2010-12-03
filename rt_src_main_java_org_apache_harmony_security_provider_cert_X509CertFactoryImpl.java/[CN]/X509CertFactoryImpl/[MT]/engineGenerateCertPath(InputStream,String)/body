@@ -1,0 +1,25 @@
+{
+  if (inStream == null) {
+    throw new CertificateException(Messages.getString("security.153"));
+  }
+  if (!inStream.markSupported()) {
+    inStream=new RestoringInputStream(inStream);
+  }
+  try {
+    inStream.mark(1);
+    int ch;
+    if ((ch=inStream.read()) == '-') {
+      return X509CertPathImpl.getInstance(decodePEM(inStream,FREE_BOUND_SUFFIX),encoding);
+    }
+ else     if (ch == 0x30) {
+      inStream.reset();
+      return X509CertPathImpl.getInstance(inStream,encoding);
+    }
+ else {
+      throw new CertificateException(Messages.getString("security.15F"));
+    }
+  }
+ catch (  IOException e) {
+    throw new CertificateException(e);
+  }
+}

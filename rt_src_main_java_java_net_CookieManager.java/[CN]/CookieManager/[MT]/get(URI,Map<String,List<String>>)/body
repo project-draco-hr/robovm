@@ -1,0 +1,15 @@
+{
+  if (uri == null || requestHeaders == null) {
+    throw new IllegalArgumentException(Msg.getString("KB004"));
+  }
+  List<HttpCookie> cookies=store.get(uri);
+  for (int i=0; i < cookies.size(); i++) {
+    HttpCookie cookie=cookies.get(i);
+    String uriPath=uri.getPath();
+    String cookiePath=cookie.getPath();
+    if (cookiePath == null || uriPath.length() == 0 || !uriPath.startsWith(cookiePath)) {
+      cookies.remove(i);
+    }
+  }
+  return getCookieMap(cookies,requestHeaders);
+}

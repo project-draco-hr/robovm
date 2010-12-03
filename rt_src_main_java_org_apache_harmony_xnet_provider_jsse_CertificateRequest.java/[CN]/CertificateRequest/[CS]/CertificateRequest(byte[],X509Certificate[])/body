@@ -1,0 +1,15 @@
+{
+  if (accepted == null) {
+    fatalAlert(AlertProtocol.INTERNAL_ERROR,"CertificateRequest: array of certificate authority certificates is null");
+  }
+  this.certificate_types=certificate_types;
+  int totalPrincipalsLength=0;
+  certificate_authorities=new X500Principal[accepted.length];
+  encoded_principals=new byte[accepted.length][];
+  for (int i=0; i < accepted.length; i++) {
+    certificate_authorities[i]=accepted[i].getIssuerX500Principal();
+    encoded_principals[i]=certificate_authorities[i].getEncoded();
+    totalPrincipalsLength+=encoded_principals[i].length + 2;
+  }
+  length=3 + certificate_types.length + totalPrincipalsLength;
+}

@@ -1,0 +1,23 @@
+{
+  ObjectStreamClass classDesc=readEnumDesc();
+  Integer newHandle=nextHandle();
+  String name;
+  byte tc=nextTC();
+switch (tc) {
+case TC_REFERENCE:
+    if (unshared) {
+      readNewHandle();
+      throw new InvalidObjectException(Messages.getString("luni.BE"));
+    }
+  name=(String)readCyclicReference();
+break;
+case TC_STRING:
+name=(String)readNewString(unshared);
+break;
+default :
+throw new StreamCorruptedException(Messages.getString("luni.BC"));
+}
+Enum<?> result=Enum.valueOf((Class)classDesc.forClass(),name);
+registerObjectRead(result,newHandle,unshared);
+return result;
+}

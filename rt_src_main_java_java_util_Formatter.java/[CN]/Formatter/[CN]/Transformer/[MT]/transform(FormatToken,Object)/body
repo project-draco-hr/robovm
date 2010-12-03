@@ -1,0 +1,81 @@
+{
+  this.formatToken=token;
+  this.arg=argument;
+  String result;
+switch (token.getConversionType()) {
+case 'B':
+case 'b':
+{
+      result=transformFromBoolean();
+      break;
+    }
+case 'H':
+case 'h':
+{
+    result=transformFromHashCode();
+    break;
+  }
+case 'S':
+case 's':
+{
+  result=transformFromString();
+  break;
+}
+case 'C':
+case 'c':
+{
+result=transformFromCharacter();
+break;
+}
+case 'd':
+case 'o':
+case 'x':
+case 'X':
+{
+if (null == arg || arg instanceof BigInteger) {
+result=transformFromBigInteger();
+}
+ else {
+result=transformFromInteger();
+}
+break;
+}
+case 'e':
+case 'E':
+case 'g':
+case 'G':
+case 'f':
+case 'a':
+case 'A':
+{
+result=transformFromFloat();
+break;
+}
+case '%':
+{
+result=transformFromPercent();
+break;
+}
+case 'n':
+{
+result=transformFromLineSeparator();
+break;
+}
+case 't':
+case 'T':
+{
+result=transformFromDateTime();
+break;
+}
+default :
+{
+throw new UnknownFormatConversionException(String.valueOf(token.getConversionType()));
+}
+}
+if (Character.isUpperCase(token.getConversionType())) {
+if (null != result) {
+result=result.toUpperCase(Locale.US);
+}
+}
+return result;
+}

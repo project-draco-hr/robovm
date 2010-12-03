@@ -1,0 +1,33 @@
+{
+  byte[] bytes=oid.getBytes("UTF-8");
+  if (bytes[bytes.length - 1] == '.') {
+    throw new IOException(Messages.getString("security.56",oid));
+  }
+  int[] result=new int[bytes.length / 2 + 1];
+  int number=0;
+  for (int i=0; i < bytes.length; i++) {
+    int value=0;
+    int pos=i;
+    while ((i < bytes.length) && (bytes[i] >= '0') && (bytes[i] <= '9')) {
+      value=10 * value + (bytes[i++] - 48);
+    }
+    if (i == pos) {
+      throw new IOException(Messages.getString("security.56",oid));
+    }
+    result[number++]=value;
+    if (i >= bytes.length) {
+      break;
+    }
+    if (bytes[i] != '.') {
+      throw new IOException(Messages.getString("security.56",oid));
+    }
+  }
+  if (number < 2) {
+    throw new IOException(Messages.getString("security.18A",oid));
+  }
+  int[] res=new int[number];
+  for (int i=0; i < number; i++) {
+    res[i]=result[i];
+  }
+  return res;
+}

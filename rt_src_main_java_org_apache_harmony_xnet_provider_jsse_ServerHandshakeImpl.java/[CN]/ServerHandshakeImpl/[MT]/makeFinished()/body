@@ -1,0 +1,27 @@
+{
+  byte[] verify_data;
+  boolean isTLS=(serverHello.server_version[1] == 1);
+  if (isTLS) {
+    verify_data=new byte[12];
+    computerVerifyDataTLS("server finished",verify_data);
+  }
+ else {
+    verify_data=new byte[36];
+    computerVerifyDataSSLv3(SSLv3Constants.server,verify_data);
+  }
+  serverFinished=new Finished(verify_data);
+  send(serverFinished);
+  if (isResuming) {
+    if (isTLS) {
+      computerReferenceVerifyDataTLS("client finished");
+    }
+ else {
+      computerReferenceVerifyDataSSLv3(SSLv3Constants.client);
+    }
+    status=NEED_UNWRAP;
+  }
+ else {
+    session.lastAccessedTime=System.currentTimeMillis();
+    status=FINISHED;
+  }
+}

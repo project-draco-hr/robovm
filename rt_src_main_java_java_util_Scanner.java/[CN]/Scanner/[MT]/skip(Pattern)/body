@@ -1,0 +1,27 @@
+{
+  checkClosed();
+  checkNull(pattern);
+  matcher.usePattern(pattern);
+  matcher.region(findStartIndex,bufferLength);
+  while (true) {
+    if (matcher.lookingAt()) {
+      boolean matchInBuffer=matcher.end() < bufferLength || (matcher.end() == bufferLength && inputExhausted);
+      if (matchInBuffer) {
+        matchSuccessful=true;
+        findStartIndex=matcher.end();
+        break;
+      }
+    }
+ else {
+      if (inputExhausted) {
+        matchSuccessful=false;
+        throw new NoSuchElementException();
+      }
+    }
+    if (!inputExhausted) {
+      readMore();
+      resetMatcher();
+    }
+  }
+  return this;
+}

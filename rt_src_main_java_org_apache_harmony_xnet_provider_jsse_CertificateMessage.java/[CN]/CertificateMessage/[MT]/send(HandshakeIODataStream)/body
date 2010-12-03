@@ -1,0 +1,23 @@
+{
+  int total_length=0;
+  if (encoded_certs == null) {
+    encoded_certs=new byte[certs.length][];
+    for (int i=0; i < certs.length; i++) {
+      try {
+        encoded_certs[i]=certs[i].getEncoded();
+      }
+ catch (      CertificateEncodingException e) {
+        fatalAlert(AlertProtocol.INTERNAL_ERROR,"INTERNAL ERROR",e);
+      }
+    }
+  }
+  total_length=3 * encoded_certs.length;
+  for (int i=0; i < encoded_certs.length; i++) {
+    total_length+=encoded_certs[i].length;
+  }
+  out.writeUint24(total_length);
+  for (int i=0; i < encoded_certs.length; i++) {
+    out.writeUint24(encoded_certs[i].length);
+    out.write(encoded_certs[i]);
+  }
+}

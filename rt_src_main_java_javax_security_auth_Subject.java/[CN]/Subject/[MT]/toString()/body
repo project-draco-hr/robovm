@@ -1,0 +1,29 @@
+{
+  StringBuilder buf=new StringBuilder("Subject:\n");
+  Iterator<?> it=principals.iterator();
+  while (it.hasNext()) {
+    buf.append("\tPrincipal: ");
+    buf.append(it.next());
+    buf.append('\n');
+  }
+  it=publicCredentials.iterator();
+  while (it.hasNext()) {
+    buf.append("\tPublic Credential: ");
+    buf.append(it.next());
+    buf.append('\n');
+  }
+  int offset=buf.length() - 1;
+  it=privateCredentials.iterator();
+  try {
+    while (it.hasNext()) {
+      buf.append("\tPrivate Credential: ");
+      buf.append(it.next());
+      buf.append('\n');
+    }
+  }
+ catch (  SecurityException e) {
+    buf.delete(offset,buf.length());
+    buf.append("\tPrivate Credentials: no accessible information\n");
+  }
+  return buf.toString();
+}

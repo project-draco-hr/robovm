@@ -1,0 +1,45 @@
+{
+  if (in.remaining() == 0) {
+    return ByteBuffer.allocate(0);
+  }
+  reset();
+  int length=(int)(in.remaining() * averBytes);
+  ByteBuffer output=ByteBuffer.allocate(length);
+  CoderResult result=null;
+  while (true) {
+    result=encode(in,output,false);
+    if (result == CoderResult.UNDERFLOW) {
+      break;
+    }
+ else     if (result == CoderResult.OVERFLOW) {
+      output=allocateMore(output);
+      continue;
+    }
+    checkCoderResult(result);
+  }
+  result=encode(in,output,true);
+  checkCoderResult(result);
+  while (true) {
+    result=flush(output);
+    if (result == CoderResult.UNDERFLOW) {
+      output.flip();
+      break;
+    }
+ else     if (result == CoderResult.OVERFLOW) {
+      output=allocateMore(output);
+      continue;
+    }
+    checkCoderResult(result);
+    output.flip();
+    if (result.isMalformed()) {
+      throw new MalformedInputException(result.length());
+    }
+ else     if (result.isUnmappable()) {
+      throw new UnmappableCharacterException(result.length());
+    }
+    break;
+  }
+  status=READY;
+  finished=true;
+  return output;
+}

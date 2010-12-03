@@ -1,0 +1,17 @@
+{
+  BlockingQueue<Runnable> q=super.getQueue();
+  boolean keepDelayed=getExecuteExistingDelayedTasksAfterShutdownPolicy();
+  boolean keepPeriodic=getContinueExistingPeriodicTasksAfterShutdownPolicy();
+  if (!keepDelayed && !keepPeriodic)   q.clear();
+ else {
+    for (    Object e : q.toArray()) {
+      if (e instanceof RunnableScheduledFuture) {
+        RunnableScheduledFuture<?> t=(RunnableScheduledFuture<?>)e;
+        if ((t.isPeriodic() ? !keepPeriodic : !keepDelayed) || t.isCancelled()) {
+          if (q.remove(t))           t.cancel(false);
+        }
+      }
+    }
+  }
+  tryTerminate();
+}

@@ -1,0 +1,20 @@
+{
+  if (type == null) {
+    throw new NullPointerException(Messages.getString("security.07"));
+  }
+  try {
+synchronized (engine) {
+      engine.getInstance(type,params);
+      return new CertStore((CertStoreSpi)engine.spi,engine.provider,type,params);
+    }
+  }
+ catch (  NoSuchAlgorithmException e) {
+    Throwable th=e.getCause();
+    if (th == null) {
+      throw e;
+    }
+ else {
+      throw new InvalidAlgorithmParameterException(e.getMessage(),th);
+    }
+  }
+}

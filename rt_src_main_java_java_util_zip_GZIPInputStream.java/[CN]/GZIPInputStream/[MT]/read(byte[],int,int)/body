@@ -1,0 +1,25 @@
+{
+  if (closed) {
+    throw new IOException(Messages.getString("archive.1E"));
+  }
+  if (eos) {
+    return -1;
+  }
+  if (off > buffer.length || nbytes < 0 || off < 0 || buffer.length - off < nbytes) {
+    throw new ArrayIndexOutOfBoundsException();
+  }
+  int bytesRead;
+  try {
+    bytesRead=super.read(buffer,off,nbytes);
+  }
+  finally {
+    eos=eof;
+  }
+  if (bytesRead != -1) {
+    crc.update(buffer,off,bytesRead);
+  }
+  if (eos) {
+    verifyCrc();
+  }
+  return bytesRead;
+}

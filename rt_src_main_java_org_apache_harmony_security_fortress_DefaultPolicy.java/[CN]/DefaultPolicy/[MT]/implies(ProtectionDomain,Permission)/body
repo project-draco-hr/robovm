@@ -1,0 +1,18 @@
+{
+  if (permission == null) {
+    throw new NullPointerException();
+  }
+  boolean implies=false;
+  if (domain != null) {
+    PermissionCollection total=getPermissions(domain);
+    PermissionCollection inherent=domain.getPermissions();
+    if (inherent != null) {
+      Enumeration<Permission> en=inherent.elements();
+      while (en.hasMoreElements()) {
+        total.add(en.nextElement());
+      }
+    }
+    implies=total.implies(permission);
+  }
+  return implies;
+}

@@ -1,0 +1,27 @@
+{
+  if (enc == null) {
+    throw new NullPointerException();
+  }
+  if (enc.length() == 0) {
+    throw new UnsupportedEncodingException(Messages.getString("luni.99","enc"));
+  }
+  if (s.indexOf('%') == -1) {
+    if (s.indexOf('+') == -1)     return s;
+    char str[]=s.toCharArray();
+    for (int i=0; i < str.length; i++) {
+      if (str[i] == '+')       str[i]=' ';
+    }
+    return new String(str);
+  }
+  Charset charset=null;
+  try {
+    charset=Charset.forName(enc);
+  }
+ catch (  IllegalCharsetNameException e) {
+    throw (UnsupportedEncodingException)(new UnsupportedEncodingException(enc).initCause(e));
+  }
+catch (  UnsupportedCharsetException e) {
+    throw (UnsupportedEncodingException)(new UnsupportedEncodingException(enc).initCause(e));
+  }
+  return decode(s,charset);
+}

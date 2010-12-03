@@ -1,0 +1,22 @@
+{
+  if (delegatedTaskErr != null) {
+    Exception e=delegatedTaskErr;
+    delegatedTaskErr=null;
+    fatalAlert(AlertProtocol.HANDSHAKE_FAILURE,"Error occured in delegated task:" + e.getMessage(),e);
+  }
+  if (io_stream.hasData()) {
+    return recordProtocol.wrap(ContentType.HANDSHAKE,io_stream);
+  }
+ else   if (needSendCCSpec) {
+    makeFinished();
+    needSendCCSpec=false;
+    return recordProtocol.getChangeCipherSpecMesage(getSession());
+  }
+ else   if (needSendHelloRequest) {
+    needSendHelloRequest=false;
+    return recordProtocol.wrap(ContentType.HANDSHAKE,new byte[]{0,0,0,0},0,4);
+  }
+ else {
+    return null;
+  }
+}

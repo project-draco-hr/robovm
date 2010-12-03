@@ -1,0 +1,31 @@
+{
+  if (type.isPrimitive()) {
+    if (type == void.class) {
+      writeUnsignedByte(OPC_pop);
+      writeUnsignedByte(OPC_return);
+    }
+ else {
+      writeUnsignedByte(OPC_checkcast);
+      writeUnsignedShort(constantPool.typeIndex(typeWrapperName(type)));
+      writeUnsignedByte(OPC_invokevirtual);
+      writeUnsignedShort(constantPool.literalIndex(typeAccessMethod(type)));
+      if (type == long.class) {
+        writeUnsignedByte(OPC_lreturn);
+      }
+ else       if (type == float.class) {
+        writeUnsignedByte(OPC_freturn);
+      }
+ else       if (type == double.class) {
+        writeUnsignedByte(OPC_dreturn);
+      }
+ else {
+        writeUnsignedByte(OPC_ireturn);
+      }
+    }
+  }
+ else {
+    writeUnsignedByte(OPC_checkcast);
+    writeUnsignedShort(constantPool.typeIndex(type.getName()));
+    writeUnsignedByte(OPC_areturn);
+  }
+}

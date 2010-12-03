@@ -1,0 +1,30 @@
+{
+  hasQE=false;
+  for (; pos < length && chars[pos] == ' '; pos++) {
+  }
+  if (pos == length) {
+    return null;
+  }
+  beg=pos;
+  pos++;
+  for (; pos < length && chars[pos] != '=' && chars[pos] != ' '; pos++) {
+  }
+  if (pos >= length) {
+    throw new IOException(Messages.getString("security.192"));
+  }
+  end=pos;
+  if (chars[pos] == ' ') {
+    for (; pos < length && chars[pos] != '=' && chars[pos] == ' '; pos++) {
+    }
+    if (chars[pos] != '=' || pos == length) {
+      throw new IOException(Messages.getString("security.192"));
+    }
+  }
+  pos++;
+  for (; pos < length && chars[pos] == ' '; pos++) {
+  }
+  if ((end - beg > 4) && (chars[beg + 3] == '.') && (chars[beg] == 'O' || chars[beg] == 'o')&& (chars[beg + 1] == 'I' || chars[beg + 1] == 'i')&& (chars[beg + 2] == 'D' || chars[beg + 2] == 'd')) {
+    beg+=4;
+  }
+  return new String(chars,beg,end - beg);
+}

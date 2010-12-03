@@ -1,0 +1,22 @@
+{
+  SecurityManager security=System.getSecurityManager();
+  if (security != null) {
+    security.checkRead(path);
+  }
+  if (path.length() == 0) {
+    return null;
+  }
+  byte[] bs=properPath(true);
+  if (!isDirectoryImpl(bs) || !existsImpl(bs) || isWriteOnlyImpl(bs)) {
+    return null;
+  }
+  byte[][] implList=listImpl(bs);
+  if (implList == null) {
+    return new String[0];
+  }
+  String result[]=new String[implList.length];
+  for (int index=0; index < implList.length; index++) {
+    result[index]=Util.toUTF8String(implList[index]);
+  }
+  return result;
+}

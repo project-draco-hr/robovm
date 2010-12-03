@@ -1,0 +1,21 @@
+{
+  if (o == null)   return false;
+  final E[] items=this.items;
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    int i=takeIndex;
+    int k=0;
+    for (; ; ) {
+      if (k++ >= count)       return false;
+      if (o.equals(items[i])) {
+        removeAt(i);
+        return true;
+      }
+      i=inc(i);
+    }
+  }
+  finally {
+    lock.unlock();
+  }
+}

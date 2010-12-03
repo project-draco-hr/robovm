@@ -1,0 +1,24 @@
+{
+  CacheElement element=null;
+synchronized (lock) {
+    element=cache.get(path);
+  }
+  if (element == null) {
+    return null;
+  }
+  long time=System.currentTimeMillis();
+  if (time - element.timestamp > timeout) {
+synchronized (lock) {
+      if (cache.get(path) != null) {
+        String oldest=null;
+        do {
+          oldest=list.removeFirst();
+          cache.remove(oldest);
+        }
+ while (!path.equals(oldest));
+      }
+    }
+    return null;
+  }
+  return element.canonicalPath;
+}

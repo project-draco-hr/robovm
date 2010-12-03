@@ -1,0 +1,16 @@
+{
+  if (algorithm == null) {
+    throw new NullPointerException(Messages.getString("security.01"));
+  }
+  MessageDigest result;
+synchronized (engine) {
+    engine.getInstance(algorithm,null);
+    if (engine.spi instanceof MessageDigest) {
+      result=(MessageDigest)engine.spi;
+      result.algorithm=algorithm;
+      result.provider=engine.provider;
+      return result;
+    }
+    return new MessageDigestImpl((MessageDigestSpi)engine.spi,engine.provider,algorithm);
+  }
+}

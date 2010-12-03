@@ -1,0 +1,13 @@
+{
+  if (parameters.getEnableSessionCreation()) {
+    isResuming=false;
+    session=new SSLSessionImpl(parameters.getSecureRandom());
+    session.protocol=ProtocolVersion.getLatestVersion(parameters.getEnabledProtocols());
+    recordProtocol.setVersion(session.protocol.version);
+    startSession();
+  }
+ else {
+    status=NOT_HANDSHAKING;
+    sendWarningAlert(AlertProtocol.NO_RENEGOTIATION);
+  }
+}

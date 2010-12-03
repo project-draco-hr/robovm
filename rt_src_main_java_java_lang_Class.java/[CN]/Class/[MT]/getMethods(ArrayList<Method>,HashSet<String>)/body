@@ -1,0 +1,17 @@
+{
+  Class<?> c=this;
+  while (c != null) {
+    for (    Method m : c.getDeclaredMethods(true)) {
+      String s=m.getName() + '(' + parameterTypesToString(m.getParameterTypes())+ ')';
+      if (!seen.contains(s)) {
+        result.add(m);
+        seen.add(s);
+      }
+    }
+    c=c.getSuperclass();
+  }
+  for (  Class<?> intf : this.getInterfaces()) {
+    intf.getMethods(result,seen);
+  }
+  return result;
+}

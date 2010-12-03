@@ -1,0 +1,17 @@
+{
+  boolean isInRange=true;
+  int result;
+  K endKey=end.getKey();
+  if (map.toEnd) {
+    result=(null != comparator()) ? comparator().compare(endKey,map.hi) : toComparable(endKey).compareTo(map.hi);
+    isInRange=(!map.hiInclusive && endInclusive) ? result < 0 : result <= 0;
+  }
+  if (map.fromStart) {
+    result=(null != comparator()) ? comparator().compare(endKey,map.lo) : toComparable(endKey).compareTo(map.lo);
+    isInRange=isInRange && ((!map.loInclusive && endInclusive) ? result > 0 : result >= 0);
+  }
+  if (isInRange) {
+    return new AscendingSubMapEntrySet<K,V>(map,null,false,end,endInclusive);
+  }
+  throw new IllegalArgumentException();
+}

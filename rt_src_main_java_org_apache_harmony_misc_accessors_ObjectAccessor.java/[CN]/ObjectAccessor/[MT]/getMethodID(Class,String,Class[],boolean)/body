@@ -1,0 +1,24 @@
+{
+  try {
+    String sig="(";
+    for (int i=0; i < parameterTypes.length; i++) {
+      sig+=getSystemName(parameterTypes[i]);
+    }
+    sig+=")";
+    if (name == null) {
+      name="<init>";
+      sig+="V";
+    }
+ else {
+      Method m=c.getDeclaredMethod(name,parameterTypes);
+      sig+=getSystemName(m.getReturnType());
+    }
+    return isStatic ? getStaticMethodID0(c,name,sig) : getMethodID0(c,name,sig);
+  }
+ catch (  SecurityException e) {
+    throw new RuntimeException(e);
+  }
+catch (  NoSuchMethodException e) {
+    throw new NoSuchMethodError(e.getMessage());
+  }
+}

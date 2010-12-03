@@ -1,0 +1,43 @@
+{
+  ObjectInputStream.GetField fields=stream.readFields();
+  rawOffset=fields.get("rawOffset",0);
+  useDaylight=fields.get("useDaylight",false);
+  if (useDaylight) {
+    endMonth=fields.get("endMonth",0);
+    endTime=fields.get("endTime",0);
+    startMonth=fields.get("startMonth",0);
+    startTime=fields.get("startTime",0);
+    startYear=fields.get("startYear",0);
+  }
+  if (fields.get("serialVersionOnStream",0) == 0) {
+    if (useDaylight) {
+      startMode=endMode=DOW_IN_MONTH_MODE;
+      endDay=fields.get("endDay",0);
+      endDayOfWeek=fields.get("endDayOfWeek",0) - 1;
+      startDay=fields.get("startDay",0);
+      startDayOfWeek=fields.get("startDayOfWeek",0) - 1;
+    }
+  }
+ else {
+    dstSavings=fields.get("dstSavings",0);
+    if (useDaylight) {
+      endMode=fields.get("endMode",0);
+      startMode=fields.get("startMode",0);
+      int length=stream.readInt();
+      byte[] values=new byte[length];
+      stream.readFully(values);
+      if (length >= 4) {
+        startDay=values[0];
+        startDayOfWeek=values[1];
+        if (startMode != DOM_MODE) {
+          startDayOfWeek--;
+        }
+        endDay=values[2];
+        endDayOfWeek=values[3];
+        if (endMode != DOM_MODE) {
+          endDayOfWeek--;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,127 @@
+{
+  int cbRemaining=cb.remaining();
+  if (CharsetProviderImpl.hasLoadedNatives() && bb.isDirect() && bb.hasRemaining()&& cb.hasArray()) {
+    int cbPos=cb.position();
+    int bbPos=bb.position();
+    int[] res={bb.remaining(),cbRemaining,0,0};
+    nDecode(cb.array(),cb.arrayOffset() + cbPos,bb.remaining(),AddressUtil.getDirectBufferAddress(bb),bbPos,res);
+    int m=bbPos + bb.remaining() - res[0];
+    bb.position(m);
+    cb.position(cbPos + cbRemaining - res[1]);
+    if (res[2] != 0 && res[3] == 0) {
+      return CoderResult.unmappableForLength(res[2]);
+    }
+ else {
+      if (res[3] == 1)       return CoderResult.OVERFLOW;
+      if (res[3] == -1)       return CoderResult.malformedForLength(res[2]);
+    }
+  }
+ else {
+    while (bb.hasRemaining()) {
+      if (cbRemaining == 0)       return CoderResult.OVERFLOW;
+      int in=(int)bb.get();
+      if (in < 0 && in >= -128) {
+        int index=decodeIndex[in & 0xFF];
+        if (index < 0 && arrDecode0.charAt(in & 0xFF) == '\u0000' || !bb.hasRemaining()) {
+          if (arrDecode0.charAt(in & 0xFF) == '\u0000') {
+            if (index > 0 && !bb.hasRemaining()) {
+              bb.position(bb.position() - 1);
+              return CoderResult.UNDERFLOW;
+            }
+            bb.position(bb.position() - 1);
+            return CoderResult.malformedForLength(1);
+          }
+ else {
+            cb.put(arrDecode0.charAt(in & 0xFF));
+            return CoderResult.UNDERFLOW;
+          }
+        }
+        int variable=0;
+        byte b2=0;
+        if (index < 0) {
+          variable=0;
+          index=in & 0xFF;
+        }
+ else {
+          variable=index >> 4;
+          index<<=8;
+          b2=bb.get();
+          index+=(b2 & 0xFF);
+          index=index - (variable << 12);
+        }
+        char resultChar='\u0000';
+switch (variable) {
+case 0:
+          resultChar=arrDecode0.charAt(index);
+        break;
+case 1:
+      resultChar=arrDecode1.charAt(index);
+    break;
+case 2:
+  resultChar=arrDecode2.charAt(index);
+break;
+case 3:
+resultChar=arrDecode3.charAt(index);
+break;
+case 4:
+resultChar=arrDecode4.charAt(index);
+break;
+case 5:
+resultChar=arrDecode5.charAt(index);
+break;
+case 6:
+resultChar=arrDecode6.charAt(index);
+break;
+case 7:
+resultChar=arrDecode7.charAt(index);
+break;
+}
+if (resultChar != '\u0000') {
+cb.put(resultChar);
+}
+ else {
+if (!((b2 >= (byte)0x40 && b2 <= (byte)0x7E) || (b2 >= (byte)0x80 && b2 <= (byte)0xFE) || (b2 >= (byte)0x30 && b2 <= (byte)0x39))) {
+bb.position(bb.position() - 2);
+if (arrDecode0.charAt(b2 & 0xFF) == '\u0000' && b2 != 0) {
+return CoderResult.malformedForLength(2);
+}
+ else {
+return CoderResult.malformedForLength(1);
+}
+}
+bb.position(bb.position() - 2);
+if (bb.remaining() >= 4) {
+byte bb1=bb.get();
+byte bb2=bb.get();
+byte bb3=bb.get();
+byte bb4=bb.get();
+if (!(bb3 >= (byte)0x81 && bb3 <= (byte)0xFE)) {
+bb.position(bb.position() - 4);
+return CoderResult.malformedForLength(3);
+}
+if (!(bb4 >= (byte)0x30 && bb4 <= (byte)0x39)) {
+bb.position(bb.position() - 4);
+return CoderResult.malformedForLength(4);
+}
+int bResult=getUnicodeFromBytes(new byte[]{bb1,bb2,bb3,bb4});
+if (bResult != -1) {
+cb.put((char)bResult);
+}
+ else {
+bb.position(bb.position() - 4);
+return CoderResult.malformedForLength(4);
+}
+}
+ else {
+return CoderResult.UNDERFLOW;
+}
+}
+}
+ else {
+cb.put((char)(in & 0xFF));
+}
+cbRemaining--;
+}
+}
+return CoderResult.UNDERFLOW;
+}

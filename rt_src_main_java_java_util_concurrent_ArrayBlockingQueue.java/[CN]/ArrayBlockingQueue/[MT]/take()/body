@@ -1,0 +1,18 @@
+{
+  final ReentrantLock lock=this.lock;
+  lock.lockInterruptibly();
+  try {
+    try {
+      while (count == 0)       notEmpty.await();
+    }
+ catch (    InterruptedException ie) {
+      notEmpty.signal();
+      throw ie;
+    }
+    E x=extract();
+    return x;
+  }
+  finally {
+    lock.unlock();
+  }
+}

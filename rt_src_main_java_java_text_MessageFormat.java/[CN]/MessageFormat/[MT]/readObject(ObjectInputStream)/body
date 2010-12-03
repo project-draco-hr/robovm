@@ -1,0 +1,25 @@
+{
+  ObjectInputStream.GetField fields=stream.readFields();
+  argumentNumbers=(int[])fields.get("argumentNumbers",null);
+  formats=(Format[])fields.get("formats",null);
+  locale=(Locale)fields.get("locale",null);
+  maxOffset=fields.get("maxOffset",0);
+  int[] offsets=(int[])fields.get("offsets",null);
+  String pattern=(String)fields.get("pattern",null);
+  int length;
+  if (maxOffset < 0) {
+    length=pattern.length() > 0 ? 1 : 0;
+  }
+ else {
+    length=maxOffset + (offsets[maxOffset] == pattern.length() ? 1 : 2);
+  }
+  strings=new String[length];
+  int last=0;
+  for (int i=0; i <= maxOffset; i++) {
+    strings[i]=pattern.substring(last,offsets[i]);
+    last=offsets[i];
+  }
+  if (maxOffset + 1 < strings.length) {
+    strings[strings.length - 1]=pattern.substring(last,pattern.length());
+  }
+}

@@ -1,0 +1,25 @@
+{
+  long lastTime=System.nanoTime();
+  final Node node=addWaiter(Node.EXCLUSIVE);
+  boolean failed=true;
+  try {
+    for (; ; ) {
+      final Node p=node.predecessor();
+      if (p == head && tryAcquire(arg)) {
+        setHead(node);
+        p.next=null;
+        failed=false;
+        return true;
+      }
+      if (nanosTimeout <= 0)       return false;
+      if (shouldParkAfterFailedAcquire(p,node) && nanosTimeout > spinForTimeoutThreshold)       LockSupport.parkNanos(nanosTimeout);
+      long now=System.nanoTime();
+      nanosTimeout-=now - lastTime;
+      lastTime=now;
+      if (Thread.interrupted())       throw new InterruptedException();
+    }
+  }
+  finally {
+    if (failed)     cancelAcquire(node);
+  }
+}

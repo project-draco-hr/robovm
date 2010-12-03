@@ -1,0 +1,33 @@
+{
+  SocketAddress retAddr=null;
+  DatagramPacket receivePacket=new DatagramPacket(stubArray,0);
+  int oldposition=target.position();
+  int received=0;
+  do {
+    long address=AddressUtil.getDirectBufferAddress(target);
+    if (isConnected()) {
+      received=networkSystem.recvConnectedDatagramDirect(fd,receivePacket,address,target.position(),target.remaining(),isBlocking() ? 0 : DEFAULT_TIMEOUT,false);
+    }
+ else {
+      received=networkSystem.receiveDatagramDirect(fd,receivePacket,address,target.position(),target.remaining(),isBlocking() ? 0 : DEFAULT_TIMEOUT,false);
+    }
+    SecurityManager sm=System.getSecurityManager();
+    if (!isConnected() && null != sm) {
+      try {
+        sm.checkAccept(receivePacket.getAddress().getHostAddress(),receivePacket.getPort());
+      }
+ catch (      SecurityException e) {
+        receivePacket=null;
+      }
+    }
+    if (null != receivePacket && null != receivePacket.getAddress()) {
+      if (received > 0) {
+        target.position(oldposition + received);
+      }
+      retAddr=receivePacket.getSocketAddress();
+      break;
+    }
+  }
+ while (loop);
+  return retAddr;
+}

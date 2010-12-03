@@ -1,0 +1,17 @@
+{
+  if (logger != null) {
+    logger.println("closeOutbound() " + isOutboundDone);
+  }
+  if (isOutboundDone) {
+    return;
+  }
+  isOutboundDone=true;
+  if (handshake_started) {
+    alertProtocol.alert(AlertProtocol.WARNING,AlertProtocol.CLOSE_NOTIFY);
+    close_notify_was_sent=true;
+  }
+ else {
+    shutdown();
+  }
+  engine_was_closed=true;
+}

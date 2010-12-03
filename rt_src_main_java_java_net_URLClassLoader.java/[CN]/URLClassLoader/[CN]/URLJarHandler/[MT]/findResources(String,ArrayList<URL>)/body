@@ -1,0 +1,20 @@
+{
+  URL res=findResourceInOwn(name);
+  if (res != null && !resources.contains(res)) {
+    resources.add(res);
+  }
+  if (index != null) {
+    int pos=name.lastIndexOf("/");
+    String indexedName=(pos > 0) ? name.substring(0,pos) : name;
+    ArrayList<URL> urls=index.get(indexedName);
+    if (urls != null) {
+      urls.remove(url);
+      for (      URL url : urls) {
+        URLHandler h=getSubHandler(url);
+        if (h != null) {
+          h.findResources(name,resources);
+        }
+      }
+    }
+  }
+}

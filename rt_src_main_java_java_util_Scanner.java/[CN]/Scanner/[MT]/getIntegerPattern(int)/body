@@ -1,0 +1,15 @@
+{
+  if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
+    throw new IllegalArgumentException(Messages.getString("luni.DE",radix));
+  }
+  decimalFormat=(DecimalFormat)NumberFormat.getInstance(locale);
+  String allAvailableDigits="0123456789abcdefghijklmnopqrstuvwxyz";
+  String ASCIIDigit=allAvailableDigits.substring(0,radix);
+  String nonZeroASCIIDigit=allAvailableDigits.substring(1,radix);
+  StringBuilder digit=new StringBuilder("((?i)[").append(ASCIIDigit).append("]|\\p{javaDigit})");
+  StringBuilder nonZeroDigit=new StringBuilder("((?i)[").append(nonZeroASCIIDigit).append("]|([\\p{javaDigit}&&[^0]]))");
+  StringBuilder numeral=getNumeral(digit,nonZeroDigit);
+  StringBuilder integer=new StringBuilder("(([-+]?(").append(numeral).append(")))|(").append(addPositiveSign(numeral)).append(")|(").append(addNegativeSign(numeral)).append(")");
+  Pattern integerPattern=Pattern.compile(integer.toString());
+  return integerPattern;
+}

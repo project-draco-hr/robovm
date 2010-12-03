@@ -1,0 +1,39 @@
+{
+  if (permission == null || permission.getClass() != permClass) {
+    return false;
+  }
+  if (allEnabled) {
+    return true;
+  }
+  String checkName=permission.getName();
+  if (items.containsKey(checkName)) {
+    return true;
+  }
+  if (items.containsKey("exitVM") || items.containsKey("exitVM.*")) {
+    if (checkName.endsWith("exitVM")) {
+      return true;
+    }
+    if (checkName.startsWith("exitVM.") && checkName.length() > "exitVM.".length()) {
+      return true;
+    }
+  }
+  char[] name=checkName.toCharArray();
+  int pos=name.length - 2;
+  for (; pos >= 0; pos--) {
+    if (name[pos] == '.') {
+      break;
+    }
+  }
+  while (pos >= 0) {
+    name[pos + 1]='*';
+    if (items.containsKey(new String(name,0,pos + 2))) {
+      return true;
+    }
+    for (--pos; pos >= 0; pos--) {
+      if (name[pos] == '.') {
+        break;
+      }
+    }
+  }
+  return false;
+}

@@ -1,0 +1,18 @@
+{
+  StringBuilder sb=new StringBuilder(10);
+  if (index < pattern.length - 2) {
+    if (pattern[index] != '{') {
+      return "Is" + new String(pattern,nextIndex(),1);
+    }
+    nextIndex();
+    char ch=0;
+    while (index < pattern.length - 2 && (ch=pattern[nextIndex()]) != '}') {
+      sb.append((char)ch);
+    }
+    if (ch != '}')     throw new PatternSyntaxException(Messages.getString("regex.15"),this.toString(),index);
+  }
+  if (sb.length() == 0)   throw new PatternSyntaxException(Messages.getString("regex.16"),this.toString(),index);
+  String res=sb.toString();
+  if (res.length() == 1)   return "Is" + res;
+  return (res.length() > 3 && (res.startsWith("Is") || res.startsWith("In"))) ? res.substring(2) : res;
+}

@@ -1,0 +1,41 @@
+{
+  int insertionLevel=indexLevel;
+  Comparable<? super K> key=comparable(idx.node.key);
+  if (key == null)   throw new NullPointerException();
+  for (; ; ) {
+    int j=h.level;
+    Index<K,V> q=h;
+    Index<K,V> r=q.right;
+    Index<K,V> t=idx;
+    for (; ; ) {
+      if (r != null) {
+        Node<K,V> n=r.node;
+        int c=key.compareTo(n.key);
+        if (n.value == null) {
+          if (!q.unlink(r))           break;
+          r=q.right;
+          continue;
+        }
+        if (c > 0) {
+          q=r;
+          r=r.right;
+          continue;
+        }
+      }
+      if (j == insertionLevel) {
+        if (t.indexesDeletedNode()) {
+          findNode(key);
+          return;
+        }
+        if (!q.link(r,t))         break;
+        if (--insertionLevel == 0) {
+          if (t.indexesDeletedNode())           findNode(key);
+          return;
+        }
+      }
+      if (--j >= insertionLevel && j < indexLevel)       t=t.down;
+      q=q.down;
+      r=q.right;
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  if (engine_was_closed) {
+    throw new SSLException("Engine has already been closed.");
+  }
+  if (!peer_mode_was_set) {
+    throw new IllegalStateException("Client/Server mode was not set");
+  }
+  if (!handshake_started) {
+    handshake_started=true;
+    if (getUseClientMode()) {
+      handshakeProtocol=new ClientHandshakeImpl(this);
+    }
+ else {
+      handshakeProtocol=new ServerHandshakeImpl(this);
+    }
+    appData=new SSLEngineAppData();
+    alertProtocol=new AlertProtocol();
+    recProtIS=new SSLBufferedInput();
+    recordProtocol=new SSLRecordProtocol(handshakeProtocol,alertProtocol,recProtIS,appData);
+  }
+  handshakeProtocol.start();
+}

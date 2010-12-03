@@ -1,0 +1,45 @@
+{
+  super(is,new Inflater(true),size);
+  byte[] header=new byte[10];
+  readFully(header,0,header.length);
+  if (getShort(header,0) != GZIP_MAGIC) {
+    throw new IOException(Messages.getString("archive.1F"));
+  }
+  int flags=header[3];
+  boolean hcrc=(flags & FHCRC) != 0;
+  if (hcrc) {
+    crc.update(header,0,header.length);
+  }
+  if ((flags & FEXTRA) != 0) {
+    readFully(header,0,2);
+    if (hcrc) {
+      crc.update(header,0,2);
+    }
+    int length=getShort(header,0);
+    while (length > 0) {
+      int max=length > buf.length ? buf.length : length;
+      int result=in.read(buf,0,max);
+      if (result == -1) {
+        throw new EOFException();
+      }
+      if (hcrc) {
+        crc.update(buf,0,result);
+      }
+      length-=result;
+    }
+  }
+  if ((flags & FNAME) != 0) {
+    readZeroTerminated(hcrc);
+  }
+  if ((flags & FCOMMENT) != 0) {
+    readZeroTerminated(hcrc);
+  }
+  if (hcrc) {
+    readFully(header,0,2);
+    int crc16=getShort(header,0);
+    if ((crc.getValue() & 0xffff) != crc16) {
+      throw new IOException(Messages.getString("archive.20"));
+    }
+    crc.reset();
+  }
+}

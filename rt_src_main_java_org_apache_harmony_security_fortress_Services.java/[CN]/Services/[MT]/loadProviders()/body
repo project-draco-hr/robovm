@@ -1,0 +1,21 @@
+{
+  String providerClassName=null;
+  int i=1;
+  ClassLoader cl=ClassLoader.getSystemClassLoader();
+  Provider p;
+  while ((providerClassName=Security.getProperty("security.provider." + i++)) != null) {
+    try {
+      p=(Provider)Class.forName(providerClassName.trim(),true,cl).newInstance();
+      providers.add(p);
+      providersNames.put(p.getName(),p);
+      initServiceInfo(p);
+    }
+ catch (    ClassNotFoundException e) {
+    }
+catch (    IllegalAccessException e) {
+    }
+catch (    InstantiationException e) {
+    }
+  }
+  Engine.door.renumProviders();
+}

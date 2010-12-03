@@ -1,0 +1,21 @@
+{
+  StringBuilder result=new StringBuilder();
+  int startIndex=0;
+  int flags=formatToken.getFlags();
+  if (formatToken.isFlagSet(FormatToken.FLAG_MINUS) && !formatToken.isWidthSet()) {
+    throw new MissingFormatWidthException("-" + formatToken.getConversionType());
+  }
+  if (FormatToken.FLAGS_UNSET != flags && FormatToken.FLAG_MINUS != flags) {
+    throw new FormatFlagsConversionMismatchException(formatToken.getStrFlags(),formatToken.getConversionType());
+  }
+  if (null == arg) {
+    result.append("false");
+  }
+ else   if (arg instanceof Boolean) {
+    result.append(arg);
+  }
+ else {
+    result.append("true");
+  }
+  return padding(result,startIndex);
+}

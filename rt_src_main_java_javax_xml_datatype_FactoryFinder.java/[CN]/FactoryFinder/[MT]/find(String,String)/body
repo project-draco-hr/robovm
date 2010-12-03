@@ -1,0 +1,49 @@
+{
+  ClassLoader classLoader=findClassLoader();
+  try {
+    String systemProp=SecuritySupport.getSystemProperty(factoryId);
+    if (systemProp != null && systemProp.length() > 0) {
+      if (debug)       debugPrintln("found " + systemProp + " in the system property "+ factoryId);
+      return newInstance(systemProp,classLoader);
+    }
+  }
+ catch (  SecurityException se) {
+    ;
+  }
+  try {
+    String javah=SecuritySupport.getSystemProperty("java.home");
+    String configFile=javah + File.separator + "lib"+ File.separator+ "jaxp.properties";
+    String factoryClassName=null;
+    if (firstTime) {
+synchronized (cacheProps) {
+        if (firstTime) {
+          File f=new File(configFile);
+          firstTime=false;
+          if (SecuritySupport.doesFileExist(f)) {
+            if (debug)             debugPrintln("Read properties file " + f);
+            cacheProps.load(SecuritySupport.getFileInputStream(f));
+          }
+        }
+      }
+    }
+    factoryClassName=cacheProps.getProperty(factoryId);
+    if (debug)     debugPrintln("found " + factoryClassName + " in $java.home/jaxp.properties");
+    if (factoryClassName != null) {
+      return newInstance(factoryClassName,classLoader);
+    }
+  }
+ catch (  Exception ex) {
+    if (debug) {
+      ex.printStackTrace();
+    }
+  }
+  Object provider=findJarServiceProvider(factoryId);
+  if (provider != null) {
+    return provider;
+  }
+  if (fallbackClassName == null) {
+    throw new ConfigurationError("Provider for " + factoryId + " cannot be found",null);
+  }
+  if (debug)   debugPrintln("loaded from fallback value: " + fallbackClassName);
+  return newInstance(fallbackClassName,classLoader);
+}

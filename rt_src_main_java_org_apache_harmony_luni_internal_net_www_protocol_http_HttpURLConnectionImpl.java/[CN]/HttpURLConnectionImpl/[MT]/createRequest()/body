@@ -1,0 +1,86 @@
+{
+  StringBuilder output=new StringBuilder(256);
+  output.append(method);
+  output.append(' ');
+  output.append(requestString());
+  output.append(' ');
+  output.append("HTTP/1.");
+  if (httpVersion == 0) {
+    output.append("0\r\n");
+  }
+ else {
+    output.append("1\r\n");
+  }
+  boolean hasContentLength=false;
+  for (int i=0; i < reqHeader.length(); i++) {
+    String key=reqHeader.getKey(i);
+    if (key != null) {
+      String lKey=key.toLowerCase();
+      if ((os != null && !os.isChunked()) || (!lKey.equals("transfer-encoding") && !lKey.equals("content-length"))) {
+        output.append(key);
+        String value=reqHeader.get(i);
+        if (lKey.equals("content-length")) {
+          hasContentLength=true;
+          if (fixedContentLength >= 0) {
+            value=String.valueOf(fixedContentLength);
+          }
+        }
+        if (value != null) {
+          output.append(": ");
+          output.append(value);
+        }
+        output.append("\r\n");
+      }
+    }
+  }
+  if (fixedContentLength >= 0 && !hasContentLength) {
+    output.append("content-length: ");
+    output.append(String.valueOf(fixedContentLength));
+    output.append("\r\n");
+  }
+  if (reqHeader.get("User-Agent") == null) {
+    output.append("User-Agent: ");
+    String agent=getSystemProperty("http.agent");
+    if (agent == null) {
+      output.append("Java");
+      output.append(getSystemProperty("java.version"));
+    }
+ else {
+      output.append(agent);
+    }
+    output.append("\r\n");
+  }
+  if (reqHeader.get("Host") == null) {
+    output.append("Host: ");
+    output.append(url.getHost());
+    int port=url.getPort();
+    if (port > 0 && port != defaultPort) {
+      output.append(':');
+      output.append(Integer.toString(port));
+    }
+    output.append("\r\n");
+  }
+  if (reqHeader.get("Accept") == null) {
+    output.append("Accept: *; */*\r\n");
+  }
+  if (httpVersion > 0 && reqHeader.get("Connection") == null) {
+    output.append("Connection: Keep-Alive\r\n");
+  }
+  if (os != null) {
+    if (reqHeader.get("Content-Type") == null) {
+      output.append("Content-Type: application/x-www-form-urlencoded\r\n");
+    }
+    if (os.isCached()) {
+      if (reqHeader.get("Content-Length") == null) {
+        output.append("Content-Length: ");
+        output.append(Integer.toString(os.size()));
+        output.append("\r\n");
+      }
+    }
+ else     if (os.isChunked()) {
+      output.append("Transfer-Encoding: chunked\r\n");
+    }
+  }
+  output.append("\r\n");
+  return output.toString().getBytes("ISO8859_1");
+}

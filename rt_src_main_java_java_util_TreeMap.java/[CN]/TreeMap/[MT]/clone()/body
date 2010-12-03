@@ -1,0 +1,23 @@
+{
+  try {
+    TreeMap<K,V> clone=(TreeMap<K,V>)super.clone();
+    clone.entrySet=null;
+    if (root != null) {
+      clone.root=root.clone(null);
+      Node<K,V> node=minimum(clone.root);
+      while (true) {
+        Node<K,V> nxt=successor(node);
+        if (nxt == null) {
+          break;
+        }
+        nxt.prev=node;
+        node.next=nxt;
+        node=nxt;
+      }
+    }
+    return clone;
+  }
+ catch (  CloneNotSupportedException e) {
+    return null;
+  }
+}

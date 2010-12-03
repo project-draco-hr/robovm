@@ -1,0 +1,25 @@
+{
+  if (!isIndexValid(targets,offset,length)) {
+    throw new IndexOutOfBoundsException();
+  }
+  checkOpenConnected();
+  int totalCount=calculateTotalRemaining(targets,offset,length);
+  if (0 == totalCount) {
+    return 0;
+  }
+  byte[] readArray=new byte[totalCount];
+  ByteBuffer readBuffer=ByteBuffer.wrap(readArray);
+  int readCount;
+  readCount=readImpl(readBuffer);
+  if (readCount > 0) {
+    int left=readCount;
+    int index=offset;
+    while (left > 0) {
+      int putLength=Math.min(targets[index].remaining(),left);
+      targets[index].put(readArray,readCount - left,putLength);
+      index++;
+      left-=putLength;
+    }
+  }
+  return readCount;
+}

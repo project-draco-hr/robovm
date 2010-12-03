@@ -1,0 +1,43 @@
+{
+synchronized (lock) {
+    if (isClosed()) {
+      throw new IOException(Messages.getString("luni.A7"));
+    }
+    if (count <= 0) {
+      return;
+    }
+    if (offset > str.length() - count || offset < 0) {
+      throw new StringIndexOutOfBoundsException();
+    }
+    if (pos == 0 && count >= buf.length) {
+      char[] chars=new char[count];
+      str.getChars(offset,offset + count,chars,0);
+      out.write(chars,0,count);
+      return;
+    }
+    int available=buf.length - pos;
+    if (count < available) {
+      available=count;
+    }
+    if (available > 0) {
+      str.getChars(offset,offset + available,buf,pos);
+      pos+=available;
+    }
+    if (pos == buf.length) {
+      out.write(this.buf,0,this.buf.length);
+      pos=0;
+      if (count > available) {
+        offset+=available;
+        available=count - available;
+        if (available >= buf.length) {
+          char[] chars=new char[count];
+          str.getChars(offset,offset + available,chars,0);
+          out.write(chars,0,available);
+          return;
+        }
+        str.getChars(offset,offset + available,buf,pos);
+        pos+=available;
+      }
+    }
+  }
+}

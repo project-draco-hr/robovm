@@ -1,0 +1,19 @@
+{
+  RandomAccessFile raf=mRaf;
+  if (raf != null) {
+synchronized (raf) {
+      mRaf=null;
+      raf.close();
+    }
+    if (fileToDeleteOnClose != null) {
+      AccessController.doPrivileged(new PrivilegedAction<Object>(){
+        public Object run(){
+          new File(fileName).delete();
+          return null;
+        }
+      }
+);
+      fileToDeleteOnClose=null;
+    }
+  }
+}

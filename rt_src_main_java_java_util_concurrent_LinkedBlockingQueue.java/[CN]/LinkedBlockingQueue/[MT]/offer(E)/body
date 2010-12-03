@@ -1,0 +1,20 @@
+{
+  if (e == null)   throw new NullPointerException();
+  final AtomicInteger count=this.count;
+  if (count.get() == capacity)   return false;
+  int c=-1;
+  final ReentrantLock putLock=this.putLock;
+  putLock.lock();
+  try {
+    if (count.get() < capacity) {
+      enqueue(e);
+      c=count.getAndIncrement();
+      if (c + 1 < capacity)       notFull.signal();
+    }
+  }
+  finally {
+    putLock.unlock();
+  }
+  if (c == 0)   signalNotEmpty();
+  return c >= 0;
+}

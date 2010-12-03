@@ -1,0 +1,88 @@
+{
+  classCache=new File(cache,"classes");
+  classCache.mkdirs();
+  libCache=new File(cache,"lib");
+  libCache.mkdirs();
+  if (target == null) {
+    target=mainClass != null ? mainClass : "a.out";
+  }
+  if (!skipRtLib) {
+    bootClassPathFiles.add(new File(home,"lib/nullvm-rt.jar"));
+  }
+  if (jarFile != null) {
+    classPathFiles.add(jarFile);
+  }
+  if (mainClass == null) {
+    throw new CmdLineException("No main class specified on command line or in JAR manifest");
+  }
+  if (bootclasspath != null) {
+    for (    String p : bootclasspath.split(File.pathSeparator)) {
+      bootClassPathFiles.add(new File(p));
+    }
+  }
+  if (classpath != null) {
+    for (    String p : classpath.split(File.pathSeparator)) {
+      classPathFiles.add(new File(p));
+    }
+  }
+  bootClassPathFiles=removeDuplicates(bootClassPathFiles);
+  classPathFiles=removeDuplicates(classPathFiles);
+  List<File> inputs=new ArrayList<File>();
+  inputs.addAll(bootClassPathFiles);
+  inputs.addAll(classPathFiles);
+  inputs=removeDuplicates(inputs);
+  for (  File f : inputs) {
+    if (!f.exists()) {
+      throw new FileNotFoundException(f.getAbsolutePath());
+    }
+    if (isArchive(f)) {
+      if (!f.isFile()) {
+        throw new IOException("Path is not a file: " + f.getAbsolutePath());
+      }
+    }
+ else {
+      if (!f.isDirectory()) {
+        throw new IOException("Path is not a directory: " + f.getAbsolutePath());
+      }
+    }
+  }
+  tmpFile=File.createTempFile("nullvm",".tmp");
+  tmpFile.delete();
+  tmpFile.mkdirs();
+  opcodesFile=new File(tmpFile,"opcodes.ll");
+  FileUtils.copyURLToFile(getClass().getResource("/opcodes.ll"),opcodesFile);
+  mainCFile=new File(tmpFile,"main.c");
+  FileUtils.copyURLToFile(getClass().getResource("/main.c"),mainCFile);
+  symbolsMapFile=new File(tmpFile,"symbols.map");
+  FileUtils.copyURLToFile(getClass().getResource("/symbols.map"),symbolsMapFile);
+  List<File> files=new ArrayList<File>();
+  for (  File input : inputs) {
+    files.addAll(processClassFiles(input));
+  }
+  output.mkdirs();
+  buildExecutable(files);
+  File bootCpClasses=new File(new File(output,"boot"),"classes");
+  bootCpClasses.mkdirs();
+  File bootCpLib=new File(new File(output,"boot"),"lib");
+  bootCpLib.mkdirs();
+  File cpClasses=new File(new File(output,"boot"),"classes");
+  cpClasses.mkdirs();
+  File cpLib=new File(new File(output,"boot"),"lib");
+  cpLib.mkdirs();
+  for (  File f : bootClassPathFiles) {
+    if (isArchive(f)) {
+      stripArchive(f,new File(bootCpLib,f.getName()));
+    }
+ else {
+      copyResources(f,bootCpClasses);
+    }
+  }
+  for (  File f : classPathFiles) {
+    if (isArchive(f)) {
+      stripArchive(f,new File(cpLib,f.getName()));
+    }
+ else {
+      copyResources(f,cpClasses);
+    }
+  }
+}

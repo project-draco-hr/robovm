@@ -1,0 +1,28 @@
+{
+  if (encoding == null) {
+    throw new NullPointerException();
+  }
+  if (start >= 0 && 0 <= length && length <= data.length - start) {
+    offset=0;
+    Charset charset=getCharset(encoding);
+    int result;
+    CharBuffer cb;
+    try {
+      cb=charset.decode(ByteBuffer.wrap(data,start,length));
+    }
+ catch (    Exception e) {
+      cb=CharBuffer.wrap("\u003f".toCharArray());
+    }
+    if ((result=cb.length()) > 0) {
+      value=cb.array();
+      count=result;
+    }
+ else {
+      count=0;
+      value=new char[0];
+    }
+  }
+ else {
+    throw new StringIndexOutOfBoundsException();
+  }
+}

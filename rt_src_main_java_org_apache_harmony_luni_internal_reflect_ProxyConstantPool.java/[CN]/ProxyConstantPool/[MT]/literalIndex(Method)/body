@@ -1,0 +1,22 @@
+{
+  int index;
+  if (aMethod.getDeclaringClass().isInterface()) {
+    if ((index=interfaceMethodCache.get(aMethod)) < 0) {
+      int classIndex=typeIndex(aMethod.getDeclaringClass().getName());
+      int nameAndTypeIndex=literalIndexForNameAndType(literalIndex(aMethod.getName().toCharArray()),literalIndex(ProxyClassFile.getConstantPoolName(aMethod)));
+      index=interfaceMethodCache.put(aMethod,currentIndex++);
+      writeU1(InterfaceMethodRefTag);
+      writeU2(classIndex);
+      writeU2(nameAndTypeIndex);
+    }
+  }
+ else   if ((index=methodCache.get(aMethod)) < 0) {
+    int classIndex=typeIndex(aMethod.getDeclaringClass().getName());
+    int nameAndTypeIndex=literalIndexForNameAndType(literalIndex(aMethod.getName().toCharArray()),literalIndex(ProxyClassFile.getConstantPoolName(aMethod)));
+    index=methodCache.put(aMethod,currentIndex++);
+    writeU1(MethodRefTag);
+    writeU2(classIndex);
+    writeU2(nameAndTypeIndex);
+  }
+  return index;
+}

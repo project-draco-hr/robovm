@@ -1,0 +1,27 @@
+{
+  if (encoded == null) {
+    throw new NullPointerException(Messages.getString("crypto.22"));
+  }
+  this.encoded=new byte[encoded.length];
+  System.arraycopy(encoded,0,this.encoded,0,encoded.length);
+  Object[] values;
+  values=(Object[])asn1.decode(encoded);
+  AlgorithmIdentifier aId=(AlgorithmIdentifier)values[0];
+  algName=aId.getAlgorithm();
+  boolean mappingExists=mapAlgName();
+  AlgorithmParameters aParams=null;
+  byte[] params=aId.getParameters();
+  if (params != null && !isNullValue(params)) {
+    try {
+      aParams=AlgorithmParameters.getInstance(algName);
+      aParams.init(aId.getParameters());
+      if (!mappingExists) {
+        algName=aParams.getAlgorithm();
+      }
+    }
+ catch (    NoSuchAlgorithmException e) {
+    }
+  }
+  algParameters=aParams;
+  encryptedData=(byte[])values[1];
+}

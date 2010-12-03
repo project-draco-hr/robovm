@@ -1,0 +1,37 @@
+{
+  int length=string.length(), i=0;
+  if (length == 0) {
+    throw new NumberFormatException();
+  }
+  char firstDigit=string.charAt(i);
+  boolean negative=firstDigit == '-';
+  if (negative) {
+    if (length == 1) {
+      throw new NumberFormatException(string);
+    }
+    firstDigit=string.charAt(++i);
+  }
+  int base=10;
+  if (firstDigit == '0') {
+    if (++i == length) {
+      return valueOf(0);
+    }
+    if ((firstDigit=string.charAt(i)) == 'x' || firstDigit == 'X') {
+      if (++i == length) {
+        throw new NumberFormatException(string);
+      }
+      base=16;
+    }
+ else {
+      base=8;
+    }
+  }
+ else   if (firstDigit == '#') {
+    if (++i == length) {
+      throw new NumberFormatException(string);
+    }
+    base=16;
+  }
+  int result=parse(string,i,base,negative);
+  return valueOf(result);
+}

@@ -1,0 +1,17 @@
+{
+  if (nbytes >= 0) {
+    if (buf == null) {
+      buf=new byte[(int)Math.min(nbytes,BUF_SIZE)];
+    }
+    long count=0, rem=0;
+    while (count < nbytes) {
+      int x=read(buf,0,(rem=nbytes - count) > buf.length ? buf.length : (int)rem);
+      if (x == -1) {
+        return count;
+      }
+      count+=x;
+    }
+    return count;
+  }
+  throw new IllegalArgumentException();
+}

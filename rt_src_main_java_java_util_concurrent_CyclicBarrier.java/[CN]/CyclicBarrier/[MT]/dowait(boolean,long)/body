@@ -1,0 +1,50 @@
+{
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    final Generation g=generation;
+    if (g.broken)     throw new BrokenBarrierException();
+    if (Thread.interrupted()) {
+      breakBarrier();
+      throw new InterruptedException();
+    }
+    int index=--count;
+    if (index == 0) {
+      boolean ranAction=false;
+      try {
+        final Runnable command=barrierCommand;
+        if (command != null)         command.run();
+        ranAction=true;
+        nextGeneration();
+        return 0;
+      }
+  finally {
+        if (!ranAction)         breakBarrier();
+      }
+    }
+    for (; ; ) {
+      try {
+        if (!timed)         trip.await();
+ else         if (nanos > 0L)         nanos=trip.awaitNanos(nanos);
+      }
+ catch (      InterruptedException ie) {
+        if (g == generation && !g.broken) {
+          breakBarrier();
+          throw ie;
+        }
+ else {
+          Thread.currentThread().interrupt();
+        }
+      }
+      if (g.broken)       throw new BrokenBarrierException();
+      if (g != generation)       return index;
+      if (timed && nanos <= 0L) {
+        breakBarrier();
+        throw new TimeoutException();
+      }
+    }
+  }
+  finally {
+    lock.unlock();
+  }
+}

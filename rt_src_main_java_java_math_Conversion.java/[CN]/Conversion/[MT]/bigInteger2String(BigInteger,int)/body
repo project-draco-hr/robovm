@@ -1,0 +1,67 @@
+{
+  int sign=val.sign;
+  int numberLength=val.numberLength;
+  int digits[]=val.digits;
+  if (sign == 0) {
+    return "0";
+  }
+  if (numberLength == 1) {
+    int highDigit=digits[numberLength - 1];
+    long v=highDigit & 0xFFFFFFFFL;
+    if (sign < 0) {
+      v=-v;
+    }
+    return Long.toString(v,radix);
+  }
+  if ((radix == 10) || (radix < Character.MIN_RADIX) || (radix > Character.MAX_RADIX)) {
+    return val.toString();
+  }
+  double bitsForRadixDigit;
+  bitsForRadixDigit=Math.log(radix) / Math.log(2);
+  int resLengthInChars=(int)(val.abs().bitLength() / bitsForRadixDigit + ((sign < 0) ? 1 : 0)) + 1;
+  char result[]=new char[resLengthInChars];
+  int currentChar=resLengthInChars;
+  int resDigit;
+  if (radix != 16) {
+    int temp[]=new int[numberLength];
+    System.arraycopy(digits,0,temp,0,numberLength);
+    int tempLen=numberLength;
+    int charsPerInt=digitFitInInt[radix];
+    int i;
+    int bigRadix=bigRadices[radix - 2];
+    while (true) {
+      resDigit=Division.divideArrayByInt(temp,temp,tempLen,bigRadix);
+      int previous=currentChar;
+      do {
+        result[--currentChar]=Character.forDigit(resDigit % radix,radix);
+      }
+ while (((resDigit/=radix) != 0) && (currentChar != 0));
+      int delta=charsPerInt - previous + currentChar;
+      for (i=0; i < delta && currentChar > 0; i++) {
+        result[--currentChar]='0';
+      }
+      for (i=tempLen - 1; (i > 0) && (temp[i] == 0); i--) {
+        ;
+      }
+      tempLen=i + 1;
+      if ((tempLen == 1) && (temp[0] == 0)) {
+        break;
+      }
+    }
+  }
+ else {
+    for (int i=0; i < numberLength; i++) {
+      for (int j=0; (j < 8) && (currentChar > 0); j++) {
+        resDigit=digits[i] >> (j << 2) & 0xf;
+        result[--currentChar]=Character.forDigit(resDigit,16);
+      }
+    }
+  }
+  while (result[currentChar] == '0') {
+    currentChar++;
+  }
+  if (sign == -1) {
+    result[--currentChar]='-';
+  }
+  return new String(result,currentChar,resLengthInChars - currentChar);
+}

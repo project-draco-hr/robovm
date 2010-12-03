@@ -1,0 +1,39 @@
+{
+  classDesc.setFlags((byte)(SC_SERIALIZABLE | SC_ENUM));
+  Integer previousHandle=null;
+  if (unshared) {
+    previousHandle=objectsWritten.get(classDesc);
+  }
+  Integer handle=null;
+  if (!unshared) {
+    handle=dumpCycle(classDesc);
+  }
+  if (handle == null) {
+    Class<?> classToWrite=classDesc.forClass();
+    objectsWritten.put(classDesc,nextHandle());
+    output.writeByte(TC_CLASSDESC);
+    if (protocolVersion == PROTOCOL_VERSION_1) {
+      writeNewClassDesc(classDesc);
+    }
+ else {
+      primitiveTypes=output;
+      writeClassDescriptor(classDesc);
+      primitiveTypes=null;
+    }
+    annotateClass(classToWrite);
+    drain();
+    output.writeByte(TC_ENDBLOCKDATA);
+    ObjectStreamClass superClassDesc=classDesc.getSuperclass();
+    if (null != superClassDesc) {
+      superClassDesc.setFlags((byte)(SC_SERIALIZABLE | SC_ENUM));
+      writeEnumDesc(superClassDesc.forClass(),superClassDesc,unshared);
+    }
+ else {
+      output.writeByte(TC_NULL);
+    }
+    if (unshared) {
+      removeUnsharedReference(classDesc,previousHandle);
+    }
+  }
+  return classDesc;
+}

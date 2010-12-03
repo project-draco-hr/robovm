@@ -1,0 +1,80 @@
+{
+  int begin=offset;
+  int last=offset + (len - 1);
+  String scaleString=null;
+  StringBuilder unscaledBuffer;
+  long newScale;
+  if (in == null) {
+    throw new NullPointerException();
+  }
+  if ((last >= in.length) || (offset < 0) || (len <= 0)|| (last < 0)) {
+    throw new NumberFormatException();
+  }
+  unscaledBuffer=new StringBuilder(len);
+  int bufLength=0;
+  if ((offset <= last) && (in[offset] == '+')) {
+    offset++;
+    begin++;
+  }
+  int counter=0;
+  boolean wasNonZero=false;
+  for (; (offset <= last) && (in[offset] != '.') && (in[offset] != 'e')&& (in[offset] != 'E'); offset++) {
+    if (!wasNonZero) {
+      if (in[offset] == '0') {
+        counter++;
+      }
+ else {
+        wasNonZero=true;
+      }
+    }
+  }
+  unscaledBuffer.append(in,begin,offset - begin);
+  bufLength+=offset - begin;
+  if ((offset <= last) && (in[offset] == '.')) {
+    offset++;
+    begin=offset;
+    for (; (offset <= last) && (in[offset] != 'e') && (in[offset] != 'E'); offset++) {
+      if (!wasNonZero) {
+        if (in[offset] == '0') {
+          counter++;
+        }
+ else {
+          wasNonZero=true;
+        }
+      }
+    }
+    scale=offset - begin;
+    bufLength+=scale;
+    unscaledBuffer.append(in,begin,scale);
+  }
+ else {
+    scale=0;
+  }
+  if ((offset <= last) && ((in[offset] == 'e') || (in[offset] == 'E'))) {
+    offset++;
+    begin=offset;
+    if ((offset <= last) && (in[offset] == '+')) {
+      offset++;
+      if ((offset <= last) && (in[offset] != '-')) {
+        begin++;
+      }
+    }
+    scaleString=String.valueOf(in,begin,last + 1 - begin);
+    newScale=(long)scale - Integer.parseInt(scaleString);
+    scale=(int)newScale;
+    if (newScale != scale) {
+      throw new NumberFormatException(Messages.getString("math.02"));
+    }
+  }
+  if (bufLength < 19) {
+    smallValue=Long.parseLong(unscaledBuffer.toString());
+    bitLength=bitLength(smallValue);
+  }
+ else {
+    setUnscaledValue(new BigInteger(unscaledBuffer.toString()));
+  }
+  precision=unscaledBuffer.length() - counter;
+  if (unscaledBuffer.charAt(0) == '-') {
+    precision--;
+  }
+}

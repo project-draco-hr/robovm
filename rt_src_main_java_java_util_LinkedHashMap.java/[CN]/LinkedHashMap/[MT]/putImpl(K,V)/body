@@ -1,0 +1,38 @@
+{
+  LinkedHashMapEntry<K,V> m;
+  if (elementCount == 0) {
+    head=tail=null;
+  }
+  if (key == null) {
+    m=(LinkedHashMapEntry<K,V>)findNullKeyEntry();
+    if (m == null) {
+      modCount++;
+      if (++elementCount > threshold) {
+        rehash();
+      }
+      m=(LinkedHashMapEntry<K,V>)createHashedEntry(null,0,0);
+    }
+ else {
+      linkEntry(m);
+    }
+  }
+ else {
+    int hash=key.hashCode();
+    int index=(hash & 0x7FFFFFFF) % elementData.length;
+    m=(LinkedHashMapEntry<K,V>)findNonNullKeyEntry(key,index,hash);
+    if (m == null) {
+      modCount++;
+      if (++elementCount > threshold) {
+        rehash();
+        index=(hash & 0x7FFFFFFF) % elementData.length;
+      }
+      m=(LinkedHashMapEntry<K,V>)createHashedEntry(key,index,hash);
+    }
+ else {
+      linkEntry(m);
+    }
+  }
+  V result=m.value;
+  m.value=value;
+  return result;
+}

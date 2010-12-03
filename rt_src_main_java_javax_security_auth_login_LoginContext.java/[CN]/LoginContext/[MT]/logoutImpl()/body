@@ -1,0 +1,28 @@
+{
+  if (subject == null) {
+    throw new LoginException(Messages.getString("auth.38"));
+  }
+  loggedIn=false;
+  Throwable firstProblem=null;
+  int total=0;
+  for (  Module module : modules) {
+    try {
+      module.module.logout();
+      ++total;
+    }
+ catch (    Throwable ex) {
+      if (firstProblem == null) {
+        firstProblem=ex;
+      }
+    }
+  }
+  if (firstProblem != null || total == 0) {
+    if (firstProblem instanceof PrivilegedActionException && firstProblem.getCause() != null) {
+      firstProblem=firstProblem.getCause();
+    }
+    if (firstProblem instanceof LoginException) {
+      throw (LoginException)firstProblem;
+    }
+    throw (LoginException)new LoginException(Messages.getString("auth.37")).initCause(firstProblem);
+  }
+}

@@ -1,0 +1,27 @@
+{
+  Node<K,V> from;
+  int fromIndex;
+  if (subMap.hasStart) {
+    subMap.setFirstKey();
+    from=subMap.firstKeyNode;
+    fromIndex=subMap.firstKeyIndex;
+  }
+ else {
+    from=minimum(subMap.backingMap.root);
+    fromIndex=from != null ? from.left_idx : 0;
+  }
+  if (!subMap.hasEnd) {
+    return new UnboundedValueIterator<K,V>(subMap.backingMap,from,from == null ? 0 : fromIndex);
+  }
+  subMap.setLastKey();
+  Node<K,V> to=subMap.lastKeyNode;
+  int toIndex=subMap.lastKeyIndex + (subMap.lastKeyNode != null && (!subMap.lastKeyNode.keys[subMap.lastKeyIndex].equals(subMap.endKey)) ? 1 : 0);
+  if (to != null && toIndex > to.right_idx) {
+    to=to.next;
+    toIndex=to != null ? to.left_idx : 0;
+    if (to == null) {
+      return new UnboundedValueIterator<K,V>(subMap.backingMap,from,from == null ? 0 : fromIndex);
+    }
+  }
+  return new BoundedValueIterator<K,V>(from,from == null ? 0 : fromIndex,subMap.backingMap,to,to == null ? 0 : toIndex);
+}

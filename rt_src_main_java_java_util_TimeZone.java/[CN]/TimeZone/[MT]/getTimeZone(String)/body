@@ -1,0 +1,43 @@
+{
+  if (AvailableZones == null) {
+    initializeAvailable();
+  }
+  TimeZone zone=AvailableZones.get(name);
+  if (zone == null && isAvailableIDInICU(name)) {
+    appendAvailableZones(name);
+    zone=AvailableZones.get(name);
+  }
+  if (zone == null) {
+    if (name.startsWith("GMT") && name.length() > 3) {
+      char sign=name.charAt(3);
+      if (sign == '+' || sign == '-') {
+        int[] position=new int[1];
+        String formattedName=formatTimeZoneName(name,4);
+        int hour=parseNumber(formattedName,4,position);
+        if (hour < 0 || hour > 23) {
+          return (TimeZone)GMT.clone();
+        }
+        int index=position[0];
+        if (index != -1) {
+          int raw=hour * 3600000;
+          if (index < formattedName.length() && formattedName.charAt(index) == ':') {
+            int minute=parseNumber(formattedName,index + 1,position);
+            if (position[0] == -1 || minute < 0 || minute > 59) {
+              return (TimeZone)GMT.clone();
+            }
+            raw+=minute * 60000;
+          }
+ else           if (hour >= 30 || index > 6) {
+            raw=(hour / 100 * 3600000) + (hour % 100 * 60000);
+          }
+          if (sign == '-') {
+            raw=-raw;
+          }
+          return new SimpleTimeZone(raw,formattedName);
+        }
+      }
+    }
+    zone=GMT;
+  }
+  return (TimeZone)zone.clone();
+}

@@ -1,0 +1,40 @@
+{
+  GrantEntry ge=new GrantEntry();
+  parsing:   while (true) {
+switch (st.nextToken()) {
+case StreamTokenizer.TT_WORD:
+      if (Util.equalsIgnoreCase("signedby",st.sval)) {
+        if (st.nextToken() == '"') {
+          ge.signers=st.sval;
+        }
+ else {
+          handleUnexpectedToken(st,Messages.getString("security.8B"));
+        }
+      }
+ else       if (Util.equalsIgnoreCase("codebase",st.sval)) {
+        if (st.nextToken() == '"') {
+          ge.codebase=st.sval;
+        }
+ else {
+          handleUnexpectedToken(st,Messages.getString("security.8C"));
+        }
+      }
+ else       if (Util.equalsIgnoreCase("principal",st.sval)) {
+        ge.addPrincipal(readPrincipalEntry(st));
+      }
+ else {
+        handleUnexpectedToken(st);
+      }
+    break;
+case ',':
+  break;
+case '{':
+ge.permissions=readPermissionEntries(st);
+break parsing;
+default :
+st.pushBack();
+break parsing;
+}
+}
+return ge;
+}

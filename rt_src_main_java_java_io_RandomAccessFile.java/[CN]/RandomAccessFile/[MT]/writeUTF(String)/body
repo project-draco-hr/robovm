@@ -1,0 +1,38 @@
+{
+  int utfCount=0, length=str.length();
+  for (int i=0; i < length; i++) {
+    int charValue=str.charAt(i);
+    if (charValue > 0 && charValue <= 127) {
+      utfCount++;
+    }
+ else     if (charValue <= 2047) {
+      utfCount+=2;
+    }
+ else {
+      utfCount+=3;
+    }
+  }
+  if (utfCount > 65535) {
+    throw new UTFDataFormatException(Messages.getString("luni.AB"));
+  }
+  byte utfBytes[]=new byte[utfCount + 2];
+  int utfIndex=2;
+  for (int i=0; i < length; i++) {
+    int charValue=str.charAt(i);
+    if (charValue > 0 && charValue <= 127) {
+      utfBytes[utfIndex++]=(byte)charValue;
+    }
+ else     if (charValue <= 2047) {
+      utfBytes[utfIndex++]=(byte)(0xc0 | (0x1f & (charValue >> 6)));
+      utfBytes[utfIndex++]=(byte)(0x80 | (0x3f & charValue));
+    }
+ else {
+      utfBytes[utfIndex++]=(byte)(0xe0 | (0x0f & (charValue >> 12)));
+      utfBytes[utfIndex++]=(byte)(0x80 | (0x3f & (charValue >> 6)));
+      utfBytes[utfIndex++]=(byte)(0x80 | (0x3f & charValue));
+    }
+  }
+  utfBytes[0]=(byte)(utfCount >> 8);
+  utfBytes[1]=(byte)utfCount;
+  write(utfBytes);
+}

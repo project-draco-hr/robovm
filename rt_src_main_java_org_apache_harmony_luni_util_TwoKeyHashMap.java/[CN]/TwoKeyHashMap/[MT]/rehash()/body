@@ -1,0 +1,24 @@
+{
+  int newArrSize=(arrSize + 1) * 2 + 1;
+  if (newArrSize < 0) {
+    newArrSize=Integer.MAX_VALUE - 1;
+  }
+  Entry<E,K,V>[] newArr=new Entry[newArrSize + 1];
+  for (int i=0; i < arr.length - 1; i++) {
+    Entry<E,K,V> entry=arr[i];
+    while (entry != null) {
+      Entry<E,K,V> next=entry.next;
+      int newIndex=(entry.hash & 0x7fffffff) % newArrSize;
+      entry.next=newArr[newIndex];
+      newArr[newIndex]=entry;
+      entry=next;
+    }
+  }
+  newArr[newArrSize]=arr[arrSize];
+  arrSize=newArrSize;
+  if (arrSize == Integer.MAX_VALUE) {
+    loadFactor*=10;
+  }
+  threshold=(int)(arrSize * loadFactor);
+  arr=newArr;
+}

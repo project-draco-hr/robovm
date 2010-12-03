@@ -1,0 +1,41 @@
+{
+  if (tasks == null || unit == null)   throw new NullPointerException();
+  long nanos=unit.toNanos(timeout);
+  List<Future<T>> futures=new ArrayList<Future<T>>(tasks.size());
+  boolean done=false;
+  try {
+    for (    Callable<T> t : tasks)     futures.add(newTaskFor(t));
+    long lastTime=System.nanoTime();
+    Iterator<Future<T>> it=futures.iterator();
+    while (it.hasNext()) {
+      execute((Runnable)(it.next()));
+      long now=System.nanoTime();
+      nanos-=now - lastTime;
+      lastTime=now;
+      if (nanos <= 0)       return futures;
+    }
+    for (    Future<T> f : futures) {
+      if (!f.isDone()) {
+        if (nanos <= 0)         return futures;
+        try {
+          f.get(nanos,TimeUnit.NANOSECONDS);
+        }
+ catch (        CancellationException ignore) {
+        }
+catch (        ExecutionException ignore) {
+        }
+catch (        TimeoutException toe) {
+          return futures;
+        }
+        long now=System.nanoTime();
+        nanos-=now - lastTime;
+        lastTime=now;
+      }
+    }
+    done=true;
+    return futures;
+  }
+  finally {
+    if (!done)     for (    Future<T> f : futures)     f.cancel(true);
+  }
+}

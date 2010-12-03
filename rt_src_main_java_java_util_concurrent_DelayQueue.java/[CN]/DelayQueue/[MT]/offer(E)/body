@@ -1,0 +1,15 @@
+{
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    q.offer(e);
+    if (q.peek() == e) {
+      leader=null;
+      available.signal();
+    }
+    return true;
+  }
+  finally {
+    lock.unlock();
+  }
+}

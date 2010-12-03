@@ -1,0 +1,32 @@
+{
+  StringBuilder line=new StringBuilder(80);
+  boolean foundTerminator=false;
+  while (true) {
+    int nextByte=in.read();
+switch (nextByte) {
+case -1:
+      if (line.length() == 0 && !foundTerminator) {
+        return null;
+      }
+    return line.toString();
+case (byte)'\r':
+  if (foundTerminator) {
+    ((PushbackInputStream)in).unread(nextByte);
+    return line.toString();
+  }
+foundTerminator=true;
+if (!(in.getClass() == PushbackInputStream.class)) {
+in=new PushbackInputStream(in);
+}
+break;
+case (byte)'\n':
+return line.toString();
+default :
+if (foundTerminator) {
+((PushbackInputStream)in).unread(nextByte);
+return line.toString();
+}
+line.append((char)nextByte);
+}
+}
+}

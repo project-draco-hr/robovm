@@ -1,0 +1,19 @@
+{
+  if (qNameAsString == null) {
+    throw new IllegalArgumentException("cannot create QName from \"null\" or \"\" String");
+  }
+  if (qNameAsString.length() == 0) {
+    return new QName(XMLConstants.NULL_NS_URI,qNameAsString,XMLConstants.DEFAULT_NS_PREFIX);
+  }
+  if (qNameAsString.charAt(0) != '{') {
+    return new QName(XMLConstants.NULL_NS_URI,qNameAsString,XMLConstants.DEFAULT_NS_PREFIX);
+  }
+  if (qNameAsString.startsWith("{" + XMLConstants.NULL_NS_URI + "}")) {
+    throw new IllegalArgumentException("Namespace URI .equals(XMLConstants.NULL_NS_URI), " + ".equals(\"" + XMLConstants.NULL_NS_URI + "\"), "+ "only the local part, "+ "\""+ qNameAsString.substring(2 + XMLConstants.NULL_NS_URI.length())+ "\", "+ "should be provided.");
+  }
+  int endOfNamespaceURI=qNameAsString.indexOf('}');
+  if (endOfNamespaceURI == -1) {
+    throw new IllegalArgumentException("cannot create QName from \"" + qNameAsString + "\", missing closing \"}\"");
+  }
+  return new QName(qNameAsString.substring(1,endOfNamespaceURI),qNameAsString.substring(endOfNamespaceURI + 1),XMLConstants.DEFAULT_NS_PREFIX);
+}

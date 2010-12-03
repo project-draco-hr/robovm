@@ -1,0 +1,63 @@
+{
+  int[] codePoints=new int[Lexer.MAX_DECOMPOSITION_LENGTH];
+  char[] codePointsHangul;
+  int readCodePoints=0;
+  int curSymb=-1;
+  int curSymbIndex=-1;
+  if (!lexemes.isEmpty() && lexemes.isLetter()) {
+    curSymb=lexemes.next();
+    codePoints[readCodePoints]=curSymb;
+    curSymbIndex=curSymb - Lexer.LBase;
+  }
+  if ((curSymbIndex >= 0) && (curSymbIndex < Lexer.LCount)) {
+    codePointsHangul=new char[Lexer.MAX_HANGUL_DECOMPOSITION_LENGTH];
+    codePointsHangul[readCodePoints++]=(char)curSymb;
+    curSymb=lexemes.peek();
+    curSymbIndex=curSymb - Lexer.VBase;
+    if ((curSymbIndex >= 0) && (curSymbIndex < Lexer.VCount)) {
+      codePointsHangul[readCodePoints++]=(char)curSymb;
+      lexemes.next();
+      curSymb=lexemes.peek();
+      curSymbIndex=curSymb - Lexer.TBase;
+      if ((curSymbIndex >= 0) && (curSymbIndex < Lexer.TCount)) {
+        codePointsHangul[readCodePoints++]=(char)curSymb;
+        lexemes.next();
+        return new HangulDecomposedCharSet(codePointsHangul,3);
+      }
+ else {
+        return new HangulDecomposedCharSet(codePointsHangul,2);
+      }
+    }
+ else {
+      if (!hasFlag(Pattern.CASE_INSENSITIVE)) {
+        return new CharSet(codePointsHangul[0]);
+      }
+ else       if (!hasFlag(Pattern.UNICODE_CASE)) {
+        return new CICharSet(codePointsHangul[0]);
+      }
+ else {
+        return new UCICharSet(codePointsHangul[0]);
+      }
+    }
+  }
+ else {
+    readCodePoints++;
+    while ((readCodePoints < Lexer.MAX_DECOMPOSITION_LENGTH) && !lexemes.isEmpty() && lexemes.isLetter()&& !Lexer.isDecomposedCharBoundary(lexemes.peek())) {
+      codePoints[readCodePoints++]=lexemes.next();
+    }
+    if (readCodePoints == 1 && !Lexer.hasSingleCodepointDecomposition(codePoints[0])) {
+      return processCharSet(codePoints[0]);
+    }
+ else {
+      if (!hasFlag(Pattern.CASE_INSENSITIVE)) {
+        return new DecomposedCharSet(codePoints,readCodePoints);
+      }
+ else       if (!hasFlag(Pattern.UNICODE_CASE)) {
+        return new CIDecomposedCharSet(codePoints,readCodePoints);
+      }
+ else {
+        return new UCIDecomposedCharSet(codePoints,readCodePoints);
+      }
+    }
+  }
+}

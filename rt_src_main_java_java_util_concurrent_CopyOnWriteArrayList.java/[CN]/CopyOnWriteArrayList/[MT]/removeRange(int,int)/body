@@ -1,0 +1,21 @@
+{
+  lock.lock();
+  try {
+    int sizeArr=size();
+    checkIndexExlusive(start,sizeArr);
+    checkIndexInclusive(start + size,sizeArr);
+    E[] data;
+    data=newElementArray(sizeArr - size);
+    E[] oldArr=getData();
+    System.arraycopy(oldArr,0,data,0,start);
+    E old=oldArr[start];
+    if (sizeArr > (start + size)) {
+      System.arraycopy(oldArr,start + size,data,start,sizeArr - (start + size));
+    }
+    setData(data);
+    return old;
+  }
+  finally {
+    lock.unlock();
+  }
+}

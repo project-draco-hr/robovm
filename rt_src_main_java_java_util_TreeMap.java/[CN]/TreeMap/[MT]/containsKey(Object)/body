@@ -1,0 +1,46 @@
+{
+  Comparable<K> object=comparator == null ? toComparable((K)key) : null;
+  K keyK=(K)key;
+  Node<K,V> node=root;
+  while (node != null) {
+    K[] keys=node.keys;
+    int left_idx=node.left_idx;
+    int result=object != null ? object.compareTo(keys[left_idx]) : -comparator.compare(keys[left_idx],keyK);
+    if (result < 0) {
+      node=node.left;
+    }
+ else     if (result == 0) {
+      return true;
+    }
+ else {
+      int right_idx=node.right_idx;
+      if (left_idx != right_idx) {
+        result=cmp(object,keyK,keys[right_idx]);
+      }
+      if (result > 0) {
+        node=node.right;
+      }
+ else       if (result == 0) {
+        return true;
+      }
+ else {
+        int low=left_idx + 1, mid=0, high=right_idx - 1;
+        while (low <= high) {
+          mid=(low + high) >>> 1;
+          result=cmp(object,keyK,keys[mid]);
+          if (result > 0) {
+            low=mid + 1;
+          }
+ else           if (result == 0) {
+            return true;
+          }
+ else {
+            high=mid - 1;
+          }
+        }
+        return false;
+      }
+    }
+  }
+  return false;
+}

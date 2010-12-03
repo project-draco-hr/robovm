@@ -1,0 +1,13 @@
+{
+  super("DSA");
+  SubjectPublicKeyInfo spki;
+  p=keySpec.getP();
+  q=keySpec.getQ();
+  g=keySpec.getG();
+  ThreeIntegerSequence threeInts=new ThreeIntegerSequence(p.toByteArray(),q.toByteArray(),g.toByteArray());
+  AlgorithmIdentifier ai=new AlgorithmIdentifier(AlgNameMapper.map2OID("DSA"),threeInts.getEncoded());
+  y=keySpec.getY();
+  spki=new SubjectPublicKeyInfo(ai,ASN1Integer.getInstance().encode(y.toByteArray()));
+  setEncoding(spki.getEncoded());
+  params=(DSAParams)(new DSAParameterSpec(p,q,g));
+}

@@ -1,0 +1,23 @@
+{
+  oos.defaultWriteObject();
+  if (certs == null || certs.length == 0) {
+    oos.writeInt(0);
+  }
+ else {
+    oos.writeInt(certs.length);
+    for (int i=0; i < certs.length; i++) {
+      try {
+        oos.writeUTF(certs[i].getType());
+        byte[] data=certs[i].getEncoded();
+        oos.writeInt(data.length);
+        oos.write(data);
+      }
+ catch (      CertificateEncodingException ex) {
+        throw (IOException)new IOException(Messages.getString("security.18")).initCause(ex);
+      }
+    }
+  }
+  if (signers != null && signers.length != 0) {
+    oos.writeObject(signers);
+  }
+}

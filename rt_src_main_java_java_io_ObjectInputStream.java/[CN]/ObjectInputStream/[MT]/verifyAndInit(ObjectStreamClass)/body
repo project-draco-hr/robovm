@@ -1,0 +1,13 @@
+{
+  Class<?> localClass=loadedStreamClass.forClass();
+  ObjectStreamClass localStreamClass=ObjectStreamClass.lookupStreamClass(localClass);
+  if (loadedStreamClass.getSerialVersionUID() != localStreamClass.getSerialVersionUID()) {
+    throw new InvalidClassException(loadedStreamClass.getName(),Messages.getString("luni.C3",loadedStreamClass,localStreamClass));
+  }
+  String loadedClassBaseName=getBaseName(loadedStreamClass.getName());
+  String localClassBaseName=getBaseName(localStreamClass.getName());
+  if (!loadedClassBaseName.equals(localClassBaseName)) {
+    throw new InvalidClassException(loadedStreamClass.getName(),Messages.getString("luni.C7",loadedClassBaseName,localClassBaseName));
+  }
+  loadedStreamClass.initPrivateFields(localStreamClass);
+}

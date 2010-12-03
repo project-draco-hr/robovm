@@ -1,0 +1,41 @@
+{
+  if (certificate == null) {
+    throw new NullPointerException();
+  }
+  if (!entriesRetrieved) {
+    retrieveEntries();
+  }
+  if (entries == null) {
+    return null;
+  }
+  BigInteger serialN=certificate.getSerialNumber();
+  if (isIndirectCRL) {
+    X500Principal certIssuer=certificate.getIssuerX500Principal();
+    if (certIssuer.equals(getIssuerX500Principal())) {
+      certIssuer=null;
+    }
+    for (int i=0; i < entriesSize; i++) {
+      X509CRLEntry entry=(X509CRLEntry)entries.get(i);
+      if (serialN.equals(entry.getSerialNumber())) {
+        X500Principal iss=entry.getCertificateIssuer();
+        if (certIssuer != null) {
+          if (certIssuer.equals(iss)) {
+            return entry;
+          }
+        }
+ else         if (iss == null) {
+          return entry;
+        }
+      }
+    }
+  }
+ else {
+    for (int i=0; i < entriesSize; i++) {
+      X509CRLEntry entry=(X509CRLEntry)entries.get(i);
+      if (serialN.equals(entry.getSerialNumber())) {
+        return entry;
+      }
+    }
+  }
+  return null;
+}

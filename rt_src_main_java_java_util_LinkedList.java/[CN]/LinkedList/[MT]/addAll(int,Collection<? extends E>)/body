@@ -1,0 +1,32 @@
+{
+  if (location < 0 || location > size) {
+    throw new IndexOutOfBoundsException();
+  }
+  int adding=collection.size();
+  if (adding == 0) {
+    return false;
+  }
+  Collection<? extends E> elements=(collection == this) ? new ArrayList<E>(collection) : collection;
+  Link<E> previous=voidLink;
+  if (location < (size / 2)) {
+    for (int i=0; i < location; i++) {
+      previous=previous.next;
+    }
+  }
+ else {
+    for (int i=size; i >= location; i--) {
+      previous=previous.previous;
+    }
+  }
+  Link<E> next=previous.next;
+  for (  E e : elements) {
+    Link<E> newLink=new Link<E>(e,previous,null);
+    previous.next=newLink;
+    previous=newLink;
+  }
+  previous.next=next;
+  next.previous=previous;
+  size+=adding;
+  modCount++;
+  return true;
+}

@@ -1,0 +1,45 @@
+{
+  InputStream is=null;
+  byte[] clBuf=null;
+  try {
+    is=jf.getInputStream(entry);
+    clBuf=getBytes(is);
+  }
+ catch (  IOException e) {
+    return null;
+  }
+ finally {
+    if (is != null) {
+      try {
+        is.close();
+      }
+ catch (      IOException e) {
+      }
+    }
+  }
+  if (packageName != null) {
+    String packageDotName=packageName.replace('/','.');
+    Package packageObj=getPackage(packageDotName);
+    if (packageObj == null) {
+      if (manifest != null) {
+        definePackage(packageDotName,manifest,codeSourceUrl);
+      }
+ else {
+        definePackage(packageDotName,null,null,null,null,null,null,null);
+      }
+    }
+ else {
+      boolean exception=packageObj.isSealed();
+      if (manifest != null) {
+        if (isSealed(manifest,packageName + "/")) {
+          exception=!packageObj.isSealed(codeSourceUrl);
+        }
+      }
+      if (exception) {
+        throw new SecurityException(Messages.getString("luni.A1",packageName));
+      }
+    }
+  }
+  CodeSource codeS=new CodeSource(codeSourceUrl,entry.getCertificates());
+  return defineClass(origName,clBuf,0,clBuf.length,codeS);
+}

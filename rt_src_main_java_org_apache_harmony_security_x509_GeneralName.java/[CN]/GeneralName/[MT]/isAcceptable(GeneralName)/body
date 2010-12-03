@@ -1,0 +1,60 @@
+{
+  if (this.tag != gname.getTag()) {
+    return false;
+  }
+switch (this.tag) {
+case RFC822_NAME:
+    return ((String)gname.getName()).toLowerCase().endsWith(((String)name).toLowerCase());
+case DNS_NAME:
+  String dns=(String)name;
+String _dns=(String)gname.getName();
+if (dns.equalsIgnoreCase(_dns)) {
+return true;
+}
+ else {
+return _dns.toLowerCase().endsWith("." + dns.toLowerCase());
+}
+case UR_ID:
+String uri=(String)name;
+int begin=uri.indexOf("://") + 3;
+int end=uri.indexOf('/',begin);
+String host=(end == -1) ? uri.substring(begin) : uri.substring(begin,end);
+uri=(String)gname.getName();
+begin=uri.indexOf("://") + 3;
+end=uri.indexOf('/',begin);
+String _host=(end == -1) ? uri.substring(begin) : uri.substring(begin,end);
+if (host.startsWith(".")) {
+return _host.toLowerCase().endsWith(host.toLowerCase());
+}
+ else {
+return host.equalsIgnoreCase(_host);
+}
+case IP_ADDR:
+byte[] address=(byte[])name;
+byte[] _address=(byte[])gname.getName();
+int length=address.length;
+int _length=_address.length;
+if (length == _length) {
+return Arrays.equals(address,_address);
+}
+ else if (length == 2 * _length) {
+for (int i=0; i < _address.length; i++) {
+if ((_address[i] < address[i]) || (_address[i] > address[i + _length])) {
+return false;
+}
+}
+return true;
+}
+ else {
+return false;
+}
+case DIR_NAME:
+case X400_ADDR:
+case OTHER_NAME:
+case EDIP_NAME:
+case REG_ID:
+return Arrays.equals(getEncoded(),gname.getEncoded());
+default :
+}
+return true;
+}

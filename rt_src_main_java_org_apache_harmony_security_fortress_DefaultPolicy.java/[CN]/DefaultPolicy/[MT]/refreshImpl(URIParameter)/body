@@ -1,0 +1,34 @@
+{
+  Set<PolicyEntry> fresh=new HashSet<PolicyEntry>();
+  Properties system=new Properties(AccessController.doPrivileged(new PolicyUtils.SystemKit()));
+  system.setProperty("/",File.separator);
+  URL[] policyLocations=PolicyUtils.getPolicyURLs(system,JAVA_SECURITY_POLICY,POLICY_URL_PREFIX);
+  boolean needLoadSysProp=true;
+  if (para != null) {
+    try {
+      URL paramURL=para.getURI().toURL();
+      fresh.addAll(parser.parse(paramURL,system));
+      needLoadSysProp=false;
+    }
+ catch (    MalformedURLException e) {
+      throw new IllegalArgumentException(e);
+    }
+catch (    Exception e) {
+    }
+  }
+  if (needLoadSysProp) {
+    for (int i=0; i < policyLocations.length; i++) {
+      try {
+        fresh.addAll(parser.parse(policyLocations[i],system));
+      }
+ catch (      Exception e) {
+      }
+    }
+  }
+synchronized (cache) {
+    grants.clear();
+    grants.addAll(fresh);
+    cache.clear();
+  }
+  initialized=true;
+}

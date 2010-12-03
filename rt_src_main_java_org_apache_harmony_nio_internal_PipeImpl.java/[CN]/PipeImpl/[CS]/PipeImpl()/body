@@ -1,0 +1,27 @@
+{
+  super();
+  sink=new SinkChannelImpl(SelectorProvider.provider());
+  source=new SourceChannelImpl(SelectorProvider.provider());
+  try {
+    AccessController.doPrivileged(new PrivilegedExceptionAction<Void>(){
+      public Void run() throws Exception {
+        sink.finishConnect();
+        source.accept();
+        source.closeServer();
+        return null;
+      }
+    }
+);
+  }
+ catch (  PrivilegedActionException e) {
+    reset();
+    Exception ex=e.getException();
+    if (ex instanceof IOException) {
+      throw (IOException)ex;
+    }
+    if (ex instanceof RuntimeException) {
+      throw (RuntimeException)ex;
+    }
+    throw new RuntimeException(ex);
+  }
+}

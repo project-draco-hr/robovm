@@ -1,0 +1,22 @@
+{
+  if (protParam == null) {
+    return null;
+  }
+  if (!(protParam instanceof KeyStore.CallbackHandlerProtection)) {
+    throw new UnrecoverableEntryException(Messages.getString("security.3C"));
+  }
+  String clName=Security.getProperty("auth.login.defaultCallbackHandler");
+  if (clName == null) {
+    throw new UnrecoverableEntryException(Messages.getString("security.3D"));
+  }
+  try {
+    Class<?> cl=Class.forName(clName);
+    CallbackHandler cbHand=(CallbackHandler)cl.newInstance();
+    PasswordCallback[] pwCb={new PasswordCallback("password: ",true)};
+    cbHand.handle(pwCb);
+    return pwCb[0].getPassword();
+  }
+ catch (  Exception e) {
+    throw new UnrecoverableEntryException(e.toString());
+  }
+}

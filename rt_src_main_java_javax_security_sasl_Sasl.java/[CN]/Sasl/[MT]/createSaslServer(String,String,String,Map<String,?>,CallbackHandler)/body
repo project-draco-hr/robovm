@@ -1,0 +1,30 @@
+{
+  if (mechanism == null) {
+    throw new NullPointerException(Messages.getString("auth.32"));
+  }
+  Collection<?> res=findFactories(SERVERFACTORYSRV);
+  if (res.isEmpty()) {
+    return null;
+  }
+  Iterator<?> iter=res.iterator();
+  while (iter.hasNext()) {
+    SaslServerFactory fact=(SaslServerFactory)iter.next();
+    String[] mech=fact.getMechanismNames(null);
+    boolean is=false;
+    if (mech != null) {
+      for (int j=0; j < mech.length; j++) {
+        if (mech[j].equals(mechanism)) {
+          is=true;
+          break;
+        }
+      }
+    }
+    if (is) {
+      SaslServer saslS=fact.createSaslServer(mechanism,protocol,serverName,prop,cbh);
+      if (saslS != null) {
+        return saslS;
+      }
+    }
+  }
+  return null;
+}

@@ -1,0 +1,26 @@
+{
+  Inet6Address address=Inet6Address.getByAddress(host,addr,0);
+  if (null == nif) {
+    return address;
+  }
+  Enumeration<InetAddress> addressList=nif.getInetAddresses();
+  while (addressList.hasMoreElements()) {
+    InetAddress ia=addressList.nextElement();
+    if (ia.getAddress().length == 16) {
+      Inet6Address v6ia=(Inet6Address)ia;
+      boolean isSameType=v6ia.compareLocalType(address);
+      if (isSameType) {
+        address.scope_id_set=true;
+        address.scope_id=v6ia.scope_id;
+        address.scope_ifname_set=true;
+        address.ifname=nif.getName();
+        address.scopedIf=nif;
+        break;
+      }
+    }
+  }
+  if (!address.scope_id_set) {
+    throw new UnknownHostException(Messages.getString("luni.63"));
+  }
+  return address;
+}

@@ -1,0 +1,14 @@
+{
+  AddressWrapper wrapper;
+synchronized (this) {
+    PlatformAddress shadow=refToShadow.remove(ref);
+    wrapper=memoryInUse.get(shadow);
+    if (wrapper != null) {
+      if (!wrapper.autoFree) {
+        System.err.println("Memory Spy! Fixed memory leak by freeing " + wrapper.shadow);
+      }
+      wrapper.shadow.free();
+    }
+  }
+  ref.clear();
+}

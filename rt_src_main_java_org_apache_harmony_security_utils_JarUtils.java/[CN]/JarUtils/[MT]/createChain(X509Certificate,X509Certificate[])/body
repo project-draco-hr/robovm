@@ -1,0 +1,23 @@
+{
+  LinkedList chain=new LinkedList();
+  chain.add(0,signer);
+  if (signer.getSubjectDN().equals(signer.getIssuerDN())) {
+    return (X509Certificate[])chain.toArray(new X509Certificate[1]);
+  }
+  Principal issuer=signer.getIssuerDN();
+  X509Certificate issuerCert;
+  int count=1;
+  while (true) {
+    issuerCert=findCert(issuer,candidates);
+    if (issuerCert == null) {
+      break;
+    }
+    chain.add(issuerCert);
+    count++;
+    if (issuerCert.getSubjectDN().equals(issuerCert.getIssuerDN())) {
+      break;
+    }
+    issuer=issuerCert.getIssuerDN();
+  }
+  return (X509Certificate[])chain.toArray(new X509Certificate[count]);
+}

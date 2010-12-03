@@ -1,0 +1,17 @@
+{
+  ObjectInputStream.GetField fields=in.readFields();
+  items=new HashMap<String,Permission>();
+synchronized (this) {
+    permClass=(Class<? extends Permission>)fields.get("permClass",null);
+    items.putAll((Hashtable<String,Permission>)fields.get("permissions",new Hashtable<String,Permission>()));
+    for (Iterator<Permission> iter=items.values().iterator(); iter.hasNext(); ) {
+      if (iter.next().getClass() != permClass) {
+        throw new InvalidObjectException(Messages.getString("security.24"));
+      }
+    }
+    allEnabled=fields.get("all_allowed",false);
+    if (allEnabled && !items.containsKey("*")) {
+      throw new InvalidObjectException(Messages.getString("security.25"));
+    }
+  }
+}

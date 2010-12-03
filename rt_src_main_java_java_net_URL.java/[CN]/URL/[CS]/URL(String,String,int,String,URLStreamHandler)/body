@@ -1,0 +1,37 @@
+{
+  if (port < -1) {
+    throw new MalformedURLException(Messages.getString("luni.56",port));
+  }
+  if (host != null && host.indexOf(":") != -1 && host.charAt(0) != '[') {
+    host="[" + host + "]";
+  }
+  if (protocol == null) {
+    throw new NullPointerException(Messages.getString("luni.9C","null"));
+  }
+  this.protocol=protocol;
+  this.host=host;
+  this.port=port;
+  int index=-1;
+  index=file.indexOf("#",file.lastIndexOf("/"));
+  if (index >= 0) {
+    this.file=file.substring(0,index);
+    ref=file.substring(index + 1);
+  }
+ else {
+    this.file=file;
+  }
+  fixURL(false);
+  if (handler == null) {
+    setupStreamHandler();
+    if (strmHandler == null) {
+      throw new MalformedURLException(Messages.getString("luni.9C",protocol));
+    }
+  }
+ else {
+    SecurityManager sm=System.getSecurityManager();
+    if (sm != null) {
+      sm.checkPermission(specifyStreamHandlerPermission);
+    }
+    strmHandler=handler;
+  }
+}

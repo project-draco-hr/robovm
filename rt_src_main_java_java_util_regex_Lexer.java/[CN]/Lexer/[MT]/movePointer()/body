@@ -1,0 +1,332 @@
+{
+  lookBack=ch;
+  ch=lookAhead;
+  curST=lookAheadST;
+  curToc=lookAheadToc;
+  lookAheadToc=index;
+  boolean reread;
+  do {
+    reread=false;
+    lookAhead=(index < pattern.length) ? nextCodePoint() : 0;
+    lookAheadST=null;
+    if (mode == Lexer.MODE_ESCAPE) {
+      if (lookAhead == '\\') {
+        lookAhead=(index < pattern.length) ? pattern[nextIndex()] : 0;
+switch (lookAhead) {
+case 'E':
+{
+            mode=saved_mode;
+            lookAhead=(index <= pattern.length - 2) ? nextCodePoint() : 0;
+            break;
+          }
+default :
+{
+          lookAhead='\\';
+          index=prevNW;
+          return;
+        }
+    }
+  }
+ else {
+    return;
+  }
+}
+if (lookAhead == '\\') {
+  lookAhead=(index < pattern.length - 2) ? nextCodePoint() : -1;
+switch (lookAhead) {
+case -1:
+    throw new PatternSyntaxException(Messages.getString("regex.10"),this.toString(),index);
+case 'P':
+case 'p':
+{
+    String cs=parseCharClassName();
+    boolean negative=false;
+    if (lookAhead == 'P')     negative=true;
+    ;
+    try {
+      lookAheadST=AbstractCharClass.getPredefinedClass(cs,negative);
+    }
+ catch (    MissingResourceException mre) {
+      throw new PatternSyntaxException(Messages.getString("regex.11",cs),this.toString(),index);
+    }
+    lookAhead=0;
+    break;
+  }
+case 'w':
+case 's':
+case 'd':
+case 'W':
+case 'S':
+case 'D':
+{
+  lookAheadST=CharClass.getPredefinedClass(new String(pattern,prevNW,1),false);
+  lookAhead=0;
+  break;
+}
+case 'Q':
+{
+saved_mode=mode;
+mode=Lexer.MODE_ESCAPE;
+reread=true;
+break;
+}
+case 't':
+lookAhead='\t';
+break;
+case 'n':
+lookAhead='\n';
+break;
+case 'r':
+lookAhead='\r';
+break;
+case 'f':
+lookAhead='\f';
+break;
+case 'a':
+lookAhead='\u0007';
+break;
+case 'e':
+lookAhead='\u001B';
+break;
+case '1':
+case '2':
+case '3':
+case '4':
+case '5':
+case '6':
+case '7':
+case '8':
+case '9':
+{
+if (mode == Lexer.MODE_PATTERN) {
+lookAhead=0x80000000 | lookAhead;
+}
+break;
+}
+case '0':
+lookAhead=readOctals();
+break;
+case 'x':
+lookAhead=readHex("hexadecimal",2);
+break;
+case 'u':
+lookAhead=readHex("Unicode",4);
+break;
+case 'b':
+lookAhead=CHAR_WORD_BOUND;
+break;
+case 'B':
+lookAhead=CHAR_NONWORD_BOUND;
+break;
+case 'A':
+lookAhead=CHAR_START_OF_INPUT;
+break;
+case 'G':
+lookAhead=CHAR_PREVIOUS_MATCH;
+break;
+case 'Z':
+lookAhead=CHAR_END_OF_LINE;
+break;
+case 'z':
+lookAhead=CHAR_END_OF_INPUT;
+break;
+case 'c':
+{
+if (index < pattern.length - 2) {
+lookAhead=(pattern[nextIndex()] & 0x1f);
+break;
+}
+ else {
+throw new PatternSyntaxException(Messages.getString("regex.12"),this.toString(),index);
+}
+}
+case 'C':
+case 'E':
+case 'F':
+case 'H':
+case 'I':
+case 'J':
+case 'K':
+case 'L':
+case 'M':
+case 'N':
+case 'O':
+case 'R':
+case 'T':
+case 'U':
+case 'V':
+case 'X':
+case 'Y':
+case 'g':
+case 'h':
+case 'i':
+case 'j':
+case 'k':
+case 'l':
+case 'm':
+case 'o':
+case 'q':
+case 'y':
+throw new PatternSyntaxException(Messages.getString("regex.13"),this.toString(),index);
+default :
+break;
+}
+}
+ else if (mode == Lexer.MODE_PATTERN) {
+switch (lookAhead) {
+case '+':
+case '*':
+case '?':
+{
+char mod=(index < pattern.length) ? pattern[index] : '*';
+switch (mod) {
+case '+':
+{
+lookAhead=lookAhead | Lexer.QMOD_POSSESSIVE;
+nextIndex();
+break;
+}
+case '?':
+{
+lookAhead=lookAhead | Lexer.QMOD_RELUCTANT;
+nextIndex();
+break;
+}
+default :
+{
+lookAhead=lookAhead | Lexer.QMOD_GREEDY;
+break;
+}
+}
+break;
+}
+case '{':
+{
+lookAheadST=processQuantifier(lookAhead);
+break;
+}
+case '$':
+lookAhead=CHAR_DOLLAR;
+break;
+case '(':
+{
+if (pattern[index] == '?') {
+nextIndex();
+char nonCap=pattern[index];
+boolean behind=false;
+do {
+if (!behind) {
+switch (nonCap) {
+case '!':
+lookAhead=CHAR_NEG_LOOKAHEAD;
+nextIndex();
+break;
+case '=':
+lookAhead=CHAR_POS_LOOKAHEAD;
+nextIndex();
+break;
+case '>':
+lookAhead=CHAR_ATOMIC_GROUP;
+nextIndex();
+break;
+case '<':
+{
+nextIndex();
+nonCap=pattern[index];
+behind=true;
+break;
+}
+default :
+{
+lookAhead=readFlags();
+if (lookAhead >= 256) {
+lookAhead=(lookAhead & 0xff);
+flags=lookAhead;
+lookAhead=lookAhead << 16;
+lookAhead=CHAR_FLAGS | lookAhead;
+}
+ else {
+flags=lookAhead;
+lookAhead=lookAhead << 16;
+lookAhead=CHAR_NONCAP_GROUP | lookAhead;
+}
+break;
+}
+}
+}
+ else {
+behind=false;
+switch (nonCap) {
+case '!':
+lookAhead=CHAR_NEG_LOOKBEHIND;
+nextIndex();
+break;
+case '=':
+lookAhead=CHAR_POS_LOOKBEHIND;
+nextIndex();
+break;
+default :
+throw new PatternSyntaxException(Messages.getString("regex.14"),this.toString(),index);
+}
+}
+}
+ while (behind);
+}
+ else {
+lookAhead=CHAR_LEFT_PARENTHESIS;
+}
+break;
+}
+case ')':
+lookAhead=CHAR_RIGHT_PARENTHESIS;
+break;
+case '[':
+{
+lookAhead=CHAR_LEFT_SQUARE_BRACKET;
+setMode(Lexer.MODE_RANGE);
+break;
+}
+case ']':
+{
+if (mode == Lexer.MODE_RANGE) {
+lookAhead=CHAR_RIGHT_SQUARE_BRACKET;
+}
+break;
+}
+case '^':
+lookAhead=CHAR_CARET;
+break;
+case '|':
+lookAhead=CHAR_VERTICAL_BAR;
+break;
+case '.':
+lookAhead=CHAR_DOT;
+break;
+default :
+break;
+}
+}
+ else if (mode == Lexer.MODE_RANGE) {
+switch (lookAhead) {
+case '[':
+lookAhead=CHAR_LEFT_SQUARE_BRACKET;
+break;
+case ']':
+lookAhead=CHAR_RIGHT_SQUARE_BRACKET;
+break;
+case '^':
+lookAhead=CHAR_CARET;
+break;
+case '&':
+lookAhead=CHAR_AMPERSAND;
+break;
+case '-':
+lookAhead=CHAR_HYPHEN;
+break;
+default :
+break;
+}
+}
+}
+ while (reread);
+}

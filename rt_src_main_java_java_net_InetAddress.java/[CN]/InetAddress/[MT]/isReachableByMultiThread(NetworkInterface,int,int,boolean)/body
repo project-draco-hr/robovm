@@ -1,0 +1,73 @@
+{
+  if (null == netif.addresses) {
+    return false;
+  }
+  Enumeration<InetAddress> addresses=netif.getInetAddresses();
+  reached=false;
+  addrCount=netif.addresses.size();
+  boolean needWait=false;
+  while (addresses.hasMoreElements()) {
+    final InetAddress addr=addresses.nextElement();
+    if (addr.isLoopbackAddress()) {
+      Enumeration<NetworkInterface> NetworkInterfaces=NetworkInterface.getNetworkInterfaces();
+      while (NetworkInterfaces.hasMoreElements()) {
+        NetworkInterface networkInterface=NetworkInterfaces.nextElement();
+        Enumeration<InetAddress> localAddresses=networkInterface.getInetAddresses();
+        while (localAddresses.hasMoreElements()) {
+          if (InetAddress.this.equals(localAddresses.nextElement())) {
+            return true;
+          }
+        }
+      }
+synchronized (waitReachable) {
+        addrCount--;
+        if (addrCount == 0) {
+          waitReachable.notifyAll();
+        }
+      }
+      continue;
+    }
+    needWait=true;
+    new Thread(){
+      @Override public void run(){
+        boolean threadReached=false;
+        if (isICMP) {
+          threadReached=NETIMPL.isReachableByICMP(addr,InetAddress.this,ttl,timeout);
+        }
+ else {
+          try {
+            threadReached=isReachableByTCP(addr,InetAddress.this,timeout);
+          }
+ catch (          IOException e) {
+          }
+        }
+synchronized (waitReachable) {
+          if (threadReached) {
+            reached=true;
+            waitReachable.notifyAll();
+          }
+ else {
+            addrCount--;
+            if (0 == addrCount) {
+              waitReachable.notifyAll();
+            }
+          }
+        }
+      }
+    }
+.start();
+  }
+  if (needWait) {
+synchronized (waitReachable) {
+      try {
+        while (!reached && (addrCount != 0)) {
+          waitReachable.wait(1000);
+        }
+      }
+ catch (      InterruptedException e) {
+      }
+      return reached;
+    }
+  }
+  return false;
+}

@@ -1,0 +1,22 @@
+{
+  if (permitted_names == null) {
+    prepareNames();
+  }
+  byte[] bytes=getExtensionValue(cert,"2.5.29.17");
+  List names;
+  try {
+    names=(bytes == null) ? new ArrayList(1) : ((GeneralNames)GeneralNames.ASN1.decode(bytes)).getNames();
+  }
+ catch (  IOException e) {
+    e.printStackTrace();
+    return false;
+  }
+  if ((excluded_names[4] != null) || (permitted_names[4] != null)) {
+    try {
+      names.add(new GeneralName(4,cert.getSubjectX500Principal().getName()));
+    }
+ catch (    IOException e) {
+    }
+  }
+  return isAcceptable(names);
+}

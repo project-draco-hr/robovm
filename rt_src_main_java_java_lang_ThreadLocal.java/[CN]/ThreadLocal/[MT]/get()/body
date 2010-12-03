@@ -1,0 +1,15 @@
+{
+  Thread currentThread=Thread.currentThread();
+  Values values=values(currentThread);
+  if (values != null) {
+    Object[] table=values.table;
+    int index=hash & values.mask;
+    if (this.reference == table[index]) {
+      return (T)table[index + 1];
+    }
+  }
+ else {
+    values=initializeValues(currentThread);
+  }
+  return (T)values.getAfterMiss(this);
+}

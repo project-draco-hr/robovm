@@ -1,0 +1,12 @@
+{
+  int length=encoding[1] & 0xFF;
+  int numOctets=0;
+  if ((length & 0x80) != 0) {
+    numOctets=length & 0x7F;
+    length=encoding[2] & 0xFF;
+    for (int i=3; i < numOctets + 2; i++) {
+      length=(length << 8) + (encoding[i] & 0xFF);
+    }
+  }
+  return 1 + 1 + numOctets+ length;
+}

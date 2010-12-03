@@ -1,0 +1,92 @@
+{
+  long days=timeVal / 86400000;
+  if (millis < 0) {
+    millis+=86400000;
+    days--;
+  }
+  millis+=zoneOffset;
+  while (millis < 0) {
+    millis+=86400000;
+    days--;
+  }
+  while (millis >= 86400000) {
+    millis-=86400000;
+    days++;
+  }
+  int dayOfYear=computeYearAndDay(days,timeVal + zoneOffset);
+  fields[DAY_OF_YEAR]=dayOfYear;
+  if (fields[YEAR] == changeYear && gregorianCutover <= timeVal + zoneOffset) {
+    dayOfYear+=currentYearSkew;
+  }
+  int month=dayOfYear / 32;
+  boolean leapYear=isLeapYear(fields[YEAR]);
+  int date=dayOfYear - daysInYear(leapYear,month);
+  if (date > daysInMonth(leapYear,month)) {
+    date-=daysInMonth(leapYear,month);
+    month++;
+  }
+  fields[DAY_OF_WEEK]=mod7(days - 3) + 1;
+  int dstOffset=fields[YEAR] <= 0 ? 0 : getTimeZone().getOffset(AD,fields[YEAR],month,date,fields[DAY_OF_WEEK],millis);
+  if (fields[YEAR] > 0) {
+    dstOffset-=zoneOffset;
+  }
+  fields[DST_OFFSET]=dstOffset;
+  if (dstOffset != 0) {
+    long oldDays=days;
+    millis+=dstOffset;
+    if (millis < 0) {
+      millis+=86400000;
+      days--;
+    }
+ else     if (millis >= 86400000) {
+      millis-=86400000;
+      days++;
+    }
+    if (oldDays != days) {
+      dayOfYear=computeYearAndDay(days,timeVal - zoneOffset + dstOffset);
+      fields[DAY_OF_YEAR]=dayOfYear;
+      if (fields[YEAR] == changeYear && gregorianCutover <= timeVal - zoneOffset + dstOffset) {
+        dayOfYear+=currentYearSkew;
+      }
+      month=dayOfYear / 32;
+      leapYear=isLeapYear(fields[YEAR]);
+      date=dayOfYear - daysInYear(leapYear,month);
+      if (date > daysInMonth(leapYear,month)) {
+        date-=daysInMonth(leapYear,month);
+        month++;
+      }
+      fields[DAY_OF_WEEK]=mod7(days - 3) + 1;
+    }
+  }
+  fields[MILLISECOND]=(millis % 1000);
+  millis/=1000;
+  fields[SECOND]=(millis % 60);
+  millis/=60;
+  fields[MINUTE]=(millis % 60);
+  millis/=60;
+  fields[HOUR_OF_DAY]=(millis % 24);
+  fields[AM_PM]=fields[HOUR_OF_DAY] > 11 ? 1 : 0;
+  fields[HOUR]=fields[HOUR_OF_DAY] % 12;
+  if (fields[YEAR] <= 0) {
+    fields[ERA]=BC;
+    fields[YEAR]=-fields[YEAR] + 1;
+  }
+ else {
+    fields[ERA]=AD;
+  }
+  fields[MONTH]=month;
+  fields[DATE]=date;
+  fields[DAY_OF_WEEK_IN_MONTH]=(date - 1) / 7 + 1;
+  fields[WEEK_OF_MONTH]=(date - 1 + mod7(days - date - 2- (getFirstDayOfWeek() - 1))) / 7 + 1;
+  int daysFromStart=mod7(days - 3 - (fields[DAY_OF_YEAR] - 1)- (getFirstDayOfWeek() - 1));
+  int week=(fields[DAY_OF_YEAR] - 1 + daysFromStart) / 7 + (7 - daysFromStart >= getMinimalDaysInFirstWeek() ? 1 : 0);
+  if (week == 0) {
+    fields[WEEK_OF_YEAR]=7 - mod7(daysFromStart - (isLeapYear(fields[YEAR] - 1) ? 2 : 1)) >= getMinimalDaysInFirstWeek() ? 53 : 52;
+  }
+ else   if (fields[DAY_OF_YEAR] >= (leapYear ? 367 : 366) - mod7(daysFromStart + (leapYear ? 2 : 1))) {
+    fields[WEEK_OF_YEAR]=7 - mod7(daysFromStart + (leapYear ? 2 : 1)) >= getMinimalDaysInFirstWeek() ? 1 : week;
+  }
+ else {
+    fields[WEEK_OF_YEAR]=week;
+  }
+}

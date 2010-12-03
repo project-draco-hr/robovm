@@ -1,0 +1,50 @@
+{
+  if (!handshake_started) {
+    startHandshake();
+  }
+  int type;
+  if (logger != null) {
+    logger.println("SSLSocket.needAppData..");
+  }
+  try {
+    while (appDataIS.available() == 0) {
+switch (type=recordProtocol.unwrap()) {
+case ContentType.HANDSHAKE:
+        if (!handshakeProtocol.getStatus().equals(SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING)) {
+          doHandshake();
+        }
+      break;
+case ContentType.ALERT:
+    processAlert();
+  if (socket_was_closed) {
+    return;
+  }
+break;
+case ContentType.APPLICATION_DATA:
+if (logger != null) {
+logger.println("SSLSocket.needAppData: got the data");
+}
+break;
+default :
+reportFatalAlert(AlertProtocol.UNEXPECTED_MESSAGE,new SSLException("Unexpected message of type " + type + " has been got"));
+}
+if (alertProtocol.hasAlert()) {
+output.write(alertProtocol.wrap());
+alertProtocol.setProcessed();
+}
+if (socket_was_closed) {
+appDataIS.setEnd();
+return;
+}
+}
+}
+ catch (AlertException e) {
+reportFatalAlert(e.getDescriptionCode(),e.getReason());
+}
+catch (EndOfSourceException e) {
+appDataIS.setEnd();
+}
+if (logger != null) {
+logger.println("SSLSocket.needAppData: app data len: " + appDataIS.available());
+}
+}

@@ -1,0 +1,57 @@
+{
+  List<Locale> locales=control.getCandidateLocales(baseName,targetLocale);
+  if (null == locales) {
+    throw new IllegalArgumentException();
+  }
+  List<String> formats=control.getFormats(baseName);
+  if (Control.FORMAT_CLASS == formats || Control.FORMAT_PROPERTIES == formats || Control.FORMAT_DEFAULT == formats) {
+    throw new IllegalArgumentException();
+  }
+  ResourceBundle ret=null;
+  ResourceBundle currentBundle=null;
+  ResourceBundle bundle=null;
+  for (  Locale locale : locales) {
+    for (    String format : formats) {
+      try {
+        if (expired) {
+          bundle=control.newBundle(baseName,locale,format,loader,control.needsReload(baseName,locale,format,loader,result,System.currentTimeMillis()));
+        }
+ else {
+          try {
+            bundle=control.newBundle(baseName,locale,format,loader,false);
+          }
+ catch (          IllegalArgumentException e) {
+          }
+        }
+      }
+ catch (      IllegalAccessException e) {
+      }
+catch (      InstantiationException e) {
+      }
+catch (      IOException e) {
+      }
+      if (null != bundle) {
+        if (null != currentBundle) {
+          currentBundle.setParent(bundle);
+          currentBundle=bundle;
+        }
+ else {
+          if (null == ret) {
+            ret=bundle;
+            currentBundle=ret;
+          }
+        }
+      }
+      if (null != bundle) {
+        break;
+      }
+    }
+  }
+  if ((null == ret) || (Locale.ROOT.equals(ret.getLocale()) && (!(locales.size() == 1 && locales.contains(Locale.ROOT))))) {
+    Locale nextLocale=control.getFallbackLocale(baseName,targetLocale);
+    if (null != nextLocale) {
+      ret=processGetBundle(baseName,nextLocale,loader,control,expired,result);
+    }
+  }
+  return ret;
+}

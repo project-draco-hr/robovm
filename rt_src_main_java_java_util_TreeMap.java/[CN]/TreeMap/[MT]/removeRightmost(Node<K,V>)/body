@@ -1,0 +1,46 @@
+{
+  int index=node.right_idx;
+  K key=(node != null && node.next != null) ? node.next.keys[node.next.left_idx] : null;
+  if (node.size == 1) {
+    deleteNode(node);
+  }
+ else   if (node.prev != null && (Node.NODE_SIZE - 1 - node.prev.right_idx) > node.size) {
+    Node<K,V> prev=node.prev;
+    int left_idx=node.left_idx;
+    int size=index - left_idx;
+    System.arraycopy(node.keys,left_idx,prev.keys,prev.right_idx + 1,size);
+    System.arraycopy(node.values,left_idx,prev.values,prev.right_idx + 1,size);
+    prev.right_idx+=size;
+    prev.size+=size;
+    deleteNode(node);
+  }
+ else   if (node.next != null && (node.next.left_idx) > node.size) {
+    Node<K,V> next=node.next;
+    int left_idx=node.left_idx;
+    int size=index - left_idx;
+    int next_new_left=next.left_idx - size;
+    next.left_idx=next_new_left;
+    System.arraycopy(node.keys,left_idx,next.keys,next_new_left,size);
+    System.arraycopy(node.values,left_idx,next.values,next_new_left,size);
+    next.size+=size;
+    deleteNode(node);
+  }
+ else {
+    node.keys[index]=null;
+    node.values[index]=null;
+    node.right_idx--;
+    node.size--;
+    Node<K,V> next=node.next;
+    key=null;
+    if (next != null && next.size == 1) {
+      node.size++;
+      node.right_idx++;
+      node.keys[node.right_idx]=next.keys[next.left_idx];
+      node.values[node.right_idx]=next.values[next.left_idx];
+      deleteNode(next);
+    }
+  }
+  modCount++;
+  size--;
+  return key;
+}

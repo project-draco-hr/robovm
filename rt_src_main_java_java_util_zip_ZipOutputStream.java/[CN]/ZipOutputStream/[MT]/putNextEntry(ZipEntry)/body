@@ -1,0 +1,69 @@
+{
+  if (currentEntry != null) {
+    closeEntry();
+  }
+  if (ze.getMethod() == STORED || (compressMethod == STORED && ze.getMethod() == -1)) {
+    if (ze.crc == -1) {
+      throw new ZipException(Messages.getString("archive.20"));
+    }
+    if (ze.size == -1 && ze.compressedSize == -1) {
+      throw new ZipException(Messages.getString("archive.21"));
+    }
+    if (ze.size != ze.compressedSize && ze.compressedSize != -1 && ze.size != -1) {
+      throw new ZipException(Messages.getString("archive.21"));
+    }
+  }
+  if (cDir == null) {
+    throw new IOException(Messages.getString("archive.1E"));
+  }
+  if (entries.contains(ze.name)) {
+    throw new ZipException(Messages.getString("archive.29",ze.name));
+  }
+  nameLength=utf8Count(ze.name);
+  if (nameLength > 0xffff) {
+    throw new IllegalArgumentException(Messages.getString("archive.2A",ze.name));
+  }
+  def.setLevel(compressLevel);
+  currentEntry=ze;
+  entries.add(currentEntry.name);
+  if (currentEntry.getMethod() == -1) {
+    currentEntry.setMethod(compressMethod);
+  }
+  writeLong(out,LOCSIG);
+  writeShort(out,ZIPLocalHeaderVersionNeeded);
+  writeShort(out,currentEntry.getMethod() == STORED ? 0 : ZIPDataDescriptorFlag);
+  writeShort(out,currentEntry.getMethod());
+  if (currentEntry.getTime() == -1) {
+    currentEntry.setTime(System.currentTimeMillis());
+  }
+  writeShort(out,currentEntry.time);
+  writeShort(out,currentEntry.modDate);
+  if (currentEntry.getMethod() == STORED) {
+    if (currentEntry.size == -1) {
+      currentEntry.size=currentEntry.compressedSize;
+    }
+ else     if (currentEntry.compressedSize == -1) {
+      currentEntry.compressedSize=currentEntry.size;
+    }
+    writeLong(out,currentEntry.crc);
+    writeLong(out,currentEntry.size);
+    writeLong(out,currentEntry.size);
+  }
+ else {
+    writeLong(out,0);
+    writeLong(out,0);
+    writeLong(out,0);
+  }
+  writeShort(out,nameLength);
+  if (currentEntry.extra != null) {
+    writeShort(out,currentEntry.extra.length);
+  }
+ else {
+    writeShort(out,0);
+  }
+  nameBytes=toUTF8Bytes(currentEntry.name,nameLength);
+  out.write(nameBytes);
+  if (currentEntry.extra != null) {
+    out.write(currentEntry.extra);
+  }
+}

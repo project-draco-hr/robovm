@@ -1,0 +1,25 @@
+{
+  lastKeyIndex++;
+  int c=lastKeyIndex;
+  ensureCommonCapacity(c);
+  keys[c]=sk;
+  int ops=sk.interestOps();
+  FileDescriptor fd=((FileDescriptorHandler)sk.channel()).getFD();
+  keysToReadableFDs[c]=-1;
+  keysToWritableFDs[c]=-1;
+  if (((SelectionKey.OP_ACCEPT | SelectionKey.OP_READ) & ops) != 0) {
+    ensureReadCapacity(c);
+    readableFDs[readableKeysCount]=fd;
+    keysToReadableFDs[c]=readableKeysCount;
+    readableFDsToKeys[readableKeysCount]=c;
+    readableKeysCount++;
+  }
+  if (((SelectionKey.OP_CONNECT | SelectionKey.OP_WRITE) & ops) != 0) {
+    ensureWriteCapacity(c);
+    writableFDs[writableKeysCount]=fd;
+    keysToWritableFDs[c]=writableKeysCount;
+    writableFDsToKeys[writableKeysCount]=c;
+    writableKeysCount++;
+  }
+  sk.setIndex(c);
+}

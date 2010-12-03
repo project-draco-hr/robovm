@@ -1,0 +1,191 @@
+{
+  int ch;
+  AbstractSet term=null;
+  do {
+    ch=lexemes.peek();
+    if ((ch & 0x8000ffff) == Lexer.CHAR_LEFT_PARENTHESIS) {
+      int newFlags;
+      lexemes.next();
+      newFlags=(ch & 0x00ff0000) >> 16;
+      ch=ch & 0xff00ffff;
+      if (ch == Lexer.CHAR_FLAGS) {
+        flags=newFlags;
+      }
+ else {
+        newFlags=(ch == Lexer.CHAR_NONCAP_GROUP) ? newFlags : flags;
+        term=processExpression(ch,newFlags,last);
+        if (lexemes.peek() != Lexer.CHAR_RIGHT_PARENTHESIS) {
+          throw new PatternSyntaxException(Messages.getString("regex.0A"),lexemes.toString(),lexemes.getIndex());
+        }
+        lexemes.next();
+      }
+    }
+ else switch (ch) {
+case Lexer.CHAR_LEFT_SQUARE_BRACKET:
+{
+        lexemes.next();
+        boolean negative=false;
+        if (lexemes.peek() == Lexer.CHAR_CARET) {
+          negative=true;
+          lexemes.next();
+        }
+        term=processRange(negative,last);
+        if (lexemes.peek() != Lexer.CHAR_RIGHT_SQUARE_BRACKET)         throw new PatternSyntaxException(Messages.getString("regex.0B"),lexemes.toString(),lexemes.getIndex());
+        lexemes.setMode(Lexer.MODE_PATTERN);
+        lexemes.next();
+        break;
+      }
+case Lexer.CHAR_DOT:
+{
+      lexemes.next();
+      if (!hasFlag(Pattern.DOTALL)) {
+        term=new DotSet(AbstractLineTerminator.getInstance(flags));
+      }
+ else {
+        term=new DotAllSet();
+      }
+      break;
+    }
+case Lexer.CHAR_CARET:
+{
+    lexemes.next();
+    consCount++;
+    if (!hasFlag(Pattern.MULTILINE)) {
+      term=new SOLSet();
+    }
+ else {
+      term=new MultiLineSOLSet(AbstractLineTerminator.getInstance(flags));
+    }
+    break;
+  }
+case Lexer.CHAR_DOLLAR:
+{
+  lexemes.next();
+  consCount++;
+  if (!hasFlag(Pattern.MULTILINE)) {
+    if (!hasFlag(Pattern.UNIX_LINES)) {
+      term=new EOLSet(consCount);
+    }
+ else {
+      term=new UEOLSet(consCount);
+    }
+  }
+ else {
+    if (!hasFlag(Pattern.UNIX_LINES)) {
+      term=new MultiLineEOLSet(consCount);
+    }
+ else {
+      term=new UMultiLineEOLSet(consCount);
+    }
+  }
+  break;
+}
+case Lexer.CHAR_WORD_BOUND:
+{
+lexemes.next();
+term=new WordBoundary(true);
+break;
+}
+case Lexer.CHAR_NONWORD_BOUND:
+{
+lexemes.next();
+term=new WordBoundary(false);
+break;
+}
+case Lexer.CHAR_END_OF_INPUT:
+{
+lexemes.next();
+term=new EOISet();
+break;
+}
+case Lexer.CHAR_END_OF_LINE:
+{
+lexemes.next();
+term=new EOLSet(++consCount);
+break;
+}
+case Lexer.CHAR_START_OF_INPUT:
+{
+lexemes.next();
+term=new SOLSet();
+break;
+}
+case Lexer.CHAR_PREVIOUS_MATCH:
+{
+lexemes.next();
+term=new PreviousMatch();
+break;
+}
+case 0x80000000 | '1':
+case 0x80000000 | '2':
+case 0x80000000 | '3':
+case 0x80000000 | '4':
+case 0x80000000 | '5':
+case 0x80000000 | '6':
+case 0x80000000 | '7':
+case 0x80000000 | '8':
+case 0x80000000 | '9':
+{
+int number=(ch & 0x7FFFFFFF) - '0';
+if (globalGroupIndex >= number) {
+lexemes.next();
+consCount++;
+if (!hasFlag(Pattern.CASE_INSENSITIVE)) {
+term=new BackReferenceSet(number,consCount);
+}
+ else if (!hasFlag(Pattern.UNICODE_CASE)) {
+term=new CIBackReferenceSet(number,consCount);
+}
+ else {
+term=new UCIBackReferenceSet(number,consCount);
+}
+(backRefs[number]).isBackReferenced=true;
+needsBackRefReplacement=true;
+break;
+}
+ else {
+throw new PatternSyntaxException(Messages.getString("regex.0C"),lexemes.toString(),lexemes.getIndex());
+}
+}
+case 0:
+{
+AbstractCharClass cc=null;
+if ((cc=(AbstractCharClass)lexemes.peekSpecial()) != null) {
+term=processRangeSet(cc);
+}
+ else if (!lexemes.isEmpty()) {
+term=new CharSet((char)ch);
+}
+ else {
+term=new EmptySet(last);
+break;
+}
+lexemes.next();
+break;
+}
+default :
+{
+if (ch >= 0 && !lexemes.isSpecial()) {
+term=processCharSet(ch);
+lexemes.next();
+}
+ else if (ch == Lexer.CHAR_VERTICAL_BAR) {
+term=new EmptySet(last);
+}
+ else if (ch == Lexer.CHAR_RIGHT_PARENTHESIS) {
+if (last instanceof FinalSet) {
+throw new PatternSyntaxException(Messages.getString("regex.09"),lexemes.toString(),lexemes.getIndex());
+}
+ else {
+term=new EmptySet(last);
+}
+}
+ else {
+throw new PatternSyntaxException(Messages.getString("regex.0D",(lexemes.isSpecial() ? lexemes.peekSpecial().toString() : Character.toString((char)ch))),lexemes.toString(),lexemes.getIndex());
+}
+}
+}
+}
+ while (ch == Lexer.CHAR_FLAGS);
+return term;
+}

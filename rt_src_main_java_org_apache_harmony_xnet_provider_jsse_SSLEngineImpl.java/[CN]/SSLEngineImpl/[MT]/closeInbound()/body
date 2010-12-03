@@ -1,0 +1,22 @@
+{
+  if (logger != null) {
+    logger.println("closeInbound() " + isInboundDone);
+  }
+  if (isInboundDone) {
+    return;
+  }
+  isInboundDone=true;
+  engine_was_closed=true;
+  if (handshake_started) {
+    if (!close_notify_was_received) {
+      if (session != null) {
+        session.invalidate();
+      }
+      alertProtocol.alert(AlertProtocol.FATAL,AlertProtocol.INTERNAL_ERROR);
+      throw new SSLException("Inbound is closed before close_notify " + "alert has been received.");
+    }
+  }
+ else {
+    shutdown();
+  }
+}

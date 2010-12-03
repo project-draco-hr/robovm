@@ -1,0 +1,23 @@
+{
+  ObjectOutputStream.PutField fields=stream.putFields();
+  fields.put("argumentNumbers",argumentNumbers);
+  Format[] compatibleFormats=formats;
+  fields.put("formats",compatibleFormats);
+  fields.put("locale",locale);
+  fields.put("maxOffset",maxOffset);
+  int offset=0;
+  int offsetsLength=maxOffset + 1;
+  int[] offsets=new int[offsetsLength];
+  StringBuilder pattern=new StringBuilder();
+  for (int i=0; i <= maxOffset; i++) {
+    offset+=strings[i].length();
+    offsets[i]=offset;
+    pattern.append(strings[i]);
+  }
+  if (maxOffset + 1 < strings.length) {
+    pattern.append(strings[maxOffset + 1]);
+  }
+  fields.put("offsets",offsets);
+  fields.put("pattern",pattern.toString());
+  stream.writeFields();
+}

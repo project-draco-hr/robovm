@@ -1,0 +1,23 @@
+{
+synchronized (lock) {
+    if (encoder != null) {
+      if (encoderFlush) {
+        CoderResult result=encoder.flush(bytes);
+        while (!result.isUnderflow()) {
+          if (result.isOverflow()) {
+            flush();
+            result=encoder.flush(bytes);
+          }
+ else {
+            result.throwException();
+          }
+        }
+      }
+      flush();
+      out.flush();
+      out.close();
+      encoder=null;
+      bytes=null;
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  for (; ; ) {
+    Node<K,V> b=findPredecessorOfLast();
+    Node<K,V> n=b.next;
+    if (n == null) {
+      if (b.isBaseHeader())       return null;
+ else       continue;
+    }
+    for (; ; ) {
+      Node<K,V> f=n.next;
+      if (n != b.next)       break;
+      Object v=n.value;
+      if (v == null) {
+        n.helpDelete(b,f);
+        break;
+      }
+      if (v == n || b.value == null)       break;
+      if (f != null) {
+        b=n;
+        n=f;
+        continue;
+      }
+      if (!n.casValue(v,null))       break;
+      K key=n.key;
+      Comparable<? super K> ck=comparable(key);
+      if (!n.appendMarker(f) || !b.casNext(n,f))       findNode(ck);
+ else {
+        findPredecessor(ck);
+        if (head.right == null)         tryReduceLevel();
+      }
+      return new AbstractMap.SimpleImmutableEntry<K,V>(key,(V)v);
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  if (uri == null) {
+    throw new NullPointerException("XPathFactory#newInstance(String uri) cannot be called with uri == null");
+  }
+  if (uri.length() == 0) {
+    throw new IllegalArgumentException("XPathFactory#newInstance(String uri) cannot be called with uri == \"\"");
+  }
+  ClassLoader classLoader=SecuritySupport.getContextClassLoader();
+  if (classLoader == null) {
+    classLoader=XPathFactory.class.getClassLoader();
+  }
+  XPathFactory xpathFactory=new XPathFactoryFinder(classLoader).newFactory(uri);
+  if (xpathFactory == null) {
+    throw new XPathFactoryConfigurationException("No XPathFctory implementation found for the object model: " + uri);
+  }
+  return xpathFactory;
+}

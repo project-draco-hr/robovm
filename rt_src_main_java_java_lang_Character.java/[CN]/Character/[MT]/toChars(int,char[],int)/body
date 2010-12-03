@@ -1,0 +1,24 @@
+{
+  if (!isValidCodePoint(codePoint)) {
+    throw new IllegalArgumentException();
+  }
+  if (dst == null) {
+    throw new NullPointerException();
+  }
+  if (dstIndex < 0 || dstIndex >= dst.length) {
+    throw new IndexOutOfBoundsException();
+  }
+  if (isSupplementaryCodePoint(codePoint)) {
+    if (dstIndex == dst.length - 1) {
+      throw new IndexOutOfBoundsException();
+    }
+    int cpPrime=codePoint - 0x10000;
+    int high=0xD800 | ((cpPrime >> 10) & 0x3FF);
+    int low=0xDC00 | (cpPrime & 0x3FF);
+    dst[dstIndex]=(char)high;
+    dst[dstIndex + 1]=(char)low;
+    return 2;
+  }
+  dst[dstIndex]=(char)codePoint;
+  return 1;
+}

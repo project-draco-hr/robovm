@@ -1,0 +1,23 @@
+{
+  URL resURL=targetURL(url,name);
+  if (resURL != null) {
+    try {
+      URLConnection uc=resURL.openConnection();
+      uc.getInputStream().close();
+      if (!resURL.getProtocol().equals("http")) {
+        return resURL;
+      }
+      int code;
+      if ((code=((HttpURLConnection)uc).getResponseCode()) >= 200 && code < 300) {
+        return resURL;
+      }
+    }
+ catch (    SecurityException e) {
+      return null;
+    }
+catch (    IOException e) {
+      return null;
+    }
+  }
+  return null;
+}

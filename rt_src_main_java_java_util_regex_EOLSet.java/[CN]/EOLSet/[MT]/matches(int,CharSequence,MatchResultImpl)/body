@@ -1,0 +1,17 @@
+{
+  int rightBound=matchResult.hasAnchoringBounds() ? matchResult.getRightBound() : testString.length();
+  if (strIndex >= rightBound) {
+    matchResult.setConsumed(consCounter,0);
+    return next.matches(strIndex,testString,matchResult);
+  }
+  if ((rightBound - strIndex) == 2 && testString.charAt(strIndex) == '\r' && testString.charAt(strIndex + 1) == '\n') {
+    matchResult.setConsumed(consCounter,0);
+    return next.matches(strIndex,testString,matchResult);
+  }
+  char ch;
+  if ((rightBound - strIndex) == 1 && (((ch=testString.charAt(strIndex)) == '\n' || ch == '\r' || ch == '\u0085' || (ch | 1) == '\u2029'))) {
+    matchResult.setConsumed(consCounter,0);
+    return next.matches(strIndex,testString,matchResult);
+  }
+  return -1;
+}

@@ -1,0 +1,36 @@
+{
+  if (val.sign == 0) {
+    return BigInteger.MINUS_ONE;
+  }
+  if (val.equals(BigInteger.MINUS_ONE)) {
+    return BigInteger.ZERO;
+  }
+  int resDigits[]=new int[val.numberLength + 1];
+  int i;
+  if (val.sign > 0) {
+    if (val.digits[val.numberLength - 1] != -1) {
+      for (i=0; val.digits[i] == -1; i++) {
+        ;
+      }
+    }
+ else {
+      for (i=0; (i < val.numberLength) && (val.digits[i] == -1); i++) {
+        ;
+      }
+      if (i == val.numberLength) {
+        resDigits[i]=1;
+        return new BigInteger(-val.sign,i + 1,resDigits);
+      }
+    }
+  }
+ else {
+    for (i=0; val.digits[i] == 0; i++) {
+      resDigits[i]=-1;
+    }
+  }
+  resDigits[i]=val.digits[i] + val.sign;
+  for (i++; i < val.numberLength; i++) {
+    resDigits[i]=val.digits[i];
+  }
+  return new BigInteger(-val.sign,i,resDigits);
+}

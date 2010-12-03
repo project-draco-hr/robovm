@@ -1,0 +1,30 @@
+{
+  LinkedHashMapEntry<K,V> m;
+  if (key == null) {
+    m=(LinkedHashMapEntry<K,V>)findNullKeyEntry();
+  }
+ else {
+    int hash=key.hashCode();
+    int index=(hash & 0x7FFFFFFF) % elementData.length;
+    m=(LinkedHashMapEntry<K,V>)findNonNullKeyEntry(key,index,hash);
+  }
+  if (m == null) {
+    return null;
+  }
+  if (accessOrder && tail != m) {
+    LinkedHashMapEntry<K,V> p=m.chainBackward;
+    LinkedHashMapEntry<K,V> n=m.chainForward;
+    n.chainBackward=p;
+    if (p != null) {
+      p.chainForward=n;
+    }
+ else {
+      head=n;
+    }
+    m.chainForward=null;
+    m.chainBackward=tail;
+    tail.chainForward=m;
+    tail=m;
+  }
+  return m.value;
+}

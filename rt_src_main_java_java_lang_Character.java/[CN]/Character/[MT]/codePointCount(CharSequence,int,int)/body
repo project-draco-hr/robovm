@@ -1,0 +1,23 @@
+{
+  if (seq == null) {
+    throw new NullPointerException();
+  }
+  int len=seq.length();
+  if (beginIndex < 0 || endIndex > len || beginIndex > endIndex) {
+    throw new IndexOutOfBoundsException();
+  }
+  int result=0;
+  for (int i=beginIndex; i < endIndex; i++) {
+    char c=seq.charAt(i);
+    if (isHighSurrogate(c)) {
+      if (++i < endIndex) {
+        c=seq.charAt(i);
+        if (!isLowSurrogate(c)) {
+          result++;
+        }
+      }
+    }
+    result++;
+  }
+  return result;
+}

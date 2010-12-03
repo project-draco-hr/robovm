@@ -1,0 +1,41 @@
+{
+  if (signature != null) {
+    try {
+      return signature.verify(data);
+    }
+ catch (    SignatureException e) {
+      return false;
+    }
+  }
+  if (cipher != null) {
+    final byte[] decrypt;
+    try {
+      decrypt=cipher.doFinal(data);
+    }
+ catch (    IllegalBlockSizeException e) {
+      return false;
+    }
+catch (    BadPaddingException e) {
+      return false;
+    }
+    final byte[] md5_sha;
+    if (md5_hash != null && sha_hash != null) {
+      md5_sha=new byte[md5_hash.length + sha_hash.length];
+      System.arraycopy(md5_hash,0,md5_sha,0,md5_hash.length);
+      System.arraycopy(sha_hash,0,md5_sha,md5_hash.length,sha_hash.length);
+    }
+ else     if (md5_hash != null) {
+      md5_sha=md5_hash;
+    }
+ else {
+      md5_sha=sha_hash;
+    }
+    return Arrays.equals(decrypt,md5_sha);
+  }
+ else   if (data == null || data.length == 0) {
+    return true;
+  }
+ else {
+    return false;
+  }
+}

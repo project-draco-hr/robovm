@@ -1,0 +1,18 @@
+{
+  this(Integer.MAX_VALUE);
+  final ReentrantLock putLock=this.putLock;
+  putLock.lock();
+  try {
+    int n=0;
+    for (    E e : c) {
+      if (e == null)       throw new NullPointerException();
+      if (n == capacity)       throw new IllegalStateException("Queue full");
+      enqueue(e);
+      ++n;
+    }
+    count.set(n);
+  }
+  finally {
+    putLock.unlock();
+  }
+}

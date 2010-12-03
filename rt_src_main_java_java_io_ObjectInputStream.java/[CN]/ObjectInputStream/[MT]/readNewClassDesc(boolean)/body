@@ -1,0 +1,27 @@
+{
+  primitiveData=input;
+  Integer oldHandle=descriptorHandle;
+  descriptorHandle=nextHandle();
+  ObjectStreamClass newClassDesc=readClassDescriptor();
+  registerObjectRead(newClassDesc,descriptorHandle,unshared);
+  descriptorHandle=oldHandle;
+  primitiveData=emptyStream;
+  try {
+    newClassDesc.setClass(resolveClass(newClassDesc));
+    verifyAndInit(newClassDesc);
+  }
+ catch (  ClassNotFoundException e) {
+    if (mustResolve) {
+      throw e;
+    }
+  }
+  ObjectStreamField[] fields=newClassDesc.getLoadFields();
+  fields=(null == fields ? new ObjectStreamField[]{} : fields);
+  ClassLoader loader=newClassDesc.forClass() == null ? callerClassLoader : newClassDesc.forClass().getClassLoader();
+  for (  ObjectStreamField element : fields) {
+    element.resolve(loader);
+  }
+  discardData();
+  checkedSetSuperClassDesc(newClassDesc,readClassDesc());
+  return newClassDesc;
+}

@@ -1,0 +1,55 @@
+{
+  char[] inputChars=input.toCharArray();
+  int inputLength=inputChars.length;
+  int resCodePointsIndex=0;
+  int inputCodePointsIndex=0;
+  int decompHangulIndex=0;
+  int[] inputCodePoints=new int[inputLength];
+  int[] resCodePoints=new int[inputLength * MAX_DECOMPOSITION_LENGTH];
+  int ch;
+  int[] decomp;
+  int[] decompHangul;
+  StringBuilder result=new StringBuilder();
+  decompTable=HashDecompositions.getHashDecompositions();
+  canonClassesTable=CanClasses.getHashCanClasses();
+  canonClassesTableSize=canonClassesTable.size;
+  singleDecompTable=SingleDecompositions.getHashSingleDecompositions();
+  singleDecompTableSize=singleDecompTable.size;
+  for (int i=0; i < inputLength; i+=Character.charCount(ch)) {
+    ch=Character.codePointAt(inputChars,i);
+    inputCodePoints[inputCodePointsIndex++]=ch;
+  }
+  for (int i=0; i < inputCodePointsIndex; i++) {
+    ch=inputCodePoints[i];
+    decomp=Lexer.getDecomposition(ch);
+    if (decomp == null) {
+      resCodePoints[resCodePointsIndex++]=ch;
+    }
+ else {
+      int curSymbDecompLength=decomp.length;
+      for (int j=0; j < curSymbDecompLength; j++) {
+        resCodePoints[resCodePointsIndex++]=decomp[j];
+      }
+    }
+  }
+  resCodePoints=Lexer.getCanonicalOrder(resCodePoints,resCodePointsIndex);
+  decompHangul=new int[resCodePoints.length];
+  for (int i=0; i < resCodePointsIndex; i++) {
+    int curSymb=resCodePoints[i];
+    decomp=getHangulDecomposition(curSymb);
+    if (decomp == null) {
+      decompHangul[decompHangulIndex++]=curSymb;
+    }
+ else {
+      decompHangul[decompHangulIndex++]=decomp[0];
+      decompHangul[decompHangulIndex++]=decomp[1];
+      if (decomp.length == 3) {
+        decompHangul[decompHangulIndex++]=decomp[2];
+      }
+    }
+  }
+  for (int i=0; i < decompHangulIndex; i++) {
+    result.append(Character.toChars(decompHangul[i]));
+  }
+  return result.toString();
+}

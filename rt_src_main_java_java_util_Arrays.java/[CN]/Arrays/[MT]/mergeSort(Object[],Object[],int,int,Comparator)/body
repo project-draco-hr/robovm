@@ -1,0 +1,55 @@
+{
+  int len=end - start;
+  if (len <= SIMPLE_LENGTH) {
+    for (int i=start + 1; i < end; i++) {
+      Object current=out[i];
+      Object prev=out[i - 1];
+      if (c.compare(prev,current) > 0) {
+        int j=i;
+        do {
+          out[j--]=prev;
+        }
+ while (j > start && (c.compare(prev=out[j - 1],current) > 0));
+        out[j]=current;
+      }
+    }
+    return;
+  }
+  int med=(end + start) >>> 1;
+  mergeSort(out,in,start,med,c);
+  mergeSort(out,in,med,end,c);
+  if (c.compare(in[med - 1],in[med]) <= 0) {
+    System.arraycopy(in,start,out,start,len);
+    return;
+  }
+  int r=med, i=start;
+  do {
+    Object fromVal=in[start];
+    Object rVal=in[r];
+    if (c.compare(fromVal,rVal) <= 0) {
+      int l_1=find(in,rVal,-1,start + 1,med - 1,c);
+      int toCopy=l_1 - start + 1;
+      System.arraycopy(in,start,out,i,toCopy);
+      i+=toCopy;
+      out[i++]=rVal;
+      r++;
+      start=l_1 + 1;
+    }
+ else {
+      int r_1=find(in,fromVal,0,r + 1,end - 1,c);
+      int toCopy=r_1 - r + 1;
+      System.arraycopy(in,r,out,i,toCopy);
+      i+=toCopy;
+      out[i++]=fromVal;
+      start++;
+      r=r_1 + 1;
+    }
+  }
+ while ((end - r) > 0 && (med - start) > 0);
+  if ((end - r) <= 0) {
+    System.arraycopy(in,start,out,i,med - start);
+  }
+ else {
+    System.arraycopy(in,r,out,i,end - r);
+  }
+}

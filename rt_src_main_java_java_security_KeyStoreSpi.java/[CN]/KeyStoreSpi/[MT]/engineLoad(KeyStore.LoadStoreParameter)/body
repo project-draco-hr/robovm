@@ -1,0 +1,29 @@
+{
+  if (param == null) {
+    engineLoad(null,null);
+    return;
+  }
+  char[] pwd;
+  KeyStore.ProtectionParameter pp=param.getProtectionParameter();
+  if (pp instanceof KeyStore.PasswordProtection) {
+    try {
+      pwd=((KeyStore.PasswordProtection)pp).getPassword();
+      engineLoad(null,pwd);
+      return;
+    }
+ catch (    IllegalStateException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+  if (pp instanceof KeyStore.CallbackHandlerProtection) {
+    try {
+      pwd=getPasswordFromCallBack(pp);
+      engineLoad(null,pwd);
+      return;
+    }
+ catch (    UnrecoverableEntryException e) {
+      throw new IllegalArgumentException(e);
+    }
+  }
+  throw new UnsupportedOperationException(Messages.getString("security.35"));
+}

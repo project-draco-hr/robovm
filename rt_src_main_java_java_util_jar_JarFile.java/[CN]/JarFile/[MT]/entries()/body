@@ -1,0 +1,19 @@
+{
+class JarFileEnumerator implements Enumeration<JarEntry> {
+    Enumeration<? extends ZipEntry> ze;
+    JarFile jf;
+    JarFileEnumerator(    Enumeration<? extends ZipEntry> zenum,    JarFile jf){
+      ze=zenum;
+      this.jf=jf;
+    }
+    public boolean hasMoreElements(){
+      return ze.hasMoreElements();
+    }
+    public JarEntry nextElement(){
+      JarEntry je=new JarEntry(ze.nextElement());
+      je.parentJar=jf;
+      return je;
+    }
+  }
+  return new JarFileEnumerator(super.entries(),this);
+}

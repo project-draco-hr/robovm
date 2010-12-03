@@ -1,0 +1,18 @@
+{
+  if (expectedModCount == list.modCount) {
+    if (canRemove) {
+      Link<ET> next=link.previous;
+      Link<ET> previous=link.next;
+      next.next=previous;
+      previous.previous=next;
+      link=previous;
+      list.size--;
+      list.modCount++;
+      expectedModCount++;
+      canRemove=false;
+      return;
+    }
+    throw new IllegalStateException();
+  }
+  throw new ConcurrentModificationException();
+}

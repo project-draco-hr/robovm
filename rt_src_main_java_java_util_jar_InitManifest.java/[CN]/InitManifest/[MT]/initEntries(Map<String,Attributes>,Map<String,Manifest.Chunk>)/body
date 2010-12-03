@@ -1,0 +1,24 @@
+{
+  int mark=pos;
+  while (readHeader()) {
+    if (!Attributes.Name.NAME.equals(name)) {
+      throw new IOException(Messages.getString("archive.23"));
+    }
+    String entryNameValue=value;
+    Attributes entry=entries.get(entryNameValue);
+    if (entry == null) {
+      entry=new Attributes(12);
+    }
+    while (readHeader()) {
+      entry.put(name,value);
+    }
+    if (chunks != null) {
+      if (chunks.get(entryNameValue) != null) {
+        throw new IOException(Messages.getString("archive.34"));
+      }
+      chunks.put(entryNameValue,new Manifest.Chunk(mark,pos));
+      mark=pos;
+    }
+    entries.put(entryNameValue,entry);
+  }
+}

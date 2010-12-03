@@ -1,0 +1,33 @@
+{
+  E result;
+  if (location < 0 || location >= size) {
+    throw new IndexOutOfBoundsException(Messages.getString("luni.0A",Integer.valueOf(location),Integer.valueOf(size)));
+  }
+  if (location == 0) {
+    result=array[firstIndex];
+    array[firstIndex++]=null;
+  }
+ else   if (location == size - 1) {
+    int lastIndex=firstIndex + size - 1;
+    result=array[lastIndex];
+    array[lastIndex]=null;
+  }
+ else {
+    int elementIndex=firstIndex + location;
+    result=array[elementIndex];
+    if (location < size / 2) {
+      System.arraycopy(array,firstIndex,array,firstIndex + 1,location);
+      array[firstIndex++]=null;
+    }
+ else {
+      System.arraycopy(array,elementIndex + 1,array,elementIndex,size - location - 1);
+      array[firstIndex + size - 1]=null;
+    }
+  }
+  size--;
+  if (size == 0) {
+    firstIndex=0;
+  }
+  modCount++;
+  return result;
+}

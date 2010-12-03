@@ -1,0 +1,29 @@
+{
+  if (pos < 0) {
+    throw new IndexOutOfBoundsException(Messages.getString("luni.37"));
+  }
+  if (pos >= actualArrayLength << OFFSET) {
+    return -1;
+  }
+  int idx=pos >> OFFSET;
+  if (bits[idx] != 0L) {
+    for (int j=pos & RIGHT_BITS; j < ELM_SIZE; j++) {
+      if (((bits[idx] & (TWO_N_ARRAY[j])) != 0)) {
+        return (idx << OFFSET) + j;
+      }
+    }
+  }
+  idx++;
+  while (idx < actualArrayLength && bits[idx] == 0L) {
+    idx++;
+  }
+  if (idx == actualArrayLength) {
+    return -1;
+  }
+  for (int j=0; j < ELM_SIZE; j++) {
+    if (((bits[idx] & (TWO_N_ARRAY[j])) != 0)) {
+      return (idx << OFFSET) + j;
+    }
+  }
+  return -1;
+}

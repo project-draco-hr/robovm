@@ -1,0 +1,23 @@
+{
+  if (testString instanceof String) {
+    String testStr=(String)testString;
+    int startStr=matchResult.getLeftBound();
+    int strLength=matchResult.getRightBound();
+    while (strIndex < strLength) {
+      strIndex=testStr.indexOf(low,strIndex);
+      if (strIndex < 0)       return -1;
+      if (strIndex > startStr) {
+        if (Character.isHighSurrogate(testStr.charAt(strIndex - 1))) {
+          strIndex++;
+          continue;
+        }
+      }
+      if (next.matches(strIndex + 1,testString,matchResult) >= 0) {
+        return strIndex;
+      }
+      strIndex++;
+    }
+    return -1;
+  }
+  return super.find(strIndex,testString,matchResult);
+}

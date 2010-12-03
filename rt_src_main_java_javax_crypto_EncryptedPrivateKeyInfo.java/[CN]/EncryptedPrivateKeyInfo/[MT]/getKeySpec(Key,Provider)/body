@@ -1,0 +1,40 @@
+{
+  if (decryptKey == null) {
+    throw new NullPointerException(Messages.getString("crypto.2A"));
+  }
+  if (provider == null) {
+    throw new NullPointerException(Messages.getString("crypto.2C"));
+  }
+  try {
+    Cipher cipher=Cipher.getInstance(algName,provider);
+    if (algParameters == null) {
+      cipher.init(Cipher.DECRYPT_MODE,decryptKey);
+    }
+ else {
+      cipher.init(Cipher.DECRYPT_MODE,decryptKey,algParameters);
+    }
+    byte[] decryptedData=cipher.doFinal(encryptedData);
+    try {
+      ASN1PrivateKeyInfo.verify(decryptedData);
+    }
+ catch (    IOException e1) {
+      throw new InvalidKeyException(Messages.getString("crypto.29"));
+    }
+    return new PKCS8EncodedKeySpec(decryptedData);
+  }
+ catch (  NoSuchPaddingException e) {
+    throw new NoSuchAlgorithmException(e.getMessage());
+  }
+catch (  InvalidAlgorithmParameterException e) {
+    throw new NoSuchAlgorithmException(e.getMessage());
+  }
+catch (  IllegalStateException e) {
+    throw new InvalidKeyException(e.getMessage());
+  }
+catch (  IllegalBlockSizeException e) {
+    throw new InvalidKeyException(e.getMessage());
+  }
+catch (  BadPaddingException e) {
+    throw new InvalidKeyException(e.getMessage());
+  }
+}

@@ -1,0 +1,20 @@
+{
+  final E[] items=this.items;
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    int i=takeIndex;
+    int k=count;
+    while (k-- > 0) {
+      items[i]=null;
+      i=inc(i);
+    }
+    count=0;
+    putIndex=0;
+    takeIndex=0;
+    notFull.signalAll();
+  }
+  finally {
+    lock.unlock();
+  }
+}

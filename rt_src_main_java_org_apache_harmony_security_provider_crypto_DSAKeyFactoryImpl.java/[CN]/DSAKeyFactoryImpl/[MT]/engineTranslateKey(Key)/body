@@ -1,0 +1,25 @@
+{
+  if (key != null) {
+    if (key instanceof DSAPrivateKey) {
+      DSAPrivateKey privateKey=(DSAPrivateKey)key;
+      DSAParams params=privateKey.getParams();
+      try {
+        return engineGeneratePrivate(new DSAPrivateKeySpec(privateKey.getX(),params.getP(),params.getQ(),params.getG()));
+      }
+ catch (      InvalidKeySpecException e) {
+        throw new InvalidKeyException(Messages.getString("security.1A0",e));
+      }
+    }
+    if (key instanceof DSAPublicKey) {
+      DSAPublicKey publicKey=(DSAPublicKey)key;
+      DSAParams params=publicKey.getParams();
+      try {
+        return engineGeneratePublic(new DSAPublicKeySpec(publicKey.getY(),params.getP(),params.getQ(),params.getG()));
+      }
+ catch (      InvalidKeySpecException e) {
+        throw new InvalidKeyException(Messages.getString("security.1A1",e));
+      }
+    }
+  }
+  throw new InvalidKeyException(Messages.getString("security.19F"));
+}

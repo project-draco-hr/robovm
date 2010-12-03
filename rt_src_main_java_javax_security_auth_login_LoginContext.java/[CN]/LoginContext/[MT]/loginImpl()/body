@@ -1,0 +1,102 @@
+{
+  if (subject == null) {
+    subject=new Subject();
+  }
+  if (sharedState == null) {
+    sharedState=new HashMap<String,Object>();
+  }
+  Throwable firstProblem=null;
+  int[] logged=new int[4];
+  int[] total=new int[4];
+  for (  Module module : modules) {
+    try {
+      module.create(subject,callbackHandler,sharedState);
+      if (module.module.login()) {
+        ++total[module.getFlag()];
+        ++logged[module.getFlag()];
+        if (module.getFlag() == SUFFICIENT) {
+          break;
+        }
+      }
+    }
+ catch (    Throwable ex) {
+      if (firstProblem == null) {
+        firstProblem=ex;
+      }
+      if (module.klass == null) {
+        ++total[REQUIRED];
+        break;
+      }
+      ++total[module.getFlag()];
+      if (module.getFlag() == REQUISITE) {
+        break;
+      }
+    }
+  }
+  boolean fail=true;
+  if (logged[REQUIRED] != total[REQUIRED] || logged[REQUISITE] != total[REQUISITE]) {
+  }
+ else {
+    if (total[REQUIRED] == 0 && total[REQUISITE] == 0) {
+      if (logged[OPTIONAL] != 0 || logged[SUFFICIENT] != 0) {
+        fail=false;
+      }
+    }
+ else {
+      fail=false;
+    }
+  }
+  int commited[]=new int[4];
+  total[0]=total[1]=total[2]=total[3]=0;
+  if (!fail) {
+    for (    Module module : modules) {
+      if (module.klass != null) {
+        ++total[module.getFlag()];
+        try {
+          module.module.commit();
+          ++commited[module.getFlag()];
+        }
+ catch (        Throwable ex) {
+          if (firstProblem == null) {
+            firstProblem=ex;
+          }
+        }
+      }
+    }
+  }
+  fail=true;
+  if (commited[REQUIRED] != total[REQUIRED] || commited[REQUISITE] != total[REQUISITE]) {
+  }
+ else {
+    if (total[REQUIRED] == 0 && total[REQUISITE] == 0) {
+      if (commited[OPTIONAL] != 0 || commited[SUFFICIENT] != 0) {
+        fail=false;
+      }
+ else {
+      }
+    }
+ else {
+      fail=false;
+    }
+  }
+  if (fail) {
+    for (    Module module : modules) {
+      try {
+        module.module.abort();
+      }
+ catch (      Throwable ex) {
+        if (firstProblem == null) {
+          firstProblem=ex;
+        }
+      }
+    }
+    if (firstProblem instanceof PrivilegedActionException && firstProblem.getCause() != null) {
+      firstProblem=firstProblem.getCause();
+    }
+    if (firstProblem instanceof LoginException) {
+      throw (LoginException)firstProblem;
+    }
+    throw (LoginException)new LoginException(Messages.getString("auth.37")).initCause(firstProblem);
+  }
+  loggedIn=true;
+}

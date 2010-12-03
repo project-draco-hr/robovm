@@ -1,0 +1,33 @@
+{
+  if (appDataIS == null) {
+    throw new IOException("Socket is not connected.");
+  }
+  if (socket_was_closed) {
+    throw new IOException("Socket has already been closed.");
+  }
+  if (!handshake_started) {
+    handshake_started=true;
+    if (sslParameters.getUseClientMode()) {
+      if (logger != null) {
+        logger.println("SSLSocketImpl: CLIENT");
+      }
+      handshakeProtocol=new ClientHandshakeImpl(this);
+    }
+ else {
+      if (logger != null) {
+        logger.println("SSLSocketImpl: SERVER");
+      }
+      handshakeProtocol=new ServerHandshakeImpl(this);
+    }
+    alertProtocol=new AlertProtocol();
+    recordProtocol=new SSLRecordProtocol(handshakeProtocol,alertProtocol,new SSLStreamedInput(input),appDataIS.dataPoint);
+  }
+  if (logger != null) {
+    logger.println("SSLSocketImpl.startHandshake");
+  }
+  handshakeProtocol.start();
+  doHandshake();
+  if (logger != null) {
+    logger.println("SSLSocketImpl.startHandshake: END");
+  }
+}

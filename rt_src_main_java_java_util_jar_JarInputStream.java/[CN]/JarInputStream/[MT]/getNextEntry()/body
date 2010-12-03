@@ -1,0 +1,24 @@
+{
+  if (mEntry != null) {
+    jarEntry=mEntry;
+    mEntry=null;
+    jarEntry.setAttributes(null);
+  }
+ else {
+    jarEntry=(JarEntry)super.getNextEntry();
+    if (jarEntry == null) {
+      return null;
+    }
+    if (verifier != null) {
+      isMeta=Util.toASCIIUpperCase(jarEntry.getName()).startsWith(JarFile.META_DIR);
+      if (isMeta) {
+        verStream=new ByteArrayOutputStream();
+      }
+ else {
+        verStream=verifier.initEntry(jarEntry.getName());
+      }
+    }
+  }
+  eos=false;
+  return jarEntry;
+}

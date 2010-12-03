@@ -1,0 +1,58 @@
+{
+  if (CharsetProviderImpl.hasLoadedNatives() && bb.isDirect() && bb.hasRemaining()&& cb.hasArray()) {
+    int toProceed=bb.remaining();
+    boolean throwOverflow=false;
+    if (cb.remaining() < toProceed) {
+      toProceed=cb.remaining();
+      throwOverflow=true;
+    }
+    int res=nDecode(cb.array(),cb.arrayOffset() + cb.position(),toProceed,AddressUtil.getDirectBufferAddress(bb),bb.position());
+    if (res <= 0) {
+      bb.position(bb.position() - res);
+      cb.position(cb.position() - res);
+      return CoderResult.unmappableForLength(1);
+    }
+ else {
+      cb.position(cb.position() + res);
+      bb.position(bb.position() + res);
+      if (throwOverflow)       return CoderResult.OVERFLOW;
+    }
+  }
+ else {
+    int cbRemaining=cb.remaining();
+    if (bb.hasArray() && cb.hasArray()) {
+      int rem=bb.remaining();
+      rem=cbRemaining >= rem ? rem : cbRemaining;
+      byte[] bArr=bb.array();
+      char[] cArr=cb.array();
+      int bStart=bb.position();
+      int cStart=cb.position();
+      int i;
+      for (i=bStart; i < bStart + rem; i++) {
+        byte b=bArr[i];
+        if (b < 0) {
+          bb.position(i);
+          cb.position(cStart);
+          return CoderResult.malformedForLength(1);
+        }
+        cArr[cStart++]=(char)b;
+      }
+      bb.position(i);
+      cb.position(cStart);
+      if (rem == cbRemaining && bb.hasRemaining())       return CoderResult.OVERFLOW;
+    }
+ else {
+      while (bb.hasRemaining()) {
+        if (cbRemaining == 0)         return CoderResult.OVERFLOW;
+        byte b=bb.get();
+        if (b < 0) {
+          bb.position(bb.position() - 1);
+          return CoderResult.malformedForLength(1);
+        }
+        cb.put((char)b);
+        cbRemaining--;
+      }
+    }
+  }
+  return CoderResult.UNDERFLOW;
+}

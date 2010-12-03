@@ -1,0 +1,26 @@
+{
+  while (!searchList.isEmpty()) {
+    URL nextCandidate=searchList.remove(0);
+    if (nextCandidate == null) {
+      throw new NullPointerException(Messages.getString("luni.94"));
+    }
+    if (!handlerMap.containsKey(nextCandidate)) {
+      URLHandler result;
+      String protocol=nextCandidate.getProtocol();
+      if (protocol.equals("jar")) {
+        result=createURLJarHandler(nextCandidate);
+      }
+ else       if (protocol.equals("file")) {
+        result=createURLFileHandler(nextCandidate);
+      }
+ else {
+        result=createURLHandler(nextCandidate);
+      }
+      if (result != null) {
+        handlerMap.put(nextCandidate,result);
+        handlerList.add(result);
+        return;
+      }
+    }
+  }
+}

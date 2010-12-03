@@ -1,0 +1,17 @@
+{
+  if (null == provider) {
+    provider=loadProviderByProperty();
+    if (null == provider) {
+      provider=loadProviderByJar();
+    }
+    if (null == provider) {
+      provider=AccessController.doPrivileged(new PrivilegedAction<SelectorProvider>(){
+        public SelectorProvider run(){
+          return new SelectorProviderImpl();
+        }
+      }
+);
+    }
+  }
+  return provider;
+}

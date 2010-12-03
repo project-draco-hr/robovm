@@ -1,0 +1,31 @@
+{
+  if (out == null) {
+    throw new IOException(Messages.getString("archive.1E"));
+  }
+  if (cDir == null) {
+    return;
+  }
+  if (entries.size() == 0) {
+    throw new ZipException(Messages.getString("archive.28"));
+  }
+  if (currentEntry != null) {
+    closeEntry();
+  }
+  int cdirSize=cDir.size();
+  writeLong(cDir,ENDSIG);
+  writeShort(cDir,0);
+  writeShort(cDir,0);
+  writeShort(cDir,entries.size());
+  writeShort(cDir,entries.size());
+  writeLong(cDir,cdirSize);
+  writeLong(cDir,offset);
+  if (comment != null) {
+    writeShort(cDir,comment.length());
+    cDir.write(comment.getBytes());
+  }
+ else {
+    writeShort(cDir,0);
+  }
+  out.write(cDir.toByteArray());
+  cDir=null;
+}

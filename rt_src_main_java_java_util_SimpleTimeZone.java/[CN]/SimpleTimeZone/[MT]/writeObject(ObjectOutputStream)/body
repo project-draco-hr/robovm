@@ -1,0 +1,47 @@
+{
+  int sEndDay=endDay, sEndDayOfWeek=endDayOfWeek + 1, sStartDay=startDay, sStartDayOfWeek=startDayOfWeek + 1;
+  if (useDaylight && (startMode != DOW_IN_MONTH_MODE || endMode != DOW_IN_MONTH_MODE)) {
+    Calendar cal=new GregorianCalendar(this);
+    if (endMode != DOW_IN_MONTH_MODE) {
+      cal.set(Calendar.MONTH,endMonth);
+      cal.set(Calendar.DATE,endDay);
+      sEndDay=cal.get(Calendar.DAY_OF_WEEK_IN_MONTH);
+      if (endMode == DOM_MODE) {
+        sEndDayOfWeek=cal.getFirstDayOfWeek();
+      }
+    }
+    if (startMode != DOW_IN_MONTH_MODE) {
+      cal.set(Calendar.MONTH,startMonth);
+      cal.set(Calendar.DATE,startDay);
+      sStartDay=cal.get(Calendar.DAY_OF_WEEK_IN_MONTH);
+      if (startMode == DOM_MODE) {
+        sStartDayOfWeek=cal.getFirstDayOfWeek();
+      }
+    }
+  }
+  ObjectOutputStream.PutField fields=stream.putFields();
+  fields.put("dstSavings",dstSavings);
+  fields.put("endDay",sEndDay);
+  fields.put("endDayOfWeek",sEndDayOfWeek);
+  fields.put("endMode",endMode);
+  fields.put("endMonth",endMonth);
+  fields.put("endTime",endTime);
+  fields.put("monthLength",GregorianCalendar.DaysInMonth);
+  fields.put("rawOffset",rawOffset);
+  fields.put("serialVersionOnStream",1);
+  fields.put("startDay",sStartDay);
+  fields.put("startDayOfWeek",sStartDayOfWeek);
+  fields.put("startMode",startMode);
+  fields.put("startMonth",startMonth);
+  fields.put("startTime",startTime);
+  fields.put("startYear",startYear);
+  fields.put("useDaylight",useDaylight);
+  stream.writeFields();
+  stream.writeInt(4);
+  byte[] values=new byte[4];
+  values[0]=(byte)startDay;
+  values[1]=(byte)(startMode == DOM_MODE ? 0 : startDayOfWeek + 1);
+  values[2]=(byte)endDay;
+  values[3]=(byte)(endMode == DOM_MODE ? 0 : endDayOfWeek + 1);
+  stream.write(values);
+}

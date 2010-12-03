@@ -1,0 +1,34 @@
+{
+  int[] oid=(int[])content;
+  int oidLen=length;
+  int elem;
+  for (int i=oid.length - 1; i > 1; i--, oidLen--) {
+    elem=oid[i];
+    if (elem > 127) {
+      encoded[offset + oidLen - 1]=(byte)(elem & 0x7F);
+      elem=elem >> 7;
+      for (; elem > 0; ) {
+        oidLen--;
+        encoded[offset + oidLen - 1]=(byte)(elem | 0x80);
+        elem=elem >> 7;
+      }
+    }
+ else {
+      encoded[offset + oidLen - 1]=(byte)elem;
+    }
+  }
+  elem=oid[0] * 40 + oid[1];
+  if (elem > 127) {
+    encoded[offset + oidLen - 1]=(byte)(elem & 0x7F);
+    elem=elem >> 7;
+    for (; elem > 0; ) {
+      oidLen--;
+      encoded[offset + oidLen - 1]=(byte)(elem | 0x80);
+      elem=elem >> 7;
+    }
+  }
+ else {
+    encoded[offset + oidLen - 1]=(byte)elem;
+  }
+  offset+=length;
+}

@@ -1,0 +1,31 @@
+{
+  if (key != null && value != null) {
+    int hash=key.hashCode();
+    int index=(hash & 0x7FFFFFFF) % elementData.length;
+    Entry<K,V> entry=elementData[index];
+    while (entry != null && !entry.equalsKey(key,hash)) {
+      entry=entry.next;
+    }
+    if (entry == null) {
+      modCount++;
+      if (++elementCount > threshold) {
+        rehash();
+        index=(hash & 0x7FFFFFFF) % elementData.length;
+      }
+      if (index < firstSlot) {
+        firstSlot=index;
+      }
+      if (index > lastSlot) {
+        lastSlot=index;
+      }
+      entry=newEntry(key,value,hash);
+      entry.next=elementData[index];
+      elementData[index]=entry;
+      return null;
+    }
+    V result=entry.value;
+    entry.value=value;
+    return result;
+  }
+  throw new NullPointerException();
+}

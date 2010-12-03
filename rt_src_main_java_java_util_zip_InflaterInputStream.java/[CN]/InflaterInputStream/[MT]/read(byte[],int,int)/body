@@ -1,0 +1,51 @@
+{
+  if (closed) {
+    throw new IOException(Messages.getString("archive.1E"));
+  }
+  if (null == buffer) {
+    throw new NullPointerException();
+  }
+  if (off < 0 || nbytes < 0 || off + nbytes > buffer.length) {
+    throw new IndexOutOfBoundsException();
+  }
+  if (nbytes == 0) {
+    return 0;
+  }
+  if (eof) {
+    return -1;
+  }
+  if (off > buffer.length || nbytes < 0 || off < 0 || buffer.length - off < nbytes) {
+    throw new ArrayIndexOutOfBoundsException();
+  }
+  do {
+    if (inf.needsInput()) {
+      fill();
+    }
+    try {
+      int result=inf.inflate(buffer,off,nbytes);
+      eof=inf.finished();
+      if (result > 0) {
+        return result;
+      }
+ else       if (eof) {
+        return -1;
+      }
+ else       if (inf.needsDictionary()) {
+        eof=true;
+        return -1;
+      }
+ else       if (len == -1) {
+        eof=true;
+        throw new EOFException();
+      }
+    }
+ catch (    DataFormatException e) {
+      eof=true;
+      if (len == -1) {
+        throw new EOFException();
+      }
+      throw (IOException)(new IOException().initCause(e));
+    }
+  }
+ while (true);
+}

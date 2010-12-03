@@ -1,0 +1,20 @@
+{
+  if (typeString == null && isPrimitive()) {
+    typeString=String.valueOf(getTypeCode());
+  }
+  if (typeString.length() == 1) {
+    if (defaultResolve()) {
+      return;
+    }
+  }
+  String className=typeString.replace('/','.');
+  if (className.charAt(0) == 'L') {
+    className=className.substring(1,className.length() - 1);
+  }
+  try {
+    Class<?> cl=Class.forName(className,false,loader);
+    type=(cl.getClassLoader() == null) ? cl : new WeakReference<Class<?>>(cl);
+  }
+ catch (  ClassNotFoundException e) {
+  }
+}

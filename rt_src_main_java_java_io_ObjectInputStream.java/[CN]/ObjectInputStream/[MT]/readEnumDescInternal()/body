@@ -1,0 +1,25 @@
+{
+  ObjectStreamClass classDesc;
+  primitiveData=input;
+  Integer oldHandle=descriptorHandle;
+  descriptorHandle=nextHandle();
+  classDesc=readClassDescriptor();
+  registerObjectRead(classDesc,descriptorHandle,false);
+  descriptorHandle=oldHandle;
+  primitiveData=emptyStream;
+  classDesc.setClass(resolveClass(classDesc));
+  discardData();
+  ObjectStreamClass superClass=readClassDesc();
+  checkedSetSuperClassDesc(classDesc,superClass);
+  if (0L != classDesc.getSerialVersionUID() || 0L != superClass.getSerialVersionUID()) {
+    throw new InvalidClassException(superClass.getName(),Messages.getString("luni.C3",superClass,superClass));
+  }
+  byte tc=nextTC();
+  if (tc == TC_ENDBLOCKDATA) {
+    superClass.setSuperclass(readClassDesc());
+  }
+ else {
+    pushbackTC();
+  }
+  return classDesc;
+}

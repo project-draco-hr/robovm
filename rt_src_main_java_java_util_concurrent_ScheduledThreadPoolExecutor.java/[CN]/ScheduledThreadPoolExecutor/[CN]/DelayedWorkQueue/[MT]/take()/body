@@ -1,0 +1,29 @@
+{
+  final ReentrantLock lock=this.lock;
+  lock.lockInterruptibly();
+  try {
+    for (; ; ) {
+      RunnableScheduledFuture first=queue[0];
+      if (first == null)       available.await();
+ else {
+        long delay=first.getDelay(TimeUnit.NANOSECONDS);
+        if (delay <= 0)         return finishPoll(first);
+ else         if (leader != null)         available.await();
+ else {
+          Thread thisThread=Thread.currentThread();
+          leader=thisThread;
+          try {
+            available.awaitNanos(delay);
+          }
+  finally {
+            if (leader == thisThread)             leader=null;
+          }
+        }
+      }
+    }
+  }
+  finally {
+    if (leader == null && queue[0] != null)     available.signal();
+    lock.unlock();
+  }
+}

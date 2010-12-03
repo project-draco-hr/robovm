@@ -1,0 +1,35 @@
+{
+synchronized (lock) {
+    if (in != null) {
+      if (length == 0) {
+        return 0;
+      }
+      Util.assertArrayIndex(buf,offset,length);
+      if (chars.limit() == chars.position()) {
+        fillBuf(in,bytes,chars,decoder);
+      }
+      int position=chars.position();
+      int availableChars=chars.limit() - position;
+      int needChars=length;
+      while (availableChars < needChars) {
+        System.arraycopy(chars.array(),position,buf,offset,availableChars);
+        chars.position(position + availableChars);
+        needChars-=availableChars;
+        offset+=availableChars;
+        if (in.available() <= 0) {
+          return needChars == length ? -1 : length - needChars;
+        }
+        fillBuf(in,bytes,chars,decoder);
+        position=chars.position();
+        availableChars=chars.limit();
+        if (availableChars == 0) {
+          return needChars == length ? -1 : length - needChars;
+        }
+      }
+      System.arraycopy(chars.array(),position,buf,offset,needChars);
+      chars.position(chars.position() + needChars);
+      return length;
+    }
+    throw new IOException(Messages.getString("nio.06"));
+  }
+}

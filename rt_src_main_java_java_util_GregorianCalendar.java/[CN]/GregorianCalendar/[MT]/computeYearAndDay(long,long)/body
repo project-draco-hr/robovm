@@ -1,0 +1,18 @@
+{
+  int year=1970;
+  long days=dayCount;
+  if (localTime < gregorianCutover) {
+    days-=julianSkew;
+  }
+  int approxYears;
+  while ((approxYears=(int)(days / 365)) != 0) {
+    year=year + approxYears;
+    days=dayCount - daysFromBaseYear(year);
+  }
+  if (days < 0) {
+    year=year - 1;
+    days=days + daysInYear(year);
+  }
+  fields[YEAR]=year;
+  return (int)days + 1;
+}

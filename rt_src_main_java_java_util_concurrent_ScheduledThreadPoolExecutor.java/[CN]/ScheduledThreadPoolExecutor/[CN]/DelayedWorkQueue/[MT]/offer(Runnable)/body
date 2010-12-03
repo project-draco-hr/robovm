@@ -1,0 +1,26 @@
+{
+  if (x == null)   throw new NullPointerException();
+  RunnableScheduledFuture e=(RunnableScheduledFuture)x;
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    int i=size;
+    if (i >= queue.length)     grow();
+    size=i + 1;
+    if (i == 0) {
+      queue[0]=e;
+      setIndex(e,0);
+    }
+ else {
+      siftUp(i,e);
+    }
+    if (queue[0] == e) {
+      leader=null;
+      available.signal();
+    }
+  }
+  finally {
+    lock.unlock();
+  }
+  return true;
+}

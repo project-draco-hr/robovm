@@ -1,0 +1,17 @@
+{
+  if (setInterruptAction != null) {
+    try {
+      setInterruptAction.invoke(Thread.currentThread(),new Object[]{null});
+    }
+ catch (    Exception e) {
+      throw new RuntimeException(e);
+    }
+    if (interrupted) {
+      interrupted=false;
+      throw new ClosedByInterruptException();
+    }
+  }
+  if (!success && closed) {
+    throw new AsynchronousCloseException();
+  }
+}

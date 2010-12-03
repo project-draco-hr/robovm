@@ -1,0 +1,42 @@
+{
+  String port=hostPort.substring(host.length());
+  String emptyString="";
+  if (emptyString.equals(port)) {
+    portMin=80;
+    portMax=80;
+    return;
+  }
+  if (":*".equals(port)) {
+    portMin=0;
+    portMax=65535;
+    return;
+  }
+  port=port.substring(1);
+  int negIdx=port.indexOf('-');
+  String strPortMin=emptyString;
+  String strPortMax=emptyString;
+  if (-1 == negIdx) {
+    strPortMin=port;
+    strPortMax=port;
+  }
+ else {
+    strPortMin=port.substring(0,negIdx);
+    strPortMax=port.substring(negIdx + 1);
+    if (emptyString.equals(strPortMin)) {
+      strPortMin="0";
+    }
+    if (emptyString.equals(strPortMax)) {
+      strPortMax="65535";
+    }
+  }
+  try {
+    portMin=Integer.valueOf(strPortMin).intValue();
+    portMax=Integer.valueOf(strPortMax).intValue();
+    if (portMin > portMax) {
+      throw new IllegalArgumentException(Messages.getString("luni.7B",port));
+    }
+  }
+ catch (  NumberFormatException e) {
+    throw new IllegalArgumentException(Messages.getString("luni.7C",port));
+  }
+}

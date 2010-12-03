@@ -1,0 +1,16 @@
+{
+  server_version[0]=(byte)in.read();
+  server_version[1]=(byte)in.read();
+  in.read(random,0,32);
+  int size=in.readUint8();
+  session_id=new byte[size];
+  in.read(session_id,0,size);
+  byte b0=(byte)in.read();
+  byte b1=(byte)in.read();
+  cipher_suite=CipherSuite.getByCode(b0,b1);
+  compression_method=(byte)in.read();
+  this.length=38 + session_id.length;
+  if (this.length != length) {
+    fatalAlert(AlertProtocol.DECODE_ERROR,"DECODE ERROR: incorrect ServerHello");
+  }
+}

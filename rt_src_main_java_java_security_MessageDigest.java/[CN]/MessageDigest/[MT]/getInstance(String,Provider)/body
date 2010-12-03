@@ -1,0 +1,20 @@
+{
+  if (provider == null) {
+    throw new IllegalArgumentException(Messages.getString("security.04"));
+  }
+  if (algorithm == null) {
+    throw new NullPointerException(Messages.getString("security.01"));
+  }
+  MessageDigest result;
+synchronized (engine) {
+    engine.getInstance(algorithm,provider,null);
+    if (engine.spi instanceof MessageDigest) {
+      result=(MessageDigest)engine.spi;
+      result.algorithm=algorithm;
+      result.provider=provider;
+      return result;
+    }
+    result=new MessageDigestImpl((MessageDigestSpi)engine.spi,provider,algorithm);
+    return result;
+  }
+}

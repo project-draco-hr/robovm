@@ -1,0 +1,28 @@
+{
+  if (null == _builtInCharsets) {
+synchronized (Charset.class) {
+      if (null == _builtInCharsets) {
+        _builtInCharsets=new TreeMap<String,Charset>(IgnoreCaseComparator.getInstance());
+        _builtInProvider.putCharsets(_builtInCharsets);
+      }
+    }
+  }
+  TreeMap<String,Charset> charsets=(TreeMap<String,Charset>)_builtInCharsets.clone();
+  ClassLoader contextClassLoader=getContextClassLoader();
+  Enumeration<URL> e=null;
+  try {
+    if (null != contextClassLoader) {
+      e=contextClassLoader.getResources(PROVIDER_CONFIGURATION_FILE_NAME);
+    }
+ else {
+      getSystemClassLoader();
+      e=systemClassLoader.getResources(PROVIDER_CONFIGURATION_FILE_NAME);
+    }
+    while (e.hasMoreElements()) {
+      loadConfiguredCharsets(e.nextElement(),contextClassLoader,charsets);
+    }
+  }
+ catch (  IOException ex) {
+  }
+  return Collections.unmodifiableSortedMap(charsets);
+}

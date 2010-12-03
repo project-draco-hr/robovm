@@ -1,0 +1,58 @@
+{
+  int value;
+  if ((value=maximums[field]) == leastMaximums[field]) {
+    return value;
+  }
+switch (field) {
+case WEEK_OF_YEAR:
+case WEEK_OF_MONTH:
+    isCached=false;
+  break;
+}
+complete();
+long orgTime=time;
+int result=0;
+switch (field) {
+case WEEK_OF_YEAR:
+set(DATE,31);
+set(MONTH,DECEMBER);
+result=get(WEEK_OF_YEAR);
+if (result == 1) {
+set(DATE,31 - 7);
+result=get(WEEK_OF_YEAR);
+}
+areFieldsSet=false;
+break;
+case WEEK_OF_MONTH:
+set(DATE,daysInMonth());
+result=get(WEEK_OF_MONTH);
+areFieldsSet=false;
+break;
+case DATE:
+return daysInMonth();
+case DAY_OF_YEAR:
+return daysInYear(fields[YEAR]);
+case DAY_OF_WEEK_IN_MONTH:
+result=get(DAY_OF_WEEK_IN_MONTH) + ((daysInMonth() - get(DATE)) / 7);
+break;
+case YEAR:
+GregorianCalendar clone=(GregorianCalendar)clone();
+if (get(ERA) == AD) {
+clone.setTimeInMillis(Long.MAX_VALUE);
+}
+ else {
+clone.setTimeInMillis(Long.MIN_VALUE);
+}
+result=clone.get(YEAR);
+clone.set(YEAR,get(YEAR));
+if (clone.before(this)) {
+result--;
+}
+break;
+case DST_OFFSET:
+result=getMaximum(DST_OFFSET);
+break;
+}
+time=orgTime;
+return result;
+}

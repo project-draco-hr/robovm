@@ -1,0 +1,27 @@
+{
+  if (relative.opaque || opaque) {
+    return relative;
+  }
+  if (scheme == null ? relative.scheme != null : !scheme.equals(relative.scheme)) {
+    return relative;
+  }
+  if (authority == null ? relative.authority != null : !authority.equals(relative.authority)) {
+    return relative;
+  }
+  String thisPath=normalize(path);
+  String relativePath=normalize(relative.path);
+  if (!thisPath.equals(relativePath)) {
+    if (!thisPath.endsWith("/")) {
+      thisPath=thisPath + '/';
+    }
+    if (!relativePath.startsWith(thisPath)) {
+      return relative;
+    }
+  }
+  URI result=new URI();
+  result.fragment=relative.fragment;
+  result.query=relative.query;
+  result.path=relativePath.substring(thisPath.length());
+  result.setSchemeSpecificPart();
+  return result;
+}

@@ -1,0 +1,24 @@
+{
+  Object[] table=this.table;
+  for (int i=table.length - 2; i >= 0; i-=2) {
+    Object k=table[i];
+    if (k == null || k == TOMBSTONE) {
+      continue;
+    }
+    Reference<InheritableThreadLocal<?>> reference=(Reference<InheritableThreadLocal<?>>)k;
+    InheritableThreadLocal key=reference.get();
+    if (key != null) {
+      table[i + 1]=key.childValue(fromParent.table[i + 1]);
+    }
+ else {
+      table[i]=TOMBSTONE;
+      table[i + 1]=null;
+      fromParent.table[i]=TOMBSTONE;
+      fromParent.table[i + 1]=null;
+      tombstones++;
+      fromParent.tombstones++;
+      size--;
+      fromParent.size--;
+    }
+  }
+}

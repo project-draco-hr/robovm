@@ -1,0 +1,78 @@
+{
+  if (null == format || null == loader) {
+    throw new NullPointerException();
+  }
+  InputStream streams=null;
+  final String bundleName=toBundleName(baseName,locale);
+  final ClassLoader clsloader=loader;
+  ResourceBundle ret;
+  Class<?> cls=null;
+  if (JAVACLASS == format) {
+    cls=AccessController.doPrivileged(new PrivilegedAction<Class<?>>(){
+      public Class<?> run(){
+        try {
+          return clsloader.loadClass(bundleName);
+        }
+ catch (        Exception e) {
+          return null;
+        }
+catch (        NoClassDefFoundError e) {
+          return null;
+        }
+      }
+    }
+);
+    if (null == cls) {
+      return null;
+    }
+    try {
+      ResourceBundle bundle=(ResourceBundle)cls.newInstance();
+      bundle.setLocale(locale);
+      return bundle;
+    }
+ catch (    NullPointerException e) {
+      return null;
+    }
+  }
+  if (JAVAPROPERTIES == format) {
+    final String resourceName=toResourceName(bundleName,"properties");
+    if (reload) {
+      URL url=null;
+      try {
+        url=loader.getResource(resourceName);
+      }
+ catch (      NullPointerException e) {
+      }
+      if (null != url) {
+        URLConnection con=url.openConnection();
+        con.setUseCaches(false);
+        streams=con.getInputStream();
+      }
+    }
+ else {
+      try {
+        streams=AccessController.doPrivileged(new PrivilegedAction<InputStream>(){
+          public InputStream run(){
+            return clsloader.getResourceAsStream(resourceName);
+          }
+        }
+);
+      }
+ catch (      NullPointerException e) {
+      }
+    }
+    if (streams != null) {
+      try {
+        ret=new PropertyResourceBundle(new InputStreamReader(streams));
+        ret.setLocale(locale);
+        streams.close();
+      }
+ catch (      IOException e) {
+        return null;
+      }
+      return ret;
+    }
+    return null;
+  }
+  throw new IllegalArgumentException();
+}

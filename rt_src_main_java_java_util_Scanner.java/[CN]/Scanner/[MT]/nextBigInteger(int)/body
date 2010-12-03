@@ -1,0 +1,22 @@
+{
+  checkClosed();
+  Object obj=cacheHasNextValue;
+  cacheHasNextValue=null;
+  if (obj instanceof BigInteger) {
+    findStartIndex=cachehasNextIndex;
+    return (BigInteger)obj;
+  }
+  Pattern integerPattern=getIntegerPattern(radix);
+  String intString=next(integerPattern);
+  intString=removeLocaleInfo(intString,DataType.INT);
+  BigInteger bigIntegerValue;
+  try {
+    bigIntegerValue=new BigInteger(intString,radix);
+  }
+ catch (  NumberFormatException e) {
+    matchSuccessful=false;
+    recoverPreviousStatus();
+    throw new InputMismatchException();
+  }
+  return bigIntegerValue;
+}

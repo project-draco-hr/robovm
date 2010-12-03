@@ -1,0 +1,26 @@
+{
+  checkClosed();
+  matcher.usePattern(LINE_PATTERN);
+  matcher.region(findStartIndex,bufferLength);
+  boolean hasNextLine=false;
+  while (true) {
+    if (matcher.find()) {
+      if (inputExhausted || matcher.end() != bufferLength || bufferLength < buffer.capacity()) {
+        matchSuccessful=true;
+        hasNextLine=true;
+        break;
+      }
+    }
+ else {
+      if (inputExhausted) {
+        matchSuccessful=false;
+        break;
+      }
+    }
+    if (!inputExhausted) {
+      readMore();
+      resetMatcher();
+    }
+  }
+  return hasNextLine;
+}

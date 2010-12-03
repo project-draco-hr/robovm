@@ -1,0 +1,19 @@
+{
+  if (!isOpen()) {
+    throw new ClosedChannelException();
+  }
+  int bytesRemain=source.remaining();
+  if (bytesRemain == 0) {
+    return 0;
+  }
+  byte[] buf=new byte[bytesRemain];
+  source.get(buf);
+  try {
+    begin();
+    outputStream.write(buf,0,bytesRemain);
+  }
+  finally {
+    end(bytesRemain >= 0);
+  }
+  return bytesRemain;
+}

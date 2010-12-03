@@ -1,0 +1,15 @@
+{
+  if (optID == SocketOptions.SO_TIMEOUT) {
+    return Integer.valueOf(receiveTimeout);
+  }
+ else   if (optID == SocketOptions.IP_TOS) {
+    return Integer.valueOf(trafficClass);
+  }
+ else {
+    Object result=netImpl.getSocketOption(fd,optID);
+    if (optID == SocketOptions.TCP_NODELAY && (netImpl.getSocketFlags() & TCP_NODELAY) != 0) {
+      return Boolean.valueOf(tcpNoDelay);
+    }
+    return result;
+  }
+}

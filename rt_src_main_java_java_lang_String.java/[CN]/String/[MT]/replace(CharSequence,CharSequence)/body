@@ -1,0 +1,32 @@
+{
+  if (target == null) {
+    throw new NullPointerException("target should not be null");
+  }
+  if (replacement == null) {
+    throw new NullPointerException("replacement should not be null");
+  }
+  String ts=target.toString();
+  int index=indexOf(ts,0);
+  if (index == -1)   return this;
+  String rs=replacement.toString();
+  if ("".equals(ts)) {
+    StringBuilder buffer=new StringBuilder(count + (rs.length() * (count + 1)));
+    buffer.append(rs);
+    for (int i=0; i < count; i++) {
+      buffer.append(value[offset + i]);
+      buffer.append(rs);
+    }
+    return buffer.toString();
+  }
+  StringBuilder buffer=new StringBuilder(count + rs.length());
+  int tl=target.length();
+  int tail=0;
+  do {
+    buffer.append(value,offset + tail,index - tail);
+    buffer.append(rs);
+    tail=index + tl;
+  }
+ while ((index=indexOf(ts,tail)) != -1);
+  buffer.append(value,offset + tail,count - tail);
+  return buffer.toString();
+}

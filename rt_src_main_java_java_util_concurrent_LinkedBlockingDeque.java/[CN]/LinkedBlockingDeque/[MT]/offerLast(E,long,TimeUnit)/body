@@ -1,0 +1,16 @@
+{
+  if (e == null)   throw new NullPointerException();
+  long nanos=unit.toNanos(timeout);
+  final ReentrantLock lock=this.lock;
+  lock.lockInterruptibly();
+  try {
+    while (!linkLast(e)) {
+      if (nanos <= 0)       return false;
+      nanos=notFull.awaitNanos(nanos);
+    }
+    return true;
+  }
+  finally {
+    lock.unlock();
+  }
+}

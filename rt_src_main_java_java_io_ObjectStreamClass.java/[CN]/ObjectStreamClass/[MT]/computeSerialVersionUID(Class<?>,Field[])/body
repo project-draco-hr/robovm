@@ -1,0 +1,128 @@
+{
+  for (int i=0; i < fields.length; i++) {
+    final Field field=fields[i];
+    if (Long.TYPE == field.getType()) {
+      int modifiers=field.getModifiers();
+      if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
+        if (UID_FIELD_NAME.equals(field.getName())) {
+          AccessController.doPrivileged(new PriviAction<Object>(field));
+          try {
+            return field.getLong(null);
+          }
+ catch (          IllegalAccessException iae) {
+            throw new RuntimeException(Messages.getString("luni.C9",iae));
+          }
+        }
+      }
+    }
+  }
+  MessageDigest digest;
+  try {
+    digest=MessageDigest.getInstance("SHA");
+  }
+ catch (  NoSuchAlgorithmException e) {
+    throw new Error(e);
+  }
+  ByteArrayOutputStream sha=new ByteArrayOutputStream();
+  try {
+    DataOutputStream output=new DataOutputStream(sha);
+    output.writeUTF(cl.getName());
+    int classModifiers=CLASS_MODIFIERS_MASK & cl.getModifiers();
+    boolean isArray=cl.isArray();
+    if (isArray) {
+      classModifiers|=Modifier.ABSTRACT;
+    }
+    if (cl.isInterface() && !Modifier.isPublic(classModifiers)) {
+      classModifiers&=~Modifier.ABSTRACT;
+    }
+    output.writeInt(classModifiers);
+    if (!isArray) {
+      Class<?>[] interfaces=cl.getInterfaces();
+      if (interfaces.length > 1) {
+        Comparator<Class<?>> interfaceComparator=new Comparator<Class<?>>(){
+          public int compare(          Class<?> itf1,          Class<?> itf2){
+            return itf1.getName().compareTo(itf2.getName());
+          }
+        }
+;
+        Arrays.sort(interfaces,interfaceComparator);
+      }
+      for (int i=0; i < interfaces.length; i++) {
+        output.writeUTF(interfaces[i].getName());
+      }
+    }
+    if (fields.length > 1) {
+      Comparator<Field> fieldComparator=new Comparator<Field>(){
+        public int compare(        Field field1,        Field field2){
+          return field1.getName().compareTo(field2.getName());
+        }
+      }
+;
+      Arrays.sort(fields,fieldComparator);
+    }
+    for (int i=0; i < fields.length; i++) {
+      Field field=fields[i];
+      int modifiers=field.getModifiers() & FIELD_MODIFIERS_MASK;
+      boolean skip=Modifier.isPrivate(modifiers) && (Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers));
+      if (!skip) {
+        output.writeUTF(field.getName());
+        output.writeInt(modifiers);
+        output.writeUTF(descriptorForFieldSignature(getFieldSignature(field)));
+      }
+    }
+    if (hasClinit(cl)) {
+      output.writeUTF(CLINIT_NAME);
+      output.writeInt(CLINIT_MODIFIERS);
+      output.writeUTF(CLINIT_SIGNATURE);
+    }
+    Constructor<?>[] constructors=cl.getDeclaredConstructors();
+    if (constructors.length > 1) {
+      Comparator<Constructor<?>> constructorComparator=new Comparator<Constructor<?>>(){
+        public int compare(        Constructor<?> ctr1,        Constructor<?> ctr2){
+          return (getConstructorSignature(ctr1).compareTo(getConstructorSignature(ctr2)));
+        }
+      }
+;
+      Arrays.sort(constructors,constructorComparator);
+    }
+    for (int i=0; i < constructors.length; i++) {
+      Constructor<?> constructor=constructors[i];
+      int modifiers=constructor.getModifiers() & METHOD_MODIFIERS_MASK;
+      boolean isPrivate=Modifier.isPrivate(modifiers);
+      if (!isPrivate) {
+        output.writeUTF("<init>");
+        output.writeInt(modifiers);
+        output.writeUTF(descriptorForSignature(getConstructorSignature(constructor)).replace('/','.'));
+      }
+    }
+    Method[] methods=cl.getDeclaredMethods();
+    if (methods.length > 1) {
+      Comparator<Method> methodComparator=new Comparator<Method>(){
+        public int compare(        Method m1,        Method m2){
+          int result=m1.getName().compareTo(m2.getName());
+          if (result == 0) {
+            return getMethodSignature(m1).compareTo(getMethodSignature(m2));
+          }
+          return result;
+        }
+      }
+;
+      Arrays.sort(methods,methodComparator);
+    }
+    for (int i=0; i < methods.length; i++) {
+      Method method=methods[i];
+      int modifiers=method.getModifiers() & METHOD_MODIFIERS_MASK;
+      boolean isPrivate=Modifier.isPrivate(modifiers);
+      if (!isPrivate) {
+        output.writeUTF(method.getName());
+        output.writeInt(modifiers);
+        output.writeUTF(descriptorForSignature(getMethodSignature(method)).replace('/','.'));
+      }
+    }
+  }
+ catch (  IOException e) {
+    throw new RuntimeException(Messages.getString("luni.CA",e));
+  }
+  byte[] hash=digest.digest(sha.toByteArray());
+  return littleEndianLongAt(hash,0);
+}

@@ -1,0 +1,37 @@
+{
+  int size=list.size();
+  int sublistSize=sublist.size();
+  if (sublistSize > size) {
+    return -1;
+  }
+  if (sublistSize == 0) {
+    return 0;
+  }
+  Object firstObj=sublist.get(0);
+  int index=list.indexOf(firstObj);
+  if (index == -1) {
+    return -1;
+  }
+  while (index < size && (size - index >= sublistSize)) {
+    ListIterator<?> listIt=list.listIterator(index);
+    if ((firstObj == null) ? listIt.next() == null : firstObj.equals(listIt.next())) {
+      ListIterator<?> sublistIt=sublist.listIterator(1);
+      boolean difFound=false;
+      while (sublistIt.hasNext()) {
+        Object element=sublistIt.next();
+        if (!listIt.hasNext()) {
+          return -1;
+        }
+        if ((element == null) ? listIt.next() != null : !element.equals(listIt.next())) {
+          difFound=true;
+          break;
+        }
+      }
+      if (!difFound) {
+        return index;
+      }
+    }
+    index++;
+  }
+  return -1;
+}

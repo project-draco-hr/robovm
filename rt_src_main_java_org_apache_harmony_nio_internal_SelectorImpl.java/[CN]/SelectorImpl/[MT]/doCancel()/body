@@ -1,0 +1,15 @@
+{
+  Set<SelectionKey> cancelledKeys=cancelledKeys();
+synchronized (cancelledKeys) {
+    if (cancelledKeys.size() > 0) {
+      for (      SelectionKey currentkey : cancelledKeys) {
+        delKey((SelectionKeyImpl)currentkey);
+        mutableKeys.remove(currentkey);
+        deregister((AbstractSelectionKey)currentkey);
+        mutableSelectedKeys.remove(currentkey);
+      }
+      cancelledKeys.clear();
+    }
+    limitCapacity();
+  }
+}

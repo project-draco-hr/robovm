@@ -1,0 +1,20 @@
+{
+  creationTime=System.currentTimeMillis();
+  lastAccessedTime=creationTime;
+  if (cipher_suite == null) {
+    this.cipherSuite=CipherSuite.TLS_NULL_WITH_NULL_NULL;
+    id=new byte[0];
+    isServer=false;
+  }
+ else {
+    this.cipherSuite=cipher_suite;
+    id=new byte[32];
+    sr.nextBytes(id);
+    long time=creationTime / 1000;
+    id[28]=(byte)((time & 0xFF000000) >>> 24);
+    id[29]=(byte)((time & 0x00FF0000) >>> 16);
+    id[30]=(byte)((time & 0x0000FF00) >>> 8);
+    id[31]=(byte)((time & 0x000000FF));
+    isServer=true;
+  }
+}

@@ -1,0 +1,47 @@
+{
+  currentObject=object;
+  currentClass=classDesc;
+  boolean hadWriteMethod=(classDesc.getFlags() & SC_WRITE_METHOD) > 0;
+  Class<?> targetClass=classDesc.forClass();
+  final Method readMethod;
+  if (targetClass == null || !mustResolve) {
+    readMethod=null;
+  }
+ else {
+    readMethod=classDesc.getMethodReadObject();
+  }
+  try {
+    if (readMethod != null) {
+      AccessController.doPrivileged(new PriviAction<Object>(readMethod));
+      try {
+        readMethod.invoke(object,new Object[]{this});
+      }
+ catch (      InvocationTargetException e) {
+        Throwable ex=e.getTargetException();
+        if (ex instanceof ClassNotFoundException) {
+          throw (ClassNotFoundException)ex;
+        }
+ else         if (ex instanceof RuntimeException) {
+          throw (RuntimeException)ex;
+        }
+ else         if (ex instanceof Error) {
+          throw (Error)ex;
+        }
+        throw (IOException)ex;
+      }
+catch (      IllegalAccessException e) {
+        throw new RuntimeException(e.toString());
+      }
+    }
+ else {
+      defaultReadObject();
+    }
+    if (hadWriteMethod) {
+      discardData();
+    }
+  }
+  finally {
+    currentObject=null;
+    currentClass=null;
+  }
+}

@@ -1,0 +1,73 @@
+{
+  int[] decCurCodePoint;
+  int[] decCodePoint=new int[Lexer.MAX_DECOMPOSITION_LENGTH];
+  int readCodePoints=0;
+  int rightBound=matchResult.getRightBound();
+  int curChar;
+  int i=0;
+  if (strIndex >= rightBound) {
+    return -1;
+  }
+  curChar=codePointAt(strIndex,testString,rightBound);
+  strIndex+=readCharsForCodePoint;
+  decCurCodePoint=Lexer.getDecomposition(curChar);
+  if (decCurCodePoint == null) {
+    decCodePoint[readCodePoints++]=curChar;
+  }
+ else {
+    i=decCurCodePoint.length;
+    System.arraycopy(decCurCodePoint,0,decCodePoint,0,i);
+    readCodePoints+=i;
+  }
+  if (strIndex < rightBound) {
+    curChar=codePointAt(strIndex,testString,rightBound);
+    while ((readCodePoints < Lexer.MAX_DECOMPOSITION_LENGTH) && !Lexer.isDecomposedCharBoundary(curChar)) {
+      if (Lexer.hasDecompositionNonNullCanClass(curChar)) {
+        decCurCodePoint=Lexer.getDecomposition(curChar);
+        if (decCurCodePoint.length == 2) {
+          decCodePoint[readCodePoints++]=decCurCodePoint[0];
+          decCodePoint[readCodePoints++]=decCurCodePoint[1];
+        }
+ else {
+          decCodePoint[readCodePoints++]=decCurCodePoint[0];
+        }
+      }
+ else {
+        decCodePoint[readCodePoints++]=curChar;
+      }
+      strIndex+=readCharsForCodePoint;
+      if (strIndex < rightBound) {
+        curChar=codePointAt(strIndex,testString,rightBound);
+      }
+ else {
+        break;
+      }
+    }
+  }
+switch (readCodePoints) {
+case 0:
+case 1:
+case 2:
+    break;
+case 3:
+  int i1=Lexer.getCanonicalClass(decCodePoint[1]);
+int i2=Lexer.getCanonicalClass(decCodePoint[2]);
+if ((i2 != 0) && (i1 > i2)) {
+i1=decCodePoint[1];
+decCodePoint[1]=decCodePoint[2];
+decCodePoint[2]=i1;
+}
+break;
+default :
+decCodePoint=Lexer.getCanonicalOrder(decCodePoint,readCodePoints);
+}
+if (readCodePoints != decomposedCharLength) {
+return -1;
+}
+for (i=0; i < readCodePoints; i++) {
+if (decCodePoint[i] != decomposedChar[i]) {
+return -1;
+}
+}
+return next.matches(strIndex,testString,matchResult);
+}

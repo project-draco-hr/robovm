@@ -1,0 +1,60 @@
+{
+  double[] limits=new double[5];
+  List<String> formats=new ArrayList<String>();
+  int length=template.length(), limitCount=0, index=0;
+  StringBuffer buffer=new StringBuffer();
+  NumberFormat format=NumberFormat.getInstance(Locale.US);
+  ParsePosition position=new ParsePosition(0);
+  while (true) {
+    index=skipWhitespace(template,index);
+    if (index >= length) {
+      if (limitCount == limits.length) {
+        choiceLimits=limits;
+      }
+ else {
+        choiceLimits=new double[limitCount];
+        System.arraycopy(limits,0,choiceLimits,0,limitCount);
+      }
+      choiceFormats=new String[formats.size()];
+      for (int i=0; i < formats.size(); i++) {
+        choiceFormats[i]=formats.get(i);
+      }
+      return;
+    }
+    position.setIndex(index);
+    Number value=format.parse(template,position);
+    index=skipWhitespace(template,position.getIndex());
+    if (position.getErrorIndex() != -1 || index >= length) {
+      choiceLimits=new double[0];
+      choiceFormats=new String[0];
+      return;
+    }
+    char ch=template.charAt(index++);
+    if (limitCount == limits.length) {
+      double[] newLimits=new double[limitCount * 2];
+      System.arraycopy(limits,0,newLimits,0,limitCount);
+      limits=newLimits;
+    }
+    double next;
+switch (ch) {
+case '#':
+case '\u2264':
+      next=value.doubleValue();
+    break;
+case '<':
+  next=nextDouble(value.doubleValue());
+break;
+default :
+throw new IllegalArgumentException();
+}
+if (limitCount > 0 && next <= limits[limitCount - 1]) {
+throw new IllegalArgumentException();
+}
+buffer.setLength(0);
+position.setIndex(index);
+upTo(template,position,buffer,'|');
+index=position.getIndex();
+limits[limitCount++]=next;
+formats.add(buffer.toString());
+}
+}

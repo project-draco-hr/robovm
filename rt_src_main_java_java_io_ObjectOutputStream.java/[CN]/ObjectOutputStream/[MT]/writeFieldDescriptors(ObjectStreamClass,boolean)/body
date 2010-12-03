@@ -1,0 +1,18 @@
+{
+  Class<?> loadedClass=classDesc.forClass();
+  ObjectStreamField[] fields=null;
+  int fieldCount=0;
+  if (!externalizable && loadedClass != ObjectStreamClass.STRINGCLASS) {
+    fields=classDesc.fields();
+    fieldCount=fields.length;
+  }
+  output.writeShort(fieldCount);
+  for (int i=0; i < fieldCount; i++) {
+    ObjectStreamField f=fields[i];
+    output.writeByte(f.getTypeCode());
+    output.writeUTF(f.getName());
+    if (!f.isPrimitive()) {
+      writeObject(f.getTypeString());
+    }
+  }
+}

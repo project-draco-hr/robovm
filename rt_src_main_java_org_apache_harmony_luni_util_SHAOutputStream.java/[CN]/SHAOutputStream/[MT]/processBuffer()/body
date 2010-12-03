@@ -1,0 +1,69 @@
+{
+  int A;
+  int B;
+  int C;
+  int D;
+  int E;
+  int temp;
+  int t;
+  for (t=0; t <= 15; t++) {
+    WArray[t]=(MArray[4 * t] & 0xff) << 24 | ((MArray[4 * t + 1] & 0xff) << 16) | ((MArray[4 * t + 2] & 0xff) << 8) | (MArray[4 * t + 3] & 0xff);
+  }
+  for (t=16; t <= 79; t++) {
+    temp=(WArray[t - 3] ^ WArray[t - 8] ^ WArray[t - 14]^ WArray[t - 16]);
+    temp=(temp << 1) | (temp >>> (32 - 1));
+    WArray[t]=temp;
+  }
+  A=HConstants[0];
+  B=HConstants[1];
+  C=HConstants[2];
+  D=HConstants[3];
+  E=HConstants[4];
+  for (t=0; t <= 19; t++) {
+    temp=(A << 5) | (A >>> (32 - 5));
+    temp=temp + E + WArray[t]+ K0_19;
+    temp=temp + ((B & C) | (~B & D));
+    E=D;
+    D=C;
+    C=(B << 30) | (B >>> (32 - 30));
+    B=A;
+    A=temp;
+  }
+  for (t=20; t <= 39; t++) {
+    temp=(A << 5) | (A >>> (32 - 5));
+    temp=temp + E + WArray[t]+ K20_39;
+    temp=temp + (B ^ C ^ D);
+    E=D;
+    D=C;
+    C=(B << 30) | (B >>> (32 - 30));
+    B=A;
+    A=temp;
+  }
+  for (t=40; t <= 59; t++) {
+    temp=(A << 5) | (A >>> (32 - 5));
+    temp=temp + E + WArray[t]+ K40_59;
+    temp=temp + ((B & C) | (B & D) | (C & D));
+    E=D;
+    D=C;
+    C=(B << 30) | (B >>> (32 - 30));
+    B=A;
+    A=temp;
+  }
+  for (t=60; t <= 79; t++) {
+    temp=(A << 5) | (A >>> (32 - 5));
+    temp=temp + E + WArray[t]+ K60_79;
+    temp=temp + (B ^ C ^ D);
+    E=D;
+    D=C;
+    C=(B << 30) | (B >>> (32 - 30));
+    B=A;
+    A=temp;
+  }
+  HConstants[0]=HConstants[0] + A;
+  HConstants[1]=HConstants[1] + B;
+  HConstants[2]=HConstants[2] + C;
+  HConstants[3]=HConstants[3] + D;
+  HConstants[4]=HConstants[4] + E;
+  bytesProcessed=bytesProcessed + BlockSizeInBytes;
+  bytesToProcess=0;
+}

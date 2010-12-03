@@ -1,0 +1,31 @@
+{
+  String[] strings=significantStr.split("\\.");
+  String strIntegerPart=strings[0];
+  String strDecimalPart=strings.length > 1 ? strings[1] : "";
+  String significand=getNormalizedSignificand(strIntegerPart,strDecimalPart);
+  if (significand.equals("0")) {
+    setZero();
+    return;
+  }
+  int offset=getOffset(strIntegerPart,strDecimalPart);
+  checkedAddExponent(offset);
+  if (exponent >= MAX_EXPONENT) {
+    setInfinite();
+    return;
+  }
+  if (exponent <= MIN_EXPONENT) {
+    setZero();
+    return;
+  }
+  if (significand.length() > MAX_SIGNIFICANT_LENGTH) {
+    abandonedNumber=significand.substring(MAX_SIGNIFICANT_LENGTH);
+    significand=significand.substring(0,MAX_SIGNIFICANT_LENGTH);
+  }
+  mantissa=Long.parseLong(significand,HEX_RADIX);
+  if (exponent >= 1) {
+    processNormalNumber();
+  }
+ else {
+    processSubNormalNumber();
+  }
+}

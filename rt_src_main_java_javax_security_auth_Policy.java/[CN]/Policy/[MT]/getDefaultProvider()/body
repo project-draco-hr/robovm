@@ -1,0 +1,23 @@
+{
+  final String defaultClass=AccessController.doPrivileged(new PolicyUtils.SecurityPropertyAccessor(POLICY_PROVIDER));
+  if (defaultClass == null) {
+    return new DefaultSubjectPolicy();
+  }
+  Object policy=AccessController.doPrivileged(new PrivilegedAction<Object>(){
+    public Object run(){
+      try {
+        return Class.forName(defaultClass,true,ClassLoader.getSystemClassLoader()).newInstance();
+      }
+ catch (      Exception e) {
+        SecurityException se=new SecurityException(Messages.getString("auth.08"));
+        se.initCause(e);
+        throw se;
+      }
+    }
+  }
+);
+  if (!(policy instanceof Policy)) {
+    throw new SecurityException(Messages.getString("auth.08"));
+  }
+  return (Policy)policy;
+}

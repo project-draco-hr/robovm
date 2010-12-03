@@ -1,0 +1,12 @@
+{
+  if (!handshake_started || engine_was_shutteddown) {
+    return SSLEngineResult.HandshakeStatus.NOT_HANDSHAKING;
+  }
+  if (alertProtocol.hasAlert()) {
+    return SSLEngineResult.HandshakeStatus.NEED_WRAP;
+  }
+  if (close_notify_was_sent && !close_notify_was_received) {
+    return SSLEngineResult.HandshakeStatus.NEED_UNWRAP;
+  }
+  return handshakeProtocol.getStatus();
+}

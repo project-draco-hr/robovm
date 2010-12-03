@@ -1,0 +1,93 @@
+{
+  int ret=0;
+  if (scheme == null && uri.scheme != null) {
+    return -1;
+  }
+ else   if (scheme != null && uri.scheme == null) {
+    return 1;
+  }
+ else   if (scheme != null && uri.scheme != null) {
+    ret=scheme.compareToIgnoreCase(uri.scheme);
+    if (ret != 0) {
+      return ret;
+    }
+  }
+  if (!opaque && uri.opaque) {
+    return -1;
+  }
+ else   if (opaque && !uri.opaque) {
+    return 1;
+  }
+ else   if (opaque && uri.opaque) {
+    ret=schemespecificpart.compareTo(uri.schemespecificpart);
+    if (ret != 0) {
+      return ret;
+    }
+  }
+ else {
+    if (authority != null && uri.authority == null) {
+      return 1;
+    }
+ else     if (authority == null && uri.authority != null) {
+      return -1;
+    }
+ else     if (authority != null && uri.authority != null) {
+      if (host != null && uri.host != null) {
+        if (userinfo != null && uri.userinfo == null) {
+          return 1;
+        }
+ else         if (userinfo == null && uri.userinfo != null) {
+          return -1;
+        }
+ else         if (userinfo != null && uri.userinfo != null) {
+          ret=userinfo.compareTo(uri.userinfo);
+          if (ret != 0) {
+            return ret;
+          }
+        }
+        ret=host.compareToIgnoreCase(uri.host);
+        if (ret != 0) {
+          return ret;
+        }
+        if (port != uri.port) {
+          return port - uri.port;
+        }
+      }
+ else {
+        ret=authority.compareTo(uri.authority);
+        if (ret != 0) {
+          return ret;
+        }
+      }
+    }
+    ret=path.compareTo(uri.path);
+    if (ret != 0) {
+      return ret;
+    }
+    if (query != null && uri.query == null) {
+      return 1;
+    }
+ else     if (query == null && uri.query != null) {
+      return -1;
+    }
+ else     if (query != null && uri.query != null) {
+      ret=query.compareTo(uri.query);
+      if (ret != 0) {
+        return ret;
+      }
+    }
+  }
+  if (fragment != null && uri.fragment == null) {
+    return 1;
+  }
+ else   if (fragment == null && uri.fragment != null) {
+    return -1;
+  }
+ else   if (fragment != null && uri.fragment != null) {
+    ret=fragment.compareTo(uri.fragment);
+    if (ret != 0) {
+      return ret;
+    }
+  }
+  return 0;
+}

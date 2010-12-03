@@ -1,0 +1,40 @@
+{
+  int resLength=Math.max(val.numberLength,that.numberLength);
+  int resDigits[]=new int[resLength];
+  int iVal=val.getFirstNonzeroDigit();
+  int iThat=that.getFirstNonzeroDigit();
+  int i=iThat;
+  int limit;
+  if (iVal == iThat) {
+    resDigits[i]=-val.digits[i] ^ -that.digits[i];
+  }
+ else {
+    resDigits[i]=-that.digits[i];
+    limit=Math.min(that.numberLength,iVal);
+    for (i++; i < limit; i++) {
+      resDigits[i]=~that.digits[i];
+    }
+    if (i == that.numberLength) {
+      for (; i < iVal; i++) {
+        resDigits[i]=-1;
+      }
+      resDigits[i]=val.digits[i] - 1;
+    }
+ else {
+      resDigits[i]=-val.digits[i] ^ ~that.digits[i];
+    }
+  }
+  limit=Math.min(val.numberLength,that.numberLength);
+  for (i++; i < limit; i++) {
+    resDigits[i]=val.digits[i] ^ that.digits[i];
+  }
+  for (; i < val.numberLength; i++) {
+    resDigits[i]=val.digits[i];
+  }
+  for (; i < that.numberLength; i++) {
+    resDigits[i]=that.digits[i];
+  }
+  BigInteger result=new BigInteger(1,resLength,resDigits);
+  result.cutOffLeadingZeroes();
+  return result;
+}

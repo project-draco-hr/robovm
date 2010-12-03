@@ -1,0 +1,21 @@
+{
+  if (m.sign <= 0) {
+    throw new ArithmeticException(Messages.getString("math.18"));
+  }
+  BigInteger base=this;
+  if (m.isOne() | (exponent.sign > 0 & base.sign == 0)) {
+    return BigInteger.ZERO;
+  }
+  if (exponent.sign == 0) {
+    return BigInteger.ONE.mod(m);
+  }
+  if (exponent.sign < 0) {
+    base=modInverse(m);
+    exponent=exponent.negate();
+  }
+  BigInteger res=(m.testBit(0)) ? Division.oddModPow(base.abs(),exponent,m) : Division.evenModPow(base.abs(),exponent,m);
+  if ((base.sign < 0) && exponent.testBit(0)) {
+    res=m.subtract(BigInteger.ONE).multiply(res).mod(m);
+  }
+  return res;
+}

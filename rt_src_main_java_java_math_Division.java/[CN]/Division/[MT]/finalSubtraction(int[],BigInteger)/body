@@ -1,0 +1,20 @@
+{
+  int modulusLen=modulus.numberLength;
+  boolean doSub=res[modulusLen] != 0;
+  if (!doSub) {
+    int modulusDigits[]=modulus.digits;
+    doSub=true;
+    for (int i=modulusLen - 1; i >= 0; i--) {
+      if (res[i] != modulusDigits[i]) {
+        doSub=(res[i] != 0) && ((res[i] & 0xFFFFFFFFL) > (modulusDigits[i] & 0xFFFFFFFFL));
+        break;
+      }
+    }
+  }
+  BigInteger result=new BigInteger(1,modulusLen + 1,res);
+  if (doSub) {
+    Elementary.inplaceSubtract(result,modulus);
+  }
+  result.cutOffLeadingZeroes();
+  return result;
+}

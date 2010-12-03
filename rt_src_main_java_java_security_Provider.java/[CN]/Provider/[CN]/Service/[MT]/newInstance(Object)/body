@@ -1,0 +1,49 @@
+{
+  if (implementation == null || !className.equals(lastClassName)) {
+    NoSuchAlgorithmException result=AccessController.doPrivileged(new PrivilegedAction<NoSuchAlgorithmException>(){
+      public NoSuchAlgorithmException run(){
+        ClassLoader cl=provider.getClass().getClassLoader();
+        if (cl == null) {
+          cl=ClassLoader.getSystemClassLoader();
+        }
+        try {
+          implementation=Class.forName(className,true,cl);
+        }
+ catch (        Exception e) {
+          return new NoSuchAlgorithmException(Messages.getString("security.11",new Object[]{type,algorithm,e}));
+        }
+        lastClassName=className;
+        return null;
+      }
+    }
+);
+    if (result != null) {
+      throw result;
+    }
+  }
+  Class[] parameterTypes=new Class[1];
+  if (constructorParameter != null && !supportsParameter(constructorParameter)) {
+    throw new InvalidParameterException(Messages.getString("security.12",type));
+  }
+  Object[] initargs={constructorParameter};
+  try {
+    if (type.equalsIgnoreCase("CertStore")) {
+      parameterTypes[0]=Class.forName("java.security.cert.CertStoreParameters");
+    }
+ else     if (type.equalsIgnoreCase("Configuration")) {
+      parameterTypes[0]=Class.forName("javax.security.auth.login.Configuration$Parameters");
+    }
+    if (parameterTypes[0] == null) {
+      if (constructorParameter == null) {
+        return implementation.newInstance();
+      }
+ else {
+        parameterTypes[0]=constructorParameter.getClass();
+      }
+    }
+    return implementation.getConstructor(parameterTypes).newInstance(initargs);
+  }
+ catch (  Exception e) {
+    throw new NoSuchAlgorithmException(Messages.getString("security.199",type,algorithm),e);
+  }
+}
