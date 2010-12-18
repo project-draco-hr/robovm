@@ -1,0 +1,15 @@
+{
+  for (  File file : files) {
+    if (!file.exists()) {
+      throw new FileNotFoundException(file.getAbsolutePath());
+    }
+    if (file.isFile() && !isArchive(file)) {
+      throw new IOException("File is not an archive file: " + file.getAbsolutePath());
+    }
+    if (!seen.contains(file)) {
+      Path p=file.isDirectory() ? new DirectoryPath(file,this) : new ZipFilePath(file,this);
+      cp.add(p);
+      seen.add(file);
+    }
+  }
+}

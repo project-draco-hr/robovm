@@ -1,0 +1,22 @@
+{
+  int name=read2u();
+  int length=read4();
+  check_tag(name,CONSTANT_Utf8);
+  if (equals_utf8(name,"ConstantValue")) {
+    int cv=read2u();
+    if (cv < constant_pool_count && cv > 0 && (tags[cv] == CONSTANT_Integer || tags[cv] == CONSTANT_Float || tags[cv] == CONSTANT_Long || tags[cv] == CONSTANT_Double || tags[cv] == CONSTANT_String)) {
+      handleConstantValueAttribute(field_index,cv);
+    }
+ else {
+      throw new ClassFormatError("erroneous ConstantValue");
+    }
+    if (length != 2)     throw new ClassFormatError();
+  }
+ else {
+    int here=pos();
+    check(length);
+    handleUnknownAttribute(name,bytes,pos(),length);
+    offset+=length;
+  }
+  return length + 6;
+}

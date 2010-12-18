@@ -1,0 +1,12 @@
+{
+  File input=path.getFile();
+  File libFile=new File(new File(new File(libCache,input.getName()),hash(input)),"lib" + input.getName() + ".a");
+  libFile.getParentFile().mkdirs();
+  if (!clean && libFile.exists() && libFile.lastModified() >= input.lastModified()) {
+    if (verbose) {
+      stdout.println("Skipping unchanged archive: " + input);
+    }
+    return libFile;
+  }
+  return buildLibrary(processClassFilesInPath(path),libFile);
+}

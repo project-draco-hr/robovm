@@ -1,0 +1,20 @@
+{
+  if (this_method_has_exceptions == false)   return;
+  for (int i=0; i < m.exceptions.length; i++) {
+    ClassFile.ExceptionTableEntry entry=m.exceptions[i];
+    if ((pc - pc_offset) >= entry.start_pc && (pc - pc_offset) < entry.end_pc) {
+      int exc_pc=pc_offset + entry.handler_pc;
+      AbstractState target=findApplicableState(now,exc_pc);
+      if (target != null) {
+        if (!target.exceptionMayMerge(now)) {
+          continue;
+        }
+      }
+      Type extype;
+      if (entry.catch_type == 0)       extype=ctx.THROWABLE;
+ else       extype=getClassType(entry.catch_type);
+      AbstractState exstate=new AbstractState(now,extype);
+      branch(exstate,exc_pc);
+    }
+  }
+}

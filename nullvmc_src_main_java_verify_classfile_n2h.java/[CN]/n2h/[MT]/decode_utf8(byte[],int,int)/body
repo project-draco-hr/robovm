@@ -1,0 +1,27 @@
+{
+  if (off + len > data.length)   throw new IllegalArgumentException();
+  StringBuffer result=new StringBuffer(len);
+  int index=off;
+  int end=off + len;
+  while (index < end) {
+    int ch0=get1u(data,index++);
+    if (ch0 < 128 && ch0 > 0) {
+      result.append((char)ch0);
+      continue;
+    }
+    if (index == end)     throw new ClassFormatError("erroneous UTF8 sequence");
+    int ch1=get1u(data,index++);
+    if ((ch0 & 0xE0) == 0xC0 && (ch1 & 0xC0) == 0x80) {
+      result.append((char)(((ch0 & 0x1F) << 6) + ((ch1 & 0x3F))));
+      continue;
+    }
+    if (index == end)     throw new ClassFormatError("erroneous UTF8 sequence");
+    int ch2=get1u(data,index++);
+    if ((ch0 & 0xF0) == 0xE0 && (ch1 & 0xC0) == 0x80 && (ch2 & 0xF0) == 0xE0) {
+      result.append((char)(((ch0 & 0x0F) << 12) + ((ch1 & 0x3F) << 6) + ((ch2 & 0x3F))));
+      continue;
+    }
+    throw new ClassFormatError("erroneous UTF8 sequence");
+  }
+  return result.toString();
+}

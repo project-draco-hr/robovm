@@ -1,16 +1,92 @@
 {
-  CmdLineParser parser=new CmdLineParser(this);
   try {
-    parser.parseArgument(args);
-    if (help) {
-      printUsageAndExit(parser,null);
+    int i=0;
+    while (i < args.length) {
+      if ("-cp".equals(args[i]) || "-classpath".equals(args[i])) {
+        classpath=args[++i];
+      }
+ else       if ("-jar".equals(args[i])) {
+        jarFile=new File(args[++i]);
+      }
+ else       if ("-o".equals(args[i])) {
+        target=args[++i];
+      }
+ else       if ("-d".equals(args[i])) {
+        output=new File(args[++i]);
+      }
+ else       if ("-cache".equals(args[i])) {
+        cache=new File(args[++i]);
+      }
+ else       if ("-home".equals(args[i])) {
+        home=new File(args[++i]);
+      }
+ else       if ("-run".equals(args[i])) {
+        run=true;
+      }
+ else       if ("-verbose".equals(args[i])) {
+        verbose=true;
+      }
+ else       if ("-clean".equals(args[i])) {
+        clean=true;
+      }
+ else       if ("-help".equals(args[i]) || "-?".equals(args[i])) {
+        printUsageAndExit(null);
+      }
+ else       if ("-ar-bin".equals(args[i])) {
+        arBin=new File(args[++i]);
+      }
+ else       if ("-ar-opt".equals(args[i])) {
+        arOpts.add(args[++i]);
+      }
+ else       if ("-gcc-bin".equals(args[i])) {
+        gccBin=new File(args[++i]);
+      }
+ else       if ("-gcc-opt".equals(args[i])) {
+        gccOpts.add(args[++i]);
+      }
+ else       if ("-llvm-bin-dir".equals(args[i])) {
+        llvmBinDir=new File(args[++i]);
+      }
+ else       if ("-llc-opt".equals(args[i])) {
+        llcOpts.add(args[++i]);
+      }
+ else       if ("-opt-opt".equals(args[i])) {
+        optOpts.add(args[++i]);
+      }
+ else       if (args[i].startsWith("-D")) {
+      }
+ else       if (args[i].startsWith("-X")) {
+      }
+ else       if (args[i].startsWith("-verify:")) {
+        try {
+          verify=VerifyWhen.valueOf(args[i].substring("-verify:".length()).toUpperCase());
+        }
+ catch (        Throwable t) {
+          throw new IllegalArgumentException("Unrecognized verify option: " + args[i]);
+        }
+      }
+ else       if (args[i].startsWith("-")) {
+        throw new IllegalArgumentException("Unrecognized option: " + args[i]);
+      }
+ else {
+        mainClass=args[i++];
+        break;
+      }
+      i++;
+    }
+    while (i < args.length) {
+      runArgs.add(args[i++]);
     }
     run();
   }
  catch (  Throwable t) {
-    if (verbose && !(t instanceof CmdLineException)) {
+    String message=t.getMessage();
+    if (t instanceof StringIndexOutOfBoundsException) {
+      message="Missing argument";
+    }
+    if (verbose && !(t instanceof StringIndexOutOfBoundsException) && !(t instanceof IllegalArgumentException)) {
       t.printStackTrace();
     }
-    printUsageAndExit(parser,t.getMessage());
+    printUsageAndExit(message);
   }
 }

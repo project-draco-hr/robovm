@@ -1,0 +1,17 @@
+{
+  int max_locals=max_locals();
+  int max_stack=max_stack();
+  if (n < 0 || n >= max_locals) {
+    throw new verify.VerificationException("out of bounds: store(" + n + ")");
+  }
+  if (sp < 1) {
+    throw new verify.VerificationException("stack underflow: store(" + n + ")");
+  }
+  Type[] wstate=storage;
+  int index=max_stack + n;
+  Type type1=wstate[--sp];
+  if (type1.storageClass != class1) {
+    throw new IncompatibleTypesException("bad value on stack: store(" + n + ")",type1,class1);
+  }
+  wstate[index]=type1;
+}

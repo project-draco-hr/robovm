@@ -1,0 +1,47 @@
+{
+  List<String> jarNames=new ArrayList<String>();
+  int count=0;
+  for (  PathObjectFiles pof : pofs) {
+    String jarName=null;
+    if (pof.getPath() instanceof ZipFilePath) {
+      ZipFilePath path=(ZipFilePath)pof.getPath();
+      jarName=path.getFile().getName();
+      stripArchive(path.getFile(),new File(dir,jarName));
+    }
+ else {
+      DirectoryPath path=(DirectoryPath)pof.getPath();
+      jarName="classes" + (count++) + ".jar";
+      createArchive(path.getDir(),new File(dir,jarName));
+    }
+    jarNames.add(jarName);
+    File outFile=new File(dir,jarName + ".so");
+    if (verbose) {
+      stdout.format("Building dynamic library '%s'\n",outFile);
+    }
+    String gccPath="gcc";
+    if (gccBin != null) {
+      gccPath=gccBin.getAbsolutePath();
+    }
+    List<String> ldArgs=new ArrayList<String>();
+    for (    File f : libDirs) {
+      ldArgs.add("-L");
+      ldArgs.add(f.getAbsolutePath());
+    }
+    ldArgs.add("-L");
+    ldArgs.add(new File(home,"lib").getAbsolutePath());
+    List<File> objectFileArgs=new ArrayList<File>();
+    List<String> libArgs=new ArrayList<String>();
+    for (    File f : pof.getObjectFiles()) {
+      if (f.getName().endsWith(".a")) {
+        ldArgs.add("-L");
+        ldArgs.add(f.getParentFile().getAbsolutePath());
+        libArgs.add("-l:" + f.getName());
+      }
+ else {
+        objectFileArgs.add(f);
+      }
+    }
+    exec(gccPath,"-o",outFile,"-g","-shared","-Wl,-soname," + outFile.getName(),"-Wl,--version-script",symbolsMapFile,gccOpts,ldArgs,objectFileArgs,"-lnullvm","-lm","-Wl,--whole-archive",libArgs,"-Wl,--no-whole-archive");
+  }
+  return jarNames;
+}

@@ -1,0 +1,26 @@
+{
+  File outFile=new File(output,target);
+  if (verbose) {
+    stdout.format("Building executable '%s'\n",outFile);
+  }
+  String gccPath="gcc";
+  if (gccBin != null) {
+    gccPath=gccBin.getAbsolutePath();
+  }
+  List<String> gccArgs=new ArrayList<String>();
+  for (  File f : includeDirs) {
+    gccArgs.add("-I");
+    gccArgs.add(f.getAbsolutePath());
+  }
+  gccArgs.add("-I");
+  gccArgs.add(new File(home,"include").getAbsolutePath());
+  gccArgs.add("-I");
+  gccArgs.add(new File(new File(home,"gc"),"include").getAbsolutePath());
+  gccArgs.add("-I");
+  gccArgs.add(new File(new File(home,"include"),"harmony").getAbsolutePath());
+  gccArgs.add("-L");
+  gccArgs.add(new File(home,"lib").getAbsolutePath());
+  gccArgs.add("-L");
+  gccArgs.add(new File(new File(home,"gc"),"lib").getAbsolutePath());
+  exec(gccPath,"-o",outFile,"-DNULLVM_MAIN_CLASS=" + mainClass.replace('.','/'),"-DLINUX","-DLINUX_X86_64","-DHYX86_64","-DIPv6_FUNCTION_SUPPORT","-DHYPORT_LIBRARY_DEFINE","-g",gccOpts,gccArgs,"-lnullvm","-lm","-ldl","-lpthread",mainCFile);
+}

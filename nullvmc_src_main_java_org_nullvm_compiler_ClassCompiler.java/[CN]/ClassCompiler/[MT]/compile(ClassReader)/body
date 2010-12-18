@@ -1,0 +1,11 @@
+{
+  ClassNode cn=new ClassNode(){
+    @Override public MethodVisitor visitMethod(    int access,    String name,    String desc,    String signature,    String[] exceptions){
+      MethodVisitor mv=super.visitMethod(access,name,desc,signature,exceptions);
+      return new JSRInlinerAdapter(mv,access,name,desc,signature,exceptions);
+    }
+  }
+;
+  cr.accept(cn,0);
+  compile(cn);
+}

@@ -1,0 +1,31 @@
+{
+  rewind();
+  int magic=read4();
+  int minor_version=read2u();
+  int major_verson=read2u();
+  if (magic != 0xCAFEBABE)   throw new ClassFormatError("bad magic number");
+  handlePreample(magic,minor_version,major_verson);
+  constant_pool_count=read2u();
+  read_constpool(constant_pool_count);
+  int access_flags=read2u();
+  int this_class=read2u();
+  int super_class=read2u();
+  check_tag(this_class,CONSTANT_Class);
+  if (super_class != 0)   check_tag(super_class,CONSTANT_Class);
+  handleClassBegin(access_flags,this_class,super_class);
+  int interfaces_count=read2u();
+  handleInterfacesBegin(interfaces_count);
+  for (int i=0; i < interfaces_count; i++) {
+    int iface=read2u();
+    check_tag(iface,CONSTANT_Class);
+    handleInterface(i,iface);
+  }
+  handleInterfacesEnd();
+  read_fields();
+  read_methods();
+  int attributes_count=read2u();
+  for (int i=0; i < attributes_count; i++) {
+    read_one_class_attribute();
+  }
+  if (offset - start != length)   throw new ClassFormatError("unused data before end of file");
+}

@@ -1,0 +1,24 @@
+{
+  int max_locals=max_locals();
+  int max_stack=max_stack();
+  if (n < 0 || n + 1 >= max_locals) {
+    throw new verify.VerificationException("out of bounds: load/2(" + n + ")");
+  }
+  if (sp + 2 > max_stack) {
+    throw new verify.VerificationException("stack overflow: load/2(" + n + ")");
+  }
+  Type[] wstate=storage;
+  int index=max_stack + n;
+  Type type1=wstate[index];
+  if (type1 == null)   throw new verify.VerificationException("reading uninitialized variable, local[" + n + "]");
+  if (type1.storageClass != class1) {
+    throw new IncompatibleTypesException("bad value on stack: load/2(" + n + ")",type1,class1);
+  }
+  wstate[sp++]=type1;
+  Type type2=wstate[index + 1];
+  if (type1 == null)   throw new verify.VerificationException("reading uninitialized variable, local[" + n + "]");
+  if (type2.storageClass != class2) {
+    throw new IncompatibleTypesException("bad value on stack: load/2(" + n + "/2)",type2,class2);
+  }
+  wstate[sp++]=type2;
+}

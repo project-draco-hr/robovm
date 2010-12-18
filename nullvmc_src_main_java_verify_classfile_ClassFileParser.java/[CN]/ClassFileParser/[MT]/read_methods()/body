@@ -1,0 +1,17 @@
+{
+  int methods_count=read2u();
+  handleMethodsBegin(methods_count);
+  for (int i=0; i < methods_count; i++) {
+    int access_flags=read2u();
+    int name_index=read2u();
+    int descriptor_index=read2u();
+    int attributes_count=read2u();
+    check_tag(name_index,CONSTANT_Utf8);
+    check_tag(descriptor_index,CONSTANT_Utf8);
+    handleMethod(i,access_flags,name_index,descriptor_index);
+    for (int j=0; j < attributes_count; j++) {
+      read_one_method_attribute(i);
+    }
+  }
+  handleMethodsEnd();
+}

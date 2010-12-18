@@ -1,0 +1,20 @@
+{
+  Type[] args;
+  Type result;
+  if (sig.charAt(0) == '(') {
+    int[] end=new int[1];
+    int index=1;
+synchronized (stack_of_types) {
+      while (sig.charAt(index) != ')') {
+        stack_of_types.push(ctx.typeForName(sig,index,end));
+        index=end[0];
+      }
+      int count=stack_of_types.size();
+      args=new Type[count];
+      while (count-- > 0)       args[count]=(Type)stack_of_types.pop();
+    }
+    result=ctx.typeForName(sig,index + 1,end);
+    if (end[0] == sig.length())     return new Signature(result,args);
+  }
+  throw new IllegalTypeNameException("bad signature: " + sig);
+}

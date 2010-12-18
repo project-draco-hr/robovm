@@ -1,0 +1,1156 @@
+{
+  ClassType thisType;
+  try {
+    thisType=ctx.classForName(classfile.getName());
+    thisType.loadFrom(new verify.ClassFileInfo(classfile));
+  }
+ catch (  verify.type.IllegalTypeNameException ex) {
+    throw ex;
+  }
+  String mname=method.name();
+  if (log1)   log("checking " + thisType + " method "+ mname);
+  if ((method.access_flags & (ABSTRACT | NATIVE)) != 0) {
+    return;
+  }
+  byte[] code=method.code;
+  if (code == null) {
+    throw new verify.VerificationException("non-native, non-abstract method " + mname + " has no code attribute.");
+  }
+  pc_offset=method.code_off;
+  end_pc=pc_offset + method.code_len;
+  int pc=pc_offset;
+  int pc_of_last_opcode=pc;
+  if (log2)   log("code at [" + pc_offset + ".."+ end_pc+ "]");
+  AbstractState state=null;
+  final int code_size=end_pc - pc_offset;
+  try {
+    pc_states=new AbstractState[code_size];
+    unchecked=new AbstractStateQueue();
+    byte_mode=new char[code_size];
+    if (pc_states == null || pc_states.length != code_size || byte_mode == null)     throw new InternalError("failed to initialize state");
+    if (method.exceptions != null) {
+      this_method_has_exceptions=true;
+      for (int i=0; i < method.exceptions.length; i++) {
+        ClassFile.ExceptionTableEntry entry=method.exceptions[i];
+        if (entry.start_pc < 0 || entry.end_pc < entry.start_pc || entry.end_pc >= code_size || entry.handler_pc < 0 || entry.handler_pc >= code_size) {
+          throw new verify.VerificationException("erroneous exception table");
+        }
+        byte_mode[entry.start_pc]=BYTE_MODE_TRY_INSTRUCTION;
+      }
+    }
+ else {
+      this_method_has_exceptions=false;
+    }
+    int arg_offset=0;
+    state=new AbstractState(method);
+    if ((method.access_flags & STATIC) == 0) {
+      arg_offset=1;
+      if (mname.equals("<init>") && classfile.super_class != 0) {
+        state.write(0,ctx.newForClass(thisType));
+        state.constructor_start=true;
+      }
+ else {
+        state.write(0,thisType);
+      }
+    }
+    Signature sig=Signature.forString(ctx,method.signature());
+    int numberArgs=sig.numberArgs();
+    if (log3) {
+      log("signature is " + sig);
+    }
+    for (int i=0; i < numberArgs; i++) {
+      Type t=sig.declaredArgument(i);
+      if (t.tag == T_LONG) {
+        state.write(arg_offset + i,ctx.LONG);
+        arg_offset+=1;
+        state.write(arg_offset + i,ctx.LONG2);
+      }
+ else       if (t.tag == T_DOUBLE) {
+        state.write(arg_offset + i,ctx.DOUBLE);
+        arg_offset+=1;
+        state.write(arg_offset + i,ctx.DOUBLE2);
+      }
+ else {
+        state.write(arg_offset + i,t);
+      }
+    }
+    branch(state,pc_offset);
+    int insn_count=0;
+    int[] pc_getter=new int[1];
+    next_basic_block:     while (true) {
+      if ((state=get_next_state(pc_getter)) == null) {
+        break next_basic_block;
+      }
+      pc=pc_getter[0];
+      pc_of_last_opcode=pc;
+      if (log3)       log("--[" + (pc - pc_offset) + "]----------");
+      next_insn:       while (true) {
+        instruction_check_count+=1;
+        ++insn_count;
+        if (pc >= end_pc || pc < pc_offset)         throw new verify.VerificationException("pc=" + (pc - pc_offset) + " is out of bounds");
+        if (pc != pc_of_last_opcode) {
+          if (pc_states[pc - pc_offset] != null) {
+            branch(state,pc);
+            break next_insn;
+          }
+        }
+        for (int i=pc_of_last_opcode + 1; i < pc; i++) {
+          int mode=byte_mode[i - pc_offset];
+          if (mode == BYTE_MODE_UNKNOWN) {
+            byte_mode[i - pc_offset]=BYTE_MODE_ILLEGAL;
+          }
+ else           if (mode == BYTE_MODE_ILLEGAL) {
+            continue;
+          }
+ else           if (mode == BYTE_MODE_INSTRUCTION || mode == BYTE_MODE_TRY_INSTRUCTION) {
+            throw new verify.VerificationException("executed code inside an instruction");
+          }
+ else {
+            throw new InternalError("illegal byte mode");
+          }
+        }
+{
+          int mode=byte_mode[pc - pc_offset];
+          if (mode == BYTE_MODE_UNKNOWN) {
+            byte_mode[pc - pc_offset]=BYTE_MODE_INSTRUCTION;
+          }
+ else           if (mode == BYTE_MODE_INSTRUCTION) {
+          }
+ else           if (mode == BYTE_MODE_TRY_INSTRUCTION) {
+            inject_exceptions(method,state,pc);
+          }
+ else           if (mode == BYTE_MODE_ILLEGAL) {
+            throw new verify.VerificationException("executing code in the middle of an instruction!");
+          }
+ else {
+            throw new InternalError("illegal byte mode");
+          }
+        }
+        pc_of_last_opcode=pc;
+        int opcode=n2h.get1u(code,pc++);
+        if (log3) {
+          log(state.toString() + " mode=" + ((int)byte_mode[pc - 1 - pc_offset])+ " pc="+ (pc - 1 - pc_offset)+ " "+ insn_name[opcode]);
+        }
+switch (opcode) {
+case op_nop:
+          continue next_insn;
+case op_aconst_null:
+        state.push(ctx.NULL);
+      continue next_insn;
+case op_iconst_m1:
+case op_iconst_0:
+case op_iconst_1:
+case op_iconst_2:
+case op_iconst_3:
+case op_iconst_4:
+case op_iconst_5:
+    state.push(ctx.INT);
+  continue next_insn;
+case op_lconst_0:
+case op_lconst_1:
+state.push(ctx.LONG,ctx.LONG2);
+continue next_insn;
+case op_fconst_0:
+case op_fconst_1:
+case op_fconst_2:
+state.push(ctx.FLOAT);
+continue next_insn;
+case op_dconst_0:
+case op_dconst_1:
+state.push(ctx.DOUBLE,ctx.DOUBLE2);
+continue next_insn;
+case op_sipush:
+pc++;
+case op_bipush:
+pc++;
+state.push(ctx.INT);
+continue next_insn;
+case op_ldc:
+{
+int index=n2h.get1u(code,pc++);
+Type t=getConstantType(index);
+if (t != ctx.FLOAT && t != ctx.INT && t != ctx.STRING && t != ctx.CLASS) {
+throw new verify.type.IncompatibleTypesException("erroneous operand, " + t + ", for ldc instruction");
+}
+state.push(t);
+}
+continue next_insn;
+case op_ldc_w:
+{
+int index=n2h.get2u(code,pc);
+pc+=2;
+Type t=getConstantType(index);
+if (t != ctx.FLOAT && t != ctx.INT && t != ctx.STRING && t != ctx.CLASS) {
+throw new verify.type.IncompatibleTypesException("erroneous operand, " + t + ", for ldc_w instruction");
+}
+state.push(t);
+}
+continue next_insn;
+case op_ldc2_w:
+{
+int index=n2h.get2u(code,pc);
+pc+=2;
+Type t=getConstantType(index);
+if (t == ctx.DOUBLE) {
+state.push(ctx.DOUBLE,ctx.DOUBLE2);
+}
+ else if (t == ctx.LONG) {
+state.push(ctx.LONG,ctx.LONG2);
+}
+ else {
+throw new verify.type.IncompatibleTypesException("erroneous operand, " + t + ", for ldc2_w instruction");
+}
+}
+continue next_insn;
+case op_iload:
+state.load(n2h.get1u(code,pc++),SC_INT);
+continue next_insn;
+case op_lload:
+state.load(n2h.get1u(code,pc++),SC_LONG,SC_LONG2);
+continue next_insn;
+case op_fload:
+state.load(n2h.get1u(code,pc++),SC_FLOAT);
+continue next_insn;
+case op_dload:
+state.load(n2h.get1u(code,pc++),SC_DOUBLE,SC_DOUBLE2);
+continue next_insn;
+case op_aload:
+{
+int index=n2h.get1u(code,pc++);
+if (index == 0 && state.constructor_start) {
+state.load(0,SC_NEW);
+}
+ else {
+state.load(index,SC_ADDR);
+if (log3) log("aload(" + index + ") = "+ state.peek(1,SC_ADDR));
+}
+}
+continue next_insn;
+case op_iload_0:
+case op_iload_1:
+case op_iload_2:
+case op_iload_3:
+state.load(opcode - op_iload_0,SC_INT);
+continue next_insn;
+case op_lload_0:
+case op_lload_1:
+case op_lload_2:
+case op_lload_3:
+state.load(opcode - op_lload_0,SC_LONG,SC_LONG2);
+continue next_insn;
+case op_fload_0:
+case op_fload_1:
+case op_fload_2:
+case op_fload_3:
+state.load(opcode - op_fload_0,SC_FLOAT);
+continue next_insn;
+case op_dload_0:
+case op_dload_1:
+case op_dload_2:
+case op_dload_3:
+state.load(opcode - op_dload_0,SC_DOUBLE,SC_DOUBLE2);
+continue next_insn;
+case op_aload_0:
+if (state.constructor_start) {
+state.load(0,SC_NEW);
+}
+ else {
+state.load(0,SC_ADDR);
+}
+continue next_insn;
+case op_aload_1:
+case op_aload_2:
+case op_aload_3:
+state.load(opcode - op_aload_0,SC_ADDR);
+continue next_insn;
+case op_iaload:
+state.aload(ctx.INT,null);
+continue next_insn;
+case op_laload:
+state.aload(ctx.LONG,ctx.LONG2);
+continue next_insn;
+case op_faload:
+state.aload(ctx.FLOAT,null);
+continue next_insn;
+case op_daload:
+state.aload(ctx.DOUBLE,ctx.DOUBLE2);
+continue next_insn;
+case op_aaload:
+{
+state.pop(SC_INT);
+Type array=state.pop(SC_ADDR);
+if (array.tag != T_ARRAY && array.tag != T_NULL) throw new verify.VerificationException("non-array operand to aaload insn");
+state.push(ctx.NULL);
+}
+continue next_insn;
+case op_baload:
+{
+Type index=state.pop(SC_INT);
+Type array=state.pop(SC_ADDR);
+Type elem;
+if (!array.isAnonymousArray()) {
+if (array.tag != T_ARRAY) throw new verify.VerificationException("" + array + " operand to baload operation");
+elem=((ArrayType)array).elementType;
+if (elem.tag == T_BYTE || elem.tag == T_BOOLEAN) {
+state.push(elem);
+}
+ else {
+throw new verify.VerificationException("" + array + " operand to baload operation");
+}
+}
+ else {
+state.push(ctx.INT);
+}
+}
+continue next_insn;
+case op_caload:
+state.aload(ctx.CHAR,null);
+continue next_insn;
+case op_saload:
+state.aload(ctx.SHORT,null);
+continue next_insn;
+case op_istore:
+state.store(n2h.get1u(code,pc++),SC_INT);
+inject_exceptions(method,state,pc);
+continue next_insn;
+case op_lstore:
+state.store(n2h.get1u(code,pc++),SC_LONG,SC_LONG2);
+inject_exceptions(method,state,pc);
+continue next_insn;
+case op_fstore:
+state.store(n2h.get1u(code,pc++),SC_FLOAT);
+inject_exceptions(method,state,pc);
+continue next_insn;
+case op_dstore:
+state.store(n2h.get1u(code,pc++),SC_DOUBLE,SC_DOUBLE2);
+inject_exceptions(method,state,pc);
+continue next_insn;
+case op_astore:
+state.store(n2h.get1u(code,pc++),SC_ADDR);
+inject_exceptions(method,state,pc);
+continue next_insn;
+case op_istore_0:
+case op_istore_1:
+case op_istore_2:
+case op_istore_3:
+state.store(opcode - op_istore_0,SC_INT);
+inject_exceptions(method,state,pc);
+continue next_insn;
+case op_lstore_0:
+case op_lstore_1:
+case op_lstore_2:
+case op_lstore_3:
+state.store(opcode - op_lstore_0,SC_LONG,SC_LONG2);
+inject_exceptions(method,state,pc);
+continue next_insn;
+case op_fstore_0:
+case op_fstore_1:
+case op_fstore_2:
+case op_fstore_3:
+state.store(opcode - op_fstore_0,SC_FLOAT);
+inject_exceptions(method,state,pc);
+continue next_insn;
+case op_dstore_0:
+case op_dstore_1:
+case op_dstore_2:
+case op_dstore_3:
+state.store(opcode - op_dstore_0,SC_DOUBLE,SC_DOUBLE2);
+inject_exceptions(method,state,pc);
+continue next_insn;
+case op_astore_0:
+case op_astore_1:
+case op_astore_2:
+case op_astore_3:
+state.store(opcode - op_astore_0,SC_ADDR);
+inject_exceptions(method,state,pc);
+continue next_insn;
+case op_iastore:
+state.astore(ctx.INT,0);
+continue next_insn;
+case op_lastore:
+state.astore(ctx.LONG,SC_LONG2);
+continue next_insn;
+case op_fastore:
+state.astore(ctx.FLOAT,0);
+continue next_insn;
+case op_dastore:
+state.astore(ctx.DOUBLE,SC_DOUBLE2);
+continue next_insn;
+case op_aastore:
+if (log3) {
+log(state.dump(false));
+}
+state.astore(ctx.NULL,0);
+continue next_insn;
+case op_bastore:
+{
+Type value=state.pop(SC_INT);
+Type index=state.pop(SC_INT);
+Type array=state.pop(SC_ADDR);
+if (!array.isAnonymousArray()) {
+if (array.tag != T_ARRAY) throw new verify.VerificationException("non-array operand to array store insn");
+Type type=((ArrayType)array).elementType;
+if (type != ctx.BYTE && type != ctx.BOOLEAN) throw new verify.VerificationException("" + array + " operand to "+ "(byte|boolean)"+ "[] store operation");
+}
+}
+continue next_insn;
+case op_castore:
+state.astore(ctx.CHAR,0);
+continue next_insn;
+case op_sastore:
+state.astore(ctx.SHORT,0);
+continue next_insn;
+case op_pop:
+{
+Type t=state.peek(1);
+if (t == ctx.LONG2 || t == ctx.DOUBLE2) {
+throw new verify.type.IncompatibleTypesException("cannot split long or double on the stack");
+}
+state.popn(1);
+continue next_insn;
+}
+case op_pop2:
+{
+Type t=state.peek(2);
+if (t == ctx.LONG2 || t == ctx.DOUBLE2) {
+throw new verify.type.IncompatibleTypesException("cannot split long or double on the stack");
+}
+state.popn(2);
+continue next_insn;
+}
+case op_dup:
+{
+Type t=state.peek(1);
+if (t == ctx.LONG2 || t == ctx.DOUBLE2) {
+throw new verify.type.IncompatibleTypesException("cannot split long or double on the stack");
+}
+state.dupx(1,0);
+continue next_insn;
+}
+case op_dup_x1:
+{
+Type t1=state.peek(1);
+Type t2=state.peek(2);
+if (t1 == ctx.LONG2 || t1 == ctx.DOUBLE2 || t2 == ctx.LONG2 || t2 == ctx.DOUBLE2) {
+throw new verify.type.IncompatibleTypesException("cannot split long or double on the stack");
+}
+state.dupx(1,1);
+continue next_insn;
+}
+case op_dup_x2:
+{
+Type t1=state.peek(1);
+Type t3=state.peek(3);
+if (t1 == ctx.LONG2 || t1 == ctx.DOUBLE2 || t3 == ctx.LONG2 || t3 == ctx.DOUBLE2) {
+throw new verify.type.IncompatibleTypesException("cannot split long or double on the stack");
+}
+state.dupx(1,2);
+continue next_insn;
+}
+case op_dup2:
+{
+Type t=state.peek(2);
+if (t == ctx.LONG2 || t == ctx.DOUBLE2) {
+throw new verify.type.IncompatibleTypesException("cannot split long or double on the stack");
+}
+state.dupx(2,0);
+continue next_insn;
+}
+case op_dup2_x1:
+{
+Type t2=state.peek(2);
+Type t3=state.peek(3);
+if (t2 == ctx.LONG2 || t2 == ctx.DOUBLE2 || t3 == ctx.LONG2 || t3 == ctx.DOUBLE2) {
+throw new verify.type.IncompatibleTypesException("cannot split long or double on the stack");
+}
+state.dupx(2,1);
+continue next_insn;
+}
+case op_dup2_x2:
+{
+Type t2=state.peek(2);
+Type t4=state.peek(4);
+if (t2 == ctx.LONG2 || t2 == ctx.DOUBLE2 || t4 == ctx.LONG2 || t4 == ctx.DOUBLE2) {
+throw new verify.type.IncompatibleTypesException("cannot split long or double on the stack");
+}
+state.dupx(2,2);
+continue next_insn;
+}
+case op_swap:
+{
+Type t1=state.peek(1);
+Type t2=state.peek(2);
+if (t1 == ctx.LONG2 || t1 == ctx.DOUBLE2 || t2 == ctx.LONG2 || t2 == ctx.DOUBLE2) {
+throw new verify.type.IncompatibleTypesException("cannot split long or double on the stack");
+}
+state.swap();
+continue next_insn;
+}
+case op_iadd:
+case op_isub:
+case op_imul:
+case op_idiv:
+case op_irem:
+case op_iand:
+case op_ior:
+case op_ixor:
+state.binop(ctx.INT);
+continue next_insn;
+case op_ladd:
+case op_lsub:
+case op_lmul:
+case op_ldiv:
+case op_lrem:
+case op_land:
+case op_lor:
+case op_lxor:
+state.binop(ctx.LONG,ctx.LONG2);
+continue next_insn;
+case op_fadd:
+case op_fsub:
+case op_fmul:
+case op_fdiv:
+case op_frem:
+state.binop(ctx.FLOAT);
+continue next_insn;
+case op_dadd:
+case op_dsub:
+case op_dmul:
+case op_ddiv:
+case op_drem:
+state.binop(ctx.DOUBLE,ctx.DOUBLE2);
+continue next_insn;
+case op_ineg:
+state.unop(ctx.INT);
+continue next_insn;
+case op_lneg:
+state.unop(ctx.LONG,ctx.LONG2);
+continue next_insn;
+case op_fneg:
+state.unop(ctx.FLOAT);
+continue next_insn;
+case op_dneg:
+state.unop(ctx.DOUBLE,ctx.DOUBLE2);
+continue next_insn;
+case op_ishl:
+case op_ishr:
+case op_iushr:
+state.pop(SC_INT);
+state.unop(ctx.INT);
+continue next_insn;
+case op_lshl:
+case op_lshr:
+case op_lushr:
+state.pop(SC_INT);
+state.unop(ctx.LONG,ctx.LONG2);
+continue next_insn;
+case op_iinc:
+state.read(n2h.get1u(code,pc++),SC_INT);
+pc++;
+continue next_insn;
+case op_i2l:
+state.pop(SC_INT);
+state.push(ctx.LONG,ctx.LONG2);
+continue next_insn;
+case op_i2f:
+state.pop(SC_INT);
+state.push(ctx.FLOAT);
+continue next_insn;
+case op_i2d:
+state.pop(SC_INT);
+state.push(ctx.DOUBLE,ctx.DOUBLE2);
+continue next_insn;
+case op_l2i:
+state.pop(SC_LONG,SC_LONG2);
+state.push(ctx.INT);
+continue next_insn;
+case op_l2f:
+state.pop(SC_LONG,SC_LONG2);
+state.push(ctx.FLOAT);
+continue next_insn;
+case op_l2d:
+state.pop(SC_LONG,SC_LONG2);
+state.push(ctx.DOUBLE,ctx.DOUBLE2);
+continue next_insn;
+case op_f2i:
+state.pop(SC_FLOAT);
+state.push(ctx.INT);
+continue next_insn;
+case op_f2l:
+state.pop(SC_FLOAT);
+state.push(ctx.LONG,ctx.LONG2);
+continue next_insn;
+case op_f2d:
+state.pop(SC_FLOAT);
+state.push(ctx.DOUBLE,ctx.DOUBLE2);
+continue next_insn;
+case op_d2i:
+state.pop(SC_DOUBLE,SC_DOUBLE2);
+state.push(ctx.INT);
+continue next_insn;
+case op_d2l:
+state.pop(SC_DOUBLE,SC_DOUBLE2);
+state.push(ctx.LONG,ctx.LONG2);
+continue next_insn;
+case op_d2f:
+state.pop(SC_DOUBLE,SC_DOUBLE2);
+state.push(ctx.FLOAT);
+continue next_insn;
+case op_i2b:
+state.pop(SC_INT);
+state.push(ctx.BYTE);
+continue next_insn;
+case op_i2c:
+state.pop(SC_INT);
+state.push(ctx.CHAR);
+continue next_insn;
+case op_i2s:
+state.pop(SC_INT);
+state.push(ctx.SHORT);
+continue next_insn;
+case op_lcmp:
+state.pop(SC_LONG,SC_LONG2);
+state.pop(SC_LONG,SC_LONG2);
+state.push(ctx.INT);
+continue next_insn;
+case op_fcmpl:
+case op_fcmpg:
+state.pop(SC_FLOAT,SC_FLOAT);
+state.push(ctx.INT);
+continue next_insn;
+case op_dcmpl:
+case op_dcmpg:
+state.pop(SC_DOUBLE,SC_DOUBLE2);
+state.pop(SC_DOUBLE,SC_DOUBLE2);
+state.push(ctx.INT);
+continue next_insn;
+case op_ifeq:
+case op_ifne:
+case op_iflt:
+case op_ifge:
+case op_ifgt:
+case op_ifle:
+{
+int base_offset=pc - 1;
+state.pop(SC_INT);
+int offset=n2h.get2s(code,pc);
+pc+=2;
+conditional_branch(state,pc,base_offset + offset);
+}
+break next_insn;
+case op_if_icmpeq:
+case op_if_icmpne:
+case op_if_icmplt:
+case op_if_icmpge:
+case op_if_icmpgt:
+case op_if_icmple:
+{
+int base_offset=pc - 1;
+state.pop(SC_INT,SC_INT);
+int offset=n2h.get2s(code,pc);
+pc+=2;
+conditional_branch(state,pc,base_offset + offset);
+}
+break next_insn;
+case op_if_acmpeq:
+case op_if_acmpne:
+{
+int base_offset=pc - 1;
+state.pop(SC_ADDR,SC_ADDR);
+int offset=n2h.get2s(code,pc);
+pc+=2;
+conditional_branch(state,pc,base_offset + offset);
+}
+break next_insn;
+case op_goto:
+{
+int offset=n2h.get2s(code,pc);
+pc+=2;
+int target_pc=pc - 3 + offset;
+branch(state,target_pc);
+}
+break next_insn;
+case op_jsr:
+{
+int offset=n2h.get2s(code,pc);
+pc+=2;
+int target_pc=pc - 3 + offset;
+state.push(ctx.forAddress(pc - pc_offset));
+state.push_for_jsr(pc - pc_offset);
+branch(state,target_pc);
+}
+break next_insn;
+case op_jsr_w:
+{
+int offset=n2h.get4(code,pc);
+pc+=4;
+int target_pc=pc - 5 + offset;
+state.push(ctx.forAddress(pc - pc_offset));
+state.push_for_jsr(pc - pc_offset);
+branch(state,target_pc);
+}
+break next_insn;
+case op_ret:
+{
+int index=n2h.get1u(code,pc++);
+Type addr=state.read(index,SC_ADDR);
+if (addr.tag != T_ADDR) throw new verify.VerificationException("ret [" + index + "] does not specify a return address");
+state.write(index,null);
+AddressType atype=(AddressType)addr;
+state.pop_for_ret(atype.pc());
+branch(state,atype.pc() + pc_offset);
+}
+break next_insn;
+case op_tableswitch:
+{
+int basepc=pc - 1;
+state.pop(SC_INT);
+while (((pc - pc_offset) % 4) != 0) {
+if (code[pc] != 0) warn("padding byte '0x" + Integer.toHexString(code[pc - 1]) + "' is non-zero");
+pc++;
+}
+int default_val=n2h.get4(code,pc);
+pc+=4;
+int low=n2h.get4(code,pc);
+pc+=4;
+int high=n2h.get4(code,pc);
+pc+=4;
+branch(state.copy(),default_val + basepc);
+for (int i=0; i < (high - low + 1); i++) {
+int this_target=n2h.get4(code,pc);
+pc+=4;
+branch(state.copy(),this_target + basepc);
+}
+}
+break next_insn;
+case op_lookupswitch:
+{
+int basepc=pc - 1;
+state.pop(SC_INT);
+while (((pc - pc_offset) % 4) != 0) {
+if (code[pc] != 0) warn("padding byte '0x" + Integer.toHexString(code[pc - 1]) + "' is non-zero");
+pc++;
+}
+int default_val=n2h.get4(code,pc);
+pc+=4;
+int npairs=n2h.get4(code,pc);
+pc+=4;
+branch(state.copy(),default_val + basepc);
+while (npairs-- > 0) {
+int this_value=n2h.get4(code,pc);
+pc+=4;
+int this_target=n2h.get4(code,pc);
+pc+=4;
+branch(state.copy(),this_target + basepc);
+}
+}
+break next_insn;
+case op_ireturn:
+state.pop(SC_INT);
+if (sig.returnType().storageClass != SC_INT) throw new verify.VerificationException("erroneous return type");
+break next_insn;
+case op_lreturn:
+state.pop(SC_LONG,SC_LONG2);
+if (sig.returnType() != ctx.LONG) throw new verify.VerificationException("erroneous return type");
+break next_insn;
+case op_freturn:
+state.pop(SC_FLOAT);
+if (sig.returnType() != ctx.FLOAT) throw new verify.VerificationException("erroneous return type");
+break next_insn;
+case op_dreturn:
+state.pop(SC_DOUBLE,SC_DOUBLE2);
+if (sig.returnType() != ctx.DOUBLE) throw new verify.VerificationException("erroneous return type");
+break next_insn;
+case op_areturn:
+{
+Type ret=state.pop(SC_ADDR);
+sig.returnType().checkAssignmentFrom(ret);
+}
+break next_insn;
+case op_return:
+if (sig.returnType() != ctx.VOID) throw new verify.VerificationException("erroneous return type");
+break next_insn;
+case op_putstatic:
+{
+int index=n2h.get2u(code,pc);
+pc+=2;
+Type type=getFieldType(index);
+if (type.tag == T_DOUBLE) {
+state.pop(SC_DOUBLE,SC_DOUBLE2);
+}
+ else if (type.tag == T_LONG) {
+state.pop(SC_LONG,SC_LONG2);
+}
+ else {
+Type value=state.pop(type.storageClass);
+type.checkAssignmentFrom(value);
+}
+}
+continue next_insn;
+case op_getstatic:
+{
+int index=n2h.get2u(code,pc);
+pc+=2;
+Type ftype=getFieldType(index);
+if (ftype.tag == T_DOUBLE) {
+state.push(ctx.DOUBLE,ctx.DOUBLE2);
+}
+ else if (ftype.tag == T_LONG) {
+state.push(ctx.LONG,ctx.LONG2);
+}
+ else {
+state.push(ftype);
+}
+}
+continue next_insn;
+case op_getfield:
+{
+Type object=state.pop(SC_ADDR);
+int index=n2h.get2u(code,pc);
+pc+=2;
+Type ftype=getFieldType(index);
+Type fclass=getFieldClass(index);
+if (log3) {
+log("get field " + ftype);
+}
+fclass.checkAssignmentFrom(object);
+if (ftype.tag == T_DOUBLE) {
+state.push(ctx.DOUBLE,ctx.DOUBLE2);
+}
+ else if (ftype.tag == T_LONG) {
+state.push(ctx.LONG,ctx.LONG2);
+}
+ else {
+state.push(ftype);
+}
+}
+continue next_insn;
+case op_putfield:
+{
+int index=n2h.get2u(code,pc);
+pc+=2;
+Type ftype=getFieldType(index);
+Type fclass=getFieldClass(index);
+if (ftype.tag == T_DOUBLE) {
+state.pop(SC_DOUBLE,SC_DOUBLE2);
+}
+ else if (ftype.tag == T_LONG) {
+state.pop(SC_LONG,SC_LONG2);
+}
+ else {
+Type value=state.pop(ftype.storageClass);
+ftype.checkAssignmentFrom(value);
+}
+if (state.constructor_start) {
+Type self_new=state.pop(SC_NEW);
+Type self=((NewObjectType)self_new).klass;
+if (self != thisType) {
+throw new verify.VerificationException("illegal field assignment in " + "constructor code");
+}
+}
+ else {
+Type object=state.pop(SC_ADDR);
+fclass.checkAssignmentFrom(object);
+}
+}
+continue next_insn;
+case op_invokevirtual:
+case op_invokespecial:
+case op_invokestatic:
+case op_invokeinterface:
+{
+int index=n2h.get2u(code,pc);
+pc+=2;
+if (opcode == op_invokeinterface) {
+if (code[pc++] != 0) warn("padding byte '0x" + Integer.toHexString(code[pc - 1]) + "' is non-zero");
+if (code[pc++] != 0) warn("padding byte '0x" + Integer.toHexString(code[pc - 1]) + "' is non-zero");
+}
+Signature msig;
+String msigname;
+String cname;
+if (opcode == op_invokeinterface) {
+msig=getInterfaceMethodSignature(index);
+msigname=getInterfaceMethodName(index);
+cname=getInterfaceMethodClass(index);
+}
+ else {
+msig=getMethodSignature(index);
+msigname=getMethodName(index);
+cname=getMethodClass(index);
+}
+if (log3) {
+log("calling " + cname + "."+ msigname+ " "+ msig);
+}
+int nargs=msig.numberArgs();
+Type receiver=null;
+Type expected_receiver=null;
+boolean is_constructor=(msigname.equals("<init>"));
+if (opcode != op_invokestatic) {
+receiver=find_receiver(msig,state,is_constructor);
+if (cname.charAt(0) == '[') expected_receiver=ctx.typeForName(cname);
+ else expected_receiver=ctx.classForName(cname);
+if (receiver.tag == T_NEW) {
+if (is_constructor && opcode == op_invokespecial) {
+receiver=state.replaceConstructedObject(receiver);
+if (state.constructor_start && receiver == thisType) {
+Type superClass=getClassType(classfile.super_class);
+if (expected_receiver != thisType && expected_receiver != superClass) throw new verify.VerificationException("illegal constructor call");
+state.constructor_start=false;
+}
+}
+ else {
+throw new verify.VerificationException("Method " + msigname + " called with an "+ "uninitialized object.");
+}
+}
+ else if (is_constructor) {
+throw new verify.VerificationException("Constructor" + " called with an " + "initialized object.");
+}
+expected_receiver.checkAssignmentFrom(receiver);
+}
+for (int arg=nargs - 1; arg >= 0; arg--) {
+Type tt=pop_arg(msig.declaredArgument(arg),state);
+}
+if (opcode != op_invokestatic) {
+Type found=state.pop(SC_ADDR);
+if (receiver != found) {
+throw new InternalError("didn't find receiver after popping args!\n" + " expecting '" + receiver + "' found '"+ found+ "'");
+}
+expected_receiver.checkAssignmentFrom(receiver);
+}
+Type rtype=msig.returnType();
+if (rtype.tag == T_VOID) {
+;
+}
+ else if (rtype.tag == T_DOUBLE) {
+state.push(ctx.DOUBLE,ctx.DOUBLE2);
+}
+ else if (rtype.tag == T_LONG) {
+state.push(ctx.LONG,ctx.LONG2);
+}
+ else {
+state.push(rtype);
+}
+}
+continue next_insn;
+case op_new:
+{
+int index=n2h.get2u(code,pc);
+pc+=2;
+String name=classfile.pool.get_class(index);
+ClassType type=ctx.classForName(name);
+state.push(ctx.newForClass(type));
+}
+continue next_insn;
+case op_newarray:
+{
+int atype_code=n2h.get1u(code,pc++);
+Type size=state.pop(SC_INT);
+Type element=null;
+switch (atype_code) {
+case 4:
+element=ctx.BOOLEAN;
+break;
+case 5:
+element=ctx.CHAR;
+break;
+case 6:
+element=ctx.FLOAT;
+break;
+case 7:
+element=ctx.DOUBLE;
+break;
+case 8:
+element=ctx.BYTE;
+break;
+case 9:
+element=ctx.SHORT;
+break;
+case 10:
+element=ctx.INT;
+break;
+case 11:
+element=ctx.LONG;
+break;
+default :
+throw new verify.VerificationException("erroneous array type in newarray instruction");
+}
+state.push(ArrayType.forElement(element));
+}
+continue next_insn;
+case op_anewarray:
+{
+int idx=n2h.get2u(code,pc);
+pc+=2;
+Type etype=getClassType(idx);
+state.pop(SC_INT);
+state.push(ArrayType.forElement(etype));
+}
+continue next_insn;
+case op_arraylength:
+{
+Type t=state.pop(SC_ADDR);
+if (!t.isAnonymousArray() && t.tag != T_ARRAY) throw new verify.VerificationException("non-array operand to arraylength operation");
+state.push(ctx.INT);
+}
+continue next_insn;
+case op_athrow:
+{
+Type extype=state.pop(SC_ADDR);
+inject_exceptions(method,state,pc - 1);
+}
+break next_insn;
+case op_checkcast:
+{
+Type t=state.pop(SC_ADDR);
+int index=n2h.get2u(code,pc);
+pc+=2;
+Type ctype=getClassType(index);
+state.push(ctype);
+}
+continue next_insn;
+case op_instanceof:
+{
+Type t=state.pop(SC_ADDR);
+int index=n2h.get2u(code,pc);
+pc+=2;
+state.push(ctx.INT);
+}
+continue next_insn;
+case op_monitorenter:
+case op_monitorexit:
+{
+Type obj=state.pop(SC_ADDR);
+}
+continue next_insn;
+case op_wide:
+{
+int the_mod_op=n2h.get1u(code,pc++);
+int wide=n2h.get2u(code,pc);
+pc+=2;
+switch (the_mod_op) {
+case op_istore:
+state.store(wide,SC_INT);
+continue next_insn;
+case op_fstore:
+state.store(wide,SC_FLOAT);
+continue next_insn;
+case op_astore:
+state.store(wide,SC_ADDR);
+continue next_insn;
+case op_lload:
+state.load(wide,SC_LONG,SC_LONG2);
+continue next_insn;
+case op_dload:
+state.load(wide,SC_DOUBLE,SC_DOUBLE2);
+continue next_insn;
+case op_iload:
+state.load(wide,SC_INT);
+continue next_insn;
+case op_fload:
+state.load(wide,SC_FLOAT);
+continue next_insn;
+case op_aload:
+if (wide == 0 && state.constructor_start) {
+state.load(0,SC_NEW);
+}
+ else {
+state.load(wide,SC_ADDR);
+}
+continue next_insn;
+case op_lstore:
+state.store(wide,SC_LONG,SC_LONG2);
+continue next_insn;
+case op_dstore:
+state.store(wide,SC_DOUBLE,SC_DOUBLE2);
+continue next_insn;
+case op_ret:
+{
+Type addr=state.read(wide,SC_ADDR);
+if (addr.tag != T_ADDR) throw new verify.VerificationException("ret [" + wide + "] does not specify a return address");
+state.write(wide,null);
+AddressType atype=(AddressType)addr;
+branch(state,atype.pc() + pc_offset);
+}
+break next_insn;
+case op_iinc:
+pc+=2;
+state.read(wide,SC_INT);
+continue next_insn;
+default :
+throw new verify.VerificationException("illegal opcode in wide operation");
+}
+}
+case op_multianewarray:
+{
+int kind=n2h.get2u(code,pc);
+pc+=2;
+int dim=n2h.get1u(code,pc++);
+Type array=getClassType(kind);
+if (log3) {
+log("dim=" + dim + "; kind=\""+ array+ "\"");
+}
+for (int i=0; i < dim; i++) state.pop(SC_INT);
+state.push(array);
+}
+continue next_insn;
+case op_ifnull:
+case op_ifnonnull:
+{
+int base=pc - 1;
+int target=n2h.get2s(code,pc);
+pc+=2;
+Type obj=state.pop(SC_ADDR);
+conditional_branch(state,base + target,pc);
+}
+break next_insn;
+case op_goto_w:
+{
+int basepc=pc - 1;
+int offset=n2h.get4(code,pc);
+pc+=4;
+branch(state,basepc + offset);
+}
+break next_insn;
+default :
+throw new verify.VerificationException("illegal opcode 0x" + Integer.toHexString(opcode) + " at pc="+ (pc - 1 - pc_offset));
+}
+}
+for (int i=pc_of_last_opcode + 1; i < pc; i++) {
+int mode=byte_mode[i - pc_offset];
+if (mode == BYTE_MODE_UNKNOWN) {
+byte_mode[i - pc_offset]=BYTE_MODE_ILLEGAL;
+}
+ else if (mode == BYTE_MODE_ILLEGAL) {
+continue;
+}
+ else if (mode == BYTE_MODE_INSTRUCTION || mode == BYTE_MODE_TRY_INSTRUCTION) {
+throw new verify.VerificationException("executed code inside an instruction");
+}
+ else {
+throw new InternalError("illegal byte mode");
+}
+}
+}
+}
+  finally {
+boolean found_unreachable_code=false;
+for (int i=0; i < code_size; i++) {
+switch (byte_mode[i]) {
+case BYTE_MODE_UNKNOWN:
+{
+int start=i++;
+while (i < (end_pc - pc_offset) && byte_mode[i] == BYTE_MODE_UNKNOWN) {
+i+=1;
+}
+}
+case BYTE_MODE_INSTRUCTION:
+case BYTE_MODE_TRY_INSTRUCTION:
+instruction_count+=1;
+case BYTE_MODE_ILLEGAL:
+break;
+default :
+throw new InternalError("illegal byte mode");
+}
+}
+}
+}

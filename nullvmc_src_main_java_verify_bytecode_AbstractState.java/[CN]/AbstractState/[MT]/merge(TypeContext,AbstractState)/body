@@ -1,0 +1,26 @@
+{
+  boolean need_recheck=false;
+  Type[] this_storage=this.storage;
+  Type[] other_storage=other.storage;
+  int max_stack=max_stack();
+  int sp=this.sp;
+  if (other_storage.length != storage.length)   throw new InternalError("different sized states");
+  for (int i=0; i < storage.length; i++) {
+    if (i >= sp && i < max_stack)     continue;
+    Type this_type=this_storage[i];
+    if (this_type == null)     continue;
+    Type other_type=other_storage[i];
+    if (other_type == this_type)     continue;
+    if (other_type == null) {
+      this_storage[i]=null;
+      need_recheck=true;
+      continue;
+    }
+    Type new_type=this_type.mergeWith(other_type);
+    if (new_type != this_type) {
+      this_storage[i]=new_type;
+      need_recheck=true;
+    }
+  }
+  return need_recheck;
+}

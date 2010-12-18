@@ -1,0 +1,42 @@
+{
+switch (name.charAt(start)) {
+case 'Z':
+    end[0]=start + 1;
+  return BOOLEAN;
+case 'B':
+end[0]=start + 1;
+return BYTE;
+case 'C':
+end[0]=start + 1;
+return CHAR;
+case 'S':
+end[0]=start + 1;
+return SHORT;
+case 'I':
+end[0]=start + 1;
+return INT;
+case 'J':
+end[0]=start + 1;
+return LONG;
+case 'F':
+end[0]=start + 1;
+return FLOAT;
+case 'D':
+end[0]=start + 1;
+return DOUBLE;
+case 'V':
+end[0]=start + 1;
+return VOID;
+case '[':
+return ArrayType.forName(this,name,start,end);
+case 'L':
+for (int i=start + 1; i < name.length(); i++) {
+if (name.charAt(i) == ';') {
+end[0]=i + 1;
+return classForName(name.substring(start + 1,i));
+}
+}
+throw new IllegalTypeNameException("no end marker ';' in " + name.substring(start));
+}
+throw new IllegalTypeNameException(name.substring(start));
+}

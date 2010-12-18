@@ -1,0 +1,17 @@
+{
+  this.out=new PrintWriter(new OutputStreamWriter(out,"UTF-8"));
+  try {
+    if (verifyWhen != VerifyWhen.SKIP) {
+      clazz.verify();
+    }
+    compile(new ClassReader(clazz.getBytes()));
+  }
+ catch (  VerifyError ve) {
+    if (verifyWhen == VerifyWhen.DEFER) {
+      compileWithVerifyError(clazz,ve);
+    }
+ else {
+      throw ve;
+    }
+  }
+}

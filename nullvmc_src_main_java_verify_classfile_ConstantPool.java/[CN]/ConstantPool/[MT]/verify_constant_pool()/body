@@ -1,0 +1,42 @@
+{
+  for (int c=1; c < size; c++) {
+switch (tags[c]) {
+case CONSTANT_String:
+case CONSTANT_Class:
+{
+        int idx=n2h.get2u(bytes,offsets[c]);
+        check_tag(idx,CONSTANT_Utf8);
+      }
+    break;
+case CONSTANT_Fieldref:
+case CONSTANT_Methodref:
+case CONSTANT_InterfaceMethodref:
+{
+    int class_idx=n2h.get2u(bytes,offsets[c]);
+    int nat_idx=n2h.get2u(bytes,offsets[c] + 2);
+    check_tag(class_idx,CONSTANT_Class);
+    check_tag(nat_idx,CONSTANT_NameAndType);
+  }
+break;
+case CONSTANT_NameAndType:
+{
+int name_idx=n2h.get2u(bytes,offsets[c]);
+int type_idx=n2h.get2u(bytes,offsets[c] + 2);
+check_tag(name_idx,CONSTANT_Utf8);
+check_tag(type_idx,CONSTANT_Utf8);
+}
+break;
+case CONSTANT_Utf8:
+case CONSTANT_Integer:
+case CONSTANT_Float:
+case CONSTANT_Unicode:
+break;
+case CONSTANT_Double:
+case CONSTANT_Long:
+c++;
+break;
+default :
+throw new ClassFormatError("illegal tag " + tags[c] + "@"+ c);
+}
+}
+}

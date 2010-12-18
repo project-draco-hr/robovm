@@ -1,0 +1,18 @@
+{
+  int name=read2u();
+  int length=read4();
+  check_tag(name,CONSTANT_Utf8);
+  if (equals_utf8(name,"SourceFile")) {
+    int sf=read2u();
+    check_tag(sf,CONSTANT_Utf8);
+    handleSourceFileAttribute(sf);
+    if (length != 2)     throw new ClassFormatError();
+  }
+ else {
+    int here=pos();
+    check(length);
+    handleUnknownAttribute(name,bytes,pos(),length);
+    offset+=length;
+  }
+  return length + 6;
+}
