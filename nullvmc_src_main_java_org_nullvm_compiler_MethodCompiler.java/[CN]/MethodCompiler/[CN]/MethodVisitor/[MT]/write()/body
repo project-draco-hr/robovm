@@ -62,6 +62,11 @@
     for (    LandingPadHandler handler : lpad.getHandlers()) {
       String type=handler.getType();
       if (type == null || type.equals("java/lang/Throwable")) {
+        throwable=tmpr("throwable");
+        out.format("    %s = load %s* %s\n",throwable,throwablePtr.getType(),throwablePtr);
+        setFrame(handler.getFrame());
+        stack.pop();
+        push1(throwable);
         out.format("    br label %%%s\n",handler.getLabel());
         alwaysMatches=true;
         break;
