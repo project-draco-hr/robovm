@@ -1,0 +1,21 @@
+{
+  Properties bootEntriesProps=new Properties();
+  for (  ClasspathEntry entry : bootEntries) {
+    bootEntriesProps.setProperty(entry.getArchive().getAbsolutePath(),entry.getDynamicLibrary().getAbsolutePath());
+  }
+  Properties mainEntriesProps=new Properties();
+  for (  ClasspathEntry entry : mainEntries) {
+    mainEntriesProps.setProperty(entry.getArchive().getAbsolutePath(),entry.getDynamicLibrary().getAbsolutePath());
+  }
+  writeProperties(bootEntriesProps,new File(output,"bootclasspath"));
+  writeProperties(mainEntriesProps,new File(output,"classpath"));
+  Map env=new HashMap<String,String>();
+  env.putAll(EnvironmentUtils.getProcEnvironment());
+  env.put("LD_LIBRARY_PATH",new File(home,"lib").getAbsolutePath());
+  try {
+    execWithEnv(output,env,new File(output,target).getAbsolutePath());
+  }
+ catch (  ExecuteException e) {
+    System.exit(e.getExitValue());
+  }
+}

@@ -43,28 +43,46 @@
   symbolsMapFile=new File(tmpFile,"symbols.map");
   FileUtils.copyURLToFile(getClass().getResource("/symbols.map"),symbolsMapFile);
   Clazzes clazzes=new Clazzes(bootClassPathFiles,classPathFiles);
-  List<PathObjectFiles> bootclasspathObjects=new ArrayList<PathObjectFiles>();
+  List<ClasspathEntry> bootclasspathObjects=new ArrayList<ClasspathEntry>();
   for (  Path path : clazzes.getBootclasspathPaths()) {
-    bootclasspathObjects.add(new PathObjectFiles(path,processClassFiles(path)));
+    ClasspathEntry entry=createClasspathEntry(path);
+    processClasspathEntry(entry);
+    bootclasspathObjects.add(entry);
   }
-  List<PathObjectFiles> classpathObjects=new ArrayList<PathObjectFiles>();
+  List<ClasspathEntry> classpathObjects=new ArrayList<ClasspathEntry>();
   for (  Path path : clazzes.getClasspathPaths()) {
-    classpathObjects.add(new PathObjectFiles(path,processClassFiles(path)));
+    ClasspathEntry entry=createClasspathEntry(path);
+    processClasspathEntry(entry);
+    classpathObjects.add(entry);
   }
   output.mkdirs();
   buildExecutable();
-  FileUtils.copyFileToDirectory(new File(new File(home,"lib"),"libnullvm.so"),output);
-  FileUtils.copyFileToDirectory(new File(new File(home,"lib"),"libnullvm-rt.so"),output);
-  FileUtils.copyFileToDirectory(new File(new File(home,"lib"),"libgc.so.1"),output);
-  File libBoot=new File(new File(output,"lib"),"boot");
-  libBoot.mkdirs();
-  File libMain=new File(new File(output,"lib"),"main");
-  libMain.mkdirs();
-  List<String> bootJars=processPathObjectFiles(bootclasspathObjects,libBoot);
-  List<String> mainJars=processPathObjectFiles(classpathObjects,libMain);
-  FileUtils.writeStringToFile(new File(libBoot,"files"),StringUtils.join(bootJars,':'),"UTF-8");
-  FileUtils.writeStringToFile(new File(libMain,"files"),StringUtils.join(mainJars,':'),"UTF-8");
   if (run) {
-    runTarget();
+    runTarget(bootclasspathObjects,classpathObjects);
+  }
+ else {
+    FileUtils.copyFileToDirectory(new File(new File(home,"lib"),"libnullvm.so"),output);
+    FileUtils.copyFileToDirectory(new File(new File(home,"lib"),"libnullvm-rt.so"),output);
+    FileUtils.copyFileToDirectory(new File(new File(home,"lib"),"libgc.so.1"),output);
+    File libBoot=new File(new File(output,"lib"),"boot");
+    libBoot.mkdirs();
+    File libMain=new File(new File(output,"lib"),"main");
+    libMain.mkdirs();
+    String bootDirString=libBoot.getAbsolutePath().substring(output.getAbsolutePath().length() + 1);
+    String mainDirString=libMain.getAbsolutePath().substring(output.getAbsolutePath().length() + 1);
+    Properties bootEntriesProps=new Properties();
+    for (    ClasspathEntry entry : bootclasspathObjects) {
+      bootEntriesProps.setProperty(bootDirString + File.separator + entry.getArchive().getName(),bootDirString + File.separator + entry.getDynamicLibrary().getName());
+      stripArchive(entry.getArchive(),new File(libBoot,entry.getArchive().getName()));
+      FileUtils.copyFileToDirectory(entry.getDynamicLibrary(),libBoot);
+    }
+    Properties mainEntriesProps=new Properties();
+    for (    ClasspathEntry entry : classpathObjects) {
+      mainEntriesProps.setProperty(mainDirString + File.separator + entry.getArchive().getName(),mainDirString + File.separator + entry.getDynamicLibrary().getName());
+      stripArchive(entry.getArchive(),new File(libMain,entry.getArchive().getName()));
+      FileUtils.copyFileToDirectory(entry.getDynamicLibrary(),libMain);
+    }
+    writeProperties(bootEntriesProps,new File(output,"bootclasspath"));
+    writeProperties(mainEntriesProps,new File(output,"classpath"));
   }
 }

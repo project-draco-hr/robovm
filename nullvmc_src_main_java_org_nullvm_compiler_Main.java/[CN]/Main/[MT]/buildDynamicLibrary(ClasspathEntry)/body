@@ -1,0 +1,30 @@
+{
+  File libFile=entry.getStaticLibrary();
+  File outFile=entry.getDynamicLibrary();
+  if (!clean && outFile.exists() && outFile.lastModified() >= libFile.lastModified()) {
+    if (verbose) {
+      stdout.println("Skipping unchanged library: " + libFile);
+    }
+    return outFile;
+  }
+  if (verbose) {
+    stdout.format("Building dynamic library '%s'\n",outFile);
+  }
+  String gccPath="gcc";
+  if (gccBin != null) {
+    gccPath=gccBin.getAbsolutePath();
+  }
+  List<String> ldArgs=new ArrayList<String>();
+  for (  File f : libDirs) {
+    ldArgs.add("-L");
+    ldArgs.add(f.getAbsolutePath());
+  }
+  ldArgs.add("-L");
+  ldArgs.add(new File(home,"lib").getAbsolutePath());
+  List<String> libArgs=new ArrayList<String>();
+  ldArgs.add("-L");
+  ldArgs.add(libFile.getParentFile().getAbsolutePath());
+  libArgs.add("-l:" + libFile.getName());
+  exec(gccPath,"-o",outFile,"-g","-shared","-Wl,-soname," + outFile.getName(),"-Wl,--version-script",symbolsMapFile,gccOpts,ldArgs,"-lnullvm","-lm","-Wl,--whole-archive",libArgs,"-Wl,--no-whole-archive");
+  return outFile;
+}

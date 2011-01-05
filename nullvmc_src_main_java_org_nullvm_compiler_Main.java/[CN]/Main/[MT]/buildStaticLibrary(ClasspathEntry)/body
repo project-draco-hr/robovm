@@ -1,0 +1,23 @@
+{
+  File outFile=entry.getStaticLibrary();
+  if (!clean && outFile.exists() && !entry.hasChangedAfter(outFile.lastModified())) {
+    if (verbose) {
+      stdout.println("Skipping unchanged classpath entry: " + entry);
+    }
+    return outFile;
+  }
+  outFile.getParentFile().mkdirs();
+  if (verbose) {
+    stdout.format("Building library '%s'\n",outFile);
+  }
+  List<File> files=processClassFilesInPath(entry.getPath());
+  String arPath="ar";
+  if (arBin != null) {
+    arPath=arBin.getAbsolutePath();
+  }
+  if (outFile.exists()) {
+    outFile.delete();
+  }
+  exec(arPath,"rcs",outFile,files);
+  return outFile;
+}
