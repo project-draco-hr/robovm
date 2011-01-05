@@ -68,21 +68,7 @@
     libBoot.mkdirs();
     File libMain=new File(new File(output,"lib"),"main");
     libMain.mkdirs();
-    String bootDirString=libBoot.getAbsolutePath().substring(output.getAbsolutePath().length() + 1);
-    String mainDirString=libMain.getAbsolutePath().substring(output.getAbsolutePath().length() + 1);
-    Properties bootEntriesProps=new Properties();
-    for (    ClasspathEntry entry : bootclasspathObjects) {
-      bootEntriesProps.setProperty(bootDirString + File.separator + entry.getArchive().getName(),bootDirString + File.separator + entry.getDynamicLibrary().getName());
-      stripArchive(entry.getArchive(),new File(libBoot,entry.getArchive().getName()));
-      FileUtils.copyFileToDirectory(entry.getDynamicLibrary(),libBoot);
-    }
-    Properties mainEntriesProps=new Properties();
-    for (    ClasspathEntry entry : classpathObjects) {
-      mainEntriesProps.setProperty(mainDirString + File.separator + entry.getArchive().getName(),mainDirString + File.separator + entry.getDynamicLibrary().getName());
-      stripArchive(entry.getArchive(),new File(libMain,entry.getArchive().getName()));
-      FileUtils.copyFileToDirectory(entry.getDynamicLibrary(),libMain);
-    }
-    writeProperties(bootEntriesProps,new File(output,"bootclasspath"));
-    writeProperties(mainEntriesProps,new File(output,"classpath"));
+    writeClasspathEntries(bootclasspathObjects,output,libBoot,new File(output,"bootclasspath"));
+    writeClasspathEntries(classpathObjects,output,libMain,new File(output,"classpath"));
   }
 }
