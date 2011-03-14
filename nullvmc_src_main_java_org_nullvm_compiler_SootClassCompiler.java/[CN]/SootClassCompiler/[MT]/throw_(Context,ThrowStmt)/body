@@ -1,0 +1,12 @@
+{
+  Value obj=immediate(ctx,(Immediate)stmt.getOp());
+  checkNull(ctx,obj);
+  if (ctx.hasTrap(stmt)) {
+    ctx.f().add(new Call(NVM_BC_EXCEPTION_SET,ENV,obj));
+    ctx.f().add(new Br(ctx.f().newBasicBlockRef(ctx.getCurrentTraps())));
+  }
+ else {
+    ctx.f().add(new Call(NVM_BC_THROW,ENV,obj));
+    ctx.f().add(new Unreachable());
+  }
+}

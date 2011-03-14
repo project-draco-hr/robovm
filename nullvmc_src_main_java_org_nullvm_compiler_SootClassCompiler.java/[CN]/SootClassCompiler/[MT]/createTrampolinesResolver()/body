@@ -1,0 +1,46 @@
+{
+  Type descType=new PointerType(new StructureType(I32,I8_PTR,I8_PTR,I8_PTR));
+  VariableRef desc=new VariableRef("desc",descType);
+  Function f=module.newFunction("resolver",new FunctionType(VOID,ENV_PTR,I32,descType),"env","index","desc");
+  TreeMap<IntegerConstant,BasicBlockRef> alt=new TreeMap<IntegerConstant,BasicBlockRef>();
+  for (int index=0; index < trampolines.size(); index++) {
+    alt.put(new IntegerConstant(index),f.newBasicBlockRef(index));
+  }
+  f.newBasicBlock(new Object());
+  f.add(new Switch(new VariableRef("index",I32),f.newBasicBlockRef(trampolines.size()),alt));
+  for (int index=0; index < trampolines.size(); index++) {
+    Trampoline t=trampolines.get(index);
+    f.newBasicBlock(index);
+    int type=TRAMPOLINE_TYPES.get(t.getClass());
+    Variable typePtr=f.newVariable(new PointerType(I32));
+    f.add(new Getelementptr(typePtr,desc,0,0));
+    f.add(new Store(new IntegerConstant(type),new VariableRef(typePtr)));
+    String targetClass=t.getTargetClass();
+    Variable targetClassPtr=f.newVariable(new PointerType(I8_PTR));
+    f.add(new Getelementptr(targetClassPtr,desc,0,1));
+    f.add(new Store(new ConstantBitcast(new GlobalRef(addString(targetClass)),I8_PTR),new VariableRef(targetClassPtr)));
+    String methodOrFieldName=null;
+    String methodOrFieldDesc=null;
+    if (t instanceof org.nullvm.compiler.trampoline.Invoke) {
+      methodOrFieldName=((org.nullvm.compiler.trampoline.Invoke)t).getMethodName();
+      methodOrFieldDesc=((org.nullvm.compiler.trampoline.Invoke)t).getMethodDesc();
+    }
+ else     if (t instanceof FieldAccessor) {
+      methodOrFieldName=((FieldAccessor)t).getFieldName();
+      methodOrFieldName=((FieldAccessor)t).getFieldDesc();
+    }
+    if (methodOrFieldName != null) {
+      Variable ptr=f.newVariable(new PointerType(I8_PTR));
+      f.add(new Getelementptr(ptr,desc,0,2));
+      f.add(new Store(new ConstantBitcast(new GlobalRef(addString(methodOrFieldName)),I8_PTR),new VariableRef(ptr)));
+    }
+    if (methodOrFieldDesc != null) {
+      Variable ptr=f.newVariable(new PointerType(I8_PTR));
+      f.add(new Getelementptr(ptr,desc,0,3));
+      f.add(new Store(new ConstantBitcast(new GlobalRef(addString(methodOrFieldDesc)),I8_PTR),new VariableRef(ptr)));
+    }
+    f.add(new Ret());
+  }
+  f.newBasicBlock(trampolines.size());
+  f.add(new Ret());
+}

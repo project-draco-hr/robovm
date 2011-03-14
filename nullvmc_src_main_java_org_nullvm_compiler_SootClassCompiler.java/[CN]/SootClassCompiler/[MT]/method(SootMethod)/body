@@ -1,0 +1,99 @@
+{
+  Context ctx=new Context();
+  Body body=method.retrieveActiveBody();
+  Function function=createFunction(method);
+  ctx.setCurrentMethod(method);
+  ctx.setCurrentBody(body);
+  ctx.setCurrentFunction(function);
+  ctx.f().newBasicBlock(new Object());
+  Set<String> seen=new HashSet<String>();
+  for (  Unit unit : body.getUnits()) {
+    if (unit instanceof DefinitionStmt) {
+      DefinitionStmt stmt=(DefinitionStmt)unit;
+      if (stmt.getLeftOp() instanceof Local) {
+        Local local=(Local)stmt.getLeftOp();
+        if (!seen.contains(local.getName())) {
+          Type type=getType(local.getType());
+          ctx.f().add(new Alloca(ctx.f().newVariable(local.getName(),type),type));
+          seen.add(local.getName());
+        }
+      }
+    }
+  }
+  Variable localTrampolines=ctx.f().newVariable("trampolines",new PointerType(I8_PTR));
+  ctx.f().add(new Load(localTrampolines,new GlobalRef("trampolines",new PointerType(new PointerType(I8_PTR)))));
+  PatchingChain<Unit> units=body.getUnits();
+  for (  Unit unit : units) {
+    ctx.setCurrentUnit(unit);
+    if (ctx.bb() == null || ctx.bb().getTag() != unit && (ctx.isJumpTarget(unit) || ctx.isTrapHandler(unit))) {
+      BasicBlock oldBlock=ctx.bb();
+      ctx.f().newBasicBlock(unit);
+      if (oldBlock != null) {
+        Instruction last=oldBlock.last();
+        if (last == null || !isTerminator(last)) {
+          oldBlock.add(new Br(ctx.f().newBasicBlockRef(unit)));
+        }
+      }
+    }
+    if (unit instanceof DefinitionStmt) {
+      assign(ctx,(DefinitionStmt)unit);
+    }
+ else     if (unit instanceof ReturnStmt) {
+      return_(ctx,(ReturnStmt)unit);
+    }
+ else     if (unit instanceof ReturnVoidStmt) {
+      returnVoid(ctx);
+    }
+ else     if (unit instanceof IfStmt) {
+      if_(ctx,(IfStmt)unit);
+    }
+ else     if (unit instanceof GotoStmt) {
+      goto_(ctx,(GotoStmt)unit);
+    }
+ else     if (unit instanceof ThrowStmt) {
+      throw_(ctx,(ThrowStmt)unit);
+    }
+ else     if (unit instanceof InvokeStmt) {
+      invoke(ctx,(InvokeStmt)unit);
+    }
+ else     if (unit instanceof EnterMonitorStmt) {
+      enterMonitor(ctx,(EnterMonitorStmt)unit);
+    }
+ else     if (unit instanceof ExitMonitorStmt) {
+      exitMonitor(ctx,(ExitMonitorStmt)unit);
+    }
+ else {
+      throw new IllegalArgumentException("Unknown Unit type: " + unit.getClass());
+    }
+  }
+  next:   for (  List<Trap> traps : ctx.getRecordedTraps()) {
+    BasicBlock bb=function.newBasicBlock(traps);
+    Variable ehptr=function.newVariable(I8_PTR);
+    bb.add(new Call(ehptr,LLVM_EH_EXCEPTION));
+    Variable sel=function.newVariable(I32);
+    bb.add(new Call(sel,LLVM_EH_SELECTOR,new VariableRef(ehptr),new ConstantBitcast(NVM_BC_PERSONALITY,I8_PTR),new IntegerConstant(1)));
+    for (    Trap trap : traps) {
+      String exName=trap.getException().getName();
+      if ("java.lang.Throwable".equals(exName)) {
+        bb.add(new Br(function.newBasicBlockRef(trap.getHandlerUnit())));
+        continue next;
+      }
+      Global throwable=throwables.get(exName);
+      if (throwable == null) {
+        throwable=new Global(exName,new NullConstant(CLASS_PTR));
+        throwables.put(exName,throwable);
+      }
+      Variable t=function.newVariable(CLASS_PTR);
+      bb.add(new Load(t,new GlobalRef(throwable)));
+      Variable v=function.newVariable(I32);
+      bb.add(new Call(v,NVM_BC_EXCEPTION_MATCH,ENV,new VariableRef(t)));
+      Variable cond=function.newVariable(I1);
+      bb.add(new Trunc(cond,new VariableRef(v),I1));
+      BasicBlockRef falseBlock=function.newBasicBlockRef(new Object());
+      bb.add(new Br(new VariableRef(cond),function.newBasicBlockRef(trap.getHandlerUnit()),falseBlock));
+      bb=function.newBasicBlock(falseBlock.getTag());
+    }
+    bb.add(new Call(NVM_BC_RETHROW,ENV));
+    bb.add(new Unreachable());
+  }
+}

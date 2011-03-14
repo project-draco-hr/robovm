@@ -1,0 +1,30 @@
+{
+  ConditionExpr condition=(ConditionExpr)stmt.getCondition();
+  Value op1=immediate(ctx,(Immediate)condition.getOp1());
+  Value op2=immediate(ctx,(Immediate)condition.getOp2());
+  op1=widen(ctx,op1,Type.I32,condition.getOp2().getType());
+  op2=widen(ctx,op2,Type.I32,condition.getOp1().getType());
+  Icmp.Condition c=null;
+  if (condition instanceof EqExpr) {
+    c=Icmp.Condition.eq;
+  }
+ else   if (condition instanceof NeExpr) {
+    c=Icmp.Condition.ne;
+  }
+ else   if (condition instanceof GtExpr) {
+    c=Icmp.Condition.sgt;
+  }
+ else   if (condition instanceof LtExpr) {
+    c=Icmp.Condition.slt;
+  }
+ else   if (condition instanceof GeExpr) {
+    c=Icmp.Condition.sge;
+  }
+ else   if (condition instanceof LeExpr) {
+    c=Icmp.Condition.sle;
+  }
+  Variable result=ctx.f().newVariable(Type.I1);
+  ctx.f().add(new Icmp(result,c,op1,op2));
+  ctx.f().add(new Br(new VariableRef(result),ctx.f().newBasicBlockRef(stmt.getTarget()),ctx.f().newBasicBlockRef(ctx.getNextUnit())));
+  ctx.f().newBasicBlock(ctx.getNextUnit());
+}

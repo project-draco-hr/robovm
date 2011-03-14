@@ -1,0 +1,24 @@
+{
+  module=new Module();
+  throwables=new TreeMap<String,Global>();
+  trampolines=new ArrayList<Trampoline>();
+  strings=new HashMap<String,Global>();
+  module.addInclude(getClass().getClassLoader().getResource("header.ll"));
+  for (  SootMethod sm : sootClass.getMethods()) {
+    if (isNative(sm)) {
+      nativeMethod(sm);
+    }
+ else     if (!sm.isAbstract()) {
+      method(sm);
+    }
+  }
+  createTrampolinesResolver();
+  module.addGlobal(new Global("trampolines",new NullConstant(new PointerType(I8_PTR))));
+  for (  Global global : throwables.values()) {
+    module.addGlobal(global);
+  }
+  for (  Global global : strings.values()) {
+    module.addGlobal(global);
+  }
+  return module;
+}

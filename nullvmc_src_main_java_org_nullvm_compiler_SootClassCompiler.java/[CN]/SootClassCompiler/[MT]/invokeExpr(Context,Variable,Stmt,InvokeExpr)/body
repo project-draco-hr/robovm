@@ -1,0 +1,42 @@
+{
+  SootMethodRef methodRef=expr.getMethodRef();
+  ArrayList<Value> args=new ArrayList<Value>();
+  if (!(expr instanceof StaticInvokeExpr)) {
+    Value base=immediate(ctx,(Immediate)((InstanceInvokeExpr)expr).getBase());
+    checkNull(ctx,base);
+    args.add(base);
+  }
+  int paramIndex=0;
+  for (  soot.Value sootArg : (List<soot.Value>)expr.getArgs()) {
+    Value arg=immediate(ctx,(Immediate)sootArg);
+    soot.Type paramType=methodRef.parameterType(paramIndex++);
+    arg=cast(ctx,arg,getType(paramType),sootArg.getType());
+    args.add(arg);
+  }
+  if (canCallDirectly(ctx,expr)) {
+    args.add(0,new NullConstant(I8_PTR));
+    args.add(1,ENV);
+    Value function=new FunctionRef(mangleMethod(methodRef),getFunctionType(methodRef));
+    callOrInvoke(ctx,result,function,args.toArray(new Value[0]));
+  }
+ else {
+    Trampoline trampoline=null;
+    String targetClassName=getInternalName(methodRef.declaringClass());
+    String methodName=methodRef.name();
+    String methodDesc=getDescriptor(methodRef);
+    if (expr instanceof SpecialInvokeExpr) {
+      trampoline=new Invokespecial(targetClassName,methodName,methodDesc);
+    }
+ else     if (expr instanceof StaticInvokeExpr) {
+      trampoline=new Invokestatic(targetClassName,methodName,methodDesc);
+    }
+ else     if (expr instanceof VirtualInvokeExpr) {
+      trampoline=new Invokevirtual(targetClassName,methodName,methodDesc);
+    }
+ else     if (expr instanceof InterfaceInvokeExpr) {
+      trampoline=new Invokeinterface(targetClassName,methodName,methodDesc);
+    }
+    int index=addTrampoline(trampoline);
+    callOrInvokeTrampoline(ctx,index,result,getFunctionType(methodRef),args.toArray(new Value[0]));
+  }
+}

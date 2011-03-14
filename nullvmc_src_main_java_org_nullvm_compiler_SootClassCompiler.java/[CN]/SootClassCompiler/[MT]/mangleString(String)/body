@@ -1,0 +1,25 @@
+{
+  byte[] s;
+  try {
+    s=name.getBytes("UTF-8");
+  }
+ catch (  UnsupportedEncodingException e) {
+    throw new RuntimeException(e);
+  }
+  StringBuilder sb=new StringBuilder();
+  for (int i=0; i < s.length; i++) {
+    byte c=s[i];
+    if (c >= '0' && c <= '9' || c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z') {
+      sb.append((char)c);
+    }
+ else     if (c == '/') {
+      sb.append('_');
+    }
+ else {
+      sb.append('$');
+      sb.append(HEX_CHARS[(c >> 8) & 0xf]);
+      sb.append(HEX_CHARS[c & 0xf]);
+    }
+  }
+  return sb.toString();
+}

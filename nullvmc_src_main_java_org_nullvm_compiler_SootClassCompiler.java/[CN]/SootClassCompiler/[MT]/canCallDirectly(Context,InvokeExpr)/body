@@ -1,0 +1,26 @@
+{
+  SootMethodRef methodRef=expr.getMethodRef();
+  SootClass declaringClass=methodRef.declaringClass();
+  if (declaringClass.equals(context.getCurrentMethod().getDeclaringClass())) {
+    SootMethod method;
+    try {
+      method=methodRef.resolve();
+    }
+ catch (    ResolutionFailedException e) {
+      return false;
+    }
+    if (method.isAbstract()) {
+      return false;
+    }
+    if (method.isStatic()) {
+      return expr instanceof StaticInvokeExpr;
+    }
+    if (expr instanceof SpecialInvokeExpr) {
+      return true;
+    }
+    if (expr instanceof VirtualInvokeExpr) {
+      return Modifier.isFinal(method.getModifiers());
+    }
+  }
+  return false;
+}

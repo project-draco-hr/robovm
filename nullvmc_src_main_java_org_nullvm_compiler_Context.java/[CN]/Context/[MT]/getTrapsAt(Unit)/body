@@ -1,0 +1,24 @@
+{
+  List<Trap> result=this.traps.get(u);
+  if (result == null) {
+    Chain<Trap> traps=currentBody.getTraps();
+    if (traps.isEmpty()) {
+      result=Collections.emptyList();
+    }
+ else {
+      result=new ArrayList<Trap>();
+      PatchingChain<Unit> units=currentBody.getUnits();
+      for (      Trap trap : traps) {
+        Unit beginUnit=trap.getBeginUnit();
+        Unit endUnit=trap.getEndUnit();
+        if (beginUnit != endUnit) {
+          if (u == beginUnit || (units.follows(u,beginUnit) && units.follows(endUnit,u))) {
+            result.add(trap);
+          }
+        }
+      }
+    }
+    this.traps.put(u,result);
+  }
+  return result;
+}
