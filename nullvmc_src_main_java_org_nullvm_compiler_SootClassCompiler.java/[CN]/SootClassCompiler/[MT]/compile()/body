@@ -7,33 +7,30 @@
   classFields=getClassFields(sootClass,false);
   instanceFields=getInstanceFields(sootClass,false);
   allInstanceFields=getInstanceFields(sootClass,true);
-  List<Type> classFieldsTypes=new ArrayList<Type>();
-  List<Type> instanceFieldsTypes=new ArrayList<Type>();
-  for (  SootField field : sootClass.getFields()) {
-    if (field.isStatic()) {
-      classFieldsTypes.add(getType(field.getType()));
-    }
- else {
-      instanceFieldsTypes.add(getType(field.getType()));
-    }
+  classFieldsType=getType("ClassFields",classFields);
+  if (classFieldsType != null) {
+    module.addType(classFieldsType);
   }
-  if (!classFieldsTypes.isEmpty()) {
-    module.addType(new StructureType("ClassFields",classFieldsTypes.toArray(new Type[0])));
-  }
-  if (!instanceFieldsTypes.isEmpty()) {
-    module.addType(new StructureType("InstanceFields",instanceFieldsTypes.toArray(new Type[0])));
+  instanceFieldsType=getType("InstanceFields",allInstanceFields);
+  if (instanceFieldsType != null) {
+    module.addType(instanceFieldsType);
   }
   for (  SootMethod method : sootClass.getMethods()) {
     if (isNative(method)) {
       nativeMethod(method);
     }
  else     if (!method.isAbstract()) {
+      Body body=method.retrieveActiveBody();
+      PackManager.v().getPack("jtp").apply(body);
+      PackManager.v().getPack("jop").apply(body);
+      PackManager.v().getPack("jap").apply(body);
       method(method);
     }
   }
   for (  FunctionRef ref : trampolines.values()) {
     trampoline(ref);
   }
+  module.addGlobal(THE_CLASS);
   for (  Global global : throwables.values()) {
     module.addGlobal(global);
   }

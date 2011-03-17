@@ -1,0 +1,19 @@
+{
+  if (ref.getFieldRef().declaringClass().equals(sootClass)) {
+    SootField field;
+    try {
+      field=ref.getField();
+    }
+ catch (    ResolutionFailedException e) {
+      return false;
+    }
+    if (!field.getDeclaringClass().equals(sootClass) || field.isPhantom()) {
+      return false;
+    }
+    if (field.isStatic()) {
+      return ref instanceof StaticFieldRef;
+    }
+    return ref instanceof InstanceFieldRef;
+  }
+  return false;
+}

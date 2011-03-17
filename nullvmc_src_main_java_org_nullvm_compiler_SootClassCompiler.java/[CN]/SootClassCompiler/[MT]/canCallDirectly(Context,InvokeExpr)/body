@@ -1,7 +1,6 @@
 {
   SootMethodRef methodRef=expr.getMethodRef();
-  SootClass declaringClass=methodRef.declaringClass();
-  if (declaringClass.equals(context.getCurrentMethod().getDeclaringClass())) {
+  if (methodRef.declaringClass().equals(sootClass)) {
     SootMethod method;
     try {
       method=methodRef.resolve();
@@ -9,7 +8,7 @@
  catch (    ResolutionFailedException e) {
       return false;
     }
-    if (method.isAbstract()) {
+    if (!method.getDeclaringClass().equals(sootClass) || method.isAbstract() || method.isPhantom()) {
       return false;
     }
     if (method.isStatic()) {
@@ -19,7 +18,7 @@
       return true;
     }
     if (expr instanceof VirtualInvokeExpr) {
-      return Modifier.isFinal(method.getModifiers());
+      return Modifier.isFinal(sootClass.getModifiers()) || Modifier.isFinal(method.getModifiers());
     }
   }
   return false;
