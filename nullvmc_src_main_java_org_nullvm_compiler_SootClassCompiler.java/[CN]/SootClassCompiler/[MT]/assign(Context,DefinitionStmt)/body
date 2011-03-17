@@ -33,14 +33,14 @@
     Value base=immediate(ctx,(Immediate)ref.getBase());
     checkNull(ctx,base);
     Trampoline trampoline=new GetField(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
-    int index=addTrampoline(trampoline);
-    callOrInvokeTrampoline(ctx,index,result,new FunctionType(rightType,I8_PTR,ENV_PTR,OBJECT_PTR),base);
+    addTrampoline(trampoline,new FunctionType(rightType,ENV_PTR,OBJECT_PTR));
+    callOrInvokeTrampoline(ctx,trampoline,result,base);
   }
  else   if (rightOp instanceof StaticFieldRef) {
     StaticFieldRef ref=(StaticFieldRef)rightOp;
     Trampoline trampoline=new GetStatic(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
-    int index=addTrampoline(trampoline);
-    callOrInvokeTrampoline(ctx,index,result,new FunctionType(rightType,I8_PTR,ENV_PTR));
+    addTrampoline(trampoline,new FunctionType(rightType,ENV_PTR));
+    callOrInvokeTrampoline(ctx,trampoline,result);
   }
  else   if (rightOp instanceof Expr) {
     if (rightOp instanceof BinopExpr) {
@@ -191,20 +191,20 @@
       }
  else {
         Trampoline trampoline=new Checkcast(getInternalName(sootTargetType));
-        int index=addTrampoline(trampoline);
-        callOrInvokeTrampoline(ctx,index,result,new FunctionType(OBJECT_PTR,I8_PTR,ENV_PTR,OBJECT_PTR),op);
+        addTrampoline(trampoline,new FunctionType(OBJECT_PTR,ENV_PTR,OBJECT_PTR));
+        callOrInvokeTrampoline(ctx,trampoline,result,op);
       }
     }
  else     if (rightOp instanceof InstanceOfExpr) {
       Value op=immediate(ctx,(Immediate)((InstanceOfExpr)rightOp).getOp());
       Trampoline trampoline=new Instanceof(getInternalName(((InstanceOfExpr)rightOp).getCheckType()));
-      int index=addTrampoline(trampoline);
-      callOrInvokeTrampoline(ctx,index,result,new FunctionType(I8,I8_PTR,ENV_PTR,OBJECT_PTR),op);
+      addTrampoline(trampoline,new FunctionType(I8,ENV_PTR,OBJECT_PTR));
+      callOrInvokeTrampoline(ctx,trampoline,result,op);
     }
  else     if (rightOp instanceof NewExpr) {
       Trampoline trampoline=new New(getInternalName(((NewExpr)rightOp).getBaseType()));
-      int index=addTrampoline(trampoline);
-      callOrInvokeTrampoline(ctx,index,result,new FunctionType(OBJECT_PTR,I8_PTR,ENV_PTR));
+      addTrampoline(trampoline,new FunctionType(OBJECT_PTR,ENV_PTR));
+      callOrInvokeTrampoline(ctx,trampoline,result);
     }
  else     if (rightOp instanceof NewArrayExpr) {
       NewArrayExpr expr=(NewArrayExpr)rightOp;
@@ -246,14 +246,14 @@
     Value base=immediate(ctx,(Immediate)ref.getBase());
     checkNull(ctx,base);
     Trampoline trampoline=new PutField(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
-    int index=addTrampoline(trampoline);
-    callOrInvokeTrampoline(ctx,index,null,new FunctionType(VOID,I8_PTR,ENV_PTR,OBJECT_PTR,leftType),base,resultRef);
+    addTrampoline(trampoline,new FunctionType(VOID,ENV_PTR,OBJECT_PTR,leftType));
+    callOrInvokeTrampoline(ctx,trampoline,null,base,resultRef);
   }
  else   if (leftOp instanceof StaticFieldRef) {
     StaticFieldRef ref=(StaticFieldRef)leftOp;
     Trampoline trampoline=new PutStatic(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
-    int index=addTrampoline(trampoline);
-    callOrInvokeTrampoline(ctx,index,null,new FunctionType(VOID,I8_PTR,ENV_PTR,leftType),resultRef);
+    addTrampoline(trampoline,new FunctionType(VOID,ENV_PTR,leftType));
+    callOrInvokeTrampoline(ctx,trampoline,null,resultRef);
   }
  else {
     throw new IllegalArgumentException("Unknown type for leftOp: " + leftOp.getClass());

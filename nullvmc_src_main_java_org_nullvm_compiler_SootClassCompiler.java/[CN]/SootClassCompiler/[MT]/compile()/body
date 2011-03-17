@@ -1,19 +1,39 @@
 {
   module=new Module();
   throwables=new TreeMap<String,Global>();
-  trampolines=new ArrayList<Trampoline>();
+  trampolines=new HashMap<Trampoline,FunctionRef>();
   strings=new HashMap<String,Global>();
   module.addInclude(getClass().getClassLoader().getResource("header.ll"));
-  for (  SootMethod sm : sootClass.getMethods()) {
-    if (isNative(sm)) {
-      nativeMethod(sm);
+  classFields=getClassFields(sootClass,false);
+  instanceFields=getInstanceFields(sootClass,false);
+  allInstanceFields=getInstanceFields(sootClass,true);
+  List<Type> classFieldsTypes=new ArrayList<Type>();
+  List<Type> instanceFieldsTypes=new ArrayList<Type>();
+  for (  SootField field : sootClass.getFields()) {
+    if (field.isStatic()) {
+      classFieldsTypes.add(getType(field.getType()));
     }
- else     if (!sm.isAbstract()) {
-      method(sm);
+ else {
+      instanceFieldsTypes.add(getType(field.getType()));
     }
   }
-  createTrampolinesResolver();
-  module.addGlobal(new Global("trampolines",new NullConstant(new PointerType(I8_PTR))));
+  if (!classFieldsTypes.isEmpty()) {
+    module.addType(new StructureType("ClassFields",classFieldsTypes.toArray(new Type[0])));
+  }
+  if (!instanceFieldsTypes.isEmpty()) {
+    module.addType(new StructureType("InstanceFields",instanceFieldsTypes.toArray(new Type[0])));
+  }
+  for (  SootMethod method : sootClass.getMethods()) {
+    if (isNative(method)) {
+      nativeMethod(method);
+    }
+ else     if (!method.isAbstract()) {
+      method(method);
+    }
+  }
+  for (  FunctionRef ref : trampolines.values()) {
+    trampoline(ref);
+  }
   for (  Global global : throwables.values()) {
     module.addGlobal(global);
   }

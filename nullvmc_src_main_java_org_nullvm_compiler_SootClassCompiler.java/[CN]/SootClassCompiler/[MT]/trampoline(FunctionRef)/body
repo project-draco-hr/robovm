@@ -1,5 +1,9 @@
 {
-  Function function=createFunction(method);
+  String[] parameterNames=new String[functionRef.getType().getParameterTypes().length];
+  for (int i=0; i < parameterNames.length; i++) {
+    parameterNames[i]="p" + i;
+  }
+  Function function=module.newFunction(functionRef.getName().substring(1),functionRef.getType(),parameterNames);
   FunctionType functionType=function.getType();
   function.newBasicBlock(new Object());
   Global functionPtr=new Global(function.getName().substring(1) + "_ptr",new NullConstant(functionType));
@@ -7,20 +11,17 @@
   Variable f=function.newVariable(functionType);
   function.add(new Load(f,new GlobalRef(functionPtr)));
   Type[] parameterTypes=function.getType().getParameterTypes();
-  String[] parameterNames=function.getParameterNames();
   Value[] args=new Value[parameterNames.length];
   for (int i=0; i < args.length; i++) {
     args[i]=new VariableRef(parameterNames[i],parameterTypes[i]);
   }
   if (function.getType().getReturnType() == VOID) {
     function.add(new Call(new VariableRef(f),args));
-    function.add(new Call(NVM_BC_THROW_IF_EXCEPTION_OCCURRED,ENV));
     function.add(new Ret());
   }
  else {
     Variable result=function.newVariable(functionType.getReturnType());
     function.add(new Call(result,new VariableRef(f),args));
-    function.add(new Call(NVM_BC_THROW_IF_EXCEPTION_OCCURRED,ENV));
     function.add(new Ret(new VariableRef(result)));
   }
 }

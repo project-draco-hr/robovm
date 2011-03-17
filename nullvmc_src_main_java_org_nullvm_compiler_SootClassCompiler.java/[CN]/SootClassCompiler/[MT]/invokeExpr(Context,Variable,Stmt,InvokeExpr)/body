@@ -14,8 +14,7 @@
     args.add(arg);
   }
   if (canCallDirectly(ctx,expr)) {
-    args.add(0,new NullConstant(I8_PTR));
-    args.add(1,ENV);
+    args.add(0,ENV);
     Value function=new FunctionRef(mangleMethod(methodRef),getFunctionType(methodRef));
     callOrInvoke(ctx,result,function,args.toArray(new Value[0]));
   }
@@ -36,7 +35,7 @@
  else     if (expr instanceof InterfaceInvokeExpr) {
       trampoline=new Invokeinterface(targetClassName,methodName,methodDesc);
     }
-    int index=addTrampoline(trampoline);
-    callOrInvokeTrampoline(ctx,index,result,getFunctionType(methodRef),args.toArray(new Value[0]));
+    addTrampoline(trampoline,getFunctionType(methodRef));
+    callOrInvokeTrampoline(ctx,trampoline,result,args.toArray(new Value[0]));
   }
 }
