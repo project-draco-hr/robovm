@@ -33,7 +33,7 @@
     Value base=immediate(ctx,(Immediate)ref.getBase());
     checkNull(ctx,base);
     if (canAccessDirectly(ctx,ref)) {
-      ctx.f().add(new Load(result,getInstanceFieldPtr(ctx,base,ref)));
+      ctx.f().add(new Load(result,getInstanceFieldPtr(ctx.f(),base,ref.getField())));
     }
  else {
       Trampoline trampoline=new GetField(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
@@ -44,7 +44,7 @@
  else   if (rightOp instanceof StaticFieldRef) {
     StaticFieldRef ref=(StaticFieldRef)rightOp;
     if (canAccessDirectly(ctx,ref)) {
-      ctx.f().add(new Load(result,getClassFieldPtr(ctx,ref)));
+      ctx.f().add(new Load(result,getClassFieldPtr(ctx.f(),ref.getField())));
     }
  else {
       Trampoline trampoline=new GetStatic(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
@@ -256,7 +256,7 @@
     Value base=immediate(ctx,(Immediate)ref.getBase());
     checkNull(ctx,base);
     if (canAccessDirectly(ctx,ref)) {
-      ctx.f().add(new Store(resultRef,getInstanceFieldPtr(ctx,base,ref)));
+      ctx.f().add(new Store(resultRef,getInstanceFieldPtr(ctx.f(),base,ref.getField())));
     }
  else {
       Trampoline trampoline=new PutField(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
@@ -267,7 +267,7 @@
  else   if (leftOp instanceof StaticFieldRef) {
     StaticFieldRef ref=(StaticFieldRef)leftOp;
     if (canAccessDirectly(ctx,ref)) {
-      ctx.f().add(new Store(resultRef,getClassFieldPtr(ctx,ref)));
+      ctx.f().add(new Store(resultRef,getClassFieldPtr(ctx.f(),ref.getField())));
     }
  else {
       Trampoline trampoline=new PutStatic(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));

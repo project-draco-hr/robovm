@@ -15,6 +15,13 @@
   if (instanceFieldsType != null) {
     module.addType(instanceFieldsType);
   }
+  List<SootField> allFields=new ArrayList<SootField>();
+  allFields.addAll(classFields);
+  allFields.addAll(instanceFields);
+  for (  SootField field : allFields) {
+    fieldGetter(field);
+    fieldSetter(field);
+  }
   for (  SootMethod method : sootClass.getMethods()) {
     if (isNative(method)) {
       nativeMethod(method);
@@ -25,6 +32,11 @@
       PackManager.v().getPack("jop").apply(body);
       PackManager.v().getPack("jap").apply(body);
       method(method);
+    }
+    if (!method.isStatic() && !method.isPrivate() && !Modifier.isFinal(method.getModifiers())) {
+      if (!ancestorDeclaresMethod(sootClass,method)) {
+        virtualLookupFunction(method);
+      }
     }
   }
   for (  FunctionRef ref : trampolines.values()) {

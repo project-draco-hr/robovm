@@ -1,27 +1,8 @@
 {
-  String[] parameterNames=new String[functionRef.getType().getParameterTypes().length];
-  for (int i=0; i < parameterNames.length; i++) {
-    parameterNames[i]="p" + i;
-  }
-  Function function=module.newFunction(functionRef.getName().substring(1),functionRef.getType(),parameterNames);
-  FunctionType functionType=function.getType();
-  function.newBasicBlock(new Object());
-  Global functionPtr=new Global(function.getName().substring(1) + "_ptr",new NullConstant(functionType));
-  module.addGlobal(functionPtr);
-  Variable f=function.newVariable(functionType);
-  function.add(new Load(f,new GlobalRef(functionPtr)));
-  Type[] parameterTypes=function.getType().getParameterTypes();
-  Value[] args=new Value[parameterNames.length];
-  for (int i=0; i < args.length; i++) {
-    args[i]=new VariableRef(parameterNames[i],parameterTypes[i]);
-  }
-  if (function.getType().getReturnType() == VOID) {
-    function.add(new Call(new VariableRef(f),args));
-    function.add(new Ret());
-  }
- else {
-    Variable result=function.newVariable(functionType.getReturnType());
-    function.add(new Call(result,new VariableRef(f),args));
-    function.add(new Ret(new VariableRef(result)));
-  }
+  String name=functionRef.getName().substring(1);
+  module.addFunctionDeclaration(new FunctionDeclaration(name,functionRef.getType()));
+  module.addAsm(name + ":");
+  module.addAsm("\tmovq " + name + "_ptr@GOTPCREL(%rip), %rax");
+  module.addAsm("\tjmpq *(%rax)");
+  module.addGlobal(new Global(name + "_ptr",new NullConstant(I8_PTR)));
 }

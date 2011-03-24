@@ -1,0 +1,18 @@
+{
+  String name=mangleField(field) + "_getter";
+  Function function=null;
+  Value fieldPtr=null;
+  if (field.isStatic()) {
+    function=module.newFunction(name,new FunctionType(getType(field.getType()),ENV_PTR),"env");
+    function.newBasicBlock(new Object());
+    fieldPtr=getClassFieldPtr(function,field);
+  }
+ else {
+    function=module.newFunction(name,new FunctionType(getType(field.getType()),ENV_PTR,OBJECT_PTR),"env","this");
+    function.newBasicBlock(new Object());
+    fieldPtr=getInstanceFieldPtr(function,new VariableRef("this",OBJECT_PTR),field);
+  }
+  Variable result=function.newVariable(getType(field.getType()));
+  function.add(new Load(result,fieldPtr));
+  function.add(new Ret(new VariableRef(result)));
+}
