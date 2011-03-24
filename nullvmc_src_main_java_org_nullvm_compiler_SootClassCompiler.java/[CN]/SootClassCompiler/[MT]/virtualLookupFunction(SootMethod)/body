@@ -4,11 +4,11 @@
   FunctionType functionType=function.getType();
   function.newBasicBlock(new Object());
   Variable fptr=function.newVariable(I8_PTR);
-  Value nameRef=new ConstantGetelementptr(new GlobalRef(addString(method.getName())),0,0);
-  Value descRef=new ConstantGetelementptr(new GlobalRef(addString(getDescriptor(method.makeRef()))),0,0);
+  Value nameRef=getString(method.getName());
+  Value descRef=getString(getDescriptor(method.makeRef()));
   function.add(new Call(fptr,NVM_BC_LOOKUP_VIRTUAL_METHOD,ENV,new VariableRef("this",OBJECT_PTR),nameRef,descRef));
   Variable f=function.newVariable(functionType);
-  function.add(new Bitcast(f,new VariableRef(fptr),function.getType()));
+  function.add(new Bitcast(f,fptr.ref(),function.getType()));
   String[] parameterNames=function.getParameterNames();
   Type[] parameterTypes=function.getType().getParameterTypes();
   Value[] args=new Value[parameterNames.length];
@@ -16,12 +16,12 @@
     args[i]=new VariableRef(parameterNames[i],parameterTypes[i]);
   }
   if (function.getType().getReturnType() == VOID) {
-    function.add(new Call(new VariableRef(f),args));
+    function.add(new Call(f.ref(),args));
     function.add(new Ret());
   }
  else {
     Variable result=function.newVariable(functionType.getReturnType());
-    function.add(new Call(result,new VariableRef(f),args));
-    function.add(new Ret(new VariableRef(result)));
+    function.add(new Call(result,f.ref(),args));
+    function.add(new Ret(result.ref()));
   }
 }

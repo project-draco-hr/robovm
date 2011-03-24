@@ -1,0 +1,25 @@
+{
+  String name="NullVM_" + mangleString(sootClass.getName());
+  Function function=module.newFunction(name,new FunctionType(CLASS_PTR,ENV_PTR),"env");
+  function.newBasicBlock(new Object());
+  Variable clazz=function.newVariable("clazz",CLASS_PTR);
+  Value superclassName=null;
+  if (sootClass.hasSuperclass()) {
+    superclassName=getString(sootClass.getSuperclass().getName());
+  }
+ else {
+    superclassName=new NullConstant(I8_PTR);
+  }
+  function.add(new Call(clazz,NVM_BC_ALLOCATE_CLASS,ENV,getString(sootClass.getName()),superclassName,new IntegerConstant(sootClass.getModifiers()),sizeof(classFieldsType),sizeof(instanceFieldsType)));
+  for (  SootField field : classFields) {
+    FunctionRef getter=new FunctionRef(mangleField(field) + "_getter",new FunctionType(getType(field.getType()),ENV_PTR));
+    FunctionRef setter=new FunctionRef(mangleField(field) + "_setter",new FunctionType(VOID,ENV_PTR,getType(field.getType())));
+    function.add(new Call(NVM_BC_ADD_FIELD,ENV,clazz.ref(),getString(field.getName()),getString(getDescriptor(field.getType())),new IntegerConstant(field.getModifiers()),offsetof(classFieldsType,classFields.indexOf(field)),new ConstantBitcast(getter,I8_PTR),new ConstantBitcast(setter,I8_PTR)));
+  }
+  for (  SootField field : instanceFields) {
+    FunctionRef getter=new FunctionRef(mangleField(field) + "_getter",new FunctionType(getType(field.getType()),ENV_PTR,OBJECT_PTR));
+    FunctionRef setter=new FunctionRef(mangleField(field) + "_setter",new FunctionType(VOID,ENV_PTR,OBJECT_PTR,getType(field.getType())));
+    function.add(new Call(NVM_BC_ADD_FIELD,ENV,clazz.ref(),getString(field.getName()),getString(getDescriptor(field.getType())),new IntegerConstant(field.getModifiers()),offsetof(instanceFieldsType,instanceFields.indexOf(field)),new ConstantBitcast(getter,I8_PTR),new ConstantBitcast(setter,I8_PTR)));
+  }
+  function.add(new Ret(clazz.ref()));
+}
