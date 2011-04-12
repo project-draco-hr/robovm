@@ -25,7 +25,13 @@
     String s=((soot.jimple.StringConstant)v).value;
     Value string=getString(s);
     Variable tmp=ctx.f().newVariable(OBJECT_PTR);
-    callOrInvoke(ctx,new Object(),tmp,NVM_BC_LDC_STRING,ENV,string);
+    callOrInvoke(ctx,new Label(),tmp,NVM_BC_LDC_STRING,ENV,string);
+    return new VariableRef(tmp);
+  }
+ else   if (v instanceof soot.jimple.ClassConstant) {
+    Value clazz=getString(((soot.jimple.ClassConstant)v).getValue());
+    Variable tmp=ctx.f().newVariable(OBJECT_PTR);
+    callOrInvoke(ctx,new Label(),tmp,NVM_BC_LDC_CLASS,ENV,clazz);
     return new VariableRef(tmp);
   }
   throw new IllegalArgumentException("Unknown Immediate type: " + v.getClass());

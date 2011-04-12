@@ -1,0 +1,55 @@
+{
+  this.sootClass=Scene.v().getSootClass(clazz.getClassName());
+  module=new Module();
+  throwables=new TreeMap<String,Global>();
+  trampolines=new HashMap<Trampoline,FunctionRef>();
+  strings=new HashMap<String,Global>();
+  module.addInclude(getClass().getClassLoader().getResource("header.ll"));
+  classFields=getClassFields(sootClass,false);
+  instanceFields=getInstanceFields(sootClass,false);
+  allInstanceFields=getInstanceFields(sootClass,true);
+  classFieldsType=getType("ClassFields",classFields);
+  if (classFieldsType != null) {
+    module.addType(classFieldsType);
+  }
+  instanceFieldsType=getType("InstanceFields",allInstanceFields);
+  if (instanceFieldsType != null) {
+    module.addType(instanceFieldsType);
+  }
+  List<SootField> allFields=new ArrayList<SootField>();
+  allFields.addAll(classFields);
+  allFields.addAll(instanceFields);
+  for (  SootField field : allFields) {
+    fieldGetter(field);
+    fieldSetter(field);
+  }
+  for (  SootMethod method : sootClass.getMethods()) {
+    if (isNative(method)) {
+      nativeMethod(method);
+    }
+ else     if (!method.isAbstract()) {
+      Body body=method.retrieveActiveBody();
+      PackManager.v().getPack("jtp").apply(body);
+      PackManager.v().getPack("jop").apply(body);
+      PackManager.v().getPack("jap").apply(body);
+      method(method);
+    }
+    if (!method.isStatic() && !method.isPrivate() && !Modifier.isFinal(method.getModifiers())) {
+      if (!ancestorDeclaresMethod(sootClass,method)) {
+        virtualLookupFunction(method);
+      }
+    }
+  }
+  for (  Entry<Trampoline,FunctionRef> entry : trampolines.entrySet()) {
+    trampoline(entry.getKey(),entry.getValue());
+  }
+  classLoaderFunction();
+  module.addGlobal(THE_CLASS);
+  for (  Global global : throwables.values()) {
+    module.addGlobal(global);
+  }
+  for (  Global global : strings.values()) {
+    module.addGlobal(global);
+  }
+  out.write(module.toString().getBytes("UTF-8"));
+}

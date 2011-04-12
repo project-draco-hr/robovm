@@ -1,7 +1,10 @@
 {
   FunctionRef f=trampolines.get(trampoline);
+  String name=f.getName().substring(1);
+  Variable ptr=ctx.f().newVariable(f.getType());
+  ctx.f().add(new Load(ptr,new GlobalRef(name + "_ptr",f.getType())));
   List<Value> newArgs=new ArrayList<Value>(args.length + 1);
   newArgs.add(ENV);
   newArgs.addAll(Arrays.asList(args));
-  callOrInvoke(ctx,result,f,newArgs.toArray(new Value[newArgs.size()]));
+  callOrInvoke(ctx,result,ptr.ref(),newArgs.toArray(new Value[newArgs.size()]));
 }

@@ -1,0 +1,62 @@
+{
+  String name=functionRef.getName().substring(1);
+  GlobalRef ptr=new GlobalRef(name + "_ptr",functionRef.getType());
+  Type[] parameterTypes=functionRef.getType().getParameterTypes();
+  String[] parameterNames=new String[parameterTypes.length];
+  parameterNames[0]=ENV.getName().substring(1);
+  for (int i=1; i < parameterNames.length; i++) {
+    parameterNames[i]="p" + i;
+  }
+  Function function=module.newFunction(Linkage._private,name,functionRef.getType(),parameterNames);
+  Variable targetI8Ptr=function.newVariable(I8_PTR);
+  if (trampoline instanceof org.nullvm.compiler.trampoline.Invoke) {
+    org.nullvm.compiler.trampoline.Invoke invoke=(org.nullvm.compiler.trampoline.Invoke)trampoline;
+    FunctionRef resolveFunc=null;
+    if (invoke instanceof Invokespecial) {
+      resolveFunc=NVM_BC_RESOLVE_INVOKESPECIAL;
+    }
+ else     if (invoke instanceof Invokestatic) {
+      resolveFunc=NVM_BC_RESOLVE_INVOKESTATIC;
+    }
+ else     if (invoke instanceof Invokevirtual) {
+      resolveFunc=NVM_BC_RESOLVE_INVOKEVIRTUAL;
+    }
+ else     if (invoke instanceof Invokeinterface) {
+      resolveFunc=NVM_BC_RESOLVE_INVOKEINTERFACE;
+    }
+    function.add(new Call(targetI8Ptr,resolveFunc,ENV,getString(invoke.getTargetClass()),getString(invoke.getMethodName()),getString(invoke.getMethodDesc()),new ConstantBitcast(ptr,I8_PTR)));
+  }
+ else   if (trampoline instanceof FieldAccessor) {
+    FieldAccessor accessor=(FieldAccessor)trampoline;
+    FunctionRef resolveFunc=null;
+    if (accessor instanceof GetStatic) {
+      resolveFunc=NVM_BC_RESOLVE_GETSTATIC;
+    }
+ else     if (accessor instanceof PutStatic) {
+      resolveFunc=NVM_BC_RESOLVE_PUTSTATIC;
+    }
+ else     if (accessor instanceof GetField) {
+      resolveFunc=NVM_BC_RESOLVE_GETFIELD;
+    }
+ else     if (accessor instanceof PutField) {
+      resolveFunc=NVM_BC_RESOLVE_PUTFIELD;
+    }
+    function.add(new Call(targetI8Ptr,resolveFunc,ENV,getString(accessor.getTargetClass()),getString(accessor.getFieldName()),getString(accessor.getFieldDesc()),new ConstantBitcast(ptr,I8_PTR)));
+  }
+  Variable targetFuncPtr=function.newVariable(functionRef.getType());
+  function.add(new Bitcast(targetFuncPtr,targetI8Ptr.ref(),functionRef.getType()));
+  Value[] args=new Value[parameterTypes.length];
+  for (int i=0; i < parameterTypes.length; i++) {
+    args[i]=new VariableRef(parameterNames[i],parameterTypes[i]);
+  }
+  if (functionRef.getType().getReturnType() != VOID) {
+    Variable result=function.newVariable(functionRef.getType().getReturnType());
+    function.add(new Call(result,targetFuncPtr.ref(),args));
+    function.add(new Ret(result.ref()));
+  }
+ else {
+    function.add(new Call(targetFuncPtr.ref(),args));
+    function.add(new Ret());
+  }
+  module.addGlobal(new Global(name + "_ptr",Linkage._private,functionRef));
+}

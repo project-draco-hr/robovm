@@ -77,7 +77,6 @@
     while (i < args.length) {
       runArgs.add(args[i++]);
     }
-    run();
   }
  catch (  Throwable t) {
     String message=t.getMessage();
@@ -85,6 +84,16 @@
       message="Missing argument";
     }
     if (verbose && !(t instanceof StringIndexOutOfBoundsException) && !(t instanceof IllegalArgumentException)) {
+      t.printStackTrace();
+    }
+    printUsageAndExit(message);
+  }
+  try {
+    run();
+  }
+ catch (  Throwable t) {
+    String message=t.getMessage();
+    if (verbose) {
       t.printStackTrace();
     }
     printUsageAndExit(message);

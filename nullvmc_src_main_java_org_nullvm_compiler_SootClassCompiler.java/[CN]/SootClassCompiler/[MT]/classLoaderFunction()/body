@@ -1,18 +1,17 @@
 {
-  String name="NullVM_" + mangleString(sootClass.getName());
+  String name="NullVM_" + mangleString(getInternalName(sootClass));
   Function function=module.newFunction(name,new FunctionType(CLASS_PTR,ENV_PTR),"env");
-  function.newBasicBlock(new Object());
   Variable clazz=function.newVariable("clazz",CLASS_PTR);
   Value superclassName=null;
-  if (sootClass.hasSuperclass()) {
-    superclassName=getString(sootClass.getSuperclass().getName());
+  if (sootClass.hasSuperclass() && !sootClass.isInterface()) {
+    superclassName=getString(getInternalName(sootClass.getSuperclass()));
   }
  else {
     superclassName=new NullConstant(I8_PTR);
   }
-  function.add(new Call(clazz,NVM_BC_ALLOCATE_CLASS,ENV,getString(sootClass.getName()),superclassName,new IntegerConstant(sootClass.getModifiers()),sizeof(classFieldsType),sizeof(instanceFieldsType)));
+  function.add(new Call(clazz,NVM_BC_ALLOCATE_CLASS,ENV,getString(getInternalName(sootClass)),superclassName,new IntegerConstant(sootClass.getModifiers()),sizeof(classFieldsType),sizeof(instanceFieldsType)));
   for (  SootClass iface : sootClass.getInterfaces()) {
-    function.add(new Call(NVM_BC_ADD_INTERFACE,ENV,clazz.ref(),getString(iface.getName())));
+    function.add(new Call(NVM_BC_ADD_INTERFACE,ENV,clazz.ref(),getString(getInternalName(iface))));
   }
   for (  SootField field : classFields) {
     FunctionRef getter=new FunctionRef(mangleField(field) + "_getter",new FunctionType(getType(field.getType()),ENV_PTR));
@@ -25,14 +24,19 @@
     function.add(new Call(NVM_BC_ADD_FIELD,ENV,clazz.ref(),getString(field.getName()),getString(getDescriptor(field.getType())),new IntegerConstant(field.getModifiers()),offsetof(instanceFieldsType,instanceFields.indexOf(field)),new ConstantBitcast(getter,I8_PTR),new ConstantBitcast(setter,I8_PTR)));
   }
   for (  SootMethod method : sootClass.getMethods()) {
+    Value functionRef=new NullConstant(I8_PTR);
     Value lookup=new NullConstant(I8_PTR);
     if (!method.isStatic() && !method.isPrivate() && !Modifier.isFinal(method.getModifiers())) {
       if (!ancestorDeclaresMethod(sootClass,method)) {
         lookup=new ConstantBitcast(new FunctionRef(mangleMethod(method) + "_lookup",getFunctionType(method)),I8_PTR);
       }
     }
-    function.add(new Call(NVM_BC_ADD_METHOD,ENV,clazz.ref(),getString(method.getName()),getString(getDescriptor(method)),new IntegerConstant(method.getModifiers()),new ConstantBitcast(new FunctionRef(mangleMethod(method),getFunctionType(method)),I8_PTR),lookup));
+    if (!method.isAbstract()) {
+      functionRef=new ConstantBitcast(new FunctionRef(mangleMethod(method),getFunctionType(method)),I8_PTR);
+    }
+    function.add(new Call(NVM_BC_ADD_METHOD,ENV,clazz.ref(),getString(method.getName()),getString(getDescriptor(method)),new IntegerConstant(method.getModifiers()),functionRef,lookup));
   }
   function.add(new Call(NVM_BC_REGISTER_CLASS,ENV,clazz.ref()));
+  function.add(new Store(clazz.ref(),THE_CLASS.ref()));
   function.add(new Ret(clazz.ref()));
 }

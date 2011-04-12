@@ -60,7 +60,12 @@
       op1=widen(ctx,op1,rightType,expr.getOp1().getType());
       op2=widen(ctx,op2,rightType,expr.getOp2().getType());
       if (rightOp instanceof AddExpr) {
-        ctx.f().add(new Add(result,op1,op2));
+        if (rightType instanceof IntegerType) {
+          ctx.f().add(new Add(result,op1,op2));
+        }
+ else {
+          ctx.f().add(new Fadd(result,op1,op2));
+        }
       }
  else       if (rightOp instanceof AndExpr) {
         ctx.f().add(new And(result,op1,op2));
@@ -86,7 +91,12 @@
         }
       }
  else       if (rightOp instanceof MulExpr) {
-        ctx.f().add(new Mul(result,op1,op2));
+        if (rightType instanceof IntegerType) {
+          ctx.f().add(new Mul(result,op1,op2));
+        }
+ else {
+          ctx.f().add(new Fmul(result,op1,op2));
+        }
       }
  else       if (rightOp instanceof OrExpr) {
         ctx.f().add(new Or(result,op1,op2));
@@ -101,10 +111,10 @@
         }
       }
  else       if (rightOp instanceof ShlExpr || rightOp instanceof ShrExpr || rightOp instanceof UshrExpr) {
-        IntegerType type=(IntegerType)leftType;
+        op1=widen(ctx,op1,leftType,expr.getOp1().getType());
+        op2=widen(ctx,op2,leftType,expr.getOp2().getType());
+        IntegerType type=(IntegerType)op2.getType();
         int bits=type.getBits();
-        op1=widen(ctx,op1,type,expr.getOp1().getType());
-        op2=widen(ctx,op2,type,expr.getOp2().getType());
         Variable t=ctx.f().newVariable(type);
         ctx.f().add(new And(t,op2,new IntegerConstant(bits - 1,type)));
         if (rightOp instanceof ShlExpr) {
@@ -118,7 +128,12 @@
         }
       }
  else       if (rightOp instanceof SubExpr) {
-        ctx.f().add(new Sub(result,op1,op2));
+        if (rightType instanceof IntegerType) {
+          ctx.f().add(new Sub(result,op1,op2));
+        }
+ else {
+          ctx.f().add(new Fsub(result,op1,op2));
+        }
       }
  else       if (rightOp instanceof XorExpr) {
         ctx.f().add(new Xor(result,op1,op2));
@@ -127,11 +142,11 @@
         ctx.f().add(new Xor(result,op1,op2));
       }
  else       if (rightOp instanceof CmplExpr) {
-        FunctionRef f=rightType == FLOAT ? FCMPL : DCMPL;
+        FunctionRef f=op1.getType() == FLOAT ? FCMPL : DCMPL;
         ctx.f().add(new Call(result,f,op1,op2));
       }
  else       if (rightOp instanceof CmpgExpr) {
-        FunctionRef f=rightType == FLOAT ? FCMPG : DCMPG;
+        FunctionRef f=op1.getType() == FLOAT ? FCMPG : DCMPG;
         ctx.f().add(new Call(result,f,op1,op2));
       }
  else {
@@ -200,26 +215,40 @@
         }
       }
  else {
-        Trampoline trampoline=new Checkcast(getInternalName(sootTargetType));
-        addTrampoline(trampoline,new FunctionType(OBJECT_PTR,ENV_PTR,OBJECT_PTR));
-        callOrInvokeTrampoline(ctx,trampoline,result,op);
+        callOrInvoke(ctx,result,NVM_BC_CHECKCAST,ENV,op,getString(getInternalName(sootTargetType)));
       }
     }
  else     if (rightOp instanceof InstanceOfExpr) {
       Value op=immediate(ctx,(Immediate)((InstanceOfExpr)rightOp).getOp());
-      Trampoline trampoline=new Instanceof(getInternalName(((InstanceOfExpr)rightOp).getCheckType()));
-      addTrampoline(trampoline,new FunctionType(I8,ENV_PTR,OBJECT_PTR));
-      callOrInvokeTrampoline(ctx,trampoline,result,op);
+      Variable tmp=ctx.f().newVariable(I32);
+      soot.Type checkType=((InstanceOfExpr)rightOp).getCheckType();
+      callOrInvoke(ctx,tmp,NVM_BC_INSTANCEOF,ENV,op,getString(getInternalName(checkType)));
+      ctx.f().add(new Trunc(result,tmp.ref(),I8));
     }
  else     if (rightOp instanceof NewExpr) {
-      Trampoline trampoline=new New(getInternalName(((NewExpr)rightOp).getBaseType()));
-      addTrampoline(trampoline,new FunctionType(OBJECT_PTR,ENV_PTR));
-      callOrInvokeTrampoline(ctx,trampoline,result);
+      callOrInvoke(ctx,result,NVM_BC_NEW,ENV,getString(getInternalName(((NewExpr)rightOp).getBaseType())));
     }
  else     if (rightOp instanceof NewArrayExpr) {
       NewArrayExpr expr=(NewArrayExpr)rightOp;
-      Value size=immediate(ctx,(Immediate)expr.getSize());
-      callOrInvoke(ctx,result,getNewArray(expr.getBaseType()),ENV,size);
+      Value size=widen(ctx,immediate(ctx,(Immediate)expr.getSize()),I32,expr.getSize().getType());
+      if (expr.getBaseType() instanceof PrimType) {
+        callOrInvoke(ctx,result,getNewArray(expr.getBaseType()),ENV,size);
+      }
+ else {
+        callOrInvoke(ctx,result,NVM_BC_NEW_OBJECT_ARRAY,ENV,size,getString(getInternalName(expr.getBaseType())));
+      }
+    }
+ else     if (rightOp instanceof NewMultiArrayExpr) {
+      NewMultiArrayExpr expr=(NewMultiArrayExpr)rightOp;
+      for (int i=0; i < expr.getSizeCount(); i++) {
+        Value size=immediate(ctx,(Immediate)expr.getSize(i));
+        Variable ptr=ctx.f().newVariable(new PointerType(I32));
+        ctx.f().add(new Getelementptr(ptr,dims.ref(),0,i));
+        ctx.f().add(new Store(size,ptr.ref()));
+      }
+      Variable dimsI32=ctx.f().newVariable(new PointerType(I32));
+      ctx.f().add(new Bitcast(dimsI32,dims.ref(),dimsI32.getType()));
+      callOrInvoke(ctx,result,NVM_BC_NEW_MULTI_ARRAY,ENV,new IntegerConstant(expr.getSizeCount()),dimsI32.ref(),getString(getInternalName(expr.getBaseType())));
     }
  else     if (rightOp instanceof InvokeExpr) {
       invokeExpr(ctx,result,stmt,(InvokeExpr)rightOp);
@@ -228,6 +257,17 @@
       Value op=immediate(ctx,(Immediate)((LengthExpr)rightOp).getOp());
       checkNull(ctx,op);
       ctx.f().add(new Call(result,ARRAY_LENGTH,op));
+    }
+ else     if (rightOp instanceof NegExpr) {
+      NegExpr expr=(NegExpr)rightOp;
+      Value op=immediate(ctx,(Immediate)expr.getOp());
+      if (rightType instanceof IntegerType) {
+        op=widen(ctx,op,rightType,expr.getOp().getType());
+        ctx.f().add(new Sub(result,new IntegerConstant(0,(IntegerType)rightType),op));
+      }
+ else {
+        ctx.f().add(new Fsub(result,new FloatingPointConstant(0.0,(FloatingPointType)rightType),op));
+      }
     }
  else {
       throw new IllegalArgumentException("Unknown type for rightOp: " + rightOp.getClass());

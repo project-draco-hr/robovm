@@ -5,7 +5,6 @@
   ctx.setCurrentMethod(method);
   ctx.setCurrentBody(body);
   ctx.setCurrentFunction(function);
-  ctx.f().newBasicBlock(new Object());
   Set<String> seen=new HashSet<String>();
   for (  Unit unit : body.getUnits()) {
     if (unit instanceof DefinitionStmt) {
@@ -21,15 +20,30 @@
     }
   }
   PatchingChain<Unit> units=body.getUnits();
+  int multiANewArrayMaxDims=0;
+  for (  Unit unit : units) {
+    if (unit instanceof DefinitionStmt) {
+      DefinitionStmt stmt=(DefinitionStmt)unit;
+      if (stmt.getRightOp() instanceof NewMultiArrayExpr) {
+        NewMultiArrayExpr expr=(NewMultiArrayExpr)stmt.getRightOp();
+        multiANewArrayMaxDims=Math.max(multiANewArrayMaxDims,expr.getSizeCount());
+      }
+    }
+  }
+  dims=null;
+  if (multiANewArrayMaxDims > 0) {
+    dims=ctx.f().newVariable("dims",new PointerType(new ArrayType(multiANewArrayMaxDims,I32)));
+    ctx.f().add(new Alloca(dims,new ArrayType(multiANewArrayMaxDims,I32)));
+  }
   for (  Unit unit : units) {
     ctx.setCurrentUnit(unit);
-    if (ctx.bb() == null || ctx.bb().getTag() != unit && (ctx.isJumpTarget(unit) || ctx.isTrapHandler(unit))) {
+    if ((ctx.isJumpTarget(unit) || ctx.isTrapHandler(unit))) {
       BasicBlock oldBlock=ctx.bb();
-      ctx.f().newBasicBlock(unit);
+      ctx.f().newBasicBlock(new Label(unit));
       if (oldBlock != null) {
         Instruction last=oldBlock.last();
         if (last == null || !isTerminator(last)) {
-          oldBlock.add(new Br(ctx.f().newBasicBlockRef(unit)));
+          oldBlock.add(new Br(ctx.f().newBasicBlockRef(new Label(unit))));
         }
       }
     }
@@ -44,6 +58,12 @@
     }
  else     if (unit instanceof IfStmt) {
       if_(ctx,(IfStmt)unit);
+    }
+ else     if (unit instanceof LookupSwitchStmt) {
+      lookupSwitch(ctx,(LookupSwitchStmt)unit);
+    }
+ else     if (unit instanceof TableSwitchStmt) {
+      tableSwitch(ctx,(TableSwitchStmt)unit);
     }
  else     if (unit instanceof GotoStmt) {
       goto_(ctx,(GotoStmt)unit);
@@ -65,7 +85,7 @@
     }
   }
   next:   for (  List<Trap> traps : ctx.getRecordedTraps()) {
-    BasicBlock bb=function.newBasicBlock(traps);
+    BasicBlock bb=function.newBasicBlock(new Label(traps));
     Variable ehptr=function.newVariable(I8_PTR);
     bb.add(new Call(ehptr,LLVM_EH_EXCEPTION));
     Variable sel=function.newVariable(I32);
@@ -73,23 +93,23 @@
     for (    Trap trap : traps) {
       String exName=trap.getException().getName();
       if ("java.lang.Throwable".equals(exName)) {
-        bb.add(new Br(function.newBasicBlockRef(trap.getHandlerUnit())));
+        bb.add(new Br(function.newBasicBlockRef(new Label(trap.getHandlerUnit()))));
         continue next;
       }
       Global throwable=throwables.get(exName);
       if (throwable == null) {
-        throwable=new Global(exName,new NullConstant(CLASS_PTR));
+        throwable=new Global(exName,Linkage._private,new NullConstant(CLASS_PTR));
         throwables.put(exName,throwable);
       }
       Variable t=function.newVariable(CLASS_PTR);
-      bb.add(new Load(t,new GlobalRef(throwable)));
+      bb.add(new Load(t,throwable.ref()));
       Variable v=function.newVariable(I32);
       bb.add(new Call(v,NVM_BC_EXCEPTION_MATCH,ENV,new VariableRef(t)));
       Variable cond=function.newVariable(I1);
       bb.add(new Trunc(cond,new VariableRef(v),I1));
-      BasicBlockRef falseBlock=function.newBasicBlockRef(new Object());
-      bb.add(new Br(new VariableRef(cond),function.newBasicBlockRef(trap.getHandlerUnit()),falseBlock));
-      bb=function.newBasicBlock(falseBlock.getTag());
+      BasicBlockRef falseBlock=function.newBasicBlockRef(new Label());
+      bb.add(new Br(new VariableRef(cond),function.newBasicBlockRef(new Label(trap.getHandlerUnit())),falseBlock));
+      bb=function.newBasicBlock(falseBlock.getLabel());
     }
     bb.add(new Call(NVM_BC_RETHROW,ENV));
     bb.add(new Unreachable());
