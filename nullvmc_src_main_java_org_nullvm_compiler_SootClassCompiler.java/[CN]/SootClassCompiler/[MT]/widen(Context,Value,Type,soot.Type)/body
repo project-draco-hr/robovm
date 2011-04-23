@@ -1,17 +1,3 @@
 {
-  if (value.isInteger() && targetType instanceof IntegerType) {
-    IntegerType t1=(IntegerType)targetType;
-    IntegerType t2=(IntegerType)value.getType();
-    if (t1.getBits() > t2.getBits()) {
-      Variable result=ctx.f().newVariable(targetType);
-      if (sootSourceType.equals(CharType.v())) {
-        ctx.f().add(new Zext(result,value,targetType));
-      }
- else {
-        ctx.f().add(new Sext(result,value,targetType));
-      }
-      return new VariableRef(result);
-    }
-  }
-  return value;
+  return widen(ctx,value,targetType,sootSourceType.equals(CharType.v()));
 }

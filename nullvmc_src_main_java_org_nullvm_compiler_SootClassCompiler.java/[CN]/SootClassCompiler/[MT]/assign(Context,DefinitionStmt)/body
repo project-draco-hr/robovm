@@ -38,7 +38,7 @@
  else {
       Trampoline trampoline=new GetField(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
       addTrampoline(trampoline,new FunctionType(rightType,ENV_PTR,OBJECT_PTR));
-      callOrInvokeTrampoline(ctx,trampoline,result,base);
+      callOrInvokeTrampoline(ctx,trampoline,result,ENV,base);
     }
   }
  else   if (rightOp instanceof StaticFieldRef) {
@@ -49,11 +49,25 @@
  else {
       Trampoline trampoline=new GetStatic(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
       addTrampoline(trampoline,new FunctionType(rightType,ENV_PTR));
-      callOrInvokeTrampoline(ctx,trampoline,result);
+      callOrInvokeTrampoline(ctx,trampoline,result,ENV);
     }
   }
  else   if (rightOp instanceof Expr) {
-    if (rightOp instanceof BinopExpr) {
+    if (rightOp instanceof UshrExpr) {
+      UshrExpr expr=(UshrExpr)rightOp;
+      Value op1=immediate(ctx,(Immediate)expr.getOp1());
+      Value op2=immediate(ctx,(Immediate)expr.getOp2());
+      op1=widen(ctx,op1,rightType,true);
+      op2=widen(ctx,op2,rightType,expr.getOp2().getType());
+      op1=widen(ctx,op1,leftType,true);
+      op2=widen(ctx,op2,leftType,expr.getOp2().getType());
+      IntegerType type=(IntegerType)op2.getType();
+      int bits=type.getBits();
+      Variable t=ctx.f().newVariable(type);
+      ctx.f().add(new And(t,op2,new IntegerConstant(bits - 1,type)));
+      ctx.f().add(new Lshr(result,op1,new VariableRef(t)));
+    }
+ else     if (rightOp instanceof BinopExpr) {
       BinopExpr expr=(BinopExpr)rightOp;
       Value op1=immediate(ctx,(Immediate)expr.getOp1());
       Value op2=immediate(ctx,(Immediate)expr.getOp2());
@@ -77,8 +91,8 @@
         Variable t4=ctx.f().newVariable(result.getType());
         ctx.f().add(new Icmp(t1,Condition.slt,op1,op2));
         ctx.f().add(new Icmp(t2,Condition.sgt,op1,op2));
-        ctx.f().add(new Sext(t3,new VariableRef(t1),result.getType()));
-        ctx.f().add(new Sext(t4,new VariableRef(t2),result.getType()));
+        ctx.f().add(new Zext(t3,new VariableRef(t1),result.getType()));
+        ctx.f().add(new Zext(t4,new VariableRef(t2),result.getType()));
         ctx.f().add(new Sub(result,new VariableRef(t4),new VariableRef(t3)));
       }
  else       if (rightOp instanceof DivExpr) {
@@ -110,7 +124,7 @@
           ctx.f().add(new Frem(result,op1,op2));
         }
       }
- else       if (rightOp instanceof ShlExpr || rightOp instanceof ShrExpr || rightOp instanceof UshrExpr) {
+ else       if (rightOp instanceof ShlExpr || rightOp instanceof ShrExpr) {
         op1=widen(ctx,op1,leftType,expr.getOp1().getType());
         op2=widen(ctx,op2,leftType,expr.getOp2().getType());
         IntegerType type=(IntegerType)op2.getType();
@@ -122,9 +136,6 @@
         }
  else         if (rightOp instanceof ShrExpr) {
           ctx.f().add(new Ashr(result,op1,new VariableRef(t)));
-        }
- else {
-          ctx.f().add(new Lshr(result,op1,new VariableRef(t)));
         }
       }
  else       if (rightOp instanceof SubExpr) {
@@ -235,7 +246,7 @@
         callOrInvoke(ctx,result,getNewArray(expr.getBaseType()),ENV,size);
       }
  else {
-        callOrInvoke(ctx,result,NVM_BC_NEW_OBJECT_ARRAY,ENV,size,getString(getInternalName(expr.getBaseType())));
+        callOrInvoke(ctx,result,NVM_BC_NEW_OBJECT_ARRAY,ENV,size,getString(getInternalName(expr.getType())));
       }
     }
  else     if (rightOp instanceof NewMultiArrayExpr) {
@@ -248,7 +259,7 @@
       }
       Variable dimsI32=ctx.f().newVariable(new PointerType(I32));
       ctx.f().add(new Bitcast(dimsI32,dims.ref(),dimsI32.getType()));
-      callOrInvoke(ctx,result,NVM_BC_NEW_MULTI_ARRAY,ENV,new IntegerConstant(expr.getSizeCount()),dimsI32.ref(),getString(getInternalName(expr.getBaseType())));
+      callOrInvoke(ctx,result,NVM_BC_NEW_MULTI_ARRAY,ENV,new IntegerConstant(expr.getSizeCount()),dimsI32.ref(),getString(getInternalName(expr.getType())));
     }
  else     if (rightOp instanceof InvokeExpr) {
       invokeExpr(ctx,result,stmt,(InvokeExpr)rightOp);
@@ -301,7 +312,7 @@
  else {
       Trampoline trampoline=new PutField(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
       addTrampoline(trampoline,new FunctionType(VOID,ENV_PTR,OBJECT_PTR,leftType));
-      callOrInvokeTrampoline(ctx,trampoline,null,base,resultRef);
+      callOrInvokeTrampoline(ctx,trampoline,null,ENV,base,resultRef);
     }
   }
  else   if (leftOp instanceof StaticFieldRef) {
@@ -312,7 +323,7 @@
  else {
       Trampoline trampoline=new PutStatic(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
       addTrampoline(trampoline,new FunctionType(VOID,ENV_PTR,leftType));
-      callOrInvokeTrampoline(ctx,trampoline,null,resultRef);
+      callOrInvokeTrampoline(ctx,trampoline,null,ENV,resultRef);
     }
   }
  else {

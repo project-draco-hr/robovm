@@ -1,6 +1,7 @@
 {
   SootMethodRef methodRef=expr.getMethodRef();
   ArrayList<Value> args=new ArrayList<Value>();
+  args.add(ENV);
   if (!(expr instanceof StaticInvokeExpr)) {
     Value base=immediate(ctx,(Immediate)((InstanceInvokeExpr)expr).getBase());
     checkNull(ctx,base);
@@ -14,7 +15,6 @@
     args.add(arg);
   }
   if (canCallDirectly(ctx,expr)) {
-    args.add(0,ENV);
     Value function=new FunctionRef(mangleMethod(methodRef),getFunctionType(methodRef));
     callOrInvoke(ctx,result,function,args.toArray(new Value[0]));
   }

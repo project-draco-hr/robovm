@@ -1,9 +1,18 @@
 {
   List<File> bootClassPathFiles=new ArrayList<File>();
-  bootClassPathFiles.add(new File("../rt/target/classes"));
+  bootClassPathFiles.add(new File("../rt/target/nullvm-rt-0.1-SNAPSHOT-all.jar"));
+  bootClassPathFiles.add(new File("target/classes"));
   List<File> classPathFiles=new ArrayList<File>();
-  classPathFiles.add(new File("target/classes"));
   Clazzes clazzes=new Clazzes(bootClassPathFiles,classPathFiles);
   SootClassCompiler.init(clazzes);
-  SootClass sootClass=Scene.v().getSootClass("org.nullvm.compiler.SootClassCompiler$HelloWorld");
+  for (  Path path : clazzes.getPaths()) {
+    for (    Clazz clazz : path.list()) {
+      if ("org.nullvm.compiler.SootClassCompiler$HelloWorld".equals(clazz.getClassName())) {
+        System.out.println("Compiling " + clazz.getClassName());
+        SootClassCompiler compiler=new SootClassCompiler();
+        compiler.compile(clazz,System.out);
+        SootClass sootClass=Scene.v().getSootClass(clazz.getClassName());
+      }
+    }
+  }
 }

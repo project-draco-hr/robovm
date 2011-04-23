@@ -1,24 +1,33 @@
 {
   Function function=createFunction(method);
-  FunctionType functionType=function.getType();
-  Global functionPtr=new Global(function.getName().substring(1) + "_native_ptr",new NullConstant(functionType));
-  module.addGlobal(functionPtr);
-  Variable f=function.newVariable(functionType);
-  function.add(new Load(f,new GlobalRef(functionPtr)));
   Type[] parameterTypes=function.getType().getParameterTypes();
   String[] parameterNames=function.getParameterNames();
-  Value[] args=new Value[parameterNames.length];
-  for (int i=0; i < args.length; i++) {
-    args[i]=new VariableRef(parameterNames[i],parameterTypes[i]);
+  ArrayList<Value> args=new ArrayList<Value>();
+  for (int i=0; i < parameterTypes.length; i++) {
+    args.add(new VariableRef(parameterNames[i],parameterTypes[i]));
   }
+  FunctionType nativeFunctionType=function.getType();
+  if (method.isStatic()) {
+    Variable tmp=function.newVariable(CLASS_PTR);
+    function.add(new Load(tmp,THE_CLASS.ref()));
+    args.add(1,tmp.ref());
+    ArrayList<Type> ptypes=new ArrayList<Type>(Arrays.asList(parameterTypes));
+    ptypes.add(1,CLASS_PTR);
+    nativeFunctionType=new FunctionType(function.getType().getReturnType(),ptypes.toArray(new Type[ptypes.size()]));
+  }
+  String targetClassName=getInternalName(method.getDeclaringClass());
+  String methodName=method.getName();
+  String methodDesc=getDescriptor(method);
+  Trampoline trampoline=new NativeCall(targetClassName,methodName,methodDesc);
+  addTrampoline(trampoline,nativeFunctionType);
   if (function.getType().getReturnType() == VOID) {
-    function.add(new Call(new VariableRef(f),args));
+    callTrampoline(function,trampoline,null,args.toArray(new Value[args.size()]));
     function.add(new Call(NVM_BC_THROW_IF_EXCEPTION_OCCURRED,ENV));
     function.add(new Ret());
   }
  else {
-    Variable result=function.newVariable(functionType.getReturnType());
-    function.add(new Call(result,new VariableRef(f),args));
+    Variable result=function.newVariable(function.getType().getReturnType());
+    callTrampoline(function,trampoline,result,args.toArray(new Value[args.size()]));
     function.add(new Call(NVM_BC_THROW_IF_EXCEPTION_OCCURRED,ENV));
     function.add(new Ret(new VariableRef(result)));
   }

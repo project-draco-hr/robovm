@@ -1,14 +1,8 @@
 {
   SootMethodRef methodRef=expr.getMethodRef();
-  if (methodRef.declaringClass().equals(sootClass)) {
-    SootMethod method;
-    try {
-      method=methodRef.resolve();
-    }
- catch (    ResolutionFailedException e) {
-      return false;
-    }
-    if (!method.getDeclaringClass().equals(sootClass) || method.isAbstract() || method.isPhantom()) {
+  SootMethod method=resolveMethod(sootClass,methodRef);
+  if (method != null) {
+    if (method.isAbstract() || method.isPhantom()) {
       return false;
     }
     if (method.isStatic()) {

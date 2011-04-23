@@ -26,6 +26,10 @@
     }
     function.add(new Call(targetI8Ptr,resolveFunc,ENV,getString(invoke.getTargetClass()),getString(invoke.getMethodName()),getString(invoke.getMethodDesc()),new ConstantBitcast(ptr,I8_PTR)));
   }
+ else   if (trampoline instanceof NativeCall) {
+    NativeCall nativeCall=(NativeCall)trampoline;
+    function.add(new Call(targetI8Ptr,NVM_BC_RESOLVE_NATIVE,ENV,getString(nativeCall.getTargetClass()),getString(nativeCall.getMethodName()),getString(nativeCall.getMethodDesc()),getString(mangleNativeMethod(nativeCall.getTargetClass(),nativeCall.getMethodName())),getString(mangleNativeMethod(nativeCall.getTargetClass(),nativeCall.getMethodName(),nativeCall.getMethodDesc())),new ConstantBitcast(ptr,I8_PTR)));
+  }
  else   if (trampoline instanceof FieldAccessor) {
     FieldAccessor accessor=(FieldAccessor)trampoline;
     FunctionRef resolveFunc=null;
