@@ -7,16 +7,16 @@
     checkNull(ctx,base);
     args.add(base);
   }
-  int paramIndex=0;
+  int i=0;
   for (  soot.Value sootArg : (List<soot.Value>)expr.getArgs()) {
     Value arg=immediate(ctx,(Immediate)sootArg);
-    soot.Type paramType=methodRef.parameterType(paramIndex++);
-    arg=cast(ctx,arg,getType(paramType),sootArg.getType());
-    args.add(arg);
+    args.add(narrowFromI32Value(ctx,getType(methodRef.parameterType(i)),arg));
+    i++;
   }
+  Value result=null;
   if (canCallDirectly(ctx,expr)) {
     Value function=new FunctionRef(mangleMethod(methodRef),getFunctionType(methodRef));
-    callOrInvoke(ctx,result,function,args.toArray(new Value[0]));
+    result=callOrInvoke(ctx,function,args.toArray(new Value[0]));
   }
  else {
     Trampoline trampoline=null;
@@ -36,6 +36,12 @@
       trampoline=new Invokeinterface(targetClassName,methodName,methodDesc);
     }
     addTrampoline(trampoline,getFunctionType(methodRef));
-    callOrInvokeTrampoline(ctx,trampoline,result,args.toArray(new Value[0]));
+    result=callOrInvokeTrampoline(ctx,trampoline,args.toArray(new Value[0]));
+  }
+  if (result != null) {
+    return widenToI32Value(ctx,result,methodRef.returnType().equals(CharType.v()));
+  }
+ else {
+    return null;
   }
 }

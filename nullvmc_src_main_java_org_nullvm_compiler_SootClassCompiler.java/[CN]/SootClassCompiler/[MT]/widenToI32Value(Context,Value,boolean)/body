@@ -1,0 +1,16 @@
+{
+  Type type=value.getType();
+  if (type instanceof IntegerType && ((IntegerType)type).getBits() < 32) {
+    Variable t=ctx.f().newVariable(I32);
+    if (unsigned) {
+      ctx.f().add(new Zext(t,value,I32));
+    }
+ else {
+      ctx.f().add(new Sext(t,value,I32));
+    }
+    return t.ref();
+  }
+ else {
+    return value;
+  }
+}

@@ -1,164 +1,161 @@
 {
-  soot.Value leftOp=stmt.getLeftOp();
-  Type leftType=getType(leftOp.getType());
   soot.Value rightOp=stmt.getRightOp();
-  Type rightType=getType(rightOp.getType());
-  Variable result=null;
-  result=ctx.f().newVariable(rightType);
+  Value result;
   if (rightOp instanceof Immediate) {
     Immediate immediate=(Immediate)rightOp;
-    ctx.f().add(new Bitcast(result,immediate(ctx,immediate),rightType));
+    result=immediate(ctx,immediate);
   }
  else   if (rightOp instanceof ThisRef) {
-    Value thiz=new VariableRef("this",rightType);
-    ctx.f().add(new Bitcast(result,thiz,rightType));
+    result=new VariableRef("this",OBJECT_PTR);
   }
  else   if (rightOp instanceof ParameterRef) {
-    Value p=new VariableRef("p" + ((ParameterRef)rightOp).getIndex(),rightType);
-    ctx.f().add(new Bitcast(result,p,rightType));
+    ParameterRef ref=(ParameterRef)rightOp;
+    Value p=new VariableRef("p" + ref.getIndex(),getType(ref.getType()));
+    result=widenToI32Value(ctx,p,isUnsigned(ref.getType()));
   }
  else   if (rightOp instanceof CaughtExceptionRef) {
-    ctx.f().add(new Call(result,NVM_BC_EXCEPTION_CLEAR,ENV));
+    result=call(ctx,NVM_BC_EXCEPTION_CLEAR,ENV);
   }
  else   if (rightOp instanceof ArrayRef) {
     ArrayRef ref=(ArrayRef)rightOp;
     VariableRef base=(VariableRef)immediate(ctx,(Immediate)ref.getBase());
-    Value index=widen(ctx,immediate(ctx,(Immediate)ref.getIndex()),I32,ref.getIndex().getType());
+    Value index=immediate(ctx,(Immediate)ref.getIndex());
     checkNull(ctx,base);
     checkBounds(ctx,base,index);
-    callOrInvoke(ctx,result,getArrayLoad(rightOp.getType()),base,index);
+    result=callOrInvoke(ctx,getArrayLoad(ref.getType()),base,index);
+    result=widenToI32Value(ctx,result,isUnsigned(ref.getType()));
   }
  else   if (rightOp instanceof InstanceFieldRef) {
     InstanceFieldRef ref=(InstanceFieldRef)rightOp;
     Value base=immediate(ctx,(Immediate)ref.getBase());
     checkNull(ctx,base);
     if (canAccessDirectly(ctx,ref)) {
-      ctx.f().add(new Load(result,getInstanceFieldPtr(ctx.f(),base,ref.getField())));
+      Variable v=ctx.f().newVariable(getType(ref.getType()));
+      ctx.f().add(new Load(v,getInstanceFieldPtr(ctx.f(),base,ref.getField())));
+      result=widenToI32Value(ctx,v.ref(),isUnsigned(ref.getType()));
     }
  else {
       Trampoline trampoline=new GetField(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
-      addTrampoline(trampoline,new FunctionType(rightType,ENV_PTR,OBJECT_PTR));
-      callOrInvokeTrampoline(ctx,trampoline,result,ENV,base);
+      addTrampoline(trampoline,new FunctionType(getType(ref.getType()),ENV_PTR,OBJECT_PTR));
+      result=callOrInvokeTrampoline(ctx,trampoline,ENV,base);
+      result=widenToI32Value(ctx,result,isUnsigned(ref.getType()));
     }
   }
  else   if (rightOp instanceof StaticFieldRef) {
     StaticFieldRef ref=(StaticFieldRef)rightOp;
     if (canAccessDirectly(ctx,ref)) {
-      ctx.f().add(new Load(result,getClassFieldPtr(ctx.f(),ref.getField())));
+      Variable v=ctx.f().newVariable(getType(ref.getType()));
+      ctx.f().add(new Load(v,getClassFieldPtr(ctx.f(),ref.getField())));
+      result=widenToI32Value(ctx,v.ref(),isUnsigned(ref.getType()));
     }
  else {
       Trampoline trampoline=new GetStatic(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
-      addTrampoline(trampoline,new FunctionType(rightType,ENV_PTR));
-      callOrInvokeTrampoline(ctx,trampoline,result,ENV);
+      addTrampoline(trampoline,new FunctionType(getType(ref.getType()),ENV_PTR));
+      result=callOrInvokeTrampoline(ctx,trampoline,ENV);
+      result=widenToI32Value(ctx,result,isUnsigned(ref.getType()));
     }
   }
  else   if (rightOp instanceof Expr) {
-    if (rightOp instanceof UshrExpr) {
-      UshrExpr expr=(UshrExpr)rightOp;
-      Value op1=immediate(ctx,(Immediate)expr.getOp1());
-      Value op2=immediate(ctx,(Immediate)expr.getOp2());
-      op1=widen(ctx,op1,rightType,true);
-      op2=widen(ctx,op2,rightType,expr.getOp2().getType());
-      op1=widen(ctx,op1,leftType,true);
-      op2=widen(ctx,op2,leftType,expr.getOp2().getType());
-      IntegerType type=(IntegerType)op2.getType();
-      int bits=type.getBits();
-      Variable t=ctx.f().newVariable(type);
-      ctx.f().add(new And(t,op2,new IntegerConstant(bits - 1,type)));
-      ctx.f().add(new Lshr(result,op1,new VariableRef(t)));
-    }
- else     if (rightOp instanceof BinopExpr) {
+    if (rightOp instanceof BinopExpr) {
       BinopExpr expr=(BinopExpr)rightOp;
+      Type rightType=getLocalType(expr.getType());
+      Variable resultVar=ctx.f().newVariable(rightType);
+      result=resultVar.ref();
       Value op1=immediate(ctx,(Immediate)expr.getOp1());
       Value op2=immediate(ctx,(Immediate)expr.getOp2());
-      op1=widen(ctx,op1,rightType,expr.getOp1().getType());
-      op2=widen(ctx,op2,rightType,expr.getOp2().getType());
       if (rightOp instanceof AddExpr) {
         if (rightType instanceof IntegerType) {
-          ctx.f().add(new Add(result,op1,op2));
+          ctx.f().add(new Add(resultVar,op1,op2));
         }
  else {
-          ctx.f().add(new Fadd(result,op1,op2));
+          ctx.f().add(new Fadd(resultVar,op1,op2));
         }
       }
  else       if (rightOp instanceof AndExpr) {
-        ctx.f().add(new And(result,op1,op2));
+        ctx.f().add(new And(resultVar,op1,op2));
       }
  else       if (rightOp instanceof CmpExpr) {
         Variable t1=ctx.f().newVariable(I1);
         Variable t2=ctx.f().newVariable(I1);
-        Variable t3=ctx.f().newVariable(result.getType());
-        Variable t4=ctx.f().newVariable(result.getType());
+        Variable t3=ctx.f().newVariable(resultVar.getType());
+        Variable t4=ctx.f().newVariable(resultVar.getType());
         ctx.f().add(new Icmp(t1,Condition.slt,op1,op2));
         ctx.f().add(new Icmp(t2,Condition.sgt,op1,op2));
-        ctx.f().add(new Zext(t3,new VariableRef(t1),result.getType()));
-        ctx.f().add(new Zext(t4,new VariableRef(t2),result.getType()));
-        ctx.f().add(new Sub(result,new VariableRef(t4),new VariableRef(t3)));
+        ctx.f().add(new Zext(t3,new VariableRef(t1),resultVar.getType()));
+        ctx.f().add(new Zext(t4,new VariableRef(t2),resultVar.getType()));
+        ctx.f().add(new Sub(resultVar,new VariableRef(t4),new VariableRef(t3)));
       }
  else       if (rightOp instanceof DivExpr) {
         if (rightType instanceof IntegerType) {
           FunctionRef f=rightType == I64 ? LDIV : IDIV;
-          callOrInvoke(ctx,result,f,ENV,op1,op2);
+          result=callOrInvoke(ctx,f,ENV,op1,op2);
         }
  else {
-          ctx.f().add(new Fdiv(result,op1,op2));
+          ctx.f().add(new Fdiv(resultVar,op1,op2));
         }
       }
  else       if (rightOp instanceof MulExpr) {
         if (rightType instanceof IntegerType) {
-          ctx.f().add(new Mul(result,op1,op2));
+          ctx.f().add(new Mul(resultVar,op1,op2));
         }
  else {
-          ctx.f().add(new Fmul(result,op1,op2));
+          ctx.f().add(new Fmul(resultVar,op1,op2));
         }
       }
  else       if (rightOp instanceof OrExpr) {
-        ctx.f().add(new Or(result,op1,op2));
+        ctx.f().add(new Or(resultVar,op1,op2));
       }
  else       if (rightOp instanceof RemExpr) {
         if (rightType instanceof IntegerType) {
           FunctionRef f=rightType == I64 ? LREM : IREM;
-          callOrInvoke(ctx,result,f,ENV,op1,op2);
+          result=callOrInvoke(ctx,f,ENV,op1,op2);
         }
  else {
-          ctx.f().add(new Frem(result,op1,op2));
+          ctx.f().add(new Frem(resultVar,op1,op2));
         }
       }
- else       if (rightOp instanceof ShlExpr || rightOp instanceof ShrExpr) {
-        op1=widen(ctx,op1,leftType,expr.getOp1().getType());
-        op2=widen(ctx,op2,leftType,expr.getOp2().getType());
-        IntegerType type=(IntegerType)op2.getType();
+ else       if (rightOp instanceof ShlExpr || rightOp instanceof ShrExpr || rightOp instanceof UshrExpr) {
+        IntegerType type=(IntegerType)op1.getType();
         int bits=type.getBits();
-        Variable t=ctx.f().newVariable(type);
-        ctx.f().add(new And(t,op2,new IntegerConstant(bits - 1,type)));
+        Variable t=ctx.f().newVariable(op2.getType());
+        ctx.f().add(new And(t,op2,new IntegerConstant(bits - 1,(IntegerType)op2.getType())));
+        Value shift=t.ref();
+        if (((IntegerType)shift.getType()).getBits() < bits) {
+          Variable tmp=ctx.f().newVariable(type);
+          ctx.f().add(new Zext(tmp,shift,type));
+          shift=tmp.ref();
+        }
         if (rightOp instanceof ShlExpr) {
-          ctx.f().add(new Shl(result,op1,new VariableRef(t)));
+          ctx.f().add(new Shl(resultVar,op1,shift));
         }
  else         if (rightOp instanceof ShrExpr) {
-          ctx.f().add(new Ashr(result,op1,new VariableRef(t)));
+          ctx.f().add(new Ashr(resultVar,op1,shift));
+        }
+ else {
+          ctx.f().add(new Lshr(resultVar,op1,shift));
         }
       }
  else       if (rightOp instanceof SubExpr) {
         if (rightType instanceof IntegerType) {
-          ctx.f().add(new Sub(result,op1,op2));
+          ctx.f().add(new Sub(resultVar,op1,op2));
         }
  else {
-          ctx.f().add(new Fsub(result,op1,op2));
+          ctx.f().add(new Fsub(resultVar,op1,op2));
         }
       }
  else       if (rightOp instanceof XorExpr) {
-        ctx.f().add(new Xor(result,op1,op2));
+        ctx.f().add(new Xor(resultVar,op1,op2));
       }
  else       if (rightOp instanceof XorExpr) {
-        ctx.f().add(new Xor(result,op1,op2));
+        ctx.f().add(new Xor(resultVar,op1,op2));
       }
  else       if (rightOp instanceof CmplExpr) {
         FunctionRef f=op1.getType() == FLOAT ? FCMPL : DCMPL;
-        ctx.f().add(new Call(result,f,op1,op2));
+        ctx.f().add(new Call(resultVar,f,op1,op2));
       }
  else       if (rightOp instanceof CmpgExpr) {
         FunctionRef f=op1.getType() == FLOAT ? FCMPG : DCMPG;
-        ctx.f().add(new Call(result,f,op1,op2));
+        ctx.f().add(new Call(resultVar,f,op1,op2));
       }
  else {
         throw new IllegalArgumentException("Unknown type for rightOp: " + rightOp.getClass());
@@ -172,41 +169,42 @@
         Type targetType=getType(sootTargetType);
         Type sourceType=getType(sootSourceType);
         if (targetType instanceof IntegerType && sourceType instanceof IntegerType) {
-          IntegerType targetIType=(IntegerType)targetType;
-          IntegerType sourceIType=(IntegerType)sourceType;
-          if (sourceIType.getBits() < targetIType.getBits()) {
-            if (sootSourceType.equals(CharType.v())) {
-              ctx.f().add(new Zext(result,op,targetIType));
+          IntegerType toType=(IntegerType)targetType;
+          IntegerType fromType=(IntegerType)op.getType();
+          Variable v=ctx.f().newVariable(toType);
+          if (fromType.getBits() < toType.getBits()) {
+            if (isUnsigned(sootSourceType)) {
+              ctx.f().add(new Zext(v,op,toType));
             }
  else {
-              ctx.f().add(new Sext(result,op,targetIType));
+              ctx.f().add(new Sext(v,op,toType));
             }
           }
- else           if (sourceIType.getBits() == targetIType.getBits()) {
-            ctx.f().add(new Bitcast(result,op,targetIType));
+ else           if (fromType.getBits() == toType.getBits()) {
+            ctx.f().add(new Bitcast(v,op,toType));
           }
  else {
-            ctx.f().add(new Trunc(result,op,targetIType));
+            ctx.f().add(new Trunc(v,op,toType));
           }
+          result=widenToI32Value(ctx,v.ref(),isUnsigned(sootTargetType));
         }
  else         if (targetType instanceof FloatingPointType && sourceType instanceof IntegerType) {
-          if (sootSourceType.equals(CharType.v())) {
-            ctx.f().add(new Uitofp(result,op,targetType));
-          }
- else {
-            ctx.f().add(new Sitofp(result,op,targetType));
-          }
+          Variable v=ctx.f().newVariable(targetType);
+          ctx.f().add(new Sitofp(v,op,targetType));
+          result=v.ref();
         }
  else         if (targetType instanceof FloatingPointType && sourceType instanceof FloatingPointType) {
+          Variable v=ctx.f().newVariable(targetType);
           if (targetType == FLOAT && sourceType == DOUBLE) {
-            ctx.f().add(new Fptrunc(result,op,targetType));
+            ctx.f().add(new Fptrunc(v,op,targetType));
           }
  else           if (targetType == DOUBLE && sourceType == FLOAT) {
-            ctx.f().add(new Fpext(result,op,targetType));
+            ctx.f().add(new Fpext(v,op,targetType));
           }
  else {
-            ctx.f().add(new Bitcast(result,op,targetType));
+            ctx.f().add(new Bitcast(v,op,targetType));
           }
+          result=v.ref();
         }
  else {
           FunctionRef f=null;
@@ -222,31 +220,31 @@
  else           if (targetType == I64 && sourceType == DOUBLE) {
             f=D2L;
           }
-          ctx.f().add(new Call(result,f,op));
+          Variable v=ctx.f().newVariable(targetType);
+          ctx.f().add(new Call(v,f,op));
+          result=v.ref();
         }
       }
  else {
-        callOrInvoke(ctx,result,NVM_BC_CHECKCAST,ENV,op,getString(getInternalName(sootTargetType)));
+        result=callOrInvoke(ctx,NVM_BC_CHECKCAST,ENV,op,getString(getInternalName(sootTargetType)));
       }
     }
  else     if (rightOp instanceof InstanceOfExpr) {
       Value op=immediate(ctx,(Immediate)((InstanceOfExpr)rightOp).getOp());
-      Variable tmp=ctx.f().newVariable(I32);
       soot.Type checkType=((InstanceOfExpr)rightOp).getCheckType();
-      callOrInvoke(ctx,tmp,NVM_BC_INSTANCEOF,ENV,op,getString(getInternalName(checkType)));
-      ctx.f().add(new Trunc(result,tmp.ref(),I8));
+      result=callOrInvoke(ctx,NVM_BC_INSTANCEOF,ENV,op,getString(getInternalName(checkType)));
     }
  else     if (rightOp instanceof NewExpr) {
-      callOrInvoke(ctx,result,NVM_BC_NEW,ENV,getString(getInternalName(((NewExpr)rightOp).getBaseType())));
+      result=callOrInvoke(ctx,NVM_BC_NEW,ENV,getString(getInternalName(((NewExpr)rightOp).getBaseType())));
     }
  else     if (rightOp instanceof NewArrayExpr) {
       NewArrayExpr expr=(NewArrayExpr)rightOp;
-      Value size=widen(ctx,immediate(ctx,(Immediate)expr.getSize()),I32,expr.getSize().getType());
+      Value size=immediate(ctx,(Immediate)expr.getSize());
       if (expr.getBaseType() instanceof PrimType) {
-        callOrInvoke(ctx,result,getNewArray(expr.getBaseType()),ENV,size);
+        result=callOrInvoke(ctx,getNewArray(expr.getBaseType()),ENV,size);
       }
  else {
-        callOrInvoke(ctx,result,NVM_BC_NEW_OBJECT_ARRAY,ENV,size,getString(getInternalName(expr.getType())));
+        result=callOrInvoke(ctx,NVM_BC_NEW_OBJECT_ARRAY,ENV,size,getString(getInternalName(expr.getType())));
       }
     }
  else     if (rightOp instanceof NewMultiArrayExpr) {
@@ -259,26 +257,30 @@
       }
       Variable dimsI32=ctx.f().newVariable(new PointerType(I32));
       ctx.f().add(new Bitcast(dimsI32,dims.ref(),dimsI32.getType()));
-      callOrInvoke(ctx,result,NVM_BC_NEW_MULTI_ARRAY,ENV,new IntegerConstant(expr.getSizeCount()),dimsI32.ref(),getString(getInternalName(expr.getType())));
+      result=callOrInvoke(ctx,NVM_BC_NEW_MULTI_ARRAY,ENV,new IntegerConstant(expr.getSizeCount()),dimsI32.ref(),getString(getInternalName(expr.getType())));
     }
  else     if (rightOp instanceof InvokeExpr) {
-      invokeExpr(ctx,result,stmt,(InvokeExpr)rightOp);
+      result=invokeExpr(ctx,stmt,(InvokeExpr)rightOp);
     }
  else     if (rightOp instanceof LengthExpr) {
       Value op=immediate(ctx,(Immediate)((LengthExpr)rightOp).getOp());
       checkNull(ctx,op);
-      ctx.f().add(new Call(result,ARRAY_LENGTH,op));
+      Variable v=ctx.f().newVariable(I32);
+      ctx.f().add(new Call(v,ARRAY_LENGTH,op));
+      result=v.ref();
     }
  else     if (rightOp instanceof NegExpr) {
       NegExpr expr=(NegExpr)rightOp;
       Value op=immediate(ctx,(Immediate)expr.getOp());
+      Type rightType=op.getType();
+      Variable v=ctx.f().newVariable(op.getType());
       if (rightType instanceof IntegerType) {
-        op=widen(ctx,op,rightType,expr.getOp().getType());
-        ctx.f().add(new Sub(result,new IntegerConstant(0,(IntegerType)rightType),op));
+        ctx.f().add(new Sub(v,new IntegerConstant(0,(IntegerType)rightType),op));
       }
  else {
-        ctx.f().add(new Fsub(result,new FloatingPointConstant(0.0,(FloatingPointType)rightType),op));
+        ctx.f().add(new Fmul(v,new FloatingPointConstant(-1.0,(FloatingPointType)rightType),op));
       }
+      result=v.ref();
     }
  else {
       throw new IllegalArgumentException("Unknown type for rightOp: " + rightOp.getClass());
@@ -287,46 +289,49 @@
  else {
     throw new IllegalArgumentException("Unknown type for rightOp: " + rightOp.getClass());
   }
-  Value resultRef=new VariableRef(result);
-  resultRef=cast(ctx,resultRef,leftType,rightOp.getType());
+  soot.Value leftOp=stmt.getLeftOp();
   if (leftOp instanceof Local) {
     Local local=(Local)leftOp;
-    VariableRef v=new VariableRef(local.getName(),new PointerType(leftType));
-    ctx.f().add(new Store(resultRef,v));
-  }
- else   if (leftOp instanceof ArrayRef) {
-    ArrayRef ref=(ArrayRef)leftOp;
-    VariableRef base=(VariableRef)immediate(ctx,(Immediate)ref.getBase());
-    Value index=widen(ctx,immediate(ctx,(Immediate)ref.getIndex()),I32,ref.getIndex().getType());
-    checkNull(ctx,base);
-    checkBounds(ctx,base,index);
-    callOrInvoke(ctx,null,getArrayStore(leftOp.getType()),base,index,resultRef);
-  }
- else   if (leftOp instanceof InstanceFieldRef) {
-    InstanceFieldRef ref=(InstanceFieldRef)leftOp;
-    Value base=immediate(ctx,(Immediate)ref.getBase());
-    checkNull(ctx,base);
-    if (canAccessDirectly(ctx,ref)) {
-      ctx.f().add(new Store(resultRef,getInstanceFieldPtr(ctx.f(),base,ref.getField())));
-    }
- else {
-      Trampoline trampoline=new PutField(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
-      addTrampoline(trampoline,new FunctionType(VOID,ENV_PTR,OBJECT_PTR,leftType));
-      callOrInvokeTrampoline(ctx,trampoline,null,ENV,base,resultRef);
-    }
-  }
- else   if (leftOp instanceof StaticFieldRef) {
-    StaticFieldRef ref=(StaticFieldRef)leftOp;
-    if (canAccessDirectly(ctx,ref)) {
-      ctx.f().add(new Store(resultRef,getClassFieldPtr(ctx.f(),ref.getField())));
-    }
- else {
-      Trampoline trampoline=new PutStatic(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
-      addTrampoline(trampoline,new FunctionType(VOID,ENV_PTR,leftType));
-      callOrInvokeTrampoline(ctx,trampoline,null,ENV,resultRef);
-    }
+    VariableRef v=new VariableRef(local.getName(),new PointerType(getLocalType(leftOp.getType())));
+    ctx.f().add(new Store(result,v));
   }
  else {
-    throw new IllegalArgumentException("Unknown type for leftOp: " + leftOp.getClass());
+    Type leftType=getType(leftOp.getType());
+    Value narrowedResult=narrowFromI32Value(ctx,leftType,result);
+    if (leftOp instanceof ArrayRef) {
+      ArrayRef ref=(ArrayRef)leftOp;
+      VariableRef base=(VariableRef)immediate(ctx,(Immediate)ref.getBase());
+      Value index=immediate(ctx,(Immediate)ref.getIndex());
+      checkNull(ctx,base);
+      checkBounds(ctx,base,index);
+      callOrInvoke(ctx,getArrayStore(leftOp.getType()),base,index,narrowedResult);
+    }
+ else     if (leftOp instanceof InstanceFieldRef) {
+      InstanceFieldRef ref=(InstanceFieldRef)leftOp;
+      Value base=immediate(ctx,(Immediate)ref.getBase());
+      checkNull(ctx,base);
+      if (canAccessDirectly(ctx,ref)) {
+        ctx.f().add(new Store(narrowedResult,getInstanceFieldPtr(ctx.f(),base,ref.getField())));
+      }
+ else {
+        Trampoline trampoline=new PutField(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
+        addTrampoline(trampoline,new FunctionType(VOID,ENV_PTR,OBJECT_PTR,leftType));
+        callOrInvokeTrampoline(ctx,trampoline,ENV,base,narrowedResult);
+      }
+    }
+ else     if (leftOp instanceof StaticFieldRef) {
+      StaticFieldRef ref=(StaticFieldRef)leftOp;
+      if (canAccessDirectly(ctx,ref)) {
+        ctx.f().add(new Store(narrowedResult,getClassFieldPtr(ctx.f(),ref.getField())));
+      }
+ else {
+        Trampoline trampoline=new PutStatic(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
+        addTrampoline(trampoline,new FunctionType(VOID,ENV_PTR,leftType));
+        callOrInvokeTrampoline(ctx,trampoline,ENV,narrowedResult);
+      }
+    }
+ else {
+      throw new IllegalArgumentException("Unknown type for leftOp: " + leftOp.getClass());
+    }
   }
 }

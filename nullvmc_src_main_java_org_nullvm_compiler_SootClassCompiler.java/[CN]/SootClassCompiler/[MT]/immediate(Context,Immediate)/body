@@ -1,8 +1,9 @@
 {
   if (v instanceof soot.Local) {
     Local local=(Local)v;
-    VariableRef var=new VariableRef(local.getName(),new PointerType(getType(v.getType())));
-    Variable tmp=ctx.f().newVariable(getType(v.getType()));
+    Type type=getLocalType(v.getType());
+    VariableRef var=new VariableRef(local.getName(),new PointerType(type));
+    Variable tmp=ctx.f().newVariable(type);
     ctx.f().add(new Load(tmp,var));
     return new VariableRef(tmp);
   }
@@ -24,15 +25,11 @@
  else   if (v instanceof soot.jimple.StringConstant) {
     String s=((soot.jimple.StringConstant)v).value;
     Value string=getString(s);
-    Variable tmp=ctx.f().newVariable(OBJECT_PTR);
-    callOrInvoke(ctx,new Label(),tmp,NVM_BC_LDC_STRING,ENV,string);
-    return new VariableRef(tmp);
+    return callOrInvoke(ctx,NVM_BC_LDC_STRING,ENV,string);
   }
  else   if (v instanceof soot.jimple.ClassConstant) {
     Value clazz=getString(((soot.jimple.ClassConstant)v).getValue());
-    Variable tmp=ctx.f().newVariable(OBJECT_PTR);
-    callOrInvoke(ctx,new Label(),tmp,NVM_BC_LDC_CLASS,ENV,clazz);
-    return new VariableRef(tmp);
+    return callOrInvoke(ctx,NVM_BC_LDC_CLASS,ENV,clazz);
   }
   throw new IllegalArgumentException("Unknown Immediate type: " + v.getClass());
 }

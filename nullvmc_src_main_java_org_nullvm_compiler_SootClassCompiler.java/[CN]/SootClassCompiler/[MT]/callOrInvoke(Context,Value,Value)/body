@@ -1,5 +1,11 @@
 {
+  Variable result=null;
+  Type returnType=((FunctionType)function.getType()).getReturnType();
+  if (returnType != VOID) {
+    result=ctx.f().newVariable(returnType);
+  }
   if (ctx.hasTrap(ctx.getCurrentUnit())) {
+    Label label=new Label();
     BasicBlockRef to=ctx.f().newBasicBlockRef(label);
     BasicBlockRef unwind=ctx.f().newBasicBlockRef(new Label(ctx.getCurrentTraps()));
     ctx.f().add(new Invoke(result,function,to,unwind,args));
@@ -9,4 +15,5 @@
  else {
     ctx.f().add(new Call(result,function,args));
   }
+  return result == null ? null : result.ref();
 }
