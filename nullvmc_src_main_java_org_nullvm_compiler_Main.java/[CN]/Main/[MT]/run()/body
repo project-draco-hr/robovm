@@ -38,18 +38,20 @@
   symbolsMapFile=new File(tmpFile,"symbols.map");
   FileUtils.copyURLToFile(getClass().getResource("/symbols.map"),symbolsMapFile);
   Clazzes clazzes=new Clazzes(bootClassPathFiles,classPathFiles);
-  SootClassCompiler.init(clazzes);
   List<ClasspathEntry> bootclasspathObjects=new ArrayList<ClasspathEntry>();
-  for (  Path path : clazzes.getBootclasspathPaths()) {
-    ClasspathEntry entry=createClasspathEntry(path);
-    processClasspathEntry(entry);
-    bootclasspathObjects.add(entry);
-  }
   List<ClasspathEntry> classpathObjects=new ArrayList<ClasspathEntry>();
+  for (  Path path : clazzes.getBootclasspathPaths()) {
+    bootclasspathObjects.add(createClasspathEntry(path));
+  }
   for (  Path path : clazzes.getClasspathPaths()) {
-    ClasspathEntry entry=createClasspathEntry(path);
+    classpathObjects.add(createClasspathEntry(path));
+  }
+  SootClassCompiler.init(clazzes,getChangedClasses(bootclasspathObjects,classpathObjects));
+  for (  ClasspathEntry entry : bootclasspathObjects) {
     processClasspathEntry(entry);
-    classpathObjects.add(entry);
+  }
+  for (  ClasspathEntry entry : classpathObjects) {
+    processClasspathEntry(entry);
   }
   output.mkdirs();
   buildExecutable();

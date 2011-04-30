@@ -1,0 +1,16 @@
+{
+  List<ClasspathEntry> all=new ArrayList<ClasspathEntry>();
+  all.addAll(bootcp);
+  all.addAll(cp);
+  List<Clazz> changed=new ArrayList<Clazz>();
+  for (  ClasspathEntry entry : all) {
+    for (    Clazz clazz : entry.getPath().list()) {
+      String className=clazz.getInternalName();
+      File outFile=new File(entry.getCacheDir(),className.replace('/',File.separatorChar) + "" + ".class.ll");
+      if (clean || !outFile.exists() || outFile.lastModified() < clazz.lastModified()) {
+        changed.add(clazz);
+      }
+    }
+  }
+  return changed;
+}
