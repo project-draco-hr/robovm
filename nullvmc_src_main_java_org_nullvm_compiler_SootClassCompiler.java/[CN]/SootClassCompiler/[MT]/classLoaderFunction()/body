@@ -1,9 +1,9 @@
 {
   String name="NullVM_" + mangleString(getInternalName(sootClass));
-  Function function=module.newFunction(name,new FunctionType(CLASS_PTR,ENV_PTR),"env");
+  Function function=module.newFunction(name,new FunctionType(CLASS_PTR,ENV_PTR,OBJECT_PTR),"env","classLoader");
   for (  Entry<SootClass,Global> entry : throwables.entrySet()) {
     Variable t1=function.newVariable(OBJECT_PTR);
-    function.add(new Call(t1,NVM_BC_LDC_CLASS,ENV,getString(getInternalName(entry.getKey()))));
+    function.add(new Call(t1,NVM_BC_FIND_CLASS_IN_LOADER,ENV,getString(getInternalName(entry.getKey())),new VariableRef("classLoader",OBJECT_PTR)));
     Variable t2=function.newVariable(CLASS_PTR);
     function.add(new Bitcast(t2,t1.ref(),CLASS_PTR));
     function.add(new Store(t2.ref(),entry.getValue().ref()));
@@ -16,7 +16,7 @@
  else {
     superclassName=new NullConstant(I8_PTR);
   }
-  function.add(new Call(clazz,NVM_BC_ALLOCATE_CLASS,ENV,getString(getInternalName(sootClass)),superclassName,new IntegerConstant(sootClass.getModifiers()),sizeof(classFieldsType),sizeof(instanceFieldsType)));
+  function.add(new Call(clazz,NVM_BC_ALLOCATE_CLASS,ENV,getString(getInternalName(sootClass)),superclassName,new VariableRef("classLoader",OBJECT_PTR),new IntegerConstant(sootClass.getModifiers()),sizeof(classFieldsType),sizeof(instanceFieldsType)));
   for (  SootClass iface : sootClass.getInterfaces()) {
     function.add(new Call(NVM_BC_ADD_INTERFACE,ENV,clazz.ref(),getString(getInternalName(iface))));
   }

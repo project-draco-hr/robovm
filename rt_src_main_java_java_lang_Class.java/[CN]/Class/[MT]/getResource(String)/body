@@ -1,0 +1,23 @@
+{
+  if (resName.startsWith("/")) {
+    resName=resName.substring(1);
+  }
+ else {
+    String pkg=getName();
+    int dot=pkg.lastIndexOf('.');
+    if (dot != -1) {
+      pkg=pkg.substring(0,dot).replace('.','/');
+    }
+ else {
+      pkg="";
+    }
+    resName=pkg + "/" + resName;
+  }
+  ClassLoader loader=getClassLoaderImpl();
+  if (loader != null) {
+    return loader.getResource(resName);
+  }
+ else {
+    return ClassLoader.getSystemResource(resName);
+  }
+}
