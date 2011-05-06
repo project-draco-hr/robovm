@@ -5,7 +5,12 @@
   Variable fptr=function.newVariable(I8_PTR);
   Value nameRef=getString(method.getName());
   Value descRef=getString(getDescriptor(method.makeRef()));
-  function.add(new Call(fptr,NVM_BC_LOOKUP_VIRTUAL_METHOD,ENV,new VariableRef("this",OBJECT_PTR),nameRef,descRef));
+  if (sootClass.isInterface()) {
+    function.add(new Call(fptr,NVM_BC_LOOKUP_INTERFACE_METHOD,ENV,getCaller(function),new VariableRef("this",OBJECT_PTR),nameRef,descRef));
+  }
+ else {
+    function.add(new Call(fptr,NVM_BC_LOOKUP_VIRTUAL_METHOD,ENV,getCaller(function),new VariableRef("this",OBJECT_PTR),nameRef,descRef));
+  }
   Variable f=function.newVariable(functionType);
   function.add(new Bitcast(f,fptr.ref(),function.getType()));
   String[] parameterNames=function.getParameterNames();

@@ -226,16 +226,16 @@
         }
       }
  else {
-        result=callOrInvoke(ctx,NVM_BC_CHECKCAST,ENV,op,getString(getInternalName(sootTargetType)));
+        result=callOrInvoke(ctx,NVM_BC_CHECKCAST,ENV,op,getString(getInternalName(sootTargetType)),getCaller(ctx));
       }
     }
  else     if (rightOp instanceof InstanceOfExpr) {
       Value op=immediate(ctx,(Immediate)((InstanceOfExpr)rightOp).getOp());
       soot.Type checkType=((InstanceOfExpr)rightOp).getCheckType();
-      result=callOrInvoke(ctx,NVM_BC_INSTANCEOF,ENV,op,getString(getInternalName(checkType)));
+      result=callOrInvoke(ctx,NVM_BC_INSTANCEOF,ENV,op,getString(getInternalName(checkType)),getCaller(ctx));
     }
  else     if (rightOp instanceof NewExpr) {
-      result=callOrInvoke(ctx,NVM_BC_NEW,ENV,getString(getInternalName(((NewExpr)rightOp).getBaseType())));
+      result=callOrInvoke(ctx,NVM_BC_NEW,ENV,getString(getInternalName(((NewExpr)rightOp).getBaseType())),getCaller(ctx));
     }
  else     if (rightOp instanceof NewArrayExpr) {
       NewArrayExpr expr=(NewArrayExpr)rightOp;
@@ -244,7 +244,7 @@
         result=callOrInvoke(ctx,getNewArray(expr.getBaseType()),ENV,size);
       }
  else {
-        result=callOrInvoke(ctx,NVM_BC_NEW_OBJECT_ARRAY,ENV,size,getString(getInternalName(expr.getType())));
+        result=callOrInvoke(ctx,NVM_BC_NEW_OBJECT_ARRAY,ENV,size,getString(getInternalName(expr.getType())),getCaller(ctx));
       }
     }
  else     if (rightOp instanceof NewMultiArrayExpr) {
@@ -257,7 +257,7 @@
       }
       Variable dimsI32=ctx.f().newVariable(new PointerType(I32));
       ctx.f().add(new Bitcast(dimsI32,dims.ref(),dimsI32.getType()));
-      result=callOrInvoke(ctx,NVM_BC_NEW_MULTI_ARRAY,ENV,new IntegerConstant(expr.getSizeCount()),dimsI32.ref(),getString(getInternalName(expr.getType())));
+      result=callOrInvoke(ctx,NVM_BC_NEW_MULTI_ARRAY,ENV,new IntegerConstant(expr.getSizeCount()),dimsI32.ref(),getString(getInternalName(expr.getType())),getCaller(ctx));
     }
  else     if (rightOp instanceof InvokeExpr) {
       result=invokeExpr(ctx,stmt,(InvokeExpr)rightOp);
