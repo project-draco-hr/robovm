@@ -1,0 +1,32 @@
+{
+  super(parent,nullAllowed);
+  if (path == null)   throw new NullPointerException();
+  this.path=path;
+  mPaths=path.split(System.getProperty("path.separator"));
+  int length=mPaths.length;
+  mFiles=new File[length];
+  mZips=new ZipFile[length];
+  for (int i=0; i < length; i++) {
+    File pathFile=new File(mPaths[i]);
+    mFiles[i]=pathFile;
+    if (pathFile.isFile()) {
+      try {
+        mZips[i]=new ZipFile(pathFile);
+      }
+ catch (      IOException ioex) {
+      }
+    }
+  }
+  libraryPathElements=new ArrayList<String>();
+  if (libPath != null) {
+    for (    String pathElement : libPath.split(File.pathSeparator)) {
+      libraryPathElements.add(cleanupPathElement(pathElement));
+    }
+  }
+  String systemLibraryPath=System.getProperty("java.library.path",".");
+  if (!systemLibraryPath.isEmpty()) {
+    for (    String pathElement : systemLibraryPath.split(File.pathSeparator)) {
+      libraryPathElements.add(cleanupPathElement(pathElement));
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  File pathFile=mFiles[i];
+  ZipFile zip=mZips[i];
+  if (zip != null) {
+    if (isInArchive(zip,name)) {
+      try {
+        return new URL("jar:" + pathFile.toURL() + "!/"+ name);
+      }
+ catch (      MalformedURLException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+ else   if (pathFile.isDirectory()) {
+    File dataFile=new File(mPaths[i] + "/" + name);
+    if (dataFile.exists()) {
+      try {
+        return dataFile.toURL();
+      }
+ catch (      MalformedURLException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+ else   if (pathFile.isFile()) {
+  }
+ else {
+    System.err.println("PathClassLoader: can't find '" + mPaths[i] + "'");
+  }
+  return null;
+}
