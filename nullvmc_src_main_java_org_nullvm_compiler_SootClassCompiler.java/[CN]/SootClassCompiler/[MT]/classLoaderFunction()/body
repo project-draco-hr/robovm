@@ -30,18 +30,26 @@
     FunctionRef setter=new FunctionRef(mangleField(field) + "_setter",new FunctionType(VOID,ENV_PTR,OBJECT_PTR,getType(field.getType())));
     function.add(new Call(NVM_BC_ADD_FIELD,ENV,clazz.ref(),getString(field.getName()),getString(getDescriptor(field.getType())),new IntegerConstant(field.getModifiers()),offsetof(instanceFieldsType,instanceFields.indexOf(field)),new ConstantBitcast(getter,I8_PTR),new ConstantBitcast(setter,I8_PTR)));
   }
+  if (!sootClass.declaresMethodByName("<clinit>") && hasConstantValueTags(classFields)) {
+    Value functionRef=new ConstantBitcast(new FunctionRef(mangleMethod(getInternalName(sootClass),"<clinit>",new ArrayList<soot.Type>(),soot.VoidType.v()),new FunctionType(VOID,ENV_PTR)),I8_PTR);
+    function.add(new Call(NVM_BC_ADD_METHOD,ENV,clazz.ref(),getString("<clinit>"),getString("()V"),new IntegerConstant(Modifier.STATIC),functionRef,new NullConstant(I8_PTR),new NullConstant(I8_PTR)));
+  }
   for (  SootMethod method : sootClass.getMethods()) {
     Value functionRef=new NullConstant(I8_PTR);
+    Value synchronizedRef=new NullConstant(I8_PTR);
     Value lookup=new NullConstant(I8_PTR);
+    if (!method.isAbstract()) {
+      functionRef=new ConstantBitcast(new FunctionRef(mangleMethod(method),getFunctionType(method)),I8_PTR);
+    }
+    if (!method.isAbstract() && method.isSynchronized()) {
+      synchronizedRef=new ConstantBitcast(new FunctionRef(mangleMethod(method) + "_synchronized",getFunctionType(method)),I8_PTR);
+    }
     if (!method.isStatic() && !"<init>".equals(method.getName()) && !method.isPrivate()&& !Modifier.isFinal(method.getModifiers())) {
       if (!ancestorDeclaresMethod(sootClass,method)) {
         lookup=new ConstantBitcast(new FunctionRef(mangleMethod(method) + "_lookup",getFunctionType(method)),I8_PTR);
       }
     }
-    if (!method.isAbstract()) {
-      functionRef=new ConstantBitcast(new FunctionRef(mangleMethod(method),getFunctionType(method)),I8_PTR);
-    }
-    function.add(new Call(NVM_BC_ADD_METHOD,ENV,clazz.ref(),getString(method.getName()),getString(getDescriptor(method)),new IntegerConstant(method.getModifiers()),functionRef,lookup));
+    function.add(new Call(NVM_BC_ADD_METHOD,ENV,clazz.ref(),getString(method.getName()),getString(getDescriptor(method)),new IntegerConstant(method.getModifiers()),functionRef,synchronizedRef,lookup));
   }
   function.add(new Call(NVM_BC_REGISTER_CLASS,ENV,clazz.ref()));
   function.add(new Store(clazz.ref(),THE_CLASS.ref()));

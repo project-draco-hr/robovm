@@ -1,0 +1,46 @@
+{
+  String name=mangleMethod(method) + "_synchronized";
+  Function function=createFunction(name,method);
+  FunctionType functionType=function.getType();
+  FunctionRef target=new FunctionRef(mangleMethod(method),functionType);
+  Value monitor=null;
+  if (method.isStatic()) {
+    Value clazz=getCaller(function);
+    Variable tmp=function.newVariable(OBJECT_PTR);
+    function.add(new Bitcast(tmp,clazz,OBJECT_PTR));
+    monitor=tmp.ref();
+  }
+ else {
+    monitor=new VariableRef("this",OBJECT_PTR);
+  }
+  function.add(new Call(NVM_BC_MONITOR_ENTER,ENV,monitor));
+  String[] parameterNames=function.getParameterNames();
+  Type[] parameterTypes=function.getType().getParameterTypes();
+  Value[] args=new Value[parameterNames.length];
+  for (int i=0; i < args.length; i++) {
+    args[i]=new VariableRef(parameterNames[i],parameterTypes[i]);
+  }
+  BasicBlockRef bbSuccess=function.newBasicBlockRef(new Label("success"));
+  BasicBlockRef bbFailure=function.newBasicBlockRef(new Label("failure"));
+  if (function.getType().getReturnType() == VOID) {
+    function.add(new Invoke(target,bbSuccess,bbFailure,args));
+    function.newBasicBlock(new Label("success"));
+    function.add(new Call(NVM_BC_MONITOR_EXIT,ENV,monitor));
+    function.add(new Ret());
+  }
+ else {
+    Variable result=function.newVariable(functionType.getReturnType());
+    function.add(new Invoke(result,target,bbSuccess,bbFailure,args));
+    function.newBasicBlock(new Label("success"));
+    function.add(new Call(NVM_BC_MONITOR_EXIT,ENV,monitor));
+    function.add(new Ret(result.ref()));
+  }
+  function.newBasicBlock(new Label("failure"));
+  Variable ehptr=function.newVariable(I8_PTR);
+  function.add(new Call(ehptr,LLVM_EH_EXCEPTION));
+  Variable sel=function.newVariable(I32);
+  function.add(new Call(sel,LLVM_EH_SELECTOR,new VariableRef(ehptr),new ConstantBitcast(NVM_BC_PERSONALITY,I8_PTR),new IntegerConstant(1)));
+  function.add(new Call(NVM_BC_MONITOR_EXIT,ENV,monitor));
+  function.add(new Call(NVM_BC_RETHROW,ENV));
+  function.add(new Unreachable());
+}

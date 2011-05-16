@@ -12,19 +12,28 @@
   if (trampoline instanceof org.nullvm.compiler.trampoline.Invoke) {
     org.nullvm.compiler.trampoline.Invoke invoke=(org.nullvm.compiler.trampoline.Invoke)trampoline;
     FunctionRef resolveFunc=null;
+    List<Value> args=new ArrayList<Value>();
+    args.add(ENV);
     if (invoke instanceof Invokespecial) {
       resolveFunc=NVM_BC_RESOLVE_INVOKESPECIAL;
+      args.add(getString(((Invokespecial)invoke).getRuntimeClass()));
     }
  else     if (invoke instanceof Invokestatic) {
       resolveFunc=NVM_BC_RESOLVE_INVOKESTATIC;
     }
  else     if (invoke instanceof Invokevirtual) {
       resolveFunc=NVM_BC_RESOLVE_INVOKEVIRTUAL;
+      args.add(getString(((Invokevirtual)invoke).getRuntimeClass()));
     }
  else     if (invoke instanceof Invokeinterface) {
       resolveFunc=NVM_BC_RESOLVE_INVOKEINTERFACE;
     }
-    function.add(new Call(targetI8Ptr,resolveFunc,ENV,getString(invoke.getTargetClass()),getString(invoke.getMethodName()),getString(invoke.getMethodDesc()),getCaller(function),new ConstantBitcast(ptr,I8_PTR)));
+    args.add(getString(invoke.getTargetClass()));
+    args.add(getString(invoke.getMethodName()));
+    args.add(getString(invoke.getMethodDesc()));
+    args.add(getCaller(function));
+    args.add(new ConstantBitcast(ptr,I8_PTR));
+    function.add(new Call(targetI8Ptr,resolveFunc,args.toArray(new Value[args.size()])));
   }
  else   if (trampoline instanceof NativeCall) {
     NativeCall nativeCall=(NativeCall)trampoline;
@@ -33,6 +42,8 @@
  else   if (trampoline instanceof FieldAccessor) {
     FieldAccessor accessor=(FieldAccessor)trampoline;
     FunctionRef resolveFunc=null;
+    List<Value> args=new ArrayList<Value>();
+    args.add(ENV);
     if (accessor instanceof GetStatic) {
       resolveFunc=NVM_BC_RESOLVE_GETSTATIC;
     }
@@ -41,11 +52,18 @@
     }
  else     if (accessor instanceof GetField) {
       resolveFunc=NVM_BC_RESOLVE_GETFIELD;
+      args.add(getString(((GetField)accessor).getRuntimeClass()));
     }
  else     if (accessor instanceof PutField) {
       resolveFunc=NVM_BC_RESOLVE_PUTFIELD;
+      args.add(getString(((PutField)accessor).getRuntimeClass()));
     }
-    function.add(new Call(targetI8Ptr,resolveFunc,ENV,getString(accessor.getTargetClass()),getString(accessor.getFieldName()),getString(accessor.getFieldDesc()),getCaller(function),new ConstantBitcast(ptr,I8_PTR)));
+    args.add(getString(accessor.getTargetClass()));
+    args.add(getString(accessor.getFieldName()));
+    args.add(getString(accessor.getFieldDesc()));
+    args.add(getCaller(function));
+    args.add(new ConstantBitcast(ptr,I8_PTR));
+    function.add(new Call(targetI8Ptr,resolveFunc,args.toArray(new Value[args.size()])));
   }
   Variable targetFuncPtr=function.newVariable(functionRef.getType());
   function.add(new Bitcast(targetFuncPtr,targetI8Ptr.ref(),functionRef.getType()));

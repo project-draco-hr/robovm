@@ -23,6 +23,11 @@
     fieldGetter(field);
     fieldSetter(field);
   }
+  if (!sootClass.declaresMethodByName("<clinit>") && hasConstantValueTags(classFields)) {
+    Function clinit=module.newFunction(Linkage._private,mangleMethod(getInternalName(sootClass),"<clinit>",new ArrayList<soot.Type>(),soot.VoidType.v()),new FunctionType(VOID,ENV_PTR),"env");
+    finalClassFieldsInitializers(clinit);
+    clinit.add(new Ret());
+  }
   for (  SootMethod method : sootClass.getMethods()) {
     if (isNative(method)) {
       nativeMethod(method);
@@ -38,6 +43,9 @@
       if (!ancestorDeclaresMethod(sootClass,method)) {
         virtualLookupFunction(method);
       }
+    }
+    if (!method.isAbstract() && method.isSynchronized()) {
+      synchronizedFunctionWrapper(method);
     }
   }
   for (  Entry<Trampoline,FunctionRef> entry : trampolines.entrySet()) {

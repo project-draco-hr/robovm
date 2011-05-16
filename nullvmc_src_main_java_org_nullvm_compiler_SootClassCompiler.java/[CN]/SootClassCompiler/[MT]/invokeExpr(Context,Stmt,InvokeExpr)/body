@@ -15,7 +15,13 @@
   }
   Value result=null;
   if (canCallDirectly(ctx,expr)) {
-    Value function=new FunctionRef(mangleMethod(methodRef),getFunctionType(methodRef));
+    Value function=null;
+    if (resolveMethod(sootClass,methodRef).isSynchronized()) {
+      function=new FunctionRef(mangleMethod(methodRef) + "_synchronized",getFunctionType(methodRef));
+    }
+ else {
+      function=new FunctionRef(mangleMethod(methodRef),getFunctionType(methodRef));
+    }
     result=callOrInvoke(ctx,function,args.toArray(new Value[0]));
   }
  else {
@@ -24,13 +30,17 @@
     String methodName=methodRef.name();
     String methodDesc=getDescriptor(methodRef);
     if (expr instanceof SpecialInvokeExpr) {
-      trampoline=new Invokespecial(targetClassName,methodName,methodDesc);
+      soot.Type runtimeType=((SpecialInvokeExpr)expr).getBase().getType();
+      String runtimeClassName=runtimeType == NullType.v() ? targetClassName : getInternalName(runtimeType);
+      trampoline=new Invokespecial(runtimeClassName,targetClassName,methodName,methodDesc);
     }
  else     if (expr instanceof StaticInvokeExpr) {
       trampoline=new Invokestatic(targetClassName,methodName,methodDesc);
     }
  else     if (expr instanceof VirtualInvokeExpr) {
-      trampoline=new Invokevirtual(targetClassName,methodName,methodDesc);
+      soot.Type runtimeType=((VirtualInvokeExpr)expr).getBase().getType();
+      String runtimeClassName=runtimeType == NullType.v() ? targetClassName : getInternalName(runtimeType);
+      trampoline=new Invokevirtual(runtimeClassName,targetClassName,methodName,methodDesc);
     }
  else     if (expr instanceof InterfaceInvokeExpr) {
       trampoline=new Invokeinterface(targetClassName,methodName,methodDesc);

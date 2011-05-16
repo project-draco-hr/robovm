@@ -35,7 +35,10 @@
       result=widenToI32Value(ctx,v.ref(),isUnsigned(ref.getType()));
     }
  else {
-      Trampoline trampoline=new GetField(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
+      soot.Type runtimeType=ref.getBase().getType();
+      String targetClassName=getInternalName(ref.getFieldRef().declaringClass());
+      String runtimeClassName=runtimeType == NullType.v() ? targetClassName : getInternalName(runtimeType);
+      Trampoline trampoline=new GetField(runtimeClassName,targetClassName,ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
       addTrampoline(trampoline,new FunctionType(getType(ref.getType()),ENV_PTR,OBJECT_PTR));
       result=callOrInvokeTrampoline(ctx,trampoline,ENV,base);
       result=widenToI32Value(ctx,result,isUnsigned(ref.getType()));
@@ -314,7 +317,10 @@
         ctx.f().add(new Store(narrowedResult,getInstanceFieldPtr(ctx.f(),base,ref.getField())));
       }
  else {
-        Trampoline trampoline=new PutField(getInternalName(ref.getFieldRef().declaringClass()),ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
+        soot.Type runtimeType=ref.getBase().getType();
+        String targetClassName=getInternalName(ref.getFieldRef().declaringClass());
+        String runtimeClassName=runtimeType == NullType.v() ? targetClassName : getInternalName(runtimeType);
+        Trampoline trampoline=new PutField(runtimeClassName,targetClassName,ref.getFieldRef().name(),getDescriptor(ref.getFieldRef().type()));
         addTrampoline(trampoline,new FunctionType(VOID,ENV_PTR,OBJECT_PTR,leftType));
         callOrInvokeTrampoline(ctx,trampoline,ENV,base,narrowedResult);
       }
