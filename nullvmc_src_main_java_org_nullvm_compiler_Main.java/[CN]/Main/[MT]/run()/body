@@ -2,17 +2,19 @@
   if (jarFile != null) {
     classPathFiles.add(jarFile);
   }
-  if (mainClass == null) {
-    throw new IllegalArgumentException("No main class specified on command line or in JAR manifest");
-  }
   if (output == null) {
     throw new IllegalArgumentException("No output dir specified");
   }
   if (classpath == null) {
     throw new IllegalArgumentException("No classpath specified");
   }
+  if (target == null && mainClass == null) {
+    throw new IllegalArgumentException("No target and no main class specified");
+  }
   if (verbose) {
-    stdout.println("Using main class: " + mainClass);
+    if (mainClass != null) {
+      stdout.println("Using main class: " + mainClass);
+    }
     stdout.println("Run arguments: " + runArgs);
   }
   cache.mkdirs();
