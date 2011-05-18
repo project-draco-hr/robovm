@@ -11,4 +11,16 @@
     Scene.v().loadClassAndSupport(clazz.getClassName()).setApplicationClass();
   }
   Scene.v().loadNecessaryClasses();
+  Pack pack=PackManager.v().getPack("jb");
+  for (Iterator<?> it=pack.iterator(); it.hasNext(); ) {
+    Transform t=(Transform)it.next();
+    if ("jb.dae".equals(t.getPhaseName())) {
+      it.remove();
+    }
+  }
+  pack.insertAfter(new Transform("jb.dae",new BodyTransformer(){
+    @SuppressWarnings("rawtypes") @Override protected void internalTransform(    Body b,    String phaseName,    Map options){
+    }
+  }
+),"jb.cp");
 }
