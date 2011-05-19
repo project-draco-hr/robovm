@@ -307,7 +307,12 @@
       Value index=immediate(ctx,(Immediate)ref.getIndex());
       checkNull(ctx,base);
       checkBounds(ctx,base,index);
-      callOrInvoke(ctx,getArrayStore(leftOp.getType()),base,index,narrowedResult);
+      if (leftOp.getType() instanceof RefLikeType) {
+        callOrInvoke(ctx,NVM_BC_SET_OBJECT_ARRAY_ELEMENT,ENV,base,index,narrowedResult);
+      }
+ else {
+        callOrInvoke(ctx,getArrayStore(leftOp.getType()),base,index,narrowedResult);
+      }
     }
  else     if (leftOp instanceof InstanceFieldRef) {
       InstanceFieldRef ref=(InstanceFieldRef)leftOp;
