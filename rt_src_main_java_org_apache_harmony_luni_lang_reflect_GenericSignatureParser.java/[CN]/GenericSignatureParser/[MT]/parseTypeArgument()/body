@@ -1,0 +1,23 @@
+{
+  ListOfTypes extendsBound=new ListOfTypes(1);
+  ListOfTypes superBound=new ListOfTypes(1);
+  if (symbol == '*') {
+    scanSymbol();
+    extendsBound.add(Object.class);
+    return new ImplForWildcard(extendsBound,superBound);
+  }
+ else   if (symbol == '+') {
+    scanSymbol();
+    extendsBound.add(parseFieldTypeSignature());
+    return new ImplForWildcard(extendsBound,superBound);
+  }
+ else   if (symbol == '-') {
+    scanSymbol();
+    superBound.add(parseFieldTypeSignature());
+    extendsBound.add(Object.class);
+    return new ImplForWildcard(extendsBound,superBound);
+  }
+ else {
+    return parseFieldTypeSignature();
+  }
+}

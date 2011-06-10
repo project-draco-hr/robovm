@@ -17,22 +17,89 @@
     superclassName=new NullConstant(I8_PTR);
   }
   function.add(new Call(clazz,NVM_BC_ALLOCATE_CLASS,ENV,getString(getInternalName(sootClass)),superclassName,new VariableRef("classLoader",OBJECT_PTR),new IntegerConstant(sootClass.getModifiers()),sizeof(classFieldsType),sizeof(instanceFieldsType)));
+  for (  Tag tag : sootClass.getTags()) {
+    if (tag instanceof SourceFileTag) {
+      Value sourceFile=getString(((SourceFileTag)tag).getSourceFile());
+      function.add(new Call(NVM_BC_SET_SOURCE_FILE,ENV,clazz.ref(),sourceFile));
+    }
+ else     if (tag instanceof EnclosingMethodTag) {
+      EnclosingMethodTag emt=(EnclosingMethodTag)tag;
+      Value eClass=getString(emt.getEnclosingClass());
+      Value eMethod=getStringOrNull(emt.getEnclosingMethod());
+      Value eDesc=getStringOrNull(emt.getEnclosingMethodSig());
+      function.add(new Call(NVM_BC_SET_ENCLOSING_METHOD,ENV,clazz.ref(),eClass,eMethod,eDesc));
+    }
+ else     if (tag instanceof SignatureTag) {
+      Value signature=getString(((SignatureTag)tag).getSignature());
+      function.add(new Call(NVM_BC_SET_CLASS_SIGNATURE,ENV,clazz.ref(),signature));
+    }
+ else     if (tag instanceof InnerClassTag) {
+      InnerClassTag ict=(InnerClassTag)tag;
+      Value innerClass=getStringOrNull(ict.getInnerClass());
+      Value outerClass=getStringOrNull(ict.getOuterClass());
+      Value innerName=getStringOrNull(ict.getShortName());
+      Value innerClassAccess=new IntegerConstant(ict.getAccessFlags());
+      function.add(new Call(NVM_BC_ADD_INNER_CLASS,ENV,clazz.ref(),innerClass,outerClass,innerName,innerClassAccess));
+    }
+ else     if (tag instanceof VisibilityAnnotationTag) {
+      VisibilityAnnotationTag vat=(VisibilityAnnotationTag)tag;
+      if (vat.getVisibility() == AnnotationConstants.RUNTIME_VISIBLE) {
+        for (        AnnotationTag at : vat.getAnnotations()) {
+          Global g=module.newGlobal(getAnnotationTagValue(at),true);
+          function.add(new Call(NVM_BC_ADD_CLASS_ANNOTATION,ENV,clazz.ref(),new ConstantBitcast(g.ref(),I8_PTR)));
+        }
+      }
+    }
+  }
   for (  SootClass iface : sootClass.getInterfaces()) {
     function.add(new Call(NVM_BC_ADD_INTERFACE,ENV,clazz.ref(),getString(getInternalName(iface))));
   }
   for (  SootField field : classFields) {
     FunctionRef getter=new FunctionRef(mangleField(field) + "_getter",new FunctionType(getType(field.getType()),ENV_PTR));
     FunctionRef setter=new FunctionRef(mangleField(field) + "_setter",new FunctionType(VOID,ENV_PTR,getType(field.getType())));
-    function.add(new Call(NVM_BC_ADD_FIELD,ENV,clazz.ref(),getString(field.getName()),getString(getDescriptor(field.getType())),new IntegerConstant(field.getModifiers()),offsetof(classFieldsType,classFields.indexOf(field)),new ConstantBitcast(getter,I8_PTR),new ConstantBitcast(setter,I8_PTR)));
+    Variable fieldPtr=function.newVariable(FIELD_PTR);
+    function.add(new Call(fieldPtr,NVM_BC_ADD_FIELD,ENV,clazz.ref(),getString(field.getName()),getString(getDescriptor(field.getType())),new IntegerConstant(field.getModifiers()),offsetof(classFieldsType,classFields.indexOf(field)),new ConstantBitcast(getter,I8_PTR),new ConstantBitcast(setter,I8_PTR)));
+    for (    Tag tag : field.getTags()) {
+      if (tag instanceof SignatureTag) {
+        Value signature=getString(((SignatureTag)tag).getSignature());
+        function.add(new Call(NVM_BC_SET_FIELD_SIGNATURE,ENV,fieldPtr.ref(),signature));
+      }
+ else       if (tag instanceof VisibilityAnnotationTag) {
+        VisibilityAnnotationTag vat=(VisibilityAnnotationTag)tag;
+        if (vat.getVisibility() == AnnotationConstants.RUNTIME_VISIBLE) {
+          for (          AnnotationTag at : vat.getAnnotations()) {
+            Global g=module.newGlobal(getAnnotationTagValue(at),true);
+            function.add(new Call(NVM_BC_ADD_FIELD_ANNOTATION,ENV,fieldPtr.ref(),new ConstantBitcast(g.ref(),I8_PTR)));
+          }
+        }
+      }
+    }
   }
   for (  SootField field : instanceFields) {
     FunctionRef getter=new FunctionRef(mangleField(field) + "_getter",new FunctionType(getType(field.getType()),ENV_PTR,OBJECT_PTR));
     FunctionRef setter=new FunctionRef(mangleField(field) + "_setter",new FunctionType(VOID,ENV_PTR,OBJECT_PTR,getType(field.getType())));
-    function.add(new Call(NVM_BC_ADD_FIELD,ENV,clazz.ref(),getString(field.getName()),getString(getDescriptor(field.getType())),new IntegerConstant(field.getModifiers()),offsetof(instanceFieldsType,instanceFields.indexOf(field)),new ConstantBitcast(getter,I8_PTR),new ConstantBitcast(setter,I8_PTR)));
+    Variable fieldPtr=function.newVariable(FIELD_PTR);
+    function.add(new Call(fieldPtr,NVM_BC_ADD_FIELD,ENV,clazz.ref(),getString(field.getName()),getString(getDescriptor(field.getType())),new IntegerConstant(field.getModifiers()),offsetof(instanceFieldsType,instanceFields.indexOf(field)),new ConstantBitcast(getter,I8_PTR),new ConstantBitcast(setter,I8_PTR)));
+    for (    Tag tag : field.getTags()) {
+      if (tag instanceof SignatureTag) {
+        Value signature=getString(((SignatureTag)tag).getSignature());
+        function.add(new Call(NVM_BC_SET_FIELD_SIGNATURE,ENV,fieldPtr.ref(),signature));
+      }
+ else       if (tag instanceof VisibilityAnnotationTag) {
+        VisibilityAnnotationTag vat=(VisibilityAnnotationTag)tag;
+        if (vat.getVisibility() == AnnotationConstants.RUNTIME_VISIBLE) {
+          for (          AnnotationTag at : vat.getAnnotations()) {
+            Global g=module.newGlobal(getAnnotationTagValue(at),true);
+            function.add(new Call(NVM_BC_ADD_FIELD_ANNOTATION,ENV,fieldPtr.ref(),new ConstantBitcast(g.ref(),I8_PTR)));
+          }
+        }
+      }
+    }
   }
   if (!sootClass.declaresMethodByName("<clinit>") && hasConstantValueTags(classFields)) {
     Value functionRef=new ConstantBitcast(new FunctionRef(mangleMethod(getInternalName(sootClass),"<clinit>",new ArrayList<soot.Type>(),soot.VoidType.v()),new FunctionType(VOID,ENV_PTR)),I8_PTR);
-    function.add(new Call(NVM_BC_ADD_METHOD,ENV,clazz.ref(),getString("<clinit>"),getString("()V"),new IntegerConstant(Modifier.STATIC),functionRef,new NullConstant(I8_PTR),new NullConstant(I8_PTR)));
+    Variable methodPtr=function.newVariable(METHOD_PTR);
+    function.add(new Call(methodPtr,NVM_BC_ADD_METHOD,ENV,clazz.ref(),getString("<clinit>"),getString("()V"),new IntegerConstant(Modifier.STATIC),functionRef,new NullConstant(I8_PTR),new NullConstant(I8_PTR)));
   }
   for (  SootMethod method : sootClass.getMethods()) {
     Value functionRef=new NullConstant(I8_PTR);
@@ -49,7 +116,31 @@
         lookup=new ConstantBitcast(new FunctionRef(mangleMethod(method) + "_lookup",getFunctionType(method)),I8_PTR);
       }
     }
-    function.add(new Call(NVM_BC_ADD_METHOD,ENV,clazz.ref(),getString(method.getName()),getString(getDescriptor(method)),new IntegerConstant(method.getModifiers()),functionRef,synchronizedRef,lookup));
+    Variable methodPtr=function.newVariable(METHOD_PTR);
+    function.add(new Call(methodPtr,NVM_BC_ADD_METHOD,ENV,clazz.ref(),getString(method.getName()),getString(getDescriptor(method)),new IntegerConstant(method.getModifiers()),functionRef,synchronizedRef,lookup));
+    for (    SootClass ex : method.getExceptions()) {
+      function.add(new Call(NVM_BC_ADD_METHOD_EXCEPTION,ENV,methodPtr.ref(),getString(getInternalName(ex))));
+    }
+    for (    Tag tag : method.getTags()) {
+      if (tag instanceof SignatureTag) {
+        Value signature=getString(((SignatureTag)tag).getSignature());
+        function.add(new Call(NVM_BC_SET_METHOD_SIGNATURE,ENV,methodPtr.ref(),signature));
+      }
+ else       if (tag instanceof AnnotationDefaultTag) {
+        Constant def=getAnnotationElementValue(((AnnotationDefaultTag)tag).getDefaultVal());
+        Global global=module.newGlobal(def,true);
+        function.add(new Call(NVM_BC_SET_ANNOTATION_DEFAULT,ENV,methodPtr.ref(),new ConstantBitcast(global.ref(),I8_PTR)));
+      }
+ else       if (tag instanceof VisibilityAnnotationTag) {
+        VisibilityAnnotationTag vat=(VisibilityAnnotationTag)tag;
+        if (vat.getVisibility() == AnnotationConstants.RUNTIME_VISIBLE) {
+          for (          AnnotationTag at : vat.getAnnotations()) {
+            Global g=module.newGlobal(getAnnotationTagValue(at),true);
+            function.add(new Call(NVM_BC_ADD_METHOD_ANNOTATION,ENV,methodPtr.ref(),new ConstantBitcast(g.ref(),I8_PTR)));
+          }
+        }
+      }
+    }
   }
   function.add(new Call(NVM_BC_REGISTER_CLASS,ENV,clazz.ref()));
   function.add(new Store(clazz.ref(),THE_CLASS.ref()));

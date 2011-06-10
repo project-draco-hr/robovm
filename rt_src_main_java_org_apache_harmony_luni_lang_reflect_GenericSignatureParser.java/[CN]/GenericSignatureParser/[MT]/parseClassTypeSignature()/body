@@ -1,0 +1,23 @@
+{
+  expect('L');
+  StringBuilder qualIdent=new StringBuilder();
+  scanIdentifier();
+  while (symbol == '/') {
+    scanSymbol();
+    qualIdent.append(identifier).append(".");
+    scanIdentifier();
+  }
+  qualIdent.append(this.identifier);
+  ListOfTypes typeArgs=parseOptTypeArguments();
+  ImplForType parentType=new ImplForType(null,qualIdent.toString(),typeArgs,loader);
+  ImplForType type=parentType;
+  while (symbol == '.') {
+    scanSymbol();
+    scanIdentifier();
+    qualIdent.append("$").append(identifier);
+    typeArgs=parseOptTypeArguments();
+    type=new ImplForType(parentType,qualIdent.toString(),typeArgs,loader);
+  }
+  expect(';');
+  return type;
+}

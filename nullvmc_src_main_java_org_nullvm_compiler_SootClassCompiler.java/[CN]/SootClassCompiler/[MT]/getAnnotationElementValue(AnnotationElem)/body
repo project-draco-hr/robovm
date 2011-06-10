@@ -1,0 +1,49 @@
+{
+  StructureType type=getAnnotationElementType(ae);
+  Value name=getStringOrNull(ae.getName());
+  Value kind=new IntegerConstant((byte)ae.getKind());
+  if (ae instanceof AnnotationIntElem) {
+    AnnotationIntElem aie=(AnnotationIntElem)ae;
+    return new StructureConstant(type,name,kind,new IntegerConstant(aie.getValue()));
+  }
+ else   if (ae instanceof AnnotationLongElem) {
+    AnnotationLongElem ale=(AnnotationLongElem)ae;
+    return new StructureConstant(type,name,kind,new IntegerConstant(ale.getValue()));
+  }
+ else   if (ae instanceof AnnotationFloatElem) {
+    AnnotationFloatElem afe=(AnnotationFloatElem)ae;
+    return new StructureConstant(type,name,kind,new FloatingPointConstant(afe.getValue()));
+  }
+ else   if (ae instanceof AnnotationDoubleElem) {
+    AnnotationDoubleElem ade=(AnnotationDoubleElem)ae;
+    return new StructureConstant(type,name,kind,new FloatingPointConstant(ade.getValue()));
+  }
+ else   if (ae instanceof AnnotationStringElem) {
+    AnnotationStringElem ase=(AnnotationStringElem)ae;
+    return new StructureConstant(type,name,kind,getStringOrNull(ase.getValue()));
+  }
+ else   if (ae instanceof AnnotationClassElem) {
+    AnnotationClassElem ace=(AnnotationClassElem)ae;
+    return new StructureConstant(type,name,kind,getStringOrNull(ace.getDesc()));
+  }
+ else   if (ae instanceof AnnotationEnumElem) {
+    AnnotationEnumElem aee=(AnnotationEnumElem)ae;
+    return new StructureConstant(type,name,kind,getStringOrNull(aee.getTypeName()),getStringOrNull(aee.getConstantName()));
+  }
+ else   if (ae instanceof AnnotationArrayElem) {
+    AnnotationArrayElem aae=(AnnotationArrayElem)ae;
+    Value[] values=new Value[aae.getNumValues() + 3];
+    values[0]=name;
+    values[1]=kind;
+    values[2]=new IntegerConstant((char)aae.getNumValues());
+    for (int i=0; i < aae.getNumValues(); i++) {
+      values[i + 3]=getAnnotationElementValue(aae.getValueAt(i));
+    }
+    return new StructureConstant(type,values);
+  }
+ else   if (ae instanceof AnnotationAnnotationElem) {
+    AnnotationAnnotationElem aae=(AnnotationAnnotationElem)ae;
+    return new StructureConstant(type,name,kind,getAnnotationTagValue(aae.getValue()));
+  }
+  throw new IllegalArgumentException("Unknown AnnotationElem type: " + ae.getClass());
+}

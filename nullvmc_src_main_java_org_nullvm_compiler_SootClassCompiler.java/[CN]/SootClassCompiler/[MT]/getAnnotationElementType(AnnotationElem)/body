@@ -1,0 +1,39 @@
+{
+  if (ae instanceof AnnotationIntElem) {
+    return new StructureType(I8_PTR,I8,I32);
+  }
+ else   if (ae instanceof AnnotationLongElem) {
+    return new StructureType(I8_PTR,I8,I64);
+  }
+ else   if (ae instanceof AnnotationFloatElem) {
+    return new StructureType(I8_PTR,I8,FLOAT);
+  }
+ else   if (ae instanceof AnnotationDoubleElem) {
+    return new StructureType(I8_PTR,I8,DOUBLE);
+  }
+ else   if (ae instanceof AnnotationStringElem) {
+    return new StructureType(I8_PTR,I8,I8_PTR);
+  }
+ else   if (ae instanceof AnnotationClassElem) {
+    return new StructureType(I8_PTR,I8,I8_PTR);
+  }
+ else   if (ae instanceof AnnotationEnumElem) {
+    return new StructureType(I8_PTR,I8,I8_PTR,I8_PTR);
+  }
+ else   if (ae instanceof AnnotationArrayElem) {
+    AnnotationArrayElem aae=(AnnotationArrayElem)ae;
+    Type[] types=new Type[aae.getNumValues() + 3];
+    types[0]=I8_PTR;
+    types[1]=I8;
+    types[2]=I16;
+    for (int i=0; i < aae.getNumValues(); i++) {
+      types[i + 3]=getAnnotationElementType(aae.getValueAt(i));
+    }
+    return new StructureType(types);
+  }
+ else   if (ae instanceof AnnotationAnnotationElem) {
+    AnnotationAnnotationElem aae=(AnnotationAnnotationElem)ae;
+    return new StructureType(I8_PTR,I8,getAnnotationTagType(aae.getValue()));
+  }
+  throw new IllegalArgumentException("Unknown AnnotationElem type: " + ae.getClass());
+}

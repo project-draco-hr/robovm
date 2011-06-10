@@ -1,0 +1,16 @@
+{
+  HashMap<Class<?>,Annotation> map=new HashMap<Class<?>,Annotation>();
+  Annotation[] annos=getDeclaredAnnotations();
+  for (int i=annos.length - 1; i >= 0; --i)   map.put(annos[i].annotationType(),annos[i]);
+  for (Class<?> sup=getSuperclass(); sup != null; sup=sup.getSuperclass()) {
+    annos=sup.getDeclaredAnnotations();
+    for (int i=annos.length - 1; i >= 0; --i) {
+      Class<?> clazz=annos[i].annotationType();
+      if (!map.containsKey(clazz) && clazz.isAnnotationPresent(Inherited.class)) {
+        map.put(clazz,annos[i]);
+      }
+    }
+  }
+  Collection<Annotation> coll=map.values();
+  return coll.toArray(new Annotation[coll.size()]);
+}

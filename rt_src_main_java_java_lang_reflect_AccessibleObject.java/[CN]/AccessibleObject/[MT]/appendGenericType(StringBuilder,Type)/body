@@ -1,0 +1,41 @@
+{
+  if (obj instanceof TypeVariable) {
+    sb.append(((TypeVariable)obj).getName());
+  }
+ else   if (obj instanceof ParameterizedType) {
+    sb.append(obj.toString());
+  }
+ else   if (obj instanceof GenericArrayType) {
+    Type simplified=((GenericArrayType)obj).getGenericComponentType();
+    appendGenericType(sb,simplified);
+    sb.append("[]");
+  }
+ else   if (obj instanceof Class) {
+    Class c=((Class<?>)obj);
+    if (c.isArray()) {
+      String as[]=c.getName().split("\\[");
+      int len=as.length - 1;
+      if (as[len].length() > 1) {
+        sb.append(as[len].substring(1,as[len].length() - 1));
+      }
+ else {
+        char ch=as[len].charAt(0);
+        if (ch == 'I')         sb.append("int");
+ else         if (ch == 'B')         sb.append("byte");
+ else         if (ch == 'J')         sb.append("long");
+ else         if (ch == 'F')         sb.append("float");
+ else         if (ch == 'D')         sb.append("double");
+ else         if (ch == 'S')         sb.append("short");
+ else         if (ch == 'C')         sb.append("char");
+ else         if (ch == 'Z')         sb.append("boolean");
+ else         if (ch == 'V')         sb.append("void");
+      }
+      for (int i=0; i < len; i++) {
+        sb.append("[]");
+      }
+    }
+ else {
+      sb.append(c.getName());
+    }
+  }
+}
