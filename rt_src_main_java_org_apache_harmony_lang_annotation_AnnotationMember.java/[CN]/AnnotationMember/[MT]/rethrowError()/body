@@ -1,0 +1,28 @@
+{
+  if (tag == ERROR) {
+    if (value instanceof TypeNotPresentException) {
+      TypeNotPresentException tnpe=(TypeNotPresentException)value;
+      throw new TypeNotPresentException(tnpe.typeName(),tnpe.getCause());
+    }
+ else     if (value instanceof EnumConstantNotPresentException) {
+      EnumConstantNotPresentException ecnpe=(EnumConstantNotPresentException)value;
+      throw new EnumConstantNotPresentException(ecnpe.enumType(),ecnpe.constantName());
+    }
+ else     if (value instanceof ArrayStoreException) {
+      ArrayStoreException ase=(ArrayStoreException)value;
+      throw new ArrayStoreException(ase.getMessage());
+    }
+    Throwable error=(Throwable)value;
+    StackTraceElement[] ste=error.getStackTrace();
+    ByteArrayOutputStream bos=new ByteArrayOutputStream(ste == null ? 512 : (ste.length + 1) * 80);
+    ObjectOutputStream oos=new ObjectOutputStream(bos);
+    oos.writeObject(error);
+    oos.flush();
+    oos.close();
+    ByteArrayInputStream bis=new ByteArrayInputStream(bos.toByteArray());
+    ObjectInputStream ois=new ObjectInputStream(bis);
+    error=(Throwable)ois.readObject();
+    ois.close();
+    throw error;
+  }
+}

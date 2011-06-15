@@ -1,0 +1,24 @@
+{
+  os.defaultReadObject();
+  AnnotationMember[] defs=getElementsDescription(klazz);
+  AnnotationMember[] old=elements;
+  List<AnnotationMember> merged=new ArrayList<AnnotationMember>(defs.length + old.length);
+  nextOld:   for (  AnnotationMember el1 : old) {
+    for (    AnnotationMember el2 : defs) {
+      if (el2.name.equals(el1.name)) {
+        continue nextOld;
+      }
+    }
+    merged.add(el1);
+  }
+  nextNew:   for (  AnnotationMember def : defs) {
+    for (    AnnotationMember val : old) {
+      if (val.name.equals(def.name)) {
+        merged.add(val.setDefinition(def));
+        continue nextNew;
+      }
+    }
+    merged.add(def);
+  }
+  elements=merged.toArray(new AnnotationMember[merged.size()]);
+}

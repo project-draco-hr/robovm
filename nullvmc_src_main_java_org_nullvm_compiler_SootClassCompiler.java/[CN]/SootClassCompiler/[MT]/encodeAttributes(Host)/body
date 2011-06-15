@@ -1,0 +1,65 @@
+{
+  List<Value> attributes=new ArrayList<Value>();
+  for (  Tag tag : host.getTags()) {
+    if (tag instanceof SourceFileTag) {
+      Value sourceFile=getString(((SourceFileTag)tag).getSourceFile());
+      attributes.add(new PackedStructureConstant(new PackedStructureType(I8,I8_PTR),new IntegerConstant(SOURCE_FILE),sourceFile));
+    }
+ else     if (tag instanceof EnclosingMethodTag) {
+      EnclosingMethodTag emt=(EnclosingMethodTag)tag;
+      Value eClass=getString(emt.getEnclosingClass());
+      Value eMethod=getStringOrNull(emt.getEnclosingMethod());
+      Value eDesc=getStringOrNull(emt.getEnclosingMethodSig());
+      attributes.add(new PackedStructureConstant(new PackedStructureType(I8,I8_PTR,I8_PTR,I8_PTR),new IntegerConstant(ENCLOSING_METHOD),eClass,eMethod,eDesc));
+    }
+ else     if (tag instanceof SignatureTag) {
+      Value signature=getString(((SignatureTag)tag).getSignature());
+      attributes.add(new PackedStructureConstant(new PackedStructureType(I8,I8_PTR),new IntegerConstant(SIGNATURE),signature));
+    }
+ else     if (tag instanceof InnerClassTag) {
+      InnerClassTag ict=(InnerClassTag)tag;
+      Value innerClass=getStringOrNull(ict.getInnerClass());
+      Value outerClass=getStringOrNull(ict.getOuterClass());
+      Value innerName=getStringOrNull(ict.getShortName());
+      Value innerClassAccess=new IntegerConstant(ict.getAccessFlags());
+      attributes.add(new PackedStructureConstant(new PackedStructureType(I8,I8_PTR,I8_PTR,I8_PTR,I32),new IntegerConstant(INNER_CLASS),innerClass,outerClass,innerName,innerClassAccess));
+    }
+ else     if (tag instanceof AnnotationDefaultTag) {
+      StructureConstant value=encodeAnnotationElementValue(((AnnotationDefaultTag)tag).getDefaultVal());
+      attributes.add(new PackedStructureConstant(new PackedStructureType(I8,value.getType()),new IntegerConstant(ANNOTATION_DEFAULT),value));
+    }
+ else     if (tag instanceof VisibilityAnnotationTag) {
+      VisibilityAnnotationTag vat=(VisibilityAnnotationTag)tag;
+      if (vat.getVisibility() == AnnotationConstants.RUNTIME_VISIBLE) {
+        Type[] types=new Type[vat.getAnnotations().size()];
+        Value[] values=new Value[vat.getAnnotations().size()];
+        int i=0;
+        for (        AnnotationTag at : vat.getAnnotations()) {
+          values[i]=encodeAnnotationTagValue(at);
+          types[i]=values[i].getType();
+          i++;
+        }
+        attributes.add(new PackedStructureConstant(new PackedStructureType(I8,I32,new PackedStructureType(types)),new IntegerConstant(RUNTIME_VISIBLE_ANNOTATIONS),new IntegerConstant(vat.getAnnotations().size()),new PackedStructureConstant(new PackedStructureType(types),values)));
+      }
+    }
+  }
+  if (host instanceof SootMethod) {
+    List<SootClass> exceptions=((SootMethod)host).getExceptions();
+    if (!exceptions.isEmpty()) {
+      Value[] values=new Value[exceptions.size()];
+      for (int i=0; i < exceptions.size(); i++) {
+        values[i]=getString(getInternalName(exceptions.get(i)));
+      }
+      attributes.add(new PackedStructureConstant(new PackedStructureType(I8,I32,new ArrayType(exceptions.size(),I8_PTR)),new IntegerConstant(EXCEPTIONS),new IntegerConstant(exceptions.size()),new ArrayConstant(new ArrayType(exceptions.size(),I8_PTR),values)));
+    }
+  }
+  if (attributes.isEmpty()) {
+    return null;
+  }
+  attributes.add(0,new IntegerConstant(attributes.size()));
+  Type[] types=new Type[attributes.size()];
+  for (int i=0; i < types.length; i++) {
+    types[i]=attributes.get(i).getType();
+  }
+  return new PackedStructureConstant(new PackedStructureType(types),attributes.toArray(new Value[0]));
+}

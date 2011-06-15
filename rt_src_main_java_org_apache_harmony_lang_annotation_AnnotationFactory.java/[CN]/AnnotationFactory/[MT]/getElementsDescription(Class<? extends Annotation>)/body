@@ -1,0 +1,24 @@
+{
+  AnnotationMember[] desc=cache.get(annotationType);
+  if (desc == null) {
+    if (!annotationType.isAnnotation()) {
+      throw new IllegalArgumentException("Type is not annotation: " + annotationType.getName());
+    }
+    Method[] m=annotationType.getDeclaredMethods();
+    desc=new AnnotationMember[m.length];
+    int idx=0;
+    for (    Method element : m) {
+      String name=element.getName();
+      Class<?> type=element.getReturnType();
+      try {
+        desc[idx]=new AnnotationMember(name,element.getDefaultValue(),type,element);
+      }
+ catch (      Throwable t) {
+        desc[idx]=new AnnotationMember(name,t,type,element);
+      }
+      idx++;
+    }
+    cache.put(annotationType,desc);
+  }
+  return desc;
+}
