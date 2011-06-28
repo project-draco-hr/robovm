@@ -1,0 +1,20 @@
+{
+  if (!sourceInited) {
+    StackTraceElement[] elements=(new Throwable()).getStackTrace();
+    int i=0;
+    String current=null;
+    FINDLOG:     for (; i < elements.length; i++) {
+      current=elements[i].getClassName();
+      if (current.equals(Logger.class.getName())) {
+        break FINDLOG;
+      }
+    }
+    while (++i < elements.length && elements[i].getClassName().equals(current)) {
+    }
+    if (i < elements.length) {
+      this.sourceClassName=elements[i].getClassName();
+      this.sourceMethodName=elements[i].getMethodName();
+    }
+    sourceInited=true;
+  }
+}

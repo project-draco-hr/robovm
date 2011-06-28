@@ -1,0 +1,23 @@
+{
+  if (null == host || "".equals(host)) {
+    throw new IllegalArgumentException(Messages.getString("logging.C"));
+  }
+  int p=0;
+  try {
+    p=Integer.parseInt(port);
+  }
+ catch (  NumberFormatException e) {
+    throw new IllegalArgumentException(Messages.getString("logging.D"));
+  }
+  if (p <= 0) {
+    throw new IllegalArgumentException(Messages.getString("logging.D"));
+  }
+  try {
+    this.socket=new Socket(host,p);
+  }
+ catch (  IOException e) {
+    getErrorManager().error(Messages.getString("logging.E"),e,ErrorManager.OPEN_FAILURE);
+    throw e;
+  }
+  super.internalSetOutputStream(new BufferedOutputStream(this.socket.getOutputStream()));
+}

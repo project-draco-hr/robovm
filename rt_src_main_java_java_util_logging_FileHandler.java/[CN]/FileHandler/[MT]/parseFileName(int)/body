@@ -1,0 +1,59 @@
+{
+  int cur=0;
+  int next=0;
+  boolean hasUniqueID=false;
+  boolean hasGeneration=false;
+  String homePath=System.getProperty("user.home");
+  if (homePath == null) {
+    throw new NullPointerException();
+  }
+  boolean homePathHasSepEnd=homePath.endsWith(File.separator);
+  String tempPath=System.getProperty("java.io.tmpdir");
+  tempPath=tempPath == null ? homePath : tempPath;
+  boolean tempPathHasSepEnd=tempPath.endsWith(File.separator);
+  StringBuilder sb=new StringBuilder();
+  pattern=pattern.replace('/',File.separatorChar);
+  char[] value=pattern.toCharArray();
+  while ((next=pattern.indexOf('%',cur)) >= 0) {
+    if (++next < pattern.length()) {
+switch (value[next]) {
+case 'g':
+        sb.append(value,cur,next - cur - 1).append(gen);
+      hasGeneration=true;
+    break;
+case 'u':
+  sb.append(value,cur,next - cur - 1).append(uniqueID);
+hasUniqueID=true;
+break;
+case 't':
+sb.append(value,cur,next - cur - 1).append(tempPath);
+if (!tempPathHasSepEnd) {
+sb.append(File.separator);
+}
+break;
+case 'h':
+sb.append(value,cur,next - cur - 1).append(homePath);
+if (!homePathHasSepEnd) {
+sb.append(File.separator);
+}
+break;
+case '%':
+sb.append(value,cur,next - cur - 1).append('%');
+break;
+default :
+sb.append(value,cur,next - cur);
+}
+cur=++next;
+}
+ else {
+}
+}
+sb.append(value,cur,value.length - cur);
+if (!hasGeneration && count > 1) {
+sb.append(".").append(gen);
+}
+if (!hasUniqueID && uniqueID > 0) {
+sb.append(".").append(uniqueID);
+}
+return sb.toString();
+}

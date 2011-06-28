@@ -1,0 +1,38 @@
+{
+  Logger parent=null;
+  int lastSeparator;
+  String parentName=name;
+  while ((lastSeparator=parentName.lastIndexOf('.')) != -1) {
+    parentName=parentName.substring(0,lastSeparator);
+    parent=loggers.get(parentName);
+    if (parent != null) {
+      setParent(logger,parent);
+      break;
+    }
+ else     if (getProperty(parentName + ".level") != null || getProperty(parentName + ".handlers") != null) {
+      parent=Logger.getLogger(parentName);
+      setParent(logger,parent);
+      break;
+    }
+  }
+  if (parent == null && null != (parent=loggers.get(""))) {
+    setParent(logger,parent);
+  }
+  Collection<Logger> allLoggers=loggers.values();
+  for (  final Logger child : allLoggers) {
+    Logger oldParent=child.getParent();
+    if (parent == oldParent && (name.length() == 0 || child.getName().startsWith(name + '.'))) {
+      final Logger thisLogger=logger;
+      AccessController.doPrivileged(new PrivilegedAction<Object>(){
+        public Object run(){
+          child.setParent(thisLogger);
+          return null;
+        }
+      }
+);
+      if (null != oldParent) {
+        oldParent.children.remove(child);
+      }
+    }
+  }
+}

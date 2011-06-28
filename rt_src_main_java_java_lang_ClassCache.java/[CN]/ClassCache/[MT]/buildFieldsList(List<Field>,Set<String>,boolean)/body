@@ -1,0 +1,15 @@
+{
+  for (Class<?> c=clazz; c != null; c=c.getSuperclass()) {
+    for (    Field f : c.getClassCache().getDeclaredFields(false,publicOnly)) {
+      String s=f.toString();
+      if (!seen.contains(s)) {
+        result.add(f);
+        seen.add(s);
+      }
+    }
+    for (    Class<?> intf : c.getInterfaces()) {
+      intf.getClassCache().buildFieldsList(result,seen,publicOnly);
+    }
+  }
+  return result;
+}

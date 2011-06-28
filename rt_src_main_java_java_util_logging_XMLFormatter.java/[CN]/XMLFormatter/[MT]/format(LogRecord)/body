@@ -1,0 +1,35 @@
+{
+  long time=r.getMillis();
+  String date=dataFormat.format(new Date(time)).replace(' ','T');
+  StringBuilder sb=new StringBuilder();
+  sb.append("<record>").append(lineSeperator);
+  sb.append(indent).append("<date>").append(date).append("</date>").append(lineSeperator);
+  sb.append(indent).append("<millis>").append(time).append("</millis>").append(lineSeperator);
+  sb.append(indent).append("<sequence>").append(r.getSequenceNumber()).append("</sequence>").append(lineSeperator);
+  String content=r.getLoggerName();
+  if (null != content) {
+    sb.append(indent).append("<logger>").append(convertSpecialSymbol(content)).append("</logger>").append(lineSeperator);
+  }
+  sb.append(indent).append("<level>").append(r.getLevel().getName()).append("</level>").append(lineSeperator);
+  content=r.getSourceClassName();
+  if (null != content) {
+    sb.append(indent).append("<class>").append(content).append("</class>").append(lineSeperator);
+  }
+  content=r.getSourceMethodName();
+  if (null != content) {
+    sb.append(indent).append("<method>").append(convertSpecialSymbol(content)).append("</method>").append(lineSeperator);
+  }
+  sb.append(indent).append("<thread>").append(r.getThreadID()).append("</thread>").append(lineSeperator);
+  formatMessages(r,sb);
+  Object[] params;
+  if ((params=r.getParameters()) != null) {
+    String elementString=null;
+    for (    Object element : params) {
+      elementString=element.toString();
+      sb.append(indent).append("<param>").append(convertSpecialSymbol(elementString)).append("</param>").append(lineSeperator);
+    }
+  }
+  formatThrowable(r,sb);
+  sb.append("</record>").append(lineSeperator);
+  return sb.toString();
+}

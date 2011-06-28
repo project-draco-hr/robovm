@@ -1,0 +1,20 @@
+{
+  Object oldValue=event.getOldValue();
+  Object newValue=event.getNewValue();
+  if (oldValue != null && newValue != null && oldValue.equals(newValue)) {
+    return;
+  }
+  PropertyChangeListener[] gListeners;
+synchronized (this) {
+    gListeners=globalListeners.toArray(new PropertyChangeListener[0]);
+  }
+  for (int i=0; i < gListeners.length; i++) {
+    gListeners[i].propertyChange(event);
+  }
+  if (event.getPropertyName() != null) {
+    PropertyChangeSupport namedListener=children.get(event.getPropertyName());
+    if (namedListener != null) {
+      namedListener.firePropertyChange(event);
+    }
+  }
+}

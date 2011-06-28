@@ -1,0 +1,37 @@
+{
+  while (true) {
+    uniqueID++;
+    for (int generation=0; generation < count; generation++) {
+      files[generation]=new File(parseFileName(generation));
+    }
+    fileName=files[0].getAbsolutePath();
+synchronized (allLocks) {
+      if (null != allLocks.get(fileName)) {
+        continue;
+      }
+      if (files[0].exists() && (!append || files[0].length() >= limit)) {
+        for (int i=count - 1; i > 0; i--) {
+          if (files[i].exists()) {
+            files[i].delete();
+          }
+          files[i - 1].renameTo(files[i]);
+        }
+      }
+      FileOutputStream fileStream=new FileOutputStream(fileName + LCK_EXT);
+      FileChannel channel=fileStream.getChannel();
+      lock=channel.tryLock();
+      if (null == lock) {
+        try {
+          fileStream.close();
+        }
+ catch (        Exception e) {
+        }
+        continue;
+      }
+      allLocks.put(fileName,lock);
+      break;
+    }
+  }
+  output=new MeasureOutputStream(new BufferedOutputStream(new FileOutputStream(fileName,append)),files[0].length());
+  setOutputStream(output);
+}

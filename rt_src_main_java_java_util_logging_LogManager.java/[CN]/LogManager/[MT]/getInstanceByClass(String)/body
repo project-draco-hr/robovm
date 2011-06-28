@@ -1,0 +1,17 @@
+{
+  try {
+    Class<?> clazz=ClassLoader.getSystemClassLoader().loadClass(className);
+    return clazz.newInstance();
+  }
+ catch (  Exception e) {
+    try {
+      Class<?> clazz=Thread.currentThread().getContextClassLoader().loadClass(className);
+      return clazz.newInstance();
+    }
+ catch (    Exception innerE) {
+      System.err.println(Messages.getString("logging.20",className));
+      System.err.println(innerE);
+      return null;
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  if ((listener != null) && (propertyName != null)) {
+    PropertyChangeSupport listeners=children.get(propertyName);
+    if (listeners == null) {
+      listeners=new PropertyChangeSupport(source);
+      children.put(propertyName,listeners);
+    }
+    if (listener instanceof PropertyChangeListenerProxy) {
+      PropertyChangeListenerProxy proxy=(PropertyChangeListenerProxy)listener;
+      listeners.addPropertyChangeListener(new PropertyChangeListenerProxy(proxy.getPropertyName(),(PropertyChangeListener)proxy.getListener()));
+    }
+ else {
+      listeners.addPropertyChangeListener(listener);
+    }
+  }
+}

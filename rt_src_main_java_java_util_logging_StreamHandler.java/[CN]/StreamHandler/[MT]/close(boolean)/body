@@ -1,0 +1,19 @@
+{
+  if (null != this.os) {
+    if (this.writerNotInitialized) {
+      initializeWritter();
+    }
+    write(getFormatter().getTail(this));
+    try {
+      this.writer.flush();
+      if (closeStream) {
+        this.writer.close();
+        this.writer=null;
+        this.os=null;
+      }
+    }
+ catch (    Exception e) {
+      getErrorManager().error(Messages.getString("logging.15"),e,ErrorManager.CLOSE_FAILURE);
+    }
+  }
+}

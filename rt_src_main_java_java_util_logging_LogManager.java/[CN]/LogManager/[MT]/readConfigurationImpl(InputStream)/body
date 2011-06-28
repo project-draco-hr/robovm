@@ -1,0 +1,24 @@
+{
+  reset();
+  props.load(ins);
+  Logger root=loggers.get("");
+  if (root != null) {
+    root.setManager(this);
+  }
+  String configs=props.getProperty("config");
+  if (null != configs) {
+    StringTokenizer st=new StringTokenizer(configs," ");
+    while (st.hasMoreTokens()) {
+      String configerName=st.nextToken();
+      getInstanceByClass(configerName);
+    }
+  }
+  Collection<Logger> allLoggers=loggers.values();
+  for (  Logger logger : allLoggers) {
+    String property=props.getProperty(logger.getName() + ".level");
+    if (null != property) {
+      logger.setLevel(Level.parse(property));
+    }
+  }
+  listeners.firePropertyChange(null,null,null);
+}

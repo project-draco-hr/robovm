@@ -1,0 +1,38 @@
+{
+  String levelProperty=manager.getProperty(name + ".level");
+  if (levelProperty != null) {
+    try {
+      manager.setLevelRecursively(Logger.this,Level.parse(levelProperty));
+    }
+ catch (    IllegalArgumentException invalidLevel) {
+      invalidLevel.printStackTrace();
+    }
+  }
+  String handlersPropertyName="".equals(name) ? "handlers" : name + ".handlers";
+  String handlersProperty=manager.getProperty(handlersPropertyName);
+  if (handlersProperty != null) {
+    for (    String handlerName : handlersProperty.split(",|\\s")) {
+      if (handlerName.equals("")) {
+        continue;
+      }
+      final Handler handler;
+      try {
+        handler=(Handler)LogManager.getInstanceByClass(handlerName);
+      }
+ catch (      Exception invalidHandlerName) {
+        invalidHandlerName.printStackTrace();
+        continue;
+      }
+      try {
+        String level=manager.getProperty(handlerName + ".level");
+        if (level != null) {
+          handler.setLevel(Level.parse(level));
+        }
+      }
+ catch (      Exception invalidLevel) {
+        invalidLevel.printStackTrace();
+      }
+      handlers.add(handler);
+    }
+  }
+}

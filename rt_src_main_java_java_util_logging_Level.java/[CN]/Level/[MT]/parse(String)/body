@@ -1,0 +1,33 @@
+{
+  if (name == null) {
+    throw new NullPointerException(Messages.getString("logging.1C"));
+  }
+  boolean isNameAnInt;
+  int nameAsInt;
+  try {
+    nameAsInt=Integer.parseInt(name);
+    isNameAnInt=true;
+  }
+ catch (  NumberFormatException e) {
+    nameAsInt=0;
+    isNameAnInt=false;
+  }
+synchronized (levels) {
+    for (    Level level : levels) {
+      if (name.equals(level.getName())) {
+        return level;
+      }
+    }
+    if (isNameAnInt) {
+      for (      Level level : levels) {
+        if (nameAsInt == level.intValue()) {
+          return level;
+        }
+      }
+    }
+  }
+  if (!isNameAnInt) {
+    throw new IllegalArgumentException(Messages.getString("logging.1D",name));
+  }
+  return new Level(name,nameAsInt);
+}

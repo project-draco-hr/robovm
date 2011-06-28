@@ -1,0 +1,44 @@
+{
+  super();
+  String className=this.getClass().getName();
+  final String targetName=manager.getProperty(className + ".target");
+  try {
+    Class<?> targetClass=AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>(){
+      public Class<?> run() throws Exception {
+        ClassLoader loader=Thread.currentThread().getContextClassLoader();
+        if (loader == null) {
+          loader=ClassLoader.getSystemClassLoader();
+        }
+        return loader.loadClass(targetName);
+      }
+    }
+);
+    target=(Handler)targetClass.newInstance();
+  }
+ catch (  Exception e) {
+    throw new RuntimeException(Messages.getString("logging.10",targetName));
+  }
+  String sizeString=manager.getProperty(className + ".size");
+  if (null != sizeString) {
+    try {
+      size=Integer.parseInt(sizeString);
+      if (size <= 0) {
+        size=DEFAULT_SIZE;
+      }
+    }
+ catch (    Exception e) {
+      printInvalidPropMessage(className + ".size",sizeString,e);
+    }
+  }
+  String pushName=manager.getProperty(className + ".push");
+  if (null != pushName) {
+    try {
+      push=Level.parse(pushName);
+    }
+ catch (    Exception e) {
+      printInvalidPropMessage(className + ".push",pushName,e);
+    }
+  }
+  initProperties("ALL",null,"java.util.logging.SimpleFormatter",null);
+  buffer=new LogRecord[size];
+}

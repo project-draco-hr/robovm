@@ -1,0 +1,23 @@
+{
+  in.defaultReadObject();
+  byte major=in.readByte();
+  byte minor=in.readByte();
+  if (major != MAJOR) {
+    throw new IOException(Messages.getString("logging.5",Byte.valueOf(major),Byte.valueOf(minor)));
+  }
+  int length=in.readInt();
+  if (length >= 0) {
+    parameters=new Object[length];
+    for (int i=0; i < parameters.length; i++) {
+      parameters[i]=in.readObject();
+    }
+  }
+  if (null != resourceBundleName) {
+    try {
+      resourceBundle=Logger.loadResourceBundle(resourceBundleName);
+    }
+ catch (    MissingResourceException e) {
+      resourceBundle=null;
+    }
+  }
+}

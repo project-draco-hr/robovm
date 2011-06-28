@@ -1,0 +1,26 @@
+{
+  if (null == level) {
+    throw new NullPointerException(Messages.getString("logging.4"));
+  }
+  this.level=level;
+  this.message=msg;
+  this.millis=System.currentTimeMillis();
+synchronized (LogRecord.class) {
+    this.sequenceNumber=currentSequenceNumber++;
+    Integer id=currentThreadId.get();
+    if (null == id) {
+      this.threadID=initThreadId;
+      currentThreadId.set(Integer.valueOf(initThreadId++));
+    }
+ else {
+      this.threadID=id.intValue();
+    }
+  }
+  this.sourceClassName=null;
+  this.sourceMethodName=null;
+  this.loggerName=null;
+  this.parameters=null;
+  this.resourceBundle=null;
+  this.resourceBundleName=null;
+  this.thrown=null;
+}

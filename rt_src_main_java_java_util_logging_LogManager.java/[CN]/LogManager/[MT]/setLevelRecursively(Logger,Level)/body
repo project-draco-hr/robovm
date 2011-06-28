@@ -1,0 +1,17 @@
+{
+  int previous=logger.levelIntVal;
+  logger.levelObjVal=newLevel;
+  if (newLevel == null) {
+    logger.levelIntVal=logger.parent != null ? logger.parent.levelIntVal : Level.INFO.intValue();
+  }
+ else {
+    logger.levelIntVal=newLevel.intValue();
+  }
+  if (previous != logger.levelIntVal) {
+    for (    Logger child : logger.children) {
+      if (child.levelObjVal == null) {
+        setLevelRecursively(child,null);
+      }
+    }
+  }
+}

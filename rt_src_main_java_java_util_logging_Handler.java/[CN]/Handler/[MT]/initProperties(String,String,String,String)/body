@@ -1,0 +1,49 @@
+{
+  LogManager manager=LogManager.getLogManager();
+  final String filterName=manager.getProperty(prefix + ".filter");
+  if (null != filterName) {
+    try {
+      filter=(Filter)getCustomizeInstance(filterName);
+    }
+ catch (    Exception e1) {
+      printInvalidPropMessage("filter",filterName,e1);
+      filter=(Filter)getDefaultInstance(defaultFilter);
+    }
+  }
+ else {
+    filter=(Filter)getDefaultInstance(defaultFilter);
+  }
+  String levelName=manager.getProperty(prefix + ".level");
+  if (null != levelName) {
+    try {
+      level=Level.parse(levelName);
+    }
+ catch (    Exception e) {
+      printInvalidPropMessage("level",levelName,e);
+      level=Level.parse(defaultLevel);
+    }
+  }
+ else {
+    level=Level.parse(defaultLevel);
+  }
+  final String formatterName=manager.getProperty(prefix + ".formatter");
+  if (null != formatterName) {
+    try {
+      formatter=(Formatter)getCustomizeInstance(formatterName);
+    }
+ catch (    Exception e) {
+      printInvalidPropMessage("formatter",formatterName,e);
+      formatter=(Formatter)getDefaultInstance(defaultFormatter);
+    }
+  }
+ else {
+    formatter=(Formatter)getDefaultInstance(defaultFormatter);
+  }
+  final String encodingName=manager.getProperty(prefix + ".encoding");
+  try {
+    internalSetEncoding(encodingName);
+  }
+ catch (  UnsupportedEncodingException e) {
+    printInvalidPropMessage("encoding",encodingName,e);
+  }
+}

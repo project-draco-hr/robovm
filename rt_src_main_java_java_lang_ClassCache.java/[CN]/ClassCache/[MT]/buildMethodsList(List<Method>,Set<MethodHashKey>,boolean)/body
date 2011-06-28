@@ -1,0 +1,17 @@
+{
+  for (Class<?> c=clazz; c != null; c=c.getSuperclass()) {
+    for (    Method m : c.getClassCache().getDeclaredMethods(false,publicOnly)) {
+      MethodHashKey key=new MethodHashKey(m);
+      if (!seen.contains(key)) {
+        result.add(m);
+        seen.add(key);
+      }
+    }
+  }
+  for (Class<?> c=clazz; c != null; c=c.getSuperclass()) {
+    for (    Class<?> intf : c.getInterfaces()) {
+      intf.getClassCache().buildMethodsList(result,seen,publicOnly);
+    }
+  }
+  return result;
+}

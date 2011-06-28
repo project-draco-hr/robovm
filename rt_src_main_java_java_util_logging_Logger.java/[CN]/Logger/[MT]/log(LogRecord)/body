@@ -1,0 +1,23 @@
+{
+  if (!internalIsLoggable(record.getLevel())) {
+    return;
+  }
+  Filter f=filter;
+  if (f != null && !f.isLoggable(record)) {
+    return;
+  }
+  Handler[] allHandlers=getHandlers();
+  for (  Handler element : allHandlers) {
+    element.publish(record);
+  }
+  Logger temp=this;
+  Logger theParent=temp.parent;
+  while (theParent != null && temp.getUseParentHandlers()) {
+    Handler[] ha=theParent.getHandlers();
+    for (    Handler element : ha) {
+      element.publish(record);
+    }
+    temp=theParent;
+    theParent=temp.parent;
+  }
+}
