@@ -20,8 +20,12 @@
   allFields.addAll(classFields);
   allFields.addAll(instanceFields);
   for (  SootField field : allFields) {
-    fieldGetter(field);
-    fieldSetter(field);
+    if (!field.isPrivate()) {
+      fieldGetter(field);
+      if (!field.isFinal()) {
+        fieldSetter(field);
+      }
+    }
   }
   if (!sootClass.declaresMethodByName("<clinit>") && hasConstantValueTags(classFields)) {
     Function clinit=module.newFunction(Linkage._private,mangleMethod(getInternalName(sootClass),"<clinit>",new ArrayList<soot.Type>(),soot.VoidType.v()),new FunctionType(VOID,ENV_PTR),"env");

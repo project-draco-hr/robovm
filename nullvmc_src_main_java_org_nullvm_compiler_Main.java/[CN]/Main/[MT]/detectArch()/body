@@ -1,0 +1,30 @@
+{
+  String llcPath="llc";
+  if (llvmBinDir != null) {
+    llcPath=new File(llvmBinDir,"llc").getAbsolutePath();
+  }
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  ExecuteStreamHandler streamHandler=new PumpStreamHandler(baos);
+  Executor executor=new DefaultExecutor();
+  executor.setStreamHandler(streamHandler);
+  Map env=EnvironmentUtils.getProcEnvironment();
+  executor.setExitValues(new int[]{0,1});
+  CommandLine command=CommandLine.parse(llcPath).addArgument("--version");
+  executor.execute(command,env);
+  String output=new String(baos.toByteArray());
+  Matcher m=Pattern.compile("(?m)Host:\\s*(.*)$").matcher(output);
+  if (m.find()) {
+    String s=m.group(1).trim();
+    if (s.matches("^(x86.64|amd64).*")) {
+      return "x86-64";
+    }
+    if (s.matches("^(x86|i\\d86).*")) {
+      return "x86";
+    }
+    if (s.matches("^arm.*")) {
+      return "arm";
+    }
+    throw new IllegalArgumentException("Unrecognized Host string: " + s);
+  }
+  throw new IllegalArgumentException("Failed to autodetect arch using command: " + command);
+}

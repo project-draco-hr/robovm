@@ -26,8 +26,14 @@
     function.add(new Call(NVM_BC_ADD_INTERFACE,ENV,clazz.ref(),getString(getInternalName(iface))));
   }
   for (  SootField field : classFields) {
-    FunctionRef getter=new FunctionRef(mangleField(field) + "_getter",new FunctionType(getType(field.getType()),ENV_PTR));
-    FunctionRef setter=new FunctionRef(mangleField(field) + "_setter",new FunctionType(VOID,ENV_PTR,getType(field.getType())));
+    Constant getter=new NullConstant(new FunctionType(getType(field.getType()),ENV_PTR));
+    Constant setter=new NullConstant(new FunctionType(VOID,ENV_PTR,getType(field.getType())));
+    if (!field.isPrivate()) {
+      getter=new FunctionRef(mangleField(field) + "_getter",(FunctionType)getter.getType());
+      if (!field.isFinal()) {
+        setter=new FunctionRef(mangleField(field) + "_setter",(FunctionType)setter.getType());
+      }
+    }
     Variable fieldPtr=function.newVariable(FIELD_PTR);
     function.add(new Call(fieldPtr,NVM_BC_ADD_FIELD,ENV,clazz.ref(),getString(field.getName()),getString(getDescriptor(field.getType())),new IntegerConstant(field.getModifiers()),offsetof(classFieldsType,classFields.indexOf(field)),new ConstantBitcast(getter,I8_PTR),new ConstantBitcast(setter,I8_PTR)));
     Constant fieldAttributes=encodeAttributes(field);
@@ -37,8 +43,14 @@
     }
   }
   for (  SootField field : instanceFields) {
-    FunctionRef getter=new FunctionRef(mangleField(field) + "_getter",new FunctionType(getType(field.getType()),ENV_PTR,OBJECT_PTR));
-    FunctionRef setter=new FunctionRef(mangleField(field) + "_setter",new FunctionType(VOID,ENV_PTR,OBJECT_PTR,getType(field.getType())));
+    Constant getter=new NullConstant(new FunctionType(getType(field.getType()),ENV_PTR,OBJECT_PTR));
+    Constant setter=new NullConstant(new FunctionType(VOID,ENV_PTR,OBJECT_PTR,getType(field.getType())));
+    if (!field.isPrivate()) {
+      getter=new FunctionRef(mangleField(field) + "_getter",(FunctionType)getter.getType());
+      if (!field.isFinal()) {
+        setter=new FunctionRef(mangleField(field) + "_setter",(FunctionType)setter.getType());
+      }
+    }
     Variable fieldPtr=function.newVariable(FIELD_PTR);
     function.add(new Call(fieldPtr,NVM_BC_ADD_FIELD,ENV,clazz.ref(),getString(field.getName()),getString(getDescriptor(field.getType())),new IntegerConstant(field.getModifiers()),offsetof(instanceFieldsType,instanceFields.indexOf(field)),new ConstantBitcast(getter,I8_PTR),new ConstantBitcast(setter,I8_PTR)));
     Constant fieldAttributes=encodeAttributes(field);

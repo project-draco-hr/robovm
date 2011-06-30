@@ -11,6 +11,12 @@
   if (target == null && mainClass == null) {
     throw new IllegalArgumentException("No target and no main class specified");
   }
+  if (arch == null) {
+    arch=detectArch();
+    if (verbose) {
+      System.out.println("Autodetected arch: " + arch);
+    }
+  }
   if (verbose) {
     if (mainClass != null) {
       stdout.println("Using main class: " + mainClass);
@@ -18,10 +24,16 @@
     stdout.println("Run arguments: " + runArgs);
   }
   cache.mkdirs();
+  llvmCache=new File(cache,"llvm");
+  llvmCache.mkdirs();
+  objectCache=new File(cache,"object");
+  objectCache.mkdirs();
   if (target == null) {
     target=mainClass;
   }
-  bootClassPathFiles.add(new File(home,"lib/nullvm-rt.jar"));
+  if (!nort) {
+    bootClassPathFiles.add(new File(home,"lib/nullvm-rt.jar"));
+  }
   if (bootclasspath != null) {
     for (    String p : bootclasspath.split(File.pathSeparator)) {
       bootClassPathFiles.add(new File(p));

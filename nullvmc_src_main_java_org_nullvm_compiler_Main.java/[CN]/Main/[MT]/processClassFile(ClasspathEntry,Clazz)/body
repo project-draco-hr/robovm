@@ -3,13 +3,13 @@
   File outFile=null;
   try {
     String className=clazz.getInternalName();
-    outFile=new File(entry.getCacheDir(),className.replace('/',File.separatorChar) + "" + ".class.ll");
+    outFile=new File(entry.getLlvmCacheDir(),className.replace('/',File.separatorChar) + "" + ".class.ll");
     outFile.getParentFile().mkdirs();
     if (!clean && outFile.exists() && outFile.lastModified() >= clazz.lastModified()) {
       if (verbose) {
         stdout.println("Skipping unchanged class file: " + clazz.getFileName());
       }
-      return processIrFile(outFile);
+      return processIrFile(entry,outFile);
     }
     if (verbose) {
       stdout.format("Compiling class file '%s' to LLVM IR file '%s'\n",clazz.getFileName(),outFile);
@@ -30,5 +30,5 @@
  finally {
     IOUtils.closeQuietly(out);
   }
-  return processIrFile(outFile);
+  return processIrFile(entry,outFile);
 }
