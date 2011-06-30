@@ -1,3 +1,10 @@
 {
+  SecurityManager sm=System.getSecurityManager();
+  if (sm != null) {
+    ClassLoader calling=ClassLoader.callerClassLoader();
+    if (calling != null && !calling.isAncestorOf(contextClassLoader)) {
+      sm.checkPermission(new RuntimePermission("getClassLoader"));
+    }
+  }
   return contextClassLoader;
 }
