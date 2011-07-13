@@ -1,13 +1,14 @@
 {
   String name=functionRef.getName().substring(1);
-  GlobalRef ptr=new GlobalRef(name + "_ptr",functionRef.getType());
+  GlobalRef ptrRef=new GlobalRef(name + "_ptr",functionRef.getType());
   Type[] parameterTypes=functionRef.getType().getParameterTypes();
   String[] parameterNames=new String[parameterTypes.length];
   parameterNames[0]=ENV.getName().substring(1);
   for (int i=1; i < parameterNames.length; i++) {
     parameterNames[i]="p" + i;
   }
-  Function function=module.newFunction(Linkage._private,name,functionRef.getType(),parameterNames);
+  Function function=module.newFunction(linkonce_odr,new FunctionAttribute[]{noinline,optsize},name + (trampoline instanceof NativeCall ? "" : "_t"),functionRef.getType(),parameterNames);
+  String runtimeClass=null;
   Variable targetI8Ptr=function.newVariable(I8_PTR);
   if (trampoline instanceof org.nullvm.compiler.trampoline.Invoke) {
     org.nullvm.compiler.trampoline.Invoke invoke=(org.nullvm.compiler.trampoline.Invoke)trampoline;
@@ -16,14 +17,14 @@
     args.add(ENV);
     if (invoke instanceof Invokespecial) {
       resolveFunc=NVM_BC_RESOLVE_INVOKESPECIAL;
-      args.add(getString(((Invokespecial)invoke).getRuntimeClass()));
+      runtimeClass=((Invokespecial)invoke).getRuntimeClass();
     }
  else     if (invoke instanceof Invokestatic) {
       resolveFunc=NVM_BC_RESOLVE_INVOKESTATIC;
     }
  else     if (invoke instanceof Invokevirtual) {
       resolveFunc=NVM_BC_RESOLVE_INVOKEVIRTUAL;
-      args.add(getString(((Invokevirtual)invoke).getRuntimeClass()));
+      runtimeClass=((Invokevirtual)invoke).getRuntimeClass();
     }
  else     if (invoke instanceof Invokeinterface) {
       resolveFunc=NVM_BC_RESOLVE_INVOKEINTERFACE;
@@ -31,13 +32,11 @@
     args.add(getString(invoke.getTargetClass()));
     args.add(getString(invoke.getMethodName()));
     args.add(getString(invoke.getMethodDesc()));
-    args.add(getCaller(function));
-    args.add(new ConstantBitcast(ptr,I8_PTR));
     function.add(new Call(targetI8Ptr,resolveFunc,args.toArray(new Value[args.size()])));
   }
  else   if (trampoline instanceof NativeCall) {
     NativeCall nativeCall=(NativeCall)trampoline;
-    function.add(new Call(targetI8Ptr,NVM_BC_RESOLVE_NATIVE,ENV,getString(nativeCall.getTargetClass()),getString(nativeCall.getMethodName()),getString(nativeCall.getMethodDesc()),getString(mangleNativeMethod(nativeCall.getTargetClass(),nativeCall.getMethodName())),getString(mangleNativeMethod(nativeCall.getTargetClass(),nativeCall.getMethodName(),nativeCall.getMethodDesc())),getCaller(function),new ConstantBitcast(ptr,I8_PTR)));
+    function.add(new Call(targetI8Ptr,NVM_BC_RESOLVE_NATIVE,ENV,getString(nativeCall.getTargetClass()),getString(nativeCall.getMethodName()),getString(nativeCall.getMethodDesc()),getString(mangleNativeMethod(nativeCall.getTargetClass(),nativeCall.getMethodName())),getString(mangleNativeMethod(nativeCall.getTargetClass(),nativeCall.getMethodName(),nativeCall.getMethodDesc())),getCaller(function),new ConstantBitcast(ptrRef,I8_PTR)));
   }
  else   if (trampoline instanceof FieldAccessor) {
     FieldAccessor accessor=(FieldAccessor)trampoline;
@@ -52,17 +51,15 @@
     }
  else     if (accessor instanceof GetField) {
       resolveFunc=NVM_BC_RESOLVE_GETFIELD;
-      args.add(getString(((GetField)accessor).getRuntimeClass()));
+      runtimeClass=((GetField)accessor).getRuntimeClass();
     }
  else     if (accessor instanceof PutField) {
       resolveFunc=NVM_BC_RESOLVE_PUTFIELD;
-      args.add(getString(((PutField)accessor).getRuntimeClass()));
+      runtimeClass=((PutField)accessor).getRuntimeClass();
     }
     args.add(getString(accessor.getTargetClass()));
     args.add(getString(accessor.getFieldName()));
     args.add(getString(accessor.getFieldDesc()));
-    args.add(getCaller(function));
-    args.add(new ConstantBitcast(ptr,I8_PTR));
     function.add(new Call(targetI8Ptr,resolveFunc,args.toArray(new Value[args.size()])));
   }
   Variable targetFuncPtr=function.newVariable(functionRef.getType());
@@ -80,5 +77,33 @@
     function.add(new Call(targetFuncPtr.ref(),args));
     function.add(new Ret());
   }
-  module.addGlobal(new Global(name + "_ptr",Linkage._private,functionRef));
+  if (!(trampoline instanceof NativeCall)) {
+    FunctionRef trampolineFuncRef=function.ref();
+    function=module.newFunction(_private,new FunctionAttribute[]{noinline,optsize},name,functionRef.getType(),parameterNames);
+    Variable reserved0Ptr=function.newVariable(I8_PTR_PTR);
+    function.add(new Getelementptr(reserved0Ptr,ENV,0,4));
+    function.add(new Store(new ConstantBitcast(ptrRef,I8_PTR),reserved0Ptr.ref()));
+    Value caller=getCaller(function);
+    Variable callerI8Ptr=function.newVariable(I8_PTR);
+    function.add(new Bitcast(callerI8Ptr,caller,I8_PTR));
+    Variable reserved1Ptr=function.newVariable(I8_PTR_PTR);
+    function.add(new Getelementptr(reserved1Ptr,ENV,0,5));
+    function.add(new Store(callerI8Ptr.ref(),reserved1Ptr.ref()));
+    if (runtimeClass != null) {
+      Variable reserved2Ptr=function.newVariable(I8_PTR_PTR);
+      function.add(new Getelementptr(reserved2Ptr,ENV,0,6));
+      function.add(new Store(getString(runtimeClass),reserved2Ptr.ref()));
+    }
+    if (functionRef.getType().getReturnType() != VOID) {
+      Variable result=function.newVariable(functionRef.getType().getReturnType());
+      function.add(new TailCall(result,trampolineFuncRef,args));
+      function.add(new Ret(result.ref()));
+    }
+ else {
+      function.add(new TailCall(trampolineFuncRef,args));
+      function.add(new Ret());
+    }
+  }
+  Global ptr=new Global(name + "_ptr",Linkage._private,function.ref());
+  module.addGlobal(ptr);
 }

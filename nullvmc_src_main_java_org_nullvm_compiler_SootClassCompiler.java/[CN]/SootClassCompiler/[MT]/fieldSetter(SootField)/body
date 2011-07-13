@@ -3,11 +3,11 @@
   Function function=null;
   Value fieldPtr=null;
   if (field.isStatic()) {
-    function=module.newFunction(Linkage._private,name,new FunctionType(VOID,ENV_PTR,getType(field.getType())),"env","value");
+    function=module.newFunction(Linkage._private,new FunctionAttribute[]{noinline,optsize},name,new FunctionType(VOID,ENV_PTR,getType(field.getType())),"env","value");
     fieldPtr=getClassFieldPtr(function,field);
   }
  else {
-    function=module.newFunction(Linkage._private,name,new FunctionType(VOID,ENV_PTR,OBJECT_PTR,getType(field.getType())),"env","this","value");
+    function=module.newFunction(Linkage._private,new FunctionAttribute[]{noinline,optsize},name,new FunctionType(VOID,ENV_PTR,OBJECT_PTR,getType(field.getType())),"env","this","value");
     fieldPtr=getInstanceFieldPtr(function,new VariableRef("this",OBJECT_PTR),field);
   }
   function.add(new Store(new VariableRef("value",getType(field.getType())),fieldPtr));
