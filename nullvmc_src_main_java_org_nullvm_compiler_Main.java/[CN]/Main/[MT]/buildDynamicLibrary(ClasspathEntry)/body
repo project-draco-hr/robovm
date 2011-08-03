@@ -10,6 +10,17 @@
     stdout.format("Building dynamic library '%s'\n",outFile);
   }
   List<File> files=processClassFiles(entry);
+  File atFile=new File(tmpFile,"files");
+  PrintWriter pw=null;
+  try {
+    pw=new PrintWriter(atFile);
+    for (    File f : files) {
+      pw.println(f.getAbsolutePath().substring(entry.getObjectCacheDir().getAbsolutePath().length() + 1));
+    }
+  }
+  finally {
+    IOUtils.closeQuietly(pw);
+  }
   outFile.getParentFile().mkdirs();
   String gccPath="gcc";
   if (gccBin != null) {
@@ -22,6 +33,11 @@
   }
   ldArgs.add("-L");
   ldArgs.add(new File(home,"lib").getAbsolutePath());
-  exec(gccPath,files,"-o",outFile,"-g","-shared","-Wl,-soname," + outFile.getName(),"-Wl,--version-script",symbolsMapFile,gccOpts,ldArgs,"-lnullvm","-lm");
+  if (os == OS.linux) {
+    exec(entry.getObjectCacheDir(),gccPath,"@" + atFile.getAbsolutePath(),"-o",outFile,"-g","-shared","-Wl,-soname," + outFile.getName(),"-Wl,--version-script",symbolsMapFile,gccOpts,ldArgs,"-lnullvm","-lm");
+  }
+ else   if (os == OS.macosx) {
+    exec(entry.getObjectCacheDir(),gccPath,"@" + atFile.getAbsolutePath(),"-o",outFile,"-g","-dynamiclib",gccOpts,ldArgs,"-lnullvm","-lm","-exported_symbols_list",symbolsMapFile);
+  }
   return outFile;
 }

@@ -11,6 +11,12 @@
   if (target == null && mainClass == null) {
     throw new IllegalArgumentException("No target and no main class specified");
   }
+  if (os == null) {
+    os=detectOS();
+    if (verbose) {
+      System.out.println("Autodetected OS: " + os);
+    }
+  }
   if (arch == null) {
     arch=detectArch();
     if (verbose) {
@@ -49,8 +55,13 @@
   tmpFile.mkdirs();
   mainCFile=new File(tmpFile,"main.c");
   FileUtils.copyURLToFile(getClass().getResource("/main.c"),mainCFile);
-  symbolsMapFile=new File(tmpFile,"symbols.map");
-  FileUtils.copyURLToFile(getClass().getResource("/symbols.map"),symbolsMapFile);
+  symbolsMapFile=new File(tmpFile,"symbols");
+  if (os == OS.linux) {
+    FileUtils.copyURLToFile(getClass().getResource("/symbols.map"),symbolsMapFile);
+  }
+ else   if (os == OS.macosx) {
+    FileUtils.copyURLToFile(getClass().getResource("/symbols.macosx"),symbolsMapFile);
+  }
   Clazzes clazzes=new Clazzes(bootClassPathFiles,classPathFiles);
   List<ClasspathEntry> bootclasspathObjects=new ArrayList<ClasspathEntry>();
   List<ClasspathEntry> classpathObjects=new ArrayList<ClasspathEntry>();
@@ -73,9 +84,8 @@
     runTarget(bootclasspathObjects,classpathObjects);
   }
  else {
-    FileUtils.copyFileToDirectory(new File(new File(home,"lib"),"libnullvm.so"),output);
-    FileUtils.copyFileToDirectory(new File(new File(home,"lib"),"libnullvm-rt.so"),output);
-    FileUtils.copyFileToDirectory(new File(new File(home,"lib"),"libgc.so.1"),output);
+    FileUtils.copyFileToDirectory(new File(new File(home,"lib"),"libnullvm" + (os == OS.linux ? ".so" : ".dylib")),output);
+    FileUtils.copyFileToDirectory(new File(new File(home,"lib"),"libnullvm-rt" + (os == OS.linux ? ".so" : ".dylib")),output);
     File libBoot=new File(new File(output,"lib"),"boot");
     libBoot.mkdirs();
     File libMain=new File(new File(output,"lib"),"main");
