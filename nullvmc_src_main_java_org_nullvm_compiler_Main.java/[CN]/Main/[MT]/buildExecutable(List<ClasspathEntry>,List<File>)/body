@@ -1,0 +1,50 @@
+{
+  File outFile=new File(output,target);
+  if (verbose) {
+    stdout.format("Building executable '%s'\n",outFile);
+  }
+  Module module=new Module();
+  List<Value> bootcpValues=new ArrayList<Value>();
+  List<Value> cpValues=new ArrayList<Value>();
+  for (  ClasspathEntry entry : entries) {
+    for (    Clazz c : entry.getPath().list()) {
+      String varName=SootClassCompiler.getStringVarName(c.getInternalName());
+      String funcName="NullVM_" + SootClassCompiler.mangleString(c.getInternalName());
+      Global var=new Global(varName,Linkage.external,new ArrayType(0,Type.I8),true);
+      module.addGlobal(var);
+      FunctionDeclaration func=new FunctionDeclaration(funcName,new FunctionType(Type.I8_PTR,Type.I8_PTR,Type.I8_PTR,Type.I8_PTR));
+      module.addFunctionDeclaration(func);
+      Value value=new StructureConstant(new StructureType(Type.I8_PTR,Type.I8_PTR),new ConstantGetelementptr(var.ref(),0,0),new ConstantBitcast(func.ref(),Type.I8_PTR));
+      if (entry.isInBootClasspath()) {
+        bootcpValues.add(value);
+      }
+ else {
+        cpValues.add(value);
+      }
+    }
+  }
+  bootcpValues.add(new StructureConstant(new StructureType(Type.I8_PTR,Type.I8_PTR),new NullConstant(Type.I8_PTR),new NullConstant(Type.I8_PTR)));
+  cpValues.add(new StructureConstant(new StructureType(Type.I8_PTR,Type.I8_PTR),new NullConstant(Type.I8_PTR),new NullConstant(Type.I8_PTR)));
+  Global gbcp=module.newGlobal(new ArrayConstant(new ArrayType(bootcpValues.size(),new StructureType(Type.I8_PTR,Type.I8_PTR)),bootcpValues.toArray(new Value[0])),true);
+  module.addGlobal(new Global("_nvmBcBootclasspathEntries",new ConstantGetelementptr(gbcp.ref(),0,0)));
+  Global gcp=module.newGlobal(new ArrayConstant(new ArrayType(cpValues.size(),new StructureType(Type.I8_PTR,Type.I8_PTR)),cpValues.toArray(new Value[0])),true);
+  module.addGlobal(new Global("_nvmBcClasspathEntries",new ConstantGetelementptr(gcp.ref(),0,0)));
+  if (mainClass != null) {
+    Global g=module.newGlobal(new StringConstant(SootClassCompiler.stringToModifiedUtf8(mainClass)),true);
+    module.addGlobal(new Global("_nvmBcMainClass",new ConstantGetelementptr(g.ref(),0,0)));
+  }
+  File configLl=new File(tmpFile,"config.ll");
+  FileUtils.writeStringToFile(configLl,module.toString(),"UTF-8");
+  File configS=new File(tmpFile,"config.s");
+  llc(configLl,configS);
+  String gccPath="gcc";
+  if (gccBin != null) {
+    gccPath=gccBin.getAbsolutePath();
+  }
+  List<String> gccArgs=new ArrayList<String>();
+  gccArgs.add("-L");
+  gccArgs.add(homeOsArchLib.getAbsolutePath());
+  gccArgs.add("-Xlinker");
+  gccArgs.add("-rpath=$ORIGIN");
+  exec(gccPath,"-o",outFile,"-g",gccOpts,gccArgs,configS,libFiles,"-lm","-lnullvm-core","-lnullvm-bc","-lnullvm-hyprt");
+}

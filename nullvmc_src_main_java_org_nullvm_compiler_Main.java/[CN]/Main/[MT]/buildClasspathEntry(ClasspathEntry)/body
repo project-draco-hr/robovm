@@ -1,0 +1,18 @@
+{
+  File outFile=entry.getStaticLibrary();
+  if (!clean && outFile.exists() && !entry.hasChangedAfter(outFile.lastModified())) {
+    if (verbose) {
+      stdout.println("Skipping unchanged classpath entry: " + entry);
+    }
+    return outFile;
+  }
+  if (verbose) {
+    stdout.format("Building static library '%s' for classpath entry\n",outFile,entry);
+  }
+  List<File> objectFiles=new ArrayList<File>();
+  for (  Clazz clazz : entry.getPath().list()) {
+    objectFiles.add(buildClassFileDebug(entry,clazz));
+  }
+  linkStatic(objectFiles,outFile);
+  return outFile;
+}

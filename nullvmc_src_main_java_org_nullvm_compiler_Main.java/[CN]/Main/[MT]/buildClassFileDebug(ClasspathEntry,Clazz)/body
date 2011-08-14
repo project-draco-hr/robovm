@@ -1,0 +1,14 @@
+{
+  String className=clazz.getInternalName();
+  File llFile=new File(entry.getLlvmCacheDir(),className.replace('/',File.separatorChar) + "" + ".class.ll");
+  classToIr(clazz,llFile);
+  File tmpBcFile=changeExt(llFile,"tmp.bc");
+  llvmAs(llFile,tmpBcFile);
+  File bcFile=changeExt(tmpBcFile,"bc");
+  opt(tmpBcFile,bcFile,"-mem2reg","-always-inline");
+  File sFile=changeExt(rebase(bcFile,entry.getLlvmCacheDir(),entry.getObjectCacheDir()),"s");
+  llc(bcFile,sFile);
+  File oFile=changeExt(sFile,"o");
+  gcc(sFile,oFile);
+  return oFile;
+}

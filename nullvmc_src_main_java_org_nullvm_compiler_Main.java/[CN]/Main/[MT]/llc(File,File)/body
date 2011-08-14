@@ -1,0 +1,22 @@
+{
+  if (!clean && outFile.exists() && outFile.lastModified() >= inFile.lastModified()) {
+    if (verbose) {
+      stdout.println("Skipping unchanged LLVM bitcode file: " + inFile);
+    }
+    return;
+  }
+  if (verbose) {
+    stdout.format("Compiling LLVM bitcode file '%s' to assembler file '%s'\n",inFile,outFile);
+  }
+  String llcPath="llc";
+  if (llvmBinDir != null) {
+    llcPath=new File(llvmBinDir,"llc").getAbsolutePath();
+  }
+  ArrayList<String> opts=new ArrayList<String>(llcOpts);
+  opts.add("-march=" + (arch == Arch.x86_64 ? "x86-64" : arch.toString()));
+  if (cpu != null) {
+    opts.add("-mcpu=" + cpu);
+  }
+  outFile.getParentFile().mkdirs();
+  exec(llcPath,opts,"-o=" + outFile.toString(),inFile);
+}

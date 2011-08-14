@@ -1,0 +1,22 @@
+{
+  if (!clean && outFile.exists() && outFile.lastModified() >= inFile.lastModified()) {
+    if (verbose) {
+      stdout.println("Skipping unchanged GCC input file: " + inFile);
+    }
+    return;
+  }
+  if (verbose) {
+    stdout.format("Compiling '%s' to '%s'\n",inFile,outFile);
+  }
+  String gccPath="gcc";
+  if (gccBin != null) {
+    gccPath=gccBin.getAbsolutePath();
+  }
+  List<String> opts=new ArrayList<String>(gccOpts);
+  if (debug) {
+    opts.add("-g");
+  }
+  opts.addAll(Arrays.asList(options));
+  outFile.getParentFile().mkdirs();
+  exec(gccPath,"-c","-o",outFile,opts,inFile);
+}
