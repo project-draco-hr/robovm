@@ -3,7 +3,12 @@
   env.putAll(EnvironmentUtils.getProcEnvironment());
   String ldLibraryPath=env.get("LD_LIBRARY_PATH");
   ldLibraryPath=ldLibraryPath == null ? "" : ":" + ldLibraryPath;
-  env.put("LD_LIBRARY_PATH",homeOsArchLib.getAbsolutePath() + ldLibraryPath);
+  if (os == OS.linux) {
+    env.put("LD_LIBRARY_PATH",homeLibOsArch.getAbsolutePath() + ldLibraryPath);
+  }
+  if (os == OS.darwin) {
+    env.put("DYLD_LIBRARY_PATH",homeLibOsArch.getAbsolutePath() + ldLibraryPath);
+  }
   try {
     execWithEnv(output,env,new File(output,target).getAbsolutePath());
   }

@@ -29,7 +29,8 @@
     }
     stdout.println("Run arguments: " + runArgs);
   }
-  homeOsArchLib=new File(new File(new File(home,os.toString()),arch.toString()),"lib");
+  homeLib=new File(home,"lib");
+  homeLibOsArch=new File(new File(homeLib,os.toString()),arch.toString());
   cache.mkdirs();
   llvmCache=new File(cache,"llvm");
   llvmCache.mkdirs();
@@ -39,7 +40,7 @@
     target=mainClass;
   }
   if (!nort) {
-    bootClassPathFiles.add(new File(home,"lib/nullvm-rt.jar"));
+    bootClassPathFiles.add(new File(homeLib,"nullvm-rt.jar"));
   }
   if (bootclasspath != null) {
     for (    String p : bootclasspath.split(File.pathSeparator)) {
@@ -54,15 +55,6 @@
   tmpFile=File.createTempFile("nullvm",".tmp");
   tmpFile.delete();
   tmpFile.mkdirs();
-  mainCFile=new File(tmpFile,"main.c");
-  FileUtils.copyURLToFile(getClass().getResource("/main.c"),mainCFile);
-  symbolsMapFile=new File(tmpFile,"symbols");
-  if (os == OS.linux) {
-    FileUtils.copyURLToFile(getClass().getResource("/symbols.map"),symbolsMapFile);
-  }
- else   if (os == OS.macosx) {
-    FileUtils.copyURLToFile(getClass().getResource("/symbols.macosx"),symbolsMapFile);
-  }
   Clazzes clazzes=new Clazzes(bootClassPathFiles,classPathFiles);
   List<ClasspathEntry> classpathEntries=new ArrayList<ClasspathEntry>();
   for (  Path path : clazzes.getBootclasspathPaths()) {
