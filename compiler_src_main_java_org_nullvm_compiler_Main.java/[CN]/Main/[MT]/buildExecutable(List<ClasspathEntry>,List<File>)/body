@@ -6,8 +6,13 @@
   Module module=new Module();
   List<Value> bootcpValues=new ArrayList<Value>();
   List<Value> cpValues=new ArrayList<Value>();
+  Set<String> seenClasses=new HashSet<String>();
   for (  ClasspathEntry entry : entries) {
     for (    Clazz c : entry.getPath().list()) {
+      if (seenClasses.contains(c.getInternalName())) {
+        continue;
+      }
+      seenClasses.add(c.getInternalName());
       byte[] modUtf8=SootClassCompiler.stringToModifiedUtf8(c.getInternalName());
       Global var=new Global(SootClassCompiler.getStringVarName(modUtf8),Linkage.linker_private_weak,new StringConstant(modUtf8),true);
       module.addGlobal(var);
