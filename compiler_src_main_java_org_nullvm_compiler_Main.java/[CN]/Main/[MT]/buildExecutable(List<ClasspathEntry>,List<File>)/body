@@ -47,17 +47,24 @@
     gccPath=gccBin.getAbsolutePath();
   }
   List<String> gccArgs=new ArrayList<String>();
+  List<String> libArgs=new ArrayList<String>();
+  libArgs.addAll(Arrays.asList("-lm","-lnullvm-core","-lnullvm-bc","-lnullvm-hyprt"));
   gccArgs.add("-L");
   gccArgs.add(homeLibOsArch.getAbsolutePath());
   if (os == OS.linux) {
+    libArgs.add("-l:libgc.so.1");
     gccArgs.add("-Xlinker");
+    gccArgs.add("-rpath=$ORIGIN");
     gccArgs.add("-rpath=$ORIGIN");
   }
   if (os == OS.darwin) {
+    libArgs.add("-lgc");
     File unexportedSymbolsFile=new File(tmpFile,"unexported_symbols");
-    FileUtils.writeStringToFile(unexportedSymbolsFile,"*","ASCII");
+    FileUtils.writeStringToFile(unexportedSymbolsFile,"*\n","ASCII");
     gccArgs.add("-unexported_symbols_list");
     gccArgs.add(unexportedSymbolsFile.getAbsolutePath());
+    gccArgs.add("-Xlinker");
+    gccArgs.add("-no_compact_unwind");
   }
-  exec(gccPath,"-o",outFile,"-g",gccOpts,gccArgs,configS,libFiles,"-lm","-l:libgc.so.1","-lnullvm-core","-lnullvm-bc","-lnullvm-hyprt");
+  exec(gccPath,"-o",outFile,"-g",gccOpts,gccArgs,configS,libFiles,libArgs);
 }
