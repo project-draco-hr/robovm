@@ -3,5 +3,15 @@
   if (secMgr != null) {
     secMgr.checkPermission(new RuntimePermission("getenv.*"));
   }
-  throw new Error();
+  Map<String,String> map=new HashMap<String,String>();
+  int index=0;
+  String entry=getEnvByIndex(index++);
+  while (entry != null) {
+    int pos=entry.indexOf('=');
+    if (pos != -1) {
+      map.put(entry.substring(0,pos),entry.substring(pos + 1));
+    }
+    entry=getEnvByIndex(index++);
+  }
+  return new SystemEnvironment(map);
 }
