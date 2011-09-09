@@ -1,0 +1,15 @@
+{
+  for (Class<?> c=clazz; c != null; c=c.getSuperclass()) {
+    for (    Class<?> f : c.getClassCache().getDeclaredClasses(false,publicOnly)) {
+      String s=f.toString();
+      if (!seen.contains(s)) {
+        result.add(f);
+        seen.add(s);
+      }
+    }
+    for (    Class<?> intf : c.getInterfaces()) {
+      intf.getClassCache().buildClassesList(result,seen,publicOnly);
+    }
+  }
+  return result;
+}
