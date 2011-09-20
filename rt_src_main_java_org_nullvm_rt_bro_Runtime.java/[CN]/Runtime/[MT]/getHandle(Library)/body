@@ -2,10 +2,38 @@
 synchronized (handles) {
     Long handle=handles.get(library.value());
     if (handle == null) {
-      String libName=mapLibraryName(library.value());
+      String libName=System.mapLibraryName(library.value());
       handle=Dl.open(libName);
       if (handle == 0L) {
-        throw new UnsatisfiedLinkError("Library " + libName + " not found");
+        if ("libc.so".equals(libName)) {
+          handle=Dl.open("libc.so.6");
+          if (handle == 0L) {
+            handle=Dl.open("libc.so.6.1");
+          }
+        }
+      }
+      if (handle == 0L) {
+        for (        String searchPath : searchPaths) {
+          File f=new File(searchPath,libName);
+          if (f.exists()) {
+            handle=Dl.open(f.getAbsolutePath());
+            if (handle != 0L) {
+              break;
+            }
+          }
+          if (Bro.IS_DARWIN) {
+            File fwDir=new File(searchPath,library.value() + ".framework");
+            if (fwDir.exists()) {
+              handle=Dl.open(new File(fwDir,library.value()).getAbsolutePath());
+              if (handle != 0L) {
+                break;
+              }
+            }
+          }
+        }
+      }
+      if (handle == 0L) {
+        throw new UnsatisfiedLinkError("Library '" + library.value() + "' not found");
       }
       handles.put(library.value(),handle);
     }
