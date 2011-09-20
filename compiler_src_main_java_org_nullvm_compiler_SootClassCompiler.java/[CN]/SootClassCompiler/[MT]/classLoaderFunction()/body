@@ -80,7 +80,13 @@
       }
     }
     Variable methodPtr=function.newVariable(METHOD_PTR);
-    function.add(new Call(methodPtr,NVM_BC_ADD_METHOD,ENV,clazz.ref(),getString(method.getName()),getString(getDescriptor(method)),new IntegerConstant(method.getModifiers()),functionRef,synchronizedRef,lookup));
+    if (isBridge(method)) {
+      GlobalRef targetFunction=new GlobalRef(mangleMethod(method) + "_ptr",getBridgeFunctionType(method));
+      function.add(new Call(methodPtr,NVM_BC_ADD_BRIDGE_METHOD,ENV,clazz.ref(),getString(method.getName()),getString(getDescriptor(method)),new IntegerConstant(method.getModifiers() | Modifier.NATIVE),functionRef,synchronizedRef,lookup,new ConstantBitcast(targetFunction,I8_PTR)));
+    }
+ else {
+      function.add(new Call(methodPtr,NVM_BC_ADD_METHOD,ENV,clazz.ref(),getString(method.getName()),getString(getDescriptor(method)),new IntegerConstant(method.getModifiers()),functionRef,synchronizedRef,lookup));
+    }
     Constant methodAttributes=encodeAttributes(method);
     if (methodAttributes != null) {
       Global g=module.newGlobal(methodAttributes,true);

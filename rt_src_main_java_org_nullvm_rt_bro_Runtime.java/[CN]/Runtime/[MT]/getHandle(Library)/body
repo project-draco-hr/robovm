@@ -1,0 +1,14 @@
+{
+synchronized (handles) {
+    Long handle=handles.get(library.value());
+    if (handle == null) {
+      String libName=mapLibraryName(library.value());
+      handle=Dl.open(libName);
+      if (handle == 0L) {
+        throw new UnsatisfiedLinkError("Library " + libName + " not found");
+      }
+      handles.put(library.value(),handle);
+    }
+    return handle;
+  }
+}

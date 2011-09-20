@@ -1,0 +1,15 @@
+{
+synchronized (runtimes) {
+    Runtime runtime=runtimes.get(runtimeClass);
+    if (runtime == null) {
+      try {
+        runtime=runtimeClass.newInstance();
+      }
+ catch (      Exception e) {
+        throw (UnsatisfiedLinkError)new UnsatisfiedLinkError("Failed to create Runtime").initCause(e);
+      }
+      runtimes.put(runtimeClass,runtime);
+    }
+    return runtime;
+  }
+}
