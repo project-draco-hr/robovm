@@ -1,0 +1,37 @@
+{
+  Map<String,Integer> indexes=new HashMap<String,Integer>();
+  StructureType structType=getStructType(sootClass,indexes);
+  if (structType == null) {
+    throw new IllegalArgumentException("Struct class " + sootClass + " has not @StructMember annotated methods");
+  }
+  Function function=createFunction(method);
+  SootField handleField=sootClass.getSuperclass().getFieldByName("handle");
+  Variable handleI64=function.newVariable(I64);
+  function.add(new Load(handleI64,getInstanceFieldPtr(function,new VariableRef("this",OBJECT_PTR),handleField)));
+  Variable handlePtr=function.newVariable(new PointerType(structType));
+  function.add(new Inttoptr(handlePtr,handleI64.ref(),handlePtr.getType()));
+  String name=method.getName().substring(3,4).toLowerCase() + method.getName().substring(4);
+  int index=indexes.get(name);
+  Variable memberPtr=function.newVariable(new PointerType(structType.getTypeAt(index)));
+  function.add(new Getelementptr(memberPtr,handlePtr.ref(),0,index));
+  if (method.getName().startsWith("get")) {
+    Variable result=function.newVariable(structType.getTypeAt(index));
+    function.add(new Load(result,memberPtr.ref()));
+    if (result.getType() == I8_PTR) {
+      Variable tmp=function.newVariable(I64);
+      function.add(new Ptrtoint(tmp,result.ref(),I64));
+      result=tmp;
+    }
+    function.add(new Ret(result.ref()));
+  }
+ else {
+    VariableRef p=function.getParameterRef(2);
+    if (structType.getTypeAt(index) == I8_PTR) {
+      Variable tmp=function.newVariable(I8_PTR);
+      function.add(new Inttoptr(tmp,p,I8_PTR));
+      p=tmp.ref();
+    }
+    function.add(new Store(p,memberPtr.ref()));
+    function.add(new Ret());
+  }
+}

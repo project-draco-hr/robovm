@@ -1,11 +1,10 @@
 {
-  int index=fields.indexOf(field);
   Value offset=new ConstantAdd(baseOffset,offsetof(fieldsType,index));
   Variable baseI8Ptr=f.newVariable(I8_PTR);
   f.add(new Bitcast(baseI8Ptr,base,I8_PTR));
   Variable fieldI8Ptr=f.newVariable(I8_PTR);
-  f.add(new Getelementptr(fieldI8Ptr,new VariableRef(baseI8Ptr),offset));
+  f.add(new Getelementptr(fieldI8Ptr,baseI8Ptr.ref(),offset));
   Variable fieldPtr=f.newVariable(new PointerType(getType(field.getType())));
-  f.add(new Bitcast(fieldPtr,new VariableRef(fieldI8Ptr),fieldPtr.getType()));
-  return new VariableRef(fieldPtr);
+  f.add(new Bitcast(fieldPtr,fieldI8Ptr.ref(),fieldPtr.getType()));
+  return fieldPtr.ref();
 }

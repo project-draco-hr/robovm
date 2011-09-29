@@ -3,28 +3,36 @@ synchronized (handles) {
     Long handle=handles.get(library.value());
     if (handle == null) {
       String libName=System.mapLibraryName(library.value());
-      handle=Dl.open(libName);
-      if (handle == 0L) {
-        if ("libc.so".equals(libName)) {
-          handle=Dl.open("libc.so.6");
-          if (handle == 0L) {
-            handle=Dl.open("libc.so.6.1");
+      for (      String searchPath : searchPaths) {
+        File f=new File(searchPath,libName);
+        if (f.exists()) {
+          handle=Dl.open(f.getAbsolutePath());
+          if (handle != 0L) {
+            break;
           }
-        }
-      }
-      if (handle == 0L) {
-        for (        String searchPath : searchPaths) {
-          File f=new File(searchPath,libName);
-          if (f.exists()) {
-            handle=Dl.open(f.getAbsolutePath());
-            if (handle != 0L) {
-              break;
+          if ("libc.so".equals(libName)) {
+            f=new File(searchPath,"libc.so.6");
+            if (f.exists()) {
+              handle=Dl.open(f.getAbsolutePath());
+              if (handle != 0L) {
+                break;
+              }
+            }
+            f=new File(searchPath,"libc.so.6.1");
+            if (f.exists()) {
+              handle=Dl.open(f.getAbsolutePath());
+              if (handle != 0L) {
+                break;
+              }
             }
           }
-          if (Bro.IS_DARWIN) {
-            File fwDir=new File(searchPath,library.value() + ".framework");
-            if (fwDir.exists()) {
-              handle=Dl.open(new File(fwDir,library.value()).getAbsolutePath());
+        }
+        if (Bro.IS_DARWIN) {
+          File fwDir=new File(searchPath,library.value() + ".framework");
+          if (fwDir.exists()) {
+            f=new File(fwDir,library.value());
+            if (f.exists()) {
+              handle=Dl.open(f.getAbsolutePath());
               if (handle != 0L) {
                 break;
               }
@@ -32,7 +40,13 @@ synchronized (handles) {
           }
         }
       }
-      if (handle == 0L) {
+      if (handle == null || handle == 0L) {
+        handle=Dl.open(library.value());
+        if (handle == 0L) {
+          handle=Dl.open(libName);
+        }
+      }
+      if (handle == null || handle == 0L) {
         throw new UnsatisfiedLinkError("Library '" + library.value() + "' not found");
       }
       handles.put(library.value(),handle);
