@@ -6,21 +6,55 @@
     if (isStructMember(method)) {
       validateStructMember(method);
       String name=method.getName().substring(3,4).toLowerCase() + method.getName().substring(4);
-      Type type=getType(method.getName().startsWith("get") ? method.getReturnType() : method.getParameterType(0));
-      if (method.getName().startsWith("get") && hasAnnotation(method,"Lorg/nullvm/rt/bro/annotation/Pointer;")) {
-        if (!method.getReturnType().equals(LongType.v())) {
-          throw new IllegalArgumentException("@StructMember annotated getter method " + method.getName() + " must return long when annotated with @Pointer");
+      boolean getter=method.getName().startsWith("get");
+      soot.Type sootType=getter ? method.getReturnType() : method.getParameterType(0);
+      Type type=sootType instanceof PrimType ? getType(sootType) : I8_PTR;
+      if (getter) {
+        if (hasAnnotation(method,"Lorg/nullvm/rt/bro/annotation/Pointer;")) {
+          if (!sootType.equals(LongType.v()) && !(sootType instanceof RefType)) {
+            throw new IllegalArgumentException("@StructMember annotated getter method " + method.getName() + " must return long or Struct when annotated with @Pointer");
+          }
+          type=I8_PTR;
         }
-        type=I8_PTR;
+ else         if (hasAnnotation(method,"Lorg/nullvm/rt/bro/annotation/MachineWord;")) {
+          if (!sootType.equals(LongType.v()) && !sootType.equals(DoubleType.v())) {
+            throw new IllegalArgumentException("@StructMember annotated getter method " + method.getName() + " must return long or double when annotated with @MachineWord");
+          }
+          type=method.getReturnType().equals(LongType.v()) ? MACHINE_INT : MACHINE_FP;
+        }
+ else         if (sootType instanceof RefType) {
+          try {
+            type=getStructType(((RefType)sootType).getSootClass());
+          }
+ catch (          StackOverflowError e) {
+            throw new IllegalArgumentException("Struct type " + sootType + " refers to itself");
+          }
+        }
       }
- else       if (hasParameterAnnotation(method,0,"Lorg/nullvm/rt/bro/annotation/Pointer;")) {
-        if (!method.getParameterType(0).equals(LongType.v())) {
-          throw new IllegalArgumentException("First parameter of @StructMember annotated setter method " + method.getName() + " must be of type long when annotated with @Pointer");
+ else {
+        if (hasParameterAnnotation(method,0,"Lorg/nullvm/rt/bro/annotation/Pointer;")) {
+          if (!sootType.equals(LongType.v()) && !(sootType instanceof RefType)) {
+            throw new IllegalArgumentException("First parameter of @StructMember annotated setter method " + method.getName() + " must be of type long or Struct when annotated with @Pointer");
+          }
+          type=I8_PTR;
         }
-        type=I8_PTR;
+ else         if (hasParameterAnnotation(method,0,"Lorg/nullvm/rt/bro/annotation/MachineWord;")) {
+          if (!sootType.equals(LongType.v()) && !sootType.equals(DoubleType.v())) {
+            throw new IllegalArgumentException("First parameter of @StructMember annotated setter method " + method.getName() + " must be of type long or double when annotated with @MachineWord");
+          }
+          type=method.getReturnType().equals(LongType.v()) ? MACHINE_INT : MACHINE_FP;
+        }
+ else         if (sootType instanceof RefType) {
+          try {
+            type=getStructType(((RefType)sootType).getSootClass());
+          }
+ catch (          StackOverflowError e) {
+            throw new IllegalArgumentException("Struct type " + sootType + " refers to itself");
+          }
+        }
       }
       if (members.containsKey(name)) {
-        if (members.get(name) != type) {
+        if (!members.get(name).equals(type)) {
           throw new IllegalArgumentException("@StructMember annotated getter and setter methods for property " + name + " have different types");
         }
       }

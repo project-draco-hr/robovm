@@ -11,10 +11,14 @@
   if (method.getName().startsWith("set") && method.getParameterCount() != 1) {
     throw new IllegalArgumentException("@StructMember annotated setter method must take a single argument");
   }
-  if (method.getName().startsWith("get") && !(method.getReturnType() instanceof PrimType)) {
-    throw new IllegalArgumentException("@StructMember annotated getter method must return primitive type");
-  }
-  if (method.getName().startsWith("set") && !(method.getParameterType(0) instanceof PrimType)) {
-    throw new IllegalArgumentException("@StructMember annotated setter method must take a single primitive type argument");
+  boolean getter=method.getName().startsWith("get");
+  soot.Type t=getter ? method.getReturnType() : method.getParameterType(0);
+  if (!(t instanceof PrimType || t instanceof RefType && isStruct(((RefType)t).getSootClass()))) {
+    if (getter) {
+      throw new IllegalArgumentException("@StructMember annotated getter method must return primitive or Struct type");
+    }
+ else {
+      throw new IllegalArgumentException("@StructMember annotated setter method must take a single primitive or Struct type argument");
+    }
   }
 }

@@ -30,6 +30,16 @@
       callbackFunction.add(new Ptrtoint(tmp,ref,I64));
       ref=tmp.ref();
     }
+ else     if (ref.getType() == MACHINE_INT) {
+      Variable tmp=callbackFunction.newVariable(I64);
+      callbackFunction.add(new Ptrtoint(tmp,ref,I64));
+      ref=tmp.ref();
+    }
+ else     if (ref.getType() == MACHINE_FP) {
+      Variable tmp=callbackFunction.newVariable(DOUBLE);
+      callbackFunction.add(new Call(tmp,MACHINE_FP_TO_DOUBLE,ref));
+      ref=tmp.ref();
+    }
     args.add(ref);
   }
   if (callbackFunction.getType().getReturnType() == VOID) {
@@ -45,6 +55,18 @@
       callbackFunction.add(new Inttoptr(resultI8Ptr,result.ref(),I8_PTR));
       callbackFunction.add(new Call(NVM_BC_DETACH_THREAD_FROM_CALLBACK,env.ref()));
       callbackFunction.add(new Ret(resultI8Ptr.ref()));
+    }
+ else     if (callbackFunctionType.getReturnType() == MACHINE_INT) {
+      Variable resultMachineInt=callbackFunction.newVariable(MACHINE_INT);
+      callbackFunction.add(new Inttoptr(resultMachineInt,result.ref(),MACHINE_INT));
+      callbackFunction.add(new Call(NVM_BC_DETACH_THREAD_FROM_CALLBACK,env.ref()));
+      callbackFunction.add(new Ret(resultMachineInt.ref()));
+    }
+ else     if (callbackFunctionType.getReturnType() == MACHINE_FP) {
+      Variable resultMachineFp=callbackFunction.newVariable(MACHINE_FP);
+      callbackFunction.add(new Call(resultMachineFp,DOUBLE_TO_MACHINE_FP,result.ref()));
+      callbackFunction.add(new Call(NVM_BC_DETACH_THREAD_FROM_CALLBACK,env.ref()));
+      callbackFunction.add(new Ret(resultMachineFp.ref()));
     }
  else {
       callbackFunction.add(new Call(NVM_BC_DETACH_THREAD_FROM_CALLBACK,env.ref()));

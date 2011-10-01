@@ -7,6 +7,12 @@
     }
     returnType=I8_PTR;
   }
+ else   if (hasAnnotation(method,"Lorg/nullvm/rt/bro/annotation/MachineWord;")) {
+    if (!method.getReturnType().equals(LongType.v()) && !method.getReturnType().equals(DoubleType.v())) {
+      throw new IllegalArgumentException(anno + " annotated method " + method.getName()+ " must return long or double when annotated with @MachineWord");
+    }
+    returnType=method.getReturnType().equals(LongType.v()) ? MACHINE_INT : MACHINE_FP;
+  }
   Type[] paramTypes=new Type[method.getParameterTypes().size()];
   int i=0;
   for (  soot.Type t : (List<soot.Type>)method.getParameterTypes()) {
@@ -18,6 +24,12 @@
         throw new IllegalArgumentException("Parameter " + (i + 1) + " of "+ anno+ " annotated method "+ method.getName()+ " must be of type long when annotated with @Pointer");
       }
       paramTypes[i]=I8_PTR;
+    }
+ else     if (hasParameterAnnotation(method,i,"Lorg/nullvm/rt/bro/annotation/MachineWord;")) {
+      if (!method.getParameterType(i).equals(LongType.v()) && !method.getParameterType(i).equals(DoubleType.v())) {
+        throw new IllegalArgumentException("Parameter " + (i + 1) + " of "+ anno+ " annotated method "+ method.getName()+ " must be of type long or double when annotated with @MachineWord");
+      }
+      paramTypes[i]=method.getParameterType(i).equals(LongType.v()) ? MACHINE_INT : MACHINE_FP;
     }
   }
   return new FunctionType(returnType,paramTypes);

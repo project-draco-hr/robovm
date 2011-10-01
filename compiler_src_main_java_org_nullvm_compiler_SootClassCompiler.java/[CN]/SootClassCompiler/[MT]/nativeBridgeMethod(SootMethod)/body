@@ -32,9 +32,19 @@
   Type[] targetParameterTypes=targetFunctionType.getParameterTypes();
   for (int i=0; i < targetParameterTypes.length; i++) {
     if (targetParameterTypes[i] == I8_PTR) {
-      Variable argI8Ptr=innerFunction.newVariable(I8_PTR);
-      innerFunction.add(new Inttoptr(argI8Ptr,args.get(i),I8_PTR));
-      args.set(i,argI8Ptr.ref());
+      Variable arg=innerFunction.newVariable(I8_PTR);
+      innerFunction.add(new Inttoptr(arg,args.get(i),I8_PTR));
+      args.set(i,arg.ref());
+    }
+ else     if (targetParameterTypes[i] == MACHINE_INT) {
+      Variable arg=innerFunction.newVariable(MACHINE_INT);
+      innerFunction.add(new Inttoptr(arg,args.get(i),MACHINE_INT));
+      args.set(i,arg.ref());
+    }
+ else     if (targetParameterTypes[i] == MACHINE_FP) {
+      Variable arg=innerFunction.newVariable(MACHINE_FP);
+      innerFunction.add(new Call(arg,DOUBLE_TO_MACHINE_FP,args.get(i)));
+      args.set(i,arg.ref());
     }
   }
   Variable targetFunction=innerFunction.newVariable(targetFunctionType);
@@ -66,6 +76,16 @@
       Variable resultI64=innerFunction.newVariable(I64);
       innerFunction.add(new Ptrtoint(resultI64,result.ref(),I64));
       innerFunction.add(new Ret(resultI64.ref()));
+    }
+ else     if (targetFunctionType.getReturnType() == MACHINE_INT) {
+      Variable resultI64=innerFunction.newVariable(I64);
+      innerFunction.add(new Ptrtoint(resultI64,result.ref(),I64));
+      innerFunction.add(new Ret(resultI64.ref()));
+    }
+ else     if (targetFunctionType.getReturnType() == MACHINE_FP) {
+      Variable resultDouble=innerFunction.newVariable(DOUBLE);
+      innerFunction.add(new Call(resultDouble,MACHINE_FP_TO_DOUBLE,result.ref()));
+      innerFunction.add(new Ret(resultDouble.ref()));
     }
  else {
       innerFunction.add(new Ret(result.ref()));
