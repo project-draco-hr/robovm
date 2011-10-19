@@ -1,0 +1,24 @@
+{
+  if (!method.isNative() && !method.isStatic()) {
+    throw new IllegalArgumentException("@StructMember annotated method must be native and not static");
+  }
+  if (!method.getName().startsWith("get") && !method.getName().startsWith("set") || method.getName().length() == 3) {
+    throw new IllegalArgumentException("@StructMember annotated method has invalid name");
+  }
+  if (method.getName().startsWith("get") && method.getParameterCount() != 0) {
+    throw new IllegalArgumentException("@StructMember annotated getter method must have no arguments");
+  }
+  if (method.getName().startsWith("set") && method.getParameterCount() != 1) {
+    throw new IllegalArgumentException("@StructMember annotated setter method must take a single argument");
+  }
+  boolean getter=method.getName().startsWith("get");
+  soot.Type t=getter ? method.getReturnType() : method.getParameterType(0);
+  if (!(t instanceof PrimType || t instanceof RefType && isStruct(((RefType)t).getSootClass()))) {
+    if (getter) {
+      throw new IllegalArgumentException("@StructMember annotated getter method must return primitive or Struct type");
+    }
+ else {
+      throw new IllegalArgumentException("@StructMember annotated setter method must take a single primitive or Struct type argument");
+    }
+  }
+}

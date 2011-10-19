@@ -81,8 +81,12 @@
     }
     Variable methodPtr=function.newVariable(METHOD_PTR);
     if (isBridge(method)) {
-      GlobalRef targetFunction=new GlobalRef(mangleMethod(method) + "_ptr",getBridgeFunctionType(method));
+      GlobalRef targetFunction=new GlobalRef(mangleMethod(method) + "_ptr",getBridgeOrCallbackFunctionType(method));
       function.add(new Call(methodPtr,NVM_BC_ADD_BRIDGE_METHOD,ENV,clazz.ref(),getString(method.getName()),getString(getDescriptor(method)),new IntegerConstant(method.getModifiers() | Modifier.NATIVE),functionRef,synchronizedRef,lookup,new ConstantBitcast(targetFunction,I8_PTR)));
+    }
+ else     if (isCallback(method)) {
+      Value callbackRef=new ConstantBitcast(new FunctionRef(mangleMethod(method) + "_callback",getBridgeOrCallbackFunctionType(method)),I8_PTR);
+      function.add(new Call(methodPtr,NVM_BC_ADD_CALLBACK_METHOD,ENV,clazz.ref(),getString(method.getName()),getString(getDescriptor(method)),new IntegerConstant(method.getModifiers() | Modifier.NATIVE),functionRef,synchronizedRef,lookup,callbackRef));
     }
  else {
       function.add(new Call(methodPtr,NVM_BC_ADD_METHOD,ENV,clazz.ref(),getString(method.getName()),getString(getDescriptor(method)),new IntegerConstant(method.getModifiers()),functionRef,synchronizedRef,lookup));

@@ -1,5 +1,8 @@
 {
   this.sootClass=Scene.v().getSootClass(clazz.getClassName());
+  if (isStruct(this.sootClass)) {
+    enhanceStructClass(this.sootClass);
+  }
   module=new Module();
   throwables=new HashMap<SootClass,Global>();
   trampolines=new HashMap<Trampoline,FunctionRef>();
@@ -37,7 +40,20 @@
       nativeBridgeMethod(method);
     }
  else     if (isNative(method)) {
-      nativeMethod(method);
+      if (isStruct(this.sootClass)) {
+        if ("_sizeOf".equals(method.getName()) || "sizeOf".equals(method.getName())) {
+          structSizeOf(method);
+        }
+ else         if (isStructMember(method)) {
+          structMember(method);
+        }
+ else {
+          nativeMethod(method);
+        }
+      }
+ else {
+        nativeMethod(method);
+      }
     }
  else     if (!method.isAbstract()) {
       Body body=method.retrieveActiveBody();
@@ -45,6 +61,9 @@
       PackManager.v().getPack("jop").apply(body);
       PackManager.v().getPack("jap").apply(body);
       method(method);
+      if (isCallback(method)) {
+        nativeCallbackMethod(method);
+      }
     }
     if (!method.isStatic() && !method.isPrivate() && !Modifier.isFinal(method.getModifiers())) {
       if (!ancestorDeclaresMethod(sootClass,method)) {

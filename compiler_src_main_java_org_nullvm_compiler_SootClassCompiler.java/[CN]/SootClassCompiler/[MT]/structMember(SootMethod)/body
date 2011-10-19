@@ -1,0 +1,95 @@
+{
+  Map<String,Integer> indexes=new HashMap<String,Integer>();
+  StructureType structType=getStructType(sootClass,indexes);
+  if (structType == null) {
+    throw new IllegalArgumentException("Struct class " + sootClass + " has not @StructMember annotated methods");
+  }
+  Function function=createFunction(method);
+  SootField handleField=sootClass.getSuperclass().getFieldByName("handle");
+  Variable handleI64=function.newVariable(I64);
+  function.add(new Load(handleI64,getInstanceFieldPtr(function,new VariableRef("this",OBJECT_PTR),handleField)));
+  Variable handlePtr=function.newVariable(new PointerType(structType));
+  function.add(new Inttoptr(handlePtr,handleI64.ref(),handlePtr.getType()));
+  String name=method.getName().substring(3,4).toLowerCase() + method.getName().substring(4);
+  int index=indexes.get(name);
+  Type memberType=structType.getTypeAt(index);
+  Variable memberPtr=function.newVariable(new PointerType(memberType));
+  function.add(new Getelementptr(memberPtr,handlePtr.ref(),0,index));
+  if (method.getName().startsWith("get")) {
+    Variable result=null;
+    if (memberType instanceof StructureType) {
+      result=function.newVariable(OBJECT_PTR);
+      Constant structClassName=getString(getInternalName(method.getReturnType()));
+      Value caller=getCaller(function);
+      Variable memberI8Ptr=function.newVariable(I8_PTR);
+      function.add(new Bitcast(memberI8Ptr,memberPtr.ref(),I8_PTR));
+      function.add(new Call(result,NVM_BC_NEW_STRUCT,ENV,structClassName,caller,memberI8Ptr.ref()));
+    }
+ else {
+      result=function.newVariable(memberType);
+      function.add(new Load(result,memberPtr.ref()));
+      if (result.getType() == I8_PTR) {
+        if (method.getReturnType().equals(LongType.v())) {
+          Variable tmp=function.newVariable(I64);
+          function.add(new Ptrtoint(tmp,result.ref(),I64));
+          result=tmp;
+        }
+ else {
+          Variable tmp=function.newVariable(OBJECT_PTR);
+          Constant structClassName=getString(getInternalName(method.getReturnType()));
+          Value caller=getCaller(function);
+          function.add(new Call(tmp,NVM_BC_NEW_STRUCT,ENV,structClassName,caller,result.ref()));
+          result=tmp;
+        }
+      }
+ else       if (result.getType() == MACHINE_INT) {
+        Variable tmp=function.newVariable(I64);
+        function.add(new Ptrtoint(tmp,result.ref(),I64));
+        result=tmp;
+      }
+ else       if (result.getType() == MACHINE_FP) {
+        Variable tmp=function.newVariable(DOUBLE);
+        function.add(new Call(tmp,MACHINE_FP_TO_DOUBLE,result.ref()));
+        result=tmp;
+      }
+    }
+    function.add(new Ret(result.ref()));
+  }
+ else {
+    VariableRef p=function.getParameterRef(2);
+    if (memberType instanceof StructureType) {
+      Variable objectPtr=function.newVariable(OBJECT_PTR);
+      function.add(new Bitcast(objectPtr,p,OBJECT_PTR));
+      Variable memberI8Ptr=function.newVariable(I8_PTR);
+      function.add(new Bitcast(memberI8Ptr,memberPtr.ref(),I8_PTR));
+      function.add(new Call(NVM_BC_COPY_STRUCT,ENV,objectPtr.ref(),memberI8Ptr.ref(),sizeof((StructureType)memberType)));
+    }
+ else {
+      if (memberType == I8_PTR) {
+        Variable tmp=function.newVariable(I8_PTR);
+        if (method.getParameterType(0).equals(LongType.v())) {
+          function.add(new Inttoptr(tmp,p,I8_PTR));
+          p=tmp.ref();
+        }
+ else {
+          Variable objectPtr=function.newVariable(OBJECT_PTR);
+          function.add(new Bitcast(objectPtr,p,OBJECT_PTR));
+          function.add(new Call(tmp,NVM_BC_GET_STRUCT_HANDLE,ENV,objectPtr.ref()));
+          p=tmp.ref();
+        }
+      }
+ else       if (memberType == MACHINE_INT) {
+        Variable tmp=function.newVariable(MACHINE_INT);
+        function.add(new Inttoptr(tmp,p,MACHINE_INT));
+        p=tmp.ref();
+      }
+ else       if (memberType == MACHINE_FP) {
+        Variable tmp=function.newVariable(MACHINE_FP);
+        function.add(new Call(tmp,DOUBLE_TO_MACHINE_FP,p));
+        p=tmp.ref();
+      }
+      function.add(new Store(p,memberPtr.ref()));
+    }
+    function.add(new Ret());
+  }
+}

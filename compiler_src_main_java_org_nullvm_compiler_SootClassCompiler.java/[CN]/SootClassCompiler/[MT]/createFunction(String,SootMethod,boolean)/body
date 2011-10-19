@@ -1,0 +1,15 @@
+{
+  FunctionType functionType=getFunctionType(method.makeRef());
+  String[] parameterNames=new String[functionType.getParameterTypes().length];
+  int i=0;
+  if (!skipEnv) {
+    parameterNames[i++]="env";
+  }
+  if (!method.isStatic()) {
+    parameterNames[i++]="this";
+  }
+  for (int j=0; j < method.getParameterCount(); j++) {
+    parameterNames[i++]="p" + j;
+  }
+  return module.newFunction(internal,new FunctionAttribute[]{noinline,optsize},name,functionType,parameterNames);
+}
