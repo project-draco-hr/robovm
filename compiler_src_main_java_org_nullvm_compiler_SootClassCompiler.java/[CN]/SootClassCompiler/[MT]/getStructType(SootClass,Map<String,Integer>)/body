@@ -11,7 +11,7 @@
       Type type=sootType instanceof PrimType ? getType(sootType) : I8_PTR;
       if (getter) {
         if (hasAnnotation(method,"Lorg/nullvm/rt/bro/annotation/Pointer;")) {
-          if (!sootType.equals(LongType.v()) && !(sootType instanceof RefType)) {
+          if (!sootType.equals(LongType.v()) && !isStruct(sootType)) {
             throw new IllegalArgumentException("@StructMember annotated getter method " + method.getName() + " must return long or Struct when annotated with @Pointer");
           }
           type=I8_PTR;
@@ -22,9 +22,9 @@
           }
           type=method.getReturnType().equals(LongType.v()) ? MACHINE_INT : MACHINE_FP;
         }
- else         if (sootType instanceof RefType) {
+ else         if (isStruct(sootType)) {
           try {
-            type=getStructType(((RefType)sootType).getSootClass());
+            type=getStructType(sootType);
           }
  catch (          StackOverflowError e) {
             throw new IllegalArgumentException("Struct type " + sootType + " refers to itself");
@@ -33,7 +33,7 @@
       }
  else {
         if (hasParameterAnnotation(method,0,"Lorg/nullvm/rt/bro/annotation/Pointer;")) {
-          if (!sootType.equals(LongType.v()) && !(sootType instanceof RefType)) {
+          if (!sootType.equals(LongType.v()) && !isStruct(sootType)) {
             throw new IllegalArgumentException("First parameter of @StructMember annotated setter method " + method.getName() + " must be of type long or Struct when annotated with @Pointer");
           }
           type=I8_PTR;
@@ -44,9 +44,9 @@
           }
           type=method.getReturnType().equals(LongType.v()) ? MACHINE_INT : MACHINE_FP;
         }
- else         if (sootType instanceof RefType) {
+ else         if (isStruct(sootType)) {
           try {
-            type=getStructType(((RefType)sootType).getSootClass());
+            type=getStructType(sootType);
           }
  catch (          StackOverflowError e) {
             throw new IllegalArgumentException("Struct type " + sootType + " refers to itself");
