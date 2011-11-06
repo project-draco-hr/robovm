@@ -3,10 +3,17 @@
     int i=0;
     while (i < args.length) {
       if ("-cp".equals(args[i]) || "-classpath".equals(args[i])) {
-        classpath=args[++i];
+        for (        String p : args[++i].split(File.pathSeparator)) {
+          classpath.add(new File(p));
+        }
       }
  else       if ("-bcp".equals(args[i]) || "-bootcp".equals(args[i]) || "-bootclasspath".equals(args[i])) {
-        bootclasspath=args[++i];
+        for (        String p : args[++i].split(File.pathSeparator)) {
+          bootclasspath.add(new File(p));
+        }
+      }
+ else       if ("-classes".equals(args[i])) {
+        classes.addAll(Arrays.asList(args[++i].split(File.pathSeparator)));
       }
  else       if ("-jar".equals(args[i])) {
         jarFile=new File(args[++i]);
@@ -34,6 +41,9 @@
       }
  else       if ("-nort".equals(args[i])) {
         nort=true;
+      }
+ else       if ("-nolink".equals(args[i])) {
+        nolink=true;
       }
  else       if ("-clean".equals(args[i])) {
         clean=true;
