@@ -1,0 +1,23 @@
+{
+  IResourceDelta delta=full ? null : getDelta(project);
+  final IResourceVisitor visitor=new IResourceVisitor(){
+    public boolean visit(    IResource resource) throws CoreException {
+      if ("class".equals(resource.getFileExtension()) && resource.exists()) {
+        files.add(resource.getLocation());
+      }
+      return true;
+    }
+  }
+;
+  if (delta == null) {
+    project.accept(visitor);
+  }
+ else {
+    delta.accept(new IResourceDeltaVisitor(){
+      public boolean visit(      IResourceDelta d) throws CoreException {
+        return visitor.visit(d.getResource());
+      }
+    }
+);
+  }
+}
