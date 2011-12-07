@@ -1,0 +1,128 @@
+{
+  boolean finished=false;
+  boolean modified=false;
+  while (true) {
+    categorize();
+    if (single_child_not_null.length() != 0) {
+      finished=false;
+      modified=true;
+      BitSetIterator i=single_child_not_null.iterator();
+      while (i.hasNext()) {
+        TypeVariableBV var=typeVariableForId(i.next());
+        if (single_child_not_null.get(var.id())) {
+          TypeVariableBV child=typeVariableForId(var.children().iterator().next());
+          var=var.union(child);
+        }
+      }
+    }
+    if (finished) {
+      if (single_soft_parent.length() != 0) {
+        finished=false;
+        modified=true;
+        BitSetIterator i=single_soft_parent.iterator();
+        while (i.hasNext()) {
+          TypeVariableBV var=typeVariableForId(i.next());
+          if (single_soft_parent.get(var.id())) {
+            TypeVariableBV parent=typeVariableForId(var.parents().iterator().next());
+            var=var.union(parent);
+          }
+        }
+      }
+      if (single_hard_parent.length() != 0) {
+        finished=false;
+        modified=true;
+        BitSetIterator i=single_hard_parent.iterator();
+        while (i.hasNext()) {
+          TypeVariableBV var=typeVariableForId(i.next());
+          if (single_hard_parent.get(var.id())) {
+            TypeVariableBV parent=typeVariableForId(var.parents().iterator().next());
+            debug_vars("union single parent\n " + var + "\n "+ parent);
+            var=var.union(parent);
+          }
+        }
+      }
+      if (single_null_child.length() != 0) {
+        finished=false;
+        modified=true;
+        BitSetIterator i=single_null_child.iterator();
+        while (i.hasNext()) {
+          TypeVariableBV var=typeVariableForId(i.next());
+          if (single_null_child.get(var.id())) {
+            TypeVariableBV child=typeVariableForId(var.children().iterator().next());
+            var=var.union(child);
+          }
+        }
+      }
+      if (finished) {
+        break;
+      }
+      continue;
+    }
+    if (modified) {
+      modified=false;
+      continue;
+    }
+    finished=true;
+    multiple_children:     for (BitSetIterator varIt=multiple_children.iterator(); varIt.hasNext(); ) {
+      final TypeVariableBV var=typeVariableForId(varIt.next());
+      TypeNode lca=null;
+      BitVector children_to_remove=new BitVector();
+      for (BitSetIterator childIt=var.children().iterator(); childIt.hasNext(); ) {
+        final TypeVariableBV child=typeVariableForId(childIt.next());
+        TypeNode type=child.type();
+        if (type != null && type.isNull()) {
+          var.removeChild(child);
+        }
+ else         if (type != null && type.isClass()) {
+          children_to_remove.set(child.id());
+          if (lca == null) {
+            lca=type;
+          }
+ else {
+            lca=lca.lcaIfUnique(type);
+            if (lca == null) {
+              if (DEBUG) {
+                G.v().out.println("==++==" + stmtBody.getMethod().getDeclaringClass().getName() + "."+ stmtBody.getMethod().getName());
+              }
+              continue multiple_children;
+            }
+          }
+        }
+      }
+      if (lca != null) {
+        for (BitSetIterator childIt=children_to_remove.iterator(); childIt.hasNext(); ) {
+          final TypeVariableBV child=typeVariableForId(childIt.next());
+          var.removeChild(child);
+        }
+        var.addChild(typeVariable(lca));
+      }
+    }
+    for (BitSetIterator varIt=multiple_parents.iterator(); varIt.hasNext(); ) {
+      final TypeVariableBV var=typeVariableForId(varIt.next());
+      LinkedList<TypeVariableBV> hp=new LinkedList<TypeVariableBV>();
+      for (BitSetIterator parentIt=var.parents().iterator(); parentIt.hasNext(); ) {
+        final TypeVariableBV parent=typeVariableForId(parentIt.next());
+        TypeNode type=parent.type();
+        if (type != null) {
+          Iterator<TypeVariableBV> k=hp.iterator();
+          while (k.hasNext()) {
+            TypeVariableBV otherparent=k.next();
+            TypeNode othertype=otherparent.type();
+            if (type.hasDescendant(othertype)) {
+              var.removeParent(parent);
+              type=null;
+              break;
+            }
+            if (type.hasAncestor(othertype)) {
+              var.removeParent(otherparent);
+              k.remove();
+            }
+          }
+          if (type != null) {
+            hp.add(parent);
+          }
+        }
+      }
+    }
+  }
+}

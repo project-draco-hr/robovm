@@ -1,0 +1,26 @@
+{
+  if (!method.jmethod.getDeclaringClass().isApplicationClass())   return;
+  BasicBlock b=this.cfg;
+  HashMap<BasicBlock,Integer> block2exc=new HashMap<BasicBlock,Integer>();
+  int tmp, nodes=0, edges=0, highest=0;
+  while (b != null) {
+    tmp=0;
+    for (    exception_table_entry element : method.code_attr.exception_table) {
+      Instruction start=element.start_inst;
+      Instruction end=element.start_inst;
+      if ((start.label >= b.head.label && start.label <= b.tail.label) || (end.label > b.head.label && (b.tail.next == null || end.label <= b.tail.next.label)))       tmp++;
+    }
+    block2exc.put(b,new Integer(tmp));
+    b=b.next;
+  }
+  b=this.cfg;
+  while (b != null) {
+    nodes++;
+    tmp=b.succ.size() + block2exc.get(b).intValue();
+    int deg=b.pred.size() + tmp + (b.beginException ? 1 : 0);
+    if (deg > highest)     highest=deg;
+    edges+=tmp;
+    b=b.next;
+  }
+  methodsToVEM.put(method.jmethod,new int[]{nodes,edges,highest});
+}

@@ -1,0 +1,18 @@
+{
+  Stmt s=(Stmt)u;
+  if (v instanceof Constant)   return false;
+  if (v instanceof Expr)   throw new RuntimeException("can't deal with expr");
+  if (s.containsInvokeExpr()) {
+    if (!(v instanceof Local))     return true;
+  }
+  Iterator useIt=u.getUseBoxes().iterator();
+  while (useIt.hasNext()) {
+    Value use=(Value)useIt.next();
+    if (use.equivTo(v))     return true;
+    Iterator vUseIt=v.getUseBoxes().iterator();
+    while (vUseIt.hasNext()) {
+      if (use.equivTo(vUseIt.next()))       return true;
+    }
+  }
+  return false;
+}

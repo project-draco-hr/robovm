@@ -1,0 +1,14 @@
+{
+  FlowSet in=(FlowSet)inVal;
+  FlowSet out=(FlowSet)outVal;
+  Stmt s=(Stmt)stmt;
+  in.copy(out);
+  CallGraph cg=Scene.v().getCallGraph();
+  Iterator edges=cg.edgesOutOf(s);
+  while (edges.hasNext()) {
+    Edge e=(Edge)edges.next();
+    if (e.isClinit()) {
+      out.add(e.tgt());
+    }
+  }
+}

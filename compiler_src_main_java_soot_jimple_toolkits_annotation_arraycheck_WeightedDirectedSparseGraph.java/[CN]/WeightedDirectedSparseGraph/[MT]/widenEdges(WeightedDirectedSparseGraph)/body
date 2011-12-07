@@ -1,0 +1,31 @@
+{
+  WeightedDirectedSparseGraph other=othergraph;
+  if (other.isUnknown)   return;
+  Hashtable<Object,Hashtable<Object,IntContainer>> othersources=other.sources;
+  List<Object> sourceList=new ArrayList<Object>(this.sources.keySet());
+  Iterator<Object> srcIt=sourceList.iterator();
+  while (srcIt.hasNext()) {
+    Object src=srcIt.next();
+    Hashtable thistargets=this.sources.get(src);
+    Hashtable othertargets=othersources.get(src);
+    if (othertargets == null) {
+      this.sources.remove(src);
+      continue;
+    }
+    List targetList=new ArrayList(thistargets.keySet());
+    Iterator targetIt=targetList.iterator();
+    while (targetIt.hasNext()) {
+      Object target=targetIt.next();
+      IntContainer thisweight=(IntContainer)thistargets.get(target);
+      IntContainer otherweight=(IntContainer)othertargets.get(target);
+      if (otherweight == null) {
+        thistargets.remove(target);
+        continue;
+      }
+      if (thisweight.value > otherweight.value) {
+        thistargets.remove(target);
+      }
+    }
+    if (thistargets.size() == 0)     this.sources.remove(src);
+  }
+}

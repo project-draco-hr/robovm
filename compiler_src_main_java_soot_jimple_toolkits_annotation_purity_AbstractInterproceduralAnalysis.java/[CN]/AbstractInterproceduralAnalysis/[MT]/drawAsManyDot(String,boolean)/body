@@ -1,0 +1,22 @@
+{
+  Iterator it=data.keySet().iterator();
+  while (it.hasNext()) {
+    SootMethod m=(SootMethod)it.next();
+    DotGraph dot=new DotGraph(m.toString());
+    dot.setGraphLabel(m.toString());
+    fillDotGraph("X",data.get(m),dot);
+    File f=new File(SourceLocator.v().getOutputDir(),prefix + m.toString() + DotGraph.DOT_EXTENSION);
+    dot.plot(f.getPath());
+  }
+  if (drawUnanalysed) {
+    it=unanalysed.keySet().iterator();
+    while (it.hasNext()) {
+      SootMethod m=(SootMethod)it.next();
+      DotGraph dot=new DotGraph(m.toString());
+      dot.setGraphLabel(m.toString() + " (unanalysed)");
+      fillDotGraph("X",unanalysed.get(m),dot);
+      File f=new File(SourceLocator.v().getOutputDir(),prefix + m.toString() + "_u"+ DotGraph.DOT_EXTENSION);
+      dot.plot(f.getPath());
+    }
+  }
+}

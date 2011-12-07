@@ -1,0 +1,169 @@
+{
+  localFields=new ArrayList<SootField>();
+  sharedFields=new ArrayList<SootField>();
+  Iterator<SootField> fieldsIt=allFields.iterator();
+  while (fieldsIt.hasNext()) {
+    SootField field=fieldsIt.next();
+    if (fieldIsInitiallyLocal(field))     localFields.add(field);
+ else     sharedFields.add(field);
+  }
+  localInnerFields=new ArrayList<SootField>();
+  sharedInnerFields=new ArrayList<SootField>();
+  Iterator<SootMethod> methodsIt=allMethods.iterator();
+  while (methodsIt.hasNext()) {
+    SootMethod method=methodsIt.next();
+    MutableDirectedGraph dataFlowSummary;
+    if (primitiveDfa != null) {
+      dataFlowSummary=primitiveDfa.getMethodInfoFlowSummary(method);
+      if (printdfgs && method.getDeclaringClass().isApplicationClass()) {
+        G.v().out.println("Attempting to print graphs (will succeed only if ./dfg/ is a valid path)");
+        DirectedGraph primitiveGraph=primitiveDfa.getMethodInfoFlowAnalysis(method).getMethodAbbreviatedInfoFlowGraph();
+        InfoFlowAnalysis.printGraphToDotFile("dfg/" + method.getDeclaringClass().getShortName() + "_"+ method.getName()+ "_primitive",primitiveGraph,method.getName() + "_primitive",false);
+        DirectedGraph nonPrimitiveGraph=dfa.getMethodInfoFlowAnalysis(method).getMethodAbbreviatedInfoFlowGraph();
+        InfoFlowAnalysis.printGraphToDotFile("dfg/" + method.getDeclaringClass().getShortName() + "_"+ method.getName(),nonPrimitiveGraph,method.getName(),false);
+      }
+    }
+ else {
+      dataFlowSummary=dfa.getMethodInfoFlowSummary(method);
+      if (printdfgs && method.getDeclaringClass().isApplicationClass()) {
+        G.v().out.println("Attempting to print graph (will succeed only if ./dfg/ is a valid path)");
+        DirectedGraph nonPrimitiveGraph=dfa.getMethodInfoFlowAnalysis(method).getMethodAbbreviatedInfoFlowGraph();
+        InfoFlowAnalysis.printGraphToDotFile("dfg/" + method.getDeclaringClass().getShortName() + "_"+ method.getName(),nonPrimitiveGraph,method.getName(),false);
+      }
+    }
+    Iterator<Object> nodesIt=dataFlowSummary.getNodes().iterator();
+    while (nodesIt.hasNext()) {
+      EquivalentValue node=(EquivalentValue)nodesIt.next();
+      if (node.getValue() instanceof InstanceFieldRef) {
+        InstanceFieldRef ifr=(InstanceFieldRef)node.getValue();
+        if (!localFields.contains(ifr.getField()) && !sharedFields.contains(ifr.getField()) && !localInnerFields.contains(ifr.getField())) {
+          localInnerFields.add(ifr.getField());
+        }
+      }
+    }
+  }
+  boolean changed=true;
+  while (changed) {
+    changed=false;
+    methodsIt=allMethods.iterator();
+    while (methodsIt.hasNext()) {
+      SootMethod method=methodsIt.next();
+      if (method.isStatic() || !method.isConcrete())       continue;
+      ListIterator<SootField> localFieldsIt=((List<SootField>)localFields).listIterator();
+      while (localFieldsIt.hasNext()) {
+        SootField localField=localFieldsIt.next();
+        List sourcesAndSinks=new ArrayList();
+        MutableDirectedGraph dataFlowSummary;
+        if (primitiveDfa != null)         dataFlowSummary=primitiveDfa.getMethodInfoFlowSummary(method);
+ else         dataFlowSummary=dfa.getMethodInfoFlowSummary(method);
+        EquivalentValue node=InfoFlowAnalysis.getNodeForFieldRef(method,localField);
+        if (dataFlowSummary.containsNode(node)) {
+          sourcesAndSinks.addAll(dataFlowSummary.getSuccsOf(node));
+          sourcesAndSinks.addAll(dataFlowSummary.getPredsOf(node));
+        }
+        Iterator sourcesAndSinksIt=sourcesAndSinks.iterator();
+        if (localField.getDeclaringClass().isApplicationClass() && sourcesAndSinksIt.hasNext()) {
+        }
+        while (sourcesAndSinksIt.hasNext()) {
+          EquivalentValue sourceOrSink=(EquivalentValue)sourcesAndSinksIt.next();
+          Ref sourceOrSinkRef=(Ref)sourceOrSink.getValue();
+          boolean fieldBecomesShared=false;
+          if (sourceOrSinkRef instanceof ParameterRef) {
+            fieldBecomesShared=!parameterIsLocal(method,sourceOrSink,true);
+          }
+ else           if (sourceOrSinkRef instanceof ThisRef) {
+            fieldBecomesShared=!thisIsLocal(method,sourceOrSink);
+          }
+ else           if (sourceOrSinkRef instanceof InstanceFieldRef) {
+            fieldBecomesShared=sharedFields.contains(((FieldRef)sourceOrSinkRef).getField()) || sharedInnerFields.contains(((FieldRef)sourceOrSinkRef).getField());
+          }
+ else           if (sourceOrSinkRef instanceof StaticFieldRef) {
+            fieldBecomesShared=true;
+          }
+ else {
+            throw new RuntimeException("Unknown type of Ref in Data Flow Graph:");
+          }
+          if (fieldBecomesShared) {
+            localFieldsIt.remove();
+            sharedFields.add(localField);
+            changed=true;
+            break;
+          }
+ else {
+          }
+        }
+      }
+      ListIterator<SootField> localInnerFieldsIt=((List<SootField>)localInnerFields).listIterator();
+      while (!changed && localInnerFieldsIt.hasNext()) {
+        SootField localInnerField=localInnerFieldsIt.next();
+        List sourcesAndSinks=new ArrayList();
+        MutableDirectedGraph dataFlowSummary;
+        if (primitiveDfa != null)         dataFlowSummary=primitiveDfa.getMethodInfoFlowSummary(method);
+ else         dataFlowSummary=dfa.getMethodInfoFlowSummary(method);
+        EquivalentValue node=InfoFlowAnalysis.getNodeForFieldRef(method,localInnerField);
+        if (dataFlowSummary.containsNode(node)) {
+          sourcesAndSinks.addAll(dataFlowSummary.getSuccsOf(node));
+          sourcesAndSinks.addAll(dataFlowSummary.getPredsOf(node));
+        }
+        Iterator sourcesAndSinksIt=sourcesAndSinks.iterator();
+        if (localInnerField.getDeclaringClass().isApplicationClass() && sourcesAndSinksIt.hasNext()) {
+        }
+        while (sourcesAndSinksIt.hasNext()) {
+          EquivalentValue sourceOrSink=(EquivalentValue)sourcesAndSinksIt.next();
+          Ref sourceOrSinkRef=(Ref)sourceOrSink.getValue();
+          boolean fieldBecomesShared=false;
+          if (sourceOrSinkRef instanceof ParameterRef) {
+            fieldBecomesShared=!parameterIsLocal(method,sourceOrSink,true);
+          }
+ else           if (sourceOrSinkRef instanceof ThisRef) {
+            fieldBecomesShared=!thisIsLocal(method,sourceOrSink);
+          }
+ else           if (sourceOrSinkRef instanceof InstanceFieldRef) {
+            fieldBecomesShared=sharedFields.contains(((FieldRef)sourceOrSinkRef).getField()) || sharedInnerFields.contains(((FieldRef)sourceOrSinkRef).getField());
+          }
+ else           if (sourceOrSinkRef instanceof StaticFieldRef) {
+            fieldBecomesShared=true;
+          }
+ else {
+            throw new RuntimeException("Unknown type of Ref in Data Flow Graph:");
+          }
+          if (fieldBecomesShared) {
+            localInnerFieldsIt.remove();
+            sharedInnerFields.add(localInnerField);
+            changed=true;
+            break;
+          }
+ else {
+          }
+        }
+      }
+    }
+  }
+  if (dfa.printDebug()) {
+    G.v().out.println("        Found local/shared fields for " + sootClass.toString());
+    G.v().out.println("          Local fields: ");
+    Iterator<SootField> localsToPrintIt=localFields.iterator();
+    while (localsToPrintIt.hasNext()) {
+      SootField localToPrint=localsToPrintIt.next();
+      if (localToPrint.getDeclaringClass().isApplicationClass())       G.v().out.println("                  " + localToPrint);
+    }
+    G.v().out.println("          Shared fields: ");
+    Iterator<SootField> sharedsToPrintIt=sharedFields.iterator();
+    while (sharedsToPrintIt.hasNext()) {
+      SootField sharedToPrint=sharedsToPrintIt.next();
+      if (sharedToPrint.getDeclaringClass().isApplicationClass())       G.v().out.println("                  " + sharedToPrint);
+    }
+    G.v().out.println("          Local inner fields: ");
+    localsToPrintIt=localInnerFields.iterator();
+    while (localsToPrintIt.hasNext()) {
+      SootField localToPrint=localsToPrintIt.next();
+      if (localToPrint.getDeclaringClass().isApplicationClass())       G.v().out.println("                  " + localToPrint);
+    }
+    G.v().out.println("          Shared inner fields: ");
+    sharedsToPrintIt=sharedInnerFields.iterator();
+    while (sharedsToPrintIt.hasNext()) {
+      SootField sharedToPrint=sharedsToPrintIt.next();
+      if (sharedToPrint.getDeclaringClass().isApplicationClass())       G.v().out.println("                  " + sharedToPrint);
+    }
+  }
+}

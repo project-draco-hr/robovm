@@ -1,0 +1,122 @@
+{
+  Date start=new Date();
+  if (Options.v().debug())   G.v().out.println("Building PseudoTopological order list on " + start);
+  LinkedList allUnits=(LinkedList)SlowPseudoTopologicalOrderer.v().newList(this.graph,false);
+  BoundedPriorityList changedUnits=new BoundedPriorityList(allUnits);
+  Date finish=new Date();
+  if (Options.v().debug()) {
+    long runtime=finish.getTime() - start.getTime();
+    long mins=runtime / 60000;
+    long secs=(runtime % 60000) / 1000;
+    G.v().out.println("Building PseudoTopological order finished. " + "It took " + mins + " mins and "+ secs+ " secs.");
+  }
+  start=new Date();
+  HashSet changedUnitsSet=new HashSet(allUnits);
+  List<Object> changedSuccs;
+  FlowGraphEdge tmpEdge=new FlowGraphEdge();
+  HashSet<Block> unvisitedNodes=new HashSet<Block>(graph.size() * 2 + 1,0.7f);
+{
+    Iterator blockIt=graph.iterator();
+    while (blockIt.hasNext()) {
+      Block block=(Block)blockIt.next();
+      HashSet<IntContainer> livelocals=(HashSet<IntContainer>)ailanalysis.getFlowBefore(block.getHead());
+      livelocals.add(zero);
+    }
+  }
+{
+    stableRoundOfUnits=new HashMap<Block,Integer>();
+    Iterator it=graph.iterator();
+    while (it.hasNext()) {
+      Block block=(Block)it.next();
+      unvisitedNodes.add(block);
+      stableRoundOfUnits.put(block,new Integer(0));
+      HashSet livelocals=(HashSet)ailanalysis.getFlowBefore(block.getHead());
+      blockToBeforeFlow.put(block,new WeightedDirectedSparseGraph(livelocals,false));
+    }
+    Iterator<FlowGraphEdge> edgeIt=edgeSet.iterator();
+    while (edgeIt.hasNext()) {
+      FlowGraphEdge edge=edgeIt.next();
+      Block target=(Block)edge.to;
+      HashSet livelocals=(HashSet)ailanalysis.getFlowBefore(target.getHead());
+      edgeMap.put(edge,new WeightedDirectedSparseGraph(livelocals,false));
+    }
+  }
+{
+    List headlist=graph.getHeads();
+    Iterator headIt=headlist.iterator();
+    while (headIt.hasNext()) {
+      Object head=headIt.next();
+      FlowGraphEdge edge=new FlowGraphEdge(head,head);
+      WeightedDirectedSparseGraph initgraph=edgeMap.get(edge);
+      initgraph.setTop();
+    }
+  }
+{
+    WeightedDirectedSparseGraph beforeFlow=new WeightedDirectedSparseGraph(null,false);
+    while (!changedUnits.isEmpty()) {
+      Block s=(Block)changedUnits.removeFirst();
+      changedUnitsSet.remove(s);
+      WeightedDirectedSparseGraph previousBeforeFlow=blockToBeforeFlow.get(s);
+      beforeFlow.setVertexes(previousBeforeFlow.getVertexes());
+{
+        List preds=graph.getPredsOf(s);
+        if (preds.size() == 0) {
+          tmpEdge.changeEndUnits(s,s);
+          copy(edgeMap.get(tmpEdge),beforeFlow);
+        }
+ else         if (preds.size() == 1) {
+          tmpEdge.changeEndUnits(preds.get(0),s);
+          copy(edgeMap.get(tmpEdge),beforeFlow);
+        }
+ else {
+          Object predFlows[]=new Object[preds.size()];
+          boolean allUnvisited=true;
+          Iterator predIt=preds.iterator();
+          int index=0;
+          int lastVisited=0;
+          while (predIt.hasNext()) {
+            Object pred=predIt.next();
+            tmpEdge.changeEndUnits(pred,s);
+            if (!unvisitedNodes.contains(pred)) {
+              allUnvisited=false;
+              lastVisited=index;
+            }
+            predFlows[index++]=edgeMap.get(tmpEdge);
+          }
+          if (allUnvisited) {
+            G.v().out.println("Warning : see all unvisited node");
+          }
+ else {
+            Object tmp=predFlows[0];
+            predFlows[0]=predFlows[lastVisited];
+            predFlows[lastVisited]=tmp;
+          }
+          mergebunch(predFlows,s,previousBeforeFlow,beforeFlow);
+        }
+        copy(beforeFlow,previousBeforeFlow);
+      }
+{
+        changedSuccs=flowThrough(beforeFlow,s);
+      }
+{
+        for (int i=0; i < changedSuccs.size(); i++) {
+          Object succ=changedSuccs.get(i);
+          if (!changedUnitsSet.contains(succ)) {
+            changedUnits.add(succ);
+            changedUnitsSet.add(succ);
+          }
+        }
+      }
+{
+        unvisitedNodes.remove(s);
+      }
+    }
+  }
+  finish=new Date();
+  if (Options.v().debug()) {
+    long runtime=finish.getTime() - start.getTime();
+    long mins=runtime / 60000;
+    long secs=(runtime / 60000) / 1000;
+    G.v().out.println("Doing analysis finished." + " It took " + mins + " mins and "+ secs+ "secs.");
+  }
+}

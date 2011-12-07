@@ -1,0 +1,12 @@
+{
+  from.checkLevel(SootClass.HIERARCHY);
+  m.getDeclaringClass().checkLevel(SootClass.HIERARCHY);
+  if (m.isPublic())   return true;
+  if (m.isPrivate()) {
+    return from.equals(m.getDeclaringClass());
+  }
+  if (m.isProtected()) {
+    return isClassSubclassOfIncluding(from,m.getDeclaringClass());
+  }
+  return from.getJavaPackageName().equals(m.getDeclaringClass().getJavaPackageName());
+}

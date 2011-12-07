@@ -1,0 +1,60 @@
+{
+  LinkedList<Typing> sigma=new LinkedList<Typing>(), r=new LinkedList<Typing>();
+  HashMap<Typing,QueuedSet<DefinitionStmt>> worklists=new HashMap<Typing,QueuedSet<DefinitionStmt>>();
+  sigma.add(tg);
+  QueuedSet<DefinitionStmt> wl=new QueuedSet<DefinitionStmt>(this.assignments);
+  worklists.put(tg,wl);
+  while (!sigma.isEmpty()) {
+    tg=sigma.element();
+    wl=worklists.get(tg);
+    if (wl.isEmpty()) {
+      r.add(tg);
+      sigma.remove();
+      worklists.remove(tg);
+    }
+ else {
+      DefinitionStmt stmt=wl.removeFirst();
+      Value lhs=stmt.getLeftOp(), rhs=stmt.getRightOp();
+      Local v;
+      if (lhs instanceof Local)       v=(Local)lhs;
+ else       v=(Local)((ArrayRef)lhs).getBase();
+      Type told=tg.get(v);
+      boolean keep=false;
+      Collection<Type> eval=ef.eval(tg,rhs,stmt);
+      for (      Type t_ : eval) {
+        if (lhs instanceof ArrayRef) {
+          if (!(t_ instanceof RefType || t_ instanceof ArrayType)) {
+            keep=true;
+            continue;
+          }
+          t_=t_.makeArrayType();
+        }
+        Collection<Type> lcas=h.lcas(told,t_);
+        for (        Type t : lcas)         if (typesEqual(t,told))         keep=true;
+ else {
+          Typing tg_;
+          QueuedSet<DefinitionStmt> wl_;
+          if (eval.size() == 1 && lcas.size() == 1) {
+            tg_=tg;
+            wl_=wl;
+            keep=true;
+          }
+ else {
+            tg_=new Typing(tg);
+            wl_=new QueuedSet<DefinitionStmt>(wl);
+            sigma.add(tg_);
+            worklists.put(tg_,wl_);
+          }
+          tg_.set(v,t);
+          wl_.addLast(this.depends.get(v));
+        }
+      }
+      if (!keep) {
+        sigma.remove();
+        worklists.remove(tg);
+      }
+    }
+  }
+  Typing.minimize(r,h);
+  return r;
+}

@@ -1,0 +1,52 @@
+{
+  Iterator classesIt=Scene.v().getApplicationClasses().iterator();
+  while (classesIt.hasNext()) {
+    SootClass appClass=(SootClass)classesIt.next();
+    Iterator methsIt=appClass.getMethods().iterator();
+    while (methsIt.hasNext()) {
+      SootMethod sm=(SootMethod)methsIt.next();
+      if (!Scene.v().getReachableMethods().contains(sm))       continue;
+      analyzeMethod(sm);
+    }
+  }
+  Iterator<SootMethod> methStatIt=methodResultsMap.keySet().iterator();
+  while (methStatIt.hasNext()) {
+    SootMethod meth=methStatIt.next();
+    int result=methodResultsMap.get(meth).intValue();
+    String sRes="Public";
+    if (result == RESULT_PUBLIC) {
+      sRes="Public";
+    }
+ else     if (result == RESULT_PROTECTED) {
+      sRes="Protected";
+    }
+ else     if (result == RESULT_PACKAGE) {
+      sRes="Package";
+    }
+ else     if (result == RESULT_PRIVATE) {
+      sRes="Private";
+    }
+    String actual=null;
+    if (Modifier.isPublic(meth.getModifiers())) {
+      actual="Public";
+    }
+ else     if (Modifier.isProtected(meth.getModifiers())) {
+      actual="Protected";
+    }
+ else     if (Modifier.isPrivate(meth.getModifiers())) {
+      actual="Private";
+    }
+ else {
+      actual="Package";
+    }
+    if (!sRes.equals(actual)) {
+      if (meth.getName().equals("<init>")) {
+        meth.addTag(new StringTag("Constructor: " + meth.getDeclaringClass().getName() + " has "+ actual+ " level access, can have: "+ sRes+ " level access.","Tightest Qualifiers"));
+      }
+ else {
+        meth.addTag(new StringTag("Method: " + meth.getName() + " has "+ actual+ " level access, can have: "+ sRes+ " level access.","Tightest Qualifiers"));
+      }
+      meth.addTag(new ColorTag(255,10,0,true,"Tightest Qualifiers"));
+    }
+  }
+}

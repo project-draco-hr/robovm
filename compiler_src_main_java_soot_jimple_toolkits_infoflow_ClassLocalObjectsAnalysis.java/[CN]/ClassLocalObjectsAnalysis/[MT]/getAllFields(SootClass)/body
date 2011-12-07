@@ -1,0 +1,19 @@
+{
+  List<SootField> allFields=new ArrayList<SootField>();
+  Iterator fieldsIt=sc.getFields().iterator();
+  while (fieldsIt.hasNext()) {
+    SootField field=(SootField)fieldsIt.next();
+    allFields.add(field);
+  }
+  SootClass superclass=sc;
+  if (superclass.hasSuperclass())   superclass=superclass.getSuperclass();
+  while (superclass.hasSuperclass()) {
+    Iterator scFieldsIt=superclass.getFields().iterator();
+    while (scFieldsIt.hasNext()) {
+      SootField scField=(SootField)scFieldsIt.next();
+      allFields.add(scField);
+    }
+    superclass=superclass.getSuperclass();
+  }
+  return allFields;
+}

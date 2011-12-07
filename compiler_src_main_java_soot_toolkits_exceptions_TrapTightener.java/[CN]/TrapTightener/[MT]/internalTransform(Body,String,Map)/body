@@ -1,0 +1,39 @@
+{
+  if (Options.v().verbose())   G.v().out.println("[" + body.getMethod().getName() + "] Tightening trap boundaries...");
+  Chain trapChain=body.getTraps();
+  Chain unitChain=body.getUnits();
+  if (trapChain.size() > 0) {
+    ExceptionalUnitGraph graph=new ExceptionalUnitGraph(body);
+    for (Iterator trapIt=trapChain.iterator(); trapIt.hasNext(); ) {
+      Trap trap=(Trap)trapIt.next();
+      Unit firstTrappedUnit=trap.getBeginUnit();
+      Unit firstTrappedThrower=null;
+      Unit firstUntrappedUnit=trap.getEndUnit();
+      Unit lastTrappedUnit=(Unit)unitChain.getPredOf(firstUntrappedUnit);
+      Unit lastTrappedThrower=null;
+      for (Unit u=firstTrappedUnit; u != null && u != firstUntrappedUnit; u=(Unit)unitChain.getSuccOf(u)) {
+        if (mightThrowTo(graph,u,trap)) {
+          firstTrappedThrower=u;
+          break;
+        }
+      }
+      if (firstTrappedThrower != null) {
+        for (Unit u=lastTrappedUnit; u != null; u=(Unit)unitChain.getPredOf(u)) {
+          if (mightThrowTo(graph,u,trap)) {
+            lastTrappedThrower=u;
+            break;
+          }
+        }
+      }
+      if (firstTrappedThrower != null && firstTrappedUnit != firstTrappedThrower) {
+        trap.setBeginUnit(firstTrappedThrower);
+      }
+      if (lastTrappedThrower == null) {
+        lastTrappedThrower=firstTrappedUnit;
+      }
+      if (lastTrappedUnit != lastTrappedThrower) {
+        trap.setEndUnit((Unit)unitChain.getSuccOf(lastTrappedThrower));
+      }
+    }
+  }
+}

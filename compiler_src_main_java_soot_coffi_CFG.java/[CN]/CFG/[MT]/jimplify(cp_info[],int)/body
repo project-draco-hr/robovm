@@ -1,0 +1,245 @@
+{
+  Code_attribute codeAttribute=method.locate_code_attribute();
+  Set<Instruction> handlerInstructions=new ArraySet();
+  Map<Instruction,SootClass> handlerInstructionToException=new HashMap<Instruction,SootClass>();
+  Map<Instruction,TypeStack> instructionToTypeStack;
+  Map<Instruction,TypeStack> instructionToPostTypeStack;
+{
+    buildInsnCFGfromBBCFG();
+{
+      for (int i=0; i < codeAttribute.exception_table_length; i++) {
+        Instruction startIns=codeAttribute.exception_table[i].start_inst;
+        Instruction endIns=codeAttribute.exception_table[i].end_inst;
+        Instruction handlerIns=codeAttribute.exception_table[i].handler_inst;
+        handlerInstructions.add(handlerIns);
+{
+          int catchType=codeAttribute.exception_table[i].catch_type;
+          SootClass exception;
+          if (catchType != 0) {
+            CONSTANT_Class_info classinfo=(CONSTANT_Class_info)constant_pool[catchType];
+            String name=((CONSTANT_Utf8_info)(constant_pool[classinfo.name_index])).convert();
+            name=name.replace('/','.');
+            exception=cm.getSootClass(name);
+          }
+ else           exception=cm.getSootClass("java.lang.Throwable");
+          handlerInstructionToException.put(handlerIns,exception);
+        }
+        if (startIns == endIns)         throw new RuntimeException("Empty catch range for exception handler");
+        Instruction ins=startIns;
+        for (; ; ) {
+          Instruction[] succs=ins.succs;
+          Instruction[] newsuccs=new Instruction[succs.length + 1];
+          System.arraycopy(succs,0,newsuccs,0,succs.length);
+          newsuccs[succs.length]=handlerIns;
+          ins.succs=newsuccs;
+          ins=ins.next;
+          if (ins == endIns || ins == null)           break;
+        }
+      }
+    }
+  }
+  Set<Instruction> reachableInstructions=new HashSet<Instruction>();
+{
+    LinkedList<Instruction> instructionsToVisit=new LinkedList<Instruction>();
+    reachableInstructions.add(firstInstruction);
+    instructionsToVisit.addLast(firstInstruction);
+    while (!instructionsToVisit.isEmpty()) {
+      Instruction ins=instructionsToVisit.removeFirst();
+      Instruction[] succs=ins.succs;
+      for (      Instruction succ : succs) {
+        if (!reachableInstructions.contains(succ)) {
+          reachableInstructions.add(succ);
+          instructionsToVisit.addLast(succ);
+        }
+      }
+    }
+  }
+{
+    instructionToTypeStack=new HashMap<Instruction,TypeStack>();
+    instructionToPostTypeStack=new HashMap<Instruction,TypeStack>();
+    Set<Instruction> visitedInstructions=new HashSet<Instruction>();
+    List<Instruction> changedInstructions=new ArrayList<Instruction>();
+    TypeStack initialTypeStack;
+{
+      initialTypeStack=TypeStack.v();
+    }
+{
+      instructionToTypeStack.put(firstInstruction,initialTypeStack);
+      visitedInstructions.add(firstInstruction);
+      changedInstructions.add(firstInstruction);
+    }
+{
+      while (!changedInstructions.isEmpty()) {
+        Instruction ins=changedInstructions.get(0);
+        changedInstructions.remove(0);
+        OutFlow ret=processFlow(ins,instructionToTypeStack.get(ins),constant_pool);
+        instructionToPostTypeStack.put(ins,ret.typeStack);
+        Instruction[] successors=ins.succs;
+        for (        Instruction s : successors) {
+          if (!visitedInstructions.contains(s)) {
+            if (handlerInstructions.contains(s)) {
+              TypeStack exceptionTypeStack=(TypeStack.v()).push(RefType.v(handlerInstructionToException.get(s).getName()));
+              instructionToTypeStack.put(s,exceptionTypeStack);
+            }
+ else {
+              instructionToTypeStack.put(s,ret.typeStack);
+            }
+            visitedInstructions.add(s);
+            changedInstructions.add(s);
+          }
+ else {
+            TypeStack newTypeStack, oldTypeStack=instructionToTypeStack.get(s);
+            if (handlerInstructions.contains(s)) {
+              TypeStack exceptionTypeStack=(TypeStack.v()).push(RefType.v(handlerInstructionToException.get(s).getName()));
+              newTypeStack=exceptionTypeStack;
+            }
+ else {
+              try {
+                newTypeStack=ret.typeStack.merge(oldTypeStack);
+              }
+ catch (              RuntimeException re) {
+                G.v().out.println("Considering " + s);
+                throw re;
+              }
+            }
+            if (!newTypeStack.equals(oldTypeStack)) {
+              changedInstructions.add(s);
+            }
+            instructionToTypeStack.put(s,newTypeStack);
+          }
+        }
+      }
+    }
+  }
+{
+    Instruction ins=firstInstruction;
+    while (ins != null) {
+      TypeStack typeStack=instructionToTypeStack.get(ins);
+      ins=ins.next;
+    }
+  }
+{
+    BasicBlock b=cfg;
+    while (b != null) {
+      Instruction ins=b.head;
+      b.statements=new ArrayList<Stmt>();
+      List<Stmt> blockStatements=b.statements;
+      for (; ; ) {
+        List<Stmt> statementsForIns=new ArrayList<Stmt>();
+        if (reachableInstructions.contains(ins))         generateJimple(ins,instructionToTypeStack.get(ins),instructionToPostTypeStack.get(ins),constant_pool,statementsForIns,b);
+ else         statementsForIns.add(Jimple.v().newNopStmt());
+        if (!statementsForIns.isEmpty()) {
+          for (int i=0; i < statementsForIns.size(); i++) {
+            units.add(statementsForIns.get(i));
+            blockStatements.add(statementsForIns.get(i));
+          }
+          instructionToFirstStmt.put(ins,statementsForIns.get(0));
+          instructionToLastStmt.put(ins,statementsForIns.get(statementsForIns.size() - 1));
+        }
+        if (ins == b.tail)         break;
+        ins=ins.next;
+      }
+      b=b.next;
+    }
+  }
+  jimpleTargetFixup();
+{
+    Map<Stmt,Stmt> targetToHandler=new HashMap<Stmt,Stmt>();
+    for (int i=0; i < codeAttribute.exception_table_length; i++) {
+      Instruction startIns=codeAttribute.exception_table[i].start_inst;
+      Instruction endIns=codeAttribute.exception_table[i].end_inst;
+      Instruction targetIns=codeAttribute.exception_table[i].handler_inst;
+      if (!instructionToFirstStmt.containsKey(startIns) || (endIns != null && (!instructionToLastStmt.containsKey(endIns)))) {
+        throw new RuntimeException("Exception range does not coincide with jimple instructions");
+      }
+      if (!instructionToFirstStmt.containsKey(targetIns)) {
+        throw new RuntimeException("Exception handler does not coincide with jimple instruction");
+      }
+      SootClass exception;
+{
+        int catchType=codeAttribute.exception_table[i].catch_type;
+        if (catchType != 0) {
+          CONSTANT_Class_info classinfo=(CONSTANT_Class_info)constant_pool[catchType];
+          String name=((CONSTANT_Utf8_info)(constant_pool[classinfo.name_index])).convert();
+          name=name.replace('/','.');
+          exception=cm.getSootClass(name);
+        }
+ else         exception=cm.getSootClass("java.lang.Throwable");
+      }
+      Stmt newTarget;
+{
+        Stmt firstTargetStmt=instructionToFirstStmt.get(targetIns);
+        if (targetToHandler.containsKey(firstTargetStmt))         newTarget=targetToHandler.get(firstTargetStmt);
+ else {
+          Local local=Util.v().getLocalCreatingIfNecessary(listBody,"$stack0",UnknownType.v());
+          newTarget=Jimple.v().newIdentityStmt(local,Jimple.v().newCaughtExceptionRef());
+          ((PatchingChain)units).insertBeforeNoRedirect(newTarget,firstTargetStmt);
+          targetToHandler.put(firstTargetStmt,newTarget);
+          if (units.getFirst() != newTarget) {
+            Unit prev=(Unit)units.getPredOf(newTarget);
+            if (prev != null && prev.fallsThrough())             units.insertAfter(Jimple.v().newGotoStmt(firstTargetStmt),prev);
+          }
+        }
+      }
+{
+        Stmt firstStmt=instructionToFirstStmt.get(startIns);
+        Stmt afterEndStmt;
+        if (endIns == null) {
+          afterEndStmt=(Stmt)units.getLast();
+        }
+ else {
+          afterEndStmt=instructionToLastStmt.get(endIns);
+          IdentityStmt catchStart=(IdentityStmt)targetToHandler.get(afterEndStmt);
+          if (catchStart != null) {
+            if (catchStart != units.getPredOf(afterEndStmt)) {
+              throw new IllegalStateException("Assertion failure: catchStart != pred of afterEndStmt");
+            }
+            afterEndStmt=catchStart;
+          }
+        }
+        Trap trap=Jimple.v().newTrap(exception,firstStmt,afterEndStmt,newTarget);
+        listBody.getTraps().add(trap);
+      }
+    }
+  }
+  if (Options.v().keep_line_number()) {
+    HashMap<Stmt,Tag> stmtstags=new HashMap<Stmt,Tag>();
+    LinkedList<Stmt> startstmts=new LinkedList<Stmt>();
+    attribute_info[] attrs=codeAttribute.attributes;
+    for (    attribute_info element : attrs) {
+      if (element instanceof LineNumberTable_attribute) {
+        LineNumberTable_attribute lntattr=(LineNumberTable_attribute)element;
+        for (        line_number_table_entry element0 : lntattr.line_number_table) {
+          Stmt start_stmt=instructionToFirstStmt.get(element0.start_inst);
+          if (start_stmt != null) {
+            LineNumberTag lntag=new LineNumberTag(element0.line_number);
+            stmtstags.put(start_stmt,lntag);
+            startstmts.add(start_stmt);
+          }
+        }
+      }
+    }
+    for (Iterator<Stmt> stmtIt=new ArrayList<Stmt>(stmtstags.keySet()).iterator(); stmtIt.hasNext(); ) {
+      final Stmt stmt=stmtIt.next();
+      Stmt pred=stmt;
+      Tag tag=stmtstags.get(stmt);
+      while (true) {
+        pred=(Stmt)units.getPredOf(pred);
+        if (pred == null)         break;
+        if (!(pred instanceof IdentityStmt))         break;
+        stmtstags.put(pred,tag);
+        pred.addTag(tag);
+      }
+    }
+    for (int i=0; i < startstmts.size(); i++) {
+      Stmt stmt=startstmts.get(i);
+      Tag tag=stmtstags.get(stmt);
+      stmt.addTag(tag);
+      stmt=(Stmt)units.getSuccOf(stmt);
+      while (stmt != null && !stmtstags.containsKey(stmt)) {
+        stmt.addTag(tag);
+        stmt=(Stmt)units.getSuccOf(stmt);
+      }
+    }
+  }
+}

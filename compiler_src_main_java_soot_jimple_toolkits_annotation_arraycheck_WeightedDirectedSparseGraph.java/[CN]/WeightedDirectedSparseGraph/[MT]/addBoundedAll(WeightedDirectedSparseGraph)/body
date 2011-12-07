@@ -1,0 +1,20 @@
+{
+  this.isUnknown=another.isUnknown;
+  Hashtable<Object,Hashtable<Object,IntContainer>> othersources=another.sources;
+  Iterator thisnodeIt=this.vertexes.iterator();
+  while (thisnodeIt.hasNext()) {
+    Object src=thisnodeIt.next();
+    Hashtable othertargets=othersources.get(src);
+    if (othertargets == null)     continue;
+    Hashtable<Object,IntContainer> thistargets=new Hashtable<Object,IntContainer>();
+    Iterator othertargetIt=othertargets.keySet().iterator();
+    while (othertargetIt.hasNext()) {
+      Object key=othertargetIt.next();
+      if (this.vertexes.contains(key)) {
+        IntContainer weight=(IntContainer)othertargets.get(key);
+        thistargets.put(key,weight.dup());
+      }
+    }
+    if (thistargets.size() > 0)     this.sources.put(src,thistargets);
+  }
+}

@@ -1,0 +1,33 @@
+{
+  if (rep != this) {
+    ecr().propagate();
+  }
+  if (depth == 0) {
+    return;
+  }
+  for (  TypeVariable typeVariable : parents) {
+    TypeVariable var=typeVariable.ecr();
+    if (var.depth() == depth) {
+      element().addParent(var.element());
+    }
+ else     if (var.depth() == 0) {
+      if (var.type() == null) {
+        if (!Options.v().j2me()) {
+          var.addChild(resolver.typeVariable(resolver.hierarchy().CLONEABLE));
+          var.addChild(resolver.typeVariable(resolver.hierarchy().SERIALIZABLE));
+        }
+      }
+    }
+ else {
+      if (var.type() == null) {
+        if (!Options.v().j2me()) {
+          var.addChild(resolver.typeVariable(ArrayType.v(RefType.v("java.lang.Cloneable"),var.depth())));
+          var.addChild(resolver.typeVariable(ArrayType.v(RefType.v("java.io.Serializable"),var.depth())));
+        }
+      }
+    }
+  }
+  for (  TypeVariable var : parents) {
+    removeParent(var);
+  }
+}

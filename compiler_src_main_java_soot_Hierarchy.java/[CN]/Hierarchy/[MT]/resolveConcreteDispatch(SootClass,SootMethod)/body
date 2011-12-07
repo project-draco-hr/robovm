@@ -1,0 +1,15 @@
+{
+  concreteType.checkLevel(SootClass.HIERARCHY);
+  m.getDeclaringClass().checkLevel(SootClass.HIERARCHY);
+  checkState();
+  if (concreteType.isInterface())   throw new RuntimeException("class needed!");
+  Iterator<SootClass> it=getSuperclassesOfIncluding(concreteType).iterator();
+  String methodSig=m.getSubSignature();
+  while (it.hasNext()) {
+    SootClass c=it.next();
+    if (c.declaresMethod(methodSig) && isVisible(c,m)) {
+      return c.getMethod(methodSig);
+    }
+  }
+  throw new RuntimeException("could not resolve concrete dispatch!\nType: " + concreteType + "\nMethod: "+ m);
+}

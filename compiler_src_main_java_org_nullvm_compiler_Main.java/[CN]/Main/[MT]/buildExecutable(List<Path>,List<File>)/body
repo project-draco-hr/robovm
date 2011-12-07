@@ -1,0 +1,69 @@
+{
+  File outFile=new File(config.getTargetDir(),config.getTarget());
+  config.getLogger().debug("Building executable '%s'\n",outFile);
+  Module module=new Module();
+  List<Value> bootcpValues=new ArrayList<Value>();
+  List<Value> cpValues=new ArrayList<Value>();
+  Set<String> seenClasses=new HashSet<String>();
+  for (  Path path : paths) {
+    for (    Clazz c : path.list()) {
+      if (seenClasses.contains(c.getInternalName())) {
+        continue;
+      }
+      seenClasses.add(c.getInternalName());
+      byte[] modUtf8=ClassCompiler.stringToModifiedUtf8(c.getInternalName());
+      Global var=new Global(ClassCompiler.getStringVarName(modUtf8),Linkage.linker_private_weak,new StringConstant(modUtf8),true);
+      module.addGlobal(var);
+      String funcName="NullVM_" + ClassCompiler.mangleString(c.getInternalName());
+      FunctionDeclaration func=new FunctionDeclaration(funcName,new FunctionType(Type.I8_PTR,Type.I8_PTR,Type.I8_PTR,Type.I8_PTR));
+      module.addFunctionDeclaration(func);
+      Value value=new StructureConstant(new StructureType(Type.I8_PTR,Type.I8_PTR),new ConstantGetelementptr(var.ref(),0,0),new ConstantBitcast(func.ref(),Type.I8_PTR));
+      if (path.isInBootClasspath()) {
+        bootcpValues.add(value);
+      }
+ else {
+        cpValues.add(value);
+      }
+    }
+  }
+  bootcpValues.add(new StructureConstant(new StructureType(Type.I8_PTR,Type.I8_PTR),new NullConstant(Type.I8_PTR),new NullConstant(Type.I8_PTR)));
+  cpValues.add(new StructureConstant(new StructureType(Type.I8_PTR,Type.I8_PTR),new NullConstant(Type.I8_PTR),new NullConstant(Type.I8_PTR)));
+  Global gbcp=module.newGlobal(new ArrayConstant(new ArrayType(bootcpValues.size(),new StructureType(Type.I8_PTR,Type.I8_PTR)),bootcpValues.toArray(new Value[0])),true);
+  module.addGlobal(new Global("_nvmBcBootclasspathEntries",new ConstantGetelementptr(gbcp.ref(),0,0)));
+  Global gcp=module.newGlobal(new ArrayConstant(new ArrayType(cpValues.size(),new StructureType(Type.I8_PTR,Type.I8_PTR)),cpValues.toArray(new Value[0])),true);
+  module.addGlobal(new Global("_nvmBcClasspathEntries",new ConstantGetelementptr(gcp.ref(),0,0)));
+  if (config.getMainClass() != null) {
+    Global g=module.newGlobal(new StringConstant(ClassCompiler.stringToModifiedUtf8(config.getMainClass())),true);
+    module.addGlobal(new Global("_nvmBcMainClass",new ConstantGetelementptr(g.ref(),0,0)));
+  }
+  File configLl=new File(config.getTmpDir(),"config.ll");
+  FileUtils.writeStringToFile(configLl,module.toString(),"UTF-8");
+  File configS=new File(config.getTmpDir(),"config.s");
+  llc(configLl,configS);
+  String gccPath="gcc";
+  if (config.getGccBinPath() != null) {
+    gccPath=config.getGccBinPath().getAbsolutePath();
+  }
+  List<String> gccArgs=new ArrayList<String>();
+  List<String> libArgs=new ArrayList<String>();
+  libArgs.addAll(Arrays.asList("-lnullvm-bc","-lm","-lnullvm-core","-lnullvm-hyprt"));
+  gccArgs.add("-L");
+  gccArgs.add(config.getOsArchDepLibDir().getAbsolutePath());
+  if (config.getOs() == OS.linux) {
+    libArgs.add("-l:libgc.so.1");
+    gccArgs.add("-Xlinker");
+    gccArgs.add("-rpath=$ORIGIN");
+  }
+ else   if (config.getOs() == OS.darwin) {
+    libArgs.add("-lgc");
+    File unexportedSymbolsFile=new File(config.getTmpDir(),"unexported_symbols");
+    FileUtils.writeStringToFile(unexportedSymbolsFile,"*\n","ASCII");
+    gccArgs.add("-unexported_symbols_list");
+    gccArgs.add(unexportedSymbolsFile.getAbsolutePath());
+    gccArgs.add("-Xlinker");
+    gccArgs.add("-no_compact_unwind");
+    gccArgs.add("-arch");
+    gccArgs.add(config.getArch().toString());
+  }
+  exec(gccPath,"-o",outFile,"-g",gccArgs,configS,libFiles,libArgs);
+}

@@ -1,0 +1,23 @@
+{
+  TypeNode left=hierarchy.typeNode(((Local)stmt.getLeftOp()).getType());
+  Value r=stmt.getRightOp();
+  if (!(r instanceof CaughtExceptionRef)) {
+    TypeNode right=hierarchy.typeNode(r.getType());
+    if (!left.hasDescendantOrSelf(right)) {
+      error("Type Error(46) [" + left + " <- "+ right+ "]");
+    }
+  }
+ else {
+    List exceptionTypes=TrapManager.getExceptionTypesOf(stmt,stmtBody);
+    Iterator typeIt=exceptionTypes.iterator();
+    while (typeIt.hasNext()) {
+      Type t=(Type)typeIt.next();
+      if (!left.hasDescendantOrSelf(hierarchy.typeNode(t))) {
+        error("Type Error(47)");
+      }
+    }
+    if (!left.hasAncestorOrSelf(hierarchy.typeNode(RefType.v("java.lang.Throwable")))) {
+      error("Type Error(48)");
+    }
+  }
+}

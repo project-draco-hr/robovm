@@ -1,0 +1,58 @@
+{
+  if ((val instanceof AddExpr) | (val instanceof SubExpr)) {
+    String resVal1=getParity(in,((BinopExpr)val).getOp1());
+    String resVal2=getParity(in,((BinopExpr)val).getOp2());
+    if (resVal1.equals(TOP) | resVal2.equals(TOP)) {
+      return TOP;
+    }
+ else     if (resVal1.equals(BOTTOM) | resVal2.equals(BOTTOM)) {
+      return BOTTOM;
+    }
+ else     if (resVal1.equals(resVal2)) {
+      return EVEN;
+    }
+ else {
+      return ODD;
+    }
+  }
+ else   if (val instanceof MulExpr) {
+    String resVal1=getParity(in,((BinopExpr)val).getOp1());
+    String resVal2=getParity(in,((BinopExpr)val).getOp2());
+    if (resVal1.equals(TOP) | resVal2.equals(TOP)) {
+      return TOP;
+    }
+ else     if (resVal1.equals(BOTTOM) | resVal2.equals(BOTTOM)) {
+      return BOTTOM;
+    }
+ else     if (resVal1.equals(ODD) && resVal2.equals(ODD)) {
+      return ODD;
+    }
+ else {
+      return EVEN;
+    }
+  }
+ else   if (val instanceof IntConstant) {
+    int value=((IntConstant)val).value;
+    if ((value % 2) == 0) {
+      return EVEN;
+    }
+ else {
+      return ODD;
+    }
+  }
+ else   if (val instanceof LongConstant) {
+    long value=((LongConstant)val).value;
+    if ((value % 2) == 0) {
+      return EVEN;
+    }
+ else {
+      return ODD;
+    }
+  }
+ else   if (in.containsKey(val)) {
+    return in.get(val);
+  }
+ else {
+    return TOP;
+  }
+}

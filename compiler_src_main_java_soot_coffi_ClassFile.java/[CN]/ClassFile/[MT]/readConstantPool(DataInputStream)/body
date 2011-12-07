@@ -1,0 +1,89 @@
+{
+  byte tag;
+  cp_info cp;
+  int i;
+  boolean skipone;
+  constant_pool=new cp_info[constant_pool_count];
+  skipone=false;
+  for (i=1; i < constant_pool_count; i++) {
+    if (skipone) {
+      skipone=false;
+      continue;
+    }
+    tag=(byte)d.readUnsignedByte();
+switch (tag) {
+case cp_info.CONSTANT_Class:
+      cp=new CONSTANT_Class_info();
+    ((CONSTANT_Class_info)cp).name_index=d.readUnsignedShort();
+  if (debug)   G.v().out.println("Constant pool[" + i + "]: Class");
+break;
+case cp_info.CONSTANT_Fieldref:
+cp=new CONSTANT_Fieldref_info();
+((CONSTANT_Fieldref_info)cp).class_index=d.readUnsignedShort();
+((CONSTANT_Fieldref_info)cp).name_and_type_index=d.readUnsignedShort();
+if (debug) G.v().out.println("Constant pool[" + i + "]: Fieldref");
+break;
+case cp_info.CONSTANT_Methodref:
+cp=new CONSTANT_Methodref_info();
+((CONSTANT_Methodref_info)cp).class_index=d.readUnsignedShort();
+((CONSTANT_Methodref_info)cp).name_and_type_index=d.readUnsignedShort();
+if (debug) G.v().out.println("Constant pool[" + i + "]: Methodref");
+break;
+case cp_info.CONSTANT_InterfaceMethodref:
+cp=new CONSTANT_InterfaceMethodref_info();
+((CONSTANT_InterfaceMethodref_info)cp).class_index=d.readUnsignedShort();
+((CONSTANT_InterfaceMethodref_info)cp).name_and_type_index=d.readUnsignedShort();
+if (debug) G.v().out.println("Constant pool[" + i + "]: InterfaceMethodref");
+break;
+case cp_info.CONSTANT_String:
+cp=new CONSTANT_String_info();
+((CONSTANT_String_info)cp).string_index=d.readUnsignedShort();
+if (debug) G.v().out.println("Constant pool[" + i + "]: String");
+break;
+case cp_info.CONSTANT_Integer:
+cp=new CONSTANT_Integer_info();
+((CONSTANT_Integer_info)cp).bytes=d.readInt();
+if (debug) G.v().out.println("Constant pool[" + i + "]: Integer = "+ ((CONSTANT_Integer_info)cp).bytes);
+break;
+case cp_info.CONSTANT_Float:
+cp=new CONSTANT_Float_info();
+((CONSTANT_Float_info)cp).bytes=d.readInt();
+if (debug) G.v().out.println("Constant pool[" + i + "]: Float = "+ ((CONSTANT_Float_info)cp).convert());
+break;
+case cp_info.CONSTANT_Long:
+cp=new CONSTANT_Long_info();
+((CONSTANT_Long_info)cp).high=d.readInt() & 0xFFFFFFFFL;
+((CONSTANT_Long_info)cp).low=d.readInt() & 0xFFFFFFFFL;
+if (debug) {
+String temp=cp.toString(constant_pool);
+G.v().out.println("Constant pool[" + i + "]: Long = "+ temp);
+}
+skipone=true;
+break;
+case cp_info.CONSTANT_Double:
+cp=new CONSTANT_Double_info();
+((CONSTANT_Double_info)cp).high=d.readInt() & 0xFFFFFFFFL;
+((CONSTANT_Double_info)cp).low=d.readInt() & 0xFFFFFFFFL;
+if (debug) G.v().out.println("Constant pool[" + i + "]: Double = "+ ((CONSTANT_Double_info)cp).convert());
+skipone=true;
+break;
+case cp_info.CONSTANT_NameAndType:
+cp=new CONSTANT_NameAndType_info();
+((CONSTANT_NameAndType_info)cp).name_index=d.readUnsignedShort();
+((CONSTANT_NameAndType_info)cp).descriptor_index=d.readUnsignedShort();
+if (debug) G.v().out.println("Constant pool[" + i + "]: Name and Type");
+break;
+case cp_info.CONSTANT_Utf8:
+CONSTANT_Utf8_info cputf8=new CONSTANT_Utf8_info(d);
+cp=(cp_info)CONSTANT_Utf8_collector.v().add(cputf8);
+if (debug) G.v().out.println("Constant pool[" + i + "]: Utf8 = \""+ cputf8.convert()+ "\"");
+break;
+default :
+G.v().out.println("Unknown tag in constant pool: " + tag + " at entry "+ i);
+return false;
+}
+cp.tag=tag;
+constant_pool[i]=cp;
+}
+return true;
+}

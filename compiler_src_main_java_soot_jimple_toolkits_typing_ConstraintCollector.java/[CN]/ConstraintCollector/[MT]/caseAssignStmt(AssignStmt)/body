@@ -1,0 +1,259 @@
+{
+  Value l=stmt.getLeftOp();
+  Value r=stmt.getRightOp();
+  TypeVariable left=null;
+  TypeVariable right=null;
+  if (l instanceof ArrayRef) {
+    ArrayRef ref=(ArrayRef)l;
+    Value base=ref.getBase();
+    Value index=ref.getIndex();
+    TypeVariable baseType=resolver.typeVariable((Local)base);
+    baseType.makeElement();
+    left=baseType.element();
+    if (index instanceof Local) {
+      if (uses) {
+        resolver.typeVariable((Local)index).addParent(resolver.typeVariable(IntType.v()));
+      }
+    }
+  }
+ else   if (l instanceof Local) {
+    left=resolver.typeVariable((Local)l);
+  }
+ else   if (l instanceof InstanceFieldRef) {
+    InstanceFieldRef ref=(InstanceFieldRef)l;
+    if (uses) {
+      TypeVariable baseType=resolver.typeVariable((Local)ref.getBase());
+      baseType.addParent(resolver.typeVariable(ref.getField().getDeclaringClass()));
+      left=resolver.typeVariable(ref.getField().getType());
+    }
+  }
+ else   if (l instanceof StaticFieldRef) {
+    if (uses) {
+      StaticFieldRef ref=(StaticFieldRef)l;
+      left=resolver.typeVariable(ref.getField().getType());
+    }
+  }
+ else {
+    throw new RuntimeException("Unhandled assignment left hand side type: " + l.getClass());
+  }
+  if (r instanceof ArrayRef) {
+    ArrayRef ref=(ArrayRef)r;
+    Value base=ref.getBase();
+    Value index=ref.getIndex();
+    TypeVariable baseType=resolver.typeVariable((Local)base);
+    baseType.makeElement();
+    right=baseType.element();
+    if (index instanceof Local) {
+      if (uses) {
+        resolver.typeVariable((Local)index).addParent(resolver.typeVariable(IntType.v()));
+      }
+    }
+  }
+ else   if (r instanceof DoubleConstant) {
+    right=resolver.typeVariable(DoubleType.v());
+  }
+ else   if (r instanceof FloatConstant) {
+    right=resolver.typeVariable(FloatType.v());
+  }
+ else   if (r instanceof IntConstant) {
+    right=resolver.typeVariable(IntType.v());
+  }
+ else   if (r instanceof LongConstant) {
+    right=resolver.typeVariable(LongType.v());
+  }
+ else   if (r instanceof NullConstant) {
+    right=resolver.typeVariable(NullType.v());
+  }
+ else   if (r instanceof StringConstant) {
+    right=resolver.typeVariable(RefType.v("java.lang.String"));
+  }
+ else   if (r instanceof ClassConstant) {
+    right=resolver.typeVariable(RefType.v("java.lang.Class"));
+  }
+ else   if (r instanceof BinopExpr) {
+    BinopExpr be=(BinopExpr)r;
+    Value lv=be.getOp1();
+    Value rv=be.getOp2();
+    TypeVariable lop;
+    TypeVariable rop;
+    if (lv instanceof Local) {
+      lop=resolver.typeVariable((Local)lv);
+    }
+ else     if (lv instanceof DoubleConstant) {
+      lop=resolver.typeVariable(DoubleType.v());
+    }
+ else     if (lv instanceof FloatConstant) {
+      lop=resolver.typeVariable(FloatType.v());
+    }
+ else     if (lv instanceof IntConstant) {
+      lop=resolver.typeVariable(IntType.v());
+    }
+ else     if (lv instanceof LongConstant) {
+      lop=resolver.typeVariable(LongType.v());
+    }
+ else     if (lv instanceof NullConstant) {
+      lop=resolver.typeVariable(NullType.v());
+    }
+ else     if (lv instanceof StringConstant) {
+      lop=resolver.typeVariable(RefType.v("java.lang.String"));
+    }
+ else     if (lv instanceof ClassConstant) {
+      lop=resolver.typeVariable(RefType.v("java.lang.Class"));
+    }
+ else {
+      throw new RuntimeException("Unhandled binary expression left operand type: " + lv.getClass());
+    }
+    if (rv instanceof Local) {
+      rop=resolver.typeVariable((Local)rv);
+    }
+ else     if (rv instanceof DoubleConstant) {
+      rop=resolver.typeVariable(DoubleType.v());
+    }
+ else     if (rv instanceof FloatConstant) {
+      rop=resolver.typeVariable(FloatType.v());
+    }
+ else     if (rv instanceof IntConstant) {
+      rop=resolver.typeVariable(IntType.v());
+    }
+ else     if (rv instanceof LongConstant) {
+      rop=resolver.typeVariable(LongType.v());
+    }
+ else     if (rv instanceof NullConstant) {
+      rop=resolver.typeVariable(NullType.v());
+    }
+ else     if (rv instanceof StringConstant) {
+      rop=resolver.typeVariable(RefType.v("java.lang.String"));
+    }
+ else     if (rv instanceof ClassConstant) {
+      rop=resolver.typeVariable(RefType.v("java.lang.Class"));
+    }
+ else {
+      throw new RuntimeException("Unhandled binary expression right operand type: " + rv.getClass());
+    }
+    if ((be instanceof AddExpr) || (be instanceof SubExpr) || (be instanceof MulExpr)|| (be instanceof DivExpr)|| (be instanceof RemExpr)|| (be instanceof AndExpr)|| (be instanceof OrExpr)|| (be instanceof XorExpr)) {
+      if (uses) {
+        TypeVariable common=resolver.typeVariable();
+        rop.addParent(common);
+        lop.addParent(common);
+      }
+      if (left != null) {
+        rop.addParent(left);
+        lop.addParent(left);
+      }
+    }
+ else     if ((be instanceof ShlExpr) || (be instanceof ShrExpr) || (be instanceof UshrExpr)) {
+      if (uses) {
+        rop.addParent(resolver.typeVariable(IntType.v()));
+      }
+      right=lop;
+    }
+ else     if ((be instanceof CmpExpr) || (be instanceof CmpgExpr) || (be instanceof CmplExpr)|| (be instanceof EqExpr)|| (be instanceof GeExpr)|| (be instanceof GtExpr)|| (be instanceof LeExpr)|| (be instanceof LtExpr)|| (be instanceof NeExpr)) {
+      if (uses) {
+        TypeVariable common=resolver.typeVariable();
+        rop.addParent(common);
+        lop.addParent(common);
+      }
+      right=resolver.typeVariable(IntType.v());
+    }
+ else {
+      throw new RuntimeException("Unhandled binary expression type: " + be.getClass());
+    }
+  }
+ else   if (r instanceof CastExpr) {
+    CastExpr ce=(CastExpr)r;
+    right=resolver.typeVariable(ce.getCastType());
+  }
+ else   if (r instanceof InstanceOfExpr) {
+    right=resolver.typeVariable(IntType.v());
+  }
+ else   if (r instanceof InvokeExpr) {
+    InvokeExpr ie=(InvokeExpr)r;
+    handleInvokeExpr(ie);
+    right=resolver.typeVariable(ie.getMethodRef().returnType());
+  }
+ else   if (r instanceof NewArrayExpr) {
+    NewArrayExpr nae=(NewArrayExpr)r;
+    Type baseType=nae.getBaseType();
+    if (baseType instanceof ArrayType) {
+      right=resolver.typeVariable(ArrayType.v(((ArrayType)baseType).baseType,((ArrayType)baseType).numDimensions + 1));
+    }
+ else {
+      right=resolver.typeVariable(ArrayType.v(baseType,1));
+    }
+    if (uses) {
+      Value size=nae.getSize();
+      if (size instanceof Local) {
+        TypeVariable var=resolver.typeVariable((Local)size);
+        var.addParent(resolver.typeVariable(IntType.v()));
+      }
+    }
+  }
+ else   if (r instanceof NewExpr) {
+    NewExpr na=(NewExpr)r;
+    right=resolver.typeVariable(na.getBaseType());
+  }
+ else   if (r instanceof NewMultiArrayExpr) {
+    NewMultiArrayExpr nmae=(NewMultiArrayExpr)r;
+    right=resolver.typeVariable(nmae.getBaseType());
+    if (uses) {
+      for (int i=0; i < nmae.getSizeCount(); i++) {
+        Value size=nmae.getSize(i);
+        if (size instanceof Local) {
+          TypeVariable var=resolver.typeVariable((Local)size);
+          var.addParent(resolver.typeVariable(IntType.v()));
+        }
+      }
+    }
+  }
+ else   if (r instanceof LengthExpr) {
+    LengthExpr le=(LengthExpr)r;
+    if (uses) {
+      if (le.getOp() instanceof Local) {
+        resolver.typeVariable((Local)le.getOp()).makeElement();
+      }
+    }
+    right=resolver.typeVariable(IntType.v());
+  }
+ else   if (r instanceof NegExpr) {
+    NegExpr ne=(NegExpr)r;
+    if (ne.getOp() instanceof Local) {
+      right=resolver.typeVariable((Local)ne.getOp());
+    }
+ else     if (ne.getOp() instanceof DoubleConstant) {
+      right=resolver.typeVariable(DoubleType.v());
+    }
+ else     if (ne.getOp() instanceof FloatConstant) {
+      right=resolver.typeVariable(FloatType.v());
+    }
+ else     if (ne.getOp() instanceof IntConstant) {
+      right=resolver.typeVariable(IntType.v());
+    }
+ else     if (ne.getOp() instanceof LongConstant) {
+      right=resolver.typeVariable(LongType.v());
+    }
+ else {
+      throw new RuntimeException("Unhandled neg expression operand type: " + ne.getOp().getClass());
+    }
+  }
+ else   if (r instanceof Local) {
+    right=resolver.typeVariable((Local)r);
+  }
+ else   if (r instanceof InstanceFieldRef) {
+    InstanceFieldRef ref=(InstanceFieldRef)r;
+    if (uses) {
+      TypeVariable baseType=resolver.typeVariable((Local)ref.getBase());
+      baseType.addParent(resolver.typeVariable(ref.getField().getDeclaringClass()));
+    }
+    right=resolver.typeVariable(ref.getField().getType());
+  }
+ else   if (r instanceof StaticFieldRef) {
+    StaticFieldRef ref=(StaticFieldRef)r;
+    right=resolver.typeVariable(ref.getField().getType());
+  }
+ else {
+    throw new RuntimeException("Unhandled assignment right hand side type: " + r.getClass());
+  }
+  if (left != null && right != null) {
+    right.addParent(left);
+  }
+}

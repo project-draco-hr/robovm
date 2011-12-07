@@ -1,0 +1,70 @@
+{
+  final LocalTypeSet in=(LocalTypeSet)inValue;
+  final LocalTypeSet out=(LocalTypeSet)in.clone();
+  LocalTypeSet outBranch=out;
+  final Stmt stmt=(Stmt)unit;
+  for (Iterator bIt=stmt.getDefBoxes().iterator(); bIt.hasNext(); ) {
+    final ValueBox b=(ValueBox)bIt.next();
+    Value v=b.getValue();
+    if (v instanceof Local && v.getType() instanceof RefType) {
+      out.killLocal((Local)v);
+    }
+  }
+  if (stmt instanceof AssignStmt) {
+    AssignStmt astmt=(AssignStmt)stmt;
+    Value rhs=astmt.getRightOp();
+    Value lhs=astmt.getLeftOp();
+    if (lhs instanceof Local && rhs.getType() instanceof RefType) {
+      Local l=(Local)lhs;
+      if (rhs instanceof NewExpr) {
+        out.localMustBeSubtypeOf(l,(RefType)rhs.getType());
+      }
+ else       if (rhs instanceof CastExpr) {
+        CastExpr cast=(CastExpr)rhs;
+        Type castType=cast.getCastType();
+        if (castType instanceof RefType && cast.getOp() instanceof Local) {
+          RefType refType=(RefType)castType;
+          Local opLocal=(Local)cast.getOp();
+          out.localCopy(l,opLocal);
+          out.localMustBeSubtypeOf(l,refType);
+          out.localMustBeSubtypeOf(opLocal,refType);
+        }
+      }
+ else       if (rhs instanceof Local) {
+        out.localCopy(l,(Local)rhs);
+      }
+    }
+  }
+ else   if (stmt instanceof IfStmt) {
+    IfStmt ifstmt=(IfStmt)stmt;
+    do {
+      if (graph.getPredsOf(stmt).size() != 1)       break;
+      Object predecessor=graph.getPredsOf(stmt).get(0);
+      if (!(predecessor instanceof AssignStmt))       break;
+      AssignStmt pred=(AssignStmt)predecessor;
+      if (!(pred.getRightOp() instanceof InstanceOfExpr))       break;
+      InstanceOfExpr iofexpr=(InstanceOfExpr)pred.getRightOp();
+      if (!(iofexpr.getCheckType() instanceof RefType))       break;
+      if (!(iofexpr.getOp() instanceof Local))       break;
+      ConditionExpr c=(ConditionExpr)ifstmt.getCondition();
+      if (!c.getOp1().equals(pred.getLeftOp()))       break;
+      if (!(c.getOp2() instanceof IntConstant))       break;
+      if (((IntConstant)c.getOp2()).value != 0)       break;
+      if (c instanceof NeExpr) {
+        outBranch=(LocalTypeSet)out.clone();
+        outBranch.localMustBeSubtypeOf((Local)iofexpr.getOp(),(RefType)iofexpr.getCheckType());
+      }
+ else       if (c instanceof EqExpr) {
+        outBranch=(LocalTypeSet)out.clone();
+        out.localMustBeSubtypeOf((Local)iofexpr.getOp(),(RefType)iofexpr.getCheckType());
+      }
+    }
+ while (false);
+  }
+  for (Iterator it=outFallValues.iterator(); it.hasNext(); ) {
+    copy(out,it.next());
+  }
+  for (Iterator it=outBranchValues.iterator(); it.hasNext(); ) {
+    copy(outBranch,it.next());
+  }
+}

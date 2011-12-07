@@ -1,0 +1,25 @@
+{
+  Chain locals=((UnitGraph)graph).getBody().getLocals();
+  List<Local> refLocals=new ArrayList<Local>();
+  for (Iterator lIt=locals.iterator(); lIt.hasNext(); ) {
+    final Local l=(Local)lIt.next();
+    if (l.getType() instanceof RefType) {
+      refLocals.add(l);
+    }
+  }
+  List<Type> types=new ArrayList<Type>();
+  for (Iterator sIt=((UnitGraph)graph).getBody().getUnits().iterator(); sIt.hasNext(); ) {
+    final Stmt s=(Stmt)sIt.next();
+    if (s instanceof AssignStmt) {
+      AssignStmt as=(AssignStmt)s;
+      Value rhs=as.getRightOp();
+      if (rhs instanceof CastExpr) {
+        Type t=((CastExpr)rhs).getCastType();
+        if (t instanceof RefType && !types.contains(t)) {
+          types.add(t);
+        }
+      }
+    }
+  }
+  emptySet=new LocalTypeSet(refLocals,types);
+}

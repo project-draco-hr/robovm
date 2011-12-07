@@ -1,0 +1,17 @@
+{
+  RefType type=(RefType)nameToClass.get(className);
+  SootClass toReturn=null;
+  if (type != null)   toReturn=type.getSootClass();
+  if (toReturn != null) {
+    return toReturn;
+  }
+ else   if (allowsPhantomRefs()) {
+    SootClass c=new SootClass(className);
+    addClass(c);
+    c.setPhantom(true);
+    return c;
+  }
+ else {
+    throw new RuntimeException(System.getProperty("line.separator") + "Aborting: can't find classfile " + className);
+  }
+}

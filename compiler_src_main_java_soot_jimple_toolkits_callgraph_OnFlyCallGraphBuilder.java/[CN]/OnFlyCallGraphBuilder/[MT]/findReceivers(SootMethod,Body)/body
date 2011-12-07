@@ -1,0 +1,25 @@
+{
+  for (Iterator sIt=b.getUnits().iterator(); sIt.hasNext(); ) {
+    final Stmt s=(Stmt)sIt.next();
+    if (s.containsInvokeExpr()) {
+      InvokeExpr ie=s.getInvokeExpr();
+      if (ie instanceof InstanceInvokeExpr) {
+        InstanceInvokeExpr iie=(InstanceInvokeExpr)ie;
+        Local receiver=(Local)iie.getBase();
+        NumberedString subSig=iie.getMethodRef().getSubSignature();
+        addVirtualCallSite(s,m,receiver,iie,subSig,Edge.ieToKind(iie));
+        if (subSig == sigStart) {
+          addVirtualCallSite(s,m,receiver,iie,sigRun,Kind.THREAD);
+        }
+      }
+ else {
+        SootMethod tgt=ie.getMethod();
+        addEdge(m,s,tgt);
+        if (tgt.getSignature().equals("<java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction)>") || tgt.getSignature().equals("<java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction)>") || tgt.getSignature().equals("<java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedAction,java.security.AccessControlContext)>")|| tgt.getSignature().equals("<java.security.AccessController: java.lang.Object doPrivileged(java.security.PrivilegedExceptionAction,java.security.AccessControlContext)>")) {
+          Local receiver=(Local)ie.getArg(0);
+          addVirtualCallSite(s,m,receiver,null,sigObjRun,Kind.PRIVILEGED);
+        }
+      }
+    }
+  }
+}

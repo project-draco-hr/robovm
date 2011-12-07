@@ -1,0 +1,117 @@
+{
+  setJimpleLnNum(1);
+{
+    StringTokenizer st=new StringTokenizer(Modifier.toString(cl.getModifiers()));
+    while (st.hasMoreTokens()) {
+      String tok=st.nextToken();
+      if (cl.isInterface() && tok.equals("abstract"))       continue;
+      out.print(tok + " ");
+    }
+    String classPrefix="";
+    if (!cl.isInterface()) {
+      classPrefix=classPrefix + " class";
+      classPrefix=classPrefix.trim();
+    }
+    out.print(classPrefix + " " + Scene.v().quotedNameOf(cl.getName())+ "");
+  }
+{
+    if (cl.hasSuperclass())     out.print(" extends " + Scene.v().quotedNameOf(cl.getSuperclass().getName()) + "");
+  }
+{
+    Iterator interfaceIt=cl.getInterfaces().iterator();
+    if (interfaceIt.hasNext()) {
+      out.print(" implements ");
+      out.print("" + Scene.v().quotedNameOf(((SootClass)interfaceIt.next()).getName()) + "");
+      while (interfaceIt.hasNext()) {
+        out.print(",");
+        out.print(" " + Scene.v().quotedNameOf(((SootClass)interfaceIt.next()).getName()) + "");
+      }
+    }
+  }
+  out.println();
+  incJimpleLnNum();
+  out.println("{");
+  incJimpleLnNum();
+  if (Options.v().print_tags_in_output()) {
+    Iterator cTagIterator=cl.getTags().iterator();
+    while (cTagIterator.hasNext()) {
+      Tag t=(Tag)cTagIterator.next();
+      out.print("/*");
+      out.print(t.toString());
+      out.println("*/");
+    }
+  }
+{
+    Iterator fieldIt=cl.getFields().iterator();
+    if (fieldIt.hasNext()) {
+      while (fieldIt.hasNext()) {
+        SootField f=(SootField)fieldIt.next();
+        if (f.isPhantom())         continue;
+        if (Options.v().print_tags_in_output()) {
+          Iterator fTagIterator=f.getTags().iterator();
+          while (fTagIterator.hasNext()) {
+            Tag t=(Tag)fTagIterator.next();
+            out.print("/*");
+            out.print(t.toString());
+            out.println("*/");
+          }
+        }
+        out.println("    " + f.getDeclaration() + ";");
+        if (addJimpleLn()) {
+          setJimpleLnNum(addJimpleLnTags(getJimpleLnNum(),f));
+        }
+      }
+    }
+  }
+{
+    Iterator methodIt=cl.methodIterator();
+    if (methodIt.hasNext()) {
+      if (cl.getMethodCount() != 0) {
+        out.println();
+        incJimpleLnNum();
+      }
+      while (methodIt.hasNext()) {
+        SootMethod method=(SootMethod)methodIt.next();
+        if (method.isPhantom())         continue;
+        if (!Modifier.isAbstract(method.getModifiers()) && !Modifier.isNative(method.getModifiers())) {
+          if (!method.hasActiveBody())           throw new RuntimeException("method " + method.getName() + " has no active body!");
+ else           if (Options.v().print_tags_in_output()) {
+            Iterator mTagIterator=method.getTags().iterator();
+            while (mTagIterator.hasNext()) {
+              Tag t=(Tag)mTagIterator.next();
+              out.print("/*");
+              out.print(t.toString());
+              out.println("*/");
+            }
+          }
+          printTo(method.getActiveBody(),out);
+          if (methodIt.hasNext()) {
+            out.println();
+            incJimpleLnNum();
+          }
+        }
+ else {
+          if (Options.v().print_tags_in_output()) {
+            Iterator mTagIterator=method.getTags().iterator();
+            while (mTagIterator.hasNext()) {
+              Tag t=(Tag)mTagIterator.next();
+              out.print("/*");
+              out.print(t.toString());
+              out.println("*/");
+            }
+          }
+          out.print("    ");
+          out.print(method.getDeclaration());
+          out.println(";");
+          incJimpleLnNum();
+          if (methodIt.hasNext()) {
+            out.println();
+            incJimpleLnNum();
+          }
+        }
+      }
+    }
+  }
+  out.println("}");
+  incJimpleLnNum();
+}

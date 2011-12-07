@@ -1,0 +1,17 @@
+{
+  WeightedDirectedSparseGraph ingraph=(WeightedDirectedSparseGraph)in;
+  ingraph.makeShortestPathGraph();
+  for (int i=0; i < succs.size(); i++) {
+    Object next=succs.get(i);
+    FlowGraphEdge nextEdge=new FlowGraphEdge(current,next);
+    WeightedDirectedSparseGraph prevs=edgeMap.get(nextEdge);
+    boolean changed=false;
+    WeightedDirectedSparseGraph tmpgraph=new WeightedDirectedSparseGraph(prevs.getVertexes(),true);
+    copy(ingraph,tmpgraph);
+    if (!tmpgraph.equals(prevs)) {
+      prevs.replaceAllEdges(tmpgraph);
+      changed=true;
+    }
+    if (changed)     changedSuccs.add(next);
+  }
+}

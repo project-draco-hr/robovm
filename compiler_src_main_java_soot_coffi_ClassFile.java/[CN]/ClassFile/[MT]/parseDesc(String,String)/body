@@ -1,0 +1,66 @@
+{
+  String params="", param;
+  char c;
+  int i, len, arraylevel=0;
+  boolean didone=false;
+  len=desc.length();
+  for (i=0; i < len; i++) {
+    c=desc.charAt(i);
+    if (c == DESC_BYTE.charAt(0)) {
+      param="byte";
+    }
+ else     if (c == DESC_CHAR.charAt(0)) {
+      param="char";
+    }
+ else     if (c == DESC_DOUBLE.charAt(0)) {
+      param="double";
+    }
+ else     if (c == DESC_FLOAT.charAt(0)) {
+      param="float";
+    }
+ else     if (c == DESC_INT.charAt(0)) {
+      param="int";
+    }
+ else     if (c == DESC_LONG.charAt(0)) {
+      param="long";
+    }
+ else     if (c == DESC_SHORT.charAt(0)) {
+      param="short";
+    }
+ else     if (c == DESC_BOOLEAN.charAt(0)) {
+      param="boolean";
+    }
+ else     if (c == DESC_VOID.charAt(0)) {
+      param="void";
+    }
+ else     if (c == DESC_ARRAY.charAt(0)) {
+      arraylevel++;
+      continue;
+    }
+ else     if (c == DESC_OBJECT.charAt(0)) {
+      int j;
+      j=desc.indexOf(';',i + 1);
+      if (j < 0) {
+        G.v().out.println("Warning: Parse error -- can't find a ; in " + desc.substring(i + 1));
+        param="<error>";
+      }
+ else {
+        if (j - i > 10 && desc.substring(i + 1,i + 11).compareTo("java/lang/") == 0)         i=i + 10;
+        param=desc.substring(i + 1,j);
+        param=param.replace('/','.');
+        i=j;
+      }
+    }
+ else {
+      param="???";
+    }
+    if (didone)     params=params + sep;
+    params=params + param;
+    while (arraylevel > 0) {
+      params=params + "[]";
+      arraylevel--;
+    }
+    didone=true;
+  }
+  return params;
+}

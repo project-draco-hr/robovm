@@ -1,0 +1,62 @@
+{
+  Chain units=body.getUnits();
+  Iterator unitIt=units.iterator();
+  Unit currentStmt=null, previousStmt;
+  while (unitIt.hasNext()) {
+    previousStmt=currentStmt;
+    currentStmt=(Unit)unitIt.next();
+{
+      if (currentStmt != units.getFirst()) {
+        if (unitGraph.getSuccsOf(previousStmt).size() != 1 || unitGraph.getPredsOf(currentStmt).size() != 1 || up.labels().containsKey(currentStmt)) {
+          up.newline();
+        }
+ else {
+          List succs=unitGraph.getSuccsOf(previousStmt);
+          if (succs.get(0) != currentStmt) {
+            up.newline();
+          }
+        }
+      }
+      if (up.labels().containsKey(currentStmt)) {
+        up.unitRef(currentStmt,true);
+        up.literal(":");
+        up.newline();
+      }
+      if (up.references().containsKey(currentStmt)) {
+        up.unitRef(currentStmt,false);
+      }
+    }
+    up.startUnit(currentStmt);
+    currentStmt.toString(up);
+    up.endUnit(currentStmt);
+    up.literal(";");
+    up.newline();
+    if (Options.v().print_tags_in_output()) {
+      Iterator tagIterator=currentStmt.getTags().iterator();
+      while (tagIterator.hasNext()) {
+        Tag t=(Tag)tagIterator.next();
+        up.noIndent();
+        up.literal("/*");
+        up.literal(t.toString());
+        up.literal("*/");
+        up.newline();
+      }
+    }
+  }
+  out.print(up.toString());
+  if (addJimpleLn()) {
+    setJimpleLnNum(up.getPositionTagger().getEndLn());
+  }
+{
+    Iterator trapIt=body.getTraps().iterator();
+    if (trapIt.hasNext()) {
+      out.println();
+      incJimpleLnNum();
+    }
+    while (trapIt.hasNext()) {
+      Trap trap=(Trap)trapIt.next();
+      out.println("        catch " + Scene.v().quotedNameOf(trap.getException().getName()) + " from "+ up.labels().get(trap.getBeginUnit())+ " to "+ up.labels().get(trap.getEndUnit())+ " with "+ up.labels().get(trap.getHandlerUnit())+ ";");
+      incJimpleLnNum();
+    }
+  }
+}

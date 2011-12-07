@@ -1,0 +1,21 @@
+{
+  super(g,dfa,true,true);
+  mlocounter++;
+  printMessages=false;
+  SootMethod method=g.getBody().getMethod();
+  AbstractDataSource sharedDataSource=new AbstractDataSource(new String("SHARED"));
+  List<Object> sharedRefs=context.getSharedRefs();
+  Iterator<Object> sharedRefEqValIt=sharedRefs.iterator();
+  while (sharedRefEqValIt.hasNext()) {
+    EquivalentValue refEqVal=(EquivalentValue)sharedRefEqValIt.next();
+    addToEntryInitialFlow(sharedDataSource,refEqVal.getValue());
+    addToNewInitialFlow(sharedDataSource,refEqVal.getValue());
+  }
+  if (printMessages) {
+    G.v().out.println("----- STARTING SHARED/LOCAL ANALYSIS FOR " + g.getBody().getMethod() + " -----");
+    G.v().out.print("      " + context.toString().replaceAll("\n","\n      "));
+    G.v().out.println("found " + sharedRefs.size() + " shared refs in context.");
+  }
+  doFlowInsensitiveAnalysis();
+  if (printMessages)   G.v().out.println("----- ENDING   SHARED/LOCAL ANALYSIS FOR " + g.getBody().getMethod() + " -----");
+}

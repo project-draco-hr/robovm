@@ -1,0 +1,33 @@
+{
+  Chain traps=b.getTraps(), units=b.getUnits();
+  Iterator trapsIt=traps.snapshotIterator();
+  while (trapsIt.hasNext()) {
+    Trap t=(Trap)trapsIt.next();
+    Iterator unitIt=units.iterator(t.getBeginUnit(),t.getEndUnit());
+    boolean insideRange=false;
+    while (unitIt.hasNext()) {
+      Unit u=(Unit)unitIt.next();
+      if (u.equals(rangeStart))       insideRange=true;
+      if (!unitIt.hasNext()) {
+        if (insideRange) {
+          Trap newTrap=(Trap)t.clone();
+          t.setBeginUnit(rangeStart);
+          newTrap.setEndUnit(rangeStart);
+          traps.insertAfter(newTrap,t);
+        }
+ else         break;
+      }
+      if (u.equals(rangeEnd)) {
+        if (!insideRange)         throw new RuntimeException("inversed range?");
+        Trap firstTrap=(Trap)t.clone();
+        Trap secondTrap=(Trap)t.clone();
+        firstTrap.setEndUnit(rangeStart);
+        secondTrap.setBeginUnit(rangeStart);
+        secondTrap.setEndUnit(rangeEnd);
+        t.setBeginUnit(rangeEnd);
+        traps.insertAfter(firstTrap,t);
+        traps.insertAfter(secondTrap,t);
+      }
+    }
+  }
+}

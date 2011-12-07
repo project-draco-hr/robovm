@@ -1,0 +1,26 @@
+{
+  List<EquivalentValue> ret=new LinkedList<EquivalentValue>();
+  visitedSinks.add(node);
+  if (!abbreviatedInfoFlowGraph.containsNode(node))   return ret;
+  Set succs=abbreviatedInfoFlowGraph.getSuccsOfAsSet(node);
+  Iterator succsIt=succs.iterator();
+  while (succsIt.hasNext()) {
+    EquivalentValue succ=(EquivalentValue)succsIt.next();
+    if (!visitedSinks.contains(succ)) {
+      ret.add(succ);
+      ret.addAll(sinksOf(succ,visitedSources,visitedSinks));
+    }
+  }
+  succsIt=succs.iterator();
+  while (succsIt.hasNext()) {
+    EquivalentValue succ=(EquivalentValue)succsIt.next();
+    if (succ.getValue() instanceof AbstractDataSource) {
+      Set vHolder=abbreviatedInfoFlowGraph.getSuccsOfAsSet(succ);
+      EquivalentValue v=(EquivalentValue)vHolder.iterator().next();
+      if (!visitedSinks.contains(v)) {
+        ret.addAll(sourcesOf(v,visitedSinks,visitedSinks));
+      }
+    }
+  }
+  return ret;
+}

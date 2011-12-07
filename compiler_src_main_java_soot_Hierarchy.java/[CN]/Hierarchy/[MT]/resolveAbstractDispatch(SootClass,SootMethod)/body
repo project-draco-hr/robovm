@@ -1,0 +1,22 @@
+{
+  c.checkLevel(SootClass.HIERARCHY);
+  m.getDeclaringClass().checkLevel(SootClass.HIERARCHY);
+  checkState();
+  Iterator<SootClass> classesIt=null;
+  if (c.isInterface()) {
+    classesIt=getImplementersOf(c).iterator();
+    HashSet<SootClass> classes=new HashSet<SootClass>();
+    while (classesIt.hasNext())     classes.addAll(getSubclassesOfIncluding(classesIt.next()));
+    classesIt=classes.iterator();
+  }
+ else   classesIt=getSubclassesOfIncluding(c).iterator();
+  ArraySet s=new ArraySet();
+  while (classesIt.hasNext()) {
+    SootClass cl=classesIt.next();
+    if (Modifier.isAbstract(cl.getModifiers()))     continue;
+    s.add(resolveConcreteDispatch(cl,m));
+  }
+  List l=new ArrayList();
+  l.addAll(s);
+  return Collections.unmodifiableList(l);
+}

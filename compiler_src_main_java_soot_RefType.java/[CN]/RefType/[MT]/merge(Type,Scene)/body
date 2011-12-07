@@ -1,0 +1,35 @@
+{
+  if (other.equals(UnknownType.v()) || this.equals(other))   return this;
+  if (!(other instanceof RefType))   throw new RuntimeException("illegal type merge: " + this + " and "+ other);
+{
+    SootClass thisClass=cm.getSootClass((this).className);
+    SootClass otherClass=cm.getSootClass(((RefType)other).className);
+    SootClass javalangObject=cm.getSootClass("java.lang.Object");
+    LinkedList<SootClass> thisHierarchy=new LinkedList<SootClass>();
+    LinkedList<SootClass> otherHierarchy=new LinkedList<SootClass>();
+{
+      SootClass SootClass=thisClass;
+      for (; ; ) {
+        thisHierarchy.addFirst(SootClass);
+        if (SootClass == javalangObject)         break;
+        SootClass=SootClass.getSuperclass();
+      }
+    }
+{
+      SootClass SootClass=otherClass;
+      for (; ; ) {
+        otherHierarchy.addFirst(SootClass);
+        if (SootClass == javalangObject)         break;
+        SootClass=SootClass.getSuperclass();
+      }
+    }
+{
+      SootClass commonClass=null;
+      while (!otherHierarchy.isEmpty() && !thisHierarchy.isEmpty() && otherHierarchy.getFirst() == thisHierarchy.getFirst()) {
+        commonClass=otherHierarchy.removeFirst();
+        thisHierarchy.removeFirst();
+      }
+      return RefType.v(commonClass.getName());
+    }
+  }
+}

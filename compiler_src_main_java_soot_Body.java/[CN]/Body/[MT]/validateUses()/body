@@ -1,0 +1,22 @@
+{
+  UnitGraph g=new ExceptionalUnitGraph(this);
+  LocalDefs ld=new SmartLocalDefs(g,new SimpleLiveLocals(g));
+  Iterator<Unit> unitsIt=getUnits().iterator();
+  while (unitsIt.hasNext()) {
+    Unit u=unitsIt.next();
+    Iterator<ValueBox> useBoxIt=u.getUseBoxes().iterator();
+    while (useBoxIt.hasNext()) {
+      Value v=(useBoxIt.next()).getValue();
+      if (v instanceof Local) {
+        List<Unit> l=ld.getDefsOfAt((Local)v,u);
+        if (l.size() == 0) {
+          for (Iterator<Unit> uuIt=getUnits().iterator(); uuIt.hasNext(); ) {
+            final Unit uu=uuIt.next();
+            System.err.println("" + uu);
+          }
+          throw new RuntimeException("no defs for value: " + v + "!"+ " in "+ getMethod());
+        }
+      }
+    }
+  }
+}

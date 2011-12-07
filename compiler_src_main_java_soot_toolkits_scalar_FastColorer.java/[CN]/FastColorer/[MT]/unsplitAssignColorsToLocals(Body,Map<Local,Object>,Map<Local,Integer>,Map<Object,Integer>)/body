@@ -1,0 +1,71 @@
+{
+  ExceptionalUnitGraph unitGraph=new ExceptionalUnitGraph(unitBody);
+  LiveLocals liveLocals;
+  liveLocals=new SimpleLiveLocals(unitGraph);
+  UnitInterferenceGraph intGraph=new UnitInterferenceGraph(unitBody,localToGroup,liveLocals);
+  Map<Local,String> localToOriginalName=new HashMap<Local,String>();
+{
+    Iterator localIt=intGraph.getLocals().iterator();
+    while (localIt.hasNext()) {
+      Local local=(Local)localIt.next();
+      int signIndex;
+      signIndex=local.getName().indexOf("#");
+      if (signIndex != -1) {
+        localToOriginalName.put(local,local.getName().substring(0,signIndex));
+      }
+ else       localToOriginalName.put(local,local.getName());
+    }
+  }
+  Map<StringGroupPair,List> originalNameAndGroupToColors=new HashMap<StringGroupPair,List>();
+{
+    int[] freeColors=new int[10];
+    Iterator localIt=intGraph.getLocals().iterator();
+    while (localIt.hasNext()) {
+      Local local=(Local)localIt.next();
+      if (localToColor.containsKey(local)) {
+        continue;
+      }
+      Object group=localToGroup.get(local);
+      int colorCount=groupToColorCount.get(group).intValue();
+      if (freeColors.length < colorCount)       freeColors=new int[Math.max(freeColors.length * 2,colorCount)];
+{
+        for (int i=0; i < colorCount; i++)         freeColors[i]=1;
+      }
+{
+        Local[] interferences=intGraph.getInterferencesOf(local);
+        for (        Local element : interferences) {
+          if (localToColor.containsKey(element)) {
+            int usedColor=localToColor.get(element).intValue();
+            freeColors[usedColor]=0;
+          }
+        }
+      }
+{
+        String originalName=localToOriginalName.get(local);
+        List<Integer> originalNameColors=originalNameAndGroupToColors.get(new StringGroupPair(originalName,group));
+        if (originalNameColors == null) {
+          originalNameColors=new ArrayList<Integer>();
+          originalNameAndGroupToColors.put(new StringGroupPair(originalName,group),originalNameColors);
+        }
+        boolean found=false;
+        int assignedColor=0;
+{
+          Iterator<Integer> colorIt=originalNameColors.iterator();
+          while (colorIt.hasNext()) {
+            Integer color=colorIt.next();
+            if (freeColors[color.intValue()] == 1) {
+              found=true;
+              assignedColor=color.intValue();
+            }
+          }
+        }
+        if (!found) {
+          assignedColor=colorCount++;
+          groupToColorCount.put(group,new Integer(colorCount));
+          originalNameColors.add(new Integer(assignedColor));
+        }
+        localToColor.put(local,new Integer(assignedColor));
+      }
+    }
+  }
+}

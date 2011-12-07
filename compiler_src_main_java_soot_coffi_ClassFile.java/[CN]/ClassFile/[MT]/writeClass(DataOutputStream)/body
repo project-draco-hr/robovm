@@ -1,0 +1,30 @@
+{
+  try {
+    dd.writeInt((int)magic);
+    dd.writeShort(minor_version);
+    dd.writeShort(major_version);
+    dd.writeShort(constant_pool_count);
+    if (!writeConstantPool(dd))     return false;
+    dd.writeShort(access_flags);
+    dd.writeShort(this_class);
+    dd.writeShort(super_class);
+    dd.writeShort(interfaces_count);
+    if (interfaces_count > 0) {
+      int j;
+      for (j=0; j < interfaces_count; j++)       dd.writeShort(interfaces[j]);
+    }
+    dd.writeShort(fields_count);
+    writeFields(dd);
+    dd.writeShort(methods_count);
+    writeMethods(dd);
+    dd.writeShort(attributes_count);
+    if (attributes_count > 0) {
+      writeAttributes(dd,attributes_count,attributes);
+    }
+  }
+ catch (  IOException e) {
+    G.v().out.println("IOException with " + fn + ": "+ e.getMessage());
+    return false;
+  }
+  return true;
+}

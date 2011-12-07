@@ -1,0 +1,27 @@
+{
+  Set<PurityNode> esc=new HashSet<PurityNode>();
+  Set<PurityNode> escaping=getEscaping();
+  localsRemove(left);
+  Iterator itRight=locals.get(right).iterator();
+  while (itRight.hasNext()) {
+    PurityNode nodeRight=(PurityNode)itRight.next();
+    Iterator itEdges=edges.get(nodeRight).iterator();
+    while (itEdges.hasNext()) {
+      PurityEdge edge=(PurityEdge)itEdges.next();
+      if (edge.isInside() && edge.getField().equals(field))       localsPut(left,edge.getTarget());
+    }
+    if (escaping.contains(nodeRight))     esc.add(nodeRight);
+  }
+  if (!esc.isEmpty()) {
+    PurityNode loadNode=cacheNode(new PurityStmtNode(stmt,false));
+    nodes.add(loadNode);
+    Iterator<PurityNode> itEsc=esc.iterator();
+    while (itEsc.hasNext()) {
+      PurityNode node=itEsc.next();
+      PurityEdge edge=cacheEdge(new PurityEdge(node,field,loadNode,false));
+      if (edges.put(node,edge))       backEdges.put(loadNode,edge);
+    }
+    localsPut(left,loadNode);
+  }
+  if (doCheck)   sanityCheck();
+}

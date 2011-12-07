@@ -1,0 +1,147 @@
+{
+  MultiMap mu=new HashMultiMap();
+  Iterator it=args.iterator();
+  int nb=0;
+  while (it.hasNext()) {
+    Value arg=(Value)it.next();
+    if (arg instanceof Local && ((Local)arg).getType() instanceof RefLikeType) {
+      mu.putAll(cacheNode(new PurityParamNode(nb)),locals.get(arg));
+    }
+    nb++;
+  }
+  if (right != null)   mu.putAll(PurityThisNode.node,locals.get(right));
+  boolean hasChanged=true;
+  while (hasChanged) {
+    hasChanged=false;
+    it=(new LinkedList(mu.keySet())).iterator();
+    while (it.hasNext()) {
+      PurityNode n1=(PurityNode)it.next();
+      Iterator it3=(new LinkedList(mu.get(n1))).iterator();
+      while (it3.hasNext()) {
+        PurityNode n3=(PurityNode)it3.next();
+        Iterator it12=g.edges.get(n1).iterator();
+        while (it12.hasNext()) {
+          PurityEdge e12=(PurityEdge)it12.next();
+          if (!e12.isInside()) {
+            Iterator it34=edges.get(n3).iterator();
+            while (it34.hasNext()) {
+              PurityEdge e34=(PurityEdge)it34.next();
+              if (e34.isInside() && e12.getField().equals(e34.getField()))               if (mu.put(e12.getTarget(),e34.getTarget()))               hasChanged=true;
+            }
+          }
+        }
+      }
+    }
+    it=g.edges.keySet().iterator();
+    while (it.hasNext()) {
+      PurityNode n1=(PurityNode)it.next();
+      Iterator it3=g.edges.keySet().iterator();
+      while (it3.hasNext()) {
+        PurityNode n3=(PurityNode)it3.next();
+        Set mu1=new HashSet(mu.get(n1));
+        Set mu3=new HashSet(mu.get(n3));
+        boolean cond=n1.equals(n3) || mu1.contains(n3) || mu3.contains(n1);
+        Iterator itt=mu1.iterator();
+        while (!cond && itt.hasNext()) {
+          cond=cond || mu3.contains(itt.next());
+        }
+        if (cond && (!n1.equals(n3) || n1.isLoad())) {
+          Iterator it12=g.edges.get(n1).iterator();
+          while (it12.hasNext()) {
+            PurityEdge e12=(PurityEdge)it12.next();
+            if (!e12.isInside()) {
+              Iterator it34=g.edges.get(n3).iterator();
+              while (it34.hasNext()) {
+                PurityEdge e34=(PurityEdge)it34.next();
+                if (e34.isInside()) {
+                  if (e12.getField().equals(e34.getField())) {
+                    PurityNode n2=e12.getTarget();
+                    PurityNode n4=e34.getTarget();
+                    if (!n4.isParam() && mu.put(n2,n4))                     hasChanged=true;
+                    if (mu.putAll(n2,mu.get(n4)))                     hasChanged=true;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  it=g.nodes.iterator();
+  while (it.hasNext()) {
+    PurityNode n=(PurityNode)it.next();
+    if (!n.isParam()) {
+      mu.put(n,n);
+      nodes.add(n);
+    }
+  }
+  it=g.edges.keySet().iterator();
+  while (it.hasNext()) {
+    PurityNode n1=(PurityNode)it.next();
+    Iterator it12=g.edges.get(n1).iterator();
+    while (it12.hasNext()) {
+      PurityEdge e12=(PurityEdge)it12.next();
+      String f=e12.getField();
+      PurityNode n2=e12.getTarget();
+      Iterator itm1=mu.get(n1).iterator();
+      while (itm1.hasNext()) {
+        PurityNode mu1=(PurityNode)itm1.next();
+        if (e12.isInside()) {
+          Iterator itm2=mu.get(n2).iterator();
+          while (itm2.hasNext()) {
+            PurityNode mu2=(PurityNode)itm2.next();
+            PurityEdge edge=cacheEdge(new PurityEdge(mu1,f,mu2,true));
+            edges.put(mu1,edge);
+            backEdges.put(mu2,edge);
+          }
+        }
+ else {
+          PurityEdge edge=cacheEdge(new PurityEdge(mu1,f,n2,false));
+          edges.put(mu1,edge);
+          backEdges.put(n2,edge);
+        }
+      }
+    }
+  }
+  if (left != null) {
+    localsRemove(left);
+    it=g.ret.iterator();
+    while (it.hasNext())     localsPutAll(left,mu.get(it.next()));
+  }
+  it=g.globEscape.iterator();
+  while (it.hasNext())   globEscape.addAll(mu.get(it.next()));
+  if (doCheck)   sanityCheck();
+  Set<PurityNode> escaping=getEscaping();
+  it=(new LinkedList(nodes)).iterator();
+  while (it.hasNext()) {
+    PurityNode n=(PurityNode)it.next();
+    if (!escaping.contains(n))     if (n.isLoad())     removeNode(n);
+ else {
+      Iterator itt=(new LinkedList(edges.get(n))).iterator();
+      while (itt.hasNext()) {
+        PurityEdge e=(PurityEdge)itt.next();
+        if (!e.isInside()) {
+          edges.remove(n,e);
+          backEdges.remove(e.getTarget(),e);
+        }
+      }
+    }
+  }
+  it=g.mutated.keySet().iterator();
+  while (it.hasNext()) {
+    PurityNode n=(PurityNode)it.next();
+    Iterator itt=mu.get(n).iterator();
+    while (itt.hasNext()) {
+      PurityNode nn=(PurityNode)itt.next();
+      if (nodes.contains(nn) && !nn.isInside()) {
+        Iterator ittt=g.mutated.get(n).iterator();
+        while (ittt.hasNext()) {
+          String f=(String)ittt.next();
+          mutated.put(nn,f);
+        }
+      }
+    }
+  }
+  if (doCheck)   sanityCheck();
+}

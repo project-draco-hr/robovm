@@ -1,0 +1,33 @@
+{
+  Unit u=(Unit)unit;
+  HashSet in=(HashSet)inValue;
+  HashSet<Unit> out=(HashSet<Unit>)outValue;
+  out.clear();
+  Set mask=unitToMask.get(u);
+  Local l=localDef(u);
+  HashSet<Unit> allDefUnits=null;
+  if (l == null) {
+    for (Iterator inUIt=in.iterator(); inUIt.hasNext(); ) {
+      final Unit inU=(Unit)inUIt.next();
+      if (mask.contains(localDef(inU))) {
+        out.add(inU);
+      }
+    }
+  }
+ else {
+    allDefUnits=defsOf(l);
+    for (Iterator inUIt=in.iterator(); inUIt.hasNext(); ) {
+      final Unit inU=(Unit)inUIt.next();
+      if (mask.contains(localDef(inU))) {
+        if (allDefUnits.contains(inU)) {
+          out.remove(inU);
+        }
+ else {
+          out.add(inU);
+        }
+      }
+    }
+    out.removeAll(allDefUnits);
+    if (mask.contains(l))     out.add(u);
+  }
+}

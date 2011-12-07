@@ -1,0 +1,23 @@
+{
+  StringBuffer buf=new StringBuffer();
+  CharacterIterator iter=new StringCharacterIterator(str);
+  for (char ch=iter.first(); ch != CharacterIterator.DONE; ch=iter.next()) {
+    if (ch != '\\')     buf.append(ch);
+ else {
+      ch=iter.next();
+      char format;
+      if (ch == '\\')       buf.append(ch);
+ else       if ((format=getCFormatChar(ch)) != '\0')       buf.append(format);
+ else       if (ch == 'u') {
+        StringBuffer mini=new StringBuffer(4);
+        for (int i=0; i < 4; i++)         mini.append(iter.next());
+        ch=(char)Integer.parseInt(mini.toString(),16);
+        buf.append(ch);
+      }
+ else {
+        throw new RuntimeException("Unexpected char: " + ch);
+      }
+    }
+  }
+  return buf.toString();
+}

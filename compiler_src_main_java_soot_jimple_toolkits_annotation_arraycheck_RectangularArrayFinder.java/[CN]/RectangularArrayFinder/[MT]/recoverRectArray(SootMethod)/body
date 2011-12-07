@@ -1,0 +1,37 @@
+{
+  Body body=method.getActiveBody();
+  HashSet<Local> malocal=new HashSet<Local>();
+  Chain locals=body.getLocals();
+  Iterator localsIt=locals.iterator();
+  while (localsIt.hasNext()) {
+    Local local=(Local)localsIt.next();
+    Type type=local.getType();
+    if (!(type instanceof ArrayType))     continue;
+    if (((ArrayType)type).numDimensions == 2)     malocal.add(local);
+  }
+  if (malocal.size() == 0)   return;
+  Chain units=body.getUnits();
+  Stmt stmt=(Stmt)units.getFirst();
+  while (true) {
+    if (stmt == null)     break;
+    if (!stmt.fallsThrough())     break;
+    searchblock: {
+      if (!(stmt instanceof AssignStmt))       break searchblock;
+      Value leftOp=((AssignStmt)stmt).getLeftOp();
+      Value rightOp=((AssignStmt)stmt).getRightOp();
+      if (!malocal.contains(leftOp) || !(rightOp instanceof NewArrayExpr))       break searchblock;
+      Local local=(Local)leftOp;
+      NewArrayExpr naexpr=(NewArrayExpr)rightOp;
+      Value size=naexpr.getSize();
+      if (!(size instanceof IntConstant))       break searchblock;
+      int firstdim=((IntConstant)size).value;
+      if (firstdim > 100)       break searchblock;
+      ArrayType localtype=(ArrayType)local.getType();
+      Type basetype=localtype.baseType;
+      Local[] tmplocals=new Local[firstdim];
+      int seconddim=lookforPattern(units,stmt,firstdim,local,basetype,tmplocals);
+      if (seconddim >= 0)       transferPattern(units,stmt,firstdim,seconddim,local,basetype,tmplocals);
+    }
+    stmt=(Stmt)units.getSuccOf(stmt);
+  }
+}

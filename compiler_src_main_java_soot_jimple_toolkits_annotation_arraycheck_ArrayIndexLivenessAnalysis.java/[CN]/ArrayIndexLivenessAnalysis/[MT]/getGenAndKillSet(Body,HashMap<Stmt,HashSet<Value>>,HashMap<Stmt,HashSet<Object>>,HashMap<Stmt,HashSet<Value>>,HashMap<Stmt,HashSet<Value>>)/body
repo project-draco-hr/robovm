@@ -1,0 +1,30 @@
+{
+  Iterator unitIt=body.getUnits().iterator();
+  while (unitIt.hasNext()) {
+    Stmt stmt=(Stmt)unitIt.next();
+    HashSet<Object> genset=new HashSet<Object>();
+    HashSet<Value> absgenset=new HashSet<Value>();
+    HashSet<Value> killset=new HashSet<Value>();
+    HashSet<Value> condset=new HashSet<Value>();
+    if (stmt instanceof DefinitionStmt) {
+      getGenAndKillSetForDefnStmt((DefinitionStmt)stmt,absgen,genset,absgenset,killset,condset);
+    }
+ else     if (stmt instanceof IfStmt) {
+      Value cmpcond=((IfStmt)stmt).getCondition();
+      if (cmpcond instanceof ConditionExpr) {
+        Value op1=((ConditionExpr)cmpcond).getOp1();
+        Value op2=((ConditionExpr)cmpcond).getOp2();
+        if (fullSet.contains(op1) && fullSet.contains(op2)) {
+          condset.add(op1);
+          condset.add(op2);
+          genset.add(op1);
+          genset.add(op2);
+        }
+      }
+    }
+    if (genset.size() != 0)     gen.put(stmt,genset);
+    if (absgenset.size() != 0)     absgen.put(stmt,absgenset);
+    if (killset.size() != 0)     kill.put(stmt,killset);
+    if (condset.size() != 0)     condition.put(stmt,condset);
+  }
+}

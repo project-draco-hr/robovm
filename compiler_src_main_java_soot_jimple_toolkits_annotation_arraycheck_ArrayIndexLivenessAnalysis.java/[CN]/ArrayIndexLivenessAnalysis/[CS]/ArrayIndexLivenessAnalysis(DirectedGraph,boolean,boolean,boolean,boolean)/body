@@ -1,0 +1,36 @@
+{
+  super(dg);
+  fieldin=takeFieldRef;
+  arrayin=takeArrayRef;
+  csin=takeCSE;
+  rectarray=takeRectArray;
+  if (Options.v().debug())   G.v().out.println("Enter ArrayIndexLivenessAnalysis");
+  eug=(ExceptionalUnitGraph)dg;
+  retrieveAllArrayLocals(eug.getBody(),fullSet);
+  genOfUnit=new HashMap<Stmt,HashSet<Object>>(eug.size() * 2 + 1);
+  absGenOfUnit=new HashMap<Stmt,HashSet<Value>>(eug.size() * 2 + 1);
+  killOfUnit=new HashMap<Stmt,HashSet<Value>>(eug.size() * 2 + 1);
+  conditionOfGen=new HashMap<Stmt,HashSet<Value>>(eug.size() * 2 + 1);
+  if (fieldin) {
+    localToFieldRef=new HashMap<Object,HashSet<Value>>();
+    fieldToFieldRef=new HashMap<Object,HashSet<Value>>();
+    allFieldRefs=new HashSet<Value>();
+  }
+  if (arrayin) {
+    localToArrayRef=new HashMap();
+    allArrayRefs=new HashSet();
+    killArrayRelated=new HashMap<DefinitionStmt,Value>();
+    killAllArrayRef=new HashMap<DefinitionStmt,Boolean>();
+    if (rectarray) {
+      multiarraylocals=new HashSet<Local>();
+      retrieveMultiArrayLocals(eug.getBody(),multiarraylocals);
+    }
+  }
+  if (csin) {
+    localToExpr=new HashMap<Value,HashSet<Value>>();
+  }
+  getAllRelatedMaps(eug.getBody());
+  getGenAndKillSet(eug.getBody(),absGenOfUnit,genOfUnit,killOfUnit,conditionOfGen);
+  doAnalysis();
+  if (Options.v().debug())   G.v().out.println("Leave ArrayIndexLivenessAnalysis");
+}

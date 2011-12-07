@@ -1,0 +1,25 @@
+{
+  if (unitsToTraps != null)   return unitsToTraps;
+  unitsToTraps=new HashMap<Unit,List>();
+  Iterator trapsIt=body.getTraps().iterator();
+  while (trapsIt.hasNext()) {
+    Trap trap=(Trap)trapsIt.next();
+    Unit beginUnit=trap.getBeginUnit();
+    List<Trap> unitTraps=unitsToTraps.get(beginUnit);
+    if (unitTraps == null) {
+      unitTraps=new ArrayList<Trap>();
+      unitsToTraps.put(beginUnit,unitTraps);
+    }
+    unitTraps.add(trap);
+    Unit endUnit=trap.getEndUnit();
+    if (endUnit != beginUnit) {
+      unitTraps=unitsToTraps.get(endUnit);
+      if (unitTraps == null) {
+        unitTraps=new ArrayList<Trap>();
+        unitsToTraps.put(endUnit,unitTraps);
+      }
+      unitTraps.add(trap);
+    }
+  }
+  return unitsToTraps;
+}

@@ -1,17 +1,12 @@
 {
   String llcPath="llc";
-  if (llvmBinDir != null) {
-    llcPath=new File(llvmBinDir,"llc").getAbsolutePath();
+  if (config.getLlvmBinDir() != null) {
+    llcPath=new File(config.getLlvmBinDir(),"llc").getAbsolutePath();
   }
-  ArrayList<String> opts=new ArrayList<String>(llcOpts);
-  if (arch == Arch.x86_64) {
-    opts.add("-march=x86-64");
-  }
- else   if (arch == Arch.i386) {
-    opts.add("-march=x86");
-  }
-  if (cpu != null) {
-    opts.add("-mcpu=" + cpu);
+  ArrayList<String> opts=new ArrayList<String>();
+  opts.add(config.getArch().getLlvmName());
+  if (config.getCpu() != null) {
+    opts.add("-mcpu=" + config.getCpu());
   }
   outFile.getParentFile().mkdirs();
   exec(llcPath,opts,"-o=" + outFile.toString(),inFile);

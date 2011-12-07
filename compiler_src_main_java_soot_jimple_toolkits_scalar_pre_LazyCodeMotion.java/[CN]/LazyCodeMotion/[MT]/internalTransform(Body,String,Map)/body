@@ -1,0 +1,106 @@
+{
+  LCMOptions options=new LCMOptions(opts);
+  HashMap<EquivalentValue,Local> expToHelper=new HashMap<EquivalentValue,Local>();
+  Chain unitChain=b.getUnits();
+  if (Options.v().verbose())   G.v().out.println("[" + b.getMethod().getName() + "] Performing Lazy Code Motion...");
+  if (options.unroll())   new LoopConditionUnroller().transform(b,phaseName + ".lcu");
+  CriticalEdgeRemover.v().transform(b,phaseName + ".cer");
+  UnitGraph graph=new BriefUnitGraph(b);
+  Map unitToEquivRhs=new UnitMap(b,graph.size() + 1,0.7f){
+    protected Object mapTo(    Unit unit){
+      Value tmp=SootFilter.noInvokeRhs(unit);
+      Value tmp2=SootFilter.binop(tmp);
+      if (tmp2 == null)       tmp2=SootFilter.concreteRef(tmp);
+      return SootFilter.equiVal(tmp2);
+    }
+  }
+;
+  Map unitToNoExceptionEquivRhs=new UnitMap(b,graph.size() + 1,0.7f){
+    protected Object mapTo(    Unit unit){
+      Value tmp=SootFilter.binopRhs(unit);
+      tmp=SootFilter.noExceptionThrowing(tmp);
+      return SootFilter.equiVal(tmp);
+    }
+  }
+;
+  FlowUniverse universe=new CollectionFlowUniverse(unitToEquivRhs.values());
+  BoundedFlowSet set=new ArrayPackedSet(universe);
+  SideEffectTester sideEffect;
+  if (Scene.v().hasCallGraph() && !options.naive_side_effect()) {
+    sideEffect=new PASideEffectTester();
+  }
+ else {
+    sideEffect=new NaiveSideEffectTester();
+  }
+  sideEffect.newMethod(b.getMethod());
+  UpSafetyAnalysis upSafe;
+  DownSafetyAnalysis downSafe;
+  EarliestnessComputation earliest;
+  DelayabilityAnalysis delay;
+  NotIsolatedAnalysis notIsolated;
+  LatestComputation latest;
+  if (options.safety() == LCMOptions.safety_safe)   upSafe=new UpSafetyAnalysis(graph,unitToNoExceptionEquivRhs,sideEffect,set);
+ else   upSafe=new UpSafetyAnalysis(graph,unitToEquivRhs,sideEffect,set);
+  if (options.safety() == LCMOptions.safety_unsafe)   downSafe=new DownSafetyAnalysis(graph,unitToEquivRhs,sideEffect,set);
+ else {
+    downSafe=new DownSafetyAnalysis(graph,unitToNoExceptionEquivRhs,sideEffect,set);
+    Iterator unitIt=unitChain.iterator();
+    while (unitIt.hasNext()) {
+      Unit currentUnit=(Unit)unitIt.next();
+      Object rhs=unitToEquivRhs.get(currentUnit);
+      if (rhs != null)       ((FlowSet)downSafe.getFlowBefore(currentUnit)).add(rhs);
+    }
+  }
+  earliest=new EarliestnessComputation(graph,upSafe,downSafe,sideEffect,set);
+  delay=new DelayabilityAnalysis(graph,earliest,unitToEquivRhs,set);
+  latest=new LatestComputation(graph,delay,unitToEquivRhs,set);
+  notIsolated=new NotIsolatedAnalysis(graph,latest,unitToEquivRhs,set);
+  LocalCreation localCreation=new LocalCreation(b.getLocals(),PREFIX);
+{
+    Iterator unitIt=unitChain.snapshotIterator();
+    while (unitIt.hasNext()) {
+      Unit currentUnit=(Unit)unitIt.next();
+      FlowSet latestSet=(FlowSet)latest.getFlowBefore(currentUnit);
+      FlowSet notIsolatedSet=(FlowSet)notIsolated.getFlowAfter(currentUnit);
+      FlowSet insertHere=latestSet.clone();
+      insertHere.intersection(notIsolatedSet,insertHere);
+      Iterator insertIt=insertHere.iterator();
+      while (insertIt.hasNext()) {
+        EquivalentValue equiVal=(EquivalentValue)insertIt.next();
+        Local helper=expToHelper.get(equiVal);
+        if (helper == null) {
+          helper=localCreation.newLocal(equiVal.getType());
+          expToHelper.put(equiVal,helper);
+        }
+        Value insertValue=Jimple.cloneIfNecessary(equiVal.getValue());
+        Unit firstComp=Jimple.v().newAssignStmt(helper,insertValue);
+        unitChain.insertBefore(firstComp,currentUnit);
+      }
+    }
+  }
+{
+    Iterator unitIt=unitChain.iterator();
+    while (unitIt.hasNext()) {
+      Unit currentUnit=(Unit)unitIt.next();
+      EquivalentValue rhs=(EquivalentValue)unitToEquivRhs.get(currentUnit);
+      if (rhs != null) {
+        FlowSet latestSet=(FlowSet)latest.getFlowBefore(currentUnit);
+        FlowSet notIsolatedSet=(FlowSet)notIsolated.getFlowAfter(currentUnit);
+        if (!latestSet.contains(rhs) && notIsolatedSet.contains(rhs)) {
+          Local helper=expToHelper.get(rhs);
+          try {
+            ((AssignStmt)currentUnit).setRightOp(helper);
+          }
+ catch (          RuntimeException e) {
+            G.v().out.println("Error on " + b.getMethod().getName());
+            G.v().out.println(currentUnit.toString());
+            G.v().out.println(latestSet);
+            G.v().out.println(notIsolatedSet);
+            throw e;
+          }
+        }
+      }
+    }
+  }
+  if (Options.v().verbose())   G.v().out.println("[" + b.getMethod().getName() + "]     Lazy Code Motion done.");
+}

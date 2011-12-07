@@ -1,0 +1,23 @@
+{
+  CallLocalityContext context;
+  if (includePrimitiveDataFlowIfAvailable)   context=new CallLocalityContext(primitiveDfa.getMethodInfoFlowSummary(sm).getNodes());
+ else   context=new CallLocalityContext(dfa.getMethodInfoFlowSummary(sm).getNodes());
+  for (int i=0; i < sm.getParameterCount(); i++) {
+    EquivalentValue paramEqVal=InfoFlowAnalysis.getNodeForParameterRef(sm,i);
+    if (parameterIsLocal(sm,paramEqVal,includePrimitiveDataFlowIfAvailable)) {
+      context.setParamLocal(i);
+    }
+ else {
+      context.setParamShared(i);
+    }
+  }
+  for (  SootField sf : getLocalFields()) {
+    EquivalentValue fieldRefEqVal=InfoFlowAnalysis.getNodeForFieldRef(sm,sf);
+    context.setFieldLocal(fieldRefEqVal);
+  }
+  for (  SootField sf : getSharedFields()) {
+    EquivalentValue fieldRefEqVal=InfoFlowAnalysis.getNodeForFieldRef(sm,sf);
+    context.setFieldShared(fieldRefEqVal);
+  }
+  return context;
+}

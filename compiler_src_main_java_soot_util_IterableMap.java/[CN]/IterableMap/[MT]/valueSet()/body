@@ -1,0 +1,37 @@
+{
+  if (valueSet == null) {
+    valueSet=new AbstractSet(){
+      public Iterator iterator(){
+        return value_chain.iterator();
+      }
+      public int size(){
+        return value_chain.size();
+      }
+      public boolean contains(      Object o){
+        return value_chain.contains(o);
+      }
+      public boolean remove(      Object o){
+        if (value_chain.contains(o) == false) {
+          return false;
+        }
+        HashChain c=(HashChain)IterableMap.this.back_map.get(o);
+        Iterator it=c.snapshotIterator();
+        while (it.hasNext()) {
+          Object ko=it.next();
+          if (IterableMap.this.content_map.get(o) == null) {
+            IterableMap.this.remove(ko);
+          }
+ else           if (IterableMap.this.remove(ko) == null) {
+            return false;
+          }
+        }
+        return true;
+      }
+      public void clear(){
+        IterableMap.this.clear();
+      }
+    }
+;
+  }
+  return valueSet;
+}

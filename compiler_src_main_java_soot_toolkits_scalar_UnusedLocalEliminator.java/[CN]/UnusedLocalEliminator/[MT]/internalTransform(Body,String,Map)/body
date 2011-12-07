@@ -1,0 +1,30 @@
+{
+  if (Options.v().verbose())   G.v().out.println("[" + body.getMethod().getName() + "] Eliminating unused locals...");
+  Set<Value> usedLocals=new HashSet<Value>();
+{
+    Iterator unitIt=body.getUnits().iterator();
+    while (unitIt.hasNext()) {
+      Unit s=(Unit)unitIt.next();
+{
+        Iterator boxIt;
+        boxIt=s.getUseBoxes().iterator();
+        while (boxIt.hasNext()) {
+          Value value=((ValueBox)boxIt.next()).getValue();
+          if (value instanceof Local && !usedLocals.contains(value))           usedLocals.add(value);
+        }
+        boxIt=s.getDefBoxes().iterator();
+        while (boxIt.hasNext()) {
+          Value value=((ValueBox)boxIt.next()).getValue();
+          if (value instanceof Local && !usedLocals.contains(value))           usedLocals.add(value);
+        }
+      }
+    }
+  }
+{
+    Iterator it=body.getLocals().iterator();
+    while (it.hasNext()) {
+      Local local=(Local)it.next();
+      if (!usedLocals.contains(local))       it.remove();
+    }
+  }
+}

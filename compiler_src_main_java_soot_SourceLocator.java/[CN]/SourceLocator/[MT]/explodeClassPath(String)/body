@@ -1,0 +1,16 @@
+{
+  List<String> ret=new ArrayList<String>();
+  StringTokenizer tokenizer=new StringTokenizer(classPath,File.pathSeparator);
+  while (tokenizer.hasMoreTokens()) {
+    String originalDir=tokenizer.nextToken();
+    String canonicalDir;
+    try {
+      canonicalDir=new File(originalDir).getCanonicalPath();
+      ret.add(canonicalDir);
+    }
+ catch (    IOException e) {
+      throw new CompilationDeathException("Couldn't resolve classpath entry " + originalDir + ": "+ e);
+    }
+  }
+  return ret;
+}

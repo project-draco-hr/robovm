@@ -1,0 +1,56 @@
+{
+  ExceptionalUnitGraph unitGraph=(ExceptionalUnitGraph)uncastUnitGraph;
+  Map<Unit,Block> unitToBlock=super.buildBlocks(leaders,unitGraph);
+  if (unitGraph.getBody().getTraps().size() == 0) {
+    throwAnalysis=unitGraph.getThrowAnalysis();
+    if (throwAnalysis == null) {
+      throw new IllegalStateException("ExceptionalUnitGraph lacked a cached ThrowAnalysis for a Body with no Traps.");
+    }
+  }
+ else {
+    int initialMapSize=(mBlocks.size() * 2) / 3;
+    blockToUnexceptionalPreds=new HashMap<Block,List<Block>>(initialMapSize);
+    blockToUnexceptionalSuccs=new HashMap<Block,List<Block>>(initialMapSize);
+    blockToExceptionalPreds=new HashMap<Block,List<Block>>(initialMapSize);
+    blockToExceptionalSuccs=new HashMap<Block,List<Block>>(initialMapSize);
+    for (Iterator<Block> blockIt=mBlocks.iterator(); blockIt.hasNext(); ) {
+      Block block=blockIt.next();
+      Unit blockHead=block.getHead();
+      List<Unit> exceptionalPredUnits=unitGraph.getExceptionalPredsOf(blockHead);
+      if (exceptionalPredUnits.size() != 0) {
+        List<Block> exceptionalPreds=mappedValues(exceptionalPredUnits,unitToBlock);
+        exceptionalPreds=Collections.unmodifiableList(exceptionalPreds);
+        blockToExceptionalPreds.put(block,exceptionalPreds);
+        List<Unit> unexceptionalPredUnits=unitGraph.getUnexceptionalPredsOf(blockHead);
+        List<Block> unexceptionalPreds=null;
+        if (unexceptionalPredUnits.size() == 0) {
+          unexceptionalPreds=Collections.emptyList();
+        }
+ else {
+          unexceptionalPreds=mappedValues(unexceptionalPredUnits,unitToBlock);
+          unexceptionalPreds=Collections.unmodifiableList(unexceptionalPreds);
+        }
+        blockToUnexceptionalPreds.put(block,unexceptionalPreds);
+      }
+      Unit blockTail=block.getTail();
+      List<Unit> exceptionalSuccUnits=unitGraph.getExceptionalSuccsOf(blockTail);
+      if (exceptionalSuccUnits.size() != 0) {
+        List<Block> exceptionalSuccs=mappedValues(exceptionalSuccUnits,unitToBlock);
+        exceptionalSuccs=Collections.unmodifiableList(exceptionalSuccs);
+        blockToExceptionalSuccs.put(block,exceptionalSuccs);
+        List<Unit> unexceptionalSuccUnits=unitGraph.getUnexceptionalSuccsOf(blockTail);
+        List<Block> unexceptionalSuccs=null;
+        if (unexceptionalSuccUnits.size() == 0) {
+          unexceptionalSuccs=Collections.emptyList();
+        }
+ else {
+          unexceptionalSuccs=mappedValues(unexceptionalSuccUnits,unitToBlock);
+          unexceptionalSuccs=Collections.unmodifiableList(unexceptionalSuccs);
+        }
+        blockToUnexceptionalSuccs.put(block,unexceptionalSuccs);
+      }
+    }
+    blockToExceptionDests=buildExceptionDests(unitGraph,unitToBlock);
+  }
+  return unitToBlock;
+}

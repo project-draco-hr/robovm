@@ -1,0 +1,119 @@
+{
+  Iterator stmtIt;
+  LocalUses localUses;
+  LocalDefs localDefs;
+  ExceptionalUnitGraph graph;
+  boolean hadAggregation=false;
+  Chain units=body.getUnits();
+  graph=new ExceptionalUnitGraph(body);
+  localDefs=new SmartLocalDefs(graph,new SimpleLiveLocals(graph));
+  localUses=new SimpleLocalUses(graph,localDefs);
+  stmtIt=(new PseudoTopologicalOrderer()).newList(graph,false).iterator();
+  while (stmtIt.hasNext()) {
+    Stmt s=(Stmt)(stmtIt.next());
+    if (!(s instanceof AssignStmt))     continue;
+    Value lhs=((AssignStmt)s).getLeftOp();
+    if (!(lhs instanceof Local))     continue;
+    if (onlyStackVars && !((Local)lhs).getName().startsWith("$"))     continue;
+    List lu=localUses.getUsesOf(s);
+    if (lu.size() != 1)     continue;
+    UnitValueBoxPair usepair=(UnitValueBoxPair)lu.get(0);
+    Unit use=usepair.unit;
+    ValueBox useBox=usepair.valueBox;
+    List<Unit> ld=localDefs.getDefsOfAt((Local)lhs,use);
+    if (ld.size() != 1)     continue;
+    if (boxToZone.get(((AssignStmt)s).getRightOpBox()) != boxToZone.get(usepair.valueBox)) {
+      continue;
+    }
+    boolean cantAggr=false;
+    boolean propagatingInvokeExpr=false;
+    boolean propagatingFieldRef=false;
+    boolean propagatingArrayRef=false;
+    ArrayList<Value> fieldRefList=new ArrayList<Value>();
+    LinkedList<Value> localsUsed=new LinkedList<Value>();
+    for (Iterator useIt=(s.getUseBoxes()).iterator(); useIt.hasNext(); ) {
+      Value v=((ValueBox)(useIt.next())).getValue();
+      if (v instanceof Local)       localsUsed.add(v);
+ else       if (v instanceof InvokeExpr)       propagatingInvokeExpr=true;
+ else       if (v instanceof ArrayRef)       propagatingArrayRef=true;
+ else       if (v instanceof FieldRef) {
+        propagatingFieldRef=true;
+        fieldRefList.add(v);
+      }
+    }
+    List<Unit> path=graph.getExtendedBasicBlockPathBetween(s,use);
+    if (path == null)     continue;
+    Iterator<Unit> pathIt=path.iterator();
+    if (pathIt.hasNext())     pathIt.next();
+    while (pathIt.hasNext() && !cantAggr) {
+      Stmt between=(Stmt)(pathIt.next());
+      if (between != use) {
+        for (Iterator it=between.getDefBoxes().iterator(); it.hasNext(); ) {
+          Value v=((ValueBox)(it.next())).getValue();
+          if (localsUsed.contains(v)) {
+            cantAggr=true;
+            break;
+          }
+          if (propagatingInvokeExpr || propagatingFieldRef || propagatingArrayRef) {
+            if (v instanceof FieldRef) {
+              if (propagatingInvokeExpr) {
+                cantAggr=true;
+                break;
+              }
+ else               if (propagatingFieldRef) {
+                Iterator<Value> frIt=fieldRefList.iterator();
+                while (frIt.hasNext()) {
+                  FieldRef fieldRef=(FieldRef)frIt.next();
+                  if (((FieldRef)v).getField() == fieldRef.getField()) {
+                    cantAggr=true;
+                    break;
+                  }
+                }
+              }
+            }
+ else             if (v instanceof ArrayRef) {
+              if (propagatingInvokeExpr) {
+                cantAggr=true;
+                break;
+              }
+ else               if (propagatingArrayRef) {
+                cantAggr=true;
+                break;
+              }
+            }
+          }
+        }
+        if (propagatingInvokeExpr && between instanceof MonitorStmt)         cantAggr=true;
+      }
+      if (propagatingInvokeExpr || propagatingFieldRef || propagatingArrayRef) {
+        for (Iterator boxIt=(between.getUseBoxes()).iterator(); boxIt.hasNext(); ) {
+          final ValueBox box=(ValueBox)boxIt.next();
+          if (between == use && box == useBox) {
+            break;
+          }
+          Value v=box.getValue();
+          if (v instanceof InvokeExpr || (propagatingInvokeExpr && (v instanceof FieldRef || v instanceof ArrayRef))) {
+            cantAggr=true;
+            break;
+          }
+        }
+      }
+    }
+    if (cantAggr) {
+      continue;
+    }
+    Value aggregatee=((AssignStmt)s).getRightOp();
+    if (usepair.valueBox.canContainValue(aggregatee)) {
+      boolean wasSimpleCopy=isSimpleCopy(usepair.unit);
+      usepair.valueBox.setValue(aggregatee);
+      units.remove(s);
+      hadAggregation=true;
+      if (wasSimpleCopy) {
+        usepair.unit.addAllTagsOf(s);
+      }
+    }
+ else {
+    }
+  }
+  return hadAggregation;
+}

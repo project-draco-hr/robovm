@@ -1,0 +1,25 @@
+{
+  Chain<Unit> units=body.getUnits();
+  Unit trueHead=units.getFirst();
+  while (this.getHeads().size() > 1) {
+    for (Iterator<Unit> headItr=this.getHeads().iterator(); headItr.hasNext(); ) {
+      Unit head=headItr.next();
+      if (trueHead == head)       continue;
+      this.unitToPreds.remove(head);
+      List<Unit> succs=this.unitToSuccs.get(head);
+      for (Iterator<Unit> succsItr=succs.iterator(); succsItr.hasNext(); ) {
+        List<Unit> tobeRemoved=new ArrayList<Unit>();
+        Unit succ=succsItr.next();
+        List<Unit> predOfSuccs=this.unitToPreds.get(succ);
+        for (Iterator<Unit> predItr=predOfSuccs.iterator(); predItr.hasNext(); ) {
+          Unit pred=predItr.next();
+          if (pred == head)           tobeRemoved.add(pred);
+        }
+        predOfSuccs.removeAll(tobeRemoved);
+      }
+      this.unitToSuccs.remove(head);
+      if (units.contains(head))       units.remove(head);
+    }
+    this.buildHeadsAndTails();
+  }
+}

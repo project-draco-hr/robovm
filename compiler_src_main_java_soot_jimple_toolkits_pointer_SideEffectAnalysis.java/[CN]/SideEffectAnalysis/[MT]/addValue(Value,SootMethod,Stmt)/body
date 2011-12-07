@@ -1,0 +1,21 @@
+{
+  RWSet ret=null;
+  if (v instanceof InstanceFieldRef) {
+    InstanceFieldRef ifr=(InstanceFieldRef)v;
+    PointsToSet base=pa.reachingObjects((Local)ifr.getBase());
+    ret=new StmtRWSet();
+    ret.addFieldRef(base,ifr.getField());
+  }
+ else   if (v instanceof StaticFieldRef) {
+    StaticFieldRef sfr=(StaticFieldRef)v;
+    ret=new StmtRWSet();
+    ret.addGlobal(sfr.getField());
+  }
+ else   if (v instanceof ArrayRef) {
+    ArrayRef ar=(ArrayRef)v;
+    PointsToSet base=pa.reachingObjects((Local)ar.getBase());
+    ret=new StmtRWSet();
+    ret.addFieldRef(base,PointsToAnalysis.ARRAY_ELEMENTS_NODE);
+  }
+  return ret;
+}

@@ -1,0 +1,37 @@
+{
+  super(g);
+  if (Options.v().time())   Timers.v().liveSetupTimer.start();
+  emptySet=new ArraySparseSet();
+{
+    unitToKillSet=new HashMap<Unit,FlowSet>(g.size() * 2 + 1,0.7f);
+    Iterator unitIt=g.iterator();
+    while (unitIt.hasNext()) {
+      Unit s=(Unit)unitIt.next();
+      FlowSet killSet=emptySet.clone();
+      Iterator boxIt=s.getDefBoxes().iterator();
+      while (boxIt.hasNext()) {
+        ValueBox box=(ValueBox)boxIt.next();
+        if (box.getValue() instanceof Local)         killSet.add(box.getValue(),killSet);
+      }
+      unitToKillSet.put(s,killSet);
+    }
+  }
+{
+    unitToGenerateSet=new HashMap<Unit,FlowSet>(g.size() * 2 + 1,0.7f);
+    Iterator unitIt=g.iterator();
+    while (unitIt.hasNext()) {
+      Unit s=(Unit)unitIt.next();
+      FlowSet genSet=emptySet.clone();
+      Iterator boxIt=s.getUseBoxes().iterator();
+      while (boxIt.hasNext()) {
+        ValueBox box=(ValueBox)boxIt.next();
+        if (box.getValue() instanceof Local)         genSet.add(box.getValue(),genSet);
+      }
+      unitToGenerateSet.put(s,genSet);
+    }
+  }
+  if (Options.v().time())   Timers.v().liveSetupTimer.end();
+  if (Options.v().time())   Timers.v().liveAnalysisTimer.start();
+  doAnalysis();
+  if (Options.v().time())   Timers.v().liveAnalysisTimer.end();
+}

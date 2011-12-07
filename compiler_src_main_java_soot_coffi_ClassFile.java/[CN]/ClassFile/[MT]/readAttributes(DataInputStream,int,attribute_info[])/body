@@ -1,0 +1,219 @@
+{
+  attribute_info a=null;
+  int i;
+  int j;
+  long len;
+  String s;
+  for (i=0; i < attributes_count; i++) {
+    j=d.readUnsignedShort();
+    len=d.readInt() & 0xFFFFFFFFL;
+    s=((CONSTANT_Utf8_info)(constant_pool[j])).convert();
+    if (s.compareTo(attribute_info.SourceFile) == 0) {
+      SourceFile_attribute sa=new SourceFile_attribute();
+      sa.sourcefile_index=d.readUnsignedShort();
+      a=(attribute_info)sa;
+    }
+ else     if (s.compareTo(attribute_info.ConstantValue) == 0) {
+      ConstantValue_attribute ca=new ConstantValue_attribute();
+      ca.constantvalue_index=d.readUnsignedShort();
+      a=(attribute_info)ca;
+    }
+ else     if (s.compareTo(attribute_info.Code) == 0) {
+      Code_attribute ca=new Code_attribute();
+      ca.max_stack=d.readUnsignedShort();
+      ca.max_locals=d.readUnsignedShort();
+      ca.code_length=d.readInt() & 0xFFFFFFFFL;
+      ca.code=new byte[(int)ca.code_length];
+      d.read(ca.code);
+      ca.exception_table_length=d.readUnsignedShort();
+      ca.exception_table=new exception_table_entry[ca.exception_table_length];
+      int k;
+      exception_table_entry e;
+      for (k=0; k < ca.exception_table_length; k++) {
+        e=new exception_table_entry();
+        e.start_pc=d.readUnsignedShort();
+        e.end_pc=d.readUnsignedShort();
+        e.handler_pc=d.readUnsignedShort();
+        e.catch_type=d.readUnsignedShort();
+        ca.exception_table[k]=e;
+      }
+      ca.attributes_count=d.readUnsignedShort();
+      ca.attributes=new attribute_info[ca.attributes_count];
+      readAttributes(d,ca.attributes_count,ca.attributes);
+      a=(attribute_info)ca;
+    }
+ else     if (s.compareTo(attribute_info.Exceptions) == 0) {
+      Exception_attribute ea=new Exception_attribute();
+      ea.number_of_exceptions=d.readUnsignedShort();
+      if (ea.number_of_exceptions > 0) {
+        int k;
+        ea.exception_index_table=new int[ea.number_of_exceptions];
+        for (k=0; k < ea.number_of_exceptions; k++)         ea.exception_index_table[k]=d.readUnsignedShort();
+      }
+      a=(attribute_info)ea;
+    }
+ else     if (s.compareTo(attribute_info.LineNumberTable) == 0) {
+      LineNumberTable_attribute la=new LineNumberTable_attribute();
+      la.line_number_table_length=d.readUnsignedShort();
+      int k;
+      line_number_table_entry e;
+      la.line_number_table=new line_number_table_entry[la.line_number_table_length];
+      for (k=0; k < la.line_number_table_length; k++) {
+        e=new line_number_table_entry();
+        e.start_pc=d.readUnsignedShort();
+        e.line_number=d.readUnsignedShort();
+        la.line_number_table[k]=e;
+      }
+      a=(attribute_info)la;
+    }
+ else     if (s.compareTo(attribute_info.LocalVariableTable) == 0) {
+      LocalVariableTable_attribute la=new LocalVariableTable_attribute();
+      la.local_variable_table_length=d.readUnsignedShort();
+      int k;
+      local_variable_table_entry e;
+      la.local_variable_table=new local_variable_table_entry[la.local_variable_table_length];
+      for (k=0; k < la.local_variable_table_length; k++) {
+        e=new local_variable_table_entry();
+        e.start_pc=d.readUnsignedShort();
+        e.length=d.readUnsignedShort();
+        e.name_index=d.readUnsignedShort();
+        e.descriptor_index=d.readUnsignedShort();
+        e.index=d.readUnsignedShort();
+        la.local_variable_table[k]=e;
+      }
+      a=(attribute_info)la;
+    }
+ else     if (s.compareTo(attribute_info.LocalVariableTypeTable) == 0) {
+      LocalVariableTypeTable_attribute la=new LocalVariableTypeTable_attribute();
+      la.local_variable_type_table_length=d.readUnsignedShort();
+      int k;
+      local_variable_type_table_entry e;
+      la.local_variable_type_table=new local_variable_type_table_entry[la.local_variable_type_table_length];
+      for (k=0; k < la.local_variable_type_table_length; k++) {
+        e=new local_variable_type_table_entry();
+        e.start_pc=d.readUnsignedShort();
+        e.length=d.readUnsignedShort();
+        e.name_index=d.readUnsignedShort();
+        e.signature_index=d.readUnsignedShort();
+        e.index=d.readUnsignedShort();
+        la.local_variable_type_table[k]=e;
+      }
+      a=(attribute_info)la;
+    }
+ else     if (s.compareTo(attribute_info.Synthetic) == 0) {
+      Synthetic_attribute ia=new Synthetic_attribute();
+      a=(attribute_info)ia;
+    }
+ else     if (s.compareTo(attribute_info.Signature) == 0) {
+      Signature_attribute ia=new Signature_attribute();
+      ia.signature_index=d.readUnsignedShort();
+      a=(attribute_info)ia;
+    }
+ else     if (s.compareTo(attribute_info.Deprecated) == 0) {
+      Deprecated_attribute da=new Deprecated_attribute();
+      a=(attribute_info)da;
+    }
+ else     if (s.compareTo(attribute_info.EnclosingMethod) == 0) {
+      EnclosingMethod_attribute ea=new EnclosingMethod_attribute();
+      ea.class_index=d.readUnsignedShort();
+      ea.method_index=d.readUnsignedShort();
+      a=(attribute_info)ea;
+    }
+ else     if (s.compareTo(attribute_info.InnerClasses) == 0) {
+      InnerClasses_attribute ia=new InnerClasses_attribute();
+      ia.inner_classes_length=d.readUnsignedShort();
+      ia.inner_classes=new inner_class_entry[ia.inner_classes_length];
+      for (int k=0; k < ia.inner_classes_length; k++) {
+        inner_class_entry e=new inner_class_entry();
+        e.inner_class_index=d.readUnsignedShort();
+        e.outer_class_index=d.readUnsignedShort();
+        e.name_index=d.readUnsignedShort();
+        e.access_flags=d.readUnsignedShort();
+        ia.inner_classes[k]=e;
+      }
+      a=(attribute_info)ia;
+    }
+ else     if (s.compareTo(attribute_info.RuntimeVisibleAnnotations) == 0) {
+      RuntimeVisibleAnnotations_attribute ra=new RuntimeVisibleAnnotations_attribute();
+      ra.number_of_annotations=d.readUnsignedShort();
+      ra.annotations=new annotation[ra.number_of_annotations];
+      for (int k=0; k < ra.number_of_annotations; k++) {
+        annotation annot=new annotation();
+        annot.type_index=d.readUnsignedShort();
+        annot.num_element_value_pairs=d.readUnsignedShort();
+        annot.element_value_pairs=readElementValues(annot.num_element_value_pairs,d,true,0);
+        ra.annotations[k]=annot;
+      }
+      a=(attribute_info)ra;
+    }
+ else     if (s.compareTo(attribute_info.RuntimeInvisibleAnnotations) == 0) {
+      RuntimeInvisibleAnnotations_attribute ra=new RuntimeInvisibleAnnotations_attribute();
+      ra.number_of_annotations=d.readUnsignedShort();
+      ra.annotations=new annotation[ra.number_of_annotations];
+      for (int k=0; k < ra.number_of_annotations; k++) {
+        annotation annot=new annotation();
+        annot.type_index=d.readUnsignedShort();
+        annot.num_element_value_pairs=d.readUnsignedShort();
+        annot.element_value_pairs=readElementValues(annot.num_element_value_pairs,d,true,0);
+        ra.annotations[k]=annot;
+      }
+      a=(attribute_info)ra;
+    }
+ else     if (s.compareTo(attribute_info.RuntimeVisibleParameterAnnotations) == 0) {
+      RuntimeVisibleParameterAnnotations_attribute ra=new RuntimeVisibleParameterAnnotations_attribute();
+      ra.num_parameters=d.readUnsignedByte();
+      ra.parameter_annotations=new parameter_annotation[ra.num_parameters];
+      for (int x=0; x < ra.num_parameters; x++) {
+        parameter_annotation pAnnot=new parameter_annotation();
+        pAnnot.num_annotations=d.readUnsignedShort();
+        pAnnot.annotations=new annotation[pAnnot.num_annotations];
+        for (int k=0; k < pAnnot.num_annotations; k++) {
+          annotation annot=new annotation();
+          annot.type_index=d.readUnsignedShort();
+          annot.num_element_value_pairs=d.readUnsignedShort();
+          annot.element_value_pairs=readElementValues(annot.num_element_value_pairs,d,true,0);
+          pAnnot.annotations[k]=annot;
+        }
+        ra.parameter_annotations[x]=pAnnot;
+      }
+      a=(attribute_info)ra;
+    }
+ else     if (s.compareTo(attribute_info.RuntimeInvisibleParameterAnnotations) == 0) {
+      RuntimeInvisibleParameterAnnotations_attribute ra=new RuntimeInvisibleParameterAnnotations_attribute();
+      ra.num_parameters=d.readUnsignedByte();
+      ra.parameter_annotations=new parameter_annotation[ra.num_parameters];
+      for (int x=0; x < ra.num_parameters; x++) {
+        parameter_annotation pAnnot=new parameter_annotation();
+        pAnnot.num_annotations=d.readUnsignedShort();
+        pAnnot.annotations=new annotation[pAnnot.num_annotations];
+        for (int k=0; k < pAnnot.num_annotations; k++) {
+          annotation annot=new annotation();
+          annot.type_index=d.readUnsignedShort();
+          annot.num_element_value_pairs=d.readUnsignedShort();
+          annot.element_value_pairs=readElementValues(annot.num_element_value_pairs,d,true,0);
+          pAnnot.annotations[k]=annot;
+        }
+        ra.parameter_annotations[x]=pAnnot;
+      }
+      a=(attribute_info)ra;
+    }
+ else     if (s.compareTo(attribute_info.AnnotationDefault) == 0) {
+      AnnotationDefault_attribute da=new AnnotationDefault_attribute();
+      element_value[] result=readElementValues(1,d,false,0);
+      da.default_value=result[0];
+      a=(attribute_info)da;
+    }
+ else {
+      Generic_attribute ga=new Generic_attribute();
+      if (len > 0) {
+        ga.info=new byte[(int)len];
+        d.read(ga.info);
+      }
+      a=(attribute_info)ga;
+    }
+    a.attribute_name=j;
+    a.attribute_length=len;
+    ai[i]=a;
+  }
+  return true;
+}

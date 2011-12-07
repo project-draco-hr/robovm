@@ -1,0 +1,30 @@
+{
+  if (rep != this) {
+    ecr().validate();
+    return;
+  }
+  if (type != null) {
+    for (    TypeVariable typeVariable : parents) {
+      TypeVariable parent=typeVariable.ecr();
+      if (parent.type != null) {
+        if (!type.hasAncestor(parent.type)) {
+          if (DEBUG) {
+            G.v().out.println(parent.type + " is not a parent of " + type);
+          }
+          error("Type Error(2): Parent type is not a valid ancestor.");
+        }
+      }
+    }
+    for (    TypeVariable typeVariable : children) {
+      TypeVariable child=typeVariable.ecr();
+      if (child.type != null) {
+        if (!type.hasDescendant(child.type)) {
+          if (DEBUG) {
+            G.v().out.println(child.type + "(" + child+ ") is not a child of "+ type+ "("+ this+ ")");
+          }
+          error("Type Error(3): Child type is not a valid descendant.");
+        }
+      }
+    }
+  }
+}

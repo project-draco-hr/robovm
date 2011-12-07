@@ -1,0 +1,52 @@
+{
+  if (rep == Options.output_format_none)   return null;
+  StringBuffer b=new StringBuffer();
+  if (!Options.v().output_jar()) {
+    b.append(getOutputDir());
+  }
+  if ((b.length() > 0) && (b.charAt(b.length() - 1) != File.separatorChar))   b.append(File.separatorChar);
+  if (rep != Options.output_format_dava) {
+    if (rep == Options.output_format_class) {
+      b.append(c.getName().replace('.',File.separatorChar));
+    }
+ else {
+      b.append(c.getName());
+    }
+    b.append(getExtensionFor(rep));
+    return b.toString();
+  }
+  b.append("dava");
+  b.append(File.separatorChar);
+{
+    String classPath=b.toString() + "classes";
+    File dir=new File(classPath);
+    if (!dir.exists())     try {
+      dir.mkdirs();
+    }
+ catch (    SecurityException se) {
+      G.v().out.println("Unable to create " + classPath);
+      throw new CompilationDeathException(CompilationDeathException.COMPILATION_ABORTED);
+    }
+  }
+  b.append("src");
+  b.append(File.separatorChar);
+  String fixedPackageName=c.getJavaPackageName();
+  if (fixedPackageName.equals("") == false) {
+    b.append(fixedPackageName.replace('.',File.separatorChar));
+    b.append(File.separatorChar);
+  }
+{
+    String path=b.toString();
+    File dir=new File(path);
+    if (!dir.exists())     try {
+      dir.mkdirs();
+    }
+ catch (    SecurityException se) {
+      G.v().out.println("Unable to create " + path);
+      throw new CompilationDeathException(CompilationDeathException.COMPILATION_ABORTED);
+    }
+  }
+  b.append(c.getShortJavaStyleName());
+  b.append(".java");
+  return b.toString();
+}

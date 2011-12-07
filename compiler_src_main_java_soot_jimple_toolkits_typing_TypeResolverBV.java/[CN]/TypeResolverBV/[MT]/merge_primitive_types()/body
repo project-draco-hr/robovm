@@ -1,0 +1,38 @@
+{
+  compute_solved();
+  BitSetIterator varIt=solved.iterator();
+  while (varIt.hasNext()) {
+    TypeVariableBV var=typeVariableForId(varIt.next());
+    if (var.type().type() instanceof IntType || var.type().type() instanceof LongType || var.type().type() instanceof FloatType|| var.type().type() instanceof DoubleType) {
+      BitVector parents;
+      BitVector children;
+      boolean finished;
+      do {
+        finished=true;
+        parents=var.parents();
+        if (parents.length() != 0) {
+          finished=false;
+          for (BitSetIterator j=parents.iterator(); j.hasNext(); ) {
+            if (DEBUG) {
+              G.v().out.print(".");
+            }
+            TypeVariableBV parent=typeVariableForId(j.next());
+            var=var.union(parent);
+          }
+        }
+        children=var.children();
+        if (children.length() != 0) {
+          finished=false;
+          for (BitSetIterator j=children.iterator(); j.hasNext(); ) {
+            if (DEBUG) {
+              G.v().out.print(".");
+            }
+            TypeVariableBV child=typeVariableForId(j.next());
+            var=var.union(child);
+          }
+        }
+      }
+ while (!finished);
+    }
+  }
+}

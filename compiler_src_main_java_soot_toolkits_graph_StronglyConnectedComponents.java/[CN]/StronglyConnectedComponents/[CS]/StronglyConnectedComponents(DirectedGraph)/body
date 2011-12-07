@@ -1,0 +1,34 @@
+{
+  nodeToColor=new HashMap<Object,Object>((3 * g.size()) / 2,0.7f);
+  indexStack=new int[g.size()];
+  nodeStack=new Object[g.size()];
+  finishingOrder=new LinkedList<Object>();
+{
+    Iterator nodeIt=g.iterator();
+    while (nodeIt.hasNext()) {
+      Object s=nodeIt.next();
+      if (nodeToColor.get(s) == null)       visitNode(g,s);
+    }
+  }
+  nodeToColor=new HashMap<Object,Object>((3 * g.size()),0.7f);
+{
+    Iterator<Object> revNodeIt=finishingOrder.iterator();
+    while (revNodeIt.hasNext()) {
+      Object s=revNodeIt.next();
+      if (nodeToColor.get(s) == null) {
+        List<Object> currentComponent=null;
+        currentComponent=new StationaryArrayList();
+        nodeToComponent.put(s,currentComponent);
+        sccGraph.addNode(currentComponent);
+        componentList.add(currentComponent);
+        visitRevNode(g,s,currentComponent);
+      }
+    }
+  }
+  componentList=Collections.unmodifiableList(componentList);
+  if (Options.v().verbose()) {
+    G.v().out.println("Done computing scc components");
+    G.v().out.println("number of nodes in underlying graph: " + g.size());
+    G.v().out.println("number of components: " + sccGraph.size());
+  }
+}

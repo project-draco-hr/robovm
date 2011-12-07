@@ -1,0 +1,26 @@
+{
+  allMethods=getAllReachableMethods(sootClass);
+  externalMethods=uf.getExtMethods(sootClass);
+  SootClass superclass=sootClass;
+  if (superclass.hasSuperclass())   superclass=superclass.getSuperclass();
+  while (superclass.hasSuperclass()) {
+    if (superclass.isApplicationClass())     externalMethods.addAll(uf.getExtMethods(superclass));
+    superclass=superclass.getSuperclass();
+  }
+  internalMethods=new ArrayList<SootMethod>();
+  for (  SootMethod method : allMethods) {
+    if (!externalMethods.contains(method))     internalMethods.add(method);
+  }
+  allFields=getAllFields(sootClass);
+  externalFields=uf.getExtFields(sootClass);
+  superclass=sootClass;
+  if (superclass.hasSuperclass())   superclass=superclass.getSuperclass();
+  while (superclass.hasSuperclass()) {
+    if (superclass.isApplicationClass())     externalFields.addAll(uf.getExtFields(superclass));
+    superclass=superclass.getSuperclass();
+  }
+  internalFields=new ArrayList<SootField>();
+  for (  SootField field : allFields) {
+    if (!externalFields.contains(field))     internalFields.add(field);
+  }
+}

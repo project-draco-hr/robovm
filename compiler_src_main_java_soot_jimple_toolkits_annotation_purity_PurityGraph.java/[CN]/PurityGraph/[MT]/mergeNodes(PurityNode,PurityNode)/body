@@ -1,0 +1,49 @@
+{
+  Iterator it=(new LinkedList(edges.get(src))).iterator();
+  while (it.hasNext()) {
+    PurityEdge e=(PurityEdge)it.next();
+    PurityNode n=e.getTarget();
+    if (n.equals(src))     n=dst;
+    PurityEdge ee=cacheEdge(new PurityEdge(dst,e.getField(),n,e.isInside()));
+    edges.remove(src,e);
+    edges.put(dst,ee);
+    backEdges.remove(n,e);
+    backEdges.put(n,ee);
+  }
+  it=(new LinkedList(backEdges.get(src))).iterator();
+  while (it.hasNext()) {
+    PurityEdge e=(PurityEdge)it.next();
+    PurityNode n=e.getSource();
+    if (n.equals(src))     n=dst;
+    PurityEdge ee=cacheEdge(new PurityEdge(n,e.getField(),dst,e.isInside()));
+    edges.remove(n,e);
+    edges.put(n,ee);
+    backEdges.remove(src,e);
+    backEdges.put(dst,ee);
+  }
+  it=(new LinkedList(backLocals.get(src))).iterator();
+  while (it.hasNext()) {
+    Local l=(Local)it.next();
+    locals.remove(l,src);
+    backLocals.remove(src,l);
+    locals.put(l,dst);
+    backLocals.put(dst,l);
+  }
+{
+    Set m=mutated.get(src);
+    mutated.remove(src);
+    mutated.putAll(dst,m);
+  }
+  if (ret.contains(src)) {
+    ret.remove(src);
+    ret.add(dst);
+  }
+  if (globEscape.contains(src)) {
+    globEscape.remove(src);
+    globEscape.add(dst);
+  }
+  nodes.remove(src);
+  nodes.add(dst);
+  paramNodes.remove(src);
+  if (dst.isParam())   paramNodes.add(dst);
+}

@@ -1,0 +1,24 @@
+{
+  last=0;
+  stmtToColor.put(startStmt,GRAY);
+  stmtStack[last]=startStmt;
+  indexStack[last++]=-1;
+  while (last > 0) {
+    int toVisitIndex=++indexStack[last - 1];
+    N toVisitNode=stmtStack[last - 1];
+    List<N> succs=graph.getSuccsOf(toVisitNode);
+    if (toVisitIndex >= succs.size()) {
+      if (mIsReversed)       order.addLast(toVisitNode);
+ else       order.addFirst(toVisitNode);
+      last--;
+    }
+ else {
+      N childNode=succs.get(toVisitIndex);
+      if (stmtToColor.get(childNode) == null) {
+        stmtToColor.put(childNode,GRAY);
+        stmtStack[last]=childNode;
+        indexStack[last++]=-1;
+      }
+    }
+  }
+}

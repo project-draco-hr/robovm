@@ -1,0 +1,18 @@
+{
+  Value l=stmt.getLeftOp();
+  Value r=stmt.getRightOp();
+  if (l instanceof Local) {
+    if (((Local)l).getType() instanceof IntegerType) {
+      TypeNode left=ClassHierarchy.v().typeNode((((Local)l).getType()));
+      TypeNode right=ClassHierarchy.v().typeNode(r.getType());
+      if (!right.hasAncestor_1(left)) {
+        if (fix) {
+          ((soot.jimple.internal.JIdentityStmt)stmt).setLeftOp(insertCastAfter((Local)l,getTypeForCast(left),getTypeForCast(right),stmt));
+        }
+ else {
+          error("Type Error(16)");
+        }
+      }
+    }
+  }
+}

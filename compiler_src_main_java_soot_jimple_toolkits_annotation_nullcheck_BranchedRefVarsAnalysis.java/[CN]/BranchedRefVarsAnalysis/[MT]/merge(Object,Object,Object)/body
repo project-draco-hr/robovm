@@ -1,0 +1,28 @@
+{
+  FlowSet inSet1=(FlowSet)in1;
+  FlowSet inSet2=(FlowSet)in2;
+  FlowSet inSet1Copy=inSet1.clone();
+  FlowSet inSet2Copy=inSet2.clone();
+  FlowSet outSet=(FlowSet)out;
+  inSet1.intersection(inSet2,outSet);
+  Iterator<EquivalentValue> it=refTypeValues.iterator();
+  while (it.hasNext()) {
+    EquivalentValue r=it.next();
+    int refInfoIn1=refInfo(r,inSet1Copy);
+    int refInfoIn2=refInfo(r,inSet2Copy);
+    if (refInfoIn1 != refInfoIn2) {
+      if ((refInfoIn1 == kTop) || (refInfoIn2 == kTop)) {
+        uAddTopToFlowSet(r,outSet);
+      }
+ else       if (refInfoIn1 == kBottom) {
+        uAddInfoToFlowSet(r,refInfoIn2,outSet);
+      }
+ else       if (refInfoIn2 == kBottom) {
+        uAddInfoToFlowSet(r,refInfoIn1,outSet);
+      }
+ else {
+        uAddTopToFlowSet(r,outSet);
+      }
+    }
+  }
+}

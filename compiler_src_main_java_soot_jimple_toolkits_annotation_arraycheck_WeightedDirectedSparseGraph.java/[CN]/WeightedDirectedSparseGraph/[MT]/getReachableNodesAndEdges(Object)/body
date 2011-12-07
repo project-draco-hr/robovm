@@ -1,0 +1,20 @@
+{
+  LinkedList<Object> worklist=new LinkedList<Object>();
+  reachableNodes.add(src);
+  worklist.add(src);
+  while (!worklist.isEmpty()) {
+    Object from=worklist.removeFirst();
+    Hashtable targets=sources.get(from);
+    if (targets == null)     continue;
+    Iterator targetIt=targets.keySet().iterator();
+    while (targetIt.hasNext()) {
+      Object target=targetIt.next();
+      if (!reachableNodes.contains(target)) {
+        worklist.add(target);
+        reachableNodes.add(target);
+      }
+      IntContainer weight=(IntContainer)targets.get(target);
+      reachableEdges.add(new WeightedDirectedEdge(from,target,weight.value));
+    }
+  }
+}

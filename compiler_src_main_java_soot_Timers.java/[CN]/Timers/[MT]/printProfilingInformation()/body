@@ -1,0 +1,35 @@
+{
+  long totalTime=totalTimer.getTime();
+  G.v().out.println("Time measurements");
+  G.v().out.println();
+  G.v().out.println("      Building graphs: " + toTimeString(graphTimer,totalTime));
+  G.v().out.println("  Computing LocalDefs: " + toTimeString(defsTimer,totalTime));
+  G.v().out.println("  Computing LocalUses: " + toTimeString(usesTimer,totalTime));
+  G.v().out.println("     Cleaning up code: " + toTimeString(cleanupAlgorithmTimer,totalTime));
+  G.v().out.println("Computing LocalCopies: " + toTimeString(copiesTimer,totalTime));
+  G.v().out.println(" Computing LiveLocals: " + toTimeString(liveTimer,totalTime));
+  G.v().out.println("Coading coffi structs: " + toTimeString(resolveTimer,totalTime));
+  G.v().out.println();
+{
+    float timeInSecs;
+    G.v().out.println("       Resolving classfiles: " + toTimeString(resolverTimer,totalTime));
+    G.v().out.println(" Bytecode -> jimple (naive): " + toTimeString(conversionTimer,totalTime));
+    G.v().out.println("        Splitting variables: " + toTimeString(splitTimer,totalTime));
+    G.v().out.println("            Assigning types: " + toTimeString(assignTimer,totalTime));
+    G.v().out.println("  Propagating copies & csts: " + toTimeString(propagatorTimer,totalTime));
+    G.v().out.println("      Eliminating dead code: " + toTimeString(deadCodeTimer,totalTime));
+    G.v().out.println("                Aggregation: " + toTimeString(aggregationTimer,totalTime));
+    G.v().out.println("            Coloring locals: " + toTimeString(packTimer,totalTime));
+    G.v().out.println("     Generating jasmin code: " + toTimeString(buildJasminTimer,totalTime));
+    G.v().out.println("          .jasmin -> .class: " + toTimeString(assembleJasminTimer,totalTime));
+    timeInSecs=totalTime / 1000.0f;
+    float memoryUsed=(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1000.0f;
+    G.v().out.println("totalTime:" + toTimeString(totalTimer,totalTime));
+    if (Options.v().subtract_gc()) {
+      G.v().out.println("Garbage collection was subtracted from these numbers.");
+      G.v().out.println("           forcedGC:" + toTimeString(G.v().Timer_forcedGarbageCollectionTimer,totalTime));
+    }
+    G.v().out.println("stmtCount: " + stmtCount + "("+ toFormattedString(stmtCount / timeInSecs)+ " stmt/s)");
+    G.v().out.println("totalFlowNodes: " + totalFlowNodes + " totalFlowComputations: "+ totalFlowComputations+ " avg: "+ truncatedOf((double)totalFlowComputations / totalFlowNodes,2));
+  }
+}

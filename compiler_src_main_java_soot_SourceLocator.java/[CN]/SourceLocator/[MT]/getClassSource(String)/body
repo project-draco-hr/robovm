@@ -1,0 +1,23 @@
+{
+  if (classPath == null) {
+    classPath=explodeClassPath(Scene.v().getSootClassPath());
+  }
+  if (classProviders == null) {
+    setupClassProviders();
+  }
+  for (  ClassProvider cp : classProviders) {
+    ClassSource ret=cp.find(className);
+    if (ret != null)     return ret;
+  }
+  for (  final ClassLoader cl : additionalClassLoaders) {
+    ClassSource ret=new ClassProvider(){
+      public ClassSource find(      String className){
+        String fileName=className.replace('.','/') + ".class";
+        return new CoffiClassSource(className,cl.getResourceAsStream(fileName));
+      }
+    }
+.find(className);
+    if (ret != null)     return ret;
+  }
+  return null;
+}

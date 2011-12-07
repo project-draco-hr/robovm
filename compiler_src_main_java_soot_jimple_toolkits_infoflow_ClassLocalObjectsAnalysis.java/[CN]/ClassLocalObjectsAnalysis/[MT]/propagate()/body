@@ -1,0 +1,42 @@
+{
+  ArrayList<SootMethod> worklist=new ArrayList<SootMethod>();
+  worklist.addAll(entryMethods);
+  methodToContext=new HashMap<SootMethod,CallLocalityContext>();
+  for (  SootMethod method : worklist) {
+    methodToContext.put(method,getContextFor(method));
+  }
+  Date start=new Date();
+  if (dfa.printDebug())   G.v().out.println("CLOA: Starting Propagation at " + start);
+  while (worklist.size() > 0) {
+    ArrayList<SootMethod> newWorklist=new ArrayList<SootMethod>();
+    for (    SootMethod containingMethod : worklist) {
+      CallLocalityContext containingContext=methodToContext.get(containingMethod);
+      if (dfa.printDebug())       G.v().out.println("      " + containingMethod.getName() + " "+ containingContext.toShortString());
+      Map<Stmt,CallLocalityContext> invokeToContext=new HashMap<Stmt,CallLocalityContext>();
+      for (Iterator edgesIt=Scene.v().getCallGraph().edgesOutOf(containingMethod); edgesIt.hasNext(); ) {
+        Edge e=(Edge)edgesIt.next();
+        if (!e.src().getDeclaringClass().isApplicationClass() || e.srcStmt() == null)         continue;
+        CallLocalityContext invokeContext;
+        if (!invokeToContext.containsKey(e.srcStmt())) {
+          invokeContext=getContextFor(e,containingMethod,containingContext);
+          invokeToContext.put(e.srcStmt(),invokeContext);
+        }
+ else {
+          invokeContext=invokeToContext.get(e.srcStmt());
+        }
+        if (!methodToContext.containsKey(e.tgt())) {
+          methodToContext.put(e.tgt(),invokeContext);
+          newWorklist.add(e.tgt());
+        }
+ else {
+          boolean causedChange=methodToContext.get(e.tgt()).merge(invokeContext);
+          if (causedChange)           newWorklist.add(e.tgt());
+        }
+      }
+    }
+    worklist=newWorklist;
+  }
+  long longTime=((new Date()).getTime() - start.getTime()) / 100;
+  float time=(longTime) / 10.0f;
+  if (dfa.printDebug())   G.v().out.println("CLOA: Ending Propagation after " + time + "s");
+}

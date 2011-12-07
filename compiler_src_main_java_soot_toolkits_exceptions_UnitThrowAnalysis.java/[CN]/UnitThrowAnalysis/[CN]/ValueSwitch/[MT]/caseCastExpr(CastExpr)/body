@@ -1,0 +1,12 @@
+{
+  result=result.add(mgr.RESOLVE_CLASS_ERRORS);
+  Type fromType=expr.getOp().getType();
+  Type toType=expr.getCastType();
+  if (toType instanceof RefLikeType) {
+    FastHierarchy h=Scene.v().getOrMakeFastHierarchy();
+    if (fromType == null || fromType instanceof UnknownType || ((!(fromType instanceof NullType)) && (!h.canStoreType(fromType,toType)))) {
+      result=result.add(mgr.CLASS_CAST_EXCEPTION);
+    }
+  }
+  result=result.add(mightThrow(expr.getOp()));
+}

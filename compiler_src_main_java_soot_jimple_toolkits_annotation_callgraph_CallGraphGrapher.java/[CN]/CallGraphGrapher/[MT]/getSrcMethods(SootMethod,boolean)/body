@@ -1,0 +1,30 @@
+{
+  ArrayList<MethInfo> list=new ArrayList<MethInfo>();
+  for (Iterator momcIt=methodToContexts.get(method).iterator(); momcIt.hasNext(); ) {
+    final MethodOrMethodContext momc=(MethodOrMethodContext)momcIt.next();
+    Iterator callerEdges=cg.edgesInto(momc);
+    while (callerEdges.hasNext()) {
+      Edge callEdge=(Edge)callerEdges.next();
+      SootMethod methodCaller=callEdge.src();
+      if (methodCaller.getDeclaringClass().isLibraryClass()) {
+        if (isShowLibMeths()) {
+          if (recurse) {
+            list.add(new MethInfo(methodCaller,hasTgtMethods(methodCaller) | hasSrcMethods(methodCaller),callEdge.kind()));
+          }
+ else {
+            list.add(new MethInfo(methodCaller,true,callEdge.kind()));
+          }
+        }
+      }
+ else {
+        if (recurse) {
+          list.add(new MethInfo(methodCaller,hasTgtMethods(methodCaller) | hasSrcMethods(methodCaller),callEdge.kind()));
+        }
+ else {
+          list.add(new MethInfo(methodCaller,true,callEdge.kind()));
+        }
+      }
+    }
+  }
+  return list;
+}

@@ -1,0 +1,30 @@
+{
+  this.stmtToLocal=stmtToLocal;
+  this.useStmts=stmtToLocal.keySet();
+  this.useLocals=stmtToLocal.values();
+  this.boundaryStmts=boundaryStmts;
+  this.redefStmts=new ArrayList<Stmt>();
+  this.firstUseToAliasSet=new HashMap<Stmt,List>();
+  doAnalysis();
+  Iterator<Stmt> useIt=useStmts.iterator();
+  while (useIt.hasNext()) {
+    Unit u=useIt.next();
+    FlowSet fs=(FlowSet)getFlowBefore(u);
+    Iterator<Stmt> redefIt=redefStmts.iterator();
+    while (redefIt.hasNext()) {
+      if (fs.contains(redefIt.next())) {
+        return false;
+      }
+    }
+    List aliases=null;
+    Iterator fsIt=fs.iterator();
+    while (fsIt.hasNext()) {
+      Object o=fsIt.next();
+      if (o instanceof List)       aliases=(List)o;
+    }
+    if (aliases != null && !aliases.contains(new EquivalentValue(stmtToLocal.get(u)))) {
+      return false;
+    }
+  }
+  return true;
+}

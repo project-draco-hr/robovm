@@ -1,0 +1,17 @@
+{
+  Code_attribute codeAttribute=method.locate_code_attribute();
+  for (int i=0; i < codeAttribute.exception_table_length; i++) {
+    exception_table_entry entry=codeAttribute.exception_table[i];
+    Instruction oldinsn=entry.start_inst;
+    Instruction newinsn=replacedInsns.get(oldinsn);
+    if (newinsn != null)     entry.start_inst=newinsn;
+    oldinsn=entry.end_inst;
+    if (entry.end_inst != null) {
+      newinsn=replacedInsns.get(oldinsn);
+      if (newinsn != null)       entry.end_inst=newinsn;
+    }
+    oldinsn=entry.handler_inst;
+    newinsn=replacedInsns.get(oldinsn);
+    if (newinsn != null)     entry.handler_inst=newinsn;
+  }
+}

@@ -1,0 +1,114 @@
+{
+  PurityGraphBox i=(PurityGraphBox)inValue;
+  PurityGraphBox o=(PurityGraphBox)outValue;
+  Stmt stmt=(Stmt)unit;
+  o.g=new PurityGraph(i.g);
+  if (stmt.containsInvokeExpr()) {
+    inter.analyseCall(inValue,stmt,outValue);
+  }
+ else   if (stmt instanceof AssignStmt) {
+    Value leftOp=((AssignStmt)stmt).getLeftOp();
+    Value rightOp=((AssignStmt)stmt).getRightOp();
+    if (leftOp instanceof Local) {
+      Local left=(Local)leftOp;
+      if (rightOp instanceof CastExpr)       rightOp=((CastExpr)rightOp).getOp();
+      if (!(left.getType() instanceof RefLikeType)) {
+      }
+ else       if (rightOp instanceof Local) {
+        Local right=(Local)rightOp;
+        o.g.assignLocalToLocal(right,left);
+      }
+ else       if (rightOp instanceof ArrayRef) {
+        Local right=(Local)((ArrayRef)rightOp).getBase();
+        o.g.assignFieldToLocal(stmt,right,"[]",left);
+      }
+ else       if (rightOp instanceof InstanceFieldRef) {
+        Local right=(Local)((InstanceFieldRef)rightOp).getBase();
+        String field=((InstanceFieldRef)rightOp).getField().getName();
+        o.g.assignFieldToLocal(stmt,right,field,left);
+      }
+ else       if (rightOp instanceof StaticFieldRef) {
+        o.g.localIsUnknown(left);
+      }
+ else       if (rightOp instanceof Constant) {
+      }
+ else       if (rightOp instanceof AnyNewExpr) {
+        o.g.assignNewToLocal(stmt,left);
+      }
+ else       if (rightOp instanceof BinopExpr || rightOp instanceof UnopExpr || rightOp instanceof InstanceOfExpr) {
+      }
+ else       throw new Error("AssignStmt match failure (rightOp)" + stmt);
+    }
+ else     if (leftOp instanceof ArrayRef) {
+      Local left=(Local)((ArrayRef)leftOp).getBase();
+      if (rightOp instanceof Local) {
+        Local right=(Local)rightOp;
+        if (right.getType() instanceof RefLikeType)         o.g.assignLocalToField(right,left,"[]");
+ else         o.g.mutateField(left,"[]");
+      }
+ else       if (rightOp instanceof Constant)       o.g.mutateField(left,"[]");
+ else       throw new Error("AssignStmt match failure (rightOp)" + stmt);
+    }
+ else     if (leftOp instanceof InstanceFieldRef) {
+      Local left=(Local)((InstanceFieldRef)leftOp).getBase();
+      String field=((InstanceFieldRef)leftOp).getField().getName();
+      if (rightOp instanceof Local) {
+        Local right=(Local)rightOp;
+        if (right.getType() instanceof RefLikeType)         o.g.assignLocalToField(right,left,field);
+ else         o.g.mutateField(left,field);
+      }
+ else       if (rightOp instanceof Constant)       o.g.mutateField(left,field);
+ else       throw new Error("AssignStmt match failure (rightOp) " + stmt);
+    }
+ else     if (leftOp instanceof StaticFieldRef) {
+      String field=((StaticFieldRef)leftOp).getField().getName();
+      if (rightOp instanceof Local) {
+        Local right=(Local)rightOp;
+        if (right.getType() instanceof RefLikeType)         o.g.assignLocalToStaticField(right,field);
+ else         o.g.mutateStaticField(field);
+      }
+ else       if (rightOp instanceof Constant)       o.g.mutateStaticField(field);
+ else       throw new Error("AssignStmt match failure (rightOp) " + stmt);
+    }
+ else     throw new Error("AssignStmt match failure (leftOp) " + stmt);
+  }
+ else   if (stmt instanceof IdentityStmt) {
+    Local left=(Local)((IdentityStmt)stmt).getLeftOp();
+    Value rightOp=((IdentityStmt)stmt).getRightOp();
+    if (rightOp instanceof ThisRef) {
+      o.g.assignThisToLocal(left);
+    }
+ else     if (rightOp instanceof ParameterRef) {
+      ParameterRef p=(ParameterRef)rightOp;
+      if (p.getType() instanceof RefLikeType)       o.g.assignParamToLocal(p.getIndex(),left);
+    }
+ else     if (rightOp instanceof CaughtExceptionRef) {
+      o.g.localIsUnknown(left);
+    }
+ else     throw new Error("IdentityStmt match failure (rightOp) " + stmt);
+  }
+ else   if (stmt instanceof ThrowStmt) {
+    Value op=((ThrowStmt)stmt).getOp();
+    if (op instanceof Local) {
+      Local v=(Local)op;
+      o.g.localEscapes(v);
+    }
+ else     if (op instanceof Constant) {
+    }
+ else     throw new Error("ThrowStmt match failure " + stmt);
+  }
+ else   if (stmt instanceof ReturnVoidStmt) {
+  }
+ else   if (stmt instanceof ReturnStmt) {
+    Value v=((ReturnStmt)stmt).getOp();
+    if (v instanceof Local) {
+      if (v.getType() instanceof RefLikeType)       o.g.returnLocal((Local)v);
+    }
+ else     if (v instanceof Constant) {
+    }
+ else     throw new Error("ReturnStmt match failure " + stmt);
+  }
+ else   if (stmt instanceof IfStmt || stmt instanceof GotoStmt || stmt instanceof LookupSwitchStmt|| stmt instanceof TableSwitchStmt|| stmt instanceof MonitorStmt|| stmt instanceof BreakpointStmt|| stmt instanceof NopStmt) {
+  }
+ else   throw new Error("Stmt match faliure " + stmt);
+}

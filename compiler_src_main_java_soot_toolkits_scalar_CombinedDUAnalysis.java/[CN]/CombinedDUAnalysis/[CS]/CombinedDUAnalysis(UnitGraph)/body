@@ -1,0 +1,34 @@
+{
+  super(graph);
+  if (Options.v().verbose())   G.v().out.println("[" + graph.getBody().getMethod().getName() + "]     Constructing CombinedDUAnalysis...");
+  for (Iterator uIt=graph.iterator(); uIt.hasNext(); ) {
+    final Unit u=(Unit)uIt.next();
+    List<Value> defs=localsInBoxes(u.getDefBoxes());
+    if (defs.size() == 1)     unitToLocalDefed.put(u,defs.get(0));
+ else     if (defs.size() != 0)     throw new RuntimeException("Locals defed in " + u + ": "+ defs.size());
+    ArraySparseSet localUseBoxes=new ArraySparseSet();
+    for (Iterator vbIt=u.getUseBoxes().iterator(); vbIt.hasNext(); ) {
+      final ValueBox vb=(ValueBox)vbIt.next();
+      Value v=vb.getValue();
+      if (!(v instanceof Local))       continue;
+      localUseBoxes.add(vb);
+      if (useBoxToUnit.containsKey(vb))       throw new RuntimeException("Aliased ValueBox " + vb + " in Unit "+ u);
+      useBoxToUnit.put(vb,u);
+      localToUseBoxes.put(v,vb);
+    }
+    unitToLocalUseBoxes.put(u,localUseBoxes);
+  }
+  doAnalysis();
+  for (Iterator defUnitIt=graph.iterator(); defUnitIt.hasNext(); ) {
+    final Unit defUnit=(Unit)defUnitIt.next();
+    Local localDefed=localDefed(defUnit);
+    if (localDefed == null)     continue;
+    for (Iterator vbIt=((FlowSet)getFlowAfter(defUnit)).iterator(); vbIt.hasNext(); ) {
+      final ValueBox vb=(ValueBox)vbIt.next();
+      if (vb.getValue() != localDefed)       continue;
+      Unit useUnit=useBoxToUnit.get(vb);
+      getDefsOfAt(localDefed,useUnit).add(defUnit);
+    }
+  }
+  if (Options.v().verbose())   G.v().out.println("[" + graph.getBody().getMethod().getName() + "]     Finished CombinedDUAnalysis...");
+}

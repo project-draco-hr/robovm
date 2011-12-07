@@ -1,0 +1,46 @@
+{
+  Set<SootMethod> ret=new HashSet<SootMethod>();
+  SootClass declaringClass=declaredTypeOfBase.getSootClass();
+  declaringClass.checkLevel(SootClass.HIERARCHY);
+  for (Iterator tIt=concreteTypes.iterator(); tIt.hasNext(); ) {
+    final Type t=(Type)tIt.next();
+    if (t instanceof AnySubType) {
+      String methodSig=m.getSubSignature();
+      HashSet s=new HashSet();
+      s.add(declaringClass);
+      while (!s.isEmpty()) {
+        SootClass c=(SootClass)s.iterator().next();
+        s.remove(c);
+        if (!c.isInterface() && !c.isAbstract() && canStoreClass(c,declaringClass)) {
+          SootMethod concreteM=resolveConcreteDispatch(c,m);
+          if (concreteM != null)           ret.add(concreteM);
+        }
+        if (classToSubclasses.containsKey(c)) {
+          s.addAll(classToSubclasses.get(c));
+        }
+        if (interfaceToSubinterfaces.containsKey(c)) {
+          s.addAll(interfaceToSubinterfaces.get(c));
+        }
+        if (interfaceToImplementers.containsKey(c)) {
+          s.addAll(interfaceToImplementers.get(c));
+        }
+      }
+      return ret;
+    }
+ else     if (t instanceof RefType) {
+      RefType concreteType=(RefType)t;
+      SootClass concreteClass=concreteType.getSootClass();
+      if (!canStoreClass(concreteClass,declaringClass)) {
+        continue;
+      }
+      SootMethod concreteM=resolveConcreteDispatch(concreteClass,m);
+      if (concreteM != null)       ret.add(concreteM);
+    }
+ else     if (t instanceof ArrayType) {
+      SootMethod concreteM=resolveConcreteDispatch(RefType.v("java.lang.Object").getSootClass(),m);
+      if (concreteM != null)       ret.add(concreteM);
+    }
+ else     throw new RuntimeException("Unrecognized reaching type " + t);
+  }
+  return ret;
+}

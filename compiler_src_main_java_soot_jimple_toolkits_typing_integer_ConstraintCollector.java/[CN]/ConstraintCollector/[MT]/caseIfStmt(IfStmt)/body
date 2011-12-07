@@ -1,0 +1,109 @@
+{
+  if (uses) {
+    ConditionExpr cond=(ConditionExpr)stmt.getCondition();
+    BinopExpr expr=cond;
+    Value lv=expr.getOp1();
+    Value rv=expr.getOp2();
+    TypeVariable lop=null;
+    TypeVariable rop=null;
+    if (lv instanceof Local) {
+      if (((Local)lv).getType() instanceof IntegerType) {
+        lop=resolver.typeVariable((Local)lv);
+      }
+    }
+ else     if (lv instanceof DoubleConstant) {
+    }
+ else     if (lv instanceof FloatConstant) {
+    }
+ else     if (lv instanceof IntConstant) {
+      int value=((IntConstant)lv).value;
+      if (value < -32768) {
+        lop=resolver.INT;
+      }
+ else       if (value < -128) {
+        lop=resolver.SHORT;
+      }
+ else       if (value < 0) {
+        lop=resolver.BYTE;
+      }
+ else       if (value < 2) {
+        lop=resolver.R0_1;
+      }
+ else       if (value < 128) {
+        lop=resolver.R0_127;
+      }
+ else       if (value < 32768) {
+        lop=resolver.R0_32767;
+      }
+ else       if (value < 65536) {
+        lop=resolver.CHAR;
+      }
+ else {
+        lop=resolver.INT;
+      }
+    }
+ else     if (lv instanceof LongConstant) {
+    }
+ else     if (lv instanceof NullConstant) {
+    }
+ else     if (lv instanceof StringConstant) {
+    }
+ else     if (lv instanceof ClassConstant) {
+    }
+ else {
+      throw new RuntimeException("Unhandled binary expression left operand type: " + lv.getClass());
+    }
+    if (rv instanceof Local) {
+      if (((Local)rv).getType() instanceof IntegerType) {
+        rop=resolver.typeVariable((Local)rv);
+      }
+    }
+ else     if (rv instanceof DoubleConstant) {
+    }
+ else     if (rv instanceof FloatConstant) {
+    }
+ else     if (rv instanceof IntConstant) {
+      int value=((IntConstant)rv).value;
+      if (value < -32768) {
+        rop=resolver.INT;
+      }
+ else       if (value < -128) {
+        rop=resolver.SHORT;
+      }
+ else       if (value < 0) {
+        rop=resolver.BYTE;
+      }
+ else       if (value < 2) {
+        rop=resolver.R0_1;
+      }
+ else       if (value < 128) {
+        rop=resolver.R0_127;
+      }
+ else       if (value < 32768) {
+        rop=resolver.R0_32767;
+      }
+ else       if (value < 65536) {
+        rop=resolver.CHAR;
+      }
+ else {
+        rop=resolver.INT;
+      }
+    }
+ else     if (rv instanceof LongConstant) {
+    }
+ else     if (rv instanceof NullConstant) {
+    }
+ else     if (rv instanceof StringConstant) {
+    }
+ else     if (rv instanceof ClassConstant) {
+    }
+ else {
+      throw new RuntimeException("Unhandled binary expression right operand type: " + rv.getClass());
+    }
+    if (rop != null && lop != null) {
+      TypeVariable common=resolver.typeVariable();
+      rop.addParent(common);
+      lop.addParent(common);
+    }
+  }
+}

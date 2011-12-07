@@ -1,0 +1,37 @@
+{
+  if (rep != this) {
+    ecr().fixDepth();
+    return;
+  }
+  if (type != null) {
+    if (type.type() instanceof ArrayType) {
+      ArrayType at=(ArrayType)type.type();
+      depth=at.numDimensions;
+    }
+ else {
+      depth=0;
+    }
+  }
+ else {
+    if (approx.type() instanceof ArrayType) {
+      ArrayType at=(ArrayType)approx.type();
+      depth=at.numDimensions;
+    }
+ else {
+      depth=0;
+    }
+  }
+  if (depth == 0 && element() != null) {
+    error("Type Error(11)");
+  }
+ else   if (depth > 0 && element() == null) {
+    makeElement();
+    TypeVariableBV element=element();
+    element.depth=depth - 1;
+    while (element.depth != 0) {
+      element.makeElement();
+      element.element().depth=element.depth - 1;
+      element=element.element();
+    }
+  }
+}

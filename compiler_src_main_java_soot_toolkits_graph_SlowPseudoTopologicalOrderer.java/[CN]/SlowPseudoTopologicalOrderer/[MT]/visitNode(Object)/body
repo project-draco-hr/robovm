@@ -1,0 +1,45 @@
+{
+  LinkedList stmtStack=new LinkedList();
+  LinkedList<Integer> indexStack=new LinkedList<Integer>();
+  stmtToColor.put(startStmt,new Integer(GRAY));
+  stmtStack.addLast(startStmt);
+  indexStack.addLast(new Integer(-1));
+  while (!stmtStack.isEmpty()) {
+    int toVisitIndex=indexStack.removeLast().intValue();
+    Object toVisitNode=stmtStack.getLast();
+    toVisitIndex++;
+    indexStack.addLast(new Integer(toVisitIndex));
+    if (toVisitIndex >= graph.getSuccsOf(toVisitNode).size()) {
+      if (mIsReversed)       order.addLast(toVisitNode);
+ else       order.addFirst(toVisitNode);
+      stmtToColor.put(toVisitNode,new Integer(BLACK));
+      stmtStack.removeLast();
+      indexStack.removeLast();
+    }
+ else {
+      List<Object> orderedSuccs=succsMap.get(toVisitNode);
+      if (orderedSuccs == null) {
+        orderedSuccs=new LinkedList<Object>();
+        succsMap.put(toVisitNode,orderedSuccs);
+        List allsuccs=graph.getSuccsOf(toVisitNode);
+        for (int i=0; i < allsuccs.size(); i++) {
+          Object cur=allsuccs.get(i);
+          int j=0;
+          for (; j < orderedSuccs.size(); j++) {
+            Object comp=orderedSuccs.get(j);
+            int idx1=reverseOrder.indexOf(cur);
+            int idx2=reverseOrder.indexOf(comp);
+            if (idx1 < idx2)             break;
+          }
+          orderedSuccs.add(j,cur);
+        }
+      }
+      Object childNode=orderedSuccs.get(toVisitIndex);
+      if (stmtToColor.get(childNode).intValue() == WHITE) {
+        stmtToColor.put(childNode,new Integer(GRAY));
+        stmtStack.addLast(childNode);
+        indexStack.addLast(new Integer(-1));
+      }
+    }
+  }
+}

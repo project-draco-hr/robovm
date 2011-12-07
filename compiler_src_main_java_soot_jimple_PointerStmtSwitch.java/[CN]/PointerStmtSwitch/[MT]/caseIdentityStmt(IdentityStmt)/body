@@ -1,0 +1,17 @@
+{
+  statement=s;
+  Value lhs=s.getLeftOp();
+  Value rhs=s.getRightOp();
+  if (!(lhs.getType() instanceof RefType) && !(lhs.getType() instanceof ArrayType)) {
+    caseUninterestingStmt(s);
+    return;
+  }
+  Local llhs=(Local)lhs;
+  if (rhs instanceof CaughtExceptionRef) {
+    caseCatchStmt(llhs,(CaughtExceptionRef)rhs);
+  }
+ else {
+    IdentityRef rrhs=(IdentityRef)rhs;
+    caseIdentityStmt(llhs,rrhs);
+  }
+}

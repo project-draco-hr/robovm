@@ -4,8 +4,8 @@
     relFiles.add(f.getAbsolutePath().substring(wd.getAbsolutePath().length() + 1));
   }
   String arPath="ar";
-  if (arBin != null) {
-    arPath=arBin.getAbsolutePath();
+  if (config.getArBinPath() != null) {
+    arPath=config.getArBinPath().getAbsolutePath();
   }
   outFile.getParentFile().mkdirs();
   List<List<String>> parts=new ArrayList<List<String>>();
@@ -20,9 +20,7 @@
     }
  catch (    IOException e) {
       if (e.getMessage() != null && e.getMessage().contains("Argument list too long")) {
-        if (verbose) {
-          stdout.printf("Got 'Argument list too long' error when running ar. " + "Will try again using %d calls to ar.\n",parts.size() * 2);
-        }
+        config.getLogger().debug("Got 'Argument list too long' error when running ar. " + "Will try again using %d calls to ar.\n",parts.size() * 2);
         List<List<String>> oldParts=parts;
         parts=new ArrayList<List<String>>();
         for (        List<String> l : oldParts) {

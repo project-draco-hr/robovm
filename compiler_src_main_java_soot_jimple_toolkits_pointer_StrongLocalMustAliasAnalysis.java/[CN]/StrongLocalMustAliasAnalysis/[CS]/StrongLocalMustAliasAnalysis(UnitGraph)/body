@@ -1,0 +1,22 @@
+{
+  super(g);
+  invalidInstanceKeys=new HashSet<Integer>();
+  StronglyConnectedComponentsFast<Unit> sccAnalysis=new StronglyConnectedComponentsFast<Unit>(g);
+  for (  List<Unit> scc : sccAnalysis.getTrueComponents()) {
+    for (    Unit unit : scc) {
+      for (      ValueBox vb : unit.getDefBoxes()) {
+        Value defValue=vb.getValue();
+        if (defValue instanceof Local) {
+          Local defLocal=(Local)defValue;
+          if (defLocal.getType() instanceof RefLikeType) {
+            Object instanceKey=getFlowBefore(unit).get(defLocal);
+            if (instanceKey instanceof Integer) {
+              Integer intKey=(Integer)instanceKey;
+              invalidInstanceKeys.add(intKey);
+            }
+          }
+        }
+      }
+    }
+  }
+}

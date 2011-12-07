@@ -1,0 +1,35 @@
+{
+  Hashtable<Object,IntContainer> outedges=sources.get(src);
+  if (outedges == null)   return true;
+  if (outedges.size() == 0)   return true;
+  InitializeSingleSource(src);
+  getReachableNodesAndEdges(src);
+  int vSize=reachableNodes.size();
+  for (int i=0; i < vSize; i++) {
+    Iterator<WeightedDirectedEdge> edgeIt=reachableEdges.iterator();
+    while (edgeIt.hasNext()) {
+      WeightedDirectedEdge edge=edgeIt.next();
+      Relax(edge.from,edge.to,edge.weight);
+    }
+  }
+  distance.remove(src);
+{
+    Iterator<WeightedDirectedEdge> edgeIt=reachableEdges.iterator();
+    while (edgeIt.hasNext()) {
+      WeightedDirectedEdge edge=edgeIt.next();
+      IntContainer dfrom=distance.get(edge.from);
+      if (dfrom == null)       continue;
+      IntContainer dto=distance.get(edge.to);
+      if (dto == null)       continue;
+      if (dto.value > (dfrom.value + edge.weight))       return false;
+    }
+  }
+  outedges.clear();
+  Iterator<Object> targetIt=distance.keySet().iterator();
+  while (targetIt.hasNext()) {
+    Object to=targetIt.next();
+    IntContainer dist=distance.get(to);
+    outedges.put(to,dist.dup());
+  }
+  return true;
+}

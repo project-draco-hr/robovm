@@ -1,0 +1,16 @@
+{
+  String fieldrefs="";
+  String staticrefs="";
+  String paramrefs="";
+  String thisref="";
+  if (nodes.size() == 0)   return "Call Locality Context: NO NODES\n";
+  for (int i=0; i < nodes.size(); i++) {
+    Ref r=(Ref)((EquivalentValue)nodes.get(i)).getValue();
+    if (r instanceof InstanceFieldRef)     fieldrefs=fieldrefs + r + ": "+ (isNodeLocal.get(i).booleanValue() ? "local" : "shared")+ "\n";
+ else     if (r instanceof StaticFieldRef)     staticrefs=staticrefs + r + ": "+ (isNodeLocal.get(i).booleanValue() ? "local" : "shared")+ "\n";
+ else     if (r instanceof ParameterRef)     paramrefs=paramrefs + r + ": "+ (isNodeLocal.get(i).booleanValue() ? "local" : "shared")+ "\n";
+ else     if (r instanceof ThisRef)     thisref=thisref + r + ": "+ (isNodeLocal.get(i).booleanValue() ? "local" : "shared")+ "\n";
+ else     return "Call Locality Context: HAS STRANGE NODE " + r + "\n";
+  }
+  return "Call Locality Context: \n" + fieldrefs + paramrefs+ thisref+ staticrefs;
+}

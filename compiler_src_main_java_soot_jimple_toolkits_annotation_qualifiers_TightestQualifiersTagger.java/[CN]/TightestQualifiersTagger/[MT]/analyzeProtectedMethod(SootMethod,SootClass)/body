@@ -1,0 +1,18 @@
+{
+  SootClass methodClass=sm.getDeclaringClass();
+  boolean insidePackageAccess=isCallSamePackage(callingClass,methodClass);
+  boolean subClassAccess=isCallClassSubClass(callingClass,methodClass);
+  boolean sameClassAccess=isCallClassMethodClass(callingClass,methodClass);
+  if (!insidePackageAccess && subClassAccess) {
+    methodResultsMap.put(sm,new Integer(RESULT_PROTECTED));
+    return true;
+  }
+ else   if (insidePackageAccess && !sameClassAccess) {
+    updateToPackage(sm);
+    return false;
+  }
+ else {
+    updateToPrivate(sm);
+    return false;
+  }
+}

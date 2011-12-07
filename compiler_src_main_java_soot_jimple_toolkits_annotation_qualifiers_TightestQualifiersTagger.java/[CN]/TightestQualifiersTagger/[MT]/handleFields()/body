@@ -1,0 +1,46 @@
+{
+  Iterator classesIt=Scene.v().getApplicationClasses().iterator();
+  while (classesIt.hasNext()) {
+    SootClass appClass=(SootClass)classesIt.next();
+    Iterator fieldsIt=appClass.getFields().iterator();
+    while (fieldsIt.hasNext()) {
+      SootField sf=(SootField)fieldsIt.next();
+      analyzeField(sf);
+    }
+  }
+  Iterator<SootField> fieldStatIt=fieldResultsMap.keySet().iterator();
+  while (fieldStatIt.hasNext()) {
+    SootField f=fieldStatIt.next();
+    int result=fieldResultsMap.get(f).intValue();
+    String sRes="Public";
+    if (result == RESULT_PUBLIC) {
+      sRes="Public";
+    }
+ else     if (result == RESULT_PROTECTED) {
+      sRes="Protected";
+    }
+ else     if (result == RESULT_PACKAGE) {
+      sRes="Package";
+    }
+ else     if (result == RESULT_PRIVATE) {
+      sRes="Private";
+    }
+    String actual=null;
+    if (Modifier.isPublic(f.getModifiers())) {
+      actual="Public";
+    }
+ else     if (Modifier.isProtected(f.getModifiers())) {
+      actual="Protected";
+    }
+ else     if (Modifier.isPrivate(f.getModifiers())) {
+      actual="Private";
+    }
+ else {
+      actual="Package";
+    }
+    if (!sRes.equals(actual)) {
+      f.addTag(new StringTag("Field: " + f.getName() + " has "+ actual+ " level access, can have: "+ sRes+ " level access.","Tightest Qualifiers"));
+      f.addTag(new ColorTag(255,10,0,true,"Tightest Qualifiers"));
+    }
+  }
+}

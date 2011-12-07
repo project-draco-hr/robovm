@@ -1,0 +1,25 @@
+{
+  AugEvalFunction ef=new AugEvalFunction(this.jb);
+  AugHierarchy ah=new AugHierarchy();
+  BytecodeHierarchy bh=new BytecodeHierarchy();
+  Collection<Typing> sigma=this.applyAssignmentConstraints(new Typing(this.jb.getLocals()),ef,bh);
+  int[] castCount=new int[1];
+  Typing tg=this.minCasts(sigma,bh,castCount);
+  if (castCount[0] != 0) {
+    this.split_new();
+    sigma=this.applyAssignmentConstraints(new Typing(this.jb.getLocals()),ef,bh);
+    tg=this.minCasts(sigma,bh,castCount);
+  }
+  this.insertCasts(tg,bh,false);
+  for (  Local v : this.jb.getLocals()) {
+    Type t=tg.get(v);
+    if (t instanceof IntegerType) {
+      t=IntType.v();
+      tg.set(v,BottomType.v());
+    }
+    v.setType(t);
+  }
+  tg=this.typePromotion(tg);
+  if (tg == null)   soot.jimple.toolkits.typing.integer.TypeResolver.resolve(this.jb);
+ else   for (  Local v : this.jb.getLocals())   v.setType(tg.get(v));
+}

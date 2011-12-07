@@ -1,0 +1,43 @@
+{
+  SlowAvailableExpressionsAnalysis analysis=new SlowAvailableExpressionsAnalysis(new ExceptionalUnitGraph(b));
+{
+    unitToPairsAfter=new HashMap<Unit,List<UnitValueBoxPair>>(b.getUnits().size() * 2 + 1,0.7f);
+    unitToPairsBefore=new HashMap<Unit,List<UnitValueBoxPair>>(b.getUnits().size() * 2 + 1,0.7f);
+    unitToEquivsAfter=new HashMap<Unit,Chain>(b.getUnits().size() * 2 + 1,0.7f);
+    unitToEquivsBefore=new HashMap<Unit,Chain>(b.getUnits().size() * 2 + 1,0.7f);
+    Iterator unitIt=b.getUnits().iterator();
+    while (unitIt.hasNext()) {
+      Unit s=(Unit)unitIt.next();
+      FlowSet set=(FlowSet)analysis.getFlowBefore(s);
+      List<UnitValueBoxPair> pairsBefore=new ArrayList<UnitValueBoxPair>();
+      List<UnitValueBoxPair> pairsAfter=new ArrayList<UnitValueBoxPair>();
+      Chain equivsBefore=new HashChain();
+      Chain equivsAfter=new HashChain();
+      List setAsList=set.toList();
+      Iterator si=setAsList.iterator();
+      while (si.hasNext()) {
+        Value v=(Value)si.next();
+        Stmt containingStmt=analysis.rhsToContainingStmt.get(v);
+        UnitValueBoxPair p=new UnitValueBoxPair(containingStmt,((AssignStmt)containingStmt).getRightOpBox());
+        EquivalentValue ev=new EquivalentValue(v);
+        pairsBefore.add(p);
+        if (!equivsBefore.contains(ev))         equivsBefore.add(ev);
+      }
+      unitToPairsBefore.put(s,pairsBefore);
+      unitToEquivsBefore.put(s,equivsBefore);
+      set=(FlowSet)analysis.getFlowAfter(s);
+      setAsList=set.toList();
+      si=setAsList.iterator();
+      while (si.hasNext()) {
+        Value v=(Value)si.next();
+        Stmt containingStmt=analysis.rhsToContainingStmt.get(v);
+        UnitValueBoxPair p=new UnitValueBoxPair(containingStmt,((AssignStmt)containingStmt).getRightOpBox());
+        EquivalentValue ev=new EquivalentValue(v);
+        pairsAfter.add(p);
+        if (!equivsAfter.contains(ev))         equivsAfter.add(ev);
+      }
+      unitToPairsAfter.put(s,pairsAfter);
+      unitToEquivsAfter.put(s,equivsAfter);
+    }
+  }
+}

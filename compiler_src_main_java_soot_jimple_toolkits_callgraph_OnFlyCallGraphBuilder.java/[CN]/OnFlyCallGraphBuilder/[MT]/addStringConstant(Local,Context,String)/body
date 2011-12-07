@@ -1,0 +1,32 @@
+{
+  for (Iterator siteIt=((Collection)stringConstToSites.get(l)).iterator(); siteIt.hasNext(); ) {
+    final VirtualCallSite site=(VirtualCallSite)siteIt.next();
+    if (constant == null) {
+      if (options.verbose()) {
+        G.v().out.println("Warning: Method " + site.container() + " is reachable, and calls Class.forName on a"+ " non-constant String; graph will be incomplete!"+ " Use safe-forname option for a conservative result.");
+      }
+    }
+ else {
+      if (constant.length() > 0 && constant.charAt(0) == '[') {
+        if (constant.length() > 1 && constant.charAt(1) == 'L' && constant.charAt(constant.length() - 1) == ';') {
+          constant=constant.substring(2,constant.length() - 1);
+        }
+ else         continue;
+      }
+      if (!Scene.v().containsClass(constant)) {
+        if (options.verbose()) {
+          G.v().out.println("Warning: Class " + constant + " is"+ " a dynamic class, and you did not specify"+ " it as such; graph will be incomplete!");
+        }
+      }
+ else {
+        SootClass sootcls=Scene.v().getSootClass(constant);
+        if (!sootcls.isApplicationClass()) {
+          sootcls.setLibraryClass();
+        }
+        for (        SootMethod clinit : EntryPoints.v().clinitsOf(sootcls)) {
+          cm.addStaticEdge(MethodContext.v(site.container(),srcContext),site.stmt(),clinit,Kind.CLINIT);
+        }
+      }
+    }
+  }
+}

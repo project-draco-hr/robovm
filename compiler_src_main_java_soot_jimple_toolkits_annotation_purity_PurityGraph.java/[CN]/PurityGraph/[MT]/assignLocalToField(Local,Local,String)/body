@@ -1,0 +1,14 @@
+{
+  Iterator itLeft=locals.get(left).iterator();
+  while (itLeft.hasNext()) {
+    PurityNode nodeLeft=(PurityNode)itLeft.next();
+    Iterator itRight=locals.get(right).iterator();
+    while (itRight.hasNext()) {
+      PurityNode nodeRight=(PurityNode)itRight.next();
+      PurityEdge edge=cacheEdge(new PurityEdge(nodeLeft,field,nodeRight,true));
+      if (edges.put(nodeLeft,edge))       backEdges.put(nodeRight,edge);
+    }
+    if (!nodeLeft.isInside())     mutated.put(nodeLeft,field);
+  }
+  if (doCheck)   sanityCheck();
+}

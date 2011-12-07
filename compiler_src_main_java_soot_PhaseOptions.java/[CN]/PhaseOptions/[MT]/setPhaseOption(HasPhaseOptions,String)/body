@@ -1,0 +1,18 @@
+{
+  Map<String,String> optionMap=mapForPhase(phase);
+  if (!checkParentEnabled(phase.getPhaseName()))   return false;
+  if (optionMap == null) {
+    G.v().out.println("Option " + option + " given for nonexistent"+ " phase "+ phase.getPhaseName());
+    return false;
+  }
+  String key=getKey(option);
+  if (key.equals("enabled") && getValue(option).equals("true")) {
+    resetRadioPack(phase.getPhaseName());
+  }
+  if (declaresOption(phase,key)) {
+    optionMap.put(key,getValue(option));
+    return true;
+  }
+  G.v().out.println("Invalid option " + option + " for phase "+ phase.getPhaseName());
+  return false;
+}

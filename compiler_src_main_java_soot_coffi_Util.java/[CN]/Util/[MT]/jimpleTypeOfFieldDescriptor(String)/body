@@ -1,0 +1,27 @@
+{
+  boolean isArray=false;
+  int numDimensions=0;
+  Type baseType;
+  while (descriptor.startsWith("[")) {
+    isArray=true;
+    numDimensions++;
+    descriptor=descriptor.substring(1);
+  }
+  if (descriptor.equals("B"))   baseType=ByteType.v();
+ else   if (descriptor.equals("C"))   baseType=CharType.v();
+ else   if (descriptor.equals("D"))   baseType=DoubleType.v();
+ else   if (descriptor.equals("F"))   baseType=FloatType.v();
+ else   if (descriptor.equals("I"))   baseType=IntType.v();
+ else   if (descriptor.equals("J"))   baseType=LongType.v();
+ else   if (descriptor.equals("V"))   baseType=VoidType.v();
+ else   if (descriptor.startsWith("L")) {
+    if (!descriptor.endsWith(";"))     throw new RuntimeException("Class reference does not end with ;");
+    String className=descriptor.substring(1,descriptor.length() - 1);
+    baseType=RefType.v(className.replace('/','.'));
+  }
+ else   if (descriptor.equals("S"))   baseType=ShortType.v();
+ else   if (descriptor.equals("Z"))   baseType=BooleanType.v();
+ else   throw new RuntimeException("Unknown field type: " + descriptor);
+  if (isArray)   return ArrayType.v(baseType,numDimensions);
+ else   return baseType;
+}

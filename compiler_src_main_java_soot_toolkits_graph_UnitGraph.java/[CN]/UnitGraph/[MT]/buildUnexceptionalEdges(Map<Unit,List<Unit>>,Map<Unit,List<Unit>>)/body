@@ -1,0 +1,29 @@
+{
+  for (Iterator<Unit> unitIt=unitChain.iterator(); unitIt.hasNext(); ) {
+    unitToPreds.put(unitIt.next(),new ArrayList<Unit>());
+  }
+  Iterator<Unit> unitIt=unitChain.iterator();
+  Unit currentUnit, nextUnit;
+  nextUnit=unitIt.hasNext() ? (Unit)unitIt.next() : null;
+  while (nextUnit != null) {
+    currentUnit=nextUnit;
+    nextUnit=unitIt.hasNext() ? (Unit)unitIt.next() : null;
+    List<Unit> successors=new ArrayList<Unit>();
+    if (currentUnit.fallsThrough()) {
+      if (nextUnit != null) {
+        successors.add(nextUnit);
+        unitToPreds.get(nextUnit).add(currentUnit);
+      }
+    }
+    if (currentUnit.branches()) {
+      for (Iterator<UnitBox> targetIt=currentUnit.getUnitBoxes().iterator(); targetIt.hasNext(); ) {
+        Unit target=targetIt.next().getUnit();
+        if (!successors.contains(target)) {
+          successors.add(target);
+          unitToPreds.get(target).add(currentUnit);
+        }
+      }
+    }
+    unitToSuccs.put(currentUnit,successors);
+  }
+}

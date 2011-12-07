@@ -1,0 +1,57 @@
+{
+  HashSet inset=(HashSet)inValue;
+  HashSet outset=(HashSet)outValue;
+  Stmt stmt=(Stmt)unit;
+  outset.clear();
+  outset.addAll(inset);
+  HashSet genset=genOfUnit.get(unit);
+  HashSet absgenset=absGenOfUnit.get(unit);
+  HashSet killset=killOfUnit.get(unit);
+  HashSet condset=conditionOfGen.get(unit);
+  if (killset != null)   outset.removeAll(killset);
+  if (arrayin) {
+    Boolean killall=killAllArrayRef.get(stmt);
+    if ((killall != null) && killall.booleanValue()) {
+      List keylist=new ArrayList(outset);
+      Iterator keyIt=keylist.iterator();
+      while (keyIt.hasNext()) {
+        Object key=keyIt.next();
+        if (key instanceof ArrayRef)         outset.remove(key);
+      }
+    }
+ else {
+      Object local=killArrayRelated.get(stmt);
+      if (local != null) {
+        List keylist=new ArrayList(outset);
+        Iterator keyIt=keylist.iterator();
+        while (keyIt.hasNext()) {
+          Object key=keyIt.next();
+          if (key instanceof ArrayRef) {
+            Value base=((ArrayRef)key).getBase();
+            Value index=((ArrayRef)key).getIndex();
+            if (base.equals(local) || index.equals(local))             outset.remove(key);
+          }
+          if (rectarray) {
+            if (key instanceof Array2ndDimensionSymbol) {
+              Object base=((Array2ndDimensionSymbol)key).getVar();
+              if (base.equals(local))               outset.remove(key);
+            }
+          }
+        }
+      }
+    }
+  }
+  if (genset != null) {
+    if (condset == null || (condset.size() == 0))     outset.addAll(genset);
+ else {
+      Iterator condIt=condset.iterator();
+      while (condIt.hasNext()) {
+        if (inset.contains(condIt.next())) {
+          outset.addAll(genset);
+          break;
+        }
+      }
+    }
+  }
+  if (absgenset != null)   outset.addAll(absgenset);
+}

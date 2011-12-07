@@ -1,17 +1,13 @@
 {
-  if (!clean && output.exists() && output.lastModified() >= input.lastModified()) {
-    if (verbose) {
-      stdout.format("Not stripping unchanged archive file '%s'\n",input);
-    }
+  if (!config.isClean() && output.exists() && output.lastModified() >= input.lastModified()) {
+    config.getLogger().debug("Not stripping unchanged archive file '%s'\n",input);
     return;
   }
   ZipFile archive=null;
   try {
     archive=new ZipFile(input);
     File strippedFile=output;
-    if (verbose) {
-      stdout.format("Creating stripped archive file '%s'\n",strippedFile);
-    }
+    config.getLogger().debug("Creating stripped archive file '%s'\n",strippedFile);
     ZipOutputStream out=null;
     try {
       out=new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(strippedFile)));

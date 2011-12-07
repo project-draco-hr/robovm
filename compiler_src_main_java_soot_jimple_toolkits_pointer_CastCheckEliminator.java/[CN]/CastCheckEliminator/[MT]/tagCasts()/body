@@ -1,0 +1,24 @@
+{
+  for (Iterator sIt=((UnitGraph)graph).getBody().getUnits().iterator(); sIt.hasNext(); ) {
+    final Stmt s=(Stmt)sIt.next();
+    if (s instanceof AssignStmt) {
+      AssignStmt as=(AssignStmt)s;
+      Value rhs=as.getRightOp();
+      if (rhs instanceof CastExpr) {
+        CastExpr cast=(CastExpr)rhs;
+        Type t=cast.getCastType();
+        if (t instanceof RefType) {
+          if (cast.getOp() instanceof Local) {
+            Local l=(Local)cast.getOp();
+            LocalTypeSet set=(LocalTypeSet)unitToBeforeFlow.get(s);
+            s.addTag(new CastCheckTag(set.get(set.indexOf(l,(RefType)t))));
+          }
+ else {
+            NullConstant nc=(NullConstant)cast.getOp();
+            s.addTag(new CastCheckTag(true));
+          }
+        }
+      }
+    }
+  }
+}

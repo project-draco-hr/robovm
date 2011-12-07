@@ -1,0 +1,15 @@
+{
+  int astorenum=((Interface_Astore)astore).getLocalNumber();
+  Instruction insn=astore.next;
+  while (insn != null) {
+    if (insn instanceof Instruction_Ret || insn instanceof Instruction_Ret_w) {
+      int retnum=((Interface_OneIntArg)insn).getIntArg();
+      if (astorenum == retnum)       return insn;
+    }
+ else     if (insn instanceof Instruction_Jsr || insn instanceof Instruction_Jsr_w) {
+      innerJsrs.add(insn);
+    }
+    insn=insn.next;
+  }
+  return null;
+}

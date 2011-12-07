@@ -1,0 +1,37 @@
+{
+  if (DEBUG) {
+    G.v().out.println(stmtBody.getMethod());
+  }
+  try {
+    TypeResolverBV resolver=new TypeResolverBV(stmtBody,scene);
+    resolver.resolve_step_1();
+  }
+ catch (  TypeException e1) {
+    if (DEBUG) {
+      e1.printStackTrace();
+      G.v().out.println("Step 1 Exception-->" + e1.getMessage());
+    }
+    try {
+      TypeResolverBV resolver=new TypeResolverBV(stmtBody,scene);
+      resolver.resolve_step_2();
+    }
+ catch (    TypeException e2) {
+      if (DEBUG) {
+        e2.printStackTrace();
+        G.v().out.println("Step 2 Exception-->" + e2.getMessage());
+      }
+      try {
+        TypeResolverBV resolver=new TypeResolverBV(stmtBody,scene);
+        resolver.resolve_step_3();
+      }
+ catch (      TypeException e3) {
+        StringWriter st=new StringWriter();
+        PrintWriter pw=new PrintWriter(st);
+        e3.printStackTrace(pw);
+        pw.close();
+        throw new RuntimeException(st.toString());
+      }
+    }
+  }
+  soot.jimple.toolkits.typing.integer.TypeResolver.resolve(stmtBody);
+}

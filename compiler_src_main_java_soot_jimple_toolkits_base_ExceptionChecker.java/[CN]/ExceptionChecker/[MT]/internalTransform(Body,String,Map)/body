@@ -1,0 +1,18 @@
+{
+  Iterator it=b.getUnits().iterator();
+  while (it.hasNext()) {
+    Stmt s=(Stmt)it.next();
+    if (s instanceof ThrowStmt) {
+      ThrowStmt ts=(ThrowStmt)s;
+      checkThrow(b,ts);
+    }
+ else     if (s instanceof InvokeStmt) {
+      InvokeStmt is=(InvokeStmt)s;
+      checkInvoke(b,is);
+    }
+ else     if ((s instanceof AssignStmt) && (((AssignStmt)s).getRightOp() instanceof InvokeExpr)) {
+      InvokeExpr ie=(InvokeExpr)((AssignStmt)s).getRightOp();
+      checkInvokeExpr(b,ie,s);
+    }
+  }
+}

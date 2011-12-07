@@ -1,0 +1,32 @@
+{
+  indexForNode.put(v,index);
+  lowlinkForNode.put(v,index);
+  index++;
+  s.push(v);
+  for (  N succ : g.getSuccsOf(v)) {
+    if (!indexForNode.containsKey(succ)) {
+      recurse(succ);
+      lowlinkForNode.put(v,Math.min(lowlinkForNode.get(v),lowlinkForNode.get(succ)));
+    }
+ else     if (s.contains(v)) {
+      lowlinkForNode.put(v,Math.min(lowlinkForNode.get(v),indexForNode.get(succ)));
+    }
+  }
+  if (lowlinkForNode.get(v) == indexForNode.get(v)) {
+    List<N> scc=new ArrayList<N>();
+    N v2;
+    do {
+      v2=s.pop();
+      scc.add(v2);
+    }
+ while (v != v2);
+    componentList.add(scc);
+    if (scc.size() > 1) {
+      trueComponentList.add(scc);
+    }
+ else {
+      N n=scc.get(0);
+      if (g.getSuccsOf(n).contains(n))       trueComponentList.add(scc);
+    }
+  }
+}

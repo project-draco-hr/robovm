@@ -1,0 +1,54 @@
+{
+  Value lhs=stmt.getLeftOp();
+  Type tlhs=null;
+  if (lhs instanceof Local)   tlhs=this.tg.get((Local)lhs);
+ else   if (lhs instanceof ArrayRef) {
+    Local base=(Local)((ArrayRef)lhs).getBase();
+    ArrayType at;
+    if (this.tg.get(base) instanceof ArrayType)     at=(ArrayType)this.tg.get(base);
+ else     at=(ArrayType)this.tg.get(base).makeArrayType();
+    tlhs=((ArrayType)at).getElementType();
+    this.handleArrayRef((ArrayRef)lhs,stmt);
+  }
+ else   if (lhs instanceof FieldRef) {
+    tlhs=((FieldRef)lhs).getField().getType();
+    if (lhs instanceof InstanceFieldRef)     this.handleInstanceFieldRef((InstanceFieldRef)lhs,stmt);
+  }
+  Value rhs=stmt.getRightOp();
+  if (rhs instanceof Local)   stmt.setRightOp(this.uv.visit(rhs,tlhs,stmt));
+ else   if (rhs instanceof ArrayRef) {
+    this.handleArrayRef((ArrayRef)rhs,stmt);
+    stmt.setRightOp(this.uv.visit(rhs,tlhs,stmt));
+  }
+ else   if (rhs instanceof InstanceFieldRef) {
+    this.handleInstanceFieldRef((InstanceFieldRef)rhs,stmt);
+    stmt.setRightOp(this.uv.visit(rhs,tlhs,stmt));
+  }
+ else   if (rhs instanceof BinopExpr)   this.handleBinopExpr((BinopExpr)rhs,stmt,tlhs);
+ else   if (rhs instanceof InvokeExpr) {
+    this.handleInvokeExpr((InvokeExpr)rhs,stmt);
+    stmt.setRightOp(this.uv.visit(rhs,tlhs,stmt));
+  }
+ else   if (rhs instanceof CastExpr)   stmt.setRightOp(this.uv.visit(rhs,tlhs,stmt));
+ else   if (rhs instanceof InstanceOfExpr) {
+    InstanceOfExpr ioe=(InstanceOfExpr)rhs;
+    ioe.setOp(this.uv.visit(ioe.getOp(),RefType.v("java.lang.Object"),stmt));
+    stmt.setRightOp(this.uv.visit(rhs,tlhs,stmt));
+  }
+ else   if (rhs instanceof NewArrayExpr) {
+    NewArrayExpr nae=(NewArrayExpr)rhs;
+    nae.setSize(this.uv.visit(nae.getSize(),IntType.v(),stmt));
+    stmt.setRightOp(this.uv.visit(rhs,tlhs,stmt));
+  }
+ else   if (rhs instanceof NewMultiArrayExpr) {
+    NewMultiArrayExpr nmae=(NewMultiArrayExpr)rhs;
+    for (int i=0; i < nmae.getSizeCount(); i++)     nmae.setSize(i,this.uv.visit(nmae.getSize(i),IntType.v(),stmt));
+    stmt.setRightOp(this.uv.visit(rhs,tlhs,stmt));
+  }
+ else   if (rhs instanceof LengthExpr) {
+    stmt.setRightOp(this.uv.visit(rhs,tlhs,stmt));
+  }
+ else   if (rhs instanceof NegExpr) {
+    ((NegExpr)rhs).setOp(this.uv.visit(((NegExpr)rhs).getOp(),tlhs,stmt));
+  }
+}

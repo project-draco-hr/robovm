@@ -1,0 +1,28 @@
+{
+  String s=new String("\nProgram Dependence Graph for Method " + this.m_body.getMethod().getName());
+  s+="\n*********CFG******** \n" + this.m_regionAnalysis.CFGtoString(this.m_blockCFG,true);
+  s+="\n*********PDG******** \n";
+  List<PDGNode> processed=new ArrayList<PDGNode>();
+  Queue nodes=new LinkedList();
+  nodes.offer(this.m_startNode);
+  while (nodes.peek() != null) {
+    PDGNode node=(PDGNode)nodes.remove();
+    processed.add(node);
+    s+="\n Begin PDGNode: " + node;
+    List succs=this.getSuccsOf(node);
+    s+="\n has " + succs.size() + " successors:\n";
+    int i=0;
+    Iterator itr=succs.iterator();
+    while (itr.hasNext()) {
+      PDGNode succ=(PDGNode)itr.next();
+      List labels=this.getLabelsForEdges(node,succ);
+      s+=i++;
+      s+=": Edge's label: " + labels + " \n";
+      s+="   Target: " + succ.toShortString();
+      s+="\n";
+      if (labels.get(0).equals("dependency"))       if (!processed.contains(succ))       nodes.offer(succ);
+    }
+    s+="\n End PDGNode.";
+  }
+  return s;
+}

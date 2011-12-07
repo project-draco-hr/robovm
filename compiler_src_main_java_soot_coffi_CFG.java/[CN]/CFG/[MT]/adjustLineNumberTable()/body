@@ -1,0 +1,15 @@
+{
+  if (!Options.v().keep_line_number())   return;
+  if (method.code_attr == null)   return;
+  attribute_info[] attributes=method.code_attr.attributes;
+  for (  attribute_info element : attributes) {
+    if (element instanceof LineNumberTable_attribute) {
+      LineNumberTable_attribute lntattr=(LineNumberTable_attribute)element;
+      for (      line_number_table_entry element0 : lntattr.line_number_table) {
+        Instruction oldinst=element0.start_inst;
+        Instruction newinst=replacedInsns.get(oldinst);
+        if (newinst != null)         element0.start_inst=newinst;
+      }
+    }
+  }
+}

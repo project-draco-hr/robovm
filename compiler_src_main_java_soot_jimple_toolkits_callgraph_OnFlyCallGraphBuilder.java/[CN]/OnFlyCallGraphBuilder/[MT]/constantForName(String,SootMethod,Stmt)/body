@@ -1,0 +1,24 @@
+{
+  if (cls.length() > 0 && cls.charAt(0) == '[') {
+    if (cls.length() > 1 && cls.charAt(1) == 'L' && cls.charAt(cls.length() - 1) == ';') {
+      cls=cls.substring(2,cls.length() - 1);
+      constantForName(cls,src,srcUnit);
+    }
+  }
+ else {
+    if (!Scene.v().containsClass(cls)) {
+      if (options.verbose()) {
+        G.v().out.println("Warning: Class " + cls + " is"+ " a dynamic class, and you did not specify"+ " it as such; graph will be incomplete!");
+      }
+    }
+ else {
+      SootClass sootcls=Scene.v().getSootClass(cls);
+      if (!sootcls.isApplicationClass()) {
+        sootcls.setLibraryClass();
+      }
+      for (      SootMethod clinit : EntryPoints.v().clinitsOf(sootcls)) {
+        addEdge(src,srcUnit,clinit,Kind.CLINIT);
+      }
+    }
+  }
+}

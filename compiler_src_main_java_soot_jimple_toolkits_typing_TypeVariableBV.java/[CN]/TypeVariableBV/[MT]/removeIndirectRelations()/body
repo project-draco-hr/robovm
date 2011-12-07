@@ -1,0 +1,19 @@
+{
+  if (rep != this) {
+    ecr().removeIndirectRelations();
+    return;
+  }
+  if (indirectAncestors == null) {
+    fixAncestors();
+  }
+  BitVector parentsToRemove=new BitVector();
+  for (BitSetIterator parentIt=parents.iterator(); parentIt.hasNext(); ) {
+    final int parent=parentIt.next();
+    if (indirectAncestors.get(parent)) {
+      parentsToRemove.set(parent);
+    }
+  }
+  for (BitSetIterator i=parentsToRemove.iterator(); i.hasNext(); ) {
+    removeParent(resolver.typeVariableForId(i.next()));
+  }
+}

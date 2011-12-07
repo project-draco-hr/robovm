@@ -1,0 +1,93 @@
+{
+  isProfiling=PhaseOptions.getBoolean(options,"profiling");
+  enableOther=!PhaseOptions.getBoolean(options,"onlyarrayref");
+{
+    Date start=new Date();
+    if (Options.v().verbose())     G.v().out.println("[npc] Null pointer check for " + body.getMethod().getName() + " started on "+ start);
+    BranchedRefVarsAnalysis analysis=new BranchedRefVarsAnalysis(new ExceptionalUnitGraph(body));
+    SootClass counterClass=null;
+    SootMethod increase=null;
+    if (isProfiling) {
+      counterClass=Scene.v().loadClassAndSupport("MultiCounter");
+      increase=counterClass.getMethod("void increase(int)");
+    }
+    Chain units=body.getUnits();
+    Iterator stmtIt=units.snapshotIterator();
+    while (stmtIt.hasNext()) {
+      Stmt s=(Stmt)stmtIt.next();
+      Value obj=null;
+      if (s.containsArrayRef()) {
+        ArrayRef aref=s.getArrayRef();
+        obj=aref.getBase();
+      }
+ else {
+        if (enableOther) {
+          if (s instanceof ThrowStmt) {
+            obj=((ThrowStmt)s).getOp();
+          }
+ else           if (s instanceof MonitorStmt) {
+            obj=((MonitorStmt)s).getOp();
+          }
+ else {
+            Iterator boxIt;
+            boxIt=s.getDefBoxes().iterator();
+            while (boxIt.hasNext()) {
+              ValueBox vBox=(ValueBox)boxIt.next();
+              Value v=vBox.getValue();
+              if (v instanceof InstanceFieldRef) {
+                obj=((InstanceFieldRef)v).getBase();
+                break;
+              }
+ else               if (v instanceof InstanceInvokeExpr) {
+                obj=((InstanceInvokeExpr)v).getBase();
+                break;
+              }
+ else               if (v instanceof LengthExpr) {
+                obj=((LengthExpr)v).getOp();
+                break;
+              }
+            }
+            boxIt=s.getUseBoxes().iterator();
+            while (boxIt.hasNext()) {
+              ValueBox vBox=(ValueBox)boxIt.next();
+              Value v=vBox.getValue();
+              if (v instanceof InstanceFieldRef) {
+                obj=((InstanceFieldRef)v).getBase();
+                break;
+              }
+ else               if (v instanceof InstanceInvokeExpr) {
+                obj=((InstanceInvokeExpr)v).getBase();
+                break;
+              }
+ else               if (v instanceof LengthExpr) {
+                obj=((LengthExpr)v).getOp();
+                break;
+              }
+            }
+          }
+        }
+      }
+      if (obj != null) {
+        FlowSet beforeSet=(FlowSet)analysis.getFlowBefore(s);
+        int vInfo=analysis.anyRefInfo(obj,beforeSet);
+        boolean needCheck=(vInfo != BranchedRefVarsAnalysis.kNonNull);
+        if (isProfiling) {
+          int whichCounter=5;
+          if (!needCheck)           whichCounter=6;
+          units.insertBefore(Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(increase.makeRef(),IntConstant.v(whichCounter))),s);
+        }
+{
+          Tag nullTag=new NullCheckTag(needCheck);
+          s.addTag(nullTag);
+        }
+      }
+    }
+    Date finish=new Date();
+    if (Options.v().verbose()) {
+      long runtime=finish.getTime() - start.getTime();
+      long mins=runtime / 60000;
+      long secs=(runtime % 60000) / 1000;
+      G.v().out.println("[npc] Null pointer checker finished. It took " + mins + " mins and "+ secs+ " secs.");
+    }
+  }
+}

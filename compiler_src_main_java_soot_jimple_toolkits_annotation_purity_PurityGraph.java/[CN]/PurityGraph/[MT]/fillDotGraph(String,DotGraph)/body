@@ -1,0 +1,74 @@
+{
+  Map<PurityNode,String> nodeId=new HashMap<PurityNode,String>();
+  int id=0;
+  Iterator it=nodes.iterator();
+  while (it.hasNext()) {
+    PurityNode n=(PurityNode)it.next();
+    String label="N" + prefix + "_"+ id;
+    DotGraphNode node=out.drawNode(label);
+    node.setLabel(n.toString());
+    if (!n.isInside()) {
+      node.setStyle("dashed");
+      node.setAttribute("color","gray50");
+    }
+    if (globEscape.contains(n))     node.setAttribute("fontcolor","red");
+    nodeId.put(n,label);
+    id++;
+  }
+  it=edges.keySet().iterator();
+  while (it.hasNext()) {
+    PurityNode src=(PurityNode)it.next();
+    Iterator itt=edges.get(src).iterator();
+    while (itt.hasNext()) {
+      PurityEdge e=(PurityEdge)itt.next();
+      DotGraphEdge edge=out.drawEdge(nodeId.get(e.getSource()),nodeId.get(e.getTarget()));
+      edge.setLabel(e.getField());
+      if (!e.isInside()) {
+        edge.setStyle("dashed");
+        edge.setAttribute("color","gray50");
+        edge.setAttribute("fontcolor","gray40");
+      }
+    }
+  }
+  it=locals.keySet().iterator();
+  while (it.hasNext()) {
+    Local local=(Local)it.next();
+    if (!locals.get(local).isEmpty()) {
+      String label="L" + prefix + "_"+ id;
+      DotGraphNode node=out.drawNode(label);
+      node.setLabel(local.toString());
+      node.setShape("plaintext");
+      Iterator itt=locals.get(local).iterator();
+      while (itt.hasNext()) {
+        PurityNode dst=(PurityNode)itt.next();
+        out.drawEdge(label,nodeId.get(dst));
+      }
+      id++;
+    }
+  }
+  if (!ret.isEmpty()) {
+    DotGraphNode node=out.drawNode("ret_" + prefix);
+    node.setLabel("ret");
+    node.setShape("plaintext");
+    Iterator itt=ret.iterator();
+    while (itt.hasNext()) {
+      PurityNode dst=(PurityNode)itt.next();
+      out.drawEdge("ret_" + prefix,nodeId.get(dst));
+    }
+  }
+  it=mutated.keySet().iterator();
+  while (it.hasNext()) {
+    PurityNode n=(PurityNode)it.next();
+    Iterator itt=mutated.get(n).iterator();
+    while (itt.hasNext()) {
+      String f=(String)itt.next();
+      String label="M" + prefix + "_"+ id;
+      DotGraphNode node=out.drawNode(label);
+      node.setLabel("");
+      node.setShape("plaintext");
+      DotGraphEdge edge=out.drawEdge(nodeId.get(n),label);
+      edge.setLabel(f);
+      id++;
+    }
+  }
+}

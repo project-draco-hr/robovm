@@ -1,0 +1,19 @@
+{
+  unitToLatest=new HashMap<Unit,FlowSet>(unitGraph.size() + 1,0.7f);
+  Iterator unitIt=unitGraph.iterator();
+  while (unitIt.hasNext()) {
+    Unit currentUnit=(Unit)unitIt.next();
+    FlowSet delaySet=(FlowSet)delayed.getFlowBefore(currentUnit);
+    FlowSet succCompSet=(FlowSet)set.topSet();
+    List succList=unitGraph.getSuccsOf(currentUnit);
+    Iterator succIt=succList.iterator();
+    while (succIt.hasNext()) {
+      Unit successor=(Unit)succIt.next();
+      succCompSet.intersection((FlowSet)delayed.getFlowBefore(successor),succCompSet);
+    }
+    if (equivRhsMap.get(currentUnit) != null)     succCompSet.remove(equivRhsMap.get(currentUnit));
+    FlowSet latest=(FlowSet)delaySet.emptySet();
+    delaySet.difference(succCompSet,latest);
+    unitToLatest.put(currentUnit,latest);
+  }
+}

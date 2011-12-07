@@ -1,0 +1,26 @@
+{
+  StmtBody stmtBody=(StmtBody)body;
+  int numTrue=0, numFalse=0;
+  if (Options.v().verbose())   G.v().out.println("[" + stmtBody.getMethod().getName() + "] Folding conditional branches...");
+  Chain units=stmtBody.getUnits();
+  ArrayList<Unit> unitList=new ArrayList<Unit>();
+  unitList.addAll(units);
+  Iterator<Unit> stmtIt=unitList.iterator();
+  while (stmtIt.hasNext()) {
+    Stmt stmt=(Stmt)stmtIt.next();
+    if (stmt instanceof IfStmt) {
+      Value cond=((IfStmt)stmt).getCondition();
+      if (Evaluator.isValueConstantValued(cond)) {
+        cond=Evaluator.getConstantValueOf(cond);
+        if (((IntConstant)cond).value == 1) {
+          Stmt newStmt=Jimple.v().newGotoStmt(((IfStmt)stmt).getTarget());
+          units.insertAfter(newStmt,stmt);
+          numTrue++;
+        }
+ else         numFalse++;
+        units.remove(stmt);
+      }
+    }
+  }
+  if (Options.v().verbose())   G.v().out.println("[" + stmtBody.getMethod().getName() + "]     Folded "+ numTrue+ " true, "+ numFalse+ " conditional branches");
+}

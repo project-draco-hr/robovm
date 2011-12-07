@@ -1,0 +1,34 @@
+{
+  JimpleBody jb=Jimple.v().newBody(m);
+  Map options=PhaseOptions.v().getPhaseOptions(phaseName);
+  boolean useOriginalNames=PhaseOptions.getBoolean(options,"use-original-names");
+  if (useOriginalNames)   soot.coffi.Util.v().setFaithfulNaming(true);
+  if (Options.v().verbose())   G.v().out.println("[" + m.getName() + "] Constructing JimpleBody from coffi...");
+  if (m.isAbstract() || m.isNative() || m.isPhantom())   return jb;
+  if (Options.v().time())   Timers.v().conversionTimer.start();
+  if (coffiMethod == null)   G.v().out.println(m);
+  if (coffiMethod.instructions == null) {
+    if (Options.v().verbose())     G.v().out.println("[" + m.getName() + "]     Parsing Coffi instructions...");
+    coffiClass.parseMethod(coffiMethod);
+  }
+  if (coffiMethod.cfg == null) {
+    if (Options.v().verbose())     G.v().out.println("[" + m.getName() + "]     Building Coffi CFG...");
+    new soot.coffi.CFG(coffiMethod);
+  }
+  if (Options.v().verbose())   G.v().out.println("[" + m.getName() + "]     Producing naive Jimple...");
+  boolean oldPhantomValue=Scene.v().getPhantomRefs();
+  Scene.v().setPhantomRefs(true);
+  coffiMethod.cfg.jimplify(coffiClass.constant_pool,coffiClass.this_class,jb);
+  Scene.v().setPhantomRefs(oldPhantomValue);
+  if (Options.v().time())   Timers.v().conversionTimer.end();
+  coffiMethod.instructions=null;
+  coffiMethod.cfg=null;
+  coffiMethod.attributes=null;
+  coffiMethod.code_attr=null;
+  coffiMethod.jmethod=null;
+  coffiMethod.instructionList=null;
+  coffiMethod=null;
+  coffiClass=null;
+  PackManager.v().getPack("jb").apply(jb);
+  return jb;
+}

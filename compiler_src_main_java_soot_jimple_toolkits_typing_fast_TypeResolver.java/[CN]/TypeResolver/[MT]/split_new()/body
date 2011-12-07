@@ -1,0 +1,39 @@
+{
+  ExceptionalUnitGraph graph=new ExceptionalUnitGraph(this.jb);
+  SimpleLocalDefs defs=new SimpleLocalDefs(graph);
+  PatchingChain<Unit> units=this.jb.getUnits();
+  Stmt[] stmts=new Stmt[units.size()];
+  units.toArray(stmts);
+  for (  Stmt stmt : stmts) {
+    if (stmt instanceof InvokeStmt) {
+      InvokeStmt invoke=(InvokeStmt)stmt;
+      if (invoke.getInvokeExpr() instanceof SpecialInvokeExpr) {
+        SpecialInvokeExpr special=(SpecialInvokeExpr)invoke.getInvokeExpr();
+        if (special.getMethodRef().name().equals("<init>")) {
+          List<Unit> deflist=defs.getDefsOfAt((Local)special.getBase(),invoke);
+          while (deflist.size() == 1) {
+            Stmt stmt2=(Stmt)deflist.get(0);
+            if (stmt2 instanceof AssignStmt) {
+              AssignStmt assign=(AssignStmt)stmt2;
+              if (assign.getRightOp() instanceof Local) {
+                deflist=defs.getDefsOfAt((Local)assign.getRightOp(),assign);
+                continue;
+              }
+ else               if (assign.getRightOp() instanceof NewExpr) {
+                Local newlocal=Jimple.v().newLocal("tmp",null);
+                this.jb.getLocals().add(newlocal);
+                special.setBase(newlocal);
+                DefinitionStmt assignStmt=Jimple.v().newAssignStmt(assign.getLeftOp(),newlocal);
+                units.insertAfter(assignStmt,assign);
+                assign.setLeftOp(newlocal);
+                this.addLocal(newlocal);
+                this.initAssignment(assignStmt);
+              }
+            }
+            break;
+          }
+        }
+      }
+    }
+  }
+}

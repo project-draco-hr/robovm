@@ -1,0 +1,16 @@
+{
+  InvokeExpr e=stmt.getInvokeExpr();
+  Local ret=null;
+  if (stmt instanceof AssignStmt) {
+    Local v=(Local)((AssignStmt)stmt).getLeftOp();
+    if (v.getType() instanceof RefLikeType)     ret=v;
+  }
+  Local obj=null;
+  if (!(e instanceof StaticInvokeExpr))   obj=(Local)((InstanceInvokeExpr)e).getBase();
+  List args=e.getArgs();
+  PurityGraphBox s=(PurityGraphBox)src;
+  PurityGraphBox d=(PurityGraphBox)dst;
+  PurityGraph g=new PurityGraph(s.g);
+  g.methodCall(((PurityGraphBox)summary).g,obj,args,ret);
+  d.g=g;
+}

@@ -1,0 +1,61 @@
+{
+  FlowSet in=(FlowSet)inValue;
+  FlowSet out=(FlowSet)outValue;
+  Stmt stmt=(Stmt)unit;
+  in.copy(out);
+  List newDefs=new ArrayList();
+  Iterator newDefBoxesIt=stmt.getDefBoxes().iterator();
+  while (newDefBoxesIt.hasNext()) {
+    newDefs.add(((ValueBox)newDefBoxesIt.next()).getValue());
+  }
+  Iterator<Local> useLocalsIt=useLocals.iterator();
+  while (useLocalsIt.hasNext()) {
+    Local useLocal=useLocalsIt.next();
+    if (newDefs.contains(useLocal)) {
+      Iterator outIt=out.iterator();
+      while (outIt.hasNext()) {
+        Object o=outIt.next();
+        if (o instanceof Stmt) {
+          Stmt s=(Stmt)o;
+          if (stmtToLocal.get(s) == useLocal)           redefStmts.add(stmt);
+        }
+      }
+    }
+  }
+  if (redefStmts.contains(stmt)) {
+    out.add(stmt);
+  }
+  if (boundaryStmts.contains(stmt)) {
+    out.clear();
+  }
+  if (useStmts.contains(stmt)) {
+    if (out.size() == 0) {
+      Local l=stmtToLocal.get(stmt);
+      List aliasList=el.getCopiesOfAt(l,stmt);
+      if (aliasList.size() == 0)       aliasList.add(l);
+      List newAliasList=new ArrayList();
+      newAliasList.addAll(aliasList);
+      firstUseToAliasSet.put(stmt,newAliasList);
+      out.add(aliasList);
+    }
+    out.add(stmt);
+  }
+  if (stmt instanceof DefinitionStmt) {
+    List<EquivalentValue> aliases=null;
+    Iterator outIt=out.iterator();
+    while (outIt.hasNext()) {
+      Object o=outIt.next();
+      if (o instanceof List)       aliases=(List<EquivalentValue>)o;
+    }
+    if (aliases != null) {
+      if (aliases.contains(new EquivalentValue(((DefinitionStmt)stmt).getRightOp()))) {
+        Iterator newDefsIt=newDefs.iterator();
+        while (newDefsIt.hasNext())         aliases.add(new EquivalentValue((Value)newDefsIt.next()));
+      }
+ else {
+        Iterator newDefsIt=newDefs.iterator();
+        while (newDefsIt.hasNext())         aliases.remove(new EquivalentValue((Value)newDefsIt.next()));
+      }
+    }
+  }
+}

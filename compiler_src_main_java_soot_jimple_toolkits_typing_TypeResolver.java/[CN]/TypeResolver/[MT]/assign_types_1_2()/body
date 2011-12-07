@@ -1,0 +1,43 @@
+{
+  for (Iterator localIt=stmtBody.getLocals().iterator(); localIt.hasNext(); ) {
+    final Local local=(Local)localIt.next();
+    TypeVariable var=typeVariable(local);
+    if (var == null) {
+      local.setType(RefType.v("java.lang.Object"));
+    }
+ else     if (var.depth() == 0) {
+      if (var.type() == null) {
+        TypeVariable.error("Type Error(5):  Variable without type");
+      }
+ else {
+        local.setType(var.type().type());
+      }
+    }
+ else {
+      TypeVariable element=var.element();
+      for (int j=1; j < var.depth(); j++) {
+        element=element.element();
+      }
+      if (element.type() == null) {
+        TypeVariable.error("Type Error(6):  Array variable without base type");
+      }
+ else       if (element.type().type() instanceof NullType) {
+        local.setType(NullType.v());
+      }
+ else {
+        Type t=element.type().type();
+        if (t instanceof IntType) {
+          local.setType(var.approx().type());
+        }
+ else {
+          local.setType(ArrayType.v(t,var.depth()));
+        }
+      }
+    }
+    if (DEBUG) {
+      if ((var != null) && (var.approx() != null) && (var.approx().type() != null)&& (local != null)&& (local.getType() != null)&& !local.getType().equals(var.approx().type())) {
+        G.v().out.println("local: " + local + ", type: "+ local.getType()+ ", approx: "+ var.approx().type());
+      }
+    }
+  }
+}

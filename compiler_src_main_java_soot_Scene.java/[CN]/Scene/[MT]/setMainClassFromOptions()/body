@@ -1,0 +1,24 @@
+{
+  if (mainClass != null)   return;
+  if (Options.v().main_class() != null && Options.v().main_class().length() > 0) {
+    setMainClass(getSootClass(Options.v().main_class()));
+  }
+ else {
+    for (Iterator<String> classIter=Options.v().classes().iterator(); classIter.hasNext(); ) {
+      SootClass c=getSootClass(classIter.next());
+      if (c.declaresMethod("main",new SingletonList(ArrayType.v(RefType.v("java.lang.String"),1)),VoidType.v())) {
+        G.v().out.println("No main class given. Inferred '" + c.getName() + "' as main class.");
+        setMainClass(c);
+        return;
+      }
+    }
+    for (Iterator<SootClass> classIter=getApplicationClasses().iterator(); classIter.hasNext(); ) {
+      SootClass c=(SootClass)classIter.next();
+      if (c.declaresMethod("main",new SingletonList(ArrayType.v(RefType.v("java.lang.String"),1)),VoidType.v())) {
+        G.v().out.println("No main class given. Inferred '" + c.getName() + "' as main class.");
+        setMainClass(c);
+        return;
+      }
+    }
+  }
+}

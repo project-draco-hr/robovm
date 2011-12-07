@@ -1,0 +1,52 @@
+{
+  refresh_solved();
+  single_soft_parent=new BitVector();
+  single_hard_parent=new BitVector();
+  multiple_parents=new BitVector();
+  single_child_not_null=new BitVector();
+  single_null_child=new BitVector();
+  multiple_children=new BitVector();
+  for (BitSetIterator i=unsolved.iterator(); i.hasNext(); ) {
+    TypeVariableBV var=typeVariableForId(i.next());
+{
+      BitVector parents=var.parents();
+      int size=parents.length();
+      if (size == 0) {
+        var.addParent(typeVariable(OBJECT));
+        single_soft_parent.set(var.id());
+      }
+ else       if (size == 1) {
+        TypeVariableBV parent=typeVariableForId(parents.iterator().next());
+        if (parent.type() == null) {
+          single_soft_parent.set(var.id());
+        }
+ else {
+          single_hard_parent.set(var.id());
+        }
+      }
+ else {
+        multiple_parents.set(var.id());
+      }
+    }
+{
+      BitVector children=var.children();
+      int size=children.size();
+      if (size == 0) {
+        var.addChild(typeVariable(NULL));
+        single_null_child.set(var.id());
+      }
+ else       if (size == 1) {
+        TypeVariableBV child=typeVariableForId(children.iterator().next());
+        if (child.type() == NULL) {
+          single_null_child.set(var.id());
+        }
+ else {
+          single_child_not_null.set(var.id());
+        }
+      }
+ else {
+        multiple_children.set(var.id());
+      }
+    }
+  }
+}

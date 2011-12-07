@@ -1,0 +1,34 @@
+{
+  StringBuffer strBuf=new StringBuffer();
+  strBuf.append("Block " + mIndexInMethod + ":"+ System.getProperty("line.separator"));
+  strBuf.append("[preds: ");
+  if (mPreds != null) {
+    Iterator<Block> it=mPreds.iterator();
+    while (it.hasNext()) {
+      strBuf.append(it.next().getIndexInMethod() + " ");
+    }
+  }
+  strBuf.append("] [succs: ");
+  if (mSuccessors != null) {
+    Iterator<Block> it=mSuccessors.iterator();
+    while (it.hasNext()) {
+      strBuf.append(it.next().getIndexInMethod() + " ");
+    }
+  }
+  strBuf.append("]" + System.getProperty("line.separator"));
+  Chain<Unit> methodUnits=mBody.getUnits();
+  Iterator<Unit> basicBlockIt=methodUnits.iterator(mHead,mTail);
+  if (basicBlockIt.hasNext()) {
+    Unit someUnit=(Unit)basicBlockIt.next();
+    strBuf.append(someUnit.toString() + ";" + System.getProperty("line.separator"));
+    while (basicBlockIt.hasNext()) {
+      someUnit=(Unit)basicBlockIt.next();
+      if (someUnit == mTail)       break;
+      strBuf.append(someUnit.toString() + ";" + System.getProperty("line.separator"));
+    }
+    someUnit=mTail;
+    if (mTail == null)     strBuf.append("error: null tail found; block length: " + mBlockLength + ""+ System.getProperty("line.separator"));
+ else     if (mHead != mTail)     strBuf.append(someUnit.toString() + ";" + System.getProperty("line.separator"));
+  }
+  return strBuf.toString();
+}

@@ -1,0 +1,201 @@
+{
+  Hashtable<Block,Region> block2region=this.m_regionAnalysis.getBlock2RegionMap();
+  DominatorTree pdom=this.m_regionAnalysis.getPostDominatorTree();
+  DominatorTree dom=this.m_regionAnalysis.getDominatorTree();
+  List<Region> regions2process=new LinkedList<Region>();
+  Region topLevelRegion=this.m_regionAnalysis.getTopLevelRegion();
+  m_strongRegionStartID=m_weakRegions.size();
+  PDGNode pdgnode=new PDGNode(topLevelRegion,PDGNode.Type.REGION);
+  this.addNode(pdgnode);
+  this.m_obj2pdgNode.put(topLevelRegion,pdgnode);
+  this.m_startNode=pdgnode;
+  topLevelRegion.setParent(null);
+  regions2process.add(topLevelRegion);
+  while (!regions2process.isEmpty()) {
+    Region r=regions2process.remove(0);
+    pdgnode=this.m_obj2pdgNode.get(r);
+    List<Block> blocks=r.getBlocks();
+    Hashtable<Region,List<Block>> toBeRemoved=new Hashtable<Region,List<Block>>();
+    PDGNode prevPDGNodeInRegion=null;
+    PDGNode curNodeInRegion=null;
+    for (Iterator<Block> itr=blocks.iterator(); itr.hasNext(); ) {
+      Block a=itr.next();
+      PDGNode pdgNodeOfA=null;
+      if (!this.m_obj2pdgNode.containsKey(a)) {
+        pdgNodeOfA=new PDGNode(a,PDGNode.Type.CFGNODE);
+        this.addNode(pdgNodeOfA);
+        this.m_obj2pdgNode.put(a,pdgNodeOfA);
+      }
+ else       pdgNodeOfA=this.m_obj2pdgNode.get(a);
+      this.addEdge(pdgnode,pdgNodeOfA,"dependency");
+      pdgnode.addDependent(pdgNodeOfA);
+      curNodeInRegion=pdgNodeOfA;
+      List<Block> bs=this.m_blockCFG.getSuccsOf(a);
+      for (Iterator<Block> bItr=bs.iterator(); bItr.hasNext(); ) {
+        List<Block> dependents=new ArrayList<Block>();
+        Block b=bItr.next();
+        if (b.equals(a))         throw new RuntimeException("PDG construction: A and B are not supposed to be the same node!");
+        DominatorNode aDode=pdom.getDode(a);
+        DominatorNode bDode=pdom.getDode(b);
+        if (pdom.isDominatorOf(bDode,aDode))         continue;
+        DominatorNode aParentDode=aDode.getParent();
+        DominatorNode dode=bDode;
+        while (dode != aParentDode) {
+          dependents.add((Block)dode.getGode());
+          if (dode.getParent() == null)           break;
+          dode=dode.getParent();
+        }
+        if (pdgNodeOfA.getAttrib() != PDGNode.Attribute.CONDHEADER) {
+          PDGNode oldA=pdgNodeOfA;
+          pdgNodeOfA=new ConditionalPDGNode(pdgNodeOfA);
+          this.replaceInGraph(pdgNodeOfA,oldA);
+          pdgnode.removeDependent(oldA);
+          this.m_obj2pdgNode.put(a,pdgNodeOfA);
+          pdgnode.addDependent(pdgNodeOfA);
+          pdgNodeOfA.setAttrib(PDGNode.Attribute.CONDHEADER);
+          curNodeInRegion=pdgNodeOfA;
+        }
+        List<Block> copyOfDependents=new ArrayList<Block>();
+        copyOfDependents.addAll(dependents);
+        Region regionOfB=block2region.get(b);
+        PDGNode pdgnodeOfBRegion=null;
+        if (!this.m_obj2pdgNode.containsKey(regionOfB)) {
+          pdgnodeOfBRegion=new PDGNode(regionOfB,PDGNode.Type.REGION);
+          this.addNode(pdgnodeOfBRegion);
+          this.m_obj2pdgNode.put(regionOfB,pdgnodeOfBRegion);
+        }
+ else         pdgnodeOfBRegion=this.m_obj2pdgNode.get(regionOfB);
+        regionOfB.setParent(r);
+        r.addChildRegion(regionOfB);
+        this.addEdge(pdgNodeOfA,pdgnodeOfBRegion,"dependency");
+        pdgNodeOfA.addDependent(pdgnodeOfBRegion);
+        regions2process.add(regionOfB);
+        copyOfDependents.remove(b);
+        copyOfDependents.removeAll(regionOfB.getBlocks());
+        while (!copyOfDependents.isEmpty()) {
+          Block depB=copyOfDependents.remove(0);
+          Region rdepB=block2region.get(depB);
+          PDGNode depBPDGNode=this.m_obj2pdgNode.get(depB);
+          if (depBPDGNode == null) {
+            PDGNode pdgnodeOfdepBRegion=null;
+            if (!this.m_obj2pdgNode.containsKey(rdepB)) {
+              pdgnodeOfdepBRegion=new PDGNode(rdepB,PDGNode.Type.REGION);
+              this.addNode(pdgnodeOfdepBRegion);
+              this.m_obj2pdgNode.put(rdepB,pdgnodeOfdepBRegion);
+            }
+ else             pdgnodeOfdepBRegion=this.m_obj2pdgNode.get(rdepB);
+            rdepB.setParent(regionOfB);
+            regionOfB.addChildRegion(rdepB);
+            this.addEdge(pdgnodeOfBRegion,pdgnodeOfdepBRegion,"dependency");
+            pdgnodeOfBRegion.addDependent(pdgnodeOfdepBRegion);
+            regions2process.add(rdepB);
+            copyOfDependents.removeAll(rdepB.getBlocks());
+            continue;
+          }
+          if (dependents.containsAll(rdepB.getBlocks())) {
+            PDGNode pdgnodeOfdepBRegion=null;
+            if (!this.m_obj2pdgNode.containsKey(rdepB)) {
+              pdgnodeOfdepBRegion=new PDGNode(rdepB,PDGNode.Type.REGION);
+              this.addNode(pdgnodeOfdepBRegion);
+              this.m_obj2pdgNode.put(rdepB,pdgnodeOfdepBRegion);
+            }
+ else             pdgnodeOfdepBRegion=this.m_obj2pdgNode.get(rdepB);
+            this.addEdge(pdgnodeOfBRegion,pdgnodeOfdepBRegion,"dependency");
+            pdgnodeOfBRegion.addDependent(pdgnodeOfdepBRegion);
+            regions2process.add(rdepB);
+            copyOfDependents.removeAll(rdepB.getBlocks());
+            continue;
+          }
+ else {
+            PDGNode predPDGofdepB=(PDGNode)this.getPredsOf(depBPDGNode).get(0);
+            assert(this.m_obj2pdgNode.containsKey(rdepB));
+            PDGNode pdgnodeOfdepBRegion=this.m_obj2pdgNode.get(rdepB);
+            if (predPDGofdepB == pdgnodeOfdepBRegion) {
+              Region newRegion=new Region(this.m_strongRegionStartID++,topLevelRegion.getSootMethod(),topLevelRegion.getSootClass(),this.m_cfg);
+              newRegion.add(depB);
+              this.m_strongRegions.add(newRegion);
+              List<Block> blocks2BRemoved;
+              if (toBeRemoved.contains(predPDGofdepB))               blocks2BRemoved=toBeRemoved.get(predPDGofdepB);
+ else {
+                blocks2BRemoved=new ArrayList<Block>();
+                toBeRemoved.put(rdepB,blocks2BRemoved);
+              }
+              blocks2BRemoved.add(depB);
+              PDGNode newpdgnode=new LoopedPDGNode(newRegion,PDGNode.Type.REGION,depBPDGNode);
+              this.addNode(newpdgnode);
+              this.m_obj2pdgNode.put(newRegion,newpdgnode);
+              newpdgnode.setAttrib(PDGNode.Attribute.LOOPHEADER);
+              depBPDGNode.setAttrib(PDGNode.Attribute.LOOPHEADER);
+              this.removeEdge(pdgnodeOfdepBRegion,depBPDGNode,"dependency");
+              pdgnodeOfdepBRegion.removeDependent(depBPDGNode);
+              this.addEdge(pdgnodeOfdepBRegion,newpdgnode,"dependency");
+              this.addEdge(newpdgnode,depBPDGNode,"dependency");
+              pdgnodeOfdepBRegion.addDependent(newpdgnode);
+              newpdgnode.addDependent(depBPDGNode);
+              if (depB == a) {
+                PDGNode loopBodyPDGNode=(PDGNode)this.getSuccsOf(depBPDGNode).get(0);
+                this.addEdge(depBPDGNode,newpdgnode,"dependency-back");
+                ((LoopedPDGNode)newpdgnode).setBody(loopBodyPDGNode);
+                depBPDGNode.addBackDependent(newpdgnode);
+                curNodeInRegion=newpdgnode;
+              }
+ else {
+                pdgnodeOfBRegion.addBackDependent(newpdgnode);
+                this.addEdge(pdgnodeOfBRegion,newpdgnode,"dependency-back");
+                PDGNode loopBodyPDGNode=null;
+                List<PDGNode> successors=this.getSuccsOf(depBPDGNode);
+                Iterator<PDGNode> succItr=successors.iterator();
+                while (succItr.hasNext()) {
+                  PDGNode succRPDGNode=succItr.next();
+                  assert(succRPDGNode.getType() == PDGNode.Type.REGION);
+                  Region succR=(Region)succRPDGNode.getNode();
+                  Block h=succR.getBlocks().get(0);
+                  DominatorNode hdode=dom.getDode(h);
+                  DominatorNode adode=dom.getDode(a);
+                  if (dom.isDominatorOf(hdode,adode)) {
+                    loopBodyPDGNode=succRPDGNode;
+                    break;
+                  }
+                }
+                assert(loopBodyPDGNode != null);
+                ((LoopedPDGNode)newpdgnode).setBody(loopBodyPDGNode);
+                PDGNode prev=depBPDGNode.getPrev();
+                if (prev != null) {
+                  this.removeEdge(prev,depBPDGNode,"controlflow");
+                  this.addEdge(prev,newpdgnode,"controlflow");
+                  prev.setNext(newpdgnode);
+                  newpdgnode.setPrev(prev);
+                  depBPDGNode.setPrev(null);
+                }
+                PDGNode next=depBPDGNode.getNext();
+                if (next != null) {
+                  this.removeEdge(depBPDGNode,next,"controlflow");
+                  this.addEdge(newpdgnode,next,"controlflow");
+                  newpdgnode.setNext(next);
+                  next.setPrev(newpdgnode);
+                  depBPDGNode.setNext(null);
+                }
+              }
+            }
+ else {
+              this.addEdge(pdgnodeOfBRegion,predPDGofdepB,"dependency-back");
+              pdgnodeOfBRegion.addBackDependent(predPDGofdepB);
+            }
+          }
+        }
+      }
+      if (prevPDGNodeInRegion != null) {
+        this.addEdge(prevPDGNodeInRegion,curNodeInRegion,"controlflow");
+        prevPDGNodeInRegion.setNext(curNodeInRegion);
+        curNodeInRegion.setPrev(prevPDGNodeInRegion);
+      }
+      prevPDGNodeInRegion=curNodeInRegion;
+    }
+    Enumeration<Region> itr1=toBeRemoved.keys();
+    while (itr1.hasMoreElements()) {
+      Region region=itr1.nextElement();
+      Iterator<Block> blockItr=toBeRemoved.get(region).iterator();
+      while (blockItr.hasNext())       region.remove(blockItr.next());
+    }
+  }
+}

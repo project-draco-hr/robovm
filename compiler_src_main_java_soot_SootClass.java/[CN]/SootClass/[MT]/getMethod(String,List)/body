@@ -1,0 +1,18 @@
+{
+  checkLevel(SIGNATURES);
+  boolean found=false;
+  SootMethod foundMethod=null;
+  Iterator<SootMethod> methodIt=methodIterator();
+  while (methodIt.hasNext()) {
+    SootMethod method=methodIt.next();
+    if (method.getName().equals(name) && parameterTypes.equals(method.getParameterTypes())) {
+      if (found)       throw new RuntimeException("ambiguous method");
+ else {
+        found=true;
+        foundMethod=method;
+      }
+    }
+  }
+  if (found)   return foundMethod;
+ else   throw new RuntimeException("couldn't find method " + name + "("+ parameterTypes+ ") in "+ this);
+}

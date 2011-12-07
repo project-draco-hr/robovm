@@ -1,0 +1,28 @@
+{
+  Body body=unitGraph.getBody();
+  if (body != mBody) {
+    throw new RuntimeException("BlockGraph.computeLeaders() called with a UnitGraph that doesn't match its mBody.");
+  }
+  Set<Unit> leaders=new HashSet<Unit>();
+  Chain<Trap> traps=body.getTraps();
+  for (Iterator<Trap> trapIt=traps.iterator(); trapIt.hasNext(); ) {
+    Trap trap=trapIt.next();
+    leaders.add(trap.getHandlerUnit());
+  }
+  for (Iterator<Unit> unitIt=body.getUnits().iterator(); unitIt.hasNext(); ) {
+    Unit u=unitIt.next();
+    List<Unit> predecessors=unitGraph.getPredsOf(u);
+    int predCount=predecessors.size();
+    List<Unit> successors=unitGraph.getSuccsOf(u);
+    int succCount=successors.size();
+    if (predCount != 1) {
+      leaders.add(u);
+    }
+    if ((succCount > 1) || (u.branches())) {
+      for (Iterator<Unit> it=successors.iterator(); it.hasNext(); ) {
+        leaders.add((Unit)it.next());
+      }
+    }
+  }
+  return leaders;
+}

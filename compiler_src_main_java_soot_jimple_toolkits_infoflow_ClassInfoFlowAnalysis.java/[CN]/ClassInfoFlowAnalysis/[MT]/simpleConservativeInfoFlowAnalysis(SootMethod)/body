@@ -1,0 +1,88 @@
+{
+  if (!sm.isConcrete())   return triviallyConservativeInfoFlowAnalysis(sm);
+  Body b=sm.retrieveActiveBody();
+  UnitGraph g=new ExceptionalUnitGraph(b);
+  HashSet<EquivalentValue> fieldsStaticsParamsAccessed=new HashSet<EquivalentValue>();
+  Iterator stmtIt=g.iterator();
+  while (stmtIt.hasNext()) {
+    Stmt s=(Stmt)stmtIt.next();
+    if (s instanceof IdentityStmt) {
+      IdentityStmt is=(IdentityStmt)s;
+      IdentityRef ir=(IdentityRef)is.getRightOp();
+      if (ir instanceof ParameterRef) {
+        ParameterRef pr=(ParameterRef)ir;
+        fieldsStaticsParamsAccessed.add(InfoFlowAnalysis.getNodeForParameterRef(sm,pr.getIndex()));
+      }
+    }
+    if (s.containsFieldRef()) {
+      FieldRef ref=s.getFieldRef();
+      if (ref instanceof StaticFieldRef) {
+        StaticFieldRef sfr=(StaticFieldRef)ref;
+        fieldsStaticsParamsAccessed.add(InfoFlowAnalysis.getNodeForFieldRef(sm,sfr.getField()));
+      }
+ else       if (ref instanceof InstanceFieldRef) {
+        InstanceFieldRef ifr=(InstanceFieldRef)ref;
+        Value base=ifr.getBase();
+        if (base instanceof Local) {
+          if (dfa.includesInnerFields() || ((!sm.isStatic()) && base.equivTo(b.getThisLocal())))           fieldsStaticsParamsAccessed.add(InfoFlowAnalysis.getNodeForFieldRef(sm,ifr.getField()));
+        }
+      }
+    }
+  }
+  HashMutableDirectedGraph dataFlowGraph=new MemoryEfficientGraph();
+  Iterator<EquivalentValue> accessedIt1=fieldsStaticsParamsAccessed.iterator();
+  while (accessedIt1.hasNext()) {
+    Object o=accessedIt1.next();
+    dataFlowGraph.addNode(o);
+  }
+  for (int i=0; i < sm.getParameterCount(); i++) {
+    EquivalentValue parameterRefEqVal=InfoFlowAnalysis.getNodeForParameterRef(sm,i);
+    if (!dataFlowGraph.containsNode(parameterRefEqVal))     dataFlowGraph.addNode(parameterRefEqVal);
+  }
+  for (Iterator it=sm.getDeclaringClass().getFields().iterator(); it.hasNext(); ) {
+    SootField sf=(SootField)it.next();
+    if (sf.isStatic() || !sm.isStatic()) {
+      EquivalentValue fieldRefEqVal=InfoFlowAnalysis.getNodeForFieldRef(sm,sf);
+      if (!dataFlowGraph.containsNode(fieldRefEqVal))       dataFlowGraph.addNode(fieldRefEqVal);
+    }
+  }
+  SootClass superclass=sm.getDeclaringClass();
+  if (superclass.hasSuperclass())   superclass=sm.getDeclaringClass().getSuperclass();
+  while (superclass.hasSuperclass()) {
+    Iterator scFieldsIt=superclass.getFields().iterator();
+    while (scFieldsIt.hasNext()) {
+      SootField scField=(SootField)scFieldsIt.next();
+      if (scField.isStatic() || !sm.isStatic()) {
+        EquivalentValue fieldRefEqVal=InfoFlowAnalysis.getNodeForFieldRef(sm,scField);
+        if (!dataFlowGraph.containsNode(fieldRefEqVal))         dataFlowGraph.addNode(fieldRefEqVal);
+      }
+    }
+    superclass=superclass.getSuperclass();
+  }
+  ParameterRef returnValueRef=null;
+  if (sm.getReturnType() != VoidType.v()) {
+    returnValueRef=new ParameterRef(sm.getReturnType(),-1);
+    dataFlowGraph.addNode(InfoFlowAnalysis.getNodeForReturnRef(sm));
+  }
+  if (!sm.isStatic()) {
+    dataFlowGraph.addNode(InfoFlowAnalysis.getNodeForThisRef(sm));
+    fieldsStaticsParamsAccessed.add(InfoFlowAnalysis.getNodeForThisRef(sm));
+  }
+  accessedIt1=fieldsStaticsParamsAccessed.iterator();
+  while (accessedIt1.hasNext()) {
+    Object r=accessedIt1.next();
+    Ref rRef=(Ref)((EquivalentValue)r).getValue();
+    if (!(rRef.getType() instanceof RefLikeType) && !dfa.includesPrimitiveInfoFlow())     continue;
+    Iterator<EquivalentValue> accessedIt2=fieldsStaticsParamsAccessed.iterator();
+    while (accessedIt2.hasNext()) {
+      Object s=accessedIt2.next();
+      Ref sRef=(Ref)((EquivalentValue)s).getValue();
+      if (rRef instanceof ThisRef && sRef instanceof InstanceFieldRef)       ;
+ else       if (sRef instanceof ThisRef && rRef instanceof InstanceFieldRef)       ;
+ else       if (sRef instanceof ParameterRef && dfa.includesInnerFields())       ;
+ else       if (sRef.getType() instanceof RefLikeType)       dataFlowGraph.addEdge(r,s);
+    }
+    if (returnValueRef != null && (returnValueRef.getType() instanceof RefLikeType || dfa.includesPrimitiveInfoFlow()))     dataFlowGraph.addEdge(r,InfoFlowAnalysis.getNodeForReturnRef(sm));
+  }
+  return dataFlowGraph;
+}

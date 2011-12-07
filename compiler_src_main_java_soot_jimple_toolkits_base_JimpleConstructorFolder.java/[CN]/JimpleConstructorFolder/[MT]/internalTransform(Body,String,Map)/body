@@ -1,0 +1,52 @@
+{
+  JimpleBody body=(JimpleBody)b;
+  if (Options.v().verbose())   G.v().out.println("[" + body.getMethod().getName() + "] Folding Jimple constructors...");
+  Analysis analysis=new Analysis(new BriefUnitGraph(body));
+  Chain units=body.getUnits();
+  List<Unit> stmtList=new ArrayList<Unit>();
+  stmtList.addAll(units);
+  Iterator<Unit> it;
+  it=stmtList.iterator();
+  while (it.hasNext()) {
+    Stmt s=(Stmt)it.next();
+    if (isCopy(s))     continue;
+    if (isConstructor(s))     continue;
+    Fact before=(Fact)analysis.getFlowBefore(s);
+    Iterator usesIt=s.getUseBoxes().iterator();
+    while (usesIt.hasNext()) {
+      ValueBox usebox=(ValueBox)usesIt.next();
+      Value value=usebox.getValue();
+      if (!(value instanceof Local))       continue;
+      Local local=(Local)value;
+      if (before.get(local) != null)       throw new RuntimeException("Use of an unitialized value " + "before constructor call; are you sure this " + "bytecode is verifiable?\n"+ s);
+    }
+  }
+  it=stmtList.iterator();
+  while (it.hasNext()) {
+    Stmt s=(Stmt)it.next();
+    if (isNew(s)) {
+      units.remove(s);
+    }
+  }
+  it=stmtList.iterator();
+  while (it.hasNext()) {
+    Stmt s=(Stmt)it.next();
+    Fact before=(Fact)analysis.getFlowBefore(s);
+    Fact after=(Fact)analysis.getFlowAfter(s);
+    if (isCopy(s)) {
+      Stmt newStmt=before.get(rhsLocal(s));
+      if (newStmt != null)       units.remove(s);
+    }
+ else     if (after.alloc() != null) {
+      Stmt newStmt=before.get(base(s));
+      setBase(s,lhsLocal(newStmt));
+      units.insertBefore(newStmt,s);
+      Iterator copyIt=before.get(newStmt).iterator();
+      while (copyIt.hasNext()) {
+        Local l=(Local)copyIt.next();
+        if (l.equals(base(s)))         continue;
+        units.insertAfter(Jimple.v().newAssignStmt(l,base(s)),s);
+      }
+    }
+  }
+}

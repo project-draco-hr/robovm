@@ -1,0 +1,40 @@
+{
+  classfieldin=takeClassField;
+  fieldin=takeFieldRef;
+  arrayin=takeArrayRef;
+  csin=takeCSE;
+  rectarray=takeRectArray;
+  SootMethod thismethod=body.getMethod();
+  if (Options.v().debug())   G.v().out.println("ArrayBoundsCheckerAnalysis started on  " + thismethod.getName());
+  ailanalysis=new ArrayIndexLivenessAnalysis(new ExceptionalUnitGraph(body),fieldin,arrayin,csin,rectarray);
+  if (fieldin) {
+    this.localToFieldRef=ailanalysis.getLocalToFieldRef();
+    this.fieldToFieldRef=ailanalysis.getFieldToFieldRef();
+  }
+  if (arrayin) {
+    if (rectarray) {
+      this.multiarraylocals=ailanalysis.getMultiArrayLocals();
+      this.rectarrayset=new HashSet<Local>();
+      RectangularArrayFinder pgbuilder=RectangularArrayFinder.v();
+      Iterator<Local> localIt=multiarraylocals.iterator();
+      while (localIt.hasNext()) {
+        Local local=localIt.next();
+        MethodLocal mlocal=new MethodLocal(thismethod,local);
+        if (pgbuilder.isRectangular(mlocal))         this.rectarrayset.add(local);
+      }
+    }
+  }
+  if (csin) {
+    this.localToExpr=ailanalysis.getLocalToExpr();
+  }
+  if (classfieldin) {
+    this.cfield=ClassFieldAnalysis.v();
+  }
+  this.graph=new ArrayRefBlockGraph(body);
+  blockToBeforeFlow=new HashMap<Block,WeightedDirectedSparseGraph>(graph.size() * 2 + 1,0.7f);
+  edgeMap=new HashMap<FlowGraphEdge,WeightedDirectedSparseGraph>(graph.size() * 2 + 1,0.7f);
+  edgeSet=buildEdgeSet(graph);
+  doAnalysis();
+  convertToUnitEntry();
+  if (Options.v().debug())   G.v().out.println("ArrayBoundsCheckerAnalysis finished.");
+}

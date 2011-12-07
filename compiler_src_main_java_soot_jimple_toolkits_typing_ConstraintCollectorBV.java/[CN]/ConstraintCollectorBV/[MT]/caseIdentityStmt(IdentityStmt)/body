@@ -1,0 +1,22 @@
+{
+  Value l=stmt.getLeftOp();
+  Value r=stmt.getRightOp();
+  if (l instanceof Local) {
+    TypeVariableBV left=resolver.typeVariable((Local)l);
+    if (!(r instanceof CaughtExceptionRef)) {
+      TypeVariableBV right=resolver.typeVariable(r.getType());
+      right.addParent(left);
+    }
+ else {
+      List exceptionTypes=TrapManager.getExceptionTypesOf(stmt,stmtBody);
+      Iterator typeIt=exceptionTypes.iterator();
+      while (typeIt.hasNext()) {
+        Type t=(Type)typeIt.next();
+        resolver.typeVariable(t).addParent(left);
+      }
+      if (uses) {
+        left.addParent(resolver.typeVariable(RefType.v("java.lang.Throwable")));
+      }
+    }
+  }
+}

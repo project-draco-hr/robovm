@@ -1,0 +1,29 @@
+{
+  BasicBlock b;
+  BBQ bbq=new BBQ();
+  Code_attribute c=method.locate_code_attribute();
+  if (c == null)   return;
+{
+    BasicBlock bb=cfg;
+    while (bb != null) {
+      bb.done=true;
+      bb=bb.next;
+    }
+  }
+  bbq.push(cfg);
+  processTargetFixup(bbq);
+  if (bbq.isEmpty()) {
+    int i;
+    for (i=0; i < c.exception_table_length; i++) {
+      b=c.exception_table[i].b;
+      if (b != null && b.done) {
+        bbq.push(b);
+        processTargetFixup(bbq);
+        if (!bbq.isEmpty()) {
+          G.v().out.println("Error 2nd processing exception block.");
+          break;
+        }
+      }
+    }
+  }
+}

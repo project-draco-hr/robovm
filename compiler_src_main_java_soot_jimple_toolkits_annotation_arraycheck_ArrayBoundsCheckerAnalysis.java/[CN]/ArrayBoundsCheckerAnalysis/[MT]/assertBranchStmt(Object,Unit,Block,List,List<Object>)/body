@@ -1,0 +1,103 @@
+{
+  IfStmt ifstmt=(IfStmt)s;
+  Value cmpcond=ifstmt.getCondition();
+  if (!(cmpcond instanceof ConditionExpr))   return false;
+  if (succs.size() != 2) {
+    return false;
+  }
+  Stmt targetUnit=ifstmt.getTarget();
+  Block targetBlock=(Block)succs.get(0);
+  Block nextBlock=(Block)succs.get(1);
+  if (!targetUnit.equals(targetBlock.getHead())) {
+    Block swap=targetBlock;
+    targetBlock=nextBlock;
+    nextBlock=swap;
+  }
+  Value op1=((ConditionExpr)cmpcond).getOp1();
+  Value op2=((ConditionExpr)cmpcond).getOp2();
+  HashSet livelocals=(HashSet)ailanalysis.getFlowAfter(s);
+  if (!livelocals.contains(op1) && !livelocals.contains(op2))   return false;
+  WeightedDirectedSparseGraph ingraph=(WeightedDirectedSparseGraph)in;
+  WeightedDirectedSparseGraph targetgraph=ingraph.dup();
+  if ((cmpcond instanceof EqExpr) || (cmpcond instanceof NeExpr)) {
+    Object node1=op1, node2=op2;
+    int weight=0;
+    if (node1 instanceof IntConstant) {
+      weight=((IntConstant)node1).value;
+      node1=zero;
+    }
+    if (node2 instanceof IntConstant) {
+      weight=((IntConstant)node2).value;
+      node2=zero;
+    }
+    if (node1 == node2)     return false;
+    if (cmpcond instanceof EqExpr)     targetgraph.addMutualEdges(node1,node2,weight);
+ else     ingraph.addMutualEdges(node1,node2,weight);
+  }
+ else   if ((cmpcond instanceof GtExpr) || (cmpcond instanceof GeExpr)) {
+    Object node1=op1, node2=op2;
+    int weight=0;
+    if (node1 instanceof IntConstant) {
+      weight+=((IntConstant)node1).value;
+      node1=zero;
+    }
+    if (node2 instanceof IntConstant) {
+      weight-=((IntConstant)node2).value;
+      node2=zero;
+    }
+    if (node1 == node2)     return false;
+    if (cmpcond instanceof GtExpr) {
+      targetgraph.addEdge(node1,node2,weight - 1);
+      ingraph.addEdge(node2,node1,-weight);
+    }
+ else {
+      targetgraph.addEdge(node1,node2,weight);
+      ingraph.addEdge(node2,node1,-weight - 1);
+    }
+  }
+ else   if ((cmpcond instanceof LtExpr) || (cmpcond instanceof LeExpr)) {
+    Object node1=op1, node2=op2;
+    int weight=0;
+    if (node1 instanceof IntConstant) {
+      weight-=((IntConstant)node1).value;
+      node1=zero;
+    }
+    if (node2 instanceof IntConstant) {
+      weight+=((IntConstant)node2).value;
+      node2=zero;
+    }
+    if (node1 == node2)     return false;
+    if (cmpcond instanceof LtExpr) {
+      targetgraph.addEdge(node2,node1,weight - 1);
+      ingraph.addEdge(node1,node2,-weight);
+    }
+ else {
+      targetgraph.addEdge(node2,node1,weight);
+      ingraph.addEdge(node1,node2,-weight - 1);
+    }
+  }
+ else   return false;
+  FlowGraphEdge targetEdge=new FlowGraphEdge(current,targetBlock);
+  WeightedDirectedSparseGraph prevtarget=edgeMap.get(targetEdge);
+  boolean changed=false;
+  targetgraph.makeShortestPathGraph();
+  WeightedDirectedSparseGraph tmpgraph=new WeightedDirectedSparseGraph(prevtarget.getVertexes(),true);
+  copy(targetgraph,tmpgraph);
+  if (!tmpgraph.equals(prevtarget)) {
+    prevtarget.replaceAllEdges(tmpgraph);
+    changed=true;
+  }
+  if (changed)   changedSuccs.add(targetBlock);
+  FlowGraphEdge nextEdge=new FlowGraphEdge(current,nextBlock);
+  WeightedDirectedSparseGraph prevnext=edgeMap.get(nextEdge);
+  changed=false;
+  ingraph.makeShortestPathGraph();
+  tmpgraph=new WeightedDirectedSparseGraph(prevnext.getVertexes(),true);
+  copy(ingraph,tmpgraph);
+  if (!tmpgraph.equals(prevnext)) {
+    prevnext.replaceAllEdges(tmpgraph);
+    changed=true;
+  }
+  if (changed)   changedSuccs.add(nextBlock);
+  return true;
+}

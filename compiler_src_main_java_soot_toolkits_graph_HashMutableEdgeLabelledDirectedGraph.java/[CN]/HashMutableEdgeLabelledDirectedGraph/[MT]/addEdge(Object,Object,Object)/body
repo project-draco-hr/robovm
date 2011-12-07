@@ -1,0 +1,20 @@
+{
+  if (from == null || to == null)   throw new RuntimeException("edge from or to null");
+  if (label == null)   throw new RuntimeException("edge with null label");
+  if (containsEdge(from,to,label))   return;
+  List<Object> succsList=nodeToSuccs.get(from);
+  if (succsList == null)   throw new RuntimeException(from + " not in graph!");
+  List<Object> predsList=nodeToPreds.get(to);
+  if (predsList == null)   throw new RuntimeException(to + " not in graph!");
+  if (heads.contains(to))   heads.remove(to);
+  if (tails.contains(from))   tails.remove(from);
+  if (!succsList.contains(to))   succsList.add(to);
+  if (!predsList.contains(from))   predsList.add(from);
+  DGEdge edge=new DGEdge(from,to);
+  if (!edgeToLabels.containsKey(edge))   edgeToLabels.put(edge,new ArrayList());
+  List<Object> labels=edgeToLabels.get(edge);
+  if (!labelToEdges.containsKey(label))   labelToEdges.put(label,new ArrayList());
+  List<DGEdge> edges=labelToEdges.get(label);
+  labels.add(label);
+  edges.add(edge);
+}

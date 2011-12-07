@@ -1,0 +1,19 @@
+{
+  EquivalentValue sinkEqVal;
+  EquivalentValue sourceEqVal;
+  if (sink instanceof InstanceFieldRef) {
+    InstanceFieldRef ifr=(InstanceFieldRef)sink;
+    sinkEqVal=InfoFlowAnalysis.getNodeForFieldRef(sm,ifr.getField(),(Local)ifr.getBase());
+  }
+ else   sinkEqVal=new CachedEquivalentValue(sink);
+  if (source instanceof InstanceFieldRef) {
+    InstanceFieldRef ifr=(InstanceFieldRef)source;
+    sourceEqVal=InfoFlowAnalysis.getNodeForFieldRef(sm,ifr.getField(),(Local)ifr.getBase());
+  }
+ else   sourceEqVal=new CachedEquivalentValue(source);
+  if (source instanceof Ref && !infoFlowSummary.containsNode(sourceEqVal))   infoFlowSummary.addNode(sourceEqVal);
+  if (sink instanceof Ref && !infoFlowSummary.containsNode(sinkEqVal))   infoFlowSummary.addNode(sinkEqVal);
+  if (!abbreviatedInfoFlowGraph.containsNode(sinkEqVal))   abbreviatedInfoFlowGraph.addNode(sinkEqVal);
+  if (!abbreviatedInfoFlowGraph.containsNode(sourceEqVal))   abbreviatedInfoFlowGraph.addNode(sourceEqVal);
+  abbreviatedInfoFlowGraph.addEdge(sourceEqVal,sinkEqVal);
+}

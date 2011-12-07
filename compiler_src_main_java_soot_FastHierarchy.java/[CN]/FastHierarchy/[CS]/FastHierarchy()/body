@@ -1,0 +1,20 @@
+{
+  this.sc=Scene.v();
+  for (Iterator clIt=sc.getClasses().iterator(); clIt.hasNext(); ) {
+    final SootClass cl=(SootClass)clIt.next();
+    if (cl.resolvingLevel() < SootClass.HIERARCHY)     continue;
+    if (!cl.isInterface() && cl.hasSuperclass()) {
+      put(classToSubclasses,cl.getSuperclass(),cl);
+    }
+    for (Iterator superclIt=cl.getInterfaces().iterator(); superclIt.hasNext(); ) {
+      final SootClass supercl=(SootClass)superclIt.next();
+      if (cl.isInterface()) {
+        interfaceToSubinterfaces.put(supercl,cl);
+      }
+ else {
+        interfaceToImplementers.put(supercl,cl);
+      }
+    }
+  }
+  dfsVisit(0,Scene.v().getSootClass("java.lang.Object"));
+}

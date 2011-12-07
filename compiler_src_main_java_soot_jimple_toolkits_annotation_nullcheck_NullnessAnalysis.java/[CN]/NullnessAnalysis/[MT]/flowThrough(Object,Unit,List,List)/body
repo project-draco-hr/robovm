@@ -1,0 +1,38 @@
+{
+  AnalysisInfo in=(AnalysisInfo)flowin;
+  AnalysisInfo out=new AnalysisInfo(in);
+  AnalysisInfo outBranch=new AnalysisInfo(in);
+  Stmt s=(Stmt)u;
+  if (s instanceof JIfStmt) {
+    JIfStmt ifStmt=(JIfStmt)s;
+    handleIfStmt(ifStmt,in,out,outBranch);
+  }
+ else   if (s instanceof MonitorStmt) {
+    MonitorStmt monitorStmt=(MonitorStmt)s;
+    out.put(monitorStmt.getOp(),NON_NULL);
+  }
+  if (s.containsArrayRef()) {
+    ArrayRef arrayRef=s.getArrayRef();
+    handleArrayRef(arrayRef,out);
+  }
+  if (s.containsFieldRef()) {
+    FieldRef fieldRef=s.getFieldRef();
+    handleFieldRef(fieldRef,out);
+  }
+  if (s.containsInvokeExpr()) {
+    InvokeExpr invokeExpr=s.getInvokeExpr();
+    handleInvokeExpr(invokeExpr,out);
+  }
+  if (s instanceof DefinitionStmt) {
+    DefinitionStmt defStmt=(DefinitionStmt)s;
+    if (defStmt.getLeftOp().getType() instanceof RefLikeType) {
+      handleRefTypeAssignment(defStmt,out);
+    }
+  }
+  for (Iterator it=fallOut.iterator(); it.hasNext(); ) {
+    copy(out,it.next());
+  }
+  for (Iterator it=branchOuts.iterator(); it.hasNext(); ) {
+    copy(outBranch,it.next());
+  }
+}

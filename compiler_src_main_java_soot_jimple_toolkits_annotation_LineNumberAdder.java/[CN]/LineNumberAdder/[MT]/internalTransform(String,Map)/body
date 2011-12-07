@@ -1,0 +1,41 @@
+{
+  Iterator it=Scene.v().getApplicationClasses().iterator();
+  while (it.hasNext()) {
+    SootClass sc=(SootClass)it.next();
+    HashMap<Integer,SootMethod> lineToMeth=new HashMap<Integer,SootMethod>();
+    Iterator methIt=sc.getMethods().iterator();
+    while (methIt.hasNext()) {
+      SootMethod meth=(SootMethod)methIt.next();
+      if (!meth.isConcrete())       continue;
+      Body body=meth.retrieveActiveBody();
+      Stmt s=(Stmt)body.getUnits().getFirst();
+      while (s instanceof IdentityStmt) {
+        s=(Stmt)body.getUnits().getSuccOf(s);
+      }
+      if (s.hasTag("LineNumberTag")) {
+        LineNumberTag tag=(LineNumberTag)s.getTag("LineNumberTag");
+        lineToMeth.put(new Integer(tag.getLineNumber()),meth);
+      }
+    }
+    Iterator methIt2=sc.getMethods().iterator();
+    while (methIt2.hasNext()) {
+      SootMethod meth=(SootMethod)methIt2.next();
+      if (!meth.isConcrete())       continue;
+      Body body=meth.retrieveActiveBody();
+      Stmt s=(Stmt)body.getUnits().getFirst();
+      while (s instanceof IdentityStmt) {
+        s=(Stmt)body.getUnits().getSuccOf(s);
+      }
+      if (s.hasTag("LineNumberTag")) {
+        LineNumberTag tag=(LineNumberTag)s.getTag("LineNumberTag");
+        int line_num=tag.getLineNumber() - 1;
+        if (lineToMeth.containsKey(new Integer(line_num))) {
+          meth.addTag(new LineNumberTag(line_num + 1));
+        }
+ else {
+          meth.addTag(new LineNumberTag(line_num));
+        }
+      }
+    }
+  }
+}

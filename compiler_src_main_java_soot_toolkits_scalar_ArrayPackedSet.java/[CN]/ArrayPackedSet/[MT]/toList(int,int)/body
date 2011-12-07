@@ -1,0 +1,32 @@
+{
+  List elements=new ArrayList();
+  int startWord=low / 32, startBit=low % 32;
+  int endWord=high / 32, endBit=high % 32;
+  if (low > high)   return elements;
+{
+    int word=bits[startWord];
+    int offset=startWord * 32;
+    int lastBit=(startWord != endWord) ? 32 : (endBit + 1);
+    for (int j=startBit; j < lastBit; j++) {
+      if ((word & (1 << j)) != 0)       elements.add(map.getObject(offset + j));
+    }
+  }
+  if (startWord != endWord && startWord + 1 != endWord) {
+    for (int i=startWord + 1; i < endWord; i++) {
+      int word=bits[i];
+      int offset=i * 32;
+      for (int j=0; j < 32; j++) {
+        if ((word & (1 << j)) != 0)         elements.add(map.getObject(offset + j));
+      }
+    }
+  }
+  if (startWord != endWord) {
+    int word=bits[endWord];
+    int offset=endWord * 32;
+    int lastBit=endBit + 1;
+    for (int j=0; j < lastBit; j++) {
+      if ((word & (1 << j)) != 0)       elements.add(map.getObject(offset + j));
+    }
+  }
+  return elements;
+}

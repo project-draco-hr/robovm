@@ -1,0 +1,80 @@
+{
+  ArrayList<AnnotationElem> list=new ArrayList<AnnotationElem>();
+  for (int j=0; j < count; j++) {
+    element_value ev=elems[j];
+    char kind=ev.tag;
+    String elemName="default";
+    if (ev.name_index != 0) {
+      elemName=((CONSTANT_Utf8_info)coffiClass.constant_pool[ev.name_index]).convert();
+    }
+    if (kind == 'B' || kind == 'C' || kind == 'I' || kind == 'S' || kind == 'Z' || kind == 'D' || kind == 'F' || kind == 'J' || kind == 's') {
+      constant_element_value cev=(constant_element_value)ev;
+      if (kind == 'B' || kind == 'C' || kind == 'I' || kind == 'S' || kind == 'Z') {
+        cp_info cval=coffiClass.constant_pool[cev.constant_value_index];
+        int constant_val=(int)((CONSTANT_Integer_info)cval).bytes;
+        AnnotationIntElem elem=new AnnotationIntElem(constant_val,kind,elemName);
+        list.add(elem);
+      }
+ else       if (kind == 'D') {
+        cp_info cval=coffiClass.constant_pool[cev.constant_value_index];
+        double constant_val=((CONSTANT_Double_info)cval).convert();
+        AnnotationDoubleElem elem=new AnnotationDoubleElem(constant_val,kind,elemName);
+        list.add(elem);
+      }
+ else       if (kind == 'F') {
+        cp_info cval=coffiClass.constant_pool[cev.constant_value_index];
+        float constant_val=((CONSTANT_Float_info)cval).convert();
+        AnnotationFloatElem elem=new AnnotationFloatElem(constant_val,kind,elemName);
+        list.add(elem);
+      }
+ else       if (kind == 'J') {
+        cp_info cval=coffiClass.constant_pool[cev.constant_value_index];
+        CONSTANT_Long_info lcval=(CONSTANT_Long_info)cval;
+        long constant_val=(lcval.high << 32) + lcval.low;
+        AnnotationLongElem elem=new AnnotationLongElem(constant_val,kind,elemName);
+        list.add(elem);
+      }
+ else       if (kind == 's') {
+        cp_info cval=coffiClass.constant_pool[cev.constant_value_index];
+        String constant_val=((CONSTANT_Utf8_info)cval).convert();
+        AnnotationStringElem elem=new AnnotationStringElem(constant_val,kind,elemName);
+        list.add(elem);
+      }
+    }
+ else     if (kind == 'e') {
+      enum_constant_element_value ecev=(enum_constant_element_value)ev;
+      cp_info type_val=coffiClass.constant_pool[ecev.type_name_index];
+      String type_name=((CONSTANT_Utf8_info)type_val).convert();
+      cp_info name_val=coffiClass.constant_pool[ecev.constant_name_index];
+      String constant_name=((CONSTANT_Utf8_info)name_val).convert();
+      AnnotationEnumElem elem=new AnnotationEnumElem(type_name,constant_name,kind,elemName);
+      list.add(elem);
+    }
+ else     if (kind == 'c') {
+      class_element_value cev=(class_element_value)ev;
+      cp_info cval=coffiClass.constant_pool[cev.class_info_index];
+      CONSTANT_Utf8_info sval=(CONSTANT_Utf8_info)cval;
+      String desc=sval.convert();
+      AnnotationClassElem elem=new AnnotationClassElem(desc,kind,elemName);
+      list.add(elem);
+    }
+ else     if (kind == '[') {
+      array_element_value aev=(array_element_value)ev;
+      int num_vals=aev.num_values;
+      ArrayList<AnnotationElem> elemVals=createElementTags(num_vals,coffiClass,aev.values);
+      AnnotationArrayElem elem=new AnnotationArrayElem(elemVals,kind,elemName);
+      list.add(elem);
+    }
+ else     if (kind == '@') {
+      annotation_element_value aev=(annotation_element_value)ev;
+      annotation annot=aev.annotation_value;
+      String annotType=((CONSTANT_Utf8_info)coffiClass.constant_pool[annot.type_index]).convert();
+      int numElems=annot.num_element_value_pairs;
+      AnnotationTag annotTag=new AnnotationTag(annotType,numElems);
+      annotTag.setElems(createElementTags(numElems,coffiClass,annot.element_value_pairs));
+      AnnotationAnnotationElem elem=new AnnotationAnnotationElem(annotTag,kind,elemName);
+      list.add(elem);
+    }
+  }
+  return list;
+}

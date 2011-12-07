@@ -1,0 +1,16 @@
+{
+  int i=0;
+  Iterator parIt=getMethod().getParameterTypes().iterator();
+  while (parIt.hasNext()) {
+    Type t=(Type)parIt.next();
+    Local l=Jimple.v().newLocal("parameter" + i,t);
+    getLocals().add(l);
+    getUnits().addFirst(Jimple.v().newIdentityStmt(l,Jimple.v().newParameterRef(l.getType(),i)));
+    i++;
+  }
+  if (!getMethod().isStatic()) {
+    Local l=Jimple.v().newLocal("this",RefType.v(getMethod().getDeclaringClass()));
+    getLocals().add(l);
+    getUnits().addFirst(Jimple.v().newIdentityStmt(l,Jimple.v().newThisRef((RefType)l.getType())));
+  }
+}

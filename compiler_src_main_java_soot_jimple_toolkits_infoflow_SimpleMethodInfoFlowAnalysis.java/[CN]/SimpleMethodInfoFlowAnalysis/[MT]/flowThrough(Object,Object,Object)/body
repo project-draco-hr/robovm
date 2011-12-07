@@ -1,0 +1,141 @@
+{
+  FlowSet in=(FlowSet)inValue;
+  FlowSet out=(FlowSet)outValue;
+  Stmt stmt=(Stmt)unit;
+  if (in != out)   in.copy(out);
+  FlowSet changedFlow=out;
+  if (stmt instanceof IdentityStmt) {
+    IdentityStmt is=(IdentityStmt)stmt;
+    IdentityRef ir=(IdentityRef)is.getRightOp();
+    if (ir instanceof JCaughtExceptionRef) {
+    }
+ else     if (ir instanceof ParameterRef) {
+      if (!ignoreThisDataType(ir.getType())) {
+        handleFlowsToValue(is.getLeftOp(),ir,changedFlow);
+      }
+    }
+ else     if (ir instanceof ThisRef) {
+      if (!ignoreThisDataType(ir.getType())) {
+        handleFlowsToValue(is.getLeftOp(),ir,changedFlow);
+      }
+    }
+  }
+ else   if (stmt instanceof ReturnStmt) {
+    ReturnStmt rs=(ReturnStmt)stmt;
+    Value rv=rs.getOp();
+    if (rv instanceof Constant) {
+    }
+ else     if (rv instanceof Local) {
+      if (!ignoreThisDataType(rv.getType())) {
+        handleFlowsToValue(returnRef,rv,changedFlow);
+      }
+    }
+  }
+ else   if (stmt instanceof AssignStmt) {
+    AssignStmt as=(AssignStmt)stmt;
+    Value lv=as.getLeftOp();
+    Value rv=as.getRightOp();
+    Value sink=null;
+    boolean flowsToDataStructure=false;
+    if (lv instanceof Local) {
+      sink=lv;
+    }
+ else     if (lv instanceof ArrayRef) {
+      ArrayRef ar=(ArrayRef)lv;
+      sink=ar.getBase();
+      flowsToDataStructure=true;
+    }
+ else     if (lv instanceof StaticFieldRef) {
+      sink=lv;
+    }
+ else     if (lv instanceof InstanceFieldRef) {
+      InstanceFieldRef ifr=(InstanceFieldRef)lv;
+      if (ifr.getBase() == thisLocal) {
+        sink=lv;
+      }
+ else {
+        sink=ifr.getBase();
+        flowsToDataStructure=true;
+      }
+    }
+    List sources=new ArrayList();
+    boolean interestingFlow=true;
+    if (rv instanceof Local) {
+      sources.add(rv);
+      interestingFlow=!ignoreThisDataType(rv.getType());
+    }
+ else     if (rv instanceof Constant) {
+      sources.add(rv);
+      interestingFlow=!ignoreThisDataType(rv.getType());
+    }
+ else     if (rv instanceof ArrayRef) {
+      ArrayRef ar=(ArrayRef)rv;
+      sources.add(ar.getBase());
+      interestingFlow=!ignoreThisDataType(ar.getType());
+    }
+ else     if (rv instanceof StaticFieldRef) {
+      sources.add(rv);
+      interestingFlow=!ignoreThisDataType(rv.getType());
+    }
+ else     if (rv instanceof InstanceFieldRef) {
+      InstanceFieldRef ifr=(InstanceFieldRef)rv;
+      if (ifr.getBase() == thisLocal) {
+        sources.add(rv);
+        interestingFlow=!ignoreThisDataType(rv.getType());
+      }
+ else {
+        sources.add(ifr.getBase());
+        interestingFlow=!ignoreThisDataType(ifr.getType());
+      }
+    }
+ else     if (rv instanceof AnyNewExpr) {
+      sources.add(rv);
+      interestingFlow=!ignoreThisDataType(rv.getType());
+    }
+ else     if (rv instanceof BinopExpr) {
+      BinopExpr be=(BinopExpr)rv;
+      sources.add(be.getOp1());
+      sources.add(be.getOp2());
+      interestingFlow=!ignoreThisDataType(be.getType());
+    }
+ else     if (rv instanceof CastExpr) {
+      CastExpr ce=(CastExpr)rv;
+      sources.add(ce.getOp());
+      interestingFlow=!ignoreThisDataType(ce.getType());
+    }
+ else     if (rv instanceof InstanceOfExpr) {
+      InstanceOfExpr ioe=(InstanceOfExpr)rv;
+      sources.add(ioe.getOp());
+      interestingFlow=!ignoreThisDataType(ioe.getType());
+    }
+ else     if (rv instanceof UnopExpr) {
+      UnopExpr ue=(UnopExpr)rv;
+      sources.add(ue.getOp());
+      interestingFlow=!ignoreThisDataType(ue.getType());
+    }
+ else     if (rv instanceof InvokeExpr) {
+      InvokeExpr ie=(InvokeExpr)rv;
+      sources.addAll(handleInvokeExpr(ie,changedFlow));
+      interestingFlow=!ignoreThisDataType(ie.getType());
+    }
+    if (interestingFlow) {
+      if (flowsToDataStructure) {
+        Iterator sourcesIt=sources.iterator();
+        while (sourcesIt.hasNext()) {
+          Value source=(Value)sourcesIt.next();
+          handleFlowsToDataStructure(sink,source,changedFlow);
+        }
+      }
+ else {
+        Iterator sourcesIt=sources.iterator();
+        while (sourcesIt.hasNext()) {
+          Value source=(Value)sourcesIt.next();
+          handleFlowsToValue(sink,source,changedFlow);
+        }
+      }
+    }
+  }
+ else   if (stmt.containsInvokeExpr()) {
+    handleInvokeExpr(stmt.getInvokeExpr(),changedFlow);
+  }
+}

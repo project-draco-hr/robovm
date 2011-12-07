@@ -1,0 +1,18 @@
+{
+  FastHierarchy fh=Scene.v().getOrMakeFastHierarchy();
+  for (Iterator siteIt=((Collection)receiverToSites.get(receiver)).iterator(); siteIt.hasNext(); ) {
+    final VirtualCallSite site=(VirtualCallSite)siteIt.next();
+    InstanceInvokeExpr iie=site.iie();
+    if (site.kind() == Kind.THREAD && !fh.canStoreType(type,clRunnable))     continue;
+    if (site.iie() instanceof SpecialInvokeExpr && site.kind != Kind.THREAD) {
+      targetsQueue.add(VirtualCalls.v().resolveSpecial((SpecialInvokeExpr)site.iie(),site.subSig(),site.container()));
+    }
+ else {
+      VirtualCalls.v().resolve(type,receiver.getType(),site.subSig(),site.container(),targetsQueue);
+    }
+    while (targets.hasNext()) {
+      SootMethod target=(SootMethod)targets.next();
+      cm.addVirtualEdge(MethodContext.v(site.container(),srcContext),site.stmt(),target,site.kind(),typeContext);
+    }
+  }
+}

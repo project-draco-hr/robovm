@@ -1,0 +1,17 @@
+{
+  SideEffectTester sideEffect;
+  if (Scene.v().hasCallGraph() && !PhaseOptions.getBoolean(opts,"naive-side-effect")) {
+    sideEffect=new PASideEffectTester();
+  }
+ else {
+    sideEffect=new NaiveSideEffectTester();
+  }
+  sideEffect.newMethod(b.getMethod());
+  AETOptions options=new AETOptions(opts);
+  if (options.kind() == AETOptions.kind_optimistic) {
+    new SlowAvailableExpressionsAnalysis(new ExceptionalUnitGraph(b));
+  }
+ else {
+    new PessimisticAvailableExpressionsAnalysis(new ExceptionalUnitGraph(b),b.getMethod(),sideEffect);
+  }
+}

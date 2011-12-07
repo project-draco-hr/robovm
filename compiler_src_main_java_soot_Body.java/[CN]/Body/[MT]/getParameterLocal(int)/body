@@ -1,0 +1,12 @@
+{
+  Iterator<Unit> unitsIt=getUnits().iterator();
+  while (unitsIt.hasNext()) {
+    Unit s=unitsIt.next();
+    if (s instanceof IdentityStmt && ((IdentityStmt)s).getRightOp() instanceof ParameterRef) {
+      IdentityStmt is=(IdentityStmt)s;
+      ParameterRef pr=(ParameterRef)is.getRightOp();
+      if (pr.getIndex() == i)       return (Local)is.getLeftOp();
+    }
+  }
+  throw new RuntimeException("couldn't find parameterref!" + " in " + getMethod());
+}

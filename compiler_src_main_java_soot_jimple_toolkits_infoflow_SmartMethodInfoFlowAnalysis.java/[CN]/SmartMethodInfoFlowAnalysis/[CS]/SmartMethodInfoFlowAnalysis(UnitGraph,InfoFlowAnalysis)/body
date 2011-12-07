@@ -1,0 +1,62 @@
+{
+  graph=g;
+  this.sm=g.getBody().getMethod();
+  if (sm.isStatic())   this.thisLocal=null;
+ else   this.thisLocal=g.getBody().getThisLocal();
+  this.dfa=dfa;
+  this.refOnly=!dfa.includesPrimitiveInfoFlow();
+  this.includeInnerFields=dfa.includesInnerFields();
+  this.abbreviatedInfoFlowGraph=new MemoryEfficientGraph();
+  this.infoFlowSummary=new MemoryEfficientGraph();
+  this.returnRef=new ParameterRef(g.getBody().getMethod().getReturnType(),-1);
+  printMessages=false;
+  counter++;
+  for (int i=0; i < sm.getParameterCount(); i++) {
+    EquivalentValue parameterRefEqVal=InfoFlowAnalysis.getNodeForParameterRef(sm,i);
+    if (!infoFlowSummary.containsNode(parameterRefEqVal))     infoFlowSummary.addNode(parameterRefEqVal);
+  }
+  for (Iterator it=sm.getDeclaringClass().getFields().iterator(); it.hasNext(); ) {
+    SootField sf=(SootField)it.next();
+    if (sf.isStatic() || !sm.isStatic()) {
+      EquivalentValue fieldRefEqVal;
+      if (!sm.isStatic())       fieldRefEqVal=InfoFlowAnalysis.getNodeForFieldRef(sm,sf,sm.retrieveActiveBody().getThisLocal());
+ else       fieldRefEqVal=InfoFlowAnalysis.getNodeForFieldRef(sm,sf);
+      if (!infoFlowSummary.containsNode(fieldRefEqVal))       infoFlowSummary.addNode(fieldRefEqVal);
+    }
+  }
+  SootClass superclass=sm.getDeclaringClass();
+  if (superclass.hasSuperclass())   superclass=sm.getDeclaringClass().getSuperclass();
+  while (superclass.hasSuperclass()) {
+    Iterator scFieldsIt=superclass.getFields().iterator();
+    while (scFieldsIt.hasNext()) {
+      SootField scField=(SootField)scFieldsIt.next();
+      if (scField.isStatic() || !sm.isStatic()) {
+        EquivalentValue fieldRefEqVal;
+        if (!sm.isStatic())         fieldRefEqVal=InfoFlowAnalysis.getNodeForFieldRef(sm,scField,sm.retrieveActiveBody().getThisLocal());
+ else         fieldRefEqVal=InfoFlowAnalysis.getNodeForFieldRef(sm,scField);
+        if (!infoFlowSummary.containsNode(fieldRefEqVal))         infoFlowSummary.addNode(fieldRefEqVal);
+      }
+    }
+    superclass=superclass.getSuperclass();
+  }
+  if (!sm.isStatic()) {
+    EquivalentValue thisRefEqVal=InfoFlowAnalysis.getNodeForThisRef(sm);
+    if (!infoFlowSummary.containsNode(thisRefEqVal))     infoFlowSummary.addNode(thisRefEqVal);
+  }
+  EquivalentValue returnRefEqVal=new CachedEquivalentValue(returnRef);
+  if (returnRef.getType() != VoidType.v() && !infoFlowSummary.containsNode(returnRefEqVal))   infoFlowSummary.addNode(returnRefEqVal);
+  Date start=new Date();
+  int counterSoFar=counter;
+  if (printMessages)   G.v().out.println("STARTING SMART ANALYSIS FOR " + g.getBody().getMethod() + " -----");
+  generateAbbreviatedInfoFlowGraph();
+  generateInfoFlowSummary();
+  if (printMessages) {
+    long longTime=((new Date()).getTime() - start.getTime());
+    float time=(longTime) / 1000.0f;
+    G.v().out.println("ENDING   SMART ANALYSIS FOR " + g.getBody().getMethod() + " ----- "+ (counter - counterSoFar + 1)+ " analyses took: "+ time+ "s");
+    G.v().out.println("  AbbreviatedDataFlowGraph:");
+    InfoFlowAnalysis.printInfoFlowSummary(abbreviatedInfoFlowGraph);
+    G.v().out.println("  DataFlowSummary:");
+    InfoFlowAnalysis.printInfoFlowSummary(infoFlowSummary);
+  }
+}

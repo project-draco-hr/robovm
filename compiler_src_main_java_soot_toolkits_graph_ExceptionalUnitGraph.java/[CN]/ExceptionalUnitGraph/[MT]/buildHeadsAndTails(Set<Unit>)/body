@@ -1,0 +1,30 @@
+{
+  List<Unit> headList=new ArrayList<Unit>(additionalHeads.size() + 1);
+  headList.addAll(additionalHeads);
+  Unit entryPoint=(Unit)unitChain.getFirst();
+  if (!headList.contains(entryPoint)) {
+    headList.add(entryPoint);
+  }
+  List<Unit> tailList=new ArrayList<Unit>();
+  for (Iterator<Unit> it=unitChain.iterator(); it.hasNext(); ) {
+    Unit u=(Unit)it.next();
+    if (u instanceof soot.jimple.ReturnStmt || u instanceof soot.jimple.ReturnVoidStmt) {
+      tailList.add(u);
+    }
+ else     if (u instanceof soot.jimple.ThrowStmt) {
+      Collection<ExceptionDest> dests=getExceptionDests(u);
+      int escapeMethodCount=0;
+      for (Iterator<ExceptionDest> destIt=dests.iterator(); destIt.hasNext(); ) {
+        ExceptionDest dest=destIt.next();
+        if (dest.getTrap() == null) {
+          escapeMethodCount++;
+        }
+      }
+      if (escapeMethodCount > 0) {
+        tailList.add(u);
+      }
+    }
+  }
+  tails=Collections.unmodifiableList(tailList);
+  heads=Collections.unmodifiableList(headList);
+}

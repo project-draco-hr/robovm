@@ -1,0 +1,18 @@
+{
+  FlowUniverse localUniverse;
+  Object[] refTypeValuesArray=refTypeValues.toArray();
+  int len=refTypeValuesArray.length;
+  Object[] universeArray=new Object[2 * len];
+  int i;
+  for (i=0; i < len; i++) {
+    int j=i * 2;
+    EquivalentValue r=(EquivalentValue)refTypeValuesArray[i];
+    universeArray[j]=getKRefIntPair(r,kNull);
+    universeArray[j + 1]=getKRefIntPair(r,kNonNull);
+  }
+  localUniverse=new ArrayFlowUniverse(universeArray);
+  emptySet=new ArrayPackedSet(localUniverse);
+  fullSet=emptySet.clone();
+  ((ArrayPackedSet)emptySet).complement(fullSet);
+  tempFlowSet=(FlowSet)newInitialFlow();
+}

@@ -1,0 +1,25 @@
+{
+  try {
+    this.m_regions.get(new Integer(r)).add(v);
+    DominatorNode parentOfV=this.m_dom.getParentOf(this.m_dom.getDode(v));
+    Block u2=(parentOfV == null) ? null : (Block)parentOfV.getGode();
+    List children=this.m_pdom.getChildrenOf(this.m_pdom.getDode(v));
+    for (int i=0; i < children.size(); i++) {
+      DominatorNode w=(DominatorNode)children.get(i);
+      Block u1=(Block)w.getGode();
+      if (u2 != null && u1.equals(u2)) {
+        this.weakRegionDFS((Block)w.getGode(),r);
+      }
+ else {
+        this.m_regCount++;
+        this.m_regions.put(new Integer(this.m_regCount),this.createRegion(this.m_regCount));
+        this.weakRegionDFS((Block)w.getGode(),this.m_regCount);
+      }
+    }
+  }
+ catch (  RuntimeException e) {
+    G.v().out.println("[RegionAnalysis] Exception in weakRegionDFS: " + e);
+    G.v().out.println("v is  " + v.toShortString() + " in region "+ r);
+    G.v().out.flush();
+  }
+}

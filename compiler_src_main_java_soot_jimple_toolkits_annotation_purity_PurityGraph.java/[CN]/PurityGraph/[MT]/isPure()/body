@@ -1,0 +1,14 @@
+{
+  if (!mutated.get(PurityGlobalNode.node).isEmpty())   return false;
+  Set<PurityNode> A=new HashSet<PurityNode>();
+  Set<PurityNode> B=new HashSet<PurityNode>();
+  internalPassNodes(paramNodes,A,false);
+  internalPassNodes(globEscape,B,true);
+  internalPassNode(PurityGlobalNode.node,B,true);
+  Iterator<PurityNode> it=A.iterator();
+  while (it.hasNext()) {
+    PurityNode n=it.next();
+    if (B.contains(n) || !mutated.get(n).isEmpty())     return false;
+  }
+  return true;
+}

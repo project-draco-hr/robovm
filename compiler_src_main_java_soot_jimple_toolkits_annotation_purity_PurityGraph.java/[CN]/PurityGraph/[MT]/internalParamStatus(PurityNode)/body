@@ -1,0 +1,24 @@
+{
+  if (!paramNodes.contains(p))   return PARAM_RW;
+  Set<PurityNode> S1=new HashSet<PurityNode>();
+  internalPassNode(p,S1,false);
+  Iterator<PurityNode> it=S1.iterator();
+  while (it.hasNext()) {
+    PurityNode n=it.next();
+    if (n.isLoad() || n.equals(p)) {
+      if (!mutated.get(n).isEmpty() || globEscape.contains(n))       return PARAM_RW;
+    }
+  }
+  Set<PurityNode> S2=new HashSet<PurityNode>();
+  internalPassNodes(ret,S2,true);
+  internalPassNodes(paramNodes,S2,true);
+  it=S2.iterator();
+  while (it.hasNext()) {
+    Iterator itt=edges.get(it.next()).iterator();
+    while (itt.hasNext()) {
+      PurityEdge e=(PurityEdge)itt.next();
+      if (e.isInside() && S1.contains(e.getTarget()))       return PARAM_RO;
+    }
+  }
+  return PARAM_SAFE;
+}

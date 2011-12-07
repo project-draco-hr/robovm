@@ -1,0 +1,30 @@
+{
+  boolean ret=false;
+  if (fields == null)   fields=new HashMap();
+  PointsToSet base=getBaseForField(field);
+  if (base instanceof FullObjectSet)   return false;
+  if (otherBase instanceof FullObjectSet) {
+    fields.put(field,otherBase);
+    return true;
+  }
+  if (otherBase.equals(base))   return false;
+  Union u;
+  if (base == null || !(base instanceof Union)) {
+    u=G.v().Union_factory.newUnion();
+    if (base != null)     u.addAll(base);
+    fields.put(field,u);
+    if (base == null)     addedField(fields.size());
+    ret=true;
+    if (fields.keySet().size() > MAX_SIZE) {
+      fields=null;
+      isFull=true;
+      if (true)       throw new RuntimeException("attempt to add more than " + MAX_SIZE + " fields into "+ this);
+      return true;
+    }
+  }
+ else {
+    u=(Union)base;
+  }
+  ret=u.addAll(otherBase) | ret;
+  return ret;
+}

@@ -1,0 +1,13 @@
+{
+  while (true) {
+    if (!worklist.hasNext()) {
+      rm.update();
+      if (!worklist.hasNext())       break;
+    }
+    MethodOrMethodContext momc=(MethodOrMethodContext)worklist.next();
+    SootMethod m=momc.method();
+    if (appOnly && !m.getDeclaringClass().isApplicationClass())     continue;
+    if (analyzedMethods.add(m))     processNewMethod(m);
+    processNewMethodContext(momc);
+  }
+}

@@ -1,0 +1,18 @@
+{
+  super(graph);
+  DominatorsFinder df=new MHGDominatorsFinder(graph);
+  unitToGenerateSet=new HashMap<Unit,FlowSet>(graph.size() * 2 + 1,0.7f);
+  for (Iterator unitIt=graph.iterator(); unitIt.hasNext(); ) {
+    Unit s=(Unit)unitIt.next();
+    FlowSet genSet=emptySet.clone();
+    for (Iterator domsIt=df.getDominators(s).iterator(); domsIt.hasNext(); ) {
+      Unit dom=(Unit)domsIt.next();
+      for (Iterator boxIt=dom.getDefBoxes().iterator(); boxIt.hasNext(); ) {
+        ValueBox box=(ValueBox)boxIt.next();
+        if (box.getValue() instanceof Local)         genSet.add(box.getValue(),genSet);
+      }
+    }
+    unitToGenerateSet.put(s,genSet);
+  }
+  doAnalysis();
+}

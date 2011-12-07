@@ -1,0 +1,31 @@
+{
+{
+    ArrayType atype=(ArrayType)local.getType();
+    List sizes=new ArrayList(2);
+    sizes.add(IntConstant.v(firstdim));
+    sizes.add(IntConstant.v(seconddim));
+    Value nmexpr=new JNewMultiArrayExpr(atype,sizes);
+    ((AssignStmt)startpoint).setRightOp(nmexpr);
+  }
+{
+    int curdim=0;
+    Local tmpcur=local;
+    Stmt curstmt=(Stmt)units.getSuccOf(startpoint);
+    while (curdim < firstdim) {
+      Value leftOp=((AssignStmt)curstmt).getLeftOp();
+      Value rightOp=((AssignStmt)curstmt).getRightOp();
+      if (tmplocals[curdim].equals(leftOp) && (rightOp instanceof NewArrayExpr)) {
+        ArrayRef arexpr=new JArrayRef(local,IntConstant.v(curdim));
+        ((AssignStmt)curstmt).setRightOp(arexpr);
+        tmpcur=(Local)leftOp;
+      }
+ else       if ((leftOp instanceof ArrayRef) && (rightOp.equals(tmpcur))) {
+        Stmt tmpstmt=curstmt;
+        curstmt=(Stmt)units.getSuccOf(curstmt);
+        units.remove(tmpstmt);
+        curdim++;
+      }
+ else       curstmt=(Stmt)units.getSuccOf(curstmt);
+    }
+  }
+}

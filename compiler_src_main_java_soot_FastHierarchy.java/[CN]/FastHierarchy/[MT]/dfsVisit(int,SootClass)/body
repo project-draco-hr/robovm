@@ -1,0 +1,19 @@
+{
+  Interval r=new Interval();
+  r.lower=start++;
+  Collection col=classToSubclasses.get(c);
+  if (col != null) {
+    Iterator it=col.iterator();
+    while (it.hasNext()) {
+      SootClass sc=(SootClass)it.next();
+      if (sc.isInterface())       continue;
+      start=dfsVisit(start,sc);
+    }
+  }
+  r.upper=start++;
+  if (c.isInterface()) {
+    throw new RuntimeException("Attempt to dfs visit interface " + c);
+  }
+  classToInterval.put(c,r);
+  return start;
+}

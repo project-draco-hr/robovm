@@ -1,0 +1,52 @@
+{
+  Chain units=body.getUnits();
+  Map<Unit,ArrayList> unitToTrapBoundaries=new HashMap<Unit,ArrayList>();
+{
+    Iterator unitIt=units.iterator();
+    while (unitIt.hasNext()) {
+      Unit u=(Unit)unitIt.next();
+      unitToTrapBoundaries.put(u,new ArrayList());
+    }
+  }
+{
+    Iterator trapIt=body.getTraps().iterator();
+    while (trapIt.hasNext()) {
+      Trap t=(Trap)trapIt.next();
+      List<Trap> boundary=unitToTrapBoundaries.get(t.getBeginUnit());
+      boundary.add(t);
+      boundary=unitToTrapBoundaries.get(t.getEndUnit());
+      boundary.add(t);
+    }
+  }
+{
+    Map<List,Zone> trapListToZone=new HashMap<List,Zone>(10,0.7f);
+    List<Trap> currentTraps=new ArrayList<Trap>();
+    Zone currentZone;
+    zoneCount=0;
+    unitToZone=new HashMap<Unit,Zone>(units.size() * 2 + 1,0.7f);
+    currentZone=new Zone("0");
+    trapListToZone.put(new ArrayList(),currentZone);
+    Iterator unitIt=units.iterator();
+    while (unitIt.hasNext()) {
+      Unit u=(Unit)unitIt.next();
+{
+        List trapBoundaries=unitToTrapBoundaries.get(u);
+        if (trapBoundaries.size() != 0) {
+          Iterator trapIt=trapBoundaries.iterator();
+          while (trapIt.hasNext()) {
+            Trap trap=(Trap)trapIt.next();
+            if (currentTraps.contains(trap))             currentTraps.remove(trap);
+ else             currentTraps.add(trap);
+          }
+          if (trapListToZone.containsKey(currentTraps))           currentZone=trapListToZone.get(currentTraps);
+ else {
+            zoneCount++;
+            currentZone=new Zone(new Integer(zoneCount).toString());
+            trapListToZone.put(currentTraps,currentZone);
+          }
+        }
+      }
+      unitToZone.put(u,currentZone);
+    }
+  }
+}

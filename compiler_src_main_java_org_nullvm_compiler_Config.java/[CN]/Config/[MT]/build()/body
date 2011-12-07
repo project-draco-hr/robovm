@@ -1,0 +1,63 @@
+{
+  if (nullVMHomeDir == null) {
+    if (System.getenv("NULLVM_HOME") == null) {
+      throw new IllegalArgumentException("Environment variable NULLVM_HOME not set");
+    }
+    nullVMHomeDir=new File(System.getenv("NULLVM_HOME"));
+    if (!nullVMHomeDir.exists()) {
+      throw new IllegalArgumentException("NULLVM_HOME directory " + nullVMHomeDir.getAbsolutePath() + " not found");
+    }
+    if (!nullVMHomeDir.isDirectory()) {
+      throw new IllegalArgumentException("Value of NULLVM_HOME environment " + "variable does not point to a directory");
+    }
+  }
+  if (mainJar != null) {
+    classpath.add(mainJar);
+  }
+  if (!skipLinking && targetDir == null) {
+    throw new IllegalArgumentException("No target directory specified");
+  }
+  if (classpath.isEmpty()) {
+    throw new IllegalArgumentException("No classpath specified");
+  }
+  if (!skipLinking && target == null && mainClass == null) {
+    throw new IllegalArgumentException("No target and no main class specified");
+  }
+  if (os == null) {
+    os=detectOS();
+    logger.debug("Autodetected OS: %s",os);
+  }
+  if (arch == null) {
+    arch=detectArch();
+    logger.debug("Autodetected arch: %s",arch);
+  }
+  if (verbose) {
+    if (mainClass != null) {
+      logger.debug("Using main class: %s",mainClass);
+    }
+    if (run) {
+      logger.debug("Run arguments: %s",runArgs);
+    }
+  }
+  File homeLib=new File(nullVMHomeDir,"lib");
+  osArchDepLibDir=new File(new File(homeLib,os.toString()),arch.toString());
+  cacheDir.mkdirs();
+  llvmCacheDir=new File(cacheDir,"llvm");
+  llvmCacheDir.mkdirs();
+  objectCacheDir=new File(cacheDir,"object");
+  objectCacheDir.mkdirs();
+  if (target == null) {
+    target=mainClass;
+  }
+  if (!skipRuntimeLib) {
+    bootclasspath.add(0,new File(homeLib,"nullvm-rt.jar"));
+  }
+  if (tmpDir == null) {
+    tmpDir=File.createTempFile("nullvm",".tmp");
+    tmpDir.delete();
+    tmpDir.mkdirs();
+  }
+  this.clazzes=new Clazzes(bootclasspath,classpath);
+  targetDir.mkdirs();
+  return this;
+}

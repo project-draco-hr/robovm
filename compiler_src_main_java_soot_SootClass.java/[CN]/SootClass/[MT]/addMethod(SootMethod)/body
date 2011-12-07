@@ -1,0 +1,14 @@
+{
+  checkLevel(SIGNATURES);
+  if (m.isDeclared())   throw new RuntimeException("already declared: " + m.getName());
+  if (subSigToMethods == null) {
+    subSigToMethods=new SmallNumberedMap(scene().getSubSigNumberer());
+  }
+  if (subSigToMethods.get(m.getNumberedSubSignature()) != null) {
+    throw new RuntimeException("Attempting to add method " + m.getSubSignature() + " to class "+ this+ ", but the class already has a method with that signature.");
+  }
+  subSigToMethods.put(m.getNumberedSubSignature(),m);
+  methodList.add(m);
+  m.isDeclared=true;
+  m.declaringClass=this;
+}

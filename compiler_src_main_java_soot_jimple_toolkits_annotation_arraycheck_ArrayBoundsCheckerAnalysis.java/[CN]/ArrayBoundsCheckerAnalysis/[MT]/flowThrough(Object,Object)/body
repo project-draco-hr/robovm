@@ -1,0 +1,23 @@
+{
+  ArrayList<Object> changedSuccs=new ArrayList<Object>();
+  WeightedDirectedSparseGraph ingraph=(WeightedDirectedSparseGraph)inValue;
+  Block block=(Block)unit;
+  List succs=block.getSuccs();
+  Unit s=block.getHead();
+  Unit nexts=block.getSuccOf(s);
+  while (nexts != null) {
+    assertArrayRef(ingraph,s);
+    assertNormalExpr(ingraph,s);
+    s=nexts;
+    nexts=block.getSuccOf(nexts);
+  }
+  if (s instanceof IfStmt) {
+    if (!assertBranchStmt(ingraph,s,block,succs,changedSuccs))     updateOutEdges(ingraph,block,succs,changedSuccs);
+  }
+ else {
+    assertArrayRef(ingraph,s);
+    assertNormalExpr(ingraph,s);
+    updateOutEdges(ingraph,block,succs,changedSuccs);
+  }
+  return changedSuccs;
+}

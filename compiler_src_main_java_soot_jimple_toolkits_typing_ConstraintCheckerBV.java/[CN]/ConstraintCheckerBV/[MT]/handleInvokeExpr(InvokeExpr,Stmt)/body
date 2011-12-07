@@ -1,0 +1,113 @@
+{
+  if (ie instanceof InterfaceInvokeExpr) {
+    InterfaceInvokeExpr invoke=(InterfaceInvokeExpr)ie;
+    SootMethodRef method=invoke.getMethodRef();
+    Value base=invoke.getBase();
+    if (base instanceof Local) {
+      Local local=(Local)base;
+      if (!hierarchy.typeNode(local.getType()).hasAncestorOrSelf(hierarchy.typeNode(method.declaringClass().getType()))) {
+        if (fix) {
+          invoke.setBase(insertCast(local,method.declaringClass().getType(),invokestmt));
+        }
+ else {
+          error("Type Error(7): local " + local + " is of incompatible type "+ local.getType());
+        }
+      }
+    }
+    int count=invoke.getArgCount();
+    for (int i=0; i < count; i++) {
+      if (invoke.getArg(i) instanceof Local) {
+        Local local=(Local)invoke.getArg(i);
+        if (!hierarchy.typeNode(local.getType()).hasAncestorOrSelf(hierarchy.typeNode(method.parameterType(i)))) {
+          if (fix) {
+            invoke.setArg(i,insertCast(local,method.parameterType(i),invokestmt));
+          }
+ else {
+            error("Type Error(8)");
+          }
+        }
+      }
+    }
+  }
+ else   if (ie instanceof SpecialInvokeExpr) {
+    SpecialInvokeExpr invoke=(SpecialInvokeExpr)ie;
+    SootMethodRef method=invoke.getMethodRef();
+    Value base=invoke.getBase();
+    if (base instanceof Local) {
+      Local local=(Local)base;
+      if (!hierarchy.typeNode(local.getType()).hasAncestorOrSelf(hierarchy.typeNode(method.declaringClass().getType()))) {
+        if (fix) {
+          invoke.setBase(insertCast(local,method.declaringClass().getType(),invokestmt));
+        }
+ else {
+          error("Type Error(9)");
+        }
+      }
+    }
+    int count=invoke.getArgCount();
+    for (int i=0; i < count; i++) {
+      if (invoke.getArg(i) instanceof Local) {
+        Local local=(Local)invoke.getArg(i);
+        if (!hierarchy.typeNode(local.getType()).hasAncestorOrSelf(hierarchy.typeNode(method.parameterType(i)))) {
+          if (fix) {
+            invoke.setArg(i,insertCast(local,method.parameterType(i),invokestmt));
+          }
+ else {
+            error("Type Error(10)");
+          }
+        }
+      }
+    }
+  }
+ else   if (ie instanceof VirtualInvokeExpr) {
+    VirtualInvokeExpr invoke=(VirtualInvokeExpr)ie;
+    SootMethodRef method=invoke.getMethodRef();
+    Value base=invoke.getBase();
+    if (base instanceof Local) {
+      Local local=(Local)base;
+      if (!hierarchy.typeNode(local.getType()).hasAncestorOrSelf(hierarchy.typeNode(method.declaringClass().getType()))) {
+        if (fix) {
+          invoke.setBase(insertCast(local,method.declaringClass().getType(),invokestmt));
+        }
+ else {
+          error("Type Error(13)");
+        }
+      }
+    }
+    int count=invoke.getArgCount();
+    for (int i=0; i < count; i++) {
+      if (invoke.getArg(i) instanceof Local) {
+        Local local=(Local)invoke.getArg(i);
+        if (!hierarchy.typeNode(local.getType()).hasAncestorOrSelf(hierarchy.typeNode(method.parameterType(i)))) {
+          if (fix) {
+            invoke.setArg(i,insertCast(local,method.parameterType(i),invokestmt));
+          }
+ else {
+            error("Type Error(14)");
+          }
+        }
+      }
+    }
+  }
+ else   if (ie instanceof StaticInvokeExpr) {
+    StaticInvokeExpr invoke=(StaticInvokeExpr)ie;
+    SootMethodRef method=invoke.getMethodRef();
+    int count=invoke.getArgCount();
+    for (int i=0; i < count; i++) {
+      if (invoke.getArg(i) instanceof Local) {
+        Local local=(Local)invoke.getArg(i);
+        if (!hierarchy.typeNode(local.getType()).hasAncestorOrSelf(hierarchy.typeNode(method.parameterType(i)))) {
+          if (fix) {
+            invoke.setArg(i,insertCast(local,method.parameterType(i),invokestmt));
+          }
+ else {
+            error("Type Error(15)");
+          }
+        }
+      }
+    }
+  }
+ else {
+    throw new RuntimeException("Unhandled invoke expression type: " + ie.getClass());
+  }
+}

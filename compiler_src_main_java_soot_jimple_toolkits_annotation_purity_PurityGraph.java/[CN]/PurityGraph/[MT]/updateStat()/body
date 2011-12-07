@@ -1,0 +1,46 @@
+{
+  Iterator it=nodes.iterator();
+  int insideNodes=0;
+  int loadNodes=0;
+  while (it.hasNext()) {
+    PurityNode n=(PurityNode)it.next();
+    if (n.isInside())     insideNodes++;
+ else     if (n.isLoad())     loadNodes++;
+  }
+  int insideEdges=0;
+  int outsideEdges=0;
+  it=edges.keySet().iterator();
+  while (it.hasNext()) {
+    Iterator itt=edges.get(it.next()).iterator();
+    while (itt.hasNext()) {
+      PurityEdge e=(PurityEdge)itt.next();
+      if (e.isInside())       insideEdges++;
+ else       outsideEdges++;
+    }
+  }
+  int mutatedFields=0;
+  it=mutated.keySet().iterator();
+  while (it.hasNext())   mutatedFields+=mutated.get(it.next()).size();
+  boolean changed=false;
+  if (insideNodes > maxInsideNodes) {
+    maxInsideNodes=insideNodes;
+    changed=true;
+  }
+  if (loadNodes > maxLoadNodes) {
+    maxLoadNodes=loadNodes;
+    changed=true;
+  }
+  if (insideEdges > maxInsideEdges) {
+    maxInsideEdges=insideEdges;
+    changed=true;
+  }
+  if (outsideEdges > maxOutsideEdges) {
+    maxOutsideEdges=outsideEdges;
+    changed=true;
+  }
+  if (mutatedFields > maxMutated) {
+    maxMutated=mutatedFields;
+    changed=true;
+  }
+  if (changed)   dumpStat();
+}

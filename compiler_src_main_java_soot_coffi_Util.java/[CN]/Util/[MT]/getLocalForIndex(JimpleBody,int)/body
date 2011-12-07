@@ -1,0 +1,25 @@
+{
+  String name=null;
+  String debug_type=null;
+  boolean assignedName=false;
+  if (useFaithfulNaming && activeVariableTable != null) {
+    if (activeOriginalIndex != -1) {
+      if (isLocalStore)       activeOriginalIndex++;
+      if (isWideLocalStore)       activeOriginalIndex++;
+      name=activeVariableTable.getLocalVariableName(activeConstantPool,index,activeOriginalIndex);
+      if (activeVariableTypeTable != null) {
+        debug_type=activeVariableTypeTable.getLocalVariableType(activeConstantPool,index,activeOriginalIndex);
+        if (debug_type != null) {
+        }
+      }
+      if (name != null)       assignedName=true;
+    }
+  }
+  if (!assignedName)   name="l" + index;
+  if (declaresLocal(listBody,name))   return getLocal(listBody,name);
+ else {
+    Local l=Jimple.v().newLocal(name,UnknownType.v());
+    listBody.getLocals().add(l);
+    return l;
+  }
+}

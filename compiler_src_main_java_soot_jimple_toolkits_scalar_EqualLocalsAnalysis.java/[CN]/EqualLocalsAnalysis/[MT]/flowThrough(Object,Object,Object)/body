@@ -1,0 +1,63 @@
+{
+  FlowSet in=(FlowSet)inValue;
+  FlowSet out=(FlowSet)outValue;
+  Stmt stmt=(Stmt)unit;
+  in.copy(out);
+  List<EquivalentValue> newDefs=new ArrayList<EquivalentValue>();
+  Iterator newDefBoxesIt=stmt.getDefBoxes().iterator();
+  while (newDefBoxesIt.hasNext()) {
+    newDefs.add(new EquivalentValue(((ValueBox)newDefBoxesIt.next()).getValue()));
+  }
+  if (newDefs.contains(new EquivalentValue(l))) {
+    List<Object> existingDefStmts=new ArrayList<Object>();
+    Iterator outIt=out.iterator();
+    while (outIt.hasNext()) {
+      Object o=outIt.next();
+      if (o instanceof Stmt)       existingDefStmts.add(o);
+    }
+    out.clear();
+    Iterator<EquivalentValue> newDefsIt=newDefs.iterator();
+    while (newDefsIt.hasNext())     out.add(newDefsIt.next());
+    if (stmt instanceof DefinitionStmt) {
+      if (!stmt.containsInvokeExpr() && !(stmt instanceof IdentityStmt)) {
+        out.add(new EquivalentValue(((DefinitionStmt)stmt).getRightOp()));
+      }
+    }
+    Iterator<Object> existingDefIt=existingDefStmts.iterator();
+    while (existingDefIt.hasNext()) {
+      Stmt s=(Stmt)existingDefIt.next();
+      List sNewDefs=new ArrayList();
+      Iterator sNewDefBoxesIt=s.getDefBoxes().iterator();
+      while (sNewDefBoxesIt.hasNext()) {
+        sNewDefs.add(((ValueBox)sNewDefBoxesIt.next()).getValue());
+      }
+      if (s instanceof DefinitionStmt) {
+        if (out.contains(new EquivalentValue(((DefinitionStmt)s).getRightOp()))) {
+          Iterator sNewDefsIt=sNewDefs.iterator();
+          while (sNewDefsIt.hasNext())           out.add(new EquivalentValue((Value)sNewDefsIt.next()));
+        }
+ else {
+          Iterator sNewDefsIt=sNewDefs.iterator();
+          while (sNewDefsIt.hasNext())           out.remove(new EquivalentValue((Value)sNewDefsIt.next()));
+        }
+      }
+    }
+  }
+ else {
+    if (stmt instanceof DefinitionStmt) {
+      if (out.contains(new EquivalentValue(l))) {
+        if (out.contains(new EquivalentValue(((DefinitionStmt)stmt).getRightOp()))) {
+          Iterator<EquivalentValue> newDefsIt=newDefs.iterator();
+          while (newDefsIt.hasNext())           out.add(newDefsIt.next());
+        }
+ else {
+          Iterator<EquivalentValue> newDefsIt=newDefs.iterator();
+          while (newDefsIt.hasNext())           out.remove(newDefsIt.next());
+        }
+      }
+ else {
+        out.add(stmt);
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  AnalysisInfo left=(AnalysisInfo)in1;
+  AnalysisInfo right=(AnalysisInfo)in2;
+  AnalysisInfo res=(AnalysisInfo)out;
+  Set values=new HashSet();
+  values.addAll(left.keySet());
+  values.addAll(right.keySet());
+  res.clear();
+  for (Iterator keyIter=values.iterator(); keyIter.hasNext(); ) {
+    Value v=(Value)keyIter.next();
+    Set<Object> leftAndRight=new HashSet<Object>();
+    leftAndRight.add(left.get(v));
+    leftAndRight.add(right.get(v));
+    Object result;
+    if (leftAndRight.contains(BOTTOM)) {
+      result=BOTTOM;
+    }
+ else     if (leftAndRight.contains(NON_NULL)) {
+      if (leftAndRight.contains(NULL)) {
+        result=BOTTOM;
+      }
+ else {
+        result=NON_NULL;
+      }
+    }
+ else     if (leftAndRight.contains(NULL)) {
+      result=NULL;
+    }
+ else {
+      result=BOTTOM;
+    }
+    res.put(v,result);
+  }
+}

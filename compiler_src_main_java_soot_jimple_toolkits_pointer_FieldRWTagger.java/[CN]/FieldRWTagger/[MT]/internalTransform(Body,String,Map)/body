@@ -1,0 +1,24 @@
+{
+  initializationStuff(phaseName);
+  SideEffectAnalysis sea=new SideEffectAnalysis(DumbPointerAnalysis.v(),Scene.v().getCallGraph());
+  sea.findNTRWSets(body.getMethod());
+  HashMap<Object,RWSet> stmtToReadSet=new HashMap<Object,RWSet>();
+  HashMap<Object,RWSet> stmtToWriteSet=new HashMap<Object,RWSet>();
+  UniqueRWSets sets=new UniqueRWSets();
+  optionDontTag=PhaseOptions.getBoolean(options,"dont-tag");
+  boolean justDoTotallyConservativeThing=body.getMethod().getName().equals("<clinit>");
+  for (Iterator stmtIt=body.getUnits().iterator(); stmtIt.hasNext(); ) {
+    final Stmt stmt=(Stmt)stmtIt.next();
+    if (!stmt.containsInvokeExpr())     continue;
+    if (justDoTotallyConservativeThing) {
+      stmtToReadSet.put(stmt,sets.getUnique(new FullRWSet()));
+      stmtToWriteSet.put(stmt,sets.getUnique(new FullRWSet()));
+      continue;
+    }
+    Object key=keyFor(stmt);
+    if (!stmtToReadSet.containsKey(key)) {
+      stmtToReadSet.put(key,sets.getUnique(sea.readSet(body.getMethod(),stmt)));
+      stmtToWriteSet.put(key,sets.getUnique(sea.writeSet(body.getMethod(),stmt)));
+    }
+  }
+}

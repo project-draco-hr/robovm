@@ -1,0 +1,18 @@
+{
+  Set<PurityNode> r=new HashSet<PurityNode>();
+  internalPassNodes(paramNodes,r,true);
+  internalPassNodes(ret,r,true);
+  internalPassNodes(globEscape,r,true);
+  internalPassNode(PurityGlobalNode.node,r,true);
+  Iterator it=nodes.iterator();
+  while (it.hasNext()) {
+    PurityNode n=(PurityNode)it.next();
+    if (n.isLoad())     internalPassNode(n,r,true);
+  }
+  it=(new LinkedList(nodes)).iterator();
+  while (it.hasNext()) {
+    PurityNode n=(PurityNode)it.next();
+    if (n.isInside() && !r.contains(n))     removeNode(n);
+  }
+  if (doCheck)   sanityCheck();
+}

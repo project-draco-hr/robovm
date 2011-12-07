@@ -1,0 +1,33 @@
+{
+  StmtBody body=(StmtBody)b;
+  boolean onlyStackVars=PhaseOptions.getBoolean(options,"only-stack-locals");
+  int aggregateCount=1;
+  if (Options.v().time())   Timers.v().aggregationTimer.start();
+  boolean changed=false;
+  Map<ValueBox,Zone> boxToZone=new HashMap<ValueBox,Zone>(body.getUnits().size() * 2 + 1,0.7f);
+{
+    Zonation zonation=new Zonation(body);
+    Iterator unitIt=body.getUnits().iterator();
+    while (unitIt.hasNext()) {
+      Unit u=(Unit)unitIt.next();
+      Zone zone=zonation.getZoneOf(u);
+      Iterator boxIt=u.getUseBoxes().iterator();
+      while (boxIt.hasNext()) {
+        ValueBox box=(ValueBox)boxIt.next();
+        boxToZone.put(box,zone);
+      }
+      boxIt=u.getDefBoxes().iterator();
+      while (boxIt.hasNext()) {
+        ValueBox box=(ValueBox)boxIt.next();
+        boxToZone.put(box,zone);
+      }
+    }
+  }
+  do {
+    if (Options.v().verbose())     G.v().out.println("[" + body.getMethod().getName() + "] Aggregating iteration "+ aggregateCount+ "...");
+    changed=internalAggregate(body,boxToZone,onlyStackVars);
+    aggregateCount++;
+  }
+ while (changed);
+  if (Options.v().time())   Timers.v().aggregationTimer.end();
+}

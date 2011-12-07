@@ -1,0 +1,19 @@
+{
+  PurityOptions opts=new PurityOptions(options);
+  G.v().out.println("[AM] Analysing purity");
+  CallGraph cg=Scene.v().getCallGraph();
+  List<SootMethod> heads=new LinkedList<SootMethod>();
+  Iterator getClassesIt=Scene.v().getApplicationClasses().iterator();
+  while (getClassesIt.hasNext()) {
+    SootClass appClass=(SootClass)getClassesIt.next();
+    Iterator getMethodsIt=appClass.getMethods().iterator();
+    while (getMethodsIt.hasNext()) {
+      SootMethod method=(SootMethod)getMethodsIt.next();
+      if (method.getName().equals("main")) {
+        heads.add(method);
+        G.v().out.println("  |- will treat " + appClass.getName() + "."+ method.getName());
+      }
+    }
+  }
+  PurityInterproceduralAnalysis p=new PurityInterproceduralAnalysis(cg,heads.iterator(),opts);
+}

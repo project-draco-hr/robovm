@@ -1,0 +1,12 @@
+{
+  Set<String> methodSignatures=reflectionInfo.methodInvokeSignatures(container);
+  if (methodSignatures == null || methodSignatures.isEmpty()) {
+    registerGuard(container,invokeStmt,"Method.invoke(..) call site; Soot did not expect this site to be reached");
+  }
+ else {
+    for (    String methodSignature : methodSignatures) {
+      SootMethod method=Scene.v().getMethod(methodSignature);
+      addEdge(container,invokeStmt,method,Kind.REFL_INVOKE);
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  refresh_solved();
+  single_soft_parent=new LinkedList<TypeVariable>();
+  single_hard_parent=new LinkedList<TypeVariable>();
+  multiple_parents=new LinkedList<TypeVariable>();
+  single_child_not_null=new LinkedList<TypeVariable>();
+  single_null_child=new LinkedList<TypeVariable>();
+  multiple_children=new LinkedList<TypeVariable>();
+  for (  TypeVariable var : unsolved) {
+{
+      List<TypeVariable> parents=var.parents();
+      int size=parents.size();
+      if (size == 0) {
+        var.addParent(typeVariable(OBJECT));
+        single_soft_parent.add(var);
+      }
+ else       if (size == 1) {
+        TypeVariable parent=parents.get(0);
+        if (parent.type() == null) {
+          single_soft_parent.add(var);
+        }
+ else {
+          single_hard_parent.add(var);
+        }
+      }
+ else {
+        multiple_parents.add(var);
+      }
+    }
+{
+      List<TypeVariable> children=var.children();
+      int size=children.size();
+      if (size == 0) {
+        var.addChild(typeVariable(NULL));
+        single_null_child.add(var);
+      }
+ else       if (size == 1) {
+        TypeVariable child=children.get(0);
+        if (child.type() == NULL) {
+          single_null_child.add(var);
+        }
+ else {
+          single_child_not_null.add(var);
+        }
+      }
+ else {
+        multiple_children.add(var);
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  DotGraph dot=new DotGraph(name);
+  dot.setGraphLabel(name);
+  dot.setGraphAttribute("compound","true");
+  int id=0;
+  Map<SootMethod,Integer> idmap=new HashMap<SootMethod,Integer>();
+  Iterator it=dg.iterator();
+  while (it.hasNext()) {
+    SootMethod m=(SootMethod)it.next();
+    DotGraph sub=dot.createSubGraph("cluster" + id);
+    DotGraphNode label=sub.drawNode("head" + id);
+    idmap.put(m,new Integer(id));
+    sub.setGraphLabel("");
+    label.setLabel("(" + order.get(m) + ") "+ m.toString());
+    label.setAttribute("fontsize","18");
+    label.setShape("box");
+    if (data.containsKey(m))     fillDotGraph("X" + id,data.get(m),sub);
+    id++;
+  }
+  it=dg.iterator();
+  while (it.hasNext()) {
+    SootMethod m=(SootMethod)it.next();
+    Iterator itt=dg.getSuccsOf(m).iterator();
+    while (itt.hasNext()) {
+      SootMethod mm=(SootMethod)itt.next();
+      DotGraphEdge edge=dot.drawEdge("head" + idmap.get(m),"head" + idmap.get(mm));
+      edge.setAttribute("ltail","cluster" + idmap.get(m));
+      edge.setAttribute("lhead","cluster" + idmap.get(mm));
+    }
+  }
+  File f=new File(SourceLocator.v().getOutputDir(),name + DotGraph.DOT_EXTENSION);
+  dot.plot(f.getPath());
+}

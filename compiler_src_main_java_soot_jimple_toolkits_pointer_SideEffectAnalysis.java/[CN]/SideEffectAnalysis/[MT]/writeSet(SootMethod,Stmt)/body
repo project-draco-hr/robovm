@@ -1,0 +1,21 @@
+{
+  RWSet ret=null;
+  Iterator<MethodOrMethodContext> targets=tt.iterator(stmt);
+  while (targets.hasNext()) {
+    SootMethod target=(SootMethod)targets.next();
+    if (target.isNative()) {
+      if (ret == null)       ret=new SiteRWSet();
+      ret.setCallsNative();
+    }
+ else     if (target.isConcrete()) {
+      RWSet ntw=nonTransitiveWriteSet(target);
+      if (ntw != null) {
+        if (ret == null)         ret=new SiteRWSet();
+        ret.union(ntw);
+      }
+    }
+  }
+  if (ret == null)   return ntWriteSet(method,stmt);
+  ret.union(ntWriteSet(method,stmt));
+  return ret;
+}

@@ -1,0 +1,95 @@
+{
+  boolean ret=false;
+  long[] a=null, b=null, c=null, d=null, e=null;
+  int al, bl, cl, dl;
+  a=this.bits;
+  al=a.length;
+  if (orset == null) {
+    bl=0;
+  }
+ else {
+    b=orset.bits;
+    bl=b.length;
+  }
+  if (andset == null) {
+    cl=0;
+  }
+ else {
+    c=andset.bits;
+    cl=c.length;
+  }
+  if (andnotset == null) {
+    dl=0;
+  }
+ else {
+    d=andnotset.bits;
+    dl=d.length;
+  }
+  if (al < bl) {
+    e=new long[bl];
+    System.arraycopy(a,0,e,0,al);
+    this.bits=e;
+  }
+ else {
+    e=a;
+  }
+  int i=0;
+  long l;
+  if (c == null) {
+    if (dl <= bl) {
+      while (i < dl) {
+        l=b[i] & ~d[i];
+        if ((l & ~e[i]) != 0)         ret=true;
+        e[i]|=l;
+        i++;
+      }
+      while (i < bl) {
+        l=b[i];
+        if ((l & ~e[i]) != 0)         ret=true;
+        e[i]|=l;
+        i++;
+      }
+    }
+ else {
+      while (i < bl) {
+        l=b[i] & ~d[i];
+        if ((l & ~e[i]) != 0)         ret=true;
+        e[i]|=l;
+        i++;
+      }
+    }
+  }
+ else   if (bl <= cl && bl <= dl) {
+    while (i < bl) {
+      l=b[i] & c[i] & ~d[i];
+      if ((l & ~e[i]) != 0)       ret=true;
+      e[i]|=l;
+      i++;
+    }
+  }
+ else   if (cl <= bl && cl <= dl) {
+    while (i < cl) {
+      l=b[i] & c[i] & ~d[i];
+      if ((l & ~e[i]) != 0)       ret=true;
+      e[i]|=l;
+      i++;
+    }
+  }
+ else {
+    while (i < dl) {
+      l=b[i] & c[i] & ~d[i];
+      if ((l & ~e[i]) != 0)       ret=true;
+      e[i]|=l;
+      i++;
+    }
+    int shorter=cl;
+    if (bl < shorter)     shorter=bl;
+    while (i < shorter) {
+      l=b[i] & c[i];
+      if ((l & ~e[i]) != 0)       ret=true;
+      e[i]|=l;
+      i++;
+    }
+  }
+  return ret;
+}

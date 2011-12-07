@@ -1,0 +1,19 @@
+{
+  Object accum=newInitialSummary();
+  Iterator it=cg.edgesOutOf(callStmt);
+  copy(accum,dst);
+  while (it.hasNext()) {
+    Edge edge=(Edge)it.next();
+    SootMethod m=edge.tgt();
+    Object elem;
+    if (data.containsKey(m)) {
+      elem=data.get(m);
+    }
+ else {
+      if (!unanalysed.containsKey(m))       unanalysed.put(m,summaryOfUnanalysedMethod(m));
+      elem=unanalysed.get(m);
+    }
+    applySummary(src,callStmt,elem,accum);
+    merge(dst,accum,dst);
+  }
+}

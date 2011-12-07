@@ -1,0 +1,20 @@
+{
+  ReachableMethods rm=Scene.v().getReachableMethods();
+  List<SootMethod> allMethods=new ArrayList<SootMethod>();
+  Iterator methodsIt=sc.methodIterator();
+  while (methodsIt.hasNext()) {
+    SootMethod method=(SootMethod)methodsIt.next();
+    if (rm.contains(method))     allMethods.add(method);
+  }
+  SootClass superclass=sc;
+  if (superclass.hasSuperclass())   superclass=superclass.getSuperclass();
+  while (superclass.hasSuperclass()) {
+    Iterator scMethodsIt=superclass.methodIterator();
+    while (scMethodsIt.hasNext()) {
+      SootMethod scMethod=(SootMethod)scMethodsIt.next();
+      if (rm.contains(scMethod))       allMethods.add(scMethod);
+    }
+    superclass=superclass.getSuperclass();
+  }
+  return allMethods;
+}

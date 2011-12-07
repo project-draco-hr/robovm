@@ -1,0 +1,36 @@
+{
+  boolean onlyStackName=PhaseOptions.getBoolean(options,"only-stack-locals");
+{
+    int objectCount=0;
+    int intCount=0;
+    int longCount=0;
+    int floatCount=0;
+    int doubleCount=0;
+    int addressCount=0;
+    int errorCount=0;
+    int nullCount=0;
+    Iterator localIt=body.getLocals().iterator();
+    while (localIt.hasNext()) {
+      Local l=(Local)localIt.next();
+      String prefix="";
+      if (l.getName().startsWith("$"))       prefix="$";
+ else {
+        if (onlyStackName)         continue;
+      }
+      if (l.getType().equals(BooleanType.v()))       l.setName(prefix + "z" + intCount++);
+ else       if (l.getType().equals(ByteType.v()))       l.setName(prefix + "b" + longCount++);
+ else       if (l.getType().equals(ShortType.v()))       l.setName(prefix + "s" + longCount++);
+ else       if (l.getType().equals(CharType.v()))       l.setName(prefix + "c" + longCount++);
+ else       if (l.getType().equals(IntType.v()))       l.setName(prefix + "i" + longCount++);
+ else       if (l.getType().equals(LongType.v()))       l.setName(prefix + "l" + longCount++);
+ else       if (l.getType().equals(DoubleType.v()))       l.setName(prefix + "d" + doubleCount++);
+ else       if (l.getType().equals(FloatType.v()))       l.setName(prefix + "f" + floatCount++);
+ else       if (l.getType().equals(StmtAddressType.v()))       l.setName(prefix + "a" + addressCount++);
+ else       if (l.getType().equals(ErroneousType.v()) || l.getType().equals(UnknownType.v())) {
+        l.setName(prefix + "e" + errorCount++);
+      }
+ else       if (l.getType().equals(NullType.v()))       l.setName(prefix + "n" + nullCount++);
+ else       l.setName(prefix + "r" + objectCount++);
+    }
+  }
+}

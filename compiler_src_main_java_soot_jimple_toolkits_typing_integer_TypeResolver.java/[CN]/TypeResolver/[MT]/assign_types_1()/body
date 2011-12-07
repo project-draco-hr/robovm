@@ -1,0 +1,19 @@
+{
+  for (Iterator localIt=stmtBody.getLocals().iterator(); localIt.hasNext(); ) {
+    final Local local=(Local)localIt.next();
+    if (local.getType() instanceof IntegerType) {
+      TypeVariable var=typeVariable(local);
+      if (var.type() == null || var.type().type() == null) {
+        TypeVariable.error("Type Error(21):  Variable without type");
+      }
+ else {
+        local.setType(var.type().type());
+      }
+      if (DEBUG) {
+        if ((var != null) && (var.approx() != null) && (var.approx().type() != null)&& (local != null)&& (local.getType() != null)&& !local.getType().equals(var.approx().type())) {
+          G.v().out.println("local: " + local + ", type: "+ local.getType()+ ", approx: "+ var.approx().type());
+        }
+      }
+    }
+  }
+}

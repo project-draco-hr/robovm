@@ -1,0 +1,24 @@
+{
+  nodecount=0;
+  Hashtable nodeindex=new Hashtable(graph.size());
+  DotGraph canvas=new DotGraph(filename);
+  if (!onePage) {
+    canvas.setPageSize(8.5,11.0);
+  }
+  canvas.setNodeShape(DotGraphConstants.NODE_SHAPE_BOX);
+  canvas.setGraphLabel(graphname);
+  Iterator nodesIt=graph.iterator();
+  while (nodesIt.hasNext()) {
+    Object node=nodesIt.next();
+    canvas.drawNode(getNodeName(node));
+    canvas.getNode(getNodeName(node)).setLabel(getNodeLabel(node));
+    Iterator succsIt=graph.getSuccsOf(node).iterator();
+    while (succsIt.hasNext()) {
+      Object s=succsIt.next();
+      canvas.drawNode(getNodeName(s));
+      canvas.getNode(getNodeName(s)).setLabel(getNodeLabel(s));
+      canvas.drawEdge(getNodeName(node),getNodeName(s));
+    }
+  }
+  canvas.plot(filename + ".dot");
+}

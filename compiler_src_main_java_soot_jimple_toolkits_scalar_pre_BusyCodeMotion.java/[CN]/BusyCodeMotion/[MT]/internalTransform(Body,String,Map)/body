@@ -1,0 +1,68 @@
+{
+  BCMOptions options=new BCMOptions(opts);
+  HashMap<EquivalentValue,Local> expToHelper=new HashMap<EquivalentValue,Local>();
+  Chain unitChain=b.getUnits();
+  if (Options.v().verbose())   G.v().out.println("[" + b.getMethod().getName() + "]     performing Busy Code Motion...");
+  CriticalEdgeRemover.v().transform(b,phaseName + ".cer");
+  UnitGraph graph=new BriefUnitGraph(b);
+  Map unitToEquivRhs=new UnitMap(b,graph.size() + 1,0.7f){
+    protected Object mapTo(    Unit unit){
+      Value tmp=SootFilter.noInvokeRhs(unit);
+      Value tmp2=SootFilter.binop(tmp);
+      if (tmp2 == null)       tmp2=SootFilter.concreteRef(tmp);
+      return SootFilter.equiVal(tmp2);
+    }
+  }
+;
+  Map unitToNoExceptionEquivRhs=new UnitMap(b,graph.size() + 1,0.7f){
+    protected Object mapTo(    Unit unit){
+      Value tmp=SootFilter.binopRhs(unit);
+      tmp=SootFilter.noExceptionThrowing(tmp);
+      return SootFilter.equiVal(tmp);
+    }
+  }
+;
+  SideEffectTester sideEffect;
+  if (Scene.v().hasCallGraph() && !options.naive_side_effect()) {
+    sideEffect=new PASideEffectTester();
+  }
+ else {
+    sideEffect=new NaiveSideEffectTester();
+  }
+  sideEffect.newMethod(b.getMethod());
+  UpSafetyAnalysis upSafe=new UpSafetyAnalysis(graph,unitToEquivRhs,sideEffect);
+  DownSafetyAnalysis downSafe=new DownSafetyAnalysis(graph,unitToNoExceptionEquivRhs,sideEffect);
+  EarliestnessComputation earliest=new EarliestnessComputation(graph,upSafe,downSafe,sideEffect);
+  LocalCreation localCreation=new LocalCreation(b.getLocals(),PREFIX);
+  Iterator unitIt=unitChain.snapshotIterator();
+{
+    while (unitIt.hasNext()) {
+      Unit currentUnit=(Unit)unitIt.next();
+      Iterator earliestIt=((FlowSet)earliest.getFlowBefore(currentUnit)).iterator();
+      while (earliestIt.hasNext()) {
+        EquivalentValue equiVal=(EquivalentValue)earliestIt.next();
+        Value exp=equiVal.getValue();
+        Local helper=expToHelper.get(equiVal);
+        if (helper == null) {
+          helper=localCreation.newLocal(equiVal.getType());
+          expToHelper.put(equiVal,helper);
+        }
+        Value insertValue=Jimple.cloneIfNecessary(equiVal.getValue());
+        Unit firstComp=Jimple.v().newAssignStmt(helper,insertValue);
+        unitChain.insertBefore(firstComp,currentUnit);
+      }
+    }
+  }
+{
+    unitIt=unitChain.iterator();
+    while (unitIt.hasNext()) {
+      Unit currentUnit=(Unit)unitIt.next();
+      EquivalentValue rhs=(EquivalentValue)unitToEquivRhs.get(currentUnit);
+      if (rhs != null) {
+        Local helper=expToHelper.get(rhs);
+        if (helper != null)         ((AssignStmt)currentUnit).setRightOp(helper);
+      }
+    }
+  }
+  if (Options.v().verbose())   G.v().out.println("[" + b.getMethod().getName() + "]     Busy Code Motion done!");
+}

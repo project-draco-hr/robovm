@@ -1,0 +1,65 @@
+{
+  BasicBlock b, p;
+  Stmt s;
+  while (!bbq.isEmpty()) {
+    try {
+      b=bbq.pull();
+    }
+ catch (    NoSuchElementException e) {
+      break;
+    }
+    s=b.getTailJStmt();
+    if (s instanceof GotoStmt) {
+      if (b.succ.size() == 1) {
+        ((GotoStmt)s).setTarget(b.succ.firstElement().getHeadJStmt());
+      }
+ else {
+        G.v().out.println("Error :");
+        for (int i=0; i < b.statements.size(); i++)         G.v().out.println(b.statements.get(i));
+        throw new RuntimeException(b + " has " + b.succ.size()+ " successors.");
+      }
+    }
+ else     if (s instanceof IfStmt) {
+      if (b.succ.size() != 2)       G.v().out.println("How can an if not have 2 successors?");
+      if ((b.succ.firstElement()) == b.next) {
+        ((IfStmt)s).setTarget(b.succ.elementAt(1).getHeadJStmt());
+      }
+ else {
+        ((IfStmt)s).setTarget(b.succ.firstElement().getHeadJStmt());
+      }
+    }
+ else     if (s instanceof TableSwitchStmt) {
+      int count=0;
+      TableSwitchStmt sts=(TableSwitchStmt)s;
+      for (      BasicBlock basicBlock : b.succ) {
+        p=(basicBlock);
+        if (count == 0) {
+          sts.setDefaultTarget(p.getHeadJStmt());
+        }
+ else {
+          sts.setTarget(count - 1,p.getHeadJStmt());
+        }
+        count++;
+      }
+    }
+ else     if (s instanceof LookupSwitchStmt) {
+      int count=0;
+      LookupSwitchStmt sls=(LookupSwitchStmt)s;
+      for (      BasicBlock basicBlock : b.succ) {
+        p=(basicBlock);
+        if (count == 0) {
+          sls.setDefaultTarget(p.getHeadJStmt());
+        }
+ else {
+          sls.setTarget(count - 1,p.getHeadJStmt());
+        }
+        count++;
+      }
+    }
+    b.done=false;
+    for (    BasicBlock basicBlock : b.succ) {
+      p=(basicBlock);
+      if (p.done)       bbq.push(p);
+    }
+  }
+}

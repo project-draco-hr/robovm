@@ -1,0 +1,28 @@
+{
+  Chain<Unit> units=getUnits();
+  Iterator<Unit> it=units.iterator();
+  while (it.hasNext()) {
+    Unit stmt=(it.next());
+    InvokeExpr iexpr=null;
+    String errorSuffix=" at " + stmt + " in "+ getMethod();
+    if (stmt instanceof DefinitionStmt) {
+      DefinitionStmt astmt=(DefinitionStmt)stmt;
+      if (!(astmt.getRightOp() instanceof CaughtExceptionRef)) {
+        Type leftType=Type.toMachineType(astmt.getLeftOp().getType());
+        Type rightType=Type.toMachineType(astmt.getRightOp().getType());
+        checkCopy(leftType,rightType,errorSuffix);
+        if (astmt.getRightOp() instanceof InvokeExpr)         iexpr=(InvokeExpr)(astmt.getRightOp());
+      }
+    }
+    if (stmt instanceof InvokeStmt)     iexpr=((InvokeStmt)stmt).getInvokeExpr();
+    if (iexpr != null) {
+      SootMethodRef called=iexpr.getMethodRef();
+      if (iexpr instanceof InstanceInvokeExpr) {
+        InstanceInvokeExpr iiexpr=(InstanceInvokeExpr)iexpr;
+        checkCopy(called.declaringClass().getType(),iiexpr.getBase().getType()," in receiver of call" + errorSuffix);
+      }
+      if (called.parameterTypes().size() != iexpr.getArgCount())       throw new RuntimeException("Warning: Argument count doesn't match up with signature in call" + errorSuffix + " in "+ getMethod());
+ else       for (int i=0; i < iexpr.getArgCount(); i++)       checkCopy(Type.toMachineType(called.parameterType(i)),Type.toMachineType(iexpr.getArg(i).getType())," in argument " + i + " of call"+ errorSuffix);
+    }
+  }
+}

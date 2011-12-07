@@ -1,0 +1,21 @@
+{
+  Type t=AugEvalFunction.eval_(this.tg,op,stmt,this.jb);
+  if (this.h.ancestor(useType,t))   return op;
+  this.count++;
+  if (countOnly)   return op;
+ else {
+    Local vold;
+    if (!(op instanceof Local)) {
+      vold=Jimple.v().newLocal("tmp",t);
+      this.tg.set(vold,t);
+      this.jb.getLocals().add(vold);
+      this.jb.getUnits().insertBefore(Jimple.v().newAssignStmt(vold,op),stmt);
+    }
+ else     vold=(Local)op;
+    Local vnew=Jimple.v().newLocal("tmp",useType);
+    this.tg.set(vnew,useType);
+    this.jb.getLocals().add(vnew);
+    this.jb.getUnits().insertBefore(Jimple.v().newAssignStmt(vnew,Jimple.v().newCastExpr(vold,useType)),stmt);
+    return vnew;
+  }
+}

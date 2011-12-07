@@ -1,0 +1,701 @@
+{
+  int x;
+  x=((ins.code)) & 0xff;
+switch (x) {
+case ByteCode.BIPUSH:
+    typeStack=typeStack.push(IntType.v());
+  break;
+case ByteCode.SIPUSH:
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.LDC1:
+return processCPEntry(constant_pool,((Instruction_Ldc1)ins).arg_b,typeStack,jmethod);
+case ByteCode.LDC2:
+case ByteCode.LDC2W:
+return processCPEntry(constant_pool,((Instruction_intindex)ins).arg_i,typeStack,jmethod);
+case ByteCode.ACONST_NULL:
+typeStack=typeStack.push(RefType.v("java.lang.Object"));
+break;
+case ByteCode.ICONST_M1:
+case ByteCode.ICONST_0:
+case ByteCode.ICONST_1:
+case ByteCode.ICONST_2:
+case ByteCode.ICONST_3:
+case ByteCode.ICONST_4:
+case ByteCode.ICONST_5:
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.LCONST_0:
+case ByteCode.LCONST_1:
+typeStack=typeStack.push(LongType.v());
+typeStack=typeStack.push(Long2ndHalfType.v());
+break;
+case ByteCode.FCONST_0:
+case ByteCode.FCONST_1:
+case ByteCode.FCONST_2:
+typeStack=typeStack.push(FloatType.v());
+break;
+case ByteCode.DCONST_0:
+case ByteCode.DCONST_1:
+typeStack=typeStack.push(DoubleType.v());
+typeStack=typeStack.push(Double2ndHalfType.v());
+break;
+case ByteCode.ILOAD:
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.FLOAD:
+typeStack=typeStack.push(FloatType.v());
+break;
+case ByteCode.ALOAD:
+typeStack=typeStack.push(RefType.v("java.lang.Object"));
+break;
+case ByteCode.DLOAD:
+typeStack=typeStack.push(DoubleType.v());
+typeStack=typeStack.push(Double2ndHalfType.v());
+break;
+case ByteCode.LLOAD:
+typeStack=typeStack.push(LongType.v());
+typeStack=typeStack.push(Long2ndHalfType.v());
+break;
+case ByteCode.ILOAD_0:
+case ByteCode.ILOAD_1:
+case ByteCode.ILOAD_2:
+case ByteCode.ILOAD_3:
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.FLOAD_0:
+case ByteCode.FLOAD_1:
+case ByteCode.FLOAD_2:
+case ByteCode.FLOAD_3:
+typeStack=typeStack.push(FloatType.v());
+break;
+case ByteCode.ALOAD_0:
+case ByteCode.ALOAD_1:
+case ByteCode.ALOAD_2:
+case ByteCode.ALOAD_3:
+typeStack=typeStack.push(RefType.v("java.lang.Object"));
+break;
+case ByteCode.LLOAD_0:
+case ByteCode.LLOAD_1:
+case ByteCode.LLOAD_2:
+case ByteCode.LLOAD_3:
+typeStack=typeStack.push(LongType.v());
+typeStack=typeStack.push(Long2ndHalfType.v());
+break;
+case ByteCode.DLOAD_0:
+case ByteCode.DLOAD_1:
+case ByteCode.DLOAD_2:
+case ByteCode.DLOAD_3:
+typeStack=typeStack.push(DoubleType.v());
+typeStack=typeStack.push(Double2ndHalfType.v());
+break;
+case ByteCode.ISTORE:
+typeStack=popSafe(typeStack,IntType.v());
+break;
+case ByteCode.FSTORE:
+typeStack=popSafe(typeStack,FloatType.v());
+break;
+case ByteCode.ASTORE:
+typeStack=typeStack.pop();
+break;
+case ByteCode.LSTORE:
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+break;
+case ByteCode.DSTORE:
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+break;
+case ByteCode.ISTORE_0:
+case ByteCode.ISTORE_1:
+case ByteCode.ISTORE_2:
+case ByteCode.ISTORE_3:
+typeStack=popSafe(typeStack,IntType.v());
+break;
+case ByteCode.FSTORE_0:
+case ByteCode.FSTORE_1:
+case ByteCode.FSTORE_2:
+case ByteCode.FSTORE_3:
+typeStack=popSafe(typeStack,FloatType.v());
+break;
+case ByteCode.ASTORE_0:
+case ByteCode.ASTORE_1:
+case ByteCode.ASTORE_2:
+case ByteCode.ASTORE_3:
+if (!(typeStack.top() instanceof StmtAddressType) && !(typeStack.top() instanceof RefType) && !(typeStack.top() instanceof ArrayType)) {
+throw new RuntimeException("Astore failed, invalid stack type: " + typeStack.top());
+}
+typeStack=typeStack.pop();
+break;
+case ByteCode.LSTORE_0:
+case ByteCode.LSTORE_1:
+case ByteCode.LSTORE_2:
+case ByteCode.LSTORE_3:
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+break;
+case ByteCode.DSTORE_0:
+case ByteCode.DSTORE_1:
+case ByteCode.DSTORE_2:
+case ByteCode.DSTORE_3:
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+break;
+case ByteCode.IINC:
+break;
+case ByteCode.WIDE:
+throw new RuntimeException("Wide instruction should not be encountered");
+case ByteCode.NEWARRAY:
+{
+typeStack=popSafe(typeStack,IntType.v());
+Type baseType=jimpleTypeOfAtype(((Instruction_Newarray)ins).atype);
+typeStack=typeStack.push(ArrayType.v(baseType,1));
+break;
+}
+case ByteCode.ANEWARRAY:
+{
+CONSTANT_Class_info c=(CONSTANT_Class_info)constant_pool[((Instruction_Anewarray)ins).arg_i];
+String name=((CONSTANT_Utf8_info)(constant_pool[c.name_index])).convert();
+name=name.replace('/','.');
+Type baseType;
+if (name.startsWith("[")) {
+String baseName=getClassName(constant_pool,((Instruction_Anewarray)ins).arg_i);
+baseType=Util.v().jimpleTypeOfFieldDescriptor(baseName);
+}
+ else {
+baseType=RefType.v(name);
+}
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=typeStack.push(baseType.makeArrayType());
+break;
+}
+case ByteCode.MULTIANEWARRAY:
+{
+int bdims=(((Instruction_Multianewarray)ins).dims);
+CONSTANT_Class_info c=(CONSTANT_Class_info)constant_pool[((Instruction_Multianewarray)ins).arg_i];
+String arrayDescriptor=((CONSTANT_Utf8_info)(constant_pool[c.name_index])).convert();
+ArrayType arrayType=(ArrayType)Util.v().jimpleTypeOfFieldDescriptor(arrayDescriptor);
+for (int j=0; j < bdims; j++) typeStack=popSafe(typeStack,IntType.v());
+typeStack=typeStack.push(arrayType);
+break;
+}
+case ByteCode.ARRAYLENGTH:
+typeStack=popSafeRefType(typeStack);
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.IALOAD:
+case ByteCode.BALOAD:
+case ByteCode.CALOAD:
+case ByteCode.SALOAD:
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=popSafeRefType(typeStack);
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.FALOAD:
+typeStack=popSafe(typeStack,FloatType.v());
+typeStack=popSafeRefType(typeStack);
+typeStack=typeStack.push(FloatType.v());
+break;
+case ByteCode.AALOAD:
+{
+typeStack=popSafe(typeStack,IntType.v());
+if (typeStack.top() instanceof ArrayType) {
+ArrayType arrayType=(ArrayType)typeStack.top();
+typeStack=popSafeRefType(typeStack);
+if (arrayType.numDimensions == 1) typeStack=typeStack.push(arrayType.baseType);
+ else typeStack=typeStack.push(ArrayType.v(arrayType.baseType,arrayType.numDimensions - 1));
+}
+ else {
+typeStack=popSafeRefType(typeStack);
+typeStack=typeStack.push(RefType.v("java.lang.Object"));
+}
+break;
+}
+case ByteCode.LALOAD:
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=popSafeRefType(typeStack);
+typeStack=typeStack.push(LongType.v());
+typeStack=typeStack.push(Long2ndHalfType.v());
+break;
+case ByteCode.DALOAD:
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=popSafeRefType(typeStack);
+typeStack=typeStack.push(DoubleType.v());
+typeStack=typeStack.push(Double2ndHalfType.v());
+break;
+case ByteCode.IASTORE:
+case ByteCode.BASTORE:
+case ByteCode.CASTORE:
+case ByteCode.SASTORE:
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=popSafeRefType(typeStack);
+break;
+case ByteCode.AASTORE:
+typeStack=popSafeRefType(typeStack);
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=popSafeRefType(typeStack);
+break;
+case ByteCode.FASTORE:
+typeStack=popSafe(typeStack,FloatType.v());
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=popSafeRefType(typeStack);
+break;
+case ByteCode.LASTORE:
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=popSafeRefType(typeStack);
+break;
+case ByteCode.DASTORE:
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=popSafeRefType(typeStack);
+break;
+case ByteCode.NOP:
+break;
+case ByteCode.POP:
+typeStack=typeStack.pop();
+break;
+case ByteCode.POP2:
+typeStack=typeStack.pop();
+typeStack=typeStack.pop();
+break;
+case ByteCode.DUP:
+typeStack=typeStack.push(typeStack.top());
+break;
+case ByteCode.DUP2:
+{
+Type topType=typeStack.get(typeStack.topIndex()), secondType=typeStack.get(typeStack.topIndex() - 1);
+typeStack=(typeStack.push(secondType)).push(topType);
+break;
+}
+case ByteCode.DUP_X1:
+{
+Type topType=typeStack.get(typeStack.topIndex()), secondType=typeStack.get(typeStack.topIndex() - 1);
+typeStack=typeStack.pop().pop();
+typeStack=typeStack.push(topType).push(secondType).push(topType);
+break;
+}
+case ByteCode.DUP_X2:
+{
+Type topType=typeStack.get(typeStack.topIndex()), secondType=typeStack.get(typeStack.topIndex() - 1), thirdType=typeStack.get(typeStack.topIndex() - 2);
+typeStack=typeStack.pop().pop().pop();
+typeStack=typeStack.push(topType).push(thirdType).push(secondType).push(topType);
+break;
+}
+case ByteCode.DUP2_X1:
+{
+Type topType=typeStack.get(typeStack.topIndex()), secondType=typeStack.get(typeStack.topIndex() - 1), thirdType=typeStack.get(typeStack.topIndex() - 2);
+typeStack=typeStack.pop().pop().pop();
+typeStack=typeStack.push(secondType).push(topType).push(thirdType).push(secondType).push(topType);
+break;
+}
+case ByteCode.DUP2_X2:
+{
+Type topType=typeStack.get(typeStack.topIndex()), secondType=typeStack.get(typeStack.topIndex() - 1), thirdType=typeStack.get(typeStack.topIndex() - 2), fourthType=typeStack.get(typeStack.topIndex() - 3);
+typeStack=typeStack.pop().pop().pop().pop();
+typeStack=typeStack.push(secondType).push(topType).push(fourthType).push(thirdType).push(secondType).push(topType);
+break;
+}
+case ByteCode.SWAP:
+{
+Type topType=typeStack.top();
+typeStack=typeStack.pop();
+Type secondType=typeStack.top();
+typeStack=typeStack.pop();
+typeStack=typeStack.push(topType);
+typeStack=typeStack.push(secondType);
+break;
+}
+case ByteCode.IADD:
+case ByteCode.ISUB:
+case ByteCode.IMUL:
+case ByteCode.IDIV:
+case ByteCode.IREM:
+case ByteCode.ISHL:
+case ByteCode.ISHR:
+case ByteCode.IUSHR:
+case ByteCode.IAND:
+case ByteCode.IOR:
+case ByteCode.IXOR:
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.LUSHR:
+case ByteCode.LSHR:
+case ByteCode.LSHL:
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+typeStack=typeStack.push(LongType.v());
+typeStack=typeStack.push(Long2ndHalfType.v());
+break;
+case ByteCode.LREM:
+case ByteCode.LDIV:
+case ByteCode.LMUL:
+case ByteCode.LSUB:
+case ByteCode.LADD:
+case ByteCode.LAND:
+case ByteCode.LOR:
+case ByteCode.LXOR:
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+typeStack=typeStack.push(LongType.v());
+typeStack=typeStack.push(Long2ndHalfType.v());
+break;
+case ByteCode.FREM:
+case ByteCode.FDIV:
+case ByteCode.FMUL:
+case ByteCode.FSUB:
+case ByteCode.FADD:
+typeStack=popSafe(typeStack,FloatType.v());
+typeStack=popSafe(typeStack,FloatType.v());
+typeStack=typeStack.push(FloatType.v());
+break;
+case ByteCode.DREM:
+case ByteCode.DDIV:
+case ByteCode.DMUL:
+case ByteCode.DSUB:
+case ByteCode.DADD:
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+typeStack=typeStack.push(DoubleType.v());
+typeStack=typeStack.push(Double2ndHalfType.v());
+break;
+case ByteCode.INEG:
+case ByteCode.LNEG:
+case ByteCode.FNEG:
+case ByteCode.DNEG:
+break;
+case ByteCode.I2L:
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=typeStack.push(LongType.v());
+typeStack=typeStack.push(Long2ndHalfType.v());
+break;
+case ByteCode.I2F:
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=typeStack.push(FloatType.v());
+break;
+case ByteCode.I2D:
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=typeStack.push(DoubleType.v());
+typeStack=typeStack.push(Double2ndHalfType.v());
+break;
+case ByteCode.L2I:
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.L2F:
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+typeStack=typeStack.push(FloatType.v());
+break;
+case ByteCode.L2D:
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+typeStack=typeStack.push(DoubleType.v());
+typeStack=typeStack.push(Double2ndHalfType.v());
+break;
+case ByteCode.F2I:
+typeStack=popSafe(typeStack,FloatType.v());
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.F2L:
+typeStack=popSafe(typeStack,FloatType.v());
+typeStack=typeStack.push(LongType.v());
+typeStack=typeStack.push(Long2ndHalfType.v());
+break;
+case ByteCode.F2D:
+typeStack=popSafe(typeStack,FloatType.v());
+typeStack=typeStack.push(DoubleType.v());
+typeStack=typeStack.push(Double2ndHalfType.v());
+break;
+case ByteCode.D2I:
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.D2L:
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+typeStack=typeStack.push(LongType.v());
+typeStack=typeStack.push(Long2ndHalfType.v());
+break;
+case ByteCode.D2F:
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+typeStack=typeStack.push(FloatType.v());
+break;
+case ByteCode.INT2BYTE:
+break;
+case ByteCode.INT2CHAR:
+break;
+case ByteCode.INT2SHORT:
+break;
+case ByteCode.IFEQ:
+case ByteCode.IFGT:
+case ByteCode.IFLT:
+case ByteCode.IFLE:
+case ByteCode.IFNE:
+case ByteCode.IFGE:
+typeStack=popSafe(typeStack,IntType.v());
+break;
+case ByteCode.IFNULL:
+case ByteCode.IFNONNULL:
+typeStack=popSafeRefType(typeStack);
+break;
+case ByteCode.IF_ICMPEQ:
+case ByteCode.IF_ICMPLT:
+case ByteCode.IF_ICMPLE:
+case ByteCode.IF_ICMPNE:
+case ByteCode.IF_ICMPGT:
+case ByteCode.IF_ICMPGE:
+typeStack=popSafe(typeStack,IntType.v());
+typeStack=popSafe(typeStack,IntType.v());
+break;
+case ByteCode.LCMP:
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.FCMPL:
+case ByteCode.FCMPG:
+typeStack=popSafe(typeStack,FloatType.v());
+typeStack=popSafe(typeStack,FloatType.v());
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.DCMPL:
+case ByteCode.DCMPG:
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+typeStack=typeStack.push(IntType.v());
+break;
+case ByteCode.IF_ACMPEQ:
+case ByteCode.IF_ACMPNE:
+typeStack=popSafeRefType(typeStack);
+typeStack=popSafeRefType(typeStack);
+break;
+case ByteCode.GOTO:
+case ByteCode.GOTO_W:
+break;
+case ByteCode.JSR:
+case ByteCode.JSR_W:
+typeStack=typeStack.push(StmtAddressType.v());
+break;
+case ByteCode.RET:
+break;
+case ByteCode.RET_W:
+break;
+case ByteCode.RETURN:
+break;
+case ByteCode.IRETURN:
+typeStack=popSafe(typeStack,IntType.v());
+break;
+case ByteCode.FRETURN:
+typeStack=popSafe(typeStack,FloatType.v());
+break;
+case ByteCode.ARETURN:
+typeStack=popSafeRefType(typeStack);
+break;
+case ByteCode.DRETURN:
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+break;
+case ByteCode.LRETURN:
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+break;
+case ByteCode.BREAKPOINT:
+break;
+case ByteCode.TABLESWITCH:
+typeStack=popSafe(typeStack,IntType.v());
+break;
+case ByteCode.LOOKUPSWITCH:
+typeStack=popSafe(typeStack,IntType.v());
+break;
+case ByteCode.PUTFIELD:
+{
+Type type=byteCodeTypeOf(jimpleTypeOfFieldInFieldRef(cm,constant_pool,((Instruction_Putfield)ins).arg_i));
+if (type.equals(DoubleType.v())) {
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+}
+ else if (type.equals(LongType.v())) {
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+}
+ else if (type instanceof RefType) typeStack=popSafeRefType(typeStack);
+ else typeStack=popSafe(typeStack,type);
+typeStack=popSafeRefType(typeStack);
+break;
+}
+case ByteCode.GETFIELD:
+{
+Type type=byteCodeTypeOf(jimpleTypeOfFieldInFieldRef(cm,constant_pool,((Instruction_Getfield)ins).arg_i));
+typeStack=popSafeRefType(typeStack);
+if (type.equals(DoubleType.v())) {
+typeStack=typeStack.push(DoubleType.v());
+typeStack=typeStack.push(Double2ndHalfType.v());
+}
+ else if (type.equals(LongType.v())) {
+typeStack=typeStack.push(LongType.v());
+typeStack=typeStack.push(Long2ndHalfType.v());
+}
+ else typeStack=typeStack.push(type);
+break;
+}
+case ByteCode.PUTSTATIC:
+{
+Type type=byteCodeTypeOf(jimpleTypeOfFieldInFieldRef(cm,constant_pool,((Instruction_Putstatic)ins).arg_i));
+if (type.equals(DoubleType.v())) {
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+}
+ else if (type.equals(LongType.v())) {
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+}
+ else if (type instanceof RefType) typeStack=popSafeRefType(typeStack);
+ else typeStack=popSafe(typeStack,type);
+break;
+}
+case ByteCode.GETSTATIC:
+{
+Type type=byteCodeTypeOf(jimpleTypeOfFieldInFieldRef(cm,constant_pool,((Instruction_Getstatic)ins).arg_i));
+if (type.equals(DoubleType.v())) {
+typeStack=typeStack.push(DoubleType.v());
+typeStack=typeStack.push(Double2ndHalfType.v());
+}
+ else if (type.equals(LongType.v())) {
+typeStack=typeStack.push(LongType.v());
+typeStack=typeStack.push(Long2ndHalfType.v());
+}
+ else typeStack=typeStack.push(type);
+break;
+}
+case ByteCode.INVOKEVIRTUAL:
+{
+Instruction_Invokevirtual iv=(Instruction_Invokevirtual)ins;
+int args=cp_info.countParams(constant_pool,iv.arg_i);
+Type returnType=byteCodeTypeOf(jimpleReturnTypeOfMethodRef(cm,constant_pool,iv.arg_i));
+for (int j=args - 1; j >= 0; j--) {
+if (typeStack.top().equals(Long2ndHalfType.v())) {
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+}
+ else if (typeStack.top().equals(Double2ndHalfType.v())) {
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+}
+ else typeStack=popSafe(typeStack,typeStack.top());
+}
+typeStack=popSafeRefType(typeStack);
+if (!returnType.equals(VoidType.v())) typeStack=smartPush(typeStack,returnType);
+break;
+}
+case ByteCode.INVOKENONVIRTUAL:
+{
+Instruction_Invokenonvirtual iv=(Instruction_Invokenonvirtual)ins;
+int args=cp_info.countParams(constant_pool,iv.arg_i);
+Type returnType=byteCodeTypeOf(jimpleReturnTypeOfMethodRef(cm,constant_pool,iv.arg_i));
+for (int j=args - 1; j >= 0; j--) {
+if (typeStack.top().equals(Long2ndHalfType.v())) {
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+}
+ else if (typeStack.top().equals(Double2ndHalfType.v())) {
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+}
+ else typeStack=popSafe(typeStack,typeStack.top());
+}
+typeStack=popSafeRefType(typeStack);
+if (!returnType.equals(VoidType.v())) typeStack=smartPush(typeStack,returnType);
+break;
+}
+case ByteCode.INVOKESTATIC:
+{
+Instruction_Invokestatic iv=(Instruction_Invokestatic)ins;
+int args=cp_info.countParams(constant_pool,iv.arg_i);
+Type returnType=byteCodeTypeOf(jimpleReturnTypeOfMethodRef(cm,constant_pool,iv.arg_i));
+for (int j=args - 1; j >= 0; j--) {
+if (typeStack.top().equals(Long2ndHalfType.v())) {
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+}
+ else if (typeStack.top().equals(Double2ndHalfType.v())) {
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+}
+ else typeStack=popSafe(typeStack,typeStack.top());
+}
+if (!returnType.equals(VoidType.v())) typeStack=smartPush(typeStack,returnType);
+break;
+}
+case ByteCode.INVOKEINTERFACE:
+{
+Instruction_Invokeinterface iv=(Instruction_Invokeinterface)ins;
+int args=cp_info.countParams(constant_pool,iv.arg_i);
+Type returnType=byteCodeTypeOf(jimpleReturnTypeOfInterfaceMethodRef(cm,constant_pool,iv.arg_i));
+for (int j=args - 1; j >= 0; j--) {
+if (typeStack.top().equals(Long2ndHalfType.v())) {
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+}
+ else if (typeStack.top().equals(Double2ndHalfType.v())) {
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+}
+ else typeStack=popSafe(typeStack,typeStack.top());
+}
+typeStack=popSafeRefType(typeStack);
+if (!returnType.equals(VoidType.v())) typeStack=smartPush(typeStack,returnType);
+break;
+}
+case ByteCode.ATHROW:
+break;
+case ByteCode.NEW:
+{
+Type type=RefType.v(getClassName(constant_pool,((Instruction_New)ins).arg_i));
+typeStack=typeStack.push(type);
+break;
+}
+case ByteCode.CHECKCAST:
+{
+String className=getClassName(constant_pool,((Instruction_Checkcast)ins).arg_i);
+Type castType;
+if (className.startsWith("[")) castType=Util.v().jimpleTypeOfFieldDescriptor(getClassName(constant_pool,((Instruction_Checkcast)ins).arg_i));
+ else castType=RefType.v(className);
+typeStack=popSafeRefType(typeStack);
+typeStack=typeStack.push(castType);
+break;
+}
+case ByteCode.INSTANCEOF:
+{
+typeStack=popSafeRefType(typeStack);
+typeStack=typeStack.push(IntType.v());
+break;
+}
+case ByteCode.MONITORENTER:
+typeStack=popSafeRefType(typeStack);
+break;
+case ByteCode.MONITOREXIT:
+typeStack=popSafeRefType(typeStack);
+break;
+default :
+throw new RuntimeException("processFlow failed: Unknown bytecode instruction: " + x);
+}
+return new OutFlow(typeStack);
+}

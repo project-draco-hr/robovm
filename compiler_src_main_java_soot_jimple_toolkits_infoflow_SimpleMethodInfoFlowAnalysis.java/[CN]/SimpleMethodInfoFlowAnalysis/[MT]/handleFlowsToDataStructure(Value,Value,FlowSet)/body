@@ -1,0 +1,28 @@
+{
+  List<Value> sinks=getDirectSources(base,fs);
+  if (isTrackableSink(base))   sinks.add(base);
+  List<Value> sources=getDirectSources(initialSource,fs);
+  if (isTrackableSource(initialSource))   sources.add(initialSource);
+  Iterator<Value> sourcesIt=sources.iterator();
+  while (sourcesIt.hasNext()) {
+    Value source=sourcesIt.next();
+    EquivalentValue sourceEqVal=new CachedEquivalentValue(source);
+    Iterator<Value> sinksIt=sinks.iterator();
+    while (sinksIt.hasNext()) {
+      Value sink=sinksIt.next();
+      if (!isTrackableSink(sink))       continue;
+      EquivalentValue sinkEqVal=new CachedEquivalentValue(sink);
+      if (sinkEqVal.equals(sourceEqVal))       continue;
+      Pair pair=new Pair(sinkEqVal,sourceEqVal);
+      if (!fs.contains(pair)) {
+        fs.add(pair);
+        if (isInterestingSource(source) && isInterestingSink(sink)) {
+          if (!infoFlowGraph.containsNode(sinkEqVal))           infoFlowGraph.addNode(sinkEqVal);
+          if (!infoFlowGraph.containsNode(sourceEqVal))           infoFlowGraph.addNode(sourceEqVal);
+          infoFlowGraph.addEdge(sourceEqVal,sinkEqVal);
+          if (printMessages)           G.v().out.println("      Found " + source + " flows to "+ sink);
+        }
+      }
+    }
+  }
+}

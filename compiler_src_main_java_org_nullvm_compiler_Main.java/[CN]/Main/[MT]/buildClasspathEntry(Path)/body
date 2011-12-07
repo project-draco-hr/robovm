@@ -1,0 +1,18 @@
+{
+  File outFile=config.getStaticLibrary(path);
+  if (!config.isClean() && outFile.exists() && !path.hasChangedSince(outFile.lastModified())) {
+    config.getLogger().debug("Skipping unchanged classpath entry: " + path);
+    return outFile;
+  }
+  List<File> objectFiles=new ArrayList<File>();
+  for (  Clazz clazz : path.list()) {
+    objectFiles.add(buildClassFileDebug(path,clazz));
+  }
+  if (objectFiles.isEmpty()) {
+    config.getLogger().debug("Skipping empty classpath entry: " + path);
+    return null;
+  }
+  config.getLogger().debug("Building static library '%s' for classpath entry: %s\n",outFile,path);
+  linkStatic(config.getObjectCacheDir(path),objectFiles,outFile);
+  return outFile;
+}

@@ -1,0 +1,43 @@
+{
+  LinkedList<String> excludedPackages=new LinkedList<String>();
+  if (Options.v().exclude() != null)   excludedPackages.addAll(Options.v().exclude());
+  if (!Options.v().include_all()) {
+    excludedPackages.add("java.");
+    excludedPackages.add("sun.");
+    excludedPackages.add("javax.");
+    excludedPackages.add("com.sun.");
+    excludedPackages.add("com.ibm.");
+    excludedPackages.add("org.xml.");
+    excludedPackages.add("org.w3c.");
+    excludedPackages.add("org.apache.");
+    excludedPackages.add("apple.awt.");
+    excludedPackages.add("com.apple.");
+  }
+  Chain<SootClass> processedClasses=new HashChain<SootClass>();
+  while (true) {
+    Chain<SootClass> unprocessedClasses=new HashChain<SootClass>(getClasses());
+    unprocessedClasses.removeAll(processedClasses);
+    if (unprocessedClasses.isEmpty())     break;
+    processedClasses.addAll(unprocessedClasses);
+    for (    SootClass s : unprocessedClasses) {
+      if (s.isPhantom())       continue;
+      if (Options.v().app()) {
+        s.setApplicationClass();
+      }
+      if (Options.v().classes().contains(s.getName())) {
+        s.setApplicationClass();
+        continue;
+      }
+      for (Iterator<String> pkgIt=excludedPackages.iterator(); pkgIt.hasNext(); ) {
+        final String pkg=(String)pkgIt.next();
+        if (s.isApplicationClass() && (s.getPackageName() + ".").startsWith(pkg)) {
+          s.setLibraryClass();
+        }
+      }
+      for (Iterator<String> pkgIt=Options.v().include().iterator(); pkgIt.hasNext(); ) {
+        final String pkg=(String)pkgIt.next();
+        if ((s.getPackageName() + ".").startsWith(pkg))         s.setApplicationClass();
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  Value base=baseBox.getValue();
+  Type type=base.getType();
+  if (type.equals(UnknownType.v()))   return UnknownType.v();
+ else   if (type.equals(NullType.v()))   return NullType.v();
+ else {
+    ArrayType arrayType;
+    if (type instanceof ArrayType)     arrayType=(ArrayType)type;
+ else     arrayType=(ArrayType)type.makeArrayType();
+    if (arrayType.numDimensions == 1)     return arrayType.baseType;
+ else     return ArrayType.v(arrayType.baseType,arrayType.numDimensions - 1);
+  }
+}

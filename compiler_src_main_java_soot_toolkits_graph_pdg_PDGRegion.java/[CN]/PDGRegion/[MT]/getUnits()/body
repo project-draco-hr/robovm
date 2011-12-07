@@ -1,0 +1,31 @@
+{
+  if (this.m_units == null) {
+    this.m_units=new LinkedList<Unit>();
+    this.m_unit2pdgnode=new LinkedHashMap<Unit,PDGNode>();
+    for (Iterator<PDGNode> itr=this.iterator(); itr.hasNext(); ) {
+      PDGNode node=itr.next();
+      if (node.getType() == PDGNode.Type.REGION) {
+        if (node instanceof LoopedPDGNode) {
+          LoopedPDGNode n=(LoopedPDGNode)node;
+          PDGNode header=n.getHeader();
+          Block headerBlock=(Block)header.getNode();
+          for (Iterator<Unit> itr1=headerBlock.iterator(); itr1.hasNext(); ) {
+            Unit u=itr1.next();
+            ((LinkedList<Unit>)this.m_units).addLast(u);
+            this.m_unit2pdgnode.put(u,header);
+          }
+        }
+      }
+ else       if (node.getType() == PDGNode.Type.CFGNODE) {
+        Block b=(Block)node.getNode();
+        for (Iterator<Unit> itr1=b.iterator(); itr1.hasNext(); ) {
+          Unit u=itr1.next();
+          ((LinkedList<Unit>)this.m_units).addLast(u);
+          this.m_unit2pdgnode.put(u,node);
+        }
+      }
+ else       throw new RuntimeException("Exception in PDGRegion.getUnits: PDGNode's type is undefined!");
+    }
+  }
+  return this.m_units;
+}

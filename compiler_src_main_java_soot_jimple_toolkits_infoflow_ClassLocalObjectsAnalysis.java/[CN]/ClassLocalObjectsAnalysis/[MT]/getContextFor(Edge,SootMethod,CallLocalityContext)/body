@@ -1,0 +1,50 @@
+{
+  InvokeExpr ie;
+  if (e.srcStmt().containsInvokeExpr())   ie=e.srcStmt().getInvokeExpr();
+ else   ie=null;
+  SootMethod callingMethod=e.tgt();
+  CallLocalityContext callingContext=new CallLocalityContext(dfa.getMethodInfoFlowSummary(callingMethod).getNodes());
+  if (callingMethod.isConcrete()) {
+    Body b=containingMethod.retrieveActiveBody();
+    if (ie != null && ie instanceof InstanceInvokeExpr) {
+      InstanceInvokeExpr iie=(InstanceInvokeExpr)ie;
+      if (!containingMethod.isStatic() && iie.getBase().equivTo(b.getThisLocal())) {
+        Iterator<Object> localRefsIt=containingContext.getLocalRefs().iterator();
+        while (localRefsIt.hasNext()) {
+          EquivalentValue rEqVal=(EquivalentValue)localRefsIt.next();
+          Ref r=(Ref)rEqVal.getValue();
+          if (r instanceof InstanceFieldRef) {
+            EquivalentValue newRefEqVal=InfoFlowAnalysis.getNodeForFieldRef(callingMethod,((FieldRef)r).getFieldRef().resolve());
+            if (callingContext.containsField(newRefEqVal))             callingContext.setFieldLocal(newRefEqVal);
+          }
+ else           if (r instanceof ThisRef)           callingContext.setThisLocal();
+        }
+      }
+ else       if (SmartMethodLocalObjectsAnalysis.isObjectLocal(dfa,containingMethod,containingContext,iie.getBase())) {
+        callingContext.setAllFieldsLocal();
+        callingContext.setThisLocal();
+      }
+ else {
+        callingContext.setAllFieldsShared();
+        callingContext.setThisShared();
+      }
+    }
+ else {
+      callingContext.setAllFieldsShared();
+      callingContext.setThisShared();
+    }
+    if (ie == null)     callingContext.setAllParamsShared();
+ else {
+      for (int param=0; param < ie.getArgCount(); param++) {
+        if (SmartMethodLocalObjectsAnalysis.isObjectLocal(dfa,containingMethod,containingContext,ie.getArg(param)))         callingContext.setParamLocal(param);
+ else         callingContext.setParamShared(param);
+      }
+    }
+  }
+ else {
+    callingContext.setAllFieldsShared();
+    callingContext.setThisShared();
+    callingContext.setAllParamsShared();
+  }
+  return callingContext;
+}

@@ -1,0 +1,44 @@
+{
+  ExceptionalUnitGraph unitGraph=new ExceptionalUnitGraph(unitBody);
+  LiveLocals liveLocals;
+  liveLocals=new SimpleLiveLocals(unitGraph);
+  UnitInterferenceGraph intGraph=new UnitInterferenceGraph(unitBody,localToGroup,liveLocals);
+{
+    int[] freeColors=new int[10];
+    Iterator localIt=intGraph.getLocals().iterator();
+    while (localIt.hasNext()) {
+      Local local=(Local)localIt.next();
+      if (localToColor.containsKey(local)) {
+        continue;
+      }
+      Object group=localToGroup.get(local);
+      int colorCount=groupToColorCount.get(group).intValue();
+      if (freeColors.length < colorCount)       freeColors=new int[Math.max(freeColors.length * 2,colorCount)];
+{
+        for (int i=0; i < colorCount; i++)         freeColors[i]=1;
+      }
+{
+        Local[] interferences=intGraph.getInterferencesOf(local);
+        for (        Local element : interferences) {
+          if (localToColor.containsKey(element)) {
+            int usedColor=localToColor.get(element).intValue();
+            freeColors[usedColor]=0;
+          }
+        }
+      }
+{
+        boolean found=false;
+        int assignedColor=0;
+        for (int i=0; i < colorCount; i++)         if (freeColors[i] == 1) {
+          found=true;
+          assignedColor=i;
+        }
+        if (!found) {
+          assignedColor=colorCount++;
+          groupToColorCount.put(group,new Integer(colorCount));
+        }
+        localToColor.put(local,new Integer(assignedColor));
+      }
+    }
+  }
+}

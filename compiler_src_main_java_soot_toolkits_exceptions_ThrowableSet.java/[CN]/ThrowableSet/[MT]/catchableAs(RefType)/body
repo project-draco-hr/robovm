@@ -1,0 +1,53 @@
+{
+  if (INSTRUMENTING) {
+    Manager.v().catchableAsQueries++;
+  }
+  FastHierarchy h=Scene.v().getOrMakeFastHierarchy();
+  if (exceptionsExcluded.size() > 0) {
+    if (INSTRUMENTING) {
+      Manager.v().catchableAsFromSearch++;
+    }
+    for (Iterator i=exceptionsExcluded.iterator(); i.hasNext(); ) {
+      AnySubType exclusion=(AnySubType)i.next();
+      if (h.canStoreType(catcher,exclusion.getBase())) {
+        return false;
+      }
+    }
+  }
+  if (exceptionsIncluded.contains(catcher)) {
+    if (INSTRUMENTING) {
+      if (exceptionsExcluded.size() == 0) {
+        Manager.v().catchableAsFromMap++;
+      }
+ else {
+        Manager.v().catchableAsFromSearch++;
+      }
+    }
+    return true;
+  }
+ else {
+    if (INSTRUMENTING) {
+      if (exceptionsExcluded.size() == 0) {
+        Manager.v().catchableAsFromSearch++;
+      }
+    }
+    for (Iterator i=exceptionsIncluded.iterator(); i.hasNext(); ) {
+      RefLikeType thrownType=(RefLikeType)i.next();
+      if (thrownType instanceof RefType) {
+        if (thrownType == catcher) {
+          throw new IllegalStateException("ThrowableSet.catchableAs(RefType): exceptions.contains() failed to match contained RefType " + catcher);
+        }
+ else         if (h.canStoreType(thrownType,catcher)) {
+          return true;
+        }
+      }
+ else {
+        RefType thrownBase=((AnySubType)thrownType).getBase();
+        if (h.canStoreType(thrownBase,catcher) || h.canStoreType(catcher,thrownBase)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+}

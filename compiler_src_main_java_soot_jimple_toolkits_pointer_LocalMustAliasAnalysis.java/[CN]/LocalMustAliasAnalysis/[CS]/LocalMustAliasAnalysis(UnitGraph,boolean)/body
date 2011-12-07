@@ -1,0 +1,16 @@
+{
+  super(g);
+  this.container=g.getBody().getMethod();
+  this.localsAndFieldRefs=new HashSet<Value>();
+  for (  Local l : (Collection<Local>)g.getBody().getLocals()) {
+    if (l.getType() instanceof RefLikeType)     this.localsAndFieldRefs.add(l);
+  }
+  if (tryTrackFieldAssignments) {
+    this.localsAndFieldRefs.addAll(trackableFields());
+  }
+  this.rhsToNumber=new HashMap<Value,Integer>();
+  this.mergePointToValueToNumber=new HashMap<Unit,Map<Value,Integer>>();
+  doAnalysis();
+  this.rhsToNumber=null;
+  this.mergePointToValueToNumber=null;
+}

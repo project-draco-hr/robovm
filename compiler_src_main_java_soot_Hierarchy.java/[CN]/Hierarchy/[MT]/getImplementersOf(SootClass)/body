@@ -1,0 +1,14 @@
+{
+  i.checkLevel(SootClass.HIERARCHY);
+  if (!i.isInterface())   throw new RuntimeException("interface needed; got " + i);
+  checkState();
+  Iterator<SootClass> it=getSubinterfacesOfIncluding(i).iterator();
+  ArraySet set=new ArraySet();
+  while (it.hasNext()) {
+    SootClass c=it.next();
+    set.addAll(getDirectImplementersOf(c));
+  }
+  ArrayList l=new ArrayList();
+  l.addAll(set);
+  return Collections.unmodifiableList(l);
+}

@@ -1,0 +1,18 @@
+{
+  field_info fi;
+  int i;
+  fields=new field_info[fields_count];
+  for (i=0; i < fields_count; i++) {
+    fi=new field_info();
+    fi.access_flags=d.readUnsignedShort();
+    fi.name_index=d.readUnsignedShort();
+    fi.descriptor_index=d.readUnsignedShort();
+    fi.attributes_count=d.readUnsignedShort();
+    if (fi.attributes_count > 0) {
+      fi.attributes=new attribute_info[fi.attributes_count];
+      readAttributes(d,fi.attributes_count,fi.attributes);
+    }
+    fields[i]=fi;
+  }
+  return true;
+}

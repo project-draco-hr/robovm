@@ -1,0 +1,100 @@
+{
+  List<Block> blockList=new ArrayList<Block>(leaders.size());
+  Map<Unit,Block> unitToBlock=new HashMap<Unit,Block>();
+  Unit blockHead=null;
+  int blockLength=0;
+  Iterator<Unit> unitIt=mUnits.iterator();
+  if (unitIt.hasNext()) {
+    blockHead=unitIt.next();
+    if (!leaders.contains(blockHead)) {
+      throw new RuntimeException("BlockGraph: first unit not a leader!");
+    }
+    blockLength++;
+  }
+  Unit blockTail=blockHead;
+  int indexInMethod=0;
+  while (unitIt.hasNext()) {
+    Unit u=unitIt.next();
+    if (leaders.contains(u)) {
+      addBlock(blockHead,blockTail,indexInMethod,blockLength,blockList,unitToBlock);
+      indexInMethod++;
+      blockHead=u;
+      blockLength=0;
+    }
+    blockTail=u;
+    blockLength++;
+  }
+  if (blockLength > 0) {
+    addBlock(blockHead,blockTail,indexInMethod,blockLength,blockList,unitToBlock);
+  }
+  for (Iterator<Unit> it=unitGraph.getHeads().iterator(); it.hasNext(); ) {
+    Unit headUnit=(Unit)it.next();
+    Block headBlock=unitToBlock.get(headUnit);
+    if (headBlock.getHead() == headUnit) {
+      mHeads.add(headBlock);
+    }
+ else {
+      throw new RuntimeException("BlockGraph(): head Unit is not the first unit in the corresponding Block!");
+    }
+  }
+  for (Iterator<Unit> it=unitGraph.getTails().iterator(); it.hasNext(); ) {
+    Unit tailUnit=(Unit)it.next();
+    Block tailBlock=unitToBlock.get(tailUnit);
+    if (tailBlock.getTail() == tailUnit) {
+      mTails.add(tailBlock);
+    }
+ else {
+      throw new RuntimeException("BlockGraph(): tail Unit is not the last unit in the corresponding Block!");
+    }
+  }
+  for (Iterator<Block> blockIt=blockList.iterator(); blockIt.hasNext(); ) {
+    Block block=blockIt.next();
+    List<Unit> predUnits=unitGraph.getPredsOf(block.getHead());
+    List<Block> predBlocks=new ArrayList<Block>(predUnits.size());
+    for (Iterator<Unit> predIt=predUnits.iterator(); predIt.hasNext(); ) {
+      Unit predUnit=predIt.next();
+      Block predBlock=unitToBlock.get(predUnit);
+      if (predBlock == null) {
+        throw new RuntimeException("BlockGraph(): block head mapped to null block!");
+      }
+      predBlocks.add(predBlock);
+    }
+    if (predBlocks.size() == 0) {
+      block.setPreds(Collections.<Block>emptyList());
+    }
+ else {
+      block.setPreds(Collections.unmodifiableList(predBlocks));
+      if (block.getHead() == mUnits.getFirst()) {
+        mHeads.add(block);
+      }
+    }
+    List<Unit> succUnits=unitGraph.getSuccsOf(block.getTail());
+    List<Block> succBlocks=new ArrayList<Block>(succUnits.size());
+    for (Iterator<Unit> succIt=succUnits.iterator(); succIt.hasNext(); ) {
+      Unit succUnit=succIt.next();
+      Block succBlock=unitToBlock.get(succUnit);
+      if (succBlock == null) {
+        throw new RuntimeException("BlockGraph(): block tail mapped to null block!");
+      }
+      succBlocks.add(succBlock);
+    }
+    if (succBlocks.size() == 0) {
+      block.setSuccs(Collections.<Block>emptyList());
+      if (!mTails.contains(block)) {
+        throw new RuntimeException("Block with no successors is not a tail!: " + block.toString());
+      }
+    }
+ else {
+      block.setSuccs(Collections.unmodifiableList(succBlocks));
+    }
+  }
+  mBlocks=Collections.unmodifiableList(blockList);
+  mHeads=Collections.unmodifiableList(mHeads);
+  if (mTails.size() == 0) {
+    mTails=Collections.emptyList();
+  }
+ else {
+    mTails=Collections.unmodifiableList(mTails);
+  }
+  return unitToBlock;
+}

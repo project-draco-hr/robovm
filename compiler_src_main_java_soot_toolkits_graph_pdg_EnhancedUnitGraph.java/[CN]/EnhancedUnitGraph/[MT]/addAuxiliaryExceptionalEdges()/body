@@ -1,0 +1,51 @@
+{
+  for (Iterator<Trap> trapIt=body.getTraps().iterator(); trapIt.hasNext(); ) {
+    Trap trap=trapIt.next();
+    Unit handler=trap.getHandlerUnit();
+    Unit pred=handler;
+    while (this.unitToPreds.get(pred).size() > 0)     pred=this.unitToPreds.get(pred).get(0);
+    handler2header.put(handler,pred);
+    Unit ehnop;
+    if (try2nop.containsKey(trap.getBeginUnit()))     ehnop=try2nop.get(trap.getBeginUnit());
+ else {
+      ehnop=new EHNopStmt();
+      try2nop.put(trap.getBeginUnit(),ehnop);
+    }
+  }
+  Hashtable<Unit,Boolean> nop2added=new Hashtable<Unit,Boolean>();
+  AddExceptionalEdge:   for (Iterator<Trap> trapIt=body.getTraps().iterator(); trapIt.hasNext(); ) {
+    Trap trap=trapIt.next();
+    Unit b=trap.getBeginUnit();
+    Unit handler=trap.getHandlerUnit();
+    handler=handler2header.get(handler);
+    if (this.unitToPreds.containsKey(handler)) {
+      List<Unit> handlerPreds=this.unitToPreds.get(handler);
+      for (Iterator<Unit> preditr=handlerPreds.iterator(); preditr.hasNext(); )       if (try2nop.containsValue(preditr.next()))       continue AddExceptionalEdge;
+    }
+ else     continue;
+    Unit ehnop=try2nop.get(b);
+    if (!nop2added.containsKey(ehnop)) {
+      List<Unit> predsOfB=getPredsOf(b);
+      List<Unit> predsOfehnop=new ArrayList<Unit>(predsOfB);
+      for (Iterator<Unit> itr=predsOfB.iterator(); itr.hasNext(); ) {
+        Unit a=itr.next();
+        List<Unit> succsOfA=this.unitToSuccs.get(a);
+        succsOfA.remove(b);
+        succsOfA.add((Unit)ehnop);
+      }
+      predsOfB.clear();
+      predsOfB.add((Unit)ehnop);
+      this.unitToPreds.put((Unit)ehnop,predsOfehnop);
+    }
+    if (!this.unitToSuccs.containsKey(ehnop))     this.unitToSuccs.put(ehnop,new ArrayList<Unit>());
+    List<Unit> succsOfehnop=this.unitToSuccs.get(ehnop);
+    if (!succsOfehnop.contains(b))     succsOfehnop.add(b);
+    succsOfehnop.add(handler);
+    if (!this.unitToPreds.containsKey(handler))     this.unitToPreds.put(handler,new ArrayList<Unit>());
+    List<Unit> predsOfhandler=this.unitToPreds.get(handler);
+    predsOfhandler.add((Unit)ehnop);
+    Chain<Unit> units=body.getUnits().getNonPatchingChain();
+    if (!units.contains(ehnop))     units.insertBefore((Unit)ehnop,b);
+    nop2added.put(ehnop,Boolean.TRUE);
+  }
+}

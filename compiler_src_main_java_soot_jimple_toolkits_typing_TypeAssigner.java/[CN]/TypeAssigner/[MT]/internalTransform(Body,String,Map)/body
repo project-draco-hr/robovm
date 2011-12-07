@@ -1,0 +1,24 @@
+{
+  if (b == null) {
+    throw new NullPointerException();
+  }
+  Date start=new Date();
+  if (Options.v().verbose())   G.v().out.println("[TypeAssigner] typing system started on " + start);
+  JBTROptions opt=new JBTROptions(options);
+  ignoreWrongStaticNess=opt.ignore_wrong_staticness();
+  if (opt.compare_type_assigners()) {
+    compareTypeAssigners(b,opt.use_older_type_assigner());
+  }
+ else {
+    if (opt.use_older_type_assigner())     TypeResolver.resolve((JimpleBody)b,Scene.v());
+ else     (new soot.jimple.toolkits.typing.fast.TypeResolver((JimpleBody)b)).inferTypes();
+  }
+  Date finish=new Date();
+  if (Options.v().verbose()) {
+    long runtime=finish.getTime() - start.getTime();
+    long mins=runtime / 60000;
+    long secs=(runtime % 60000) / 1000;
+    G.v().out.println("[TypeAssigner] typing system ended. It took " + mins + " mins and "+ secs+ " secs.");
+  }
+  if (typingFailed((JimpleBody)b))   throw new RuntimeException("type inference failed!");
+}

@@ -1,0 +1,30 @@
+{
+  int size=unitChain.size();
+  Set<Unit> trapUnitsThatAreHeads=Collections.emptySet();
+  if (Options.v().time())   Timers.v().graphTimer.start();
+  unitToUnexceptionalSuccs=new HashMap<Unit,List<Unit>>(size * 2 + 1,0.7f);
+  unitToUnexceptionalPreds=new HashMap<Unit,List<Unit>>(size * 2 + 1,0.7f);
+  buildUnexceptionalEdges(unitToUnexceptionalSuccs,unitToUnexceptionalPreds);
+  makeMappedListsUnmodifiable(unitToUnexceptionalSuccs);
+  makeMappedListsUnmodifiable(unitToUnexceptionalPreds);
+  this.throwAnalysis=throwAnalysis;
+  if (body.getTraps().size() == 0) {
+    unitToExceptionDests=Collections.emptyMap();
+    unitToExceptionalSuccs=Collections.emptyMap();
+    unitToExceptionalPreds=Collections.emptyMap();
+    unitToSuccs=unitToUnexceptionalSuccs;
+    unitToPreds=unitToUnexceptionalPreds;
+  }
+ else {
+    unitToExceptionDests=buildExceptionDests(throwAnalysis);
+    unitToExceptionalSuccs=new HashMap<Unit,List<Unit>>(unitToExceptionDests.size() * 2 + 1,0.7f);
+    unitToExceptionalPreds=new HashMap<Unit,List<Unit>>(body.getTraps().size() * 2 + 1,0.7f);
+    trapUnitsThatAreHeads=buildExceptionalEdges(throwAnalysis,unitToExceptionDests,unitToExceptionalSuccs,unitToExceptionalPreds,omitExceptingUnitEdges);
+    makeMappedListsUnmodifiable(unitToExceptionalSuccs);
+    makeMappedListsUnmodifiable(unitToExceptionalPreds);
+    unitToSuccs=combineMapValues(unitToUnexceptionalSuccs,unitToExceptionalSuccs);
+    unitToPreds=combineMapValues(unitToUnexceptionalPreds,unitToExceptionalPreds);
+  }
+  buildHeadsAndTails(trapUnitsThatAreHeads);
+  if (Options.v().time())   Timers.v().graphTimer.end();
+}

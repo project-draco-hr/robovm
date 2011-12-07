@@ -1,0 +1,18 @@
+{
+  PointsToAnalysis pa=Scene.v().getPointsToAnalysis();
+  Set<IdentityStmt> parms=new HashSet<IdentityStmt>();
+  for (Iterator sIt=b.getUnits().iterator(); sIt.hasNext(); ) {
+    final Stmt s=(Stmt)sIt.next();
+    if (!(s instanceof IdentityStmt))     continue;
+    IdentityStmt is=(IdentityStmt)s;
+    ValueBox vb=is.getRightOpBox();
+    if (!(vb.getValue() instanceof ParameterRef))     continue;
+    ParameterRef pr=(ParameterRef)vb.getValue();
+    if (!(pr.getType() instanceof RefLikeType))     continue;
+    parms.add(is);
+  }
+  int colour=0;
+  while (!parms.isEmpty()) {
+    fill(parms,parms.iterator().next(),colour++,pa);
+  }
+}

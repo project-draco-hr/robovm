@@ -1,0 +1,23 @@
+{
+  HashMap in=(HashMap)inValue;
+  HashMap out=(HashMap)outValue;
+  Stmt s=(Stmt)unit;
+  out.clear();
+  out.putAll(in);
+  if (s instanceof DefinitionStmt) {
+    DefinitionStmt ds=(DefinitionStmt)s;
+    Value lhs=ds.getLeftOp();
+    Value rhs=ds.getRightOp();
+    if (lhs instanceof Local) {
+      HashSet lv=new HashSet();
+      out.put(lhs,lv);
+      if (rhs instanceof NewExpr) {
+        lv.add(rhs);
+      }
+ else       if (rhs instanceof Local) {
+        lv.addAll((HashSet)in.get(rhs));
+      }
+ else       lv.add(UNKNOWN);
+    }
+  }
+}
