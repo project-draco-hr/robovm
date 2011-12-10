@@ -1,21 +1,22 @@
 {
-  this.sootClass=Scene.v().getSootClass(clazz.getClassName());
-  if (isStruct(this.sootClass)) {
-    enhanceStructClass(this.sootClass);
-  }
+  reset();
+  sootClass=Scene.v().getSootClass(clazz.getClassName());
   module=new Module();
   throwables=new HashMap<SootClass,Global>();
   trampolines=new HashMap<Trampoline,FunctionRef>();
   strings=new HashMap<String,Global>();
-  module.addInclude(getClass().getClassLoader().getResource("header.ll"));
   classFields=getClassFields(sootClass,false);
   instanceFields=getInstanceFields(sootClass,false);
   allInstanceFields=getInstanceFields(sootClass,true);
   classFieldsType=getType("ClassFields",classFields);
+  instanceFieldsType=getType("InstanceFields",allInstanceFields);
+  if (isStruct(this.sootClass)) {
+    enhanceStructClass(this.sootClass);
+  }
+  module.addInclude(getClass().getClassLoader().getResource("header.ll"));
   if (classFieldsType != null) {
     module.addType(classFieldsType);
   }
-  instanceFieldsType=getType("InstanceFields",allInstanceFields);
   if (instanceFieldsType != null) {
     module.addType(instanceFieldsType);
   }

@@ -39,7 +39,7 @@
   File configLl=new File(config.getTmpDir(),"config.ll");
   FileUtils.writeStringToFile(configLl,module.toString(),"UTF-8");
   File configS=new File(config.getTmpDir(),"config.s");
-  llc(configLl,configS);
+  CompilerUtil.llc(config,configLl,configS);
   String gccPath="gcc";
   if (config.getGccBinPath() != null) {
     gccPath=config.getGccBinPath().getAbsolutePath();
@@ -65,5 +65,5 @@
     gccArgs.add("-arch");
     gccArgs.add(config.getArch().toString());
   }
-  exec(gccPath,"-o",outFile,"-g",gccArgs,configS,libFiles,libArgs);
+  CompilerUtil.exec(config,gccPath,"-o",outFile,"-g",gccArgs,configS,libFiles,libArgs);
 }

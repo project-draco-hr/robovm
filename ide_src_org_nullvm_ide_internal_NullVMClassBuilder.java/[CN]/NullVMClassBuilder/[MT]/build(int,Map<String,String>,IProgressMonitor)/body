@@ -28,30 +28,37 @@
       }
     }
   }
-  List<File> bootclasspath=new ArrayList<File>();
-  List<File> classpath=new ArrayList<File>();
+  Config.Builder builder=new Config.Builder();
+  builder.skipLinking();
+  builder.skipRuntimeLib();
+  builder.nullVMHomeDir(new File(System.getProperty("user.home"),".nullvm"));
+  builder.llvmHomeDir(new File("/home/niklas/Applications/clang+llvm-2.9-x86_64-linux"));
   for (  IClasspathEntry entry : javaProject.getResolvedClasspath(false)) {
     if (entry.getEntryKind() != IClasspathEntry.CPE_SOURCE) {
       IResource member=root.findMember(entry.getPath());
       if (member != null) {
-        classpath.add(member.getLocation().toFile());
+        builder.addClasspathEntry(member.getLocation().toFile());
       }
  else {
         if (entry.getPath().toString().contains("/nullvm-rt.jar")) {
-          bootclasspath.add(entry.getPath().toFile());
+          builder.addBootClasspathEntry(entry.getPath().toFile());
         }
  else {
-          classpath.add(entry.getPath().toFile());
+          builder.addClasspathEntry(entry.getPath().toFile());
         }
       }
     }
   }
   for (  IPath outputPath : outputPaths) {
-    classpath.add(outputPath.toFile());
+    builder.addClasspathEntry(outputPath.toFile());
   }
-  System.out.println(classpath);
   try {
-    AppCompiler.main(new String[0]);
+    Config config=builder.build();
+    ClassCompiler compiler=new ClassCompiler(config);
+    for (    String c : changedClasses) {
+      Clazz clazz=config.getClazzes().load(c.replace('.','/'));
+      compiler.compile(clazz);
+    }
   }
  catch (  IOException e) {
     e.printStackTrace();

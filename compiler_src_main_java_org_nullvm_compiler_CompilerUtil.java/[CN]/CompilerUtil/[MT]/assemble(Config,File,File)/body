@@ -1,0 +1,16 @@
+{
+  String gccPath="gcc";
+  if (config.getGccBinPath() != null) {
+    gccPath=config.getGccBinPath().getAbsolutePath();
+  }
+  List<String> opts=new ArrayList<String>();
+  if (config.isDebug()) {
+    opts.add("-g");
+  }
+  if (config.getOs() == OS.darwin) {
+    opts.add("-arch");
+    opts.add(config.getArch().toString());
+  }
+  outFile.getParentFile().mkdirs();
+  exec(config,gccPath,"-c","-o",outFile,opts,inFile);
+}
