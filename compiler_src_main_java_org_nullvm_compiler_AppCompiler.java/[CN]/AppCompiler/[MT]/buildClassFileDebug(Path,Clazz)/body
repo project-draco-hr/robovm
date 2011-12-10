@@ -8,12 +8,10 @@
   }
   llFile.getParentFile().mkdirs();
   outFile.getParentFile().mkdirs();
-  config.getLogger().debug("Compiling class file '%s' to object file '%s'\n",clazz.getFileName(),outFile);
+  config.getLogger().debug("Compiling class file '%s' to object file '%s'",clazz.getFileName(),outFile);
   classToIr(clazz,llFile);
-  File tmpBcFile=changeExt(llFile,"tmp.bc");
-  llvmAs(llFile,tmpBcFile);
   File bcFile=changeExt(llFile,"bc");
-  opt(tmpBcFile,bcFile,"-mem2reg","-always-inline");
+  opt(llFile,bcFile,"-mem2reg","-always-inline");
   File sFile=changeExt(outFile,"s");
   llc(bcFile,sFile);
   gcc(sFile,outFile);

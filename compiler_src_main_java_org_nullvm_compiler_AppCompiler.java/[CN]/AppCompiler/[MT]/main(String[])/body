@@ -1,5 +1,5 @@
 {
-  Main main=null;
+  AppCompiler main=null;
   boolean verbose=false;
   try {
     Config.Builder builder=new Config.Builder();
@@ -57,7 +57,7 @@
  else       if ("-ar-bin".equals(args[i])) {
         builder.arBinPath(new File(args[++i]));
       }
- else       if ("-llvm-bin-dir".equals(args[i])) {
+ else       if ("-llvm-home".equals(args[i])) {
         builder.llvmHomeDir(new File(args[++i]));
       }
  else       if ("-os".equals(args[i])) {
@@ -112,7 +112,7 @@
       }
 );
     }
-    main=new Main(builder.build());
+    main=new AppCompiler(builder.build());
   }
  catch (  Throwable t) {
     String message=t.getMessage();
@@ -129,7 +129,7 @@
   }
  catch (  Throwable t) {
     String message=t.getMessage();
-    if (verbose) {
+    if (verbose && !(t instanceof ExecuteException)) {
       t.printStackTrace();
     }
     printUsageAndExit(message);
