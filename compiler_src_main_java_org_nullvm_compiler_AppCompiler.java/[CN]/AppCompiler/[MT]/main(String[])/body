@@ -1,6 +1,8 @@
 {
-  AppCompiler main=null;
+  AppCompiler compiler=null;
   boolean verbose=false;
+  boolean run=false;
+  List<String> runArgs=new ArrayList<String>();
   try {
     Config.Builder builder=new Config.Builder();
     int i=0;
@@ -22,7 +24,7 @@
         builder.target(args[++i]);
       }
  else       if ("-d".equals(args[i])) {
-        builder.targetDir(new File(args[++i]));
+        builder.installDir(new File(args[++i]));
       }
  else       if ("-cache".equals(args[i])) {
         builder.cacheDir(new File(args[++i]));
@@ -31,22 +33,22 @@
         builder.nullVMHomeDir(new File(args[++i]));
       }
  else       if ("-run".equals(args[i])) {
-        builder.run();
+        run=true;
       }
  else       if ("-verbose".equals(args[i])) {
         verbose=true;
       }
  else       if ("-debug".equals(args[i])) {
-        builder.debug();
+        builder.debug(true);
       }
  else       if ("-skiprt".equals(args[i])) {
-        builder.skipRuntimeLib();
+        builder.skipRuntimeLib(true);
       }
  else       if ("-skiplink".equals(args[i])) {
-        builder.skipLinking();
+        builder.skipLinking(true);
       }
  else       if ("-clean".equals(args[i])) {
-        builder.clean();
+        builder.clean(true);
       }
  else       if ("-help".equals(args[i]) || "-?".equals(args[i])) {
         printUsageAndExit(null);
@@ -89,14 +91,10 @@
       i++;
     }
     while (i < args.length) {
-      builder.addRunArg(args[i++]);
+      runArgs.add(args[i++]);
     }
     if (verbose) {
       builder.logger(new Logger(){
-        public void warn(        String format,        Object... args){
-          System.err.format(format,args);
-          System.err.println();
-        }
         public void info(        String format,        Object... args){
           System.out.format(format,args);
           System.out.println();
@@ -112,7 +110,8 @@
       }
 );
     }
-    main=new AppCompiler(builder.build());
+    builder.skipInstall(run);
+    compiler=new AppCompiler(builder.build());
   }
  catch (  Throwable t) {
     String message=t.getMessage();
@@ -125,7 +124,14 @@
     printUsageAndExit(message);
   }
   try {
-    main.run();
+    compiler.compile();
+    if (run) {
+      compiler.config.getApp().launch(runArgs);
+    }
+ else {
+      compiler.compile();
+      compiler.config.getApp().install();
+    }
   }
  catch (  Throwable t) {
     String message=t.getMessage();

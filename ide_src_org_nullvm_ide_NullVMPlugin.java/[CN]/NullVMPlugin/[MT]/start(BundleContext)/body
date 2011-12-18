@@ -1,5 +1,19 @@
 {
   super.start(context);
   plugin=this;
-  System.out.println("start");
+  console=new MessageConsole("NullVM Console",null);
+  ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[]{console});
+  Display display=plugin.getWorkbench().getDisplay();
+  debugStream=console.newMessageStream();
+  final Color debugColor=new Color(display,0x99,0x99,0x99);
+  infoStream=console.newMessageStream();
+  errorStream=console.newMessageStream();
+  final Color errorColor=new Color(display,0xFF,0x00,0x00);
+  display.asyncExec(new Runnable(){
+    public void run(){
+      debugStream.setColor(debugColor);
+      errorStream.setColor(errorColor);
+    }
+  }
+);
 }

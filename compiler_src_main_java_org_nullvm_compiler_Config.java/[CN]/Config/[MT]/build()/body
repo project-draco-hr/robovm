@@ -14,9 +14,6 @@
   if (mainJar != null) {
     classpath.add(mainJar);
   }
-  if (!skipLinking && targetDir == null) {
-    throw new IllegalArgumentException("No target directory specified");
-  }
   if (classpath.isEmpty()) {
     throw new IllegalArgumentException("No classpath specified");
   }
@@ -24,12 +21,13 @@
     throw new IllegalArgumentException("No target and no main class specified");
   }
   if (os == null) {
-    os=detectOS();
-    logger.debug("Autodetected OS: %s",os);
+    os=OS.getDefaultOS(llvmHomeDir);
   }
   if (arch == null) {
-    arch=detectArch();
-    logger.debug("Autodetected arch: %s",arch);
+    arch=Arch.getDefaultArch(llvmHomeDir);
+  }
+  if (skipLinking) {
+    skipInstall=true;
   }
   File homeLib=new File(nullVMHomeDir,"lib");
   osArchDepLibDir=new File(new File(homeLib,os.toString()),arch.toString());
@@ -50,8 +48,12 @@
     tmpDir.mkdirs();
   }
   this.clazzes=new Clazzes(bootclasspath,classpath);
-  if (!skipLinking) {
-    targetDir.mkdirs();
+  if (!skipInstall) {
+    if (installDir == null) {
+      installDir=new File(".",target);
+    }
+    installDir.mkdirs();
   }
+  app=appBuilder.build(this);
   return this;
 }
