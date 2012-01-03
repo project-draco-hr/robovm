@@ -18,10 +18,8 @@
     if (monitor.isCanceled()) {
       return;
     }
-    File nullVMHomeDir=new File(System.getProperty("user.home"),".nullvm");
-    File llvmHomeDir=new File("/home/niklas/Applications/clang+llvm-2.9-x86_64-linux");
-    Arch arch=Arch.getDefaultArch(llvmHomeDir);
-    OS os=OS.getDefaultOS(llvmHomeDir);
+    Arch arch=NullVMPlugin.getArch(configuration.getAttribute(NullVMPlugin.LAUNCH_ARCH,(String)null));
+    OS os=NullVMPlugin.getOS(configuration.getAttribute(NullVMPlugin.LAUNCH_OS,(String)null));
     File installDir=new File(NullVMPlugin.getMetadataDir(),getJavaProjectName(configuration));
     installDir=new File(new File(installDir,os.toString()),arch.toString());
     installDir=new File(installDir,mainTypeName);
@@ -36,8 +34,15 @@
     configBuilder.os(os);
     configBuilder.debug(true);
     configBuilder.skipInstall(false);
-    configBuilder.nullVMHomeDir(nullVMHomeDir);
-    configBuilder.llvmHomeDir(llvmHomeDir);
+    if (NullVMPlugin.useBundledNullVM()) {
+      configBuilder.nullVMHomeDir(NullVMPlugin.getBundledNullVMDir());
+    }
+ else {
+      configBuilder.nullVMHomeDir(NullVMPlugin.getNullVMHomeDir());
+    }
+    if (!NullVMPlugin.useSystemLlvm()) {
+      configBuilder.llvmHomeDir(NullVMPlugin.getLlvmHomeDir());
+    }
     configBuilder.logger(NullVMPlugin.getConsoleLogger());
     if (bootclasspath != null) {
       configBuilder.skipRuntimeLib(true);
@@ -71,7 +76,7 @@
     }
  catch (    IOException e) {
       NullVMPlugin.consoleError("Build failed");
-      throw new CoreException(new Status(IStatus.ERROR,NullVMPlugin.PLUGIN_ID,"Build failed",e));
+      throw new CoreException(new Status(IStatus.ERROR,NullVMPlugin.PLUGIN_ID,"Build failed. Check the NullVM console for more information.",e));
     }
     try {
       NullVMPlugin.consoleInfo("Installing executable to %s",installDir);
@@ -106,7 +111,7 @@
     }
  catch (    IOException e) {
       NullVMPlugin.consoleError("Launch failed");
-      throw new CoreException(new Status(IStatus.ERROR,NullVMPlugin.PLUGIN_ID,"Launch failed",e));
+      throw new CoreException(new Status(IStatus.ERROR,NullVMPlugin.PLUGIN_ID,"Launch failed. Check the NullVM console for more information.",e));
     }
   }
   finally {
