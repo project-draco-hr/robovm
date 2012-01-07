@@ -66,9 +66,9 @@
   FileUtils.writeStringToFile(configLl,module.toString(),"UTF-8");
   File configS=new File(config.getTmpDir(),"config.s");
   CompilerUtil.llc(config,configLl,configS);
-  String gccPath="gcc";
-  if (config.getGccBinPath() != null) {
-    gccPath=config.getGccBinPath().getAbsolutePath();
+  String ccPath=config.getOs() == OS.darwin ? "clang" : "gcc";
+  if (config.getCcBinPath() != null) {
+    ccPath=config.getCcBinPath().getAbsolutePath();
   }
   List<String> gccArgs=new ArrayList<String>();
   List<String> libArgs=new ArrayList<String>();
@@ -91,5 +91,5 @@
     gccArgs.add("-arch");
     gccArgs.add(config.getArch().toString());
   }
-  CompilerUtil.exec(config,gccPath,"-o",outFile,"-g",gccArgs,configS,libFiles,libArgs);
+  CompilerUtil.exec(config,ccPath,"-o",outFile,"-g",gccArgs,configS,libFiles,libArgs);
 }

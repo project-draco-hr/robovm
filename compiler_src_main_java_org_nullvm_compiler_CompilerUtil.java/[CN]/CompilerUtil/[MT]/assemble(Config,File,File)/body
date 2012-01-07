@@ -1,7 +1,7 @@
 {
-  String gccPath="gcc";
-  if (config.getGccBinPath() != null) {
-    gccPath=config.getGccBinPath().getAbsolutePath();
+  String ccPath=config.getOs() == OS.darwin ? "clang" : "gcc";
+  if (config.getCcBinPath() != null) {
+    ccPath=config.getCcBinPath().getAbsolutePath();
   }
   List<String> opts=new ArrayList<String>();
   if (config.isDebug()) {
@@ -12,5 +12,5 @@
     opts.add(config.getArch().toString());
   }
   outFile.getParentFile().mkdirs();
-  exec(config,gccPath,"-c","-o",outFile,opts,inFile);
+  exec(config,ccPath,"-c","-o",outFile,opts,inFile);
 }
