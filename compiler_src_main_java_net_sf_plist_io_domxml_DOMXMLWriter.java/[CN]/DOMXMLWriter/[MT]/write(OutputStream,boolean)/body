@@ -1,0 +1,25 @@
+{
+  Element rootNode=doc.createElement("plist");
+  rootNode.setAttribute("version",VERSION);
+  rootNode.appendChild(generateNode(root));
+  doc.appendChild(rootNode);
+  TransformerFactory transformerFactory=TransformerFactory.newInstance();
+  Transformer transformer;
+  try {
+    transformer=transformerFactory.newTransformer();
+    DOMSource source=new DOMSource(doc);
+    StreamResult result=new StreamResult(stream);
+    transformer.setOutputProperty(OutputKeys.INDENT,indent ? "yes" : "no");
+    transformer.setOutputProperty(OutputKeys.STANDALONE,"no");
+    transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC,DOCTYPE_PUBLIC);
+    transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,DOCTYPE_SYSTEM);
+    transformer.transform(source,result);
+  }
+ catch (  TransformerConfigurationException e) {
+    e.printStackTrace();
+  }
+catch (  TransformerException e) {
+    e.printStackTrace();
+  }
+  stream.close();
+}

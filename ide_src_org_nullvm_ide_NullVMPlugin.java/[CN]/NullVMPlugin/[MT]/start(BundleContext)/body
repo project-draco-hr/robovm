@@ -2,6 +2,7 @@
   super.start(context);
   plugin=this;
   console=new MessageConsole("NullVM Console",null);
+  console.setWaterMarks(40000,80000);
   ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[]{console});
   Display display=getDisplay();
   debugStream=console.newMessageStream();
@@ -16,4 +17,18 @@
     }
   }
 );
+  String version=getBundle().getHeaders().get("Bundle-Version");
+  File versionFile=new File(getMetadataDir(),"version");
+  if (!versionFile.exists() || !FileUtils.readFileToString(versionFile,"UTF8").equals(version)) {
+    File lib=new File(getBundledNullVMDir(),"lib");
+    try {
+      FileUtils.deleteDirectory(lib);
+    }
+ catch (    IOException ignored) {
+    }
+    lib.mkdirs();
+    FileUtils.copyURLToFile(getBundle().getResource("/lib/nullvm-rt.jar"),new File(lib,"nullvm-rt.jar"));
+    unzip(getBundle().getResource("/lib/binaries.zip"),lib);
+    FileUtils.writeStringToFile(versionFile,version,"UTF8");
+  }
 }

@@ -1,0 +1,16 @@
+{
+  int length2=getLength(length);
+  byte[] buffer=new byte[2 * length2 * objRefSize];
+  HashMap<String,NSObject> result=new HashMap<String,NSObject>(length2);
+  stream.read(buffer);
+  for (int i=0; i < length2; i++) {
+    byte[] keyRefArr=new byte[objRefSize];
+    System.arraycopy(buffer,objRefSize * i,keyRefArr,0,objRefSize);
+    int keyRef=getInteger(keyRefArr);
+    byte[] objRefArr=new byte[objRefSize];
+    System.arraycopy(buffer,length2 * objRefSize + objRefSize * i,objRefArr,0,objRefSize);
+    int objRef=getInteger(objRefArr);
+    result.put(parseNode(offsetTable[keyRef]).toString(),parseNode(offsetTable[objRef]));
+  }
+  return new NSDictionary(result);
+}

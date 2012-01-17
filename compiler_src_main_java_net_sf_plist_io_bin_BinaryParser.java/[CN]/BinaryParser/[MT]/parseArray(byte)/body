@@ -1,0 +1,13 @@
+{
+  int length2=getLength(length);
+  byte[] buffer=new byte[length2 * objRefSize];
+  ArrayList<NSObject> result=new ArrayList<NSObject>(length2);
+  stream.read(buffer);
+  for (int i=0; i < length2; i++) {
+    byte[] objRefArr=new byte[objRefSize];
+    System.arraycopy(buffer,objRefSize * i,objRefArr,0,objRefSize);
+    int objRef=getInteger(objRefArr);
+    result.add(parseNode(offsetTable[objRef]));
+  }
+  return new NSArray(result);
+}

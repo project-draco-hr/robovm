@@ -17,7 +17,7 @@
   if (classpath.isEmpty()) {
     throw new IllegalArgumentException("No classpath specified");
   }
-  if (!skipLinking && target == null && mainClass == null) {
+  if (!skipLinking && executable == null && mainClass == null) {
     throw new IllegalArgumentException("No target and no main class specified");
   }
   if (os == null) {
@@ -30,14 +30,14 @@
     skipInstall=true;
   }
   File homeLib=new File(nullVMHomeDir,"lib");
-  osArchDepLibDir=new File(new File(homeLib,os.toString()),arch.toString());
+  osArchDepLibDir=new File(new File(new File(homeLib,os.toString()),arch.toString()),debug ? "Debug" : "Release");
   cacheDir.mkdirs();
   llvmCacheDir=new File(cacheDir,"llvm");
   llvmCacheDir.mkdirs();
   objectCacheDir=new File(cacheDir,"object");
   objectCacheDir.mkdirs();
-  if (target == null) {
-    target=mainClass;
+  if (executable == null) {
+    executable=mainClass;
   }
   if (!skipRuntimeLib) {
     bootclasspath.add(0,new File(homeLib,"nullvm-rt.jar"));
@@ -50,10 +50,10 @@
   this.clazzes=new Clazzes(bootclasspath,classpath);
   if (!skipInstall) {
     if (installDir == null) {
-      installDir=new File(".",target);
+      installDir=new File(".",executable);
     }
     installDir.mkdirs();
   }
-  app=appBuilder.build(this);
+  target=targetBuilder.build(this);
   return this;
 }
