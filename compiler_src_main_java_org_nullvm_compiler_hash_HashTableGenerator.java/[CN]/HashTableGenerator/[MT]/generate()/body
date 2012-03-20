@@ -1,0 +1,23 @@
+{
+  StructureConstantBuilder builder=new StructureConstantBuilder();
+  int start=0;
+  builder.add(new IntegerConstant(table.length,indexType));
+  builder.add(new IntegerConstant(start,indexType));
+  for (int i=1; i <= table.length; i++) {
+    if (table[i - 1] == null) {
+      builder.add(new IntegerConstant(start,indexType));
+    }
+ else {
+      start+=table[i - 1].size();
+      builder.add(new IntegerConstant(start,indexType));
+    }
+  }
+  for (int i=0; i < table.length; i++) {
+    if (table[i] != null) {
+      for (      Entry<K,V> entry : table[i]) {
+        builder.add(entry.v);
+      }
+    }
+  }
+  return builder.build();
+}

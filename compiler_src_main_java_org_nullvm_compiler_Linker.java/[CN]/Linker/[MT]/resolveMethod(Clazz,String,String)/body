@@ -1,0 +1,30 @@
+{
+  if (clazz != null) {
+    MethodInfo method=clazz.getClazzInfo().getMethod(name,desc);
+    if (method != null) {
+      return new ResolvedMethod(clazz,method);
+    }
+    String superclass=clazz.getClazzInfo().getSuperclass();
+    Clazz c=superclass != null ? config.getClazzes().load(superclass) : null;
+    while (c != null) {
+      method=c.getClazzInfo().getMethod(name,desc);
+      if (method != null) {
+        return new ResolvedMethod(c,method);
+      }
+      superclass=c.getClazzInfo().getSuperclass();
+      c=superclass != null ? config.getClazzes().load(superclass) : null;
+    }
+    c=clazz;
+    while (c != null) {
+      for (      String interfaze : c.getClazzInfo().getInterfaces()) {
+        ResolvedMethod rm=resolveInterfaceMethod(config.getClazzes().load(interfaze),name,desc);
+        if (rm != null) {
+          return rm;
+        }
+      }
+      superclass=c.getClazzInfo().getSuperclass();
+      c=superclass != null ? config.getClazzes().load(superclass) : null;
+    }
+  }
+  return null;
+}

@@ -1,0 +1,52 @@
+{
+  Clazzes clazzes=config.getClazzes();
+  LinkedList<Clazz> queue=new LinkedList<Clazz>(getRootClasses());
+  Set<Clazz> required=new HashSet<Clazz>();
+  while (!queue.isEmpty()) {
+    Clazz clazz=queue.remove();
+    if (required.contains(clazz)) {
+      continue;
+    }
+    required.add(clazz);
+    ClazzInfo clazzInfo=clazz.getClazzInfo();
+    Set<String> deps=new HashSet<String>();
+    if (clazzInfo.getSuperclass() != null) {
+      deps.add(clazzInfo.getSuperclass());
+    }
+    deps.addAll(clazzInfo.getInterfaces());
+    deps.addAll(clazzInfo.getAttributeDependencies());
+    for (    FieldInfo field : clazzInfo.getFields()) {
+      deps.addAll(getDependencies(field.getDesc()));
+    }
+    for (    MethodInfo method : clazzInfo.getMethods()) {
+      deps.addAll(getDependencies(method.getDesc()));
+    }
+    for (    Trampoline t : clazz.getClazzInfo().getTrampolines()) {
+      if (!(t instanceof LdcString)) {
+        String targetClass=t.getTarget();
+        if (isArray(targetClass)) {
+          deps.addAll(getDependencies(targetClass));
+        }
+ else {
+          deps.add(targetClass);
+        }
+      }
+      if (t instanceof FieldAccessor) {
+        deps.addAll(getDependencies(((FieldAccessor)t).getFieldDesc()));
+      }
+ else       if (t instanceof Invoke) {
+        deps.addAll(getDependencies(((Invoke)t).getMethodDesc()));
+      }
+    }
+    for (    String s : deps) {
+      Clazz c=clazzes.load(s);
+      if (c == null) {
+        config.getLogger().warn("Class %s depends on non existing class %s",clazz,s.replace('/','.'));
+      }
+ else       if (!required.contains(c)) {
+        queue.add(c);
+      }
+    }
+  }
+  return required;
+}

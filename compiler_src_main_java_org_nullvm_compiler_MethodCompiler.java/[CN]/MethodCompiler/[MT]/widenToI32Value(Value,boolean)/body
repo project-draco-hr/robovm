@@ -1,0 +1,16 @@
+{
+  Type type=value.getType();
+  if (type instanceof IntegerType && ((IntegerType)type).getBits() < 32) {
+    Variable t=function.newVariable(I32);
+    if (unsigned) {
+      function.add(new Zext(t,value,I32));
+    }
+ else {
+      function.add(new Sext(t,value,I32));
+    }
+    return t.ref();
+  }
+ else {
+    return value;
+  }
+}

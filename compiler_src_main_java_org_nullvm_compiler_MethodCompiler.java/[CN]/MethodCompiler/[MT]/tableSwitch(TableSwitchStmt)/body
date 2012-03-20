@@ -1,0 +1,10 @@
+{
+  Map<IntegerConstant,BasicBlockRef> targets=new HashMap<IntegerConstant,BasicBlockRef>();
+  for (int i=stmt.getLowIndex(); i <= stmt.getHighIndex(); i++) {
+    Unit target=stmt.getTarget(i - stmt.getLowIndex());
+    targets.put(new IntegerConstant(i),function.newBasicBlockRef(new Label(target)));
+  }
+  BasicBlockRef def=function.newBasicBlockRef(new Label(stmt.getDefaultTarget()));
+  Value key=immediate(stmt,(Immediate)stmt.getKey());
+  function.add(new Switch(key,def,targets));
+}

@@ -1,0 +1,50 @@
+{
+  File outFile=new File(config.getTmpDir(),config.getExecutable());
+  config.getLogger().debug("Building executable %s",outFile);
+  String ccPath=(config.getOs().getFamily() == OS.Family.darwin) ? "clang" : "gcc";
+  if (config.getCcBinPath() != null) {
+    ccPath=config.getCcBinPath().getAbsolutePath();
+  }
+  LinkedList<String> ccArgs=new LinkedList<String>();
+  LinkedList<String> libArgs=new LinkedList<String>();
+  libArgs.addAll(Arrays.asList("-lnullvm-bc","-lm","-lnullvm-core","-lnullvm-hyprt"));
+  ccArgs.add("-L");
+  ccArgs.add(config.getOsArchDepLibDir().getAbsolutePath());
+  if (config.getOs().getFamily() == OS.Family.linux) {
+    libArgs.add("-l:libgc.so.1");
+    ccArgs.add("-Xlinker");
+    ccArgs.add("-rpath=$ORIGIN");
+    File aliasFile=new File(config.getTmpDir(),"aliases");
+    PrintWriter w=null;
+    try {
+      w=new PrintWriter(aliasFile,"ASCII");
+      for (      Entry<String,String> alias : aliases.entrySet()) {
+        w.print(alias.getKey());
+        w.print(" = ");
+        w.print(alias.getValue());
+        w.print(";\n");
+      }
+    }
+  finally {
+      IOUtils.closeQuietly(w);
+    }
+    ccArgs.add("-Xlinker");
+    ccArgs.add("--script=" + aliasFile.getAbsolutePath());
+    ccArgs.add("-Xlinker");
+    ccArgs.add("--gc-sections");
+  }
+ else   if (config.getOs().getFamily() == OS.Family.darwin) {
+    ccArgs.add("-Xlinker");
+    ccArgs.add("-no_implicit_dylibs");
+    libArgs.add("-lgc");
+    File unexportedSymbolsFile=new File(config.getTmpDir(),"unexported_symbols");
+    FileUtils.writeStringToFile(unexportedSymbolsFile,"*\n","ASCII");
+    ccArgs.add("-unexported_symbols_list");
+    ccArgs.add(unexportedSymbolsFile.getAbsolutePath());
+    ccArgs.add("-Xlinker");
+    ccArgs.add("-no_compact_unwind");
+    ccArgs.add("-arch");
+    ccArgs.add(config.getArch().toString());
+  }
+  doBuild(ccPath,outFile,ccArgs,objectFiles,libFiles,libArgs);
+}

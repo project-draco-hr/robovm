@@ -1,0 +1,42 @@
+{
+  Set<Clazz> classes=new HashSet<Clazz>();
+  classes.addAll(getMatchingClasses("java.lang.**.*"));
+  classes.addAll(getMatchingClasses("org.apache.harmony.lang.annotation.*"));
+  classes.addAll(getMatchingClasses("org.apache.harmony.niochar.*"));
+  classes.addAll(getMatchingClasses("org.apache.harmony.niochar.charset.*"));
+  classes.addAll(getMatchingClasses("org.nullvm.rt.*"));
+  classes.add(config.getClazzes().load("java/io/Serializable"));
+  if (config.getRoots().isEmpty()) {
+    if (config.getMainClass() != null) {
+      Clazz clazz=config.getClazzes().load(config.getMainClass().replace('.','/'));
+      if (clazz == null) {
+        throw new CompilerException("Main class " + config.getMainClass() + " not found");
+      }
+      classes.add(clazz);
+    }
+ else {
+      classes.addAll(config.getClazzes().listClasses());
+    }
+  }
+ else {
+    for (    String root : config.getRoots()) {
+      if (root.indexOf('*') == -1) {
+        Clazz clazz=config.getClazzes().load(root.replace('.','/'));
+        if (clazz == null) {
+          throw new CompilerException("Root class " + root + " not found");
+        }
+        classes.add(clazz);
+      }
+ else {
+        Set<Clazz> matches=getMatchingClasses(root);
+        if (matches.isEmpty()) {
+          config.getLogger().warn("Root pattern %s matches no classes",root);
+        }
+ else {
+          classes.addAll(matches);
+        }
+      }
+    }
+  }
+  return classes;
+}

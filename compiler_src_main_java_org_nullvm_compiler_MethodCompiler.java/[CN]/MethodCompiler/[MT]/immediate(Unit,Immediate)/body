@@ -1,0 +1,53 @@
+{
+  if (v instanceof soot.Local) {
+    Local local=(Local)v;
+    Type type=getLocalType(v.getType());
+    VariableRef var=new VariableRef(local.getName(),new PointerType(type));
+    Variable tmp=function.newVariable(type);
+    function.add(new Load(tmp,var));
+    return new VariableRef(tmp);
+  }
+ else   if (v instanceof soot.jimple.IntConstant) {
+    return new IntegerConstant(((soot.jimple.IntConstant)v).value);
+  }
+ else   if (v instanceof soot.jimple.LongConstant) {
+    return new IntegerConstant(((soot.jimple.LongConstant)v).value);
+  }
+ else   if (v instanceof soot.jimple.FloatConstant) {
+    return new FloatingPointConstant(((soot.jimple.FloatConstant)v).value);
+  }
+ else   if (v instanceof soot.jimple.DoubleConstant) {
+    return new FloatingPointConstant(((soot.jimple.DoubleConstant)v).value);
+  }
+ else   if (v instanceof soot.jimple.NullConstant) {
+    return new NullConstant(OBJECT_PTR);
+  }
+ else   if (v instanceof soot.jimple.StringConstant) {
+    String s=((soot.jimple.StringConstant)v).value;
+    Trampoline trampoline=new LdcString(className,s);
+    trampolines.add(trampoline);
+    return callOrInvoke(unit,trampoline.getFunctionRef(),ENV);
+  }
+ else   if (v instanceof soot.jimple.ClassConstant) {
+    String targetClassName=((soot.jimple.ClassConstant)v).getValue();
+    if (isArray(targetClassName) && isPrimitiveComponentType(targetClassName)) {
+      String primitiveDesc=targetClassName.substring(1);
+      Variable result=function.newVariable(OBJECT_PTR);
+      function.add(new Load(result,new GlobalRef("array_" + primitiveDesc,OBJECT_PTR)));
+      return result.ref();
+    }
+ else {
+      FunctionRef fn=null;
+      if (targetClassName.equals(this.className)) {
+        fn=new FunctionRef(mangleClass(sootMethod.getDeclaringClass()) + "_ldc",new FunctionType(OBJECT_PTR,ENV_PTR));
+      }
+ else {
+        Trampoline trampoline=new LdcClass(className,((soot.jimple.ClassConstant)v).getValue());
+        trampolines.add(trampoline);
+        fn=trampoline.getFunctionRef();
+      }
+      return callOrInvoke(unit,fn,ENV);
+    }
+  }
+  throw new IllegalArgumentException("Unknown Immediate type: " + v.getClass());
+}

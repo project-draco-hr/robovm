@@ -1,0 +1,18 @@
+{
+  List<Type> paramTypes=new ArrayList<Type>();
+  paramTypes.add(ENV_PTR);
+  if (!ztatic) {
+    paramTypes.add(OBJECT_PTR);
+  }
+ else   if (nativ) {
+    paramTypes.add(OBJECT_PTR);
+  }
+  CharBuffer buffer=CharBuffer.wrap(methodDesc);
+  buffer.get();
+  while (buffer.get(buffer.position()) != ')') {
+    paramTypes.add(getType(buffer));
+  }
+  buffer.get();
+  Type returnType=getType(buffer);
+  return new FunctionType(returnType,paramTypes.toArray(new Type[paramTypes.size()]));
+}

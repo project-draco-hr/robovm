@@ -1,0 +1,23 @@
+{
+  Clazz caller=config.getClazzes().load(t.getCallingClass());
+  String targetClassName=t.getTarget();
+  if (isArray(targetClassName)) {
+    if (isPrimitiveBaseType(targetClassName)) {
+      return true;
+    }
+    targetClassName=getBaseType(targetClassName);
+  }
+  Clazz target=config.getClazzes().load(targetClassName);
+  if (caller == target) {
+    return true;
+  }
+  if (target.getClazzInfo().isPublic()) {
+    return true;
+  }
+  if (target.getPackageName().equals(caller.getPackageName())) {
+    return true;
+  }
+  throwIllegalAccessError(f,"Attempt to access class %s from class %s",target.getClassName(),caller.getClassName());
+  f.add(new Unreachable());
+  return false;
+}

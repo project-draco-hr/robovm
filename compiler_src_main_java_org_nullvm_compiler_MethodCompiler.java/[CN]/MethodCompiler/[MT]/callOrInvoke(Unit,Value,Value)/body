@@ -1,0 +1,20 @@
+{
+  Variable result=null;
+  Type returnType=((FunctionType)fn.getType()).getReturnType();
+  if (returnType != VOID) {
+    result=this.function.newVariable(returnType);
+  }
+  List<Trap> traps=getTrapsAt(unit);
+  if (!traps.isEmpty()) {
+    Label label=new Label();
+    BasicBlockRef to=function.newBasicBlockRef(label);
+    BasicBlockRef unwind=function.newBasicBlockRef(new Label(traps));
+    function.add(new Invoke(result,fn,to,unwind,args));
+    function.newBasicBlock(label);
+    recordedTraps.add(traps);
+  }
+ else {
+    function.add(new Call(result,fn,args));
+  }
+  return result == null ? null : result.ref();
+}

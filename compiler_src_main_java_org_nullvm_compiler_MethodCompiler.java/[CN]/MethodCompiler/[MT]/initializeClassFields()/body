@@ -1,0 +1,42 @@
+{
+  for (  SootField field : sootMethod.getDeclaringClass().getFields()) {
+    if (!field.isStatic()) {
+      continue;
+    }
+    String fieldName=field.getName();
+    String fieldDesc=getDescriptor(field.getType());
+    for (    Tag tag : field.getTags()) {
+      Value value=null;
+      if (tag instanceof DoubleConstantValueTag) {
+        DoubleConstantValueTag dtag=(DoubleConstantValueTag)tag;
+        value=new FloatingPointConstant(dtag.getDoubleValue());
+      }
+ else       if (tag instanceof FloatConstantValueTag) {
+        FloatConstantValueTag ftag=(FloatConstantValueTag)tag;
+        value=new FloatingPointConstant(ftag.getFloatValue());
+      }
+ else       if (tag instanceof IntegerConstantValueTag) {
+        IntegerConstantValueTag itag=(IntegerConstantValueTag)tag;
+        value=new IntegerConstant(itag.getIntValue());
+        IntegerType type=(IntegerType)getType(field.getType());
+        if (type.getBits() < 32) {
+          value=new ConstantTrunc((Constant)value,type);
+        }
+      }
+ else       if (tag instanceof LongConstantValueTag) {
+        LongConstantValueTag ltag=(LongConstantValueTag)tag;
+        value=new IntegerConstant(ltag.getLongValue());
+      }
+ else       if (tag instanceof StringConstantValueTag) {
+        String s=((StringConstantValueTag)tag).getStringValue();
+        Trampoline trampoline=new LdcString(className,s);
+        trampolines.add(trampoline);
+        value=call(trampoline.getFunctionRef(),ENV);
+      }
+      if (value != null) {
+        FunctionRef fn=new FunctionRef(mangleField(this.className,fieldName,fieldDesc) + "_setter",new FunctionType(VOID,ENV_PTR,getType(fieldDesc)));
+        call(fn,ENV,value);
+      }
+    }
+  }
+}

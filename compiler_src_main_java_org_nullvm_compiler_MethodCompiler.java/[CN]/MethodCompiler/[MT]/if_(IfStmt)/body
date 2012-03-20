@@ -1,0 +1,28 @@
+{
+  ConditionExpr condition=(ConditionExpr)stmt.getCondition();
+  Value op1=immediate(stmt,(Immediate)condition.getOp1());
+  Value op2=immediate(stmt,(Immediate)condition.getOp2());
+  Icmp.Condition c=null;
+  if (condition instanceof EqExpr) {
+    c=Icmp.Condition.eq;
+  }
+ else   if (condition instanceof NeExpr) {
+    c=Icmp.Condition.ne;
+  }
+ else   if (condition instanceof GtExpr) {
+    c=Icmp.Condition.sgt;
+  }
+ else   if (condition instanceof LtExpr) {
+    c=Icmp.Condition.slt;
+  }
+ else   if (condition instanceof GeExpr) {
+    c=Icmp.Condition.sge;
+  }
+ else   if (condition instanceof LeExpr) {
+    c=Icmp.Condition.sle;
+  }
+  Variable result=function.newVariable(Type.I1);
+  function.add(new Icmp(result,c,op1,op2));
+  Unit nextUnit=sootMethod.getActiveBody().getUnits().getSuccOf(stmt);
+  function.add(new Br(new VariableRef(result),function.newBasicBlockRef(new Label(stmt.getTarget())),function.newBasicBlockRef(new Label(nextUnit))));
+}
