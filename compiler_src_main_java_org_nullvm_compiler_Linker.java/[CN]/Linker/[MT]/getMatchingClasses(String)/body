@@ -1,10 +1,12 @@
 {
   Pattern regexp=antPatternToRegexp(pattern);
-  Set<Clazz> matches=new HashSet<Clazz>();
-  for (  Clazz clazz : config.getClazzes().listClasses()) {
-    if (regexp.matcher(clazz.getClassName()).matches()) {
-      matches.add(clazz);
+  Map<String,Clazz> matches=new HashMap<String,Clazz>();
+  for (  Path path : config.getClazzes().getPaths()) {
+    for (    Clazz clazz : path.listClasses()) {
+      if (!matches.containsKey(clazz.getClassName()) && regexp.matcher(clazz.getClassName()).matches()) {
+        matches.put(clazz.getClassName(),clazz);
+      }
     }
   }
-  return matches;
+  return matches.values();
 }
