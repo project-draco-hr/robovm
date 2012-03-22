@@ -1,3 +1,14 @@
 {
-  CompilerUtil.exec(config,ccPath,"-o",outFile,"-g",ccArgs,objectFiles,libArgs);
+  File wd=config.getCacheDir();
+  String wdAbsPath=wd.getCanonicalPath();
+  List<String> relFiles=new ArrayList<String>();
+  for (  File f : objectFiles) {
+    if (f.getCanonicalPath().startsWith(wdAbsPath)) {
+      relFiles.add(f.getCanonicalPath().substring(wdAbsPath.length() + 1));
+    }
+ else {
+      relFiles.add(f.getCanonicalPath());
+    }
+  }
+  CompilerUtil.exec(config,wd,ccPath,"-o",outFile,"-g",ccArgs,relFiles,libArgs);
 }
