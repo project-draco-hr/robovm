@@ -10,13 +10,13 @@
   HashTableGenerator<String,Constant> cpHashGen=new HashTableGenerator<String,Constant>(new ModifiedUtf8HashFunction());
   Set<Trampoline> trampolines=new HashSet<Trampoline>();
   for (  Clazz clazz : required) {
-    Global info=new Global(mangleClass(clazz.getInternalName()) + "_info",Linkage.external,I8_PTR,false);
+    Global info=getClassInfoStruct(clazz);
     module.addGlobal(info);
     if (clazz.isInBootClasspath()) {
-      bcpHashGen.put(clazz.getInternalName(),info.ref());
+      bcpHashGen.put(clazz.getInternalName(),new ConstantBitcast(info.ref(),I8_PTR));
     }
  else {
-      cpHashGen.put(clazz.getInternalName(),info.ref());
+      cpHashGen.put(clazz.getInternalName(),new ConstantBitcast(info.ref(),I8_PTR));
     }
     trampolines.addAll(clazz.getClazzInfo().getTrampolines());
     if (!clazz.getClazzInfo().isInterface()) {

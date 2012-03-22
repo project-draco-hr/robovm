@@ -8,16 +8,10 @@
     targetClassName=getBaseType(targetClassName);
   }
   Clazz target=config.getClazzes().load(targetClassName);
-  if (caller == target) {
+  if (checkClassAccessible(target,caller)) {
     return true;
   }
-  if (target.getClazzInfo().isPublic()) {
-    return true;
-  }
-  if (target.getPackageName().equals(caller.getPackageName())) {
-    return true;
-  }
-  throwIllegalAccessError(f,"Attempt to access class %s from class %s",target.getClassName(),caller.getClassName());
+  throwIllegalAccessError(f,ILLEGAL_ACCESS_ERROR_CLASS,target,caller);
   f.add(new Unreachable());
   return false;
 }
