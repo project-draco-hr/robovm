@@ -9,6 +9,13 @@
   instanceFieldsType=getStructureType(instanceFields);
   attributesEncoder.encode(module,sootClass);
   strings.putAll(attributesEncoder.getStrings());
+  if (!sootClass.declaresMethodByName("<clinit>") && hasConstantValueTags(classFields)) {
+    SootMethod clinit=new SootMethod("<clinit>",Collections.EMPTY_LIST,VoidType.v(),Modifier.STATIC);
+    JimpleBody body=Jimple.v().newBody(clinit);
+    clinit.setActiveBody(body);
+    body.getUnits().add(new JReturnVoidStmt());
+    this.sootClass.addMethod(clinit);
+  }
   classInfoStruct=new Global(mangleClass(sootClass) + "_info",linker_private_weak,createInfoStruct());
   if (isStruct(this.sootClass)) {
     enhanceStructClass(this.sootClass);
@@ -37,13 +44,6 @@
         module.addFunction(createClassInitWrapperFunction(setter.ref()));
       }
     }
-  }
-  if (!sootClass.declaresMethodByName("<clinit>") && hasConstantValueTags(classFields)) {
-    SootMethod clinit=new SootMethod("<clinit>",Collections.EMPTY_LIST,VoidType.v(),Modifier.STATIC);
-    JimpleBody body=Jimple.v().newBody(clinit);
-    clinit.setActiveBody(body);
-    body.getUnits().add(new JReturnVoidStmt());
-    this.sootClass.addMethod(clinit);
   }
   for (  SootMethod method : sootClass.getMethods()) {
     if (isBridge(method)) {
