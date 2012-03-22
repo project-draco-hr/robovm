@@ -81,6 +81,17 @@
     }
     aliases.put(t.getFunctionName(),fnName);
   }
+ else   if (t instanceof Multianewarray) {
+    String fnName="array_" + mangleClass(t.getTarget()) + "_multi";
+    if (!module.hasFunctionDefined(fnName)) {
+      Function fn=new Function(Linkage.external,t.getFunctionRef(),fnName);
+      Value arrayClass=callLdcArray(module,fn,t.getTarget());
+      Value result=call(fn,NVM_BC_NEW_MULTI_ARRAY,fn.getParameterRef(0),fn.getParameterRef(1),fn.getParameterRef(2),arrayClass);
+      fn.add(new Ret(result));
+      module.addFunction(fn);
+    }
+    aliases.put(t.getFunctionName(),fnName);
+  }
  else   if (t instanceof NativeCall) {
     Clazz target=config.getClazzes().load(t.getTarget());
     NativeCall nc=(NativeCall)t;
