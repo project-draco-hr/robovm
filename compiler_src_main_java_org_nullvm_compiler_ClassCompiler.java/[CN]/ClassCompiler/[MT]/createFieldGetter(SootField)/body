@@ -1,0 +1,17 @@
+{
+  String name=mangleField(field) + "_getter";
+  Function fn=null;
+  Value fieldPtr=null;
+  if (field.isStatic()) {
+    fn=new Function(_private,new FunctionAttribute[]{alwaysinline,optsize},name,new FunctionType(getType(field.getType()),ENV_PTR),"env");
+    fieldPtr=getClassFieldPtr(fn,field);
+  }
+ else {
+    fn=new Function(field.isPrivate() ? _private : external,new FunctionAttribute[]{alwaysinline,optsize},name,new FunctionType(getType(field.getType()),ENV_PTR,OBJECT_PTR),"env","this");
+    fieldPtr=getInstanceFieldPtr(fn,new VariableRef("this",OBJECT_PTR),field);
+  }
+  Variable result=fn.newVariable(getType(field.getType()));
+  fn.add(new Load(result,fieldPtr));
+  fn.add(new Ret(new VariableRef(result)));
+  return fn;
+}

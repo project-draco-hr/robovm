@@ -1,0 +1,25 @@
+{
+  if (clazzInfo == null) {
+    File f=clazzes.getConfig().getInfoFile(this);
+    if (!f.exists()) {
+      clazzInfo=new ClazzInfo();
+    }
+ else {
+      ObjectInputStream ois=null;
+      try {
+        ois=new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
+        clazzInfo=(ClazzInfo)ois.readObject();
+      }
+ catch (      IOException e) {
+        throw new RuntimeException(e);
+      }
+catch (      ClassNotFoundException e) {
+        throw new RuntimeException(e);
+      }
+ finally {
+        IOUtils.closeQuietly(ois);
+      }
+    }
+  }
+  return clazzInfo;
+}

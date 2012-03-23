@@ -1,0 +1,20 @@
+{
+  String fnName=targetFn.getName() + "_clinit";
+  Function fn=new Function(external,new FunctionAttribute[]{noinline,optsize},fnName,targetFn.getType());
+  Variable flags=fn.newVariable(I32);
+  fn.add(new Load(flags,new ConstantGetelementptr(classInfoStruct.ref(),0,0,1)));
+  Variable initializedFlag=fn.newVariable(I32);
+  fn.add(new And(initializedFlag,flags.ref(),new IntegerConstant(CI_INITIALIZED)));
+  Variable initialized=fn.newVariable(I1);
+  fn.add(new Icmp(initialized,Icmp.Condition.eq,initializedFlag.ref(),new IntegerConstant(CI_INITIALIZED)));
+  Label trueLabel=new Label();
+  Label falseLabel=new Label();
+  fn.add(new Br(initialized.ref(),fn.newBasicBlockRef(trueLabel),fn.newBasicBlockRef(falseLabel)));
+  fn.newBasicBlock(trueLabel);
+  Value result=call(fn,targetFn,fn.getParameterRefs());
+  fn.add(new Ret(result));
+  fn.newBasicBlock(falseLabel);
+  call(fn,NVM_BC_INITIALIZE_CLASS,fn.getParameterRef(0),new ConstantGetelementptr(classInfoStruct.ref(),0,0,0));
+  fn.add(new Br(fn.newBasicBlockRef(trueLabel)));
+  return fn;
+}

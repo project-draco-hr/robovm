@@ -31,11 +31,10 @@
   }
   File homeLib=new File(nullVMHomeDir,"lib");
   osArchDepLibDir=new File(new File(new File(homeLib,os.toString()),arch.toString()),debug ? "Debug" : "Release");
+  File osDir=new File(cacheDir,os.toString());
+  File archDir=new File(osDir,arch.toString());
+  cacheDir=new File(archDir,cpu == null ? "default" : cpu);
   cacheDir.mkdirs();
-  llvmCacheDir=new File(cacheDir,"llvm");
-  llvmCacheDir.mkdirs();
-  objectCacheDir=new File(cacheDir,"object");
-  objectCacheDir.mkdirs();
   if (executable == null) {
     executable=mainClass;
   }
@@ -47,7 +46,7 @@
     tmpDir.delete();
     tmpDir.mkdirs();
   }
-  this.clazzes=new Clazzes(bootclasspath,classpath);
+  this.clazzes=new Clazzes(this,bootclasspath,classpath);
   if (!skipInstall) {
     if (installDir == null) {
       installDir=new File(".",executable);

@@ -1,0 +1,256 @@
+{
+  int flags=0;
+  flags<<=CI_INTERFACE_COUNT_BITS;
+  if (sootClass.getInterfaceCount() < CI_INTERFACE_COUNT_MASK) {
+    flags|=sootClass.getInterfaceCount();
+  }
+ else {
+    flags|=CI_INTERFACE_COUNT_MASK;
+  }
+  flags<<=CI_FIELD_COUNT_BITS;
+  if (sootClass.getFieldCount() < CI_FIELD_COUNT_MASK) {
+    flags|=sootClass.getFieldCount();
+  }
+ else {
+    flags|=CI_FIELD_COUNT_MASK;
+  }
+  flags<<=CI_METHOD_COUNT_BITS;
+  if (sootClass.getMethodCount() < CI_METHOD_COUNT_MASK) {
+    flags|=sootClass.getMethodCount();
+  }
+ else {
+    flags|=CI_METHOD_COUNT_MASK;
+  }
+  flags<<=CI_FLAGS_BITS;
+  if (Modifier.isPublic(sootClass.getModifiers())) {
+    flags|=CI_PUBLIC;
+  }
+  if (Modifier.isFinal(sootClass.getModifiers())) {
+    flags|=CI_FINAL;
+  }
+  if (Modifier.isInterface(sootClass.getModifiers())) {
+    flags|=CI_INTERFACE;
+  }
+  if (Modifier.isAbstract(sootClass.getModifiers())) {
+    flags|=CI_ABSTRACT;
+  }
+  if ((sootClass.getModifiers() & 0x1000) > 0) {
+    flags|=CI_SYNTHETIC;
+  }
+  if (Modifier.isAnnotation(sootClass.getModifiers())) {
+    flags|=CI_ANNOTATION;
+  }
+  if (Modifier.isEnum(sootClass.getModifiers())) {
+    flags|=CI_ENUM;
+  }
+  if (attributesEncoder.classHasAttributes()) {
+    flags|=CI_ATTRIBUTES;
+  }
+  StructureConstantBuilder header=new StructureConstantBuilder();
+  header.add(new NullConstant(I8_PTR));
+  header.add(new IntegerConstant(flags));
+  header.add(getString(getInternalName(sootClass)));
+  if (sootClass.declaresMethod("<clinit>",Collections.emptyList(),VoidType.v())) {
+    SootMethod method=sootClass.getMethod("<clinit>",Collections.emptyList(),VoidType.v());
+    header.add(new FunctionRef(mangleMethod(method),getFunctionType(method)));
+  }
+ else {
+    header.add(new NullConstant(I8_PTR));
+  }
+  header.add(classFieldsType == null ? new IntegerConstant(0) : alignedSizeof(classFieldsType));
+  header.add(instanceFieldsType == null ? new IntegerConstant(0) : alignedSizeof(instanceFieldsType));
+  PackedStructureConstantBuilder body=new PackedStructureConstantBuilder();
+  if (sootClass.getInterfaceCount() >= CI_INTERFACE_COUNT_MASK) {
+    body.add(new IntegerConstant((short)sootClass.getInterfaceCount()));
+  }
+  if (sootClass.getFieldCount() >= CI_FIELD_COUNT_MASK) {
+    body.add(new IntegerConstant((short)sootClass.getFieldCount()));
+  }
+  if (sootClass.getMethodCount() >= CI_METHOD_COUNT_MASK) {
+    body.add(new IntegerConstant((short)sootClass.getMethodCount()));
+  }
+  if (!sootClass.isInterface()) {
+    body.add(getStringOrNull(sootClass.hasSuperclass() ? getInternalName(sootClass.getSuperclass()) : null));
+  }
+  if (attributesEncoder.classHasAttributes()) {
+    body.add(new ConstantBitcast(attributesEncoder.getClassAttributes().ref(),I8_PTR));
+  }
+  for (  SootClass s : sootClass.getInterfaces()) {
+    body.add(getString(getInternalName(s)));
+  }
+  int classFieldCounter=0;
+  int instanceFieldCounter=0;
+  for (  SootField f : sootClass.getFields()) {
+    flags=0;
+    soot.Type t=f.getType();
+    if (t instanceof PrimType) {
+      if (t.equals(BooleanType.v())) {
+        flags|=DESC_Z;
+      }
+ else       if (t.equals(ByteType.v())) {
+        flags|=DESC_B;
+      }
+ else       if (t.equals(ShortType.v())) {
+        flags|=DESC_S;
+      }
+ else       if (t.equals(CharType.v())) {
+        flags|=DESC_C;
+      }
+ else       if (t.equals(IntType.v())) {
+        flags|=DESC_I;
+      }
+ else       if (t.equals(LongType.v())) {
+        flags|=DESC_J;
+      }
+ else       if (t.equals(FloatType.v())) {
+        flags|=DESC_F;
+      }
+ else       if (t.equals(DoubleType.v())) {
+        flags|=DESC_D;
+      }
+      flags<<=12;
+    }
+    if (Modifier.isPublic(f.getModifiers())) {
+      flags|=FI_PUBLIC;
+    }
+ else     if (Modifier.isPrivate(f.getModifiers())) {
+      flags|=FI_PRIVATE;
+    }
+ else     if (Modifier.isProtected(f.getModifiers())) {
+      flags|=FI_PROTECTED;
+    }
+    if (Modifier.isStatic(f.getModifiers())) {
+      flags|=FI_STATIC;
+    }
+    if (Modifier.isFinal(f.getModifiers())) {
+      flags|=FI_FINAL;
+    }
+    if (Modifier.isVolatile(f.getModifiers())) {
+      flags|=FI_VOLATILE;
+    }
+    if (Modifier.isTransient(f.getModifiers())) {
+      flags|=FI_TRANSIENT;
+    }
+    if ((f.getModifiers() & 0x1000) > 0) {
+      flags|=FI_SYNTHETIC;
+    }
+    if (Modifier.isEnum(f.getModifiers())) {
+      flags|=FI_ENUM;
+    }
+    if (attributesEncoder.fieldHasAttributes(f)) {
+      flags|=FI_ATTRIBUTES;
+    }
+    body.add(new IntegerConstant((short)flags));
+    body.add(getString(f.getName()));
+    if (!(t instanceof PrimType)) {
+      body.add(getString(getDescriptor(f)));
+    }
+    if (f.isStatic()) {
+      body.add(offsetof(classFieldsType,classFieldCounter++));
+    }
+ else {
+      body.add(offsetof(instanceFieldsType,instanceFieldCounter++));
+    }
+    if (attributesEncoder.fieldHasAttributes(f)) {
+      body.add(new ConstantBitcast(attributesEncoder.getFieldAttributes(f).ref(),I8_PTR));
+    }
+  }
+  for (  SootMethod m : sootClass.getMethods()) {
+    soot.Type t=m.getReturnType();
+    flags=0;
+    if (Modifier.isPublic(m.getModifiers())) {
+      flags|=MI_PUBLIC;
+    }
+ else     if (Modifier.isPrivate(m.getModifiers())) {
+      flags|=MI_PRIVATE;
+    }
+ else     if (Modifier.isProtected(m.getModifiers())) {
+      flags|=MI_PROTECTED;
+    }
+    if (Modifier.isStatic(m.getModifiers())) {
+      flags|=MI_STATIC;
+    }
+    if (Modifier.isFinal(m.getModifiers())) {
+      flags|=MI_FINAL;
+    }
+    if (Modifier.isSynchronized(m.getModifiers())) {
+      flags|=MI_SYNCHRONIZED;
+    }
+    if ((m.getModifiers() & 0x0040) > 0) {
+      flags|=MI_BRIDGE;
+    }
+    if ((m.getModifiers() & 0x0080) > 0) {
+      flags|=MI_VARARGS;
+    }
+    if (Modifier.isNative(m.getModifiers())) {
+      flags|=MI_NATIVE;
+    }
+    if (Modifier.isAbstract(m.getModifiers())) {
+      flags|=MI_ABSTRACT;
+    }
+    if (Modifier.isStrictFP(m.getModifiers())) {
+      flags|=MI_STRICT;
+    }
+    if ((m.getModifiers() & 0x1000) > 0) {
+      flags|=MI_SYNTHETIC;
+    }
+    if (attributesEncoder.methodHasAttributes(m)) {
+      flags|=MI_ATTRIBUTES;
+    }
+    if (isBridge(m)) {
+      flags|=MI_BRO_BRIDGE;
+    }
+    if (isCallback(m)) {
+      flags|=MI_BRO_CALLBACK;
+    }
+    if ((t instanceof PrimType || t == VoidType.v()) && m.getParameterCount() == 0) {
+      flags|=MI_COMPACT_DESC;
+    }
+    body.add(new IntegerConstant((short)flags));
+    body.add(getString(m.getName()));
+    if ((flags & MI_COMPACT_DESC) > 0) {
+      int desc=0;
+      if (t.equals(BooleanType.v())) {
+        desc=DESC_Z;
+      }
+ else       if (t.equals(ByteType.v())) {
+        desc=DESC_B;
+      }
+ else       if (t.equals(ShortType.v())) {
+        desc=DESC_S;
+      }
+ else       if (t.equals(CharType.v())) {
+        desc=DESC_C;
+      }
+ else       if (t.equals(IntType.v())) {
+        desc=DESC_I;
+      }
+ else       if (t.equals(LongType.v())) {
+        desc=DESC_J;
+      }
+ else       if (t.equals(FloatType.v())) {
+        desc=DESC_F;
+      }
+ else       if (t.equals(DoubleType.v())) {
+        desc=DESC_D;
+      }
+ else       if (t.equals(VoidType.v())) {
+        desc=DESC_V;
+      }
+      body.add(new IntegerConstant((byte)desc));
+    }
+ else {
+      body.add(getString(getDescriptor(m)));
+    }
+    if (attributesEncoder.methodHasAttributes(m)) {
+      body.add(new ConstantBitcast(attributesEncoder.getMethodAttributes(m).ref(),I8_PTR));
+    }
+    if (!sootClass.isInterface() && !m.isAbstract()) {
+      body.add(new ConstantBitcast(new FunctionRef(mangleMethod(m),getFunctionType(m)),I8_PTR));
+      if (m.isSynchronized()) {
+        body.add(new ConstantBitcast(new FunctionRef(mangleMethod(m) + "_synchronized",getFunctionType(m)),I8_PTR));
+      }
+    }
+  }
+  return new StructureConstantBuilder().add(header.build()).add(body.build()).build();
+}

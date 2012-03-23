@@ -1,0 +1,29 @@
+{
+  if (expr instanceof InterfaceInvokeExpr) {
+    return false;
+  }
+  SootClass sootClass=this.sootMethod.getDeclaringClass();
+  SootMethodRef methodRef=expr.getMethodRef();
+  if (!methodRef.declaringClass().equals(sootClass)) {
+    return false;
+  }
+  try {
+    SootMethod method=sootClass.getMethod(methodRef.name(),methodRef.parameterTypes(),methodRef.returnType());
+    if (method.isAbstract()) {
+      return false;
+    }
+    if (method.isStatic()) {
+      return expr instanceof StaticInvokeExpr;
+    }
+    if (expr instanceof SpecialInvokeExpr) {
+      return true;
+    }
+    if (expr instanceof VirtualInvokeExpr) {
+      return Modifier.isFinal(sootClass.getModifiers()) || Modifier.isFinal(method.getModifiers()) || method.isPrivate();
+    }
+    return false;
+  }
+ catch (  RuntimeException e) {
+    return false;
+  }
+}

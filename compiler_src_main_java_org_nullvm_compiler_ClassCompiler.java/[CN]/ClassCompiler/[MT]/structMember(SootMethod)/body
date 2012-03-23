@@ -42,16 +42,6 @@
           result=tmp;
         }
       }
- else       if (result.getType() == MACHINE_INT) {
-        Variable tmp=function.newVariable(I64);
-        function.add(new Ptrtoint(tmp,result.ref(),I64));
-        result=tmp;
-      }
- else       if (result.getType() == MACHINE_FP) {
-        Variable tmp=function.newVariable(DOUBLE);
-        function.add(new Call(tmp,MACHINE_FP_TO_DOUBLE,result.ref()));
-        result=tmp;
-      }
     }
     function.add(new Ret(result.ref()));
   }
@@ -77,16 +67,6 @@
           function.add(new Call(tmp,NVM_BC_GET_STRUCT_HANDLE,ENV,objectPtr.ref()));
           p=tmp.ref();
         }
-      }
- else       if (memberType == MACHINE_INT) {
-        Variable tmp=function.newVariable(MACHINE_INT);
-        function.add(new Inttoptr(tmp,p,MACHINE_INT));
-        p=tmp.ref();
-      }
- else       if (memberType == MACHINE_FP) {
-        Variable tmp=function.newVariable(MACHINE_FP);
-        function.add(new Call(tmp,DOUBLE_TO_MACHINE_FP,p));
-        p=tmp.ref();
       }
       function.add(new Store(p,memberPtr.ref()));
     }

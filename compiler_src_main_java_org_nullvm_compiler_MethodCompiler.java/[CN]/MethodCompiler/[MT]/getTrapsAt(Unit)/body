@@ -1,0 +1,25 @@
+{
+  List<Trap> result=this.trapsAt.get(u);
+  if (result == null) {
+    Body body=sootMethod.getActiveBody();
+    Chain<Trap> traps=body.getTraps();
+    if (traps.isEmpty()) {
+      result=Collections.emptyList();
+    }
+ else {
+      result=new ArrayList<Trap>();
+      PatchingChain<Unit> units=body.getUnits();
+      for (      Trap trap : traps) {
+        Unit beginUnit=trap.getBeginUnit();
+        Unit endUnit=trap.getEndUnit();
+        if (beginUnit != endUnit && u != endUnit) {
+          if (u == beginUnit || (units.follows(u,beginUnit) && units.follows(endUnit,u))) {
+            result.add(trap);
+          }
+        }
+      }
+    }
+    this.trapsAt.put(u,result);
+  }
+  return result;
+}

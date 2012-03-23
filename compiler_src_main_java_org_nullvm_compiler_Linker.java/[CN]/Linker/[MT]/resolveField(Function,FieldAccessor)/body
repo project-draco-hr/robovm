@@ -1,0 +1,19 @@
+{
+  Clazz target=config.getClazzes().load(t.getTarget());
+  String name=t.getFieldName();
+  String desc=t.getFieldDesc();
+  ResolvedField rf=resolveField(target,name,desc);
+  if (rf == null) {
+    throwNoSuchFieldError(f,target,t);
+    return null;
+  }
+  if (!rf.field.isStatic() && t.isStatic()) {
+    throwIncompatibleChangeError(f,"Expected static field %s.%s",rf.clazz.getClassName(),t.getFieldName());
+    return null;
+  }
+  if (rf.field.isStatic() && !t.isStatic()) {
+    throwIncompatibleChangeError(f,"Expected non-static field %s.%s",rf.clazz.getClassName(),t.getFieldName());
+    return null;
+  }
+  return rf;
+}

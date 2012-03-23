@@ -1,0 +1,57 @@
+{
+  SootMethodRef methodRef=expr.getMethodRef();
+  ArrayList<Value> args=new ArrayList<Value>();
+  args.add(ENV);
+  if (!(expr instanceof StaticInvokeExpr)) {
+    Value base=immediate(stmt,(Immediate)((InstanceInvokeExpr)expr).getBase());
+    checkNull(stmt,base);
+    args.add(base);
+  }
+  int i=0;
+  for (  soot.Value sootArg : (List<soot.Value>)expr.getArgs()) {
+    Value arg=immediate(stmt,(Immediate)sootArg);
+    args.add(narrowFromI32Value(getType(methodRef.parameterType(i)),arg));
+    i++;
+  }
+  FunctionRef functionRef=null;
+  Value result=null;
+  if (canCallDirectly(expr)) {
+    SootMethod method=this.sootMethod.getDeclaringClass().getMethod(methodRef.name(),methodRef.parameterTypes(),methodRef.returnType());
+    String functionName=mangleMethod(method);
+    if (method.isSynchronized()) {
+      functionName+="_synchronized";
+    }
+    functionRef=new FunctionRef(functionName,getFunctionType(method));
+  }
+ else {
+    Trampoline trampoline=null;
+    String targetClassName=getInternalName(methodRef.declaringClass());
+    String methodName=methodRef.name();
+    String methodDesc=getDescriptor(methodRef);
+    if (expr instanceof SpecialInvokeExpr) {
+      soot.Type runtimeType=((SpecialInvokeExpr)expr).getBase().getType();
+      String runtimeClassName=runtimeType == NullType.v() ? targetClassName : getInternalName(runtimeType);
+      trampoline=new Invokespecial(this.className,targetClassName,methodName,methodDesc,runtimeClassName);
+    }
+ else     if (expr instanceof StaticInvokeExpr) {
+      trampoline=new Invokestatic(this.className,targetClassName,methodName,methodDesc);
+    }
+ else     if (expr instanceof VirtualInvokeExpr) {
+      soot.Type runtimeType=((VirtualInvokeExpr)expr).getBase().getType();
+      String runtimeClassName=runtimeType == NullType.v() ? targetClassName : getInternalName(runtimeType);
+      trampoline=new Invokevirtual(this.className,targetClassName,methodName,methodDesc,runtimeClassName);
+    }
+ else     if (expr instanceof InterfaceInvokeExpr) {
+      trampoline=new Invokeinterface(this.className,targetClassName,methodName,methodDesc);
+    }
+    trampolines.add(trampoline);
+    functionRef=trampoline.getFunctionRef();
+  }
+  result=callOrInvoke(stmt,functionRef,args.toArray(new Value[0]));
+  if (result != null) {
+    return widenToI32Value(result,methodRef.returnType().equals(CharType.v()));
+  }
+ else {
+    return null;
+  }
+}

@@ -1,0 +1,67 @@
+{
+  int errorType=ClassCompiler.CI_ERROR_TYPE_NONE;
+  String errorMessage=null;
+  if (clazz.getClazzInfo().getSuperclass() != null) {
+    Clazz superclazz=config.getClazzes().load(clazz.getClazzInfo().getSuperclass());
+    if (superclazz == null) {
+      errorType=ClassCompiler.CI_ERROR_TYPE_NO_CLASS_DEF_FOUND;
+      errorMessage=clazz.getClazzInfo().getSuperclass();
+    }
+ else     if (!checkClassAccessible(superclazz,clazz)) {
+      errorType=ClassCompiler.CI_ERROR_TYPE_ILLEGAL_ACCESS;
+      errorMessage=String.format(ILLEGAL_ACCESS_ERROR_CLASS,superclazz,clazz);
+    }
+ else     if (superclazz.getClazzInfo().isInterface()) {
+      errorType=ClassCompiler.CI_ERROR_TYPE_INCOMPATIBLE_CLASS_CHANGE;
+      errorMessage=String.format("class %s has interface %s as super class",clazz,superclazz);
+    }
+  }
+  if (errorType == ClassCompiler.CI_ERROR_TYPE_NONE) {
+    for (    String interfaceName : clazz.getClazzInfo().getInterfaces()) {
+      Clazz interfaze=config.getClazzes().load(interfaceName);
+      if (interfaze == null) {
+        errorType=ClassCompiler.CI_ERROR_TYPE_NO_CLASS_DEF_FOUND;
+        errorMessage=interfaceName;
+        break;
+      }
+ else       if (!checkClassAccessible(interfaze,clazz)) {
+        errorType=ClassCompiler.CI_ERROR_TYPE_ILLEGAL_ACCESS;
+        errorMessage=String.format(ILLEGAL_ACCESS_ERROR_CLASS,interfaze,clazz);
+        break;
+      }
+ else       if (!interfaze.getClazzInfo().isInterface()) {
+        errorType=ClassCompiler.CI_ERROR_TYPE_INCOMPATIBLE_CLASS_CHANGE;
+        errorMessage=String.format("class %s tries to implement class %s as interface",clazz,interfaze);
+        break;
+      }
+    }
+  }
+  if (errorType == ClassCompiler.CI_ERROR_TYPE_NONE) {
+    for (    Trampoline t : clazz.getClazzInfo().getTrampolines()) {
+      if (t instanceof ExceptionMatch) {
+        Clazz ex=config.getClazzes().load(t.getTarget());
+        if (ex == null) {
+          errorType=ClassCompiler.CI_ERROR_TYPE_NO_CLASS_DEF_FOUND;
+          errorMessage=t.getTarget();
+          break;
+        }
+ else         if (!checkClassAccessible(ex,clazz)) {
+          errorType=ClassCompiler.CI_ERROR_TYPE_ILLEGAL_ACCESS;
+          errorMessage=String.format(ILLEGAL_ACCESS_ERROR_CLASS,ex,clazz);
+          break;
+        }
+      }
+    }
+  }
+  String name=mangleClass(clazz.getInternalName()) + "_info";
+  if (errorType != ClassCompiler.CI_ERROR_TYPE_NONE) {
+    StructureConstantBuilder error=new StructureConstantBuilder();
+    error.add(new NullConstant(I8_PTR));
+    error.add(new IntegerConstant(ClassCompiler.CI_ERROR));
+    error.add(getString(clazz.getInternalName()));
+    error.add(new IntegerConstant(errorType));
+    error.add(getString(errorMessage));
+    return new Global(name,error.build());
+  }
+  return new Global(name,external,I8_PTR,false);
+}

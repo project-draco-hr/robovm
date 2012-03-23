@@ -1,0 +1,17 @@
+{
+  SootClass sootClass=this.sootMethod.getDeclaringClass();
+  SootFieldRef fieldRef=ref.getFieldRef();
+  if (!fieldRef.declaringClass().equals(sootClass)) {
+    return false;
+  }
+  try {
+    SootField field=sootClass.getField(fieldRef.name(),fieldRef.type());
+    if (field.isStatic()) {
+      return ref instanceof StaticFieldRef;
+    }
+    return ref instanceof InstanceFieldRef;
+  }
+ catch (  RuntimeException e) {
+    return false;
+  }
+}

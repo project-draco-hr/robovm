@@ -1,0 +1,25 @@
+{
+  String name=mangleMethod(m) + "_lookup";
+  Function function=new Function(Linkage.external,name,getFunctionType(m));
+  module.addFunction(function);
+  Variable reserved0=function.newVariable(I8_PTR_PTR);
+  function.add(new Getelementptr(reserved0,function.getParameterRef(0),0,4));
+  Variable reserved1=function.newVariable(I8_PTR_PTR);
+  function.add(new Getelementptr(reserved1,function.getParameterRef(0),0,5));
+  function.add(new Store(getString(m.getName()),reserved0.ref()));
+  function.add(new Store(getString(getDescriptor(m)),reserved1.ref()));
+  Value lookupFn=sootClass.isInterface() ? NVM_BC_LOOKUP_INTERFACE_METHOD : NVM_BC_LOOKUP_VIRTUAL_METHOD;
+  List<Value> args=new ArrayList<Value>();
+  args.add(function.getParameterRef(0));
+  if (sootClass.isInterface()) {
+    args.add(new ConstantGetelementptr(classInfoStruct.ref(),0,0,0));
+  }
+  args.add(function.getParameterRef(1));
+  args.add(getString(m.getName()));
+  args.add(getString(getDescriptor(m)));
+  Value fptr=call(function,lookupFn,args);
+  Variable f=function.newVariable(function.getType());
+  function.add(new Bitcast(f,fptr,f.getType()));
+  Value result=call(function,f.ref(),function.getParameterRefs());
+  function.add(new Ret(result));
+}

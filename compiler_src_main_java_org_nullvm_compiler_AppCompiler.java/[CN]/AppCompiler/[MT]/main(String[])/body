@@ -32,6 +32,9 @@
  else       if ("-home".equals(args[i])) {
         builder.nullVMHomeDir(new File(args[++i]));
       }
+ else       if ("-tmp".equals(args[i])) {
+        builder.tmpDir(new File(args[++i]));
+      }
  else       if ("-run".equals(args[i])) {
         run=true;
       }
@@ -77,6 +80,11 @@
  else       if ("-cpu".equals(args[i])) {
         builder.cpu(args[++i]);
       }
+ else       if ("-roots".equals(args[i])) {
+        for (        String p : args[++i].split(":")) {
+          builder.addRoot(p);
+        }
+      }
  else       if (args[i].startsWith("-D")) {
       }
  else       if (args[i].startsWith("-X")) {
@@ -103,18 +111,13 @@
           System.err.format(format,args);
           System.err.println();
         }
-        public void debug(        String format,        Object... args){
+        public void warn(        String format,        Object... args){
           System.out.format(format,args);
           System.out.println();
         }
-        public void debug(        byte[] message,        int off,        int length){
-          debug(new String(message,off,length));
-        }
-        public void info(        byte[] message,        int off,        int length){
-          info(new String(message,off,length));
-        }
-        public void error(        byte[] message,        int off,        int length){
-          error(new String(message,off,length));
+        public void debug(        String format,        Object... args){
+          System.out.format(format,args);
+          System.out.println();
         }
       }
 );
@@ -138,7 +141,6 @@
       compiler.config.getTarget().launch(runArgs);
     }
  else {
-      compiler.compile();
       compiler.config.getTarget().install();
     }
   }

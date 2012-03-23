@@ -1,0 +1,17 @@
+{
+  Constant offset=new IntegerConstant(0);
+  if (clazz.getClazzInfo().getSuperclass() != null) {
+    Clazz zuper=config.getClazzes().load(clazz.getClazzInfo().getSuperclass());
+    if (zuper != null) {
+      List<Type> types=new ArrayList<Type>();
+      for (      FieldInfo f : zuper.getClazzInfo().getInstanceFields()) {
+        types.add(getType(f.getDesc()));
+      }
+      if (types.size() > 0) {
+        offset=alignedSizeof(new StructureType(types.toArray(new Type[types.size()])));
+      }
+      offset=new ConstantAdd(alignedOffset(zuper),offset);
+    }
+  }
+  return offset;
+}

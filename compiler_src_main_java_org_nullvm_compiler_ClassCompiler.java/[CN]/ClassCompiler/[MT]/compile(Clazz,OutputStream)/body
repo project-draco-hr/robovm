@@ -1,46 +1,55 @@
 {
-  reset();
-  sootClass=Scene.v().loadClassAndSupport(clazz.getClassName());
+  sootClass=clazz.getSootClass();
   module=new Module();
-  throwables=new HashMap<SootClass,Global>();
-  trampolines=new HashMap<Trampoline,FunctionRef>();
+  trampolines=new HashSet<Trampoline>();
   strings=new HashMap<String,Global>();
-  classFields=getClassFields(sootClass,false);
-  instanceFields=getInstanceFields(sootClass,false);
-  allInstanceFields=getInstanceFields(sootClass,true);
-  classFieldsType=getType("ClassFields",classFields);
-  instanceFieldsType=getType("InstanceFields",allInstanceFields);
+  classFields=getClassFields(sootClass);
+  instanceFields=getInstanceFields(sootClass);
+  classFieldsType=getStructureType(classFields);
+  instanceFieldsType=getStructureType(instanceFields);
+  attributesEncoder.encode(module,sootClass);
+  strings.putAll(attributesEncoder.getStrings());
+  if (!sootClass.declaresMethodByName("<clinit>") && hasConstantValueTags(classFields)) {
+    SootMethod clinit=new SootMethod("<clinit>",Collections.EMPTY_LIST,VoidType.v(),Modifier.STATIC);
+    JimpleBody body=Jimple.v().newBody(clinit);
+    clinit.setActiveBody(body);
+    body.getUnits().add(new JReturnVoidStmt());
+    this.sootClass.addMethod(clinit);
+  }
+  classInfoStruct=new Global(mangleClass(sootClass) + "_info",linker_private_weak,createClassInfoStruct());
   if (isStruct(this.sootClass)) {
     enhanceStructClass(this.sootClass);
   }
   module.addInclude(getClass().getClassLoader().getResource("header.ll"));
-  if (classFieldsType != null) {
-    module.addType(classFieldsType);
-  }
-  if (instanceFieldsType != null) {
-    module.addType(instanceFieldsType);
-  }
-  List<SootField> allFields=new ArrayList<SootField>();
-  allFields.addAll(classFields);
-  allFields.addAll(instanceFields);
-  for (  SootField field : allFields) {
-    if (!field.isPrivate()) {
-      fieldGetter(field);
-      if (!field.isFinal()) {
-        fieldSetter(field);
+  Function allocator=createAllocator();
+  module.addFunction(allocator);
+  module.addFunction(createClassInitWrapperFunction(allocator.ref()));
+  Function instanceof_=createInstanceof();
+  module.addFunction(instanceof_);
+  module.addFunction(createClassInitWrapperFunction(instanceof_.ref()));
+  Function checkcast=createCheckcast();
+  module.addFunction(checkcast);
+  module.addFunction(createClassInitWrapperFunction(checkcast.ref()));
+  Function ldcClass=createLdcClass();
+  module.addFunction(ldcClass);
+  module.addFunction(createClassInitWrapperFunction(ldcClass.ref()));
+  for (  SootField f : sootClass.getFields()) {
+    Function getter=createFieldGetter(f);
+    Function setter=createFieldSetter(f);
+    module.addFunction(getter);
+    module.addFunction(setter);
+    if (f.isStatic() && !f.isPrivate()) {
+      module.addFunction(createClassInitWrapperFunction(getter.ref()));
+      if (!f.isFinal()) {
+        module.addFunction(createClassInitWrapperFunction(setter.ref()));
       }
     }
-  }
-  if (!sootClass.declaresMethodByName("<clinit>") && hasConstantValueTags(classFields)) {
-    Function clinit=module.newFunction(Linkage.internal,new FunctionAttribute[]{noinline,optsize},mangleMethod(getInternalName(sootClass),"<clinit>",new ArrayList<soot.Type>(),soot.VoidType.v()),new FunctionType(VOID,ENV_PTR),"env");
-    classFieldsInitializers(clinit);
-    clinit.add(new Ret());
   }
   for (  SootMethod method : sootClass.getMethods()) {
     if (isBridge(method)) {
       nativeBridgeMethod(method);
     }
- else     if (isNative(method)) {
+ else     if (method.isNative()) {
       if (isStruct(this.sootClass)) {
         if ("_sizeOf".equals(method.getName()) || "sizeOf".equals(method.getName())) {
           structSizeOf(method);
@@ -57,34 +66,58 @@
       }
     }
  else     if (!method.isAbstract()) {
-      Body body=method.retrieveActiveBody();
-      PackManager.v().getPack("jtp").apply(body);
-      PackManager.v().getPack("jop").apply(body);
-      PackManager.v().getPack("jap").apply(body);
       method(method);
       if (isCallback(method)) {
         nativeCallbackMethod(method);
       }
     }
-    if (!method.isStatic() && !method.isPrivate() && !Modifier.isFinal(method.getModifiers())) {
-      if (!ancestorDeclaresMethod(sootClass,method)) {
-        virtualLookupFunction(method);
+    if (!method.getName().equals("<clinit>") && !method.getName().equals("<init>") && !method.isPrivate()&& !method.isStatic()&& !Modifier.isFinal(method.getModifiers())&& !Modifier.isFinal(sootClass.getModifiers())) {
+      createLookupFunction(method);
+    }
+    if (method.isStatic()) {
+      String fnName=mangleMethod(method);
+      if (method.isSynchronized()) {
+        fnName+="_synchronized";
       }
+      FunctionRef fn=new FunctionRef(fnName,getFunctionType(method));
+      module.addFunction(createClassInitWrapperFunction(fn));
     }
-    if (!method.isAbstract() && method.isSynchronized()) {
-      synchronizedFunctionWrapper(method);
-    }
   }
-  for (  Entry<Trampoline,FunctionRef> entry : trampolines.entrySet()) {
-    trampoline(entry.getKey(),entry.getValue());
+  for (  Trampoline trampoline : trampolines) {
+    createTrampoline(module,trampoline);
   }
-  classLoaderFunction();
-  module.addGlobal(THE_CLASS);
-  for (  Global global : throwables.values()) {
-    module.addGlobal(global);
-  }
+  module.addGlobal(new Global(mangleClass(sootClass) + "_offset",Linkage.external,I32,false));
+  module.addGlobal(classInfoStruct);
   for (  Global global : strings.values()) {
     module.addGlobal(global);
   }
   out.write(module.toString().getBytes("UTF-8"));
+  ClazzInfo clazzInfo=clazz.resetClazzInfo();
+  clazzInfo.setModifiers(sootClass.getModifiers());
+  clazzInfo.setName(clazz.getInternalName());
+  if (sootClass.hasSuperclass() && !sootClass.isInterface()) {
+    clazzInfo.setSuperclass(sootClass.getSuperclass().getName().replace('.','/'));
+  }
+ else {
+    clazzInfo.setSuperclass(null);
+  }
+  List<String> interfaces=new ArrayList<String>();
+  for (  SootClass iface : sootClass.getInterfaces()) {
+    interfaces.add(iface.getName().replace('.','/'));
+  }
+  clazzInfo.setInterfaces(interfaces);
+  List<FieldInfo> fieldInfos=new ArrayList<FieldInfo>();
+  for (  SootField f : sootClass.getFields()) {
+    fieldInfos.add(new FieldInfo(f.getModifiers(),f.getName(),getDescriptor(f)));
+  }
+  clazzInfo.setFields(fieldInfos);
+  List<MethodInfo> methodInfos=new ArrayList<MethodInfo>();
+  for (  SootMethod m : sootClass.getMethods()) {
+    methodInfos.add(new MethodInfo(m.getModifiers(),m.getName(),getDescriptor(m)));
+  }
+  clazzInfo.setMethods(methodInfos);
+  clazzInfo.setStruct(isStruct(this.sootClass));
+  clazzInfo.setAttributeDependencies(attributesEncoder.getDependencies());
+  clazzInfo.setTrampolines(trampolines);
+  clazz.commitClazzInfo();
 }

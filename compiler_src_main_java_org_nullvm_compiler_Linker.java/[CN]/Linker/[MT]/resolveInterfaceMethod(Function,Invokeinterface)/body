@@ -1,0 +1,30 @@
+{
+  Clazz target=config.getClazzes().load(t.getTarget());
+  String name=t.getMethodName();
+  String desc=t.getMethodDesc();
+  if (!target.getClazzInfo().isInterface()) {
+    throwIncompatibleChangeError(f,"Expected interface but found class %s",target);
+    return null;
+  }
+  if ("<clinit>".equals(name) || "<init>".equals(name)) {
+    throwNoSuchMethodError(f,target,t);
+    return null;
+  }
+  ResolvedMethod rm=resolveInterfaceMethod(target,name,desc);
+  if (rm == null) {
+    Clazz javaLangObject=config.getClazzes().load("java/lang/Object");
+    MethodInfo method=javaLangObject.getClazzInfo().getMethod(name,desc);
+    if (method != null) {
+      rm=new ResolvedMethod(javaLangObject,method);
+    }
+  }
+  if (rm == null) {
+    throwNoSuchMethodError(f,target,t);
+    return null;
+  }
+  if (rm.method.isStatic()) {
+    throwIncompatibleChangeError(f,"Expected non-static method %s.%s%s",target,name,desc);
+    return null;
+  }
+  return rm;
+}

@@ -1,0 +1,153 @@
+{
+  jumpTargets=new HashSet<Unit>();
+  trapHandlers=new HashSet<Unit>();
+  trapsAt=new HashMap<Unit,List<Trap>>();
+  recordedTraps=new HashSet<List<Trap>>();
+  function=createFunction(method,Linkage.external,FunctionAttribute.noinline);
+  module.addFunction(function);
+  Body body=method.retrieveActiveBody();
+  PackManager.v().getPack("jtp").apply(body);
+  PackManager.v().getPack("jop").apply(body);
+  PackManager.v().getPack("jap").apply(body);
+  Set<String> seen=new HashSet<String>();
+  for (  Unit unit : body.getUnits()) {
+    if (unit instanceof DefinitionStmt) {
+      DefinitionStmt stmt=(DefinitionStmt)unit;
+      if (stmt.getLeftOp() instanceof Local) {
+        Local local=(Local)stmt.getLeftOp();
+        if (!seen.contains(local.getName())) {
+          Type type=getLocalType(local.getType());
+          function.add(new Alloca(function.newVariable(local.getName(),type),type));
+          seen.add(local.getName());
+        }
+      }
+    }
+  }
+  if ("<clinit>".equals(method.getName())) {
+    initializeClassFields();
+  }
+  PatchingChain<Unit> units=body.getUnits();
+  int multiANewArrayMaxDims=0;
+  for (  Unit unit : units) {
+    if (unit instanceof DefinitionStmt) {
+      DefinitionStmt stmt=(DefinitionStmt)unit;
+      if (stmt.getRightOp() instanceof NewMultiArrayExpr) {
+        NewMultiArrayExpr expr=(NewMultiArrayExpr)stmt.getRightOp();
+        multiANewArrayMaxDims=Math.max(multiANewArrayMaxDims,expr.getSizeCount());
+      }
+    }
+  }
+  dims=null;
+  if (multiANewArrayMaxDims > 0) {
+    dims=function.newVariable("dims",new PointerType(new ArrayType(multiANewArrayMaxDims,I32)));
+    function.add(new Alloca(dims,new ArrayType(multiANewArrayMaxDims,I32)));
+  }
+  for (  Unit unit : units) {
+    for (    Unit u : units) {
+      if (u instanceof GotoStmt) {
+        Unit target=((GotoStmt)u).getTarget();
+        if (target == unit) {
+          jumpTargets.add(unit);
+        }
+      }
+ else       if (u instanceof IfStmt) {
+        Unit target=((IfStmt)u).getTarget();
+        if (target == unit || unit == units.getSuccOf(u)) {
+          jumpTargets.add(unit);
+        }
+      }
+ else       if (u instanceof LookupSwitchStmt) {
+        LookupSwitchStmt stmt=(LookupSwitchStmt)u;
+        if (unit == stmt.getDefaultTarget() || stmt.getTargets().contains(unit)) {
+          jumpTargets.add(unit);
+        }
+      }
+ else       if (u instanceof TableSwitchStmt) {
+        TableSwitchStmt stmt=(TableSwitchStmt)u;
+        if (unit == stmt.getDefaultTarget() || stmt.getTargets().contains(unit)) {
+          jumpTargets.add(unit);
+        }
+      }
+    }
+    for (    Trap trap : body.getTraps()) {
+      Unit beginUnit=trap.getBeginUnit();
+      Unit endUnit=trap.getEndUnit();
+      if (beginUnit != endUnit && unit == trap.getHandlerUnit()) {
+        trapHandlers.add(unit);
+      }
+    }
+  }
+  for (  Unit unit : units) {
+    if (jumpTargets.contains(unit) || trapHandlers.contains(unit)) {
+      BasicBlock oldBlock=function.getCurrentBasicBlock();
+      function.newBasicBlock(new Label(unit));
+      if (oldBlock != null) {
+        Instruction last=oldBlock.last();
+        if (last == null || !isTerminator(last)) {
+          oldBlock.add(new Br(function.newBasicBlockRef(new Label(unit))));
+        }
+      }
+    }
+    if (unit instanceof DefinitionStmt) {
+      assign((DefinitionStmt)unit);
+    }
+ else     if (unit instanceof ReturnStmt) {
+      return_((ReturnStmt)unit);
+    }
+ else     if (unit instanceof ReturnVoidStmt) {
+      returnVoid();
+    }
+ else     if (unit instanceof IfStmt) {
+      if_((IfStmt)unit);
+    }
+ else     if (unit instanceof LookupSwitchStmt) {
+      lookupSwitch((LookupSwitchStmt)unit);
+    }
+ else     if (unit instanceof TableSwitchStmt) {
+      tableSwitch((TableSwitchStmt)unit);
+    }
+ else     if (unit instanceof GotoStmt) {
+      goto_((GotoStmt)unit);
+    }
+ else     if (unit instanceof ThrowStmt) {
+      throw_((ThrowStmt)unit);
+    }
+ else     if (unit instanceof InvokeStmt) {
+      invoke((InvokeStmt)unit);
+    }
+ else     if (unit instanceof EnterMonitorStmt) {
+      enterMonitor((EnterMonitorStmt)unit);
+    }
+ else     if (unit instanceof ExitMonitorStmt) {
+      exitMonitor((ExitMonitorStmt)unit);
+    }
+ else {
+      throw new IllegalArgumentException("Unknown Unit type: " + unit.getClass());
+    }
+  }
+  next:   for (  List<Trap> traps : recordedTraps) {
+    BasicBlock bb=function.newBasicBlock(new Label(traps));
+    Variable ehptr=function.newVariable(I8_PTR);
+    bb.add(new Call(ehptr,LLVM_EH_EXCEPTION,new Value[0]));
+    Variable sel=function.newVariable(I32);
+    bb.add(new Call(sel,LLVM_EH_SELECTOR,new VariableRef(ehptr),new ConstantBitcast(NVM_BC_PERSONALITY,I8_PTR),new IntegerConstant(1)));
+    for (    Trap trap : traps) {
+      String exName=trap.getException().getName();
+      if ("java.lang.Throwable".equals(exName)) {
+        bb.add(new Br(function.newBasicBlockRef(new Label(trap.getHandlerUnit()))));
+        continue next;
+      }
+      Trampoline trampoline=new ExceptionMatch(this.className,getInternalName(trap.getException()));
+      trampolines.add(trampoline);
+      Variable v=function.newVariable(I32);
+      bb.add(new Call(v,trampoline.getFunctionRef(),ENV));
+      Variable cond=function.newVariable(I1);
+      bb.add(new Trunc(cond,new VariableRef(v),I1));
+      BasicBlockRef falseBlock=function.newBasicBlockRef(new Label());
+      bb.add(new Br(new VariableRef(cond),function.newBasicBlockRef(new Label(trap.getHandlerUnit())),falseBlock));
+      bb=function.newBasicBlock(falseBlock.getLabel());
+    }
+    bb.add(new Call(NVM_BC_RETHROW,ENV));
+    bb.add(new Unreachable());
+  }
+}

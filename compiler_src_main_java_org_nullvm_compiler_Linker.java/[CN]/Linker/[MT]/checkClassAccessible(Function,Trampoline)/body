@@ -1,0 +1,17 @@
+{
+  Clazz caller=config.getClazzes().load(t.getCallingClass());
+  String targetClassName=t.getTarget();
+  if (isArray(targetClassName)) {
+    if (isPrimitiveBaseType(targetClassName)) {
+      return true;
+    }
+    targetClassName=getBaseType(targetClassName);
+  }
+  Clazz target=config.getClazzes().load(targetClassName);
+  if (checkClassAccessible(target,caller)) {
+    return true;
+  }
+  throwIllegalAccessError(f,ILLEGAL_ACCESS_ERROR_CLASS,target,caller);
+  f.add(new Unreachable());
+  return false;
+}
