@@ -17,9 +17,8 @@
   Value resultOuter=call(outerFunction,innerFunction.ref(),args);
   outerFunction.add(new Ret(resultOuter));
   if (method.isStatic()) {
-    Trampoline ldc=new LdcClass(className,className);
-    trampolines.add(ldc);
-    Value clazz=call(innerFunction,ldc.getFunctionRef(),ENV);
+    FunctionRef ldcFn=new FunctionRef(mangleClass(sootMethod.getDeclaringClass()) + "_ldc",new FunctionType(OBJECT_PTR,ENV_PTR));
+    Value clazz=call(innerFunction,ldcFn,ENV);
     args.add(1,clazz);
   }
   Value frameAddress=call(innerFunction,LLVM_FRAMEADDRESS,new IntegerConstant(0));
