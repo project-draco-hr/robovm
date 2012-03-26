@@ -1,0 +1,33 @@
+{
+  SootClass target=config.getClazzes().load(t.getTarget()).getSootClass();
+  String name=t.getMethodName();
+  String desc=t.getMethodDesc();
+  if (target.isInterface()) {
+    throwIncompatibleChangeError(f,EXPECTED_CLASS_BUT_FOUND_INTERFACE,target);
+    return null;
+  }
+  if ("<init>".equals(name) && t instanceof Invokespecial) {
+    SootMethod method=getMethod(target,name,desc);
+    if (method != null) {
+      return method;
+    }
+  }
+  if ("<clinit>".equals(name) || "<init>".equals(name)) {
+    throwNoSuchMethodError(f,t);
+    return null;
+  }
+  SootMethod method=resolveMethod(target,name,desc);
+  if (method == null) {
+    throwNoSuchMethodError(f,t);
+    return null;
+  }
+  if (t.isStatic() && !method.isStatic()) {
+    throwIncompatibleChangeError(f,EXPECTED_STATIC_METHOD,target,name,desc);
+    return null;
+  }
+ else   if (!t.isStatic() && method.isStatic()) {
+    throwIncompatibleChangeError(f,EXPECTED_NON_STATIC_METHOD,target,name,desc);
+    return null;
+  }
+  return method;
+}

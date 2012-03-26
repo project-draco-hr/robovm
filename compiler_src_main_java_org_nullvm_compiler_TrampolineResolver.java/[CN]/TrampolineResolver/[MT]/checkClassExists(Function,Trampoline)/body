@@ -1,0 +1,19 @@
+{
+  String targetClassName=t.getTarget();
+  if (isArray(targetClassName)) {
+    if (isPrimitiveBaseType(targetClassName)) {
+      return true;
+    }
+    targetClassName=getBaseType(targetClassName);
+  }
+  Clazz target=config.getClazzes().load(targetClassName);
+  if (target != null) {
+    Clazz caller=config.getClazzes().load(t.getCallingClass());
+    if (!caller.isInBootClasspath() || target.isInBootClasspath()) {
+      return true;
+    }
+  }
+  call(f,NVM_BC_THROW_NO_CLASS_DEF_FOUND_ERROR,f.getParameterRef(0),mb.getString(t.getTarget()));
+  f.add(new Unreachable());
+  return false;
+}

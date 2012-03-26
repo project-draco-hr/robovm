@@ -1,0 +1,19 @@
+{
+  SootClass target=config.getClazzes().load(t.getTarget()).getSootClass();
+  String name=t.getFieldName();
+  String desc=t.getFieldDesc();
+  SootField field=resolveField(target,name,desc);
+  if (field == null) {
+    throwNoSuchFieldError(f,t);
+    return null;
+  }
+  if (!field.isStatic() && t.isStatic()) {
+    throwIncompatibleChangeError(f,EXPECTED_STATIC_FIELD,field.getDeclaringClass(),t.getFieldName());
+    return null;
+  }
+  if (field.isStatic() && !t.isStatic()) {
+    throwIncompatibleChangeError(f,EXPECTED_NON_STATIC_FIELD,field.getDeclaringClass(),t.getFieldName());
+    return null;
+  }
+  return field;
+}

@@ -1,0 +1,18 @@
+{
+  if (clazz != null && !clazz.isPhantom()) {
+    SootField field=getField(clazz,name,desc);
+    if (field != null) {
+      return field;
+    }
+    for (    SootClass interfaze : clazz.getInterfaces()) {
+      field=resolveField(interfaze,name,desc);
+      if (field != null) {
+        return field;
+      }
+    }
+    if (!clazz.isInterface() && clazz.hasSuperclass()) {
+      return resolveField(clazz.getSuperclass(),name,desc);
+    }
+  }
+  return null;
+}

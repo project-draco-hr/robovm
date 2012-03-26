@@ -1,0 +1,27 @@
+{
+  if (clazz != null && !clazz.isPhantom()) {
+    SootMethod method=getMethod(clazz,name,desc);
+    if (method != null) {
+      return method;
+    }
+    SootClass c=!clazz.isInterface() && clazz.hasSuperclass() ? clazz.getSuperclass() : null;
+    while (c != null) {
+      method=getMethod(c,name,desc);
+      if (method != null) {
+        return method;
+      }
+      c=!c.isInterface() && c.hasSuperclass() ? c.getSuperclass() : null;
+    }
+    c=clazz;
+    while (c != null) {
+      for (      SootClass interfaze : c.getInterfaces()) {
+        method=resolveInterfaceMethod(interfaze,name,desc);
+        if (method != null) {
+          return method;
+        }
+      }
+      c=!c.isInterface() && c.hasSuperclass() ? c.getSuperclass() : null;
+    }
+  }
+  return null;
+}

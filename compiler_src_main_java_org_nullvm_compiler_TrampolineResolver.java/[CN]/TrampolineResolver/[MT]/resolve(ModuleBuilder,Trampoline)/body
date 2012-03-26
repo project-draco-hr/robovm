@@ -1,0 +1,178 @@
+{
+  this.mb=mb;
+  if (t instanceof LdcString) {
+    Function f=new Function(Linkage.linker_private_weak,t.getFunctionRef());
+    mb.addFunction(f);
+    Value result=call(f,NVM_BC_LDC_STRING,f.getParameterRef(0),mb.getString(t.getTarget()));
+    f.add(new Ret(result));
+    return;
+  }
+  Function f=new Function(Linkage.external,t.getFunctionRef());
+  if (!checkClassExists(f,t) || !checkClassAccessible(f,t)) {
+    mb.addFunction(f);
+    return;
+  }
+  if (t instanceof New) {
+    SootClass target=config.getClazzes().load(t.getTarget()).getSootClass();
+    if (target.isAbstract() || target.isInterface()) {
+      call(f,NVM_BC_THROW_INSTANTIATION_ERROR,f.getParameterRef(0),mb.getString(t.getTarget()));
+      f.add(new Unreachable());
+      mb.addFunction(f);
+      return;
+    }
+    String fnName=mangleClass(t.getTarget()) + "_allocator_clinit";
+    alias(t,fnName);
+  }
+ else   if (t instanceof ExceptionMatch) {
+    String fnName=mangleClass(t.getTarget()) + "_exmatch";
+    if (!mb.hasSymbol(fnName)) {
+      Function fn=new Function(weak,t.getFunctionRef(),fnName);
+      Global exHeader=new Global(mangleClass(t.getTarget()) + "_info",I8_PTR);
+      if (!mb.hasSymbol(exHeader.getName())) {
+        mb.addGlobal(exHeader);
+      }
+      Value result=call(fn,NVM_BC_EXCEPTION_MATCH,f.getParameterRef(0),exHeader.ref());
+      fn.add(new Ret(result));
+      mb.addFunction(fn);
+    }
+    alias(t,fnName);
+  }
+ else   if (t instanceof Instanceof) {
+    if (isArray(t.getTarget())) {
+      String fnName="array_" + mangleClass(t.getTarget()) + "_instanceof";
+      if (!mb.hasSymbol(fnName)) {
+        Function fn=new Function(weak,t.getFunctionRef(),fnName);
+        Value arrayClass=callLdcArray(fn,t.getTarget());
+        Value result=call(fn,NVM_BC_INSTANCEOF_ARRAY,fn.getParameterRef(0),arrayClass,fn.getParameterRef(1));
+        fn.add(new Ret(result));
+        mb.addFunction(fn);
+      }
+      alias(t,fnName);
+    }
+ else {
+      String fnName=mangleClass(t.getTarget()) + "_instanceof_clinit";
+      alias(t,fnName);
+    }
+  }
+ else   if (t instanceof Checkcast) {
+    if (isArray(t.getTarget())) {
+      String fnName="array_" + mangleClass(t.getTarget()) + "_checkcast";
+      if (!mb.hasSymbol(fnName)) {
+        Function fn=new Function(weak,t.getFunctionRef(),fnName);
+        Value arrayClass=callLdcArray(fn,t.getTarget());
+        Value result=call(fn,NVM_BC_CHECKCAST_ARRAY,fn.getParameterRef(0),arrayClass,fn.getParameterRef(1));
+        fn.add(new Ret(result));
+        mb.addFunction(fn);
+      }
+      alias(t,fnName);
+    }
+ else {
+      String fnName=mangleClass(t.getTarget()) + "_checkcast_clinit";
+      alias(t,fnName);
+    }
+  }
+ else   if (t instanceof LdcClass) {
+    if (isArray(t.getTarget())) {
+      FunctionRef fn=createLdcArray(t.getTarget());
+      alias(t,fn.getName());
+    }
+ else {
+      String fnName=mangleClass(t.getTarget()) + "_ldc_clinit";
+      alias(t,fnName);
+    }
+  }
+ else   if (t instanceof Anewarray) {
+    String fnName="array_" + mangleClass(t.getTarget()) + "_new";
+    if (!mb.hasSymbol(fnName)) {
+      Function fn=new Function(weak,t.getFunctionRef(),fnName);
+      Value arrayClass=callLdcArray(fn,t.getTarget());
+      Value result=call(fn,NVM_BC_NEW_OBJECT_ARRAY,fn.getParameterRef(0),fn.getParameterRef(1),arrayClass);
+      fn.add(new Ret(result));
+      mb.addFunction(fn);
+    }
+    alias(t,fnName);
+  }
+ else   if (t instanceof Multianewarray) {
+    String fnName="array_" + mangleClass(t.getTarget()) + "_multi";
+    if (!mb.hasSymbol(fnName)) {
+      Function fn=new Function(weak,t.getFunctionRef(),fnName);
+      Value arrayClass=callLdcArray(fn,t.getTarget());
+      Value result=call(fn,NVM_BC_NEW_MULTI_ARRAY,fn.getParameterRef(0),fn.getParameterRef(1),fn.getParameterRef(2),arrayClass);
+      fn.add(new Ret(result));
+      mb.addFunction(fn);
+    }
+    alias(t,fnName);
+  }
+ else   if (t instanceof NativeCall) {
+    Clazz target=config.getClazzes().load(t.getTarget());
+    NativeCall nc=(NativeCall)t;
+    String shortName=mangleNativeMethod(target.getInternalName(),nc.getMethodName());
+    String longName=mangleNativeMethod(target.getInternalName(),nc.getMethodName(),nc.getMethodDesc());
+    if (target.isInBootClasspath()) {
+      Function fnLong=new Function(weak,longName,nc.getFunctionType());
+      call(fnLong,NVM_BC_THROW_UNSATISIFED_LINK_ERROR,fnLong.getParameterRef(0));
+      fnLong.add(new Unreachable());
+      mb.addFunction(fnLong);
+      FunctionRef targetFn=fnLong.ref();
+      if (!isLongNativeFunctionNameRequired(nc)) {
+        Function fnShort=new Function(Linkage.weak,shortName,nc.getFunctionType());
+        Value resultInner=call(fnShort,fnLong.ref(),fnShort.getParameterRefs());
+        fnShort.add(new Ret(resultInner));
+        mb.addFunction(fnShort);
+        targetFn=fnShort.ref();
+      }
+      Function fn=new Function(Linkage.external,nc.getFunctionRef());
+      Value result=call(fn,targetFn,fn.getParameterRefs());
+      fn.add(new Ret(result));
+      mb.addFunction(fn);
+    }
+ else {
+      Global g=new Global("native_" + mangleMethod(nc.getTarget(),nc.getMethodName(),nc.getMethodDesc()) + "_ptr",new NullConstant(I8_PTR));
+      mb.addGlobal(g);
+      Function fn=new Function(Linkage.external,nc.getFunctionRef());
+      Value implI8Ptr=call(fn,NVM_BC_RESOLVE_NATIVE,fn.getParameterRef(0),new GlobalRef(mangleClass(nc.getTarget()) + "_info",I8_PTR),mb.getString(nc.getMethodName()),mb.getString(nc.getMethodDesc()),mb.getString(mangleNativeMethod(nc.getTarget(),nc.getMethodName())),mb.getString(mangleNativeMethod(nc.getTarget(),nc.getMethodName(),nc.getMethodDesc())),g.ref());
+      Variable impl=fn.newVariable(nc.getFunctionType());
+      fn.add(new Bitcast(impl,implI8Ptr,impl.getType()));
+      Value result=call(fn,impl.ref(),fn.getParameterRefs());
+      fn.add(new Ret(result));
+      mb.addFunction(fn);
+    }
+  }
+ else   if (t instanceof FieldAccessor) {
+    SootField field=resolveField(f,(FieldAccessor)t);
+    if (field == null || !checkMemberAccessible(f,t,field)) {
+      mb.addFunction(f);
+      return;
+    }
+    Clazz caller=config.getClazzes().load(t.getCallingClass());
+    Clazz target=config.getClazzes().load(t.getTarget());
+    if (!((FieldAccessor)t).isGetter() && field.isFinal() && caller != target) {
+      throwIllegalAccessError(f,ATTEMPT_TO_WRITE_TO_FINAL_FIELD,target,field.getName(),caller);
+      mb.addFunction(f);
+      return;
+    }
+    createTrampolineAliasForField((FieldAccessor)t,field);
+  }
+ else   if (t instanceof Invokeinterface) {
+    SootMethod rm=resolveInterfaceMethod(f,(Invokeinterface)t);
+    if (rm == null || !checkMemberAccessible(f,t,rm)) {
+      mb.addFunction(f);
+      return;
+    }
+    createTrampolineAliasForMethod((Invoke)t,rm);
+  }
+ else   if (t instanceof Invoke) {
+    SootMethod method=resolveMethod(f,(Invoke)t);
+    if (method == null || !checkMemberAccessible(f,t,method)) {
+      mb.addFunction(f);
+      return;
+    }
+    if (t instanceof Invokespecial && method.isAbstract()) {
+      call(f,NVM_BC_THROW_ABSTRACT_METHOD_ERROR,f.getParameterRef(0),mb.getString(String.format(NO_SUCH_METHOD_ERROR,method.getDeclaringClass(),method.getName(),getDescriptor(method))));
+      f.add(new Unreachable());
+      mb.addFunction(f);
+      return;
+    }
+    createTrampolineAliasForMethod((Invoke)t,method);
+  }
+}

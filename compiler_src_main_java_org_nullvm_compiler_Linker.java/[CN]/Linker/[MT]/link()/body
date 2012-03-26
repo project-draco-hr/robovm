@@ -4,14 +4,14 @@
   aliases=new TreeMap<String,String>();
   Set<Clazz> required=new TreeSet<Clazz>(findRequiredClasses());
   config.getLogger().info("Linking %d classes",required.size());
-  Module module=new Module();
-  module.addInclude(getClass().getClassLoader().getResource("header.ll"));
+  ModuleBuilder mb=new ModuleBuilder();
+  mb.addInclude(getClass().getClassLoader().getResource("header.ll"));
   HashTableGenerator<String,Constant> bcpHashGen=new HashTableGenerator<String,Constant>(new ModifiedUtf8HashFunction());
   HashTableGenerator<String,Constant> cpHashGen=new HashTableGenerator<String,Constant>(new ModifiedUtf8HashFunction());
   Set<Trampoline> trampolines=new HashSet<Trampoline>();
   for (  Clazz clazz : required) {
-    Global info=getClassInfoStruct(clazz);
-    module.addGlobal(info);
+    Global info=new Global(mangleClass(clazz.getInternalName()) + "_info",external,I8_PTR,false);
+    mb.addGlobal(info);
     if (clazz.isInBootClasspath()) {
       bcpHashGen.put(clazz.getInternalName(),new ConstantBitcast(info.ref(),I8_PTR));
     }
@@ -19,15 +19,9 @@
       cpHashGen.put(clazz.getInternalName(),new ConstantBitcast(info.ref(),I8_PTR));
     }
     trampolines.addAll(clazz.getClazzInfo().getTrampolines());
-    if (!clazz.getClazzInfo().isInterface()) {
-      String superclassName=clazz.getClazzInfo().getSuperclass();
-      if (superclassName != null && !"java/lang/Object".equals(superclassName)) {
-        module.addGlobal(new Global(mangleClass(clazz.getInternalName()) + "_offset",alignedOffset(clazz),true));
-      }
-    }
   }
-  module.addGlobal(new Global("_nvmBcBootClassesHash",new ConstantGetelementptr(module.newGlobal(bcpHashGen.generate(),true).ref(),0,0)));
-  module.addGlobal(new Global("_nvmBcClassesHash",new ConstantGetelementptr(module.newGlobal(cpHashGen.generate(),true).ref(),0,0)));
+  mb.addGlobal(new Global("_nvmBcBootClassesHash",new ConstantGetelementptr(mb.newGlobal(bcpHashGen.generate(),true).ref(),0,0)));
+  mb.addGlobal(new Global("_nvmBcClassesHash",new ConstantGetelementptr(mb.newGlobal(cpHashGen.generate(),true).ref(),0,0)));
   ArrayConstantBuilder bootClasspathValues=new ArrayConstantBuilder(I8_PTR);
   ArrayConstantBuilder classpathValues=new ArrayConstantBuilder(I8_PTR);
   for (  Path path : config.getClazzes().getPaths()) {
@@ -39,31 +33,27 @@
       entryName=config.getTarget().getInstallRelativeArchivePath(path);
     }
     if (path.isInBootClasspath()) {
-      bootClasspathValues.add(getString(entryName));
+      bootClasspathValues.add(mb.getString(entryName));
     }
  else {
-      classpathValues.add(getString(entryName));
+      classpathValues.add(mb.getString(entryName));
     }
   }
   bootClasspathValues.add(new NullConstant(Type.I8_PTR));
   classpathValues.add(new NullConstant(Type.I8_PTR));
-  module.newGlobal(bootClasspathValues.build());
-  module.addGlobal(new Global("_nvmBcBootclasspath",new ConstantGetelementptr(module.newGlobal(bootClasspathValues.build()).ref(),0,0)));
-  module.addGlobal(new Global("_nvmBcClasspath",new ConstantGetelementptr(module.newGlobal(classpathValues.build()).ref(),0,0)));
+  mb.addGlobal(new Global("_nvmBcBootclasspath",new ConstantGetelementptr(mb.newGlobal(bootClasspathValues.build()).ref(),0,0)));
+  mb.addGlobal(new Global("_nvmBcClasspath",new ConstantGetelementptr(mb.newGlobal(classpathValues.build()).ref(),0,0)));
   if (config.getMainClass() != null) {
-    module.addGlobal(new Global("_nvmBcMainClass",getString(config.getMainClass())));
-  }
-  for (  Trampoline t : trampolines) {
-    createTrampoline(module,t);
+    mb.addGlobal(new Global("_nvmBcMainClass",mb.getString(config.getMainClass())));
   }
   for (  Global g : strings.values()) {
-    module.addGlobal(g);
+    mb.addGlobal(g);
   }
   for (  FunctionDeclaration fd : functionDeclarations.values()) {
-    module.addFunctionDeclaration(fd);
+    mb.addFunctionDeclaration(fd);
   }
   File linkerLl=new File(config.getTmpDir(),"linker.ll");
-  FileUtils.writeStringToFile(linkerLl,module.toString(),"UTF-8");
+  FileUtils.writeStringToFile(linkerLl,mb.build().toString(),"UTF-8");
   File linkerBc=new File(config.getTmpDir(),"linker.bc");
   CompilerUtil.opt(config,linkerLl,linkerBc,"-mem2reg","-always-inline");
   File linkerS=new File(config.getTmpDir(),"linker.s");
