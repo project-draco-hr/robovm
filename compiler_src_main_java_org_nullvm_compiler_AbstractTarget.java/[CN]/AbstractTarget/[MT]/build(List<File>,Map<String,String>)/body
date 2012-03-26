@@ -1,45 +1,41 @@
 {
   File outFile=new File(config.getTmpDir(),config.getExecutable());
   config.getLogger().debug("Building executable %s",outFile);
-  String ccPath=(config.getOs().getFamily() == OS.Family.darwin) ? "clang" : "gcc";
-  if (config.getCcBinPath() != null) {
-    ccPath=config.getCcBinPath().getAbsolutePath();
-  }
   LinkedList<String> ccArgs=new LinkedList<String>();
-  LinkedList<String> libArgs=new LinkedList<String>();
-  libArgs.addAll(Arrays.asList("-lnullvm-bc","-Wl,--whole-archive","-lnullvm-rt","-Wl,--no-whole-archive","-lnullvm-core","-lnullvm-hyprt","-lnullvm-hythr","-lnullvm-hypool","-lnullvm-hycommon","-lgc","-lpthread","-ldl","-lm","-lz"));
+  LinkedList<String> libs=new LinkedList<String>();
+  libs.add("-lnullvm-bc");
+  if (config.getOs().getFamily() == OS.Family.darwin) {
+    libs.add("-lnullvm-rt");
+  }
+ else {
+    libs.addAll(Arrays.asList("-Wl,--whole-archive","-lnullvm-rt","-Wl,--no-whole-archive"));
+  }
+  libs.addAll(Arrays.asList("-lnullvm-core","-lnullvm-hyprt","-lnullvm-hythr","-lnullvm-hypool","-lnullvm-hycommon","-lgc","-lpthread","-ldl","-lm","-lz"));
+  if (config.getOs().getFamily() == OS.Family.darwin) {
+    libs.add("-liconv");
+  }
   ccArgs.add("-L");
   ccArgs.add(config.getOsArchDepLibDir().getAbsolutePath());
+  File aliasFile=new File(config.getTmpDir(),"aliases");
   if (config.getOs().getFamily() == OS.Family.linux) {
-    File aliasFile=new File(config.getTmpDir(),"aliases");
-    PrintWriter w=null;
-    try {
-      w=new PrintWriter(aliasFile,"ASCII");
-      for (      Entry<String,String> alias : aliases.entrySet()) {
-        w.print(alias.getKey());
-        w.print(" = ");
-        w.print(alias.getValue());
-        w.print(";\n");
-      }
-    }
-  finally {
-      IOUtils.closeQuietly(w);
-    }
-    ccArgs.add("-Wl,-rpath=$ORIGIN");
+    createGnuLdAliasFile(aliasFile,aliases);
     ccArgs.add("-Wl,--script=" + aliasFile.getAbsolutePath());
+    ccArgs.add("-Wl,-rpath=$ORIGIN");
     ccArgs.add("-Wl,--gc-sections");
     ccArgs.add("-Wl,-u,_nvmPersonality");
     ccArgs.add("-Wl,-u,_nvmBcPersonality");
   }
  else   if (config.getOs().getFamily() == OS.Family.darwin) {
+    ccArgs.add("-arch");
+    ccArgs.add(config.getArch().toString());
     File unexportedSymbolsFile=new File(config.getTmpDir(),"unexported_symbols");
     FileUtils.writeStringToFile(unexportedSymbolsFile,"*\n","ASCII");
     ccArgs.add("-unexported_symbols_list");
     ccArgs.add(unexportedSymbolsFile.getAbsolutePath());
-    ccArgs.add("-arch");
-    ccArgs.add(config.getArch().toString());
+    createMacLdAliasFile(aliasFile,aliases);
     ccArgs.add("-Wl,-no_implicit_dylibs");
     ccArgs.add("-Wl,-no_compact_unwind");
+    ccArgs.add("-Wl,-dead_strip");
   }
-  doBuild(ccPath,outFile,ccArgs,objectFiles,libArgs);
+  doBuild(outFile,ccArgs,objectFiles,libs);
 }
