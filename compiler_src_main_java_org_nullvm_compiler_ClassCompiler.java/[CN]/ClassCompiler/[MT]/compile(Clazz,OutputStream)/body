@@ -14,7 +14,7 @@
     body.getUnits().add(new JReturnVoidStmt());
     this.sootClass.addMethod(clinit);
   }
-  classInfoStruct=new Global(mangleClass(sootClass) + "_info",linker_private_weak,createClassInfoStruct());
+  Global classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",linker_private_weak,createClassInfoStruct());
   if (isStruct(this.sootClass)) {
     enhanceStructClass(this.sootClass);
   }
@@ -86,12 +86,15 @@
   }
   StructureConstant classInfoErrorStruct=createClassInfoErrorStruct();
   if (classInfoErrorStruct != null) {
-    classInfoStruct=new Global(mangleClass(sootClass) + "_info",linker_private_weak,classInfoErrorStruct);
+    classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",linker_private_weak,classInfoErrorStruct);
   }
   if (sootClass.hasSuperclass() && !"java.lang.Object".equals(sootClass.getSuperclass().getName())) {
     mb.addGlobal(new Global(mangleClass(sootClass) + "_offset",_private,alignedOffset(sootClass),true));
   }
   mb.addGlobal(classInfoStruct);
+  Function infoFn=new Function(external,new FunctionAttribute[]{alwaysinline,optsize},getInfoStructFn(getInternalName(sootClass)));
+  infoFn.add(new Ret(new ConstantBitcast(classInfoStruct.ref(),I8_PTR_PTR)));
+  mb.addFunction(infoFn);
   out.write(mb.build().toString().getBytes("UTF-8"));
   ClazzInfo clazzInfo=clazz.resetClazzInfo();
   clazzInfo.setModifiers(sootClass.getModifiers());

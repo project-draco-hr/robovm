@@ -1,7 +1,4 @@
 {
-  strings=new HashMap<String,Global>();
-  functionDeclarations=new HashMap<String,FunctionDeclaration>();
-  aliases=new TreeMap<String,String>();
   Set<Clazz> required=new TreeSet<Clazz>(findRequiredClasses());
   config.getLogger().info("Linking %d classes",required.size());
   ModuleBuilder mb=new ModuleBuilder();
@@ -10,7 +7,7 @@
   HashTableGenerator<String,Constant> cpHashGen=new HashTableGenerator<String,Constant>(new ModifiedUtf8HashFunction());
   Set<Trampoline> trampolines=new HashSet<Trampoline>();
   for (  Clazz clazz : required) {
-    Global info=new Global(mangleClass(clazz.getInternalName()) + "_info",external,I8_PTR,false);
+    Global info=new Global(mangleClass(clazz.getInternalName()) + "_info_struct",external,I8_PTR,false);
     mb.addGlobal(info);
     if (clazz.isInBootClasspath()) {
       bcpHashGen.put(clazz.getInternalName(),new ConstantBitcast(info.ref(),I8_PTR));
@@ -46,12 +43,6 @@
   if (config.getMainClass() != null) {
     mb.addGlobal(new Global("_nvmBcMainClass",mb.getString(config.getMainClass())));
   }
-  for (  Global g : strings.values()) {
-    mb.addGlobal(g);
-  }
-  for (  FunctionDeclaration fd : functionDeclarations.values()) {
-    mb.addFunctionDeclaration(fd);
-  }
   File linkerLl=new File(config.getTmpDir(),"linker.ll");
   FileUtils.writeStringToFile(linkerLl,mb.build().toString(),"UTF-8");
   File linkerBc=new File(config.getTmpDir(),"linker.bc");
@@ -63,5 +54,5 @@
   for (  Clazz clazz : required) {
     objectFiles.add(config.getOFile(clazz));
   }
-  config.getTarget().build(objectFiles,aliases);
+  config.getTarget().build(objectFiles);
 }

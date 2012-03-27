@@ -16,10 +16,7 @@
   }
   ccArgs.add("-L");
   ccArgs.add(config.getOsArchDepLibDir().getAbsolutePath());
-  File aliasFile=new File(config.getTmpDir(),"aliases");
   if (config.getOs().getFamily() == OS.Family.linux) {
-    createGnuLdAliasFile(aliasFile,aliases);
-    ccArgs.add("-Wl,--script=" + aliasFile.getAbsolutePath());
     ccArgs.add("-Wl,-rpath=$ORIGIN");
     ccArgs.add("-Wl,--gc-sections");
     ccArgs.add("-Wl,-u,_nvmPersonality");
@@ -32,7 +29,6 @@
     FileUtils.writeStringToFile(unexportedSymbolsFile,"*\n","ASCII");
     ccArgs.add("-unexported_symbols_list");
     ccArgs.add(unexportedSymbolsFile.getAbsolutePath());
-    createMacLdAliasFile(aliasFile,aliases);
     ccArgs.add("-Wl,-no_implicit_dylibs");
     ccArgs.add("-Wl,-no_compact_unwind");
     ccArgs.add("-Wl,-dead_strip");
