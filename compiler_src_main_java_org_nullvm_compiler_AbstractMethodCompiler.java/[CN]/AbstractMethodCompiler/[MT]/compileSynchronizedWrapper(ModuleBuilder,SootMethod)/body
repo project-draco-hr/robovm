@@ -26,10 +26,9 @@
   call(function,NVM_BC_MONITOR_EXIT,ENV,monitor);
   function.add(new Ret(result));
   function.newBasicBlock(new Label("failure"));
+  Variable lpResult=function.newVariable(new StructureType(I8_PTR,I32));
+  function.add(new Landingpad(lpResult,NVM_BC_PERSONALITY,new Catch(new NullConstant(I8_PTR))));
   call(function,NVM_BC_MONITOR_EXIT,ENV,monitor);
-  Variable ehptr=function.newVariable(I8_PTR);
-  function.add(new Call(ehptr,LLVM_EH_EXCEPTION,new Value[0]));
-  call(function,LLVM_EH_SELECTOR,ehptr.ref(),new ConstantBitcast(NVM_BC_PERSONALITY,I8_PTR),new IntegerConstant(1));
   call(function,NVM_BC_RETHROW,ENV);
   function.add(new Unreachable());
 }
