@@ -1,13 +1,13 @@
 {
   this.mb=mb;
   if (t instanceof LdcString) {
-    Function f=new Function(Linkage.linker_private_weak,t.getFunctionRef());
+    Function f=new Function(weak,t.getFunctionRef());
     mb.addFunction(f);
     Value result=call(f,NVM_BC_LDC_STRING,f.getParameterRef(0),mb.getString(t.getTarget()));
     f.add(new Ret(result));
     return;
   }
-  Function f=new Function(Linkage.external,t.getFunctionRef());
+  Function f=new Function(external,t.getFunctionRef());
   if (!checkClassExists(f,t) || !checkClassAccessible(f,t)) {
     mb.addFunction(f);
     return;
@@ -116,13 +116,13 @@
       mb.addFunction(fnLong);
       FunctionRef targetFn=fnLong.ref();
       if (!isLongNativeFunctionNameRequired(nc)) {
-        Function fnShort=new Function(Linkage.weak,shortName,nc.getFunctionType());
+        Function fnShort=new Function(weak,shortName,nc.getFunctionType());
         Value resultInner=call(fnShort,fnLong.ref(),fnShort.getParameterRefs());
         fnShort.add(new Ret(resultInner));
         mb.addFunction(fnShort);
         targetFn=fnShort.ref();
       }
-      Function fn=new Function(Linkage.external,nc.getFunctionRef());
+      Function fn=new Function(external,nc.getFunctionRef());
       Value result=call(fn,targetFn,fn.getParameterRefs());
       fn.add(new Ret(result));
       mb.addFunction(fn);
@@ -130,7 +130,7 @@
  else {
       Global g=new Global("native_" + mangleMethod(nc.getTarget(),nc.getMethodName(),nc.getMethodDesc()) + "_ptr",new NullConstant(I8_PTR));
       mb.addGlobal(g);
-      Function fn=new Function(Linkage.external,nc.getFunctionRef());
+      Function fn=new Function(external,nc.getFunctionRef());
       FunctionRef ldcFn=new FunctionRef(mangleClass(nc.getTarget()) + "_ldc",new FunctionType(OBJECT_PTR,ENV_PTR));
       Value theClass=call(fn,ldcFn,fn.getParameterRef(0));
       Value implI8Ptr=call(fn,NVM_BC_RESOLVE_NATIVE,fn.getParameterRef(0),theClass,mb.getString(nc.getMethodName()),mb.getString(nc.getMethodDesc()),mb.getString(mangleNativeMethod(nc.getTarget(),nc.getMethodName())),mb.getString(mangleNativeMethod(nc.getTarget(),nc.getMethodName(),nc.getMethodDesc())),g.ref());

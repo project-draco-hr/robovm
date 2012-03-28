@@ -14,7 +14,6 @@
     body.getUnits().add(new JReturnVoidStmt());
     this.sootClass.addMethod(clinit);
   }
-  Global classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",linker_private_weak,createClassInfoStruct());
   if (isStruct(this.sootClass)) {
     enhanceStructClass(this.sootClass);
   }
@@ -84,9 +83,13 @@
   for (  Trampoline trampoline : trampolines) {
     trampolineResolver.compile(mb,trampoline);
   }
+  Global classInfoStruct=null;
   StructureConstant classInfoErrorStruct=createClassInfoErrorStruct();
   if (classInfoErrorStruct != null) {
-    classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",linker_private_weak,classInfoErrorStruct);
+    classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",classInfoErrorStruct);
+  }
+ else {
+    classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",createClassInfoStruct());
   }
   if (sootClass.hasSuperclass() && !"java.lang.Object".equals(sootClass.getSuperclass().getName())) {
     mb.addGlobal(new Global(mangleClass(sootClass) + "_offset",_private,alignedOffset(sootClass),true));
