@@ -1,0 +1,38 @@
+{
+  validateCallbackMethod(method);
+  Function callbackFn=new Function(external,new FunctionAttribute[]{noinline,optsize},mangleMethod(method) + "_callback",getCallbackFunctionType(method));
+  moduleBuilder.addFunction(callbackFn);
+  Value env=call(callbackFn,NVM_BC_ATTACH_THREAD_FROM_CALLBACK);
+  ArrayList<Value> args=new ArrayList<Value>();
+  args.add(env);
+  for (  VariableRef ref : callbackFn.getParameterRefs()) {
+    if (ref.getType() == I8_PTR) {
+      Variable tmp=callbackFn.newVariable(I64);
+      callbackFn.add(new Ptrtoint(tmp,ref,I64));
+      ref=tmp.ref();
+    }
+    args.add(ref);
+  }
+  String targetName=mangleMethod(method);
+  if (method.isSynchronized()) {
+    targetName+="_synchronized";
+  }
+  FunctionRef targetFn=new FunctionRef(targetName,getFunctionType(method));
+  BasicBlockRef bbSuccess=callbackFn.newBasicBlockRef(new Label("success"));
+  BasicBlockRef bbFailure=callbackFn.newBasicBlockRef(new Label("failure"));
+  Value result=invoke(callbackFn,targetFn,bbSuccess,bbFailure,args);
+  callbackFn.newBasicBlock(new Label("success"));
+  if (callbackFn.getType().getReturnType() == I8_PTR) {
+    Variable resultI8Ptr=callbackFn.newVariable(I8_PTR);
+    callbackFn.add(new Inttoptr(resultI8Ptr,result,I8_PTR));
+    result=resultI8Ptr.ref();
+  }
+  call(callbackFn,NVM_BC_DETACH_THREAD_FROM_CALLBACK,env);
+  callbackFn.add(new Ret(result));
+  callbackFn.newBasicBlock(new Label("failure"));
+  Variable lpResult=callbackFn.newVariable(new StructureType(I8_PTR,I32));
+  callbackFn.add(new Landingpad(lpResult,NVM_BC_PERSONALITY,new Catch(new NullConstant(I8_PTR))));
+  call(callbackFn,NVM_BC_DETACH_THREAD_FROM_CALLBACK,env);
+  call(callbackFn,NVM_BC_RETHROW,env);
+  callbackFn.add(new Unreachable());
+}

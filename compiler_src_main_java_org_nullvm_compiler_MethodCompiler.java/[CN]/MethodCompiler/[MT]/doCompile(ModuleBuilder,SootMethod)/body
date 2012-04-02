@@ -3,8 +3,9 @@
   trapHandlers=new HashSet<Unit>();
   trapsAt=new HashMap<Unit,List<Trap>>();
   recordedTraps=new HashSet<List<Trap>>();
-  function=createFunction(method,Linkage.external,FunctionAttribute.noinline);
+  function=createFunction(method,external,noinline);
   moduleBuilder.addFunction(function);
+  env=function.getParameterRef(0);
   Body body=method.retrieveActiveBody();
   PackManager.v().getPack("jtp").apply(body);
   PackManager.v().getPack("jop").apply(body);
@@ -141,14 +142,14 @@
       Trampoline trampoline=new ExceptionMatch(this.className,getInternalName(trap.getException()));
       trampolines.add(trampoline);
       Variable v=function.newVariable(I32);
-      bb.add(new Call(v,trampoline.getFunctionRef(),ENV));
+      bb.add(new Call(v,trampoline.getFunctionRef(),env));
       Variable cond=function.newVariable(I1);
       bb.add(new Trunc(cond,new VariableRef(v),I1));
       BasicBlockRef falseBlock=function.newBasicBlockRef(new Label());
       bb.add(new Br(new VariableRef(cond),function.newBasicBlockRef(new Label(trap.getHandlerUnit())),falseBlock));
       bb=function.newBasicBlock(falseBlock.getLabel());
     }
-    bb.add(new Call(NVM_BC_RETHROW,ENV));
+    bb.add(new Call(NVM_BC_RETHROW,env));
     bb.add(new Unreachable());
   }
 }

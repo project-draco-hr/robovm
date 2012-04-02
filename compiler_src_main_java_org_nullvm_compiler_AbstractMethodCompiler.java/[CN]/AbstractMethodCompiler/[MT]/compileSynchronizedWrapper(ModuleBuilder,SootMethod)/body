@@ -1,34 +1,28 @@
 {
   String targetName=mangleMethod(method);
-  Function function=createFunction(targetName + "_synchronized",method,Linkage.external,FunctionAttribute.noinline);
-  moduleBuilder.addFunction(function);
-  FunctionType functionType=function.getType();
+  Function syncFn=createFunction(targetName + "_synchronized",method,external,noinline);
+  moduleBuilder.addFunction(syncFn);
+  FunctionType functionType=syncFn.getType();
   FunctionRef target=new FunctionRef(targetName,functionType);
   Value monitor=null;
   if (method.isStatic()) {
     FunctionRef fn=new FunctionRef(mangleClass(sootMethod.getDeclaringClass()) + "_ldc",new FunctionType(OBJECT_PTR,ENV_PTR));
-    monitor=call(function,fn,ENV);
+    monitor=call(syncFn,fn,syncFn.getParameterRef(0));
   }
  else {
     monitor=new VariableRef("this",OBJECT_PTR);
   }
-  String[] parameterNames=function.getParameterNames();
-  Type[] parameterTypes=function.getType().getParameterTypes();
-  Value[] args=new Value[parameterNames.length];
-  for (int i=0; i < args.length; i++) {
-    args[i]=new VariableRef(parameterNames[i],parameterTypes[i]);
-  }
-  call(function,NVM_BC_MONITOR_ENTER,ENV,monitor);
-  BasicBlockRef bbSuccess=function.newBasicBlockRef(new Label("success"));
-  BasicBlockRef bbFailure=function.newBasicBlockRef(new Label("failure"));
-  Value result=invoke(function,target,bbSuccess,bbFailure,args);
-  function.newBasicBlock(new Label("success"));
-  call(function,NVM_BC_MONITOR_EXIT,ENV,monitor);
-  function.add(new Ret(result));
-  function.newBasicBlock(new Label("failure"));
-  Variable lpResult=function.newVariable(new StructureType(I8_PTR,I32));
-  function.add(new Landingpad(lpResult,NVM_BC_PERSONALITY,new Catch(new NullConstant(I8_PTR))));
-  call(function,NVM_BC_MONITOR_EXIT,ENV,monitor);
-  call(function,NVM_BC_RETHROW,ENV);
-  function.add(new Unreachable());
+  call(syncFn,NVM_BC_MONITOR_ENTER,syncFn.getParameterRef(0),monitor);
+  BasicBlockRef bbSuccess=syncFn.newBasicBlockRef(new Label("success"));
+  BasicBlockRef bbFailure=syncFn.newBasicBlockRef(new Label("failure"));
+  Value result=invoke(syncFn,target,bbSuccess,bbFailure,syncFn.getParameterRefs());
+  syncFn.newBasicBlock(new Label("success"));
+  call(syncFn,NVM_BC_MONITOR_EXIT,syncFn.getParameterRef(0),monitor);
+  syncFn.add(new Ret(result));
+  syncFn.newBasicBlock(new Label("failure"));
+  Variable lpResult=syncFn.newVariable(new StructureType(I8_PTR,I32));
+  syncFn.add(new Landingpad(lpResult,NVM_BC_PERSONALITY,new Catch(new NullConstant(I8_PTR))));
+  call(syncFn,NVM_BC_MONITOR_EXIT,syncFn.getParameterRef(0),monitor);
+  call(syncFn,NVM_BC_RETHROW,syncFn.getParameterRef(0));
+  syncFn.add(new Unreachable());
 }

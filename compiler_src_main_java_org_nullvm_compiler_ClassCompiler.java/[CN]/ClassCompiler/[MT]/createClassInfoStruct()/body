@@ -255,6 +255,9 @@
     if (isBridge(m)) {
       body.add(new GlobalRef(BridgeMethodCompiler.getTargetFnPtrName(m),I8_PTR));
     }
+    if (isCallback(m)) {
+      body.add(new ConstantBitcast(new FunctionRef(mangleMethod(m) + "_callback",getCallbackFunctionType(m)),I8_PTR));
+    }
   }
   return new StructureConstantBuilder().add(header.build()).add(body.build()).build();
 }

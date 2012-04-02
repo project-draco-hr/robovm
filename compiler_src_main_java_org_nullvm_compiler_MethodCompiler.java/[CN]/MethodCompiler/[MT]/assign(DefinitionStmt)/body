@@ -14,7 +14,7 @@
     result=widenToI32Value(p,isUnsigned(ref.getType()));
   }
  else   if (rightOp instanceof CaughtExceptionRef) {
-    result=call(NVM_BC_EXCEPTION_CLEAR,ENV);
+    result=call(NVM_BC_EXCEPTION_CLEAR,env);
   }
  else   if (rightOp instanceof ArrayRef) {
     ArrayRef ref=(ArrayRef)rightOp;
@@ -41,7 +41,7 @@
       trampolines.add(trampoline);
       fn=trampoline.getFunctionRef();
     }
-    result=callOrInvoke(stmt,fn,ENV,base);
+    result=callOrInvoke(stmt,fn,env,base);
     result=widenToI32Value(result,isUnsigned(ref.getType()));
   }
  else   if (rightOp instanceof StaticFieldRef) {
@@ -56,7 +56,7 @@
       trampolines.add(trampoline);
       fn=trampoline.getFunctionRef();
     }
-    result=callOrInvoke(stmt,fn,ENV);
+    result=callOrInvoke(stmt,fn,env);
     result=widenToI32Value(result,isUnsigned(ref.getType()));
   }
  else   if (rightOp instanceof Expr) {
@@ -92,7 +92,7 @@
  else       if (rightOp instanceof DivExpr) {
         if (rightType instanceof IntegerType) {
           FunctionRef f=rightType == I64 ? LDIV : IDIV;
-          result=callOrInvoke(stmt,f,ENV,op1,op2);
+          result=callOrInvoke(stmt,f,env,op1,op2);
         }
  else {
           function.add(new Fdiv(resultVar,op1,op2));
@@ -112,7 +112,7 @@
  else       if (rightOp instanceof RemExpr) {
         if (rightType instanceof IntegerType) {
           FunctionRef f=rightType == I64 ? LREM : IREM;
-          result=callOrInvoke(stmt,f,ENV,op1,op2);
+          result=callOrInvoke(stmt,f,env,op1,op2);
         }
  else {
           function.add(new Frem(resultVar,op1,op2));
@@ -243,7 +243,7 @@
           trampolines.add(trampoline);
           fn=trampoline.getFunctionRef();
         }
-        result=callOrInvoke(stmt,fn,ENV,op);
+        result=callOrInvoke(stmt,fn,env,op);
       }
     }
  else     if (rightOp instanceof InstanceOfExpr) {
@@ -259,7 +259,7 @@
         trampolines.add(trampoline);
         fn=trampoline.getFunctionRef();
       }
-      result=callOrInvoke(stmt,fn,ENV,op);
+      result=callOrInvoke(stmt,fn,env,op);
     }
  else     if (rightOp instanceof NewExpr) {
       String targetClassName=getInternalName(((NewExpr)rightOp).getBaseType());
@@ -272,19 +272,19 @@
         trampolines.add(trampoline);
         fn=trampoline.getFunctionRef();
       }
-      result=callOrInvoke(stmt,fn,ENV);
+      result=callOrInvoke(stmt,fn,env);
     }
  else     if (rightOp instanceof NewArrayExpr) {
       NewArrayExpr expr=(NewArrayExpr)rightOp;
       Value size=immediate(stmt,(Immediate)expr.getSize());
       if (expr.getBaseType() instanceof PrimType) {
-        result=callOrInvoke(stmt,getNewArray(expr.getBaseType()),ENV,size);
+        result=callOrInvoke(stmt,getNewArray(expr.getBaseType()),env,size);
       }
  else {
         String targetClassName=getInternalName(expr.getType());
         Trampoline trampoline=new Anewarray(this.className,targetClassName);
         trampolines.add(trampoline);
-        result=callOrInvoke(stmt,trampoline.getFunctionRef(),ENV,size);
+        result=callOrInvoke(stmt,trampoline.getFunctionRef(),env,size);
       }
     }
  else     if (rightOp instanceof NewMultiArrayExpr) {
@@ -300,7 +300,7 @@
       String targetClassName=getInternalName(expr.getType());
       Trampoline trampoline=new Multianewarray(this.className,targetClassName);
       trampolines.add(trampoline);
-      result=callOrInvoke(stmt,trampoline.getFunctionRef(),ENV,new IntegerConstant(expr.getSizeCount()),dimsI32.ref());
+      result=callOrInvoke(stmt,trampoline.getFunctionRef(),env,new IntegerConstant(expr.getSizeCount()),dimsI32.ref());
     }
  else     if (rightOp instanceof InvokeExpr) {
       result=invokeExpr(stmt,(InvokeExpr)rightOp);
@@ -348,7 +348,7 @@
       checkNull(stmt,base);
       checkBounds(stmt,base,index);
       if (leftOp.getType() instanceof RefLikeType) {
-        callOrInvoke(stmt,NVM_BC_SET_OBJECT_ARRAY_ELEMENT,ENV,base,index,narrowedResult);
+        callOrInvoke(stmt,NVM_BC_SET_OBJECT_ARRAY_ELEMENT,env,base,index,narrowedResult);
       }
  else {
         callOrInvoke(stmt,getArrayStore(leftOp.getType()),base,index,narrowedResult);
@@ -370,7 +370,7 @@
         trampolines.add(trampoline);
         fn=trampoline.getFunctionRef();
       }
-      callOrInvoke(stmt,fn,ENV,base,narrowedResult);
+      callOrInvoke(stmt,fn,env,base,narrowedResult);
     }
  else     if (leftOp instanceof StaticFieldRef) {
       StaticFieldRef ref=(StaticFieldRef)leftOp;
@@ -384,7 +384,7 @@
         trampolines.add(trampoline);
         fn=trampoline.getFunctionRef();
       }
-      callOrInvoke(stmt,fn,ENV,narrowedResult);
+      callOrInvoke(stmt,fn,env,narrowedResult);
     }
  else {
       throw new IllegalArgumentException("Unknown type for leftOp: " + leftOp.getClass());

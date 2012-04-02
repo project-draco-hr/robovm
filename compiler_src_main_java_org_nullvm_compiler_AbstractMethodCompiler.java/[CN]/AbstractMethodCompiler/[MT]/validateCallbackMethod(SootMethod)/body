@@ -1,0 +1,14 @@
+{
+  if (!method.isStatic()) {
+    throw new IllegalArgumentException("@Callback annotated method must be static: " + method);
+  }
+  soot.Type sootRetType=method.getReturnType();
+  if (!sootRetType.equals(VoidType.v()) && !(sootRetType instanceof PrimType)) {
+    throw new IllegalArgumentException("@Callback annotated method must return void or primitive type");
+  }
+  for (int i=0; i < method.getParameterCount(); i++) {
+    if (!(method.getParameterType(i) instanceof PrimType)) {
+      throw new IllegalArgumentException("@Callback annotated method must take only primitive type arguments");
+    }
+  }
+}
