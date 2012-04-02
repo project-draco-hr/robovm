@@ -1,0 +1,41 @@
+{
+  if (!f.exists() || !f.isFile()) {
+    return;
+  }
+  BufferedReader reader=null;
+  try {
+    reader=new BufferedReader(new FileReader(f));
+    String line=null;
+    while ((line=reader.readLine()) != null) {
+      if (line.startsWith("/")) {
+        paths.add(line);
+      }
+ else       if (line.startsWith("include ") || line.startsWith("include\t")) {
+        String pattern=line.substring("include ".length()).trim();
+        int wcIdx=pattern.indexOf('*');
+        if (wcIdx != -1) {
+          File dir=new File(pattern.substring(0,wcIdx));
+          if (dir.exists() && dir.isDirectory()) {
+            for (            File child : dir.listFiles()) {
+              if (wcIdx == pattern.length() - 1 || child.getName().endsWith(pattern.substring(wcIdx + 1))) {
+                readLdSoConf(child,paths);
+              }
+            }
+          }
+        }
+ else {
+          readLdSoConf(new File(pattern),paths);
+        }
+      }
+    }
+  }
+  finally {
+    if (reader != null) {
+      try {
+        reader.close();
+      }
+ catch (      Throwable t) {
+      }
+    }
+  }
+}
