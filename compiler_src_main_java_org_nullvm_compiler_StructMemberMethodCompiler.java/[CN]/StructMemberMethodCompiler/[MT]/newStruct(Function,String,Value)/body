@@ -1,0 +1,18 @@
+{
+  FunctionRef fn=null;
+  if (targetClassName.equals(this.className)) {
+    fn=new FunctionRef(mangleClass(this.className) + "_allocator",new FunctionType(OBJECT_PTR,ENV_PTR));
+  }
+ else {
+    Trampoline trampoline=new New(this.className,targetClassName);
+    trampolines.add(trampoline);
+    fn=trampoline.getFunctionRef();
+  }
+  Value result=call(function,fn,function.getParameterRef(0));
+  Variable handleI64=function.newVariable(I64);
+  function.add(new Ptrtoint(handleI64,handle,I64));
+  Invokespecial constructor=new Invokespecial(this.className,targetClassName,"<init>","(J)V",targetClassName);
+  trampolines.add(constructor);
+  call(function,constructor.getFunctionRef(),function.getParameterRef(0),result,handleI64.ref());
+  return result;
+}

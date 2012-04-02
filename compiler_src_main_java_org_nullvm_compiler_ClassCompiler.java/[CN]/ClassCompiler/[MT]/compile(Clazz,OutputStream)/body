@@ -14,8 +14,14 @@
     body.getUnits().add(new JReturnVoidStmt());
     this.sootClass.addMethod(clinit);
   }
-  if (isStruct(this.sootClass)) {
-    enhanceStructClass(this.sootClass);
+  if (isStruct(sootClass)) {
+    if (!Modifier.isFinal(sootClass.getModifiers())) {
+      throw new IllegalArgumentException("Struct class must be final");
+    }
+    SootMethod _sizeOf=new SootMethod("_sizeOf",Collections.EMPTY_LIST,IntType.v(),Modifier.PROTECTED);
+    sootClass.addMethod(_sizeOf);
+    SootMethod sizeOf=new SootMethod("sizeOf",Collections.EMPTY_LIST,IntType.v(),Modifier.PUBLIC | Modifier.STATIC);
+    sootClass.addMethod(sizeOf);
   }
   mb.addInclude(getClass().getClassLoader().getResource("header.ll"));
   Function allocator=createAllocator();
@@ -43,29 +49,20 @@
     }
   }
   for (  SootMethod method : sootClass.getMethods()) {
+    String name=method.getName();
     if (isBridge(method)) {
-      nativeBridgeMethod(method);
+      bridgeMethod(method);
+    }
+ else     if (isStruct(sootClass) && ("_sizeOf".equals(name) || "sizeOf".equals(name) || isStructMember(method))) {
+      structMember(method);
     }
  else     if (method.isNative()) {
-      if (isStruct(this.sootClass)) {
-        if ("_sizeOf".equals(method.getName()) || "sizeOf".equals(method.getName())) {
-          structSizeOf(method);
-        }
- else         if (isStructMember(method)) {
-          structMember(method);
-        }
- else {
-          nativeMethod(method);
-        }
-      }
- else {
-        nativeMethod(method);
-      }
+      nativeMethod(method);
     }
  else     if (!method.isAbstract()) {
       method(method);
     }
-    if (!method.getName().equals("<clinit>") && !method.getName().equals("<init>") && !method.isPrivate()&& !method.isStatic()&& !Modifier.isFinal(method.getModifiers())&& !Modifier.isFinal(sootClass.getModifiers())) {
+    if (!name.equals("<clinit>") && !name.equals("<init>") && !method.isPrivate()&& !method.isStatic()&& !Modifier.isFinal(method.getModifiers())&& !Modifier.isFinal(sootClass.getModifiers())) {
       createLookupFunction(method);
     }
     if (method.isStatic()) {

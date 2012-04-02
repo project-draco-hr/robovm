@@ -1,0 +1,78 @@
+{
+  validateStructMember(method);
+  SootClass sootClass=method.getDeclaringClass();
+  Map<String,Integer> indexes=new HashMap<String,Integer>();
+  StructureType structType=getStructType(sootClass,indexes);
+  if (structType == null) {
+    throw new IllegalArgumentException("Struct class " + sootClass + " has not @StructMember annotated methods");
+  }
+  Function function=new Function(external,new FunctionAttribute[]{noinline,optsize},mangleMethod(method),getFunctionType(method));
+  moduleBuilder.addFunction(function);
+  Variable handleI64=function.newVariable(I64);
+  function.add(new Load(handleI64,getFieldPtr(function,function.getParameterRef(1),sizeof(OBJECT),new StructureType(I64),0)));
+  Variable handlePtr=function.newVariable(new PointerType(structType));
+  function.add(new Inttoptr(handlePtr,handleI64.ref(),handlePtr.getType()));
+  String name=method.getName().substring(3,4).toLowerCase() + method.getName().substring(4);
+  int index=indexes.get(name);
+  Type memberType=structType.getTypeAt(index);
+  Variable memberPtr=function.newVariable(new PointerType(memberType));
+  function.add(new Getelementptr(memberPtr,handlePtr.ref(),0,index));
+  if (method.getName().startsWith("get")) {
+    if (memberType instanceof StructureType) {
+      Value result=newStruct(function,getInternalName(method.getReturnType()),memberPtr.ref());
+      function.add(new Ret(result));
+    }
+ else {
+      Variable result=function.newVariable(memberType);
+      function.add(new Load(result,memberPtr.ref()));
+      if (memberType == I8_PTR) {
+        if (method.getReturnType().equals(LongType.v())) {
+          Variable resultI64=function.newVariable(I64);
+          function.add(new Ptrtoint(resultI64,result.ref(),I64));
+          function.add(new Ret(resultI64.ref()));
+        }
+ else {
+          Variable isNull=function.newVariable(I1);
+          function.add(new Icmp(isNull,Icmp.Condition.ne,result.ref(),new NullConstant(I8_PTR)));
+          Label success=new Label();
+          Label failure=new Label();
+          function.add(new Br(isNull.ref(),function.newBasicBlockRef(success),function.newBasicBlockRef(failure)));
+          function.newBasicBlock(success);
+          Value result2=newStruct(function,getInternalName(method.getReturnType()),result.ref());
+          function.add(new Ret(result2));
+          function.newBasicBlock(failure);
+          function.add(new Ret(new NullConstant(OBJECT_PTR)));
+        }
+      }
+ else {
+        function.add(new Ret(result.ref()));
+      }
+    }
+  }
+ else {
+    Value p=function.getParameterRef(2);
+    if (memberType instanceof StructureType) {
+      Variable objectPtr=function.newVariable(OBJECT_PTR);
+      function.add(new Bitcast(objectPtr,p,OBJECT_PTR));
+      Variable memberI8Ptr=function.newVariable(I8_PTR);
+      function.add(new Bitcast(memberI8Ptr,memberPtr.ref(),I8_PTR));
+      call(function,NVM_BC_COPY_STRUCT,function.getParameterRef(0),objectPtr.ref(),memberI8Ptr.ref(),sizeof((StructureType)memberType));
+    }
+ else {
+      if (memberType == I8_PTR) {
+        if (method.getParameterType(0).equals(LongType.v())) {
+          Variable tmp=function.newVariable(I8_PTR);
+          function.add(new Inttoptr(tmp,p,I8_PTR));
+          p=tmp.ref();
+        }
+ else {
+          Variable objectPtr=function.newVariable(OBJECT_PTR);
+          function.add(new Bitcast(objectPtr,p,OBJECT_PTR));
+          p=call(function,NVM_BC_GET_STRUCT_HANDLE,function.getParameterRef(0),objectPtr.ref());
+        }
+      }
+      function.add(new Store(p,memberPtr.ref()));
+    }
+    function.add(new Ret());
+  }
+}
