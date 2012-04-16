@@ -3,13 +3,19 @@
   if (config.getLlvmBinDir() != null) {
     llcPath=new File(config.getLlvmBinDir(),"llc").getAbsolutePath();
   }
+  Arch arch=config.getArch();
+  OS os=config.getOs();
   ArrayList<String> opts=new ArrayList<String>();
-  opts.add("-march=" + config.getArch().getLlvmName());
+  opts.add("-mtriple=" + arch.getLlvmName() + "-unknown-"+ os);
   if (config.getCpu() != null) {
     opts.add("-mcpu=" + config.getCpu());
   }
+  if (os.getFamily() == OS.Family.darwin && arch.isArm()) {
+    opts.add("-disable-cfi");
+  }
   opts.add("-ffunction-sections");
   opts.add("-fdata-sections");
+  opts.add("--disable-fp-elim");
   outFile.getParentFile().mkdirs();
   exec(config,llcPath,opts,"-o=" + outFile.toString(),inFile);
 }

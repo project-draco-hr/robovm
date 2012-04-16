@@ -129,10 +129,7 @@
   next:   for (  List<Trap> traps : recordedTraps) {
     BasicBlock bb=function.newBasicBlock(new Label(traps));
     Variable result=function.newVariable(new StructureType(I8_PTR,I32));
-    bb.add(new Landingpad(result,NVM_BC_PERSONALITY,new Catch(new NullConstant(I8_PTR))));
-    Label directCatchLabel=new Label(bb.getLabel());
-    bb.add(new Br(function.newBasicBlockRef(directCatchLabel)));
-    bb=function.newBasicBlock(directCatchLabel);
+    bb.add(new Landingpad(result,new ConstantBitcast(NVM_BC_PERSONALITY,I8_PTR),new Catch(new NullConstant(I8_PTR))));
     for (    Trap trap : traps) {
       String exName=trap.getException().getName();
       if ("java.lang.Throwable".equals(exName)) {
@@ -149,7 +146,7 @@
       bb.add(new Br(new VariableRef(cond),function.newBasicBlockRef(new Label(trap.getHandlerUnit())),falseBlock));
       bb=function.newBasicBlock(falseBlock.getLabel());
     }
-    bb.add(new Call(NVM_BC_RETHROW,env));
+    bb.add(new Call(NVM_BC_RETHROW,env,result.ref()));
     bb.add(new Unreachable());
   }
 }
