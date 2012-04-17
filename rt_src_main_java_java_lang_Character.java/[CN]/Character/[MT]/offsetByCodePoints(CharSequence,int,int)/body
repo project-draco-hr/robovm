@@ -1,2 +1,46 @@
 {
+  if (seq == null) {
+    throw new NullPointerException();
+  }
+  int len=seq.length();
+  if (index < 0 || index > len) {
+    throw new IndexOutOfBoundsException();
+  }
+  if (codePointOffset == 0) {
+    return index;
+  }
+  if (codePointOffset > 0) {
+    int codePoints=codePointOffset;
+    int i=index;
+    while (codePoints > 0) {
+      codePoints--;
+      if (i >= len) {
+        throw new IndexOutOfBoundsException();
+      }
+      if (isHighSurrogate(seq.charAt(i))) {
+        int next=i + 1;
+        if (next < len && isLowSurrogate(seq.charAt(next))) {
+          i++;
+        }
+      }
+      i++;
+    }
+    return i;
+  }
+  int codePoints=-codePointOffset;
+  int i=index;
+  while (codePoints > 0) {
+    codePoints--;
+    i--;
+    if (i < 0) {
+      throw new IndexOutOfBoundsException();
+    }
+    if (isLowSurrogate(seq.charAt(i))) {
+      int prev=i - 1;
+      if (prev >= 0 && isHighSurrogate(seq.charAt(prev))) {
+        i--;
+      }
+    }
+  }
+  return i;
 }

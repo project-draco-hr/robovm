@@ -1,20 +1,26 @@
 {
   stream.defaultReadObject();
-  int length=stream.readInt();
-  elementData=newElementArray(length);
-  elementCount=stream.readInt();
-  for (int i=elementCount; --i >= 0; ) {
-    Object key=stream.readObject();
-    int hash=key.hashCode();
-    int index=(hash & 0x7FFFFFFF) % length;
-    if (index < firstSlot) {
-      firstSlot=index;
-    }
-    if (index > lastSlot) {
-      lastSlot=index;
-    }
-    Entry<K,V> entry=newEntry((K)key,(V)stream.readObject(),hash);
-    entry.next=elementData[index];
-    elementData[index]=entry;
+  int capacity=stream.readInt();
+  if (capacity < 0) {
+    throw new InvalidObjectException("Capacity: " + capacity);
+  }
+  if (capacity < MINIMUM_CAPACITY) {
+    capacity=MINIMUM_CAPACITY;
+  }
+ else   if (capacity > MAXIMUM_CAPACITY) {
+    capacity=MAXIMUM_CAPACITY;
+  }
+ else {
+    capacity=roundUpToPowerOfTwo(capacity);
+  }
+  makeTable(capacity);
+  int size=stream.readInt();
+  if (size < 0) {
+    throw new InvalidObjectException("Size: " + size);
+  }
+  for (int i=0; i < size; i++) {
+    @SuppressWarnings("unchecked") K key=(K)stream.readObject();
+    @SuppressWarnings("unchecked") V val=(V)stream.readObject();
+    constructorPut(key,val);
   }
 }

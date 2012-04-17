@@ -1,19 +1,14 @@
 {
-  if (start >= 0 && 0 <= length && length <= data.length - start) {
-    offset=0;
-    Charset charset=defaultCharset();
-    int result;
-    CharBuffer cb=charset.decode(ByteBuffer.wrap(data,start,length));
-    if ((result=cb.length()) > 0) {
-      value=cb.array();
-      count=result;
-    }
- else {
-      count=0;
-      value=new char[0];
-    }
+  if ((offset | byteCount) < 0 || byteCount > data.length - offset) {
+    throw failedBoundsCheck(data.length,offset,byteCount);
+  }
+  CharBuffer cb=Charset.defaultCharset().decode(ByteBuffer.wrap(data,offset,byteCount));
+  this.count=cb.length();
+  this.offset=0;
+  if (count > 0) {
+    value=cb.array();
   }
  else {
-    throw new StringIndexOutOfBoundsException();
+    value=EmptyArray.CHAR;
   }
 }

@@ -1,22 +1,8 @@
 {
-  long[] bsBits=bs.bits;
-  if (!needClear) {
-    return;
+  int minSize=Math.min(this.longCount,bs.longCount);
+  for (int i=0; i < minSize; ++i) {
+    bits[i]&=bs.bits[i];
   }
-  int length1=actualArrayLength, length2=bs.actualArrayLength;
-  if (length1 <= length2) {
-    for (int i=0; i < length1; i++) {
-      bits[i]&=bsBits[i];
-    }
-  }
- else {
-    for (int i=0; i < length2; i++) {
-      bits[i]&=bsBits[i];
-    }
-    for (int i=length2; i < length1; i++) {
-      bits[i]=0;
-    }
-    actualArrayLength=length2;
-  }
-  isLengthActual=!((actualArrayLength > 0) && (bits[actualArrayLength - 1] == 0));
+  Arrays.fill(bits,minSize,longCount,0L);
+  shrinkSize();
 }

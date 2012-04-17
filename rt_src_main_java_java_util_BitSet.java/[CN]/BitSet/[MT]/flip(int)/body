@@ -1,15 +1,12 @@
 {
-  if (pos < 0) {
-    throw new IndexOutOfBoundsException(Messages.getString("luni.37"));
+  if (index < 0) {
+    checkIndex(index);
   }
-  int len=(pos >> OFFSET) + 1;
-  if (len > bits.length) {
-    growLength(len);
+  int arrayIndex=index / 64;
+  if (arrayIndex >= bits.length) {
+    ensureCapacity(arrayIndex + 1);
   }
-  bits[len - 1]^=TWO_N_ARRAY[pos & RIGHT_BITS];
-  if (len > actualArrayLength) {
-    actualArrayLength=len;
-  }
-  isLengthActual=!((actualArrayLength > 0) && (bits[actualArrayLength - 1] == 0));
-  needClear();
+  bits[arrayIndex]^=(1L << index);
+  longCount=Math.max(longCount,arrayIndex + 1);
+  shrinkSize();
 }

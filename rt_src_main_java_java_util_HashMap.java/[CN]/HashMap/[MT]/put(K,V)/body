@@ -1,3 +1,23 @@
 {
-  return putImpl(key,value);
+  if (key == null) {
+    return putValueForNullKey(value);
+  }
+  int hash=secondaryHash(key.hashCode());
+  HashMapEntry<K,V>[] tab=table;
+  int index=hash & (tab.length - 1);
+  for (HashMapEntry<K,V> e=tab[index]; e != null; e=e.next) {
+    if (e.hash == hash && key.equals(e.key)) {
+      preModify(e);
+      V oldValue=e.value;
+      e.value=value;
+      return oldValue;
+    }
+  }
+  modCount++;
+  if (size++ > threshold) {
+    tab=doubleCapacity();
+    index=hash & (tab.length - 1);
+  }
+  addNewEntry(key,value,hash,index);
+  return null;
 }

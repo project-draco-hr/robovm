@@ -1,0 +1,15 @@
+{
+  if (key == null) {
+    HashMapEntry<K,V> e=entryForNullKey;
+    return e != null && Objects.equal(value,e.value);
+  }
+  int hash=secondaryHash(key.hashCode());
+  HashMapEntry<K,V>[] tab=table;
+  int index=hash & (tab.length - 1);
+  for (HashMapEntry<K,V> e=tab[index]; e != null; e=e.next) {
+    if (e.hash == hash && key.equals(e.key)) {
+      return Objects.equal(value,e.value);
+    }
+  }
+  return false;
+}

@@ -1,0 +1,42 @@
+{
+  Node<K,V> left=node.left;
+  Node<K,V> right=node.right;
+  Node<K,V> originalParent=node.parent;
+  if (left != null && right != null) {
+    Node<K,V> adjacent=(left.height > right.height) ? left.last() : right.first();
+    removeInternal(adjacent);
+    int leftHeight=0;
+    left=node.left;
+    if (left != null) {
+      leftHeight=left.height;
+      adjacent.left=left;
+      left.parent=adjacent;
+      node.left=null;
+    }
+    int rightHeight=0;
+    right=node.right;
+    if (right != null) {
+      rightHeight=right.height;
+      adjacent.right=right;
+      right.parent=adjacent;
+      node.right=null;
+    }
+    adjacent.height=Math.max(leftHeight,rightHeight) + 1;
+    replaceInParent(node,adjacent);
+    return;
+  }
+ else   if (left != null) {
+    replaceInParent(node,left);
+    node.left=null;
+  }
+ else   if (right != null) {
+    replaceInParent(node,right);
+    node.right=null;
+  }
+ else {
+    replaceInParent(node,null);
+  }
+  rebalance(originalParent,false);
+  size--;
+  modCount++;
+}

@@ -1,0 +1,113 @@
+{
+  StringExponentPair result=new StringExponentPair();
+  if (length == 0) {
+    throw invalidReal(s,isDouble);
+  }
+  result.negative=(s.charAt(0) == '-');
+  char c=s.charAt(length - 1);
+  if (c == 'D' || c == 'd' || c == 'F' || c == 'f') {
+    length--;
+    if (length == 0) {
+      throw invalidReal(s,isDouble);
+    }
+  }
+  int end=Math.max(s.indexOf('E'),s.indexOf('e'));
+  if (end != -1) {
+    if (end + 1 == length) {
+      throw invalidReal(s,isDouble);
+    }
+    int exponentOffset=end + 1;
+    boolean negativeExponent=false;
+    char firstExponentChar=s.charAt(exponentOffset);
+    if (firstExponentChar == '+' || firstExponentChar == '-') {
+      negativeExponent=(firstExponentChar == '-');
+      ++exponentOffset;
+    }
+    String exponentString=s.substring(exponentOffset,length);
+    if (exponentString.isEmpty()) {
+      throw invalidReal(s,isDouble);
+    }
+    for (int i=0; i < exponentString.length(); ++i) {
+      char ch=exponentString.charAt(i);
+      if (ch < '0' || ch > '9') {
+        throw invalidReal(s,isDouble);
+      }
+    }
+    try {
+      result.e=Integer.parseInt(exponentString);
+      if (negativeExponent) {
+        result.e=-result.e;
+      }
+    }
+ catch (    NumberFormatException ex) {
+      if (negativeExponent) {
+        result.zero=true;
+      }
+ else {
+        result.infinity=true;
+      }
+      return result;
+    }
+  }
+ else {
+    end=length;
+  }
+  if (length == 0) {
+    throw invalidReal(s,isDouble);
+  }
+  int start=0;
+  c=s.charAt(start);
+  if (c == '-') {
+    ++start;
+    --length;
+    result.negative=true;
+  }
+ else   if (c == '+') {
+    ++start;
+    --length;
+  }
+  if (length == 0) {
+    throw invalidReal(s,isDouble);
+  }
+  int decimal=s.indexOf('.');
+  if (decimal > -1) {
+    result.e-=end - decimal - 1;
+    s=s.substring(start,decimal) + s.substring(decimal + 1,end);
+  }
+ else {
+    s=s.substring(start,end);
+  }
+  if ((length=s.length()) == 0) {
+    throw invalidReal(s,isDouble);
+  }
+  end=length;
+  while (end > 1 && s.charAt(end - 1) == '0') {
+    --end;
+  }
+  start=0;
+  while (start < end - 1 && s.charAt(start) == '0') {
+    start++;
+  }
+  if (end != length || start != 0) {
+    result.e+=length - end;
+    s=s.substring(start,end);
+  }
+  final int APPROX_MIN_MAGNITUDE=-359;
+  final int MAX_DIGITS=52;
+  length=s.length();
+  if (length > MAX_DIGITS && result.e < APPROX_MIN_MAGNITUDE) {
+    int d=Math.min(APPROX_MIN_MAGNITUDE - (int)result.e,length - 1);
+    s=s.substring(0,length - d);
+    result.e+=d;
+  }
+  if (result.e < -1024) {
+    result.zero=true;
+    return result;
+  }
+ else   if (result.e > 1024) {
+    result.infinity=true;
+    return result;
+  }
+  result.s=s;
+  return result;
+}

@@ -1,16 +1,16 @@
 {
+  Hashtable<K,V> result;
   try {
-    Hashtable<K,V> hashtable=(Hashtable<K,V>)super.clone();
-    hashtable.elementData=new Entry[elementData.length];
-    Entry<K,V> entry;
-    for (int i=elementData.length; --i >= 0; ) {
-      if ((entry=elementData[i]) != null) {
-        hashtable.elementData[i]=(Entry<K,V>)entry.clone();
-      }
-    }
-    return hashtable;
+    result=(Hashtable<K,V>)super.clone();
   }
  catch (  CloneNotSupportedException e) {
-    return null;
+    throw new AssertionError(e);
   }
+  result.makeTable(table.length);
+  result.size=0;
+  result.keySet=null;
+  result.entrySet=null;
+  result.values=null;
+  result.constructorPutAll(this);
+  return result;
 }

@@ -1,34 +1,7 @@
 {
-  if (expectedModCount == modCount) {
-    if (canRemove) {
-      canRemove=false;
-synchronized (Hashtable.this) {
-        boolean removed=false;
-        Entry<K,V> entry=elementData[lastPosition];
-        if (entry == lastEntry) {
-          elementData[lastPosition]=entry.next;
-          removed=true;
-        }
- else {
-          while (entry != null && entry.next != lastEntry) {
-            entry=entry.next;
-          }
-          if (entry != null) {
-            entry.next=lastEntry.next;
-            removed=true;
-          }
-        }
-        if (removed) {
-          modCount++;
-          elementCount--;
-          expectedModCount++;
-          return;
-        }
-      }
-    }
- else {
-      throw new IllegalStateException();
-    }
-  }
-  throw new ConcurrentModificationException();
+  if (lastEntryReturned == null)   throw new IllegalStateException();
+  if (modCount != expectedModCount)   throw new ConcurrentModificationException();
+  Hashtable.this.remove(lastEntryReturned.key);
+  lastEntryReturned=null;
+  expectedModCount=modCount;
 }

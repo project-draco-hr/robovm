@@ -2,9 +2,18 @@
   if (blockName == null) {
     throw new NullPointerException();
   }
-  UnicodeBlock match=BLOCKS_BY_NAME.get(blockName);
-  if (match == null) {
-    throw new IllegalArgumentException();
+  int block=forNameImpl(blockName);
+  if (block == -1) {
+    if (blockName.equals("SURROGATES_AREA")) {
+      return SURROGATES_AREA;
+    }
+ else     if (blockName.equalsIgnoreCase("greek")) {
+      return GREEK;
+    }
+ else     if (blockName.equals("COMBINING_MARKS_FOR_SYMBOLS") || blockName.equals("Combining Marks for Symbols") || blockName.equals("CombiningMarksforSymbols")) {
+      return COMBINING_MARKS_FOR_SYMBOLS;
+    }
+    throw new IllegalArgumentException("Bad block name: " + blockName);
   }
-  return match;
+  return BLOCKS[block];
 }

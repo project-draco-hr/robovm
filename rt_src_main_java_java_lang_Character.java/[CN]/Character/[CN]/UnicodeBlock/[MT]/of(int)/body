@@ -1,22 +1,8 @@
 {
-  if (!isValidCodePoint(codePoint)) {
-    throw new IllegalArgumentException();
+  checkValidCodePoint(codePoint);
+  int block=ofImpl(codePoint);
+  if (block == -1 || block >= BLOCKS.length) {
+    return null;
   }
-  int low=0;
-  int mid=-1;
-  int high=BLOCKS.length - 1;
-  while (low <= high) {
-    mid=(low + high) >>> 1;
-    UnicodeBlock block=BLOCKS[mid];
-    if (codePoint > block.end) {
-      low=mid + 1;
-    }
- else     if (codePoint >= block.start && codePoint <= block.end) {
-      return block;
-    }
- else {
-      high=mid - 1;
-    }
-  }
-  return null;
+  return BLOCKS[block];
 }

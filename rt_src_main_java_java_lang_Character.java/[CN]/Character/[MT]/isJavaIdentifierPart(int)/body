@@ -1,4 +1,10 @@
 {
+  if (codePoint < 64) {
+    return (0x3ff00100fffc1ffL & (1L << codePoint)) != 0;
+  }
+ else   if (codePoint < 128) {
+    return (0x87fffffe87fffffeL & (1L << (codePoint - 64))) != 0;
+  }
   int type=getType(codePoint);
-  return (type >= UPPERCASE_LETTER && type <= OTHER_LETTER) || type == CURRENCY_SYMBOL || type == CONNECTOR_PUNCTUATION || (type >= DECIMAL_DIGIT_NUMBER && type <= LETTER_NUMBER) || type == COMBINING_SPACING_MARK || type == NON_SPACING_MARK || isIdentifierIgnorable(codePoint);
+  return (type >= UPPERCASE_LETTER && type <= OTHER_LETTER) || type == CURRENCY_SYMBOL || type == CONNECTOR_PUNCTUATION || (type >= DECIMAL_DIGIT_NUMBER && type <= LETTER_NUMBER) || type == COMBINING_SPACING_MARK || type == NON_SPACING_MARK || (codePoint >= 0 && codePoint <= 8) || (codePoint >= 0xe && codePoint <= 0x1b) || (codePoint >= 0x7f && codePoint <= 0x9f) || type == FORMAT;
 }

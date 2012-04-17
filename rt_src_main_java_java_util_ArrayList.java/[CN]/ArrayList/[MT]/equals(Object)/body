@@ -1,0 +1,34 @@
+{
+  if (o == this) {
+    return true;
+  }
+  if (!(o instanceof List)) {
+    return false;
+  }
+  List<?> that=(List<?>)o;
+  int s=size;
+  if (that.size() != s) {
+    return false;
+  }
+  Object[] a=array;
+  if (that instanceof RandomAccess) {
+    for (int i=0; i < s; i++) {
+      Object eThis=a[i];
+      Object ethat=that.get(i);
+      if (eThis == null ? ethat != null : !eThis.equals(ethat)) {
+        return false;
+      }
+    }
+  }
+ else {
+    Iterator<?> it=that.iterator();
+    for (int i=0; i < s; i++) {
+      Object eThis=a[i];
+      Object eThat=it.next();
+      if (eThis == null ? eThat != null : !eThis.equals(eThat)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}

@@ -1,7 +1,17 @@
 {
-  Entry<K,V> m=getEntry(key);
-  if (m != null) {
-    return m.value;
+  if (key == null) {
+    HashMapEntry<K,V> e=entryForNullKey;
+    return e == null ? null : e.value;
+  }
+  int hash=key.hashCode();
+  hash^=(hash >>> 20) ^ (hash >>> 12);
+  hash^=(hash >>> 7) ^ (hash >>> 4);
+  HashMapEntry<K,V>[] tab=table;
+  for (HashMapEntry<K,V> e=tab[hash & (tab.length - 1)]; e != null; e=e.next) {
+    K eKey=e.key;
+    if (eKey == key || (e.hash == hash && key.equals(eKey))) {
+      return e.value;
+    }
   }
   return null;
 }

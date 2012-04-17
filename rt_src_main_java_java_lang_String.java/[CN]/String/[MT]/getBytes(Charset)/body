@@ -1,6 +1,22 @@
 {
-  ByteBuffer buffer=encoding.encode(CharBuffer.wrap(this.value,this.offset,this.count));
-  byte[] bytes=new byte[buffer.limit()];
-  buffer.get(bytes);
-  return bytes;
+  String canonicalCharsetName=charset.name();
+  if (canonicalCharsetName.equals("UTF-8")) {
+    return Charsets.toUtf8Bytes(value,offset,count);
+  }
+ else   if (canonicalCharsetName.equals("ISO-8859-1")) {
+    return Charsets.toIsoLatin1Bytes(value,offset,count);
+  }
+ else   if (canonicalCharsetName.equals("US-ASCII")) {
+    return Charsets.toAsciiBytes(value,offset,count);
+  }
+ else   if (canonicalCharsetName.equals("UTF-16BE")) {
+    return Charsets.toBigEndianUtf16Bytes(value,offset,count);
+  }
+ else {
+    CharBuffer chars=CharBuffer.wrap(this.value,this.offset,this.count);
+    ByteBuffer buffer=charset.encode(chars.asReadOnlyBuffer());
+    byte[] bytes=new byte[buffer.limit()];
+    buffer.get(bytes);
+    return bytes;
+  }
 }

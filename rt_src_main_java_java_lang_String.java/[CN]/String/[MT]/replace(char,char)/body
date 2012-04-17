@@ -1,13 +1,23 @@
 {
-  int index=indexOf(oldChar,0);
-  if (index == -1) {
-    return this;
+  char[] buffer=value;
+  int _offset=offset;
+  int _count=count;
+  int idx=_offset;
+  int last=_offset + _count;
+  boolean copied=false;
+  while (idx < last) {
+    if (buffer[idx] == oldChar) {
+      if (!copied) {
+        char[] newBuffer=new char[_count];
+        System.arraycopy(buffer,_offset,newBuffer,0,_count);
+        buffer=newBuffer;
+        idx-=_offset;
+        last-=_offset;
+        copied=true;
+      }
+      buffer[idx]=newChar;
+    }
+    idx++;
   }
-  char[] buffer=new char[count];
-  System.arraycopy(value,offset,buffer,0,count);
-  do {
-    buffer[index++]=newChar;
-  }
- while ((index=indexOf(oldChar,index)) != -1);
-  return new String(0,count,buffer);
+  return copied ? new String(0,count,buffer) : this;
 }

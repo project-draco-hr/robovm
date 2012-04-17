@@ -1,13 +1,14 @@
 {
-  if (original.length >= start && 0 <= start) {
-    if (start <= end) {
-      int length=end - start;
-      int copyLength=Math.min(length,original.length - start);
-      T[] copy=(T[])Array.newInstance(original.getClass().getComponentType(),length);
-      System.arraycopy(original,start,copy,0,copyLength);
-      return copy;
-    }
+  int originalLength=original.length;
+  if (start > end) {
     throw new IllegalArgumentException();
   }
-  throw new ArrayIndexOutOfBoundsException();
+  if (start < 0 || start > originalLength) {
+    throw new ArrayIndexOutOfBoundsException();
+  }
+  int resultLength=end - start;
+  int copyLength=Math.min(resultLength,originalLength - start);
+  T[] result=(T[])Array.newInstance(original.getClass().getComponentType(),resultLength);
+  System.arraycopy(original,start,result,0,copyLength);
+  return result;
 }

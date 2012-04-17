@@ -1,0 +1,32 @@
+{
+  int i=(int)v;
+  if (i == v) {
+    return intToString(i,radix);
+  }
+  if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
+    radix=10;
+  }
+  if (radix == 10) {
+    return longToString(v);
+  }
+  boolean negative=false;
+  if (v < 0) {
+    negative=true;
+  }
+ else {
+    v=-v;
+  }
+  int bufLen=radix < 8 ? 65 : 23;
+  char[] buf=new char[bufLen];
+  int cursor=bufLen;
+  do {
+    long q=v / radix;
+    buf[--cursor]=DIGITS[(int)(radix * q - v)];
+    v=q;
+  }
+ while (v != 0);
+  if (negative) {
+    buf[--cursor]='-';
+  }
+  return new String(cursor,bufLen - cursor,buf);
+}

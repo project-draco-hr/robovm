@@ -1,8 +1,11 @@
 {
-  ObjectInputStream.GetField fields=stream.readFields();
-  size=fields.get("size",0);
-  array=newElementArray(stream.readInt());
+  stream.defaultReadObject();
+  int cap=stream.readInt();
+  if (cap < size) {
+    throw new InvalidObjectException("Capacity: " + cap + " < size: "+ size);
+  }
+  array=(cap == 0 ? EmptyArray.OBJECT : new Object[cap]);
   for (int i=0; i < size; i++) {
-    array[i]=(E)stream.readObject();
+    array[i]=stream.readObject();
   }
 }

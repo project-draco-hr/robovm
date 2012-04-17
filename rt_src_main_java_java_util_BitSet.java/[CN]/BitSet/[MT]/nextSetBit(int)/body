@@ -1,29 +1,17 @@
 {
-  if (pos < 0) {
-    throw new IndexOutOfBoundsException(Messages.getString("luni.37"));
-  }
-  if (pos >= actualArrayLength << OFFSET) {
+  checkIndex(index);
+  int arrayIndex=index / 64;
+  if (arrayIndex >= longCount) {
     return -1;
   }
-  int idx=pos >> OFFSET;
-  if (bits[idx] != 0L) {
-    for (int j=pos & RIGHT_BITS; j < ELM_SIZE; j++) {
-      if (((bits[idx] & (TWO_N_ARRAY[j])) != 0)) {
-        return (idx << OFFSET) + j;
-      }
-    }
+  long mask=ALL_ONES << index;
+  if ((bits[arrayIndex] & mask) != 0) {
+    return 64 * arrayIndex + Long.numberOfTrailingZeros(bits[arrayIndex] & mask);
   }
-  idx++;
-  while (idx < actualArrayLength && bits[idx] == 0L) {
-    idx++;
+  while (++arrayIndex < longCount && bits[arrayIndex] == 0) {
   }
-  if (idx == actualArrayLength) {
+  if (arrayIndex == longCount) {
     return -1;
   }
-  for (int j=0; j < ELM_SIZE; j++) {
-    if (((bits[idx] & (TWO_N_ARRAY[j])) != 0)) {
-      return (idx << OFFSET) + j;
-    }
-  }
-  return -1;
+  return 64 * arrayIndex + Long.numberOfTrailingZeros(bits[arrayIndex]);
 }

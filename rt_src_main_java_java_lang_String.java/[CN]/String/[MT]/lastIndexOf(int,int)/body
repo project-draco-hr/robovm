@@ -1,24 +1,17 @@
 {
+  if (c > 0xffff) {
+    return lastIndexOfSupplementary(c,start);
+  }
+  int _count=count;
+  int _offset=offset;
+  char[] _value=value;
   if (start >= 0) {
-    if (start >= count) {
-      start=count - 1;
+    if (start >= _count) {
+      start=_count - 1;
     }
-    if (c >= 0 && c <= Character.MAX_VALUE) {
-      for (int i=offset + start; i >= offset; --i) {
-        if (value[i] == c) {
-          return i - offset;
-        }
-      }
-    }
- else     if (c > Character.MAX_VALUE && c <= Character.MAX_CODE_POINT) {
-      for (int i=start; i >= 0; --i) {
-        int codePoint=codePointAt(i);
-        if (codePoint == c) {
-          return i;
-        }
- else         if (codePoint >= Character.MIN_SUPPLEMENTARY_CODE_POINT) {
-          --i;
-        }
+    for (int i=_offset + start; i >= _offset; --i) {
+      if (_value[i] == c) {
+        return i - _offset;
       }
     }
   }

@@ -1,0 +1,32 @@
+{
+  HashtableEntry<K,V>[] oldTable=table;
+  int oldCapacity=oldTable.length;
+  if (oldCapacity == MAXIMUM_CAPACITY) {
+    return oldTable;
+  }
+  int newCapacity=oldCapacity * 2;
+  HashtableEntry<K,V>[] newTable=makeTable(newCapacity);
+  if (size == 0) {
+    return newTable;
+  }
+  for (int j=0; j < oldCapacity; j++) {
+    HashtableEntry<K,V> e=oldTable[j];
+    if (e == null) {
+      continue;
+    }
+    int highBit=e.hash & oldCapacity;
+    HashtableEntry<K,V> broken=null;
+    newTable[j | highBit]=e;
+    for (HashtableEntry<K,V> n=e.next; n != null; e=n, n=n.next) {
+      int nextHighBit=n.hash & oldCapacity;
+      if (nextHighBit != highBit) {
+        if (broken == null)         newTable[j | nextHighBit]=n;
+ else         broken.next=n;
+        broken=e;
+        highBit=nextHighBit;
+      }
+    }
+    if (broken != null)     broken.next=null;
+  }
+  return newTable;
+}

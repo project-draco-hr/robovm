@@ -1,0 +1,34 @@
+{
+  if (key == null) {
+    HashMapEntry<K,V> e=entryForNullKey;
+    if (e == null || !Objects.equal(value,e.value)) {
+      return false;
+    }
+    entryForNullKey=null;
+    modCount++;
+    size--;
+    postRemove(e);
+    return true;
+  }
+  int hash=secondaryHash(key.hashCode());
+  HashMapEntry<K,V>[] tab=table;
+  int index=hash & (tab.length - 1);
+  for (HashMapEntry<K,V> e=tab[index], prev=null; e != null; prev=e, e=e.next) {
+    if (e.hash == hash && key.equals(e.key)) {
+      if (!Objects.equal(value,e.value)) {
+        return false;
+      }
+      if (prev == null) {
+        tab[index]=e.next;
+      }
+ else {
+        prev.next=e.next;
+      }
+      modCount++;
+      size--;
+      postRemove(e);
+      return true;
+    }
+  }
+  return false;
+}

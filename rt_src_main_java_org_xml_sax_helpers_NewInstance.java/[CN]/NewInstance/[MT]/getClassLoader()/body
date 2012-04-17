@@ -1,7 +1,18 @@
 {
-  ClassLoader cl=SecuritySupport.getContextClassLoader();
-  if (cl == null) {
-    cl=NewInstance.class.getClassLoader();
+  Method m=null;
+  try {
+    m=Thread.class.getMethod("getContextClassLoader");
   }
-  return cl;
+ catch (  NoSuchMethodException e) {
+    return NewInstance.class.getClassLoader();
+  }
+  try {
+    return (ClassLoader)m.invoke(Thread.currentThread());
+  }
+ catch (  IllegalAccessException e) {
+    throw new UnknownError(e.getMessage());
+  }
+catch (  InvocationTargetException e) {
+    throw new UnknownError(e.getMessage());
+  }
 }

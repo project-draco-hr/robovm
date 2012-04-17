@@ -1,0 +1,23 @@
+{
+  s=s.trim();
+  int length=s.length();
+  if (length == 0) {
+    throw invalidReal(s,false);
+  }
+  char last=s.charAt(length - 1);
+  if (last == 'y' || last == 'N') {
+    return parseName(s,false);
+  }
+  if (s.indexOf("0x") != -1 || s.indexOf("0X") != -1) {
+    return HexStringParser.parseFloat(s);
+  }
+  StringExponentPair info=initialParse(s,length,false);
+  if (info.infinity || info.zero) {
+    return info.specialValue();
+  }
+  float result=parseFltImpl(info.s,(int)info.e);
+  if (Float.floatToRawIntBits(result) == 0xffffffff) {
+    throw invalidReal(s,false);
+  }
+  return info.negative ? -result : result;
+}

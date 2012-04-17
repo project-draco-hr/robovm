@@ -1,23 +1,12 @@
 {
   try {
-    TreeMap<K,V> clone=(TreeMap<K,V>)super.clone();
-    clone.entrySet=null;
-    if (root != null) {
-      clone.root=root.clone(null);
-      Node<K,V> node=minimum(clone.root);
-      while (true) {
-        Node<K,V> nxt=successor(node);
-        if (nxt == null) {
-          break;
-        }
-        nxt.prev=node;
-        node.next=nxt;
-        node=nxt;
-      }
-    }
-    return clone;
+    @SuppressWarnings("unchecked") TreeMap<K,V> map=(TreeMap<K,V>)super.clone();
+    map.root=root != null ? root.copy(null) : null;
+    map.entrySet=null;
+    map.keySet=null;
+    return map;
   }
  catch (  CloneNotSupportedException e) {
-    return null;
+    throw new AssertionError();
   }
 }

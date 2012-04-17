@@ -1,27 +1,32 @@
 {
-  checkIndexForBinarySearch(array.length,startIndex,endIndex);
-  int intBits=Float.floatToIntBits(value);
-  int low=startIndex, mid=-1, high=endIndex - 1;
-  while (low <= high) {
-    mid=(low + high) >>> 1;
-    if (lessThan(array[mid],value)) {
-      low=mid + 1;
+  checkBinarySearchBounds(startIndex,endIndex,array.length);
+  int lo=startIndex;
+  int hi=endIndex - 1;
+  while (lo <= hi) {
+    int mid=(lo + hi) >>> 1;
+    float midVal=array[mid];
+    if (midVal < value) {
+      lo=mid + 1;
     }
- else     if (intBits == Float.floatToIntBits(array[mid])) {
+ else     if (midVal > value) {
+      hi=mid - 1;
+    }
+ else     if (midVal != 0 && midVal == value) {
       return mid;
     }
  else {
-      high=mid - 1;
-    }
-  }
-  if (mid < 0) {
-    int insertPoint=endIndex;
-    for (int index=startIndex; index < endIndex; index++) {
-      if (value < array[index]) {
-        insertPoint=index;
+      int midValBits=Float.floatToIntBits(midVal);
+      int valueBits=Float.floatToIntBits(value);
+      if (midValBits < valueBits) {
+        lo=mid + 1;
+      }
+ else       if (midValBits > valueBits) {
+        hi=mid - 1;
+      }
+ else {
+        return mid;
       }
     }
-    return -insertPoint - 1;
   }
-  return -mid - (lessThan(value,array[mid]) ? 1 : 2);
+  return ~lo;
 }

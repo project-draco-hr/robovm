@@ -1,2 +1,44 @@
 {
+  Arrays.checkOffsetAndCount(seq.length,start,count);
+  int end=start + count;
+  if (index < start || index > end) {
+    throw new IndexOutOfBoundsException();
+  }
+  if (codePointOffset == 0) {
+    return index;
+  }
+  if (codePointOffset > 0) {
+    int codePoints=codePointOffset;
+    int i=index;
+    while (codePoints > 0) {
+      codePoints--;
+      if (i >= end) {
+        throw new IndexOutOfBoundsException();
+      }
+      if (isHighSurrogate(seq[i])) {
+        int next=i + 1;
+        if (next < end && isLowSurrogate(seq[next])) {
+          i++;
+        }
+      }
+      i++;
+    }
+    return i;
+  }
+  int codePoints=-codePointOffset;
+  int i=index;
+  while (codePoints > 0) {
+    codePoints--;
+    i--;
+    if (i < start) {
+      throw new IndexOutOfBoundsException();
+    }
+    if (isLowSurrogate(seq[i])) {
+      int prev=i - 1;
+      if (prev >= start && isHighSurrogate(seq[prev])) {
+        i--;
+      }
+    }
+  }
+  return i;
 }

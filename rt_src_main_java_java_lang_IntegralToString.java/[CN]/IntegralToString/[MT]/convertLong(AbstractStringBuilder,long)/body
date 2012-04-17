@@ -1,0 +1,51 @@
+{
+  int i=(int)n;
+  if (i == n) {
+    return convertInt(sb,i);
+  }
+  boolean negative=(n < 0);
+  if (negative) {
+    n=-n;
+    if (n < 0) {
+      String quickResult="-9223372036854775808";
+      if (sb != null) {
+        sb.append0(quickResult);
+        return null;
+      }
+      return quickResult;
+    }
+  }
+  int bufLen=20;
+  char[] buf=(sb != null) ? BUFFER.get() : new char[bufLen];
+  int low=(int)(n % 1000000000);
+  int cursor=intIntoCharArray(buf,bufLen,low);
+  while (cursor != (bufLen - 9)) {
+    buf[--cursor]='0';
+  }
+  n=((n - low) >>> 9) * 0x8E47CE423A2E9C6DL;
+  if ((n & (-1L << 32)) == 0) {
+    cursor=intIntoCharArray(buf,cursor,(int)n);
+  }
+ else {
+    int lo32=(int)n;
+    int hi32=(int)(n >>> 32);
+    int midDigit=MOD_10_TABLE[(0x19999999 * lo32 + (lo32 >>> 1) + (lo32 >>> 3)) >>> 28];
+    midDigit-=hi32 << 2;
+    if (midDigit < 0) {
+      midDigit+=10;
+    }
+    buf[--cursor]=DIGITS[midDigit];
+    int rest=((int)((n - midDigit) >>> 1)) * 0xCCCCCCCD;
+    cursor=intIntoCharArray(buf,cursor,rest);
+  }
+  if (negative) {
+    buf[--cursor]='-';
+  }
+  if (sb != null) {
+    sb.append0(buf,cursor,bufLen - cursor);
+    return null;
+  }
+ else {
+    return new String(cursor,bufLen - cursor,buf);
+  }
+}

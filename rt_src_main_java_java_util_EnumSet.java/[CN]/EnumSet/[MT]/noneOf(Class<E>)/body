@@ -1,9 +1,10 @@
 {
   if (!elementType.isEnum()) {
-    throw new ClassCastException();
+    throw new ClassCastException(elementType.getClass().getName() + " is not an Enum");
   }
-  if (elementType.getEnumConstants().length <= 64) {
-    return new MiniEnumSet<E>(elementType);
+  E[] enums=Enum.getSharedConstants(elementType);
+  if (enums.length <= 64) {
+    return new MiniEnumSet<E>(elementType,enums);
   }
-  return new HugeEnumSet<E>(elementType);
+  return new HugeEnumSet<E>(elementType,enums);
 }

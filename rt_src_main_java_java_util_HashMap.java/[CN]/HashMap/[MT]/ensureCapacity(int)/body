@@ -1,0 +1,26 @@
+{
+  int newCapacity=roundUpToPowerOfTwo(capacityForInitSize(numMappings));
+  HashMapEntry<K,V>[] oldTable=table;
+  int oldCapacity=oldTable.length;
+  if (newCapacity <= oldCapacity) {
+    return;
+  }
+  if (newCapacity == oldCapacity * 2) {
+    doubleCapacity();
+    return;
+  }
+  HashMapEntry<K,V>[] newTable=makeTable(newCapacity);
+  if (size != 0) {
+    int newMask=newCapacity - 1;
+    for (int i=0; i < oldCapacity; i++) {
+      for (HashMapEntry<K,V> e=oldTable[i]; e != null; ) {
+        HashMapEntry<K,V> oldNext=e.next;
+        int newIndex=e.hash & newMask;
+        HashMapEntry<K,V> newNext=newTable[newIndex];
+        newTable[newIndex]=e;
+        e.next=newNext;
+        e=oldNext;
+      }
+    }
+  }
+}

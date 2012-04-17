@@ -1,0 +1,31 @@
+{
+  if (!ascending) {
+    K fromTmp=from;
+    Bound fromBoundTmp=fromBound;
+    from=to;
+    fromBound=toBound;
+    to=fromTmp;
+    toBound=fromBoundTmp;
+  }
+  if (fromBound == NO_BOUND) {
+    from=this.from;
+    fromBound=this.fromBound;
+  }
+ else {
+    Bound fromBoundToCheck=fromBound == this.fromBound ? INCLUSIVE : this.fromBound;
+    if (!isInBounds(from,fromBoundToCheck,this.toBound)) {
+      throw outOfBounds(to,fromBoundToCheck,this.toBound);
+    }
+  }
+  if (toBound == NO_BOUND) {
+    to=this.to;
+    toBound=this.toBound;
+  }
+ else {
+    Bound toBoundToCheck=toBound == this.toBound ? INCLUSIVE : this.toBound;
+    if (!isInBounds(to,this.fromBound,toBoundToCheck)) {
+      throw outOfBounds(to,this.fromBound,toBoundToCheck);
+    }
+  }
+  return new BoundedMap(ascending,from,fromBound,to,toBound);
+}

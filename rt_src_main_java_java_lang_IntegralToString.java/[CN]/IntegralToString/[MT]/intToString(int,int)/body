@@ -1,0 +1,28 @@
+{
+  if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
+    radix=10;
+  }
+  if (radix == 10) {
+    return intToString(i);
+  }
+  boolean negative=false;
+  if (i < 0) {
+    negative=true;
+  }
+ else {
+    i=-i;
+  }
+  int bufLen=radix < 8 ? 33 : 12;
+  char[] buf=new char[bufLen];
+  int cursor=bufLen;
+  do {
+    int q=i / radix;
+    buf[--cursor]=DIGITS[radix * q - i];
+    i=q;
+  }
+ while (i != 0);
+  if (negative) {
+    buf[--cursor]='-';
+  }
+  return new String(cursor,bufLen - cursor,buf);
+}

@@ -1,18 +1,9 @@
 {
-  if (command.isEmpty()) {
-    throw new IndexOutOfBoundsException();
-  }
-  String[] cmdArray=new String[command.size()];
-  for (int i=0; i < cmdArray.length; i++) {
-    if ((cmdArray[i]=command.get(i)) == null) {
-      throw new NullPointerException();
-    }
-  }
+  String[] cmdArray=command.toArray(new String[command.size()]);
   String[] envArray=new String[environment.size()];
   int i=0;
   for (  Map.Entry<String,String> entry : environment.entrySet()) {
     envArray[i++]=entry.getKey() + "=" + entry.getValue();
   }
-  Process process=Runtime.getRuntime().exec(cmdArray,envArray,directory);
-  return process;
+  return ProcessManager.getInstance().exec(cmdArray,envArray,directory,redirectErrorStream);
 }

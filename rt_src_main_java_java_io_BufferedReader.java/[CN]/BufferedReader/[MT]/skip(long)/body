@@ -1,31 +1,29 @@
 {
-  if (amount < 0) {
-    throw new IllegalArgumentException();
+  if (byteCount < 0) {
+    throw new IllegalArgumentException("byteCount < 0: " + byteCount);
   }
 synchronized (lock) {
-    if (isClosed()) {
-      throw new IOException(Messages.getString("luni.A5"));
-    }
-    if (amount < 1) {
+    checkNotClosed();
+    if (byteCount < 1) {
       return 0;
     }
-    if (end - pos >= amount) {
-      pos+=amount;
-      return amount;
+    if (end - pos >= byteCount) {
+      pos+=byteCount;
+      return byteCount;
     }
     long read=end - pos;
     pos=end;
-    while (read < amount) {
+    while (read < byteCount) {
       if (fillBuf() == -1) {
         return read;
       }
-      if (end - pos >= amount - read) {
-        pos+=amount - read;
-        return amount;
+      if (end - pos >= byteCount - read) {
+        pos+=byteCount - read;
+        return byteCount;
       }
       read+=(end - pos);
       pos=end;
     }
-    return amount;
+    return byteCount;
   }
 }

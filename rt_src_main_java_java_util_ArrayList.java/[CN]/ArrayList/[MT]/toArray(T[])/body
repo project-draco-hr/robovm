@@ -1,11 +1,12 @@
 {
-  if (size > contents.length) {
-    Class<?> ct=contents.getClass().getComponentType();
-    contents=(T[])Array.newInstance(ct,size);
+  int s=size;
+  if (contents.length < s) {
+    @SuppressWarnings("unchecked") T[] newArray=(T[])Array.newInstance(contents.getClass().getComponentType(),s);
+    contents=newArray;
   }
-  System.arraycopy(array,firstIndex,contents,0,size);
-  if (size < contents.length) {
-    contents[size]=null;
+  System.arraycopy(this.array,0,contents,0,s);
+  if (contents.length > s) {
+    contents[s]=null;
   }
   return contents;
 }

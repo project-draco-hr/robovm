@@ -8,6 +8,17 @@
  else   if (f == Float.MAX_VALUE || f == -Float.MAX_VALUE) {
     return (float)pow(2,104);
   }
-  f=abs(f);
-  return nextafterf(f,Float.MAX_VALUE) - f;
+  f=Math.abs(f);
+  int hx=Float.floatToRawIntBits(f);
+  int hy=Float.floatToRawIntBits(Float.MAX_VALUE);
+  if ((hx & 0x7fffffff) == 0) {
+    return Float.intBitsToFloat((hy & 0x80000000) | 0x1);
+  }
+  if ((hx > 0) ^ (hx > hy)) {
+    hx+=1;
+  }
+ else {
+    hx-=1;
+  }
+  return Float.intBitsToFloat(hx) - f;
 }

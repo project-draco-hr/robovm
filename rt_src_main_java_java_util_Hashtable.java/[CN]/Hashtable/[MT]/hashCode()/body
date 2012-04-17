@@ -1,18 +1,12 @@
 {
   int result=0;
-  Iterator<Map.Entry<K,V>> it=entrySet().iterator();
-  while (it.hasNext()) {
-    Map.Entry<K,V> entry=it.next();
-    Object key=entry.getKey();
-    if (key == this) {
+  for (  Entry<K,V> e : entrySet()) {
+    K key=e.getKey();
+    V value=e.getValue();
+    if (key == this || value == this) {
       continue;
     }
-    Object value=entry.getValue();
-    if (value == this) {
-      continue;
-    }
-    int hash=(key != null ? key.hashCode() : 0) ^ (value != null ? value.hashCode() : 0);
-    result+=hash;
+    result+=(key != null ? key.hashCode() : 0) ^ (value != null ? value.hashCode() : 0);
   }
   return result;
 }

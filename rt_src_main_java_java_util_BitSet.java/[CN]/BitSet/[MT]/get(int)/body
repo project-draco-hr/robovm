@@ -1,10 +1,10 @@
 {
-  if (pos < 0) {
-    throw new IndexOutOfBoundsException(Messages.getString("luni.37"));
+  if (index < 0) {
+    checkIndex(index);
   }
-  int arrayPos=pos >> OFFSET;
-  if (arrayPos < actualArrayLength) {
-    return (bits[arrayPos] & TWO_N_ARRAY[pos & RIGHT_BITS]) != 0;
+  int arrayIndex=index / 64;
+  if (arrayIndex >= longCount) {
+    return false;
   }
-  return false;
+  return (bits[arrayIndex] & (1L << index)) != 0;
 }

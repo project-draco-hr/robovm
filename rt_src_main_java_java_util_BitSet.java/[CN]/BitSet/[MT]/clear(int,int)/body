@@ -1,32 +1,29 @@
 {
-  if (pos1 < 0 || pos2 < 0 || pos2 < pos1) {
-    throw new IndexOutOfBoundsException(Messages.getString("luni.37"));
-  }
-  if (!needClear) {
+  checkRange(fromIndex,toIndex);
+  if (fromIndex == toIndex || longCount == 0) {
     return;
   }
-  int last=(actualArrayLength << OFFSET);
-  if (pos1 >= last || pos1 == pos2) {
+  int last=64 * longCount;
+  if (fromIndex >= last) {
     return;
   }
-  if (pos2 > last) {
-    pos2=last;
+  if (toIndex > last) {
+    toIndex=last;
   }
-  int idx1=pos1 >> OFFSET;
-  int idx2=(pos2 - 1) >> OFFSET;
-  long factor1=(~0L) << (pos1 & RIGHT_BITS);
-  long factor2=(~0L) >>> (ELM_SIZE - (pos2 & RIGHT_BITS));
-  if (idx1 == idx2) {
-    bits[idx1]&=~(factor1 & factor2);
+  int firstArrayIndex=fromIndex / 64;
+  int lastArrayIndex=(toIndex - 1) / 64;
+  long lowMask=ALL_ONES << fromIndex;
+  long highMask=ALL_ONES >>> -toIndex;
+  if (firstArrayIndex == lastArrayIndex) {
+    bits[firstArrayIndex]&=~(lowMask & highMask);
   }
  else {
-    bits[idx1]&=~factor1;
-    bits[idx2]&=~factor2;
-    for (int i=idx1 + 1; i < idx2; i++) {
-      bits[i]=0L;
+    int i=firstArrayIndex;
+    bits[i++]&=~lowMask;
+    while (i < lastArrayIndex) {
+      bits[i++]=0L;
     }
+    bits[i++]&=~highMask;
   }
-  if ((actualArrayLength > 0) && (bits[actualArrayLength - 1] == 0)) {
-    isLengthActual=false;
-  }
+  shrinkSize();
 }

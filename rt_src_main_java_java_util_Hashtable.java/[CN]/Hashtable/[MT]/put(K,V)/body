@@ -1,31 +1,25 @@
 {
-  if (key != null && value != null) {
-    int hash=key.hashCode();
-    int index=(hash & 0x7FFFFFFF) % elementData.length;
-    Entry<K,V> entry=elementData[index];
-    while (entry != null && !entry.equalsKey(key,hash)) {
-      entry=entry.next;
-    }
-    if (entry == null) {
-      modCount++;
-      if (++elementCount > threshold) {
-        rehash();
-        index=(hash & 0x7FFFFFFF) % elementData.length;
-      }
-      if (index < firstSlot) {
-        firstSlot=index;
-      }
-      if (index > lastSlot) {
-        lastSlot=index;
-      }
-      entry=newEntry(key,value,hash);
-      entry.next=elementData[index];
-      elementData[index]=entry;
-      return null;
-    }
-    V result=entry.value;
-    entry.value=value;
-    return result;
+  if (value == null) {
+    throw new NullPointerException();
   }
-  throw new NullPointerException();
+  int hash=secondaryHash(key.hashCode());
+  HashtableEntry<K,V>[] tab=table;
+  int index=hash & (tab.length - 1);
+  HashtableEntry<K,V> first=tab[index];
+  for (HashtableEntry<K,V> e=first; e != null; e=e.next) {
+    if (e.hash == hash && key.equals(e.key)) {
+      V oldValue=e.value;
+      e.value=value;
+      return oldValue;
+    }
+  }
+  modCount++;
+  if (size++ > threshold) {
+    rehash();
+    tab=doubleCapacity();
+    index=hash & (tab.length - 1);
+    first=tab[index];
+  }
+  tab[index]=new HashtableEntry<K,V>(key,value,hash,first);
+  return null;
 }

@@ -1,12 +1,13 @@
 {
   int hash=key.hashCode();
-  int index=(hash & 0x7FFFFFFF) % elementData.length;
-  Entry<K,V> entry=elementData[index];
-  while (entry != null) {
-    if (entry.equalsKey(key,hash)) {
-      return entry.value;
+  hash^=(hash >>> 20) ^ (hash >>> 12);
+  hash^=(hash >>> 7) ^ (hash >>> 4);
+  HashtableEntry<K,V>[] tab=table;
+  for (HashtableEntry<K,V> e=tab[hash & (tab.length - 1)]; e != null; e=e.next) {
+    K eKey=e.key;
+    if (eKey == key || (e.hash == hash && key.equals(eKey))) {
+      return e.value;
     }
-    entry=entry.next;
   }
   return null;
 }

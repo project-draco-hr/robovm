@@ -1,0 +1,60 @@
+{
+  boolean negative=false;
+  String quickResult=null;
+  if (i < 0) {
+    negative=true;
+    i=-i;
+    if (i < 100) {
+      if (i < 0) {
+        quickResult="-2147483648";
+      }
+ else {
+        quickResult=SMALL_NEGATIVE_VALUES[i];
+        if (quickResult == null) {
+          SMALL_NEGATIVE_VALUES[i]=quickResult=i < 10 ? stringOf('-',ONES[i]) : stringOf('-',TENS[i],ONES[i]);
+        }
+      }
+    }
+  }
+ else {
+    if (i < 100) {
+      quickResult=SMALL_NONNEGATIVE_VALUES[i];
+      if (quickResult == null) {
+        SMALL_NONNEGATIVE_VALUES[i]=quickResult=i < 10 ? stringOf(ONES[i]) : stringOf(TENS[i],ONES[i]);
+      }
+    }
+  }
+  if (quickResult != null) {
+    if (sb != null) {
+      sb.append0(quickResult);
+      return null;
+    }
+    return quickResult;
+  }
+  int bufLen=11;
+  char[] buf=(sb != null) ? BUFFER.get() : new char[bufLen];
+  int cursor=bufLen;
+  while (i >= (1 << 16)) {
+    int q=(int)((0x51EB851FL * i) >>> 37);
+    int r=i - 100 * q;
+    buf[--cursor]=ONES[r];
+    buf[--cursor]=TENS[r];
+    i=q;
+  }
+  while (i != 0) {
+    int q=(0xCCCD * i) >>> 19;
+    int r=i - 10 * q;
+    buf[--cursor]=DIGITS[r];
+    i=q;
+  }
+  if (negative) {
+    buf[--cursor]='-';
+  }
+  if (sb != null) {
+    sb.append0(buf,cursor,bufLen - cursor);
+    return null;
+  }
+ else {
+    return new String(cursor,bufLen - cursor,buf);
+  }
+}

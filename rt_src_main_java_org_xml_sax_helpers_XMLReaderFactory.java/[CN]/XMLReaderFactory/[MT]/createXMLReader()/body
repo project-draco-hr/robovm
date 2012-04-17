@@ -2,50 +2,27 @@
   String className=null;
   ClassLoader loader=NewInstance.getClassLoader();
   try {
-    className=SecuritySupport.getSystemProperty(property);
+    className=System.getProperty(property);
   }
- catch (  Exception e) {
+ catch (  RuntimeException e) {
   }
-  if (className == null || className.length() == 0) {
-    String service="META-INF/services/" + property;
-    InputStream is=null;
-    className=null;
-    ClassLoader cl=SecuritySupport.getContextClassLoader();
-    if (cl != null) {
-      is=SecuritySupport.getResourceAsStream(cl,service);
-      if (is == null) {
-        cl=XMLReaderFactory.class.getClassLoader();
-        is=SecuritySupport.getResourceAsStream(cl,service);
+  if (className == null) {
+    try {
+      String service="META-INF/services/" + property;
+      InputStream in;
+      BufferedReader reader;
+      if (loader == null)       in=ClassLoader.getSystemResourceAsStream(service);
+ else       in=loader.getResourceAsStream(service);
+      if (in != null) {
+        reader=new BufferedReader(new InputStreamReader(in,Charsets.UTF_8));
+        className=reader.readLine();
+        in.close();
       }
     }
- else {
-      cl=XMLReaderFactory.class.getClassLoader();
-      is=SecuritySupport.getResourceAsStream(cl,service);
-    }
-    if (is != null) {
-      BufferedReader rd;
-      try {
-        rd=new BufferedReader(new InputStreamReader(is,"UTF-8"),DEFAULT_LINE_LENGTH);
-      }
- catch (      java.io.UnsupportedEncodingException e) {
-        rd=new BufferedReader(new InputStreamReader(is),DEFAULT_LINE_LENGTH);
-      }
-      try {
-        className=rd.readLine();
-      }
- catch (      Exception x) {
-      }
- finally {
-        try {
-          rd.close();
-        }
- catch (        IOException exc) {
-        }
-      }
+ catch (    Exception e) {
     }
   }
   if (className == null) {
-    className="org.apache.xerces.parsers.SAXParser";
   }
   if (className != null)   return loadClass(loader,className);
   try {

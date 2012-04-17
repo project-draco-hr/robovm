@@ -1,42 +1,27 @@
 {
-  if (location < 0 || location > size) {
-    throw new IndexOutOfBoundsException(Messages.getString("luni.0A",Integer.valueOf(location),Integer.valueOf(size)));
+  int s=size;
+  if (index > s || index < 0) {
+    throwIndexOutOfBoundsException(index,s);
   }
-  Object[] dumparray=collection.toArray();
-  int growSize=dumparray.length;
-  if (growSize == 0) {
+  Object[] newPart=collection.toArray();
+  int newPartSize=newPart.length;
+  if (newPartSize == 0) {
     return false;
   }
-  if (location == 0) {
-    growAtFront(growSize);
-    firstIndex-=growSize;
-  }
- else   if (location == size) {
-    if (firstIndex + size > array.length - growSize) {
-      growAtEnd(growSize);
-    }
+  Object[] a=array;
+  int newSize=s + newPartSize;
+  if (newSize <= a.length) {
+    System.arraycopy(a,index,a,index + newPartSize,s - index);
   }
  else {
-    if (array.length - size < growSize) {
-      growForInsert(location,growSize);
-    }
- else     if (firstIndex + size > array.length - growSize || (firstIndex > 0 && location < size / 2)) {
-      int newFirst=firstIndex - growSize;
-      if (newFirst < 0) {
-        int index=location + firstIndex;
-        System.arraycopy(array,index,array,index - newFirst,size - location);
-        newFirst=0;
-      }
-      System.arraycopy(array,firstIndex,array,newFirst,location);
-      firstIndex=newFirst;
-    }
- else {
-      int index=location + firstIndex;
-      System.arraycopy(array,index,array,index + growSize,size - location);
-    }
+    int newCapacity=newCapacity(newSize - 1);
+    Object[] newArray=new Object[newCapacity];
+    System.arraycopy(a,0,newArray,0,index);
+    System.arraycopy(a,index,newArray,index + newPartSize,s - index);
+    array=a=newArray;
   }
-  System.arraycopy(dumparray,0,this.array,location + firstIndex,growSize);
-  size+=growSize;
+  System.arraycopy(newPart,0,a,index,newPartSize);
+  size=newSize;
   modCount++;
   return true;
 }

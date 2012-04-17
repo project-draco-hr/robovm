@@ -1,0 +1,59 @@
+{
+  String languageCode=locale.getLanguage();
+  if (languageCode.equals("tr") || languageCode.equals("az") || languageCode.equals("lt")) {
+    return ICU.toUpperCase(s,locale.toString());
+  }
+  char[] output=null;
+  int i=0;
+  for (int o=offset, end=offset + count; o < end; o++) {
+    char ch=value[o];
+    if (Character.isHighSurrogate(ch)) {
+      return ICU.toUpperCase(s,locale.toString());
+    }
+    int index=upperIndex(ch);
+    if (index == -1) {
+      if (output != null && i >= output.length) {
+        char[] newoutput=new char[output.length + (count / 6) + 2];
+        System.arraycopy(output,0,newoutput,0,output.length);
+        output=newoutput;
+      }
+      char upch=Character.toUpperCase(ch);
+      if (ch != upch) {
+        if (output == null) {
+          output=new char[count];
+          i=o - offset;
+          System.arraycopy(value,offset,output,0,i);
+        }
+        output[i++]=upch;
+      }
+ else       if (output != null) {
+        output[i++]=ch;
+      }
+    }
+ else {
+      int target=index * 3;
+      char val3=upperValues[target + 2];
+      if (output == null) {
+        output=new char[count + (count / 6) + 2];
+        i=o - offset;
+        System.arraycopy(value,offset,output,0,i);
+      }
+ else       if (i + (val3 == 0 ? 1 : 2) >= output.length) {
+        char[] newoutput=new char[output.length + (count / 6) + 3];
+        System.arraycopy(output,0,newoutput,0,output.length);
+        output=newoutput;
+      }
+      char val=upperValues[target];
+      output[i++]=val;
+      val=upperValues[target + 1];
+      output[i++]=val;
+      if (val3 != 0) {
+        output[i++]=val3;
+      }
+    }
+  }
+  if (output == null) {
+    return s;
+  }
+  return output.length == i || output.length - i < 8 ? new String(0,i,output) : new String(output,0,i);
+}

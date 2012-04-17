@@ -1,0 +1,74 @@
+{
+  long R, S, M;
+  if (e >= 0) {
+    M=1l << e;
+    if (!mantissaIsZero) {
+      R=f << (e + 1);
+      S=2;
+    }
+ else {
+      R=f << (e + 2);
+      S=4;
+    }
+  }
+ else {
+    M=1;
+    if (isDenormalized || !mantissaIsZero) {
+      R=f << 1;
+      S=1l << (1 - e);
+    }
+ else {
+      R=f << 2;
+      S=1l << (2 - e);
+    }
+  }
+  int k=(int)Math.ceil((e + p - 1) * invLogOfTenBaseTwo - 1e-10);
+  if (k > 0) {
+    S=S * MathUtils.LONG_POWERS_OF_TEN[k];
+  }
+ else   if (k < 0) {
+    long scale=MathUtils.LONG_POWERS_OF_TEN[-k];
+    R=R * scale;
+    M=M == 1 ? scale : M * scale;
+  }
+  if (R + M > S) {
+    firstK=k;
+  }
+ else {
+    firstK=k - 1;
+    R=R * 10;
+    M=M * 10;
+  }
+  boolean low, high;
+  int U;
+  while (true) {
+    U=0;
+    for (int i=3; i >= 0; i--) {
+      long remainder=R - (S << i);
+      if (remainder >= 0) {
+        R=remainder;
+        U+=1 << i;
+      }
+    }
+    low=R < M;
+    high=R + M > S;
+    if (low || high) {
+      break;
+    }
+    R=R * 10;
+    M=M * 10;
+    digits[digitCount++]=U;
+  }
+  if (low && !high) {
+    digits[digitCount++]=U;
+  }
+ else   if (high && !low) {
+    digits[digitCount++]=U + 1;
+  }
+ else   if ((R << 1) < S) {
+    digits[digitCount++]=U;
+  }
+ else {
+    digits[digitCount++]=U + 1;
+  }
+}

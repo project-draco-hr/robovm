@@ -1,0 +1,33 @@
+{
+  try {
+    if (out == null) {
+      throw new NullPointerException("out == null");
+    }
+    StringBuilder sb=new StringBuilder(80);
+    Enumeration<?> keys=propertyNames();
+    while (keys.hasMoreElements()) {
+      String key=(String)keys.nextElement();
+      sb.append(key);
+      sb.append('=');
+      String property=(String)super.get(key);
+      Properties def=defaults;
+      while (property == null) {
+        property=(String)def.get(key);
+        def=def.defaults;
+      }
+      if (property.length() > 40) {
+        sb.append(property.substring(0,37));
+        sb.append("...");
+      }
+ else {
+        sb.append(property);
+      }
+      sb.append(System.lineSeparator());
+      out.append(sb.toString());
+      sb.setLength(0);
+    }
+  }
+ catch (  IOException ex) {
+    throw new AssertionError(ex);
+  }
+}

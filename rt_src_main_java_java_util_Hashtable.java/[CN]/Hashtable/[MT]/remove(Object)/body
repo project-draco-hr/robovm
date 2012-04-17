@@ -1,24 +1,19 @@
 {
-  int hash=key.hashCode();
-  int index=(hash & 0x7FFFFFFF) % elementData.length;
-  Entry<K,V> last=null;
-  Entry<K,V> entry=elementData[index];
-  while (entry != null && !entry.equalsKey(key,hash)) {
-    last=entry;
-    entry=entry.next;
-  }
-  if (entry != null) {
-    modCount++;
-    if (last == null) {
-      elementData[index]=entry.next;
-    }
+  int hash=secondaryHash(key.hashCode());
+  HashtableEntry<K,V>[] tab=table;
+  int index=hash & (tab.length - 1);
+  for (HashtableEntry<K,V> e=tab[index], prev=null; e != null; prev=e, e=e.next) {
+    if (e.hash == hash && key.equals(e.key)) {
+      if (prev == null) {
+        tab[index]=e.next;
+      }
  else {
-      last.next=entry.next;
+        prev.next=e.next;
+      }
+      modCount++;
+      size--;
+      return e.value;
     }
-    elementCount--;
-    V result=entry.value;
-    entry.value=null;
-    return result;
   }
   return null;
 }

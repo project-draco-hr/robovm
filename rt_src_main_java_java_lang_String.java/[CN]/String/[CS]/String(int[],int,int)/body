@@ -1,10 +1,9 @@
 {
-  super();
   if (codePoints == null) {
     throw new NullPointerException();
   }
-  if (offset < 0 || count < 0 || (long)offset + (long)count > codePoints.length) {
-    throw new IndexOutOfBoundsException();
+  if ((offset | count) < 0 || count > codePoints.length - offset) {
+    throw failedBoundsCheck(codePoints.length,offset,count);
   }
   this.offset=0;
   this.value=new char[count * 2];

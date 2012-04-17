@@ -1,9 +1,31 @@
 {
-  lng|=lng >> 1;
-  lng|=lng >> 2;
-  lng|=lng >> 4;
-  lng|=lng >> 8;
-  lng|=lng >> 16;
-  lng|=lng >> 32;
-  return bitCount(~lng);
+  if (v < 0) {
+    return 0;
+  }
+  if (v == 0) {
+    return 64;
+  }
+  int n=1;
+  int i=(int)(v >>> 32);
+  if (i == 0) {
+    n+=32;
+    i=(int)v;
+  }
+  if (i >>> 16 == 0) {
+    n+=16;
+    i<<=16;
+  }
+  if (i >>> 24 == 0) {
+    n+=8;
+    i<<=8;
+  }
+  if (i >>> 28 == 0) {
+    n+=4;
+    i<<=4;
+  }
+  if (i >>> 30 == 0) {
+    n+=2;
+    i<<=2;
+  }
+  return n - (i >>> 31);
 }

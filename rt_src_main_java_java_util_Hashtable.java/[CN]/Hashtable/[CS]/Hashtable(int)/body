@@ -1,12 +1,21 @@
 {
-  if (capacity >= 0) {
-    elementCount=0;
-    elementData=newElementArray(capacity == 0 ? 1 : capacity);
-    firstSlot=elementData.length;
-    loadFactor=0.75f;
-    computeMaxSize();
+  if (capacity < 0) {
+    throw new IllegalArgumentException("Capacity: " + capacity);
+  }
+  if (capacity == 0) {
+    @SuppressWarnings("unchecked") HashtableEntry<K,V>[] tab=(HashtableEntry<K,V>[])EMPTY_TABLE;
+    table=tab;
+    threshold=-1;
+    return;
+  }
+  if (capacity < MINIMUM_CAPACITY) {
+    capacity=MINIMUM_CAPACITY;
+  }
+ else   if (capacity > MAXIMUM_CAPACITY) {
+    capacity=MAXIMUM_CAPACITY;
   }
  else {
-    throw new IllegalArgumentException();
+    capacity=roundUpToPowerOfTwo(capacity);
   }
+  makeTable(capacity);
 }

@@ -1,0 +1,32 @@
+{
+  relation=relation.forOrder(ascending);
+  Bound fromBoundForCheck=fromBound;
+  Bound toBoundForCheck=toBound;
+  if (toBound != NO_BOUND && (relation == LOWER || relation == FLOOR)) {
+    int comparison=comparator.compare(to,key);
+    if (comparison <= 0) {
+      key=to;
+      if (toBound == EXCLUSIVE) {
+        relation=LOWER;
+      }
+ else       if (comparison < 0) {
+        relation=FLOOR;
+      }
+    }
+    toBoundForCheck=NO_BOUND;
+  }
+  if (fromBound != NO_BOUND && (relation == CEILING || relation == HIGHER)) {
+    int comparison=comparator.compare(from,key);
+    if (comparison >= 0) {
+      key=from;
+      if (fromBound == EXCLUSIVE) {
+        relation=HIGHER;
+      }
+ else       if (comparison > 0) {
+        relation=CEILING;
+      }
+    }
+    fromBoundForCheck=NO_BOUND;
+  }
+  return bound(find(key,relation),fromBoundForCheck,toBoundForCheck);
+}

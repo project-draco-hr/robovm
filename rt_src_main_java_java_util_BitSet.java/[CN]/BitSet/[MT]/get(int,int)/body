@@ -1,43 +1,41 @@
 {
-  if (pos1 < 0 || pos2 < 0 || pos2 < pos1) {
-    throw new IndexOutOfBoundsException(Messages.getString("luni.37"));
-  }
-  int last=actualArrayLength << OFFSET;
-  if (pos1 >= last || pos1 == pos2) {
+  checkRange(fromIndex,toIndex);
+  int last=64 * longCount;
+  if (fromIndex >= last || fromIndex == toIndex) {
     return new BitSet(0);
   }
-  if (pos2 > last) {
-    pos2=last;
+  if (toIndex > last) {
+    toIndex=last;
   }
-  int idx1=pos1 >> OFFSET;
-  int idx2=(pos2 - 1) >> OFFSET;
-  long factor1=(~0L) << (pos1 & RIGHT_BITS);
-  long factor2=(~0L) >>> (ELM_SIZE - (pos2 & RIGHT_BITS));
-  if (idx1 == idx2) {
-    long result=(bits[idx1] & (factor1 & factor2)) >>> (pos1 % ELM_SIZE);
+  int firstArrayIndex=fromIndex / 64;
+  int lastArrayIndex=(toIndex - 1) / 64;
+  long lowMask=ALL_ONES << fromIndex;
+  long highMask=ALL_ONES >>> -toIndex;
+  if (firstArrayIndex == lastArrayIndex) {
+    long result=(bits[firstArrayIndex] & (lowMask & highMask)) >>> fromIndex;
     if (result == 0) {
       return new BitSet(0);
     }
-    return new BitSet(new long[]{result},needClear,1,true);
+    return new BitSet(new long[]{result});
   }
-  long[] newbits=new long[idx2 - idx1 + 1];
-  newbits[0]=bits[idx1] & factor1;
-  newbits[newbits.length - 1]=bits[idx2] & factor2;
-  for (int i=1; i < idx2 - idx1; i++) {
-    newbits[i]=bits[idx1 + i];
+  long[] newBits=new long[lastArrayIndex - firstArrayIndex + 1];
+  newBits[0]=bits[firstArrayIndex] & lowMask;
+  newBits[newBits.length - 1]=bits[lastArrayIndex] & highMask;
+  for (int i=1; i < lastArrayIndex - firstArrayIndex; i++) {
+    newBits[i]=bits[firstArrayIndex + i];
   }
-  int numBitsToShift=pos1 & RIGHT_BITS;
-  int actualLen=newbits.length;
+  int numBitsToShift=fromIndex % 64;
+  int actualLen=newBits.length;
   if (numBitsToShift != 0) {
-    for (int i=0; i < newbits.length; i++) {
-      newbits[i]=newbits[i] >>> (numBitsToShift);
-      if (i != newbits.length - 1) {
-        newbits[i]|=newbits[i + 1] << (ELM_SIZE - (numBitsToShift));
+    for (int i=0; i < newBits.length; i++) {
+      newBits[i]=newBits[i] >>> (numBitsToShift);
+      if (i != newBits.length - 1) {
+        newBits[i]|=newBits[i + 1] << -numBitsToShift;
       }
-      if (newbits[i] != 0) {
+      if (newBits[i] != 0) {
         actualLen=i + 1;
       }
     }
   }
-  return new BitSet(newbits,needClear,actualLen,newbits[actualLen - 1] != 0);
+  return new BitSet(newBits);
 }

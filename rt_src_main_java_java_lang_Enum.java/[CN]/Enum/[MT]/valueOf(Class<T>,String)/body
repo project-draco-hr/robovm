@@ -1,15 +1,14 @@
 {
-  if ((enumType == null) || (name == null)) {
-    throw new NullPointerException(Messages.getString("luni.4D"));
+  if (enumType == null || name == null) {
+    throw new NullPointerException("enumType == null || name == null");
   }
-  T[] values=getValues(enumType);
-  if (values == null) {
-    throw new IllegalArgumentException(Messages.getString("luni.4E",enumType));
+  if (!enumType.isEnum()) {
+    throw new IllegalArgumentException(enumType + " is not an enum type");
   }
-  for (  T enumConst : values) {
-    if (enumConst.name.equals(name)) {
-      return enumConst;
+  for (  T value : getSharedConstants(enumType)) {
+    if (name.equals(value.name())) {
+      return value;
     }
   }
-  throw new IllegalArgumentException(Messages.getString("luni.4F",name,enumType));
+  throw new IllegalArgumentException(name + " is not a constant in " + enumType.getName());
 }

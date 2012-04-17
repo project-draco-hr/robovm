@@ -1,0 +1,25 @@
+{
+  if (key == null) {
+    HashMapEntry<K,V> entry=entryForNullKey;
+    if (entry == null) {
+      entryForNullKey=constructorNewEntry(null,value,0,null);
+      size++;
+    }
+ else {
+      entry.value=value;
+    }
+    return;
+  }
+  int hash=secondaryHash(key.hashCode());
+  HashMapEntry<K,V>[] tab=table;
+  int index=hash & (tab.length - 1);
+  HashMapEntry<K,V> first=tab[index];
+  for (HashMapEntry<K,V> e=first; e != null; e=e.next) {
+    if (e.hash == hash && key.equals(e.key)) {
+      e.value=value;
+      return;
+    }
+  }
+  tab[index]=constructorNewEntry(key,value,hash,first);
+  size++;
+}

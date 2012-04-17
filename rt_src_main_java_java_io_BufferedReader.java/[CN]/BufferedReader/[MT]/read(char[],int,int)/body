@@ -1,11 +1,7 @@
 {
 synchronized (lock) {
-    if (isClosed()) {
-      throw new IOException(Messages.getString("luni.A5"));
-    }
-    if (offset < 0 || offset > buffer.length - length || length < 0) {
-      throw new IndexOutOfBoundsException();
-    }
+    checkNotClosed();
+    Arrays.checkOffsetAndCount(buffer.length,offset,length);
     int outstanding=length;
     while (outstanding > 0) {
       int available=end - pos;
@@ -22,7 +18,6 @@ synchronized (lock) {
       if ((mark == -1 || (pos - mark >= markLimit)) && outstanding >= buf.length) {
         int count=in.read(buffer,offset,outstanding);
         if (count > 0) {
-          offset+=count;
           outstanding-=count;
           mark=-1;
         }

@@ -1,0 +1,30 @@
+{
+  String languageCode=locale.getLanguage();
+  if (languageCode.equals("tr") || languageCode.equals("az") || languageCode.equals("lt")) {
+    return ICU.toLowerCase(s,locale.toString());
+  }
+  char[] newValue=null;
+  int newCount=0;
+  for (int i=offset, end=offset + count; i < end; ++i) {
+    char ch=value[i];
+    char newCh;
+    if (ch == LATIN_CAPITAL_I_WITH_DOT || Character.isHighSurrogate(ch)) {
+      return ICU.toLowerCase(s,locale.toString());
+    }
+ else     if (ch == GREEK_CAPITAL_SIGMA && isFinalSigma(value,offset,count,i)) {
+      newCh=GREEK_SMALL_FINAL_SIGMA;
+    }
+ else {
+      newCh=Character.toLowerCase(ch);
+    }
+    if (newValue == null && ch != newCh) {
+      newValue=new char[count];
+      newCount=i - offset;
+      System.arraycopy(value,offset,newValue,0,newCount);
+    }
+    if (newValue != null) {
+      newValue[newCount++]=newCh;
+    }
+  }
+  return newValue != null ? new String(0,newCount,newValue) : s;
+}

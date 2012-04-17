@@ -2,8 +2,30 @@
   if (s == null) {
     s="null";
   }
-  if (start < 0 || end < 0 || start > end || end > s.length()) {
+  if ((start | end) < 0 || start > end || end > s.length()) {
     throw new IndexOutOfBoundsException();
   }
-  append0(s.subSequence(start,end).toString());
+  int length=end - start;
+  int newCount=count + length;
+  if (newCount > value.length) {
+    enlargeBuffer(newCount);
+  }
+ else   if (shared) {
+    value=value.clone();
+    shared=false;
+  }
+  if (s instanceof String) {
+    ((String)s)._getChars(start,end,value,count);
+  }
+ else   if (s instanceof AbstractStringBuilder) {
+    AbstractStringBuilder other=(AbstractStringBuilder)s;
+    System.arraycopy(other.value,start,value,count,length);
+  }
+ else {
+    int j=count;
+    for (int i=start; i < end; i++) {
+      value[j++]=s.charAt(i);
+    }
+  }
+  this.count=newCount;
 }

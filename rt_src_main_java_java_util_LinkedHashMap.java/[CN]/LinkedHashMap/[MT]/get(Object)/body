@@ -1,30 +1,20 @@
 {
-  LinkedHashMapEntry<K,V> m;
   if (key == null) {
-    m=(LinkedHashMapEntry<K,V>)findNullKeyEntry();
+    HashMapEntry<K,V> e=entryForNullKey;
+    if (e == null)     return null;
+    if (accessOrder)     makeTail((LinkedEntry<K,V>)e);
+    return e.value;
   }
- else {
-    int hash=key.hashCode();
-    int index=(hash & 0x7FFFFFFF) % elementData.length;
-    m=(LinkedHashMapEntry<K,V>)findNonNullKeyEntry(key,index,hash);
-  }
-  if (m == null) {
-    return null;
-  }
-  if (accessOrder && tail != m) {
-    LinkedHashMapEntry<K,V> p=m.chainBackward;
-    LinkedHashMapEntry<K,V> n=m.chainForward;
-    n.chainBackward=p;
-    if (p != null) {
-      p.chainForward=n;
+  int hash=key.hashCode();
+  hash^=(hash >>> 20) ^ (hash >>> 12);
+  hash^=(hash >>> 7) ^ (hash >>> 4);
+  HashMapEntry<K,V>[] tab=table;
+  for (HashMapEntry<K,V> e=tab[hash & (tab.length - 1)]; e != null; e=e.next) {
+    K eKey=e.key;
+    if (eKey == key || (e.hash == hash && key.equals(eKey))) {
+      if (accessOrder)       makeTail((LinkedEntry<K,V>)e);
+      return e.value;
     }
- else {
-      head=n;
-    }
-    m.chainForward=null;
-    m.chainBackward=tail;
-    tail.chainForward=m;
-    tail=m;
   }
-  return m.value;
+  return null;
 }

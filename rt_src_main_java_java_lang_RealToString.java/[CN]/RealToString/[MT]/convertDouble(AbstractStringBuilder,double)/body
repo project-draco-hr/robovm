@@ -1,0 +1,57 @@
+{
+  long inputNumberBits=Double.doubleToRawLongBits(inputNumber);
+  boolean positive=(inputNumberBits & Double.SIGN_MASK) == 0;
+  int e=(int)((inputNumberBits & Double.EXPONENT_MASK) >> Double.MANTISSA_BITS);
+  long f=inputNumberBits & Double.MANTISSA_MASK;
+  boolean mantissaIsZero=f == 0;
+  String quickResult=null;
+  if (e == 2047) {
+    if (mantissaIsZero) {
+      quickResult=positive ? "Infinity" : "-Infinity";
+    }
+ else {
+      quickResult="NaN";
+    }
+  }
+ else   if (e == 0) {
+    if (mantissaIsZero) {
+      quickResult=positive ? "0.0" : "-0.0";
+    }
+ else     if (f == 1) {
+      quickResult=positive ? "4.9E-324" : "-4.9E-324";
+    }
+  }
+  if (quickResult != null) {
+    return resultOrSideEffect(sb,quickResult);
+  }
+  int p=Double.EXPONENT_BIAS + Double.MANTISSA_BITS;
+  int pow;
+  int numBits=Double.MANTISSA_BITS;
+  if (e == 0) {
+    pow=1 - p;
+    long ff=f;
+    while ((ff & 0x0010000000000000L) == 0) {
+      ff=ff << 1;
+      numBits--;
+    }
+  }
+ else {
+    f=f | 0x0010000000000000L;
+    pow=e - p;
+  }
+  firstK=digitCount=0;
+  if (-59 < pow && pow < 6 || (pow == -59 && !mantissaIsZero)) {
+    longDigitGenerator(f,pow,e == 0,mantissaIsZero,numBits);
+  }
+ else {
+    bigIntDigitGenerator(f,pow,e == 0,numBits);
+  }
+  AbstractStringBuilder dst=(sb != null) ? sb : new StringBuilder(26);
+  if (inputNumber >= 1e7D || inputNumber <= -1e7D || (inputNumber > -1e-3D && inputNumber < 1e-3D)) {
+    freeFormatExponential(dst,positive);
+  }
+ else {
+    freeFormat(dst,positive);
+  }
+  return (sb != null) ? null : dst.toString();
+}

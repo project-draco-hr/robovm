@@ -1,29 +1,21 @@
 {
-  if (start < 0) {
-    throw new IndexOutOfBoundsException(Messages.getString("luni.0B",Integer.valueOf(start)));
-  }
- else   if (end > size) {
-    throw new IndexOutOfBoundsException(Messages.getString("luni.0A",Integer.valueOf(end),Integer.valueOf(size)));
-  }
- else   if (start > end) {
-    throw new IndexOutOfBoundsException(Messages.getString("luni.35",Integer.valueOf(start),Integer.valueOf(end)));
-  }
-  if (start == end) {
+  if (fromIndex == toIndex) {
     return;
   }
-  if (end == size) {
-    Arrays.fill(array,firstIndex + start,firstIndex + size,null);
+  Object[] a=array;
+  int s=size;
+  if (fromIndex >= s) {
+    throw new IndexOutOfBoundsException("fromIndex " + fromIndex + " >= size "+ size);
   }
- else   if (start == 0) {
-    Arrays.fill(array,firstIndex,firstIndex + end,null);
-    firstIndex+=end;
+  if (toIndex > s) {
+    throw new IndexOutOfBoundsException("toIndex " + toIndex + " > size "+ size);
   }
- else {
-    System.arraycopy(array,firstIndex + end,array,firstIndex + start,size - end);
-    int lastIndex=firstIndex + size;
-    int newLast=lastIndex + start - end;
-    Arrays.fill(array,newLast,lastIndex,null);
+  if (fromIndex > toIndex) {
+    throw new IndexOutOfBoundsException("fromIndex " + fromIndex + " > toIndex "+ toIndex);
   }
-  size-=end - start;
+  System.arraycopy(a,toIndex,a,fromIndex,s - toIndex);
+  int rangeSize=toIndex - fromIndex;
+  Arrays.fill(a,s - rangeSize,s,null);
+  size=s - rangeSize;
   modCount++;
 }
