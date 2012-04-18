@@ -1,0 +1,21 @@
+{
+  try {
+    List<SDK> sdks=new ArrayList<SDK>();
+    File sdksDir=new File("/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/");
+    for (    File root : sdksDir.listFiles()) {
+      File settingsFile=new File(root,"SDKSettings.plist");
+      if (settingsFile.exists()) {
+        NSDictionary settings=(NSDictionary)PropertyListParser.parse(settingsFile);
+        NSObject displayName=settings.get("DisplayName");
+        NSObject version=settings.get("Version");
+        if (displayName != null && version != null) {
+          sdks.add(new SDK(displayName.toString(),version.toString(),root));
+        }
+      }
+    }
+    return sdks;
+  }
+ catch (  Throwable t) {
+    throw new RuntimeException(t);
+  }
+}
