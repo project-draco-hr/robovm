@@ -1,0 +1,67 @@
+{
+  final Process process=this.launch(command,environment,dir);
+  try {
+    streams.setProcessInputStream(process.getOutputStream());
+    streams.setProcessOutputStream(process.getInputStream());
+    streams.setProcessErrorStream(process.getErrorStream());
+  }
+ catch (  IOException e) {
+    process.destroy();
+    throw e;
+  }
+  streams.start();
+  if (this.getProcessDestroyer() != null) {
+    this.getProcessDestroyer().add(process);
+  }
+  if (watchdog != null) {
+    watchdog.start(process);
+  }
+  Thread waitForThread=new Thread(AsyncExecutor.class.getSimpleName() + ".waitFor-" + threadCounter.incrementAndGet()){
+    public void run(){
+      int exitValue=Executor.INVALID_EXITVALUE;
+      try {
+        try {
+          exitValue=process.waitFor();
+        }
+ catch (        InterruptedException e) {
+          process.destroy();
+        }
+        if (watchdog != null) {
+          watchdog.stop();
+        }
+        streams.stop();
+        closeStreams(process);
+        if (watchdog != null) {
+          try {
+            watchdog.checkException();
+          }
+ catch (          Exception e) {
+            throw new IOException(e.getMessage());
+          }
+        }
+        if (handler != null) {
+          handler.onProcessComplete(exitValue);
+        }
+      }
+ catch (      ExecuteException e) {
+        if (handler != null) {
+          handler.onProcessFailed(e);
+        }
+      }
+catch (      Exception e) {
+        if (handler != null) {
+          handler.onProcessFailed(new ExecuteException("Execution failed",exitValue,e));
+        }
+      }
+ finally {
+        if (AsyncExecutor.this.getProcessDestroyer() != null) {
+          AsyncExecutor.this.getProcessDestroyer().remove(process);
+        }
+      }
+    }
+  }
+;
+  waitForThread.setDaemon(true);
+  waitForThread.start();
+  return process;
+}

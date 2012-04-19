@@ -1,0 +1,30 @@
+{
+  File dir=getAppDir();
+  String iosSimPath="ios-sim";
+  if (iosSimBinPath != null) {
+    iosSimPath=iosSimBinPath.getAbsolutePath();
+  }
+  List<Object> args=new ArrayList<Object>();
+  args.add("launch");
+  args.add(dir.getAbsolutePath());
+  args.add("--unbuffered");
+  if (sdk != null) {
+    args.add("--sdk");
+    args.add(sdk.getVersion());
+  }
+  args.add("--family");
+  args.add(family.toString().toLowerCase());
+  if (launchParameters.getStdoutFifo() != null) {
+    args.add("--stdout");
+    args.add(launchParameters.getStdoutFifo());
+  }
+  if (launchParameters.getStderrFifo() != null) {
+    args.add("--stderr");
+    args.add(launchParameters.getStderrFifo());
+  }
+  if (!launchParameters.getArguments().isEmpty()) {
+    args.add("--args");
+    args.addAll(launchParameters.getArguments());
+  }
+  return CompilerUtil.createCommandLine(iosSimPath,args);
+}
