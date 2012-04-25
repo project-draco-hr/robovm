@@ -1,0 +1,47 @@
+{
+  if (consoleStream == null) {
+    empty=true;
+    items=new String[0];
+    return;
+  }
+ else {
+    empty=false;
+  }
+  List<String> lines=new ArrayList<String>();
+  java.util.StringTokenizer st=new StringTokenizer(consoleStream,"\n");
+  while (st.hasMoreTokens()) {
+    lines.add(st.nextToken());
+  }
+  if (Log.MI.ui) {
+    System.out.printf("USER INTERACTION LINES:\n");
+    for (    String line : lines)     System.out.printf("\t'%s'\n",line);
+  }
+  Pattern p=Pattern.compile("\\[(\\d+)\\] (.+)");
+  List<String> itemList=new ArrayList<String>();
+  int cx=0;
+  if (Log.MI.ui)   System.out.printf("PARSED based on '%s'\n",p.pattern());
+  for (  String line : lines) {
+    Matcher m=p.matcher(line);
+    if (m.matches()) {
+      if (Log.MI.ui)       System.out.printf("'%s' '%s'\n",m.group(1),m.group(2));
+      String choice=m.group(2);
+      if ("cancel".equals(choice)) {
+        cancelIndex=Integer.parseInt(m.group(1));
+        continue;
+      }
+ else       if ("all".equals(choice)) {
+        allIndex=java.lang.Integer.parseInt(m.group(1));
+        continue;
+      }
+ else {
+        if (firstChoice == -1)         firstChoice=java.lang.Integer.parseInt(m.group(1));
+        itemList.add(choice);
+      }
+    }
+ else {
+      if (Log.MI.ui)       System.out.printf("No match\n");
+    }
+  }
+  items=new String[itemList.size()];
+  itemList.toArray(items);
+}

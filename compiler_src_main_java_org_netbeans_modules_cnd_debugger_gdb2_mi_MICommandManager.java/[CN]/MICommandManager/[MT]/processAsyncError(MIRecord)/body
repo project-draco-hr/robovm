@@ -1,0 +1,15 @@
+{
+  if ("error".equals(record.cls) && !record.isEmpty()) {
+    MIValue msgVal=record.results().valueOf("msg");
+    if (msgVal != null && msgVal.asConst().value().endsWith("while target running")) {
+      for (Iterator<MICommand> iter=pendingCommands.iterator(); iter.hasNext(); ) {
+        if (iter.next().getToken() == record.token) {
+          iter.remove();
+          break;
+        }
+      }
+      return true;
+    }
+  }
+  return false;
+}
