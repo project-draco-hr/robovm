@@ -1,17 +1,25 @@
 {
+  OutputStream fruitstrapOut=new DebugOutputStream(config.getLogger());
+  OutputStream fruitstrapErr=new ErrorOutputStream(config.getLogger());
   OutputStream out=null;
   OutputStream err=null;
   if (launchParameters.getStdoutFifo() != null) {
     out=new FileOutputStream(launchParameters.getStdoutFifo());
   }
+ else   if (launchParameters.isRedirectStreamsToLogger()) {
+    out=fruitstrapOut;
+  }
  else {
-    out=new DebugOutputStream(config.getLogger());
+    out=System.out;
   }
   if (launchParameters.getStderrFifo() != null) {
     err=new FileOutputStream(launchParameters.getStderrFifo());
   }
- else {
-    err=new ErrorOutputStream(config.getLogger());
+ else   if (launchParameters.isRedirectStreamsToLogger()) {
+    err=fruitstrapErr;
   }
-  executor.setStreamHandler(new FruitstrapStreamHandler(out,err));
+ else {
+    err=System.err;
+  }
+  executor.setStreamHandler(new FruitstrapStreamHandler(out,err,fruitstrapOut,fruitstrapErr));
 }
