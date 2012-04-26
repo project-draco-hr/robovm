@@ -5,5 +5,9 @@
   executor.setWorkingDirectory(launchParameters.getWorkingDirectory());
   executor.setExitValue(0);
   initStreams(executor,launchParameters);
-  return executor.execute(commandLine,launchParameters.getEnvironment());
+  Map<String,String> env=launchParameters.getEnvironment();
+  if (env == null) {
+    env=EnvironmentUtils.getProcEnvironment();
+  }
+  return executor.execute(commandLine,env);
 }
