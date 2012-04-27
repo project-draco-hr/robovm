@@ -2,15 +2,21 @@
   String name=mangleField(field) + "_setter";
   Function fn=null;
   Value fieldPtr=null;
+  Value value=null;
   if (field.isStatic()) {
     fn=new Function(_private,new FunctionAttribute[]{alwaysinline,optsize},name,new FunctionType(VOID,ENV_PTR,getType(field.getType())),"env","value");
     fieldPtr=getClassFieldPtr(fn,field);
+    value=fn.getParameterRef(1);
   }
  else {
     fn=new Function(field.isPrivate() || field.isFinal() ? _private : external,new FunctionAttribute[]{alwaysinline,optsize},name,new FunctionType(VOID,ENV_PTR,OBJECT_PTR,getType(field.getType())),"env","this","value");
     fieldPtr=getInstanceFieldPtr(fn,new VariableRef("this",OBJECT_PTR),field);
+    value=fn.getParameterRef(2);
   }
-  fn.add(new Store(new VariableRef("value",getType(field.getType())),fieldPtr));
+  fn.add(new Store(value,fieldPtr));
+  if (Modifier.isVolatile(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
+    fn.add(new Fence(Ordering.seq_cst));
+  }
   fn.add(new Ret());
   return fn;
 }
