@@ -57,8 +57,14 @@
  else {
     header.add(new NullConstant(I8_PTR));
   }
-  header.add(classFieldsType == null ? new IntegerConstant(0) : alignedSizeof(classFieldsType));
-  header.add(instanceFieldsType == null ? new IntegerConstant(0) : alignedSizeof(instanceFieldsType));
+  header.add(sizeof(classType));
+  header.add(sizeof(instanceType));
+  if (!instanceFields.isEmpty()) {
+    header.add(offsetof(instanceType,1,1));
+  }
+ else {
+    header.add(sizeof(instanceType));
+  }
   PackedStructureConstantBuilder body=new PackedStructureConstantBuilder();
   if (sootClass.getInterfaceCount() >= CI_INTERFACE_COUNT_MASK) {
     body.add(new IntegerConstant((short)sootClass.getInterfaceCount()));
@@ -146,10 +152,10 @@
       body.add(getString(getDescriptor(f)));
     }
     if (f.isStatic()) {
-      body.add(offsetof(classFieldsType,classFieldCounter++));
+      body.add(offsetof(classType,1,classFieldCounter++));
     }
  else {
-      body.add(offsetof(instanceFieldsType,instanceFieldCounter++));
+      body.add(offsetof(instanceType,1,1 + instanceFieldCounter++));
     }
     if (attributesEncoder.fieldHasAttributes(f)) {
       body.add(new ConstantBitcast(attributesEncoder.getFieldAttributes(f).ref(),I8_PTR));
@@ -249,7 +255,7 @@
     }
     if (!m.isAbstract()) {
       body.add(new ConstantBitcast(new FunctionRef(mangleMethod(m),getFunctionType(m)),I8_PTR));
-      body.add(new IntegerConstant(0));
+      body.add(new IntegerConstant(DUMMY_METHOD_SIZE));
       if (m.isSynchronized()) {
         body.add(new ConstantBitcast(new FunctionRef(mangleMethod(m) + "_synchronized",getFunctionType(m)),I8_PTR));
       }

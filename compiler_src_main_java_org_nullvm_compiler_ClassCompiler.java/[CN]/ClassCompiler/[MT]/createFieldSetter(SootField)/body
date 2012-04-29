@@ -13,9 +13,17 @@
     fieldPtr=getInstanceFieldPtr(fn,new VariableRef("this",OBJECT_PTR),field);
     value=fn.getParameterRef(2);
   }
-  fn.add(new Store(value,fieldPtr));
   if (Modifier.isVolatile(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
+    if (LongType.v().equals(field.getType())) {
+      fn.add(new Store(value,fieldPtr,Ordering.unordered,8));
+    }
+ else {
+      fn.add(new Store(value,fieldPtr));
+    }
     fn.add(new Fence(Ordering.seq_cst));
+  }
+ else {
+    fn.add(new Store(value,fieldPtr));
   }
   fn.add(new Ret());
   return fn;

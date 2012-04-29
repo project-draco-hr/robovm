@@ -1,13 +1,3 @@
 {
-  Value offset=new IntegerConstant(0);
-  if (sootClass.hasSuperclass() && !"java.lang.Object".equals(sootClass.getSuperclass().getName())) {
-    Variable v=f.newVariable(I32);
-    f.add(new Load(v,new GlobalRef(mangleClass(sootClass) + "_offset",I32)));
-    offset=v.ref();
-  }
-  Variable baseI8Ptr=f.newVariable(I8_PTR);
-  f.add(new Bitcast(baseI8Ptr,base,I8_PTR));
-  Variable newBase=f.newVariable(I8_PTR);
-  f.add(new Getelementptr(newBase,baseI8Ptr.ref(),offset));
-  return getFieldPtr(f,newBase.ref(),sizeof(OBJECT),instanceFieldsType,instanceFields.indexOf(field));
+  return getFieldPtr(f,base,offsetof(instanceType,1,1 + instanceFields.indexOf(field)),getType(field.getType()));
 }
