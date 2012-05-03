@@ -1,0 +1,26 @@
+{
+  X500Principal issuer=cert.getIssuerX500Principal();
+synchronized (subjectToTrustAnchors) {
+    List<TrustAnchor> anchors=subjectToTrustAnchors.get(issuer);
+    if (anchors == null) {
+      return null;
+    }
+    for (    TrustAnchor anchor : anchors) {
+      PublicKey publicKey;
+      try {
+        X509Certificate caCert=anchor.getTrustedCert();
+        if (caCert != null) {
+          publicKey=caCert.getPublicKey();
+        }
+ else {
+          publicKey=anchor.getCAPublicKey();
+        }
+        cert.verify(publicKey);
+        return anchor;
+      }
+ catch (      Exception ignored) {
+      }
+    }
+  }
+  return null;
+}

@@ -1,0 +1,24 @@
+{
+  Arrays.checkOffsetAndCount(targets.length,offset,length);
+  checkOpenConnected();
+  int totalCount=FileChannelImpl.calculateTotalRemaining(targets,offset,length,true);
+  if (totalCount == 0) {
+    return 0;
+  }
+  byte[] readArray=new byte[totalCount];
+  ByteBuffer readBuffer=ByteBuffer.wrap(readArray);
+  int readCount;
+  readCount=readImpl(readBuffer);
+  readBuffer.flip();
+  if (readCount > 0) {
+    int left=readCount;
+    int index=offset;
+    while (left > 0) {
+      int putLength=Math.min(targets[index].remaining(),left);
+      targets[index].put(readArray,readCount - left,putLength);
+      index++;
+      left-=putLength;
+    }
+  }
+  return readCount;
+}

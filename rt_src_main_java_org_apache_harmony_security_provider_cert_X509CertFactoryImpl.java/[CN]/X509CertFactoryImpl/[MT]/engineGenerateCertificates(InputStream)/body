@@ -1,8 +1,8 @@
 {
   if (inStream == null) {
-    throw new CertificateException(Messages.getString("security.153"));
+    throw new CertificateException("inStream == null");
   }
-  ArrayList result=new ArrayList();
+  ArrayList<Certificate> result=new ArrayList<Certificate>();
   try {
     if (!inStream.markSupported()) {
       inStream=new RestoringInputStream(inStream);
@@ -22,7 +22,7 @@
       }
  else {
         if (result.size() == 0) {
-          throw new CertificateException(Messages.getString("security.15F"));
+          throw new CertificateException("Unsupported encoding");
         }
  else {
           inStream.reset();
@@ -56,23 +56,23 @@
       return result;
     }
  else     if (ch == -1) {
-      throw new CertificateException(Messages.getString("security.155"));
+      throw new CertificateException("There is no data in the stream");
     }
     if (second_asn1_tag == ASN1Constants.TAG_OID) {
       ContentInfo info=(ContentInfo)((encoding != null) ? ContentInfo.ASN1.decode(encoding) : ContentInfo.ASN1.decode(inStream));
       SignedData data=info.getSignedData();
       if (data == null) {
-        throw new CertificateException(Messages.getString("security.154"));
+        throw new CertificateException("Invalid PKCS7 data provided");
       }
-      List certs=data.getCertificates();
+      List<org.apache.harmony.security.x509.Certificate> certs=data.getCertificates();
       if (certs != null) {
-        for (int i=0; i < certs.size(); i++) {
-          result.add(new X509CertImpl((org.apache.harmony.security.x509.Certificate)certs.get(i)));
+        for (        org.apache.harmony.security.x509.Certificate cert : certs) {
+          result.add(new X509CertImpl(cert));
         }
       }
       return result;
     }
-    throw new CertificateException(Messages.getString("security.15F"));
+    throw new CertificateException("Unsupported encoding");
   }
  catch (  IOException e) {
     throw new CertificateException(e);

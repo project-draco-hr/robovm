@@ -1,0 +1,56 @@
+{
+  boolean foundGMT=string.regionMatches(offset,"GMT",0,3);
+  if (foundGMT) {
+    offset+=3;
+  }
+  char sign;
+  if (offset < string.length() && ((sign=string.charAt(offset)) == '+' || sign == '-')) {
+    ParsePosition position=new ParsePosition(offset + 1);
+    Number result=numberFormat.parse(string,position);
+    if (result == null) {
+      return -position.getErrorIndex() - 1;
+    }
+    int hour=result.intValue();
+    int raw=hour * 3600000;
+    int index=position.getIndex();
+    if (index < string.length() && string.charAt(index) == ':') {
+      position.setIndex(index + 1);
+      result=numberFormat.parse(string,position);
+      if (result == null) {
+        return -position.getErrorIndex() - 1;
+      }
+      int minute=result.intValue();
+      raw+=minute * 60000;
+    }
+ else     if (hour >= 24) {
+      raw=(hour / 100 * 3600000) + (hour % 100 * 60000);
+    }
+    if (sign == '-') {
+      raw=-raw;
+    }
+    calendar.setTimeZone(new SimpleTimeZone(raw,""));
+    return position.getIndex();
+  }
+  if (foundGMT) {
+    calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
+    return offset;
+  }
+  String[][] zones=formatData.internalZoneStrings();
+  for (  String[] element : zones) {
+    for (int j=TimeZones.LONG_NAME; j < TimeZones.NAME_COUNT; j++) {
+      if (string.regionMatches(true,offset,element[j],0,element[j].length())) {
+        TimeZone zone=TimeZone.getTimeZone(element[TimeZones.OLSON_NAME]);
+        if (zone == null) {
+          return -offset - 1;
+        }
+        int raw=zone.getRawOffset();
+        if (j == TimeZones.LONG_NAME_DST || j == TimeZones.SHORT_NAME_DST) {
+          raw+=3600000;
+        }
+        calendar.setTimeZone(new SimpleTimeZone(raw,""));
+        return offset + element[j].length();
+      }
+    }
+  }
+  return -offset - 1;
+}

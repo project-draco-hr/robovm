@@ -10,15 +10,16 @@
   }
  else {
     int seqTagOffset=tagOffset;
-    ArrayList values=new ArrayList();
+    ArrayList<Object> values=new ArrayList<Object>();
     while (endOffset > offset) {
       next();
       values.add(type.decode(this));
     }
+    values.trimToSize();
     content=values;
     tagOffset=seqTagOffset;
   }
   if (offset != endOffset) {
-    throw new ASN1Exception(Messages.getString("security.134",begOffset));
+    throw new ASN1Exception("Wrong encoding at [" + begOffset + "]. Content's length and encoded length are not the same");
   }
 }

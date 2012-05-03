@@ -1,17 +1,15 @@
 {
 synchronized (lock) {
-    if (isClosed()) {
-      throw new IOException(Messages.getString("luni.D6"));
-    }
+    checkNotClosed();
     int minSkip=-pos;
     int maxSkip=count - pos;
-    if (maxSkip == 0 || ns > maxSkip) {
-      ns=maxSkip;
+    if (maxSkip == 0 || charCount > maxSkip) {
+      charCount=maxSkip;
     }
- else     if (ns < minSkip) {
-      ns=minSkip;
+ else     if (charCount < minSkip) {
+      charCount=minSkip;
     }
-    pos+=ns;
-    return ns;
+    pos+=charCount;
+    return charCount;
   }
 }

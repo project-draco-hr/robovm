@@ -1,0 +1,34 @@
+{
+  checkOpen();
+  checkWritable();
+  if (buffer == null) {
+    throw new NullPointerException("buffer == null");
+  }
+  if (!buffer.hasRemaining()) {
+    return 0;
+  }
+  int bytesWritten=0;
+  boolean completed=false;
+  try {
+    begin();
+    try {
+      if (position == -1) {
+        bytesWritten=Libcore.os.write(fd,buffer);
+      }
+ else {
+        bytesWritten=Libcore.os.pwrite(fd,buffer,position);
+      }
+    }
+ catch (    ErrnoException errnoException) {
+      throw errnoException.rethrowAsIOException();
+    }
+    completed=true;
+  }
+  finally {
+    end(completed);
+  }
+  if (bytesWritten > 0) {
+    buffer.position(buffer.position() + bytesWritten);
+  }
+  return bytesWritten;
+}

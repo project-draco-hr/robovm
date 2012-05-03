@@ -1,0 +1,55 @@
+{
+  if (authority == null) {
+    return;
+  }
+  String tempUserInfo=null;
+  String temp=authority;
+  int index=temp.indexOf('@');
+  int hostIndex=0;
+  if (index != -1) {
+    tempUserInfo=temp.substring(0,index);
+    validateUserInfo(authority,tempUserInfo,0);
+    temp=temp.substring(index + 1);
+    hostIndex=index + 1;
+  }
+  index=temp.lastIndexOf(':');
+  int endIndex=temp.indexOf(']');
+  String tempHost;
+  int tempPort=-1;
+  if (index != -1 && endIndex < index) {
+    tempHost=temp.substring(0,index);
+    if (index < (temp.length() - 1)) {
+      try {
+        tempPort=Integer.parseInt(temp.substring(index + 1));
+        if (tempPort < 0) {
+          if (forceServer) {
+            throw new URISyntaxException(authority,"Invalid port number",hostIndex + index + 1);
+          }
+          return;
+        }
+      }
+ catch (      NumberFormatException e) {
+        if (forceServer) {
+          throw new URISyntaxException(authority,"Invalid port number",hostIndex + index + 1);
+        }
+        return;
+      }
+    }
+  }
+ else {
+    tempHost=temp;
+  }
+  if (tempHost.isEmpty()) {
+    if (forceServer) {
+      throw new URISyntaxException(authority,"Expected host",hostIndex);
+    }
+    return;
+  }
+  if (!isValidHost(forceServer,tempHost)) {
+    return;
+  }
+  userInfo=tempUserInfo;
+  host=tempHost;
+  port=tempPort;
+  serverAuthority=true;
+}

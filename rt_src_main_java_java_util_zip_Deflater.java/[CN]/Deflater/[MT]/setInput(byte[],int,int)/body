@@ -1,17 +1,11 @@
 {
-  if (streamHandle == -1) {
-    throw new IllegalStateException();
+  checkOpen();
+  Arrays.checkOffsetAndCount(buf.length,offset,byteCount);
+  inLength=byteCount;
+  inRead=0;
+  if (inputBuffer == null) {
+    setLevelsImpl(compressLevel,strategy,streamHandle);
   }
-  if (off <= buf.length && nbytes >= 0 && off >= 0 && buf.length - off >= nbytes) {
-    inLength=nbytes;
-    inRead=0;
-    if (inputBuffer == null) {
-      setLevelsImpl(compressLevel,strategy,streamHandle);
-    }
-    inputBuffer=buf;
-    setInputImpl(buf,off,nbytes,streamHandle);
-  }
- else {
-    throw new ArrayIndexOutOfBoundsException();
-  }
+  inputBuffer=buf;
+  setInputImpl(buf,offset,byteCount,streamHandle);
 }

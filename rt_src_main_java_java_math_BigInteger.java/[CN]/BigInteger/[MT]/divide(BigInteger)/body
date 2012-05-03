@@ -1,38 +1,5 @@
 {
-  if (divisor.sign == 0) {
-    throw new ArithmeticException(Messages.getString("math.17"));
-  }
-  int divisorSign=divisor.sign;
-  if (divisor.isOne()) {
-    return ((divisor.sign > 0) ? this : this.negate());
-  }
-  int thisSign=sign;
-  int thisLen=numberLength;
-  int divisorLen=divisor.numberLength;
-  if (thisLen + divisorLen == 2) {
-    long val=(digits[0] & 0xFFFFFFFFL) / (divisor.digits[0] & 0xFFFFFFFFL);
-    if (thisSign != divisorSign) {
-      val=-val;
-    }
-    return valueOf(val);
-  }
-  int cmp=((thisLen != divisorLen) ? ((thisLen > divisorLen) ? 1 : -1) : Elementary.compareArrays(digits,divisor.digits,thisLen));
-  if (cmp == EQUALS) {
-    return ((thisSign == divisorSign) ? ONE : MINUS_ONE);
-  }
-  if (cmp == LESS) {
-    return ZERO;
-  }
-  int resLength=thisLen - divisorLen + 1;
-  int resDigits[]=new int[resLength];
-  int resSign=((thisSign == divisorSign) ? 1 : -1);
-  if (divisorLen == 1) {
-    Division.divideArrayByInt(resDigits,digits,thisLen,divisor.digits[0]);
-  }
- else {
-    Division.divide(resDigits,resLength,digits,thisLen,divisor.digits,divisorLen);
-  }
-  BigInteger result=new BigInteger(resSign,resLength,resDigits);
-  result.cutOffLeadingZeroes();
-  return result;
+  BigInt quotient=new BigInt();
+  BigInt.division(getBigInt(),divisor.getBigInt(),quotient,null);
+  return new BigInteger(quotient);
 }

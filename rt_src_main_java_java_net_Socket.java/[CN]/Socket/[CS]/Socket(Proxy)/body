@@ -1,20 +1,7 @@
 {
-  if (null == proxy || Proxy.Type.HTTP == proxy.type()) {
-    throw new IllegalArgumentException(Messages.getString("luni.73"));
+  if (proxy == null || proxy.type() == Proxy.Type.HTTP) {
+    throw new IllegalArgumentException("Invalid proxy: " + proxy);
   }
-  InetSocketAddress address=(InetSocketAddress)proxy.address();
-  if (null != address) {
-    InetAddress addr=address.getAddress();
-    String host;
-    if (null != addr) {
-      host=addr.getHostAddress();
-    }
- else {
-      host=address.getHostName();
-    }
-    int port=address.getPort();
-    checkConnectPermission(host,port);
-  }
-  impl=factory != null ? factory.createSocketImpl() : new PlainSocketImpl(proxy);
   this.proxy=proxy;
+  this.impl=factory != null ? factory.createSocketImpl() : new PlainSocketImpl(proxy);
 }

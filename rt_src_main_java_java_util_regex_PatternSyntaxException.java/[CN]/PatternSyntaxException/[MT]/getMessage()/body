@@ -1,9 +1,26 @@
 {
-  String filler="";
-  if (index >= 1) {
-    char[] temp=new char[index];
-    Arrays.fill(temp,' ');
-    filler=new String(temp);
+  StringBuilder sb=new StringBuilder();
+  if (desc != null) {
+    sb.append(desc);
   }
-  return desc + ((pattern != null && pattern.length() != 0) ? Messages.getString("regex.07",new Object[]{index,pattern,filler}) : "");
+  if (index >= 0) {
+    if (desc != null) {
+      sb.append(' ');
+    }
+    sb.append("near index ");
+    sb.append(index);
+    sb.append(':');
+  }
+  if (pattern != null) {
+    sb.append('\n');
+    sb.append(pattern);
+    if (index >= 0) {
+      char[] spaces=new char[index];
+      Arrays.fill(spaces,' ');
+      sb.append('\n');
+      sb.append(spaces);
+      sb.append('^');
+    }
+  }
+  return sb.toString();
 }

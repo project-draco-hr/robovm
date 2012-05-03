@@ -1,0 +1,33 @@
+{
+  int stringLength=value.length();
+  int endChar=stringLength;
+  int sign;
+  int startChar;
+  if (value.charAt(0) == '-') {
+    sign=-1;
+    startChar=1;
+    stringLength--;
+  }
+ else {
+    sign=1;
+    startChar=0;
+  }
+  int charsPerInt=Conversion.digitFitInInt[radix];
+  int bigRadixDigitsLength=stringLength / charsPerInt;
+  int topChars=stringLength % charsPerInt;
+  if (topChars != 0) {
+    bigRadixDigitsLength++;
+  }
+  int[] digits=new int[bigRadixDigitsLength];
+  int bigRadix=Conversion.bigRadices[radix - 2];
+  int digitIndex=0;
+  int substrEnd=startChar + ((topChars == 0) ? charsPerInt : topChars);
+  for (int substrStart=startChar; substrStart < endChar; substrStart=substrEnd, substrEnd=substrStart + charsPerInt) {
+    int bigRadixDigit=Integer.parseInt(value.substring(substrStart,substrEnd),radix);
+    int newDigit=multiplyByInt(digits,digits,digitIndex,bigRadix);
+    newDigit+=inplaceAdd(digits,digitIndex,bigRadixDigit);
+    digits[digitIndex++]=newDigit;
+  }
+  int numberLength=digitIndex;
+  bi.setJavaRepresentation(sign,numberLength,digits);
+}

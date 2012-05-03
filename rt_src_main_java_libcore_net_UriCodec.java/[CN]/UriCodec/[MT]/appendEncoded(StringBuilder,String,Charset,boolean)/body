@@ -1,0 +1,31 @@
+{
+  if (s == null) {
+    throw new NullPointerException();
+  }
+  int escapeStart=-1;
+  for (int i=0; i < s.length(); i++) {
+    char c=s.charAt(i);
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')|| isRetained(c)|| (c == '%' && isPartiallyEncoded)) {
+      if (escapeStart != -1) {
+        appendHex(builder,s.substring(escapeStart,i),charset);
+        escapeStart=-1;
+      }
+      if (c == '%' && isPartiallyEncoded) {
+        builder.append(s,i,i + 3);
+        i+=2;
+      }
+ else       if (c == ' ') {
+        builder.append('+');
+      }
+ else {
+        builder.append(c);
+      }
+    }
+ else     if (escapeStart == -1) {
+      escapeStart=i;
+    }
+  }
+  if (escapeStart != -1) {
+    appendHex(builder,s.substring(escapeStart,s.length()),charset);
+  }
+}

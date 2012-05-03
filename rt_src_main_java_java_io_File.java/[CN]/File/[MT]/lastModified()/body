@@ -1,11 +1,8 @@
 {
-  SecurityManager security=System.getSecurityManager();
-  if (security != null) {
-    security.checkRead(path);
+  try {
+    return Libcore.os.stat(path).st_mtime * 1000L;
   }
-  long result=lastModifiedImpl(properPath(true));
-  if (result == -1 || result == 0) {
+ catch (  ErrnoException errnoException) {
     return 0;
   }
-  return result;
 }

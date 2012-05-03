@@ -1,18 +1,16 @@
 {
-  if (formalVar == null) {
-    GenericDeclaration curLayer=declOfVarUser;
-    TypeVariable var=null;
-    do {
-      var=findFormalVar(curLayer,name);
-      if (var != null)       break;
- else {
-        curLayer=nextLayer(curLayer);
-        if (curLayer == null)         break;
-      }
-    }
- while (true);
-    formalVar=(ImplForVariable<D>)var;
-    this.genericDeclaration=formalVar.genericDeclaration;
-    this.bounds=formalVar.bounds;
+  if (formalVar != null) {
+    return;
   }
+  GenericDeclaration curLayer=declOfVarUser;
+  TypeVariable var;
+  while ((var=findFormalVar(curLayer,name)) == null) {
+    curLayer=nextLayer(curLayer);
+    if (curLayer == null) {
+      throw new AssertionError("illegal type variable reference");
+    }
+  }
+  formalVar=(ImplForVariable<D>)var;
+  this.genericDeclaration=formalVar.genericDeclaration;
+  this.bounds=formalVar.bounds;
 }

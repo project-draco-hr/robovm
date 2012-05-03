@@ -1,20 +1,14 @@
 {
   ObjectStreamClass classDesc=readClassDesc();
   if (classDesc == null) {
-    throw new InvalidClassException(Messages.getString("luni.C1"));
+    throw missingClassDescriptor();
   }
-  Integer newHandle=nextHandle();
-  boolean wasExternalizable=(classDesc.getFlags() & SC_EXTERNALIZABLE) > 0;
-  boolean wasSerializable=(classDesc.getFlags() & SC_SERIALIZABLE) > 0;
+  int newHandle=nextHandle();
   Class<?> objectClass=classDesc.forClass();
-  Object result, registeredResult=null;
+  Object result=null;
+  Object registeredResult=null;
   if (objectClass != null) {
-    long constructor=classDesc.getConstructor();
-    if (constructor == ObjectStreamClass.CONSTRUCTOR_IS_NOT_RESOLVED) {
-      constructor=accessor.getMethodID(resolveConstructorClass(objectClass,wasSerializable,wasExternalizable),null,new Class[0]);
-      classDesc.setConstructor(constructor);
-    }
-    result=accessor.newInstance(objectClass,constructor,null);
+    result=classDesc.newInstance(objectClass);
     registerObjectRead(result,newHandle,unshared);
     registeredResult=result;
   }
@@ -24,8 +18,9 @@
   try {
     currentObject=result;
     currentClass=classDesc;
+    boolean wasExternalizable=(classDesc.getFlags() & SC_EXTERNALIZABLE) != 0;
     if (wasExternalizable) {
-      boolean blockData=(classDesc.getFlags() & SC_BLOCK_DATA) > 0;
+      boolean blockData=(classDesc.getFlags() & SC_BLOCK_DATA) != 0;
       if (!blockData) {
         primitiveData=input;
       }
@@ -54,7 +49,7 @@
       try {
         result=methodReadResolve.invoke(result,(Object[])null);
       }
- catch (      IllegalAccessException iae) {
+ catch (      IllegalAccessException ignored) {
       }
 catch (      InvocationTargetException ite) {
         Throwable target=ite.getTargetException();

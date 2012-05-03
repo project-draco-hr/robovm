@@ -1,17 +1,18 @@
 {
   if (hasDD) {
-    in.read(hdrBuf,0,EXTHDR);
-    if (getLong(hdrBuf,0) != EXTSIG) {
-      throw new ZipException(Messages.getString("archive.1F"));
+    Streams.readFully(in,hdrBuf,0,EXTHDR);
+    int sig=Memory.peekInt(hdrBuf,0,ByteOrder.LITTLE_ENDIAN);
+    if (sig != (int)EXTSIG) {
+      throw new ZipException(String.format("unknown format (EXTSIG=%x)",sig));
     }
-    currentEntry.crc=getLong(hdrBuf,EXTCRC);
-    currentEntry.compressedSize=getLong(hdrBuf,EXTSIZ);
-    currentEntry.size=getLong(hdrBuf,EXTLEN);
+    currentEntry.crc=((long)Memory.peekInt(hdrBuf,EXTCRC,ByteOrder.LITTLE_ENDIAN)) & 0xffffffffL;
+    currentEntry.compressedSize=((long)Memory.peekInt(hdrBuf,EXTSIZ,ByteOrder.LITTLE_ENDIAN)) & 0xffffffffL;
+    currentEntry.size=((long)Memory.peekInt(hdrBuf,EXTLEN,ByteOrder.LITTLE_ENDIAN)) & 0xffffffffL;
   }
   if (currentEntry.crc != crc.getValue()) {
-    throw new ZipException(Messages.getString("archive.20"));
+    throw new ZipException("CRC mismatch");
   }
   if (currentEntry.compressedSize != inB || currentEntry.size != out) {
-    throw new ZipException(Messages.getString("archive.21"));
+    throw new ZipException("Size mismatch");
   }
 }

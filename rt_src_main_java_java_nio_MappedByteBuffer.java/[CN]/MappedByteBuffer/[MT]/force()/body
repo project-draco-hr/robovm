@@ -1,6 +1,11 @@
 {
-  if (mapMode == IMemorySystem.MMAP_READ_WRITE) {
-    ((MappedPlatformAddress)address).mmapFlush();
+  if (mapMode == MapMode.READ_WRITE) {
+    try {
+      Libcore.os.msync(block.toInt(),block.getSize(),MS_SYNC);
+    }
+ catch (    ErrnoException errnoException) {
+      throw new AssertionError(errnoException);
+    }
   }
   return this;
 }

@@ -1,0 +1,26 @@
+{
+  if (alias == null) {
+    return;
+  }
+  File file=fileForAlias(alias);
+  if (file == null) {
+    return;
+  }
+  if (isSystem(alias)) {
+    X509Certificate cert=readCertificate(file);
+    if (cert == null) {
+      return;
+    }
+    File deleted=getCertificateFile(deletedDir,cert);
+    if (deleted.exists()) {
+      return;
+    }
+    writeCertificate(deleted,cert);
+    return;
+  }
+  if (isUser(alias)) {
+    new FileOutputStream(file).close();
+    removeUnnecessaryTombstones(alias);
+    return;
+  }
+}

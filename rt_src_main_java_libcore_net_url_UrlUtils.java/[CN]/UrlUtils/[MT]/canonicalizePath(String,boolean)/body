@@ -1,0 +1,41 @@
+{
+  int segmentStart=0;
+  int deletableSegments=0;
+  for (int i=0; i <= path.length(); ) {
+    int nextSegmentStart;
+    if (i == path.length()) {
+      nextSegmentStart=i;
+    }
+ else     if (path.charAt(i) == '/') {
+      nextSegmentStart=i + 1;
+    }
+ else {
+      i++;
+      continue;
+    }
+    if (i == segmentStart + 1 && path.regionMatches(segmentStart,".",0,1)) {
+      path=path.substring(0,segmentStart) + path.substring(nextSegmentStart);
+      i=segmentStart;
+    }
+ else     if (i == segmentStart + 2 && path.regionMatches(segmentStart,"..",0,2)) {
+      if (deletableSegments > 0 || discardRelativePrefix) {
+        deletableSegments--;
+        int prevSegmentStart=path.lastIndexOf('/',segmentStart - 2) + 1;
+        path=path.substring(0,prevSegmentStart) + path.substring(nextSegmentStart);
+        i=segmentStart=prevSegmentStart;
+      }
+ else {
+        i++;
+        segmentStart=i;
+      }
+    }
+ else {
+      if (i > 0) {
+        deletableSegments++;
+      }
+      i++;
+      segmentStart=i;
+    }
+  }
+  return path;
+}

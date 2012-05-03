@@ -1,0 +1,16 @@
+{
+  boolean connectionReused;
+  try {
+    connectionReused=makeSslConnection(true);
+  }
+ catch (  IOException e) {
+    if (e instanceof SSLHandshakeException && e.getCause() instanceof CertificateException) {
+      throw e;
+    }
+    release(false);
+    connectionReused=makeSslConnection(false);
+  }
+  if (!connectionReused) {
+    sslSocket=connection.verifySecureSocketHostname(enclosing.getHostnameVerifier());
+  }
+}

@@ -1,63 +1,63 @@
 {
   ObjectStreamClass classDesc=readClassDesc();
   if (classDesc == null) {
-    throw new InvalidClassException(Messages.getString("luni.C1"));
+    throw missingClassDescriptor();
   }
-  Integer newHandle=nextHandle();
+  int newHandle=nextHandle();
   int size=input.readInt();
   Class<?> arrayClass=classDesc.forClass();
   Class<?> componentType=arrayClass.getComponentType();
   Object result=Array.newInstance(componentType,size);
   registerObjectRead(result,newHandle,unshared);
   if (componentType.isPrimitive()) {
-    if (componentType == Integer.TYPE) {
+    if (componentType == int.class) {
       int[] intArray=(int[])result;
       for (int i=0; i < size; i++) {
         intArray[i]=input.readInt();
       }
     }
- else     if (componentType == Byte.TYPE) {
+ else     if (componentType == byte.class) {
       byte[] byteArray=(byte[])result;
       input.readFully(byteArray,0,size);
     }
- else     if (componentType == Character.TYPE) {
+ else     if (componentType == char.class) {
       char[] charArray=(char[])result;
       for (int i=0; i < size; i++) {
         charArray[i]=input.readChar();
       }
     }
- else     if (componentType == Short.TYPE) {
+ else     if (componentType == short.class) {
       short[] shortArray=(short[])result;
       for (int i=0; i < size; i++) {
         shortArray[i]=input.readShort();
       }
     }
- else     if (componentType == Boolean.TYPE) {
+ else     if (componentType == boolean.class) {
       boolean[] booleanArray=(boolean[])result;
       for (int i=0; i < size; i++) {
         booleanArray[i]=input.readBoolean();
       }
     }
- else     if (componentType == Long.TYPE) {
+ else     if (componentType == long.class) {
       long[] longArray=(long[])result;
       for (int i=0; i < size; i++) {
         longArray[i]=input.readLong();
       }
     }
- else     if (componentType == Float.TYPE) {
+ else     if (componentType == float.class) {
       float[] floatArray=(float[])result;
       for (int i=0; i < size; i++) {
         floatArray[i]=input.readFloat();
       }
     }
- else     if (componentType == Double.TYPE) {
+ else     if (componentType == double.class) {
       double[] doubleArray=(double[])result;
       for (int i=0; i < size; i++) {
         doubleArray[i]=input.readDouble();
       }
     }
  else {
-      throw new ClassNotFoundException(Messages.getString("luni.C2",classDesc.getName()));
+      throw new ClassNotFoundException("Wrong base type in " + classDesc.getName());
     }
   }
  else {

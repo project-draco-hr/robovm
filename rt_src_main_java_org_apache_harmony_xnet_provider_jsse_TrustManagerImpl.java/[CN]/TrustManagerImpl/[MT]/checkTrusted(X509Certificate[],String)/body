@@ -1,0 +1,31 @@
+{
+  if (chain == null || chain.length == 0 || authType == null || authType.length() == 0) {
+    throw new IllegalArgumentException("null or zero-length parameter");
+  }
+  if (err != null) {
+    throw new CertificateException(err);
+  }
+  Set<TrustAnchor> trustAnchors=new HashSet<TrustAnchor>();
+  X509Certificate[] newChain=cleanupCertChainAndFindTrustAnchors(chain,trustAnchors);
+  if (newChain.length == 0) {
+    return;
+  }
+  CertPath certPath=factory.generateCertPath(Arrays.asList(newChain));
+  if (trustAnchors.isEmpty()) {
+    throw new CertificateException(new CertPathValidatorException("Trust anchor for certification path not found.",null,certPath,-1));
+  }
+  try {
+    PKIXParameters params=new PKIXParameters(trustAnchors);
+    params.setRevocationEnabled(false);
+    validator.validate(certPath,params);
+    for (int i=1; i < newChain.length; i++) {
+      trustedCertificateIndex.index(newChain[i]);
+    }
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+    throw new CertificateException(e);
+  }
+catch (  CertPathValidatorException e) {
+    throw new CertificateException(e);
+  }
+}

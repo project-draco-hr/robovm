@@ -1,20 +1,16 @@
 {
-  if (null == src) {
-    throw new NullPointerException(Messages.getString("luni.DB"));
+  if (src == null) {
+    throw new NullPointerException("src == null");
   }
   FileInputStream fis=new FileInputStream(src);
-  if (null == charsetName) {
-    throw new IllegalArgumentException(Messages.getString("luni.DC"));
+  if (charsetName == null) {
+    throw new IllegalArgumentException("charsetName == null");
   }
   try {
     input=new InputStreamReader(fis,charsetName);
   }
  catch (  UnsupportedEncodingException e) {
-    try {
-      fis.close();
-    }
- catch (    IOException ioException) {
-    }
+    IoUtils.closeQuietly(fis);
     throw new IllegalArgumentException(e.getMessage());
   }
   initialization();

@@ -1,3 +1,26 @@
 {
-  q=new PriorityQueue<E>(c);
+  this.lock=new ReentrantLock();
+  this.notEmpty=lock.newCondition();
+  boolean heapify=true;
+  boolean screen=true;
+  if (c instanceof SortedSet<?>) {
+    SortedSet<? extends E> ss=(SortedSet<? extends E>)c;
+    this.comparator=(Comparator<? super E>)ss.comparator();
+    heapify=false;
+  }
+ else   if (c instanceof PriorityBlockingQueue<?>) {
+    PriorityBlockingQueue<? extends E> pq=(PriorityBlockingQueue<? extends E>)c;
+    this.comparator=(Comparator<? super E>)pq.comparator();
+    screen=false;
+    if (pq.getClass() == PriorityBlockingQueue.class)     heapify=false;
+  }
+  Object[] a=c.toArray();
+  int n=a.length;
+  if (a.getClass() != Object[].class)   a=Arrays.copyOf(a,n,Object[].class);
+  if (screen && (n == 1 || this.comparator != null)) {
+    for (int i=0; i < n; ++i)     if (a[i] == null)     throw new NullPointerException();
+  }
+  this.queue=a;
+  this.size=n;
+  if (heapify)   heapify();
 }

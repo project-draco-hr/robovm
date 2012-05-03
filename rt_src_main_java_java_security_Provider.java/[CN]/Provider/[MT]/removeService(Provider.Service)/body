@@ -2,17 +2,13 @@
   if (s == null) {
     throw new NullPointerException();
   }
-  SecurityManager sm=System.getSecurityManager();
-  if (sm != null) {
-    sm.checkSecurityAccess("removeProviderProperty." + name);
-  }
   servicesChanged();
   if (serviceTable != null) {
-    serviceTable.remove(s.type,s.algorithm.toUpperCase());
+    serviceTable.remove(s.type,s.algorithm.toUpperCase(Locale.US));
   }
   if (aliasTable != null && s.aliases != null) {
-    for (Iterator<String> it=s.getAliases(); it.hasNext(); ) {
-      aliasTable.remove(s.type,(it.next()).toUpperCase());
+    for (    String alias : s.getAliases()) {
+      aliasTable.remove(s.type,alias.toUpperCase(Locale.US));
     }
   }
   serviceInfoFromProperties(s);

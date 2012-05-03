@@ -1,18 +1,18 @@
 {
-  if (pos + 4 >= length) {
-    throw new IOException(Messages.getString("security.192"));
+  if (pos + 4 >= chars.length) {
+    throw new IOException("Invalid distinguished name string");
   }
   beg=pos;
   pos++;
   while (true) {
-    if (pos == length || chars[pos] == '+' || chars[pos] == ',' || chars[pos] == ';') {
+    if (pos == chars.length || chars[pos] == '+' || chars[pos] == ',' || chars[pos] == ';') {
       end=pos;
       break;
     }
     if (chars[pos] == ' ') {
       end=pos;
       pos++;
-      for (; pos < length && chars[pos] == ' '; pos++) {
+      for (; pos < chars.length && chars[pos] == ' '; pos++) {
       }
       break;
     }
@@ -23,7 +23,7 @@
   }
   int hexLen=end - beg;
   if (hexLen < 5 || (hexLen & 1) == 0) {
-    throw new IOException(Messages.getString("security.192"));
+    throw new IOException("Invalid distinguished name string");
   }
   encoded=new byte[hexLen / 2];
   for (int i=0, p=beg + 1; i < encoded.length; p+=2, i++) {

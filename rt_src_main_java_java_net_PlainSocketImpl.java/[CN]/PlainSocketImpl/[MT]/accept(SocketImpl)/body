@@ -1,0 +1,22 @@
+{
+  if (usingSocks()) {
+    ((PlainSocketImpl)newImpl).socksBind();
+    ((PlainSocketImpl)newImpl).socksAccept();
+    return;
+  }
+  try {
+    InetSocketAddress peerAddress=new InetSocketAddress();
+    FileDescriptor clientFd=Libcore.os.accept(fd,peerAddress);
+    newImpl.fd.setInt$(clientFd.getInt$());
+    newImpl.address=peerAddress.getAddress();
+    newImpl.port=peerAddress.getPort();
+  }
+ catch (  ErrnoException errnoException) {
+    if (errnoException.errno == EAGAIN || errnoException.errno == EWOULDBLOCK) {
+      throw new SocketTimeoutException(errnoException);
+    }
+    throw errnoException.rethrowAsSocketException();
+  }
+  newImpl.setOption(SocketOptions.SO_TIMEOUT,Integer.valueOf(0));
+  newImpl.localport=IoBridge.getSocketLocalPort(newImpl.fd);
+}

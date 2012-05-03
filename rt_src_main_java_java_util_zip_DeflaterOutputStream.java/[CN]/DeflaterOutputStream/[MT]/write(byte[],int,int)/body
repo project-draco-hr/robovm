@@ -1,15 +1,11 @@
 {
   if (done) {
-    throw new IOException(Messages.getString("archive.26"));
+    throw new IOException("attempt to write after finish");
   }
-  if (off <= buffer.length && nbytes >= 0 && off >= 0 && buffer.length - off >= nbytes) {
-    if (!def.needsInput()) {
-      throw new IOException();
-    }
-    def.setInput(buffer,off,nbytes);
-    deflate();
+  Arrays.checkOffsetAndCount(buffer.length,offset,byteCount);
+  if (!def.needsInput()) {
+    throw new IOException();
   }
- else {
-    throw new ArrayIndexOutOfBoundsException();
-  }
+  def.setInput(buffer,offset,byteCount);
+  deflate();
 }

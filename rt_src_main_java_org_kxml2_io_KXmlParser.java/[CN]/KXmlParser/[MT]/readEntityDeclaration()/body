@@ -1,0 +1,39 @@
+{
+  read(START_ENTITY);
+  boolean generalEntity=true;
+  skip();
+  if (peekCharacter() == '%') {
+    generalEntity=false;
+    position++;
+    skip();
+  }
+  String name=readName();
+  skip();
+  int quote=peekCharacter();
+  String entityValue;
+  if (quote == '"' || quote == '\'') {
+    position++;
+    entityValue=readValue((char)quote,true,false,ValueContext.ENTITY_DECLARATION);
+    position++;
+  }
+ else   if (readExternalId(true,false)) {
+    entityValue="";
+    skip();
+    if (peekCharacter() == NDATA[0]) {
+      read(NDATA);
+      skip();
+      readName();
+    }
+  }
+ else {
+    throw new XmlPullParserException("Expected entity value or external ID",this,null);
+  }
+  if (generalEntity && processDocDecl) {
+    if (documentEntities == null) {
+      documentEntities=new HashMap<String,char[]>();
+    }
+    documentEntities.put(name,entityValue.toCharArray());
+  }
+  skip();
+  read('>');
+}

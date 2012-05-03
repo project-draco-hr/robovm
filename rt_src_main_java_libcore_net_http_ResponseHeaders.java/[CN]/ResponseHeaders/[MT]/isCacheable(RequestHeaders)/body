@@ -1,0 +1,13 @@
+{
+  int responseCode=headers.getResponseCode();
+  if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_NOT_AUTHORITATIVE && responseCode != HttpURLConnection.HTTP_MULT_CHOICE && responseCode != HttpURLConnection.HTTP_MOVED_PERM && responseCode != HttpURLConnection.HTTP_GONE) {
+    return false;
+  }
+  if (request.hasAuthorization() && !isPublic && !mustRevalidate&& sMaxAgeSeconds == -1) {
+    return false;
+  }
+  if (noStore) {
+    return false;
+  }
+  return true;
+}

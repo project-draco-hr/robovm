@@ -1,0 +1,21 @@
+{
+  if (stack.isEmpty()) {
+    return;
+  }
+  Scope context=peek();
+  if (context == Scope.EMPTY_ARRAY) {
+    replaceTop(Scope.NONEMPTY_ARRAY);
+    newline();
+  }
+ else   if (context == Scope.NONEMPTY_ARRAY) {
+    out.append(',');
+    newline();
+  }
+ else   if (context == Scope.DANGLING_KEY) {
+    out.append(indent == null ? ":" : ": ");
+    replaceTop(Scope.NONEMPTY_OBJECT);
+  }
+ else   if (context != Scope.NULL) {
+    throw new JSONException("Nesting problem");
+  }
+}

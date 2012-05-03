@@ -1,0 +1,32 @@
+{
+  check(false);
+  if (indent[depth]) {
+    writer.write("\r\n");
+    for (int i=0; i < depth; i++)     writer.write("  ");
+  }
+  int esp=depth * 3;
+  if (elementStack.length < esp + 3) {
+    String[] hlp=new String[elementStack.length + 12];
+    System.arraycopy(elementStack,0,hlp,0,esp);
+    elementStack=hlp;
+  }
+  String prefix=namespace == null ? "" : getPrefix(namespace,true,true);
+  if (namespace != null && namespace.isEmpty()) {
+    for (int i=nspCounts[depth]; i < nspCounts[depth + 1]; i++) {
+      if (nspStack[i * 2].isEmpty() && !nspStack[i * 2 + 1].isEmpty()) {
+        throw new IllegalStateException("Cannot set default namespace for elements in no namespace");
+      }
+    }
+  }
+  elementStack[esp++]=namespace;
+  elementStack[esp++]=prefix;
+  elementStack[esp]=name;
+  writer.write('<');
+  if (!prefix.isEmpty()) {
+    writer.write(prefix);
+    writer.write(':');
+  }
+  writer.write(name);
+  pending=true;
+  return this;
+}

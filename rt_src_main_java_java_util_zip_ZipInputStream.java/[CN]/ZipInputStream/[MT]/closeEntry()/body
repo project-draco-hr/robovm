@@ -1,7 +1,5 @@
 {
-  if (closed) {
-    throw new IOException(Messages.getString("archive.1E"));
-  }
+  checkClosed();
   if (currentEntry == null) {
     return;
   }
@@ -13,13 +11,13 @@
   }
   Exception failure=null;
   try {
-    skip(Long.MAX_VALUE);
+    Streams.skipAll(this);
   }
  catch (  Exception e) {
     failure=e;
   }
   int inB, out;
-  if (currentEntry.compressionMethod == DEFLATED) {
+  if (currentEntry.compressionMethod == ZipEntry.DEFLATED) {
     inB=inf.getTotalIn();
     out=inf.getTotalOut();
   }

@@ -1,0 +1,24 @@
+{
+  RawHeaders rawRequestHeaders=requestHeaders.getHeaders();
+  while (true) {
+    HttpEngine connect=new ProxyConnectEngine(policy,rawRequestHeaders,connection);
+    connect.sendRequest();
+    connect.readResponse();
+    int responseCode=connect.getResponseCode();
+switch (connect.getResponseCode()) {
+case HTTP_OK:
+      return;
+case HTTP_PROXY_AUTH:
+    rawRequestHeaders=new RawHeaders(rawRequestHeaders);
+  boolean credentialsFound=policy.processAuthHeader(HTTP_PROXY_AUTH,connect.getResponseHeaders(),rawRequestHeaders);
+if (credentialsFound) {
+  continue;
+}
+ else {
+  throw new IOException("Failed to authenticate with proxy");
+}
+default :
+throw new IOException("Unexpected response code for CONNECT: " + responseCode);
+}
+}
+}

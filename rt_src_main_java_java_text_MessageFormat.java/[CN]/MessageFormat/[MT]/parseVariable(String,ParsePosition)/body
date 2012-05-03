@@ -2,7 +2,7 @@
   int length=string.length(), offset=position.getIndex();
   char ch;
   if (offset >= length || ((ch=string.charAt(offset++)) != '}' && ch != ',')) {
-    throw new IllegalArgumentException(Messages.getString("text.15"));
+    throw new IllegalArgumentException("Missing element format");
   }
   position.setIndex(offset);
   if (ch == '}') {
@@ -10,7 +10,7 @@
   }
   int type=match(string,position,false,new String[]{"time","date","number","choice"});
   if (type == -1) {
-    throw new IllegalArgumentException(Messages.getString("text.16"));
+    throw new IllegalArgumentException("Unknown element format");
   }
   StringBuffer buffer=new StringBuffer();
   ch=string.charAt(position.getIndex() - 1);
@@ -42,7 +42,7 @@ break;
 return type == 1 ? DateFormat.getDateInstance(dateStyle,locale) : DateFormat.getTimeInstance(dateStyle,locale);
 case 2:
 if (ch == '}') {
-return NumberFormat.getInstance();
+return NumberFormat.getInstance(locale);
 }
 int numberStyle=match(string,position,true,new String[]{"currency","percent","integer"});
 if (numberStyle == -1) {

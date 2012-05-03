@@ -1,17 +1,13 @@
 {
   String serviceId="META-INF/services/" + factoryId;
   InputStream is=null;
-  ClassLoader cl=SecuritySupport.getContextClassLoader();
+  ClassLoader cl=Thread.currentThread().getContextClassLoader();
   if (cl != null) {
-    is=SecuritySupport.getResourceAsStream(cl,serviceId);
-    if (is == null) {
-      cl=FactoryFinder.class.getClassLoader();
-      is=SecuritySupport.getResourceAsStream(cl,serviceId);
-    }
+    is=cl.getResourceAsStream(serviceId);
   }
- else {
+  if (is == null) {
     cl=FactoryFinder.class.getClassLoader();
-    is=SecuritySupport.getResourceAsStream(cl,serviceId);
+    is=cl.getResourceAsStream(serviceId);
   }
   if (is == null) {
     return null;
@@ -32,11 +28,7 @@
     return null;
   }
  finally {
-    try {
-      rd.close();
-    }
- catch (    IOException exc) {
-    }
+    IoUtils.closeQuietly(rd);
   }
   if (factoryClassName != null && !"".equals(factoryClassName)) {
     if (debug)     debugPrintln("found in resource, value=" + factoryClassName);

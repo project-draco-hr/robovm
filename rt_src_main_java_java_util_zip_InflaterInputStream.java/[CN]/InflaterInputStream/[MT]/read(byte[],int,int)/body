@@ -1,28 +1,18 @@
 {
-  if (closed) {
-    throw new IOException(Messages.getString("archive.1E"));
-  }
-  if (null == buffer) {
-    throw new NullPointerException();
-  }
-  if (off < 0 || nbytes < 0 || off + nbytes > buffer.length) {
-    throw new IndexOutOfBoundsException();
-  }
-  if (nbytes == 0) {
+  checkClosed();
+  Arrays.checkOffsetAndCount(buffer.length,offset,byteCount);
+  if (byteCount == 0) {
     return 0;
   }
   if (eof) {
     return -1;
-  }
-  if (off > buffer.length || nbytes < 0 || off < 0 || buffer.length - off < nbytes) {
-    throw new ArrayIndexOutOfBoundsException();
   }
   do {
     if (inf.needsInput()) {
       fill();
     }
     try {
-      int result=inf.inflate(buffer,off,nbytes);
+      int result=inf.inflate(buffer,offset,byteCount);
       eof=inf.finished();
       if (result > 0) {
         return result;

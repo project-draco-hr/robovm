@@ -1,0 +1,15 @@
+{
+  checkNotNull(e);
+  final Node<E> newNode=new Node<E>(e);
+  restartFromTail:   for (; ; )   for (Node<E> t=tail, p=t, q; ; ) {
+    if ((q=p.next) != null && (q=(p=q).next) != null)     p=(t != (t=tail)) ? t : q;
+ else     if (p.prev == p)     continue restartFromTail;
+ else {
+      newNode.lazySetPrev(p);
+      if (p.casNext(null,newNode)) {
+        if (p != t)         casTail(t,newNode);
+        return;
+      }
+    }
+  }
+}

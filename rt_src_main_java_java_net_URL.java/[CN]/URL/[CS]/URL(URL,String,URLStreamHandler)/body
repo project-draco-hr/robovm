@@ -1,74 +1,35 @@
 {
-  if (handler != null) {
-    SecurityManager sm=System.getSecurityManager();
-    if (sm != null) {
-      sm.checkPermission(specifyStreamHandlerPermission);
-    }
-    strmHandler=handler;
-  }
   if (spec == null) {
     throw new MalformedURLException();
   }
+  if (handler != null) {
+    streamHandler=handler;
+  }
   spec=spec.trim();
-  int index;
-  try {
-    index=spec.indexOf(':');
+  protocol=UrlUtils.getSchemePrefix(spec);
+  int schemeSpecificPartStart=protocol != null ? (protocol.length() + 1) : 0;
+  if (protocol != null && context != null && !protocol.equals(context.protocol)) {
+    context=null;
   }
- catch (  NullPointerException e) {
-    throw new MalformedURLException(e.toString());
-  }
-  int startIPv6Addr=spec.indexOf('[');
-  if (index >= 0) {
-    if ((startIPv6Addr == -1) || (index < startIPv6Addr)) {
-      protocol=spec.substring(0,index);
-      char c=protocol.charAt(0);
-      boolean valid=('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
-      for (int i=1; valid && (i < protocol.length()); i++) {
-        c=protocol.charAt(i);
-        valid=('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9')|| (c == '+')|| (c == '-')|| (c == '.');
-      }
-      if (!valid) {
-        protocol=null;
-        index=-1;
-      }
- else {
-        protocol=Util.toASCIILowerCase(protocol);
-      }
+  if (context != null) {
+    set(context.protocol,context.getHost(),context.getPort(),context.getAuthority(),context.getUserInfo(),context.getPath(),context.getQuery(),context.getRef());
+    if (streamHandler == null) {
+      streamHandler=context.streamHandler;
     }
   }
-  if (protocol != null) {
-    if (context != null && protocol.equals(context.getProtocol())) {
-      String cPath=context.getPath();
-      if (cPath != null && cPath.startsWith("/")) {
-        set(protocol,context.getHost(),context.getPort(),context.getAuthority(),context.getUserInfo(),cPath,context.getQuery(),null);
-      }
-      if (strmHandler == null) {
-        strmHandler=context.strmHandler;
-      }
-    }
+ else   if (protocol == null) {
+    throw new MalformedURLException("Protocol not found: " + spec);
   }
- else {
-    if (context == null) {
-      throw new MalformedURLException(Messages.getString("luni.9B",spec));
-    }
-    set(context.getProtocol(),context.getHost(),context.getPort(),context.getAuthority(),context.getUserInfo(),context.getPath(),context.getQuery(),null);
-    if (strmHandler == null) {
-      strmHandler=context.strmHandler;
-    }
-  }
-  if (strmHandler == null) {
+  if (streamHandler == null) {
     setupStreamHandler();
-    if (strmHandler == null) {
-      throw new MalformedURLException(Messages.getString("luni.9C",protocol));
+    if (streamHandler == null) {
+      throw new MalformedURLException("Unknown protocol: " + protocol);
     }
   }
   try {
-    strmHandler.parseURL(this,spec,++index,spec.length());
+    streamHandler.parseURL(this,spec,schemeSpecificPartStart,spec.length());
   }
  catch (  Exception e) {
     throw new MalformedURLException(e.toString());
-  }
-  if (port < -1) {
-    throw new MalformedURLException(Messages.getString("luni.56",port));
   }
 }

@@ -1,6 +1,56 @@
 {
   if (paragraph == null) {
-    throw new IllegalArgumentException(Messages.getString("text.14"));
+    throw new IllegalArgumentException("paragraph is null");
   }
-  icuBidi=new com.ibm.icu.text.Bidi(paragraph);
+  int begin=paragraph.getBeginIndex();
+  int end=paragraph.getEndIndex();
+  int length=end - begin;
+  char[] text=new char[length + 1];
+  if (length != 0) {
+    text[0]=paragraph.first();
+  }
+ else {
+    paragraph.first();
+  }
+  int flags=DIRECTION_DEFAULT_LEFT_TO_RIGHT;
+  Object direction=paragraph.getAttribute(TextAttribute.RUN_DIRECTION);
+  if (direction != null && direction instanceof Boolean) {
+    if (direction.equals(TextAttribute.RUN_DIRECTION_LTR)) {
+      flags=DIRECTION_LEFT_TO_RIGHT;
+    }
+ else {
+      flags=DIRECTION_RIGHT_TO_LEFT;
+    }
+  }
+  byte[] embeddings=null;
+  for (int textLimit=1, i=1; i < length; textLimit=paragraph.getRunLimit(TextAttribute.BIDI_EMBEDDING) - begin + 1) {
+    Object embedding=paragraph.getAttribute(TextAttribute.BIDI_EMBEDDING);
+    if (embedding != null && embedding instanceof Integer) {
+      int embLevel=((Integer)embedding).intValue();
+      if (embeddings == null) {
+        embeddings=new byte[length];
+      }
+      for (; i < textLimit; i++) {
+        text[i]=paragraph.next();
+        embeddings[i - 1]=(byte)embLevel;
+      }
+    }
+ else {
+      for (; i < textLimit; i++) {
+        text[i]=paragraph.next();
+      }
+    }
+  }
+  Object numericShaper=paragraph.getAttribute(TextAttribute.NUMERIC_SHAPING);
+  if (numericShaper != null && numericShaper instanceof NumericShaper) {
+    ((NumericShaper)numericShaper).shape(text,0,length);
+  }
+  long bidi=0;
+  try {
+    bidi=createUBiDi(text,0,embeddings,0,length,flags);
+    readBidiInfo(bidi);
+  }
+  finally {
+    ubidi_close(bidi);
+  }
 }

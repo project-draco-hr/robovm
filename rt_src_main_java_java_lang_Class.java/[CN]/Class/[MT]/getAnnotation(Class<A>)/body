@@ -1,8 +1,17 @@
 {
-  Annotation[] list=getAnnotations();
-  for (int i=0; i < list.length; i++) {
-    if (annotationClass.isInstance(list[i])) {
-      return (A)list[i];
+  if (annotationType == null) {
+    throw new NullPointerException("annotationType == null");
+  }
+  A annotation=getDeclaredAnnotation(annotationType);
+  if (annotation != null) {
+    return annotation;
+  }
+  if (annotationType.isAnnotationPresent(Inherited.class)) {
+    for (Class<?> sup=getSuperclass(); sup != null; sup=sup.getSuperclass()) {
+      annotation=sup.getDeclaredAnnotation(annotationType);
+      if (annotation != null) {
+        return annotation;
+      }
     }
   }
   return null;

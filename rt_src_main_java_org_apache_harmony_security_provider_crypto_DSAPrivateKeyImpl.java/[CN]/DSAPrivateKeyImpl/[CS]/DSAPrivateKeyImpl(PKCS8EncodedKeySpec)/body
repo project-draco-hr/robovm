@@ -3,26 +3,26 @@
   AlgorithmIdentifier ai;
   ThreeIntegerSequence threeInts=null;
   String alg, algName;
-  byte encoding[]=keySpec.getEncoded();
+  byte[] encoding=keySpec.getEncoded();
   PrivateKeyInfo privateKeyInfo=null;
   try {
     privateKeyInfo=(PrivateKeyInfo)PrivateKeyInfo.ASN1.decode(encoding);
   }
  catch (  IOException e) {
-    throw new InvalidKeySpecException(Messages.getString("security.19A",e));
+    throw new InvalidKeySpecException("Failed to decode keySpec encoding: " + e);
   }
   try {
     x=new BigInteger((byte[])ASN1Integer.getInstance().decode(privateKeyInfo.getPrivateKey()));
   }
  catch (  IOException e) {
-    throw new InvalidKeySpecException(Messages.getString("security.19B",e));
+    throw new InvalidKeySpecException("Failed to decode parameters: " + e);
   }
   ai=privateKeyInfo.getAlgorithmIdentifier();
   try {
     threeInts=(ThreeIntegerSequence)ThreeIntegerSequence.ASN1.decode(ai.getParameters());
   }
  catch (  IOException e) {
-    throw new InvalidKeySpecException(Messages.getString("security.19B",e));
+    throw new InvalidKeySpecException("Failed to decode parameters: " + e);
   }
   p=new BigInteger(threeInts.p);
   q=new BigInteger(threeInts.q);

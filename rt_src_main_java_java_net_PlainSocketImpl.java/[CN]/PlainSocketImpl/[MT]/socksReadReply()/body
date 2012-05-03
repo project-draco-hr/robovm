@@ -1,0 +1,15 @@
+{
+  Socks4Message reply=new Socks4Message();
+  int bytesRead=0;
+  while (bytesRead < Socks4Message.REPLY_LENGTH) {
+    int count=getInputStream().read(reply.getBytes(),bytesRead,Socks4Message.REPLY_LENGTH - bytesRead);
+    if (count == -1) {
+      break;
+    }
+    bytesRead+=count;
+  }
+  if (Socks4Message.REPLY_LENGTH != bytesRead) {
+    throw new SocketException("Malformed reply from SOCKS server");
+  }
+  return reply;
+}

@@ -35,15 +35,15 @@ catch (    BufferUnderflowException e) {
       status=endOfInput ? END : ONGOING;
       return result;
     }
-    CodingErrorAction action=malformAction;
+    CodingErrorAction action=malformedInputAction;
     if (result.isUnmappable()) {
-      action=unmapAction;
+      action=unmappableCharacterAction;
     }
     if (action == CodingErrorAction.REPLACE) {
-      if (out.remaining() < replace.length) {
+      if (out.remaining() < replacementBytes.length) {
         return CoderResult.OVERFLOW;
       }
-      out.put(replace);
+      out.put(replacementBytes);
     }
  else {
       if (action != CodingErrorAction.IGNORE) {

@@ -1,0 +1,27 @@
+{
+  Thread currentThread=Thread.currentThread();
+  if (group == null) {
+    group=currentThread.getThreadGroup();
+  }
+  if (group.isDestroyed()) {
+    throw new IllegalThreadStateException("Group already destroyed");
+  }
+  this.group=group;
+synchronized (Thread.class) {
+    id=++Thread.count;
+  }
+  if (threadName == null) {
+    this.name="Thread-" + id;
+  }
+ else {
+    this.name=threadName;
+  }
+  this.target=runnable;
+  this.stackSize=stackSize;
+  this.priority=currentThread.getPriority();
+  this.contextClassLoader=currentThread.contextClassLoader;
+  if (currentThread.inheritableValues != null) {
+    inheritableValues=new ThreadLocal.Values(currentThread.inheritableValues);
+  }
+  this.group.addThread(this);
+}

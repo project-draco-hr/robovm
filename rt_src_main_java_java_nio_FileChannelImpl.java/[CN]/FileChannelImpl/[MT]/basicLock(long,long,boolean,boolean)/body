@@ -1,0 +1,36 @@
+{
+  int accessMode=(mode & O_ACCMODE);
+  if (accessMode == O_RDONLY) {
+    if (!shared) {
+      throw new NonWritableChannelException();
+    }
+  }
+ else   if (accessMode == O_WRONLY) {
+    if (shared) {
+      throw new NonReadableChannelException();
+    }
+  }
+  if (position < 0 || size < 0) {
+    throw new IllegalArgumentException("position=" + position + " size="+ size);
+  }
+  FileLock pendingLock=new FileLockImpl(this,position,size,shared);
+  addLock(pendingLock);
+  StructFlock flock=new StructFlock();
+  flock.l_type=(short)(shared ? F_RDLCK : F_WRLCK);
+  flock.l_whence=(short)SEEK_SET;
+  flock.l_start=position;
+  flock.l_len=translateLockLength(size);
+  boolean success=false;
+  try {
+    success=(Libcore.os.fcntlFlock(fd,wait ? F_SETLKW64 : F_SETLK64,flock) != -1);
+  }
+ catch (  ErrnoException errnoException) {
+    throw errnoException.rethrowAsIOException();
+  }
+ finally {
+    if (!success) {
+      removeLock(pendingLock);
+    }
+  }
+  return success ? pendingLock : null;
+}

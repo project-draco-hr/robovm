@@ -1,0 +1,18 @@
+{
+  SocketAddress retAddr=null;
+  DatagramPacket receivePacket=new DatagramPacket(EmptyArray.BYTE,0);
+  int oldposition=target.position();
+  int received=0;
+  do {
+    received=IoBridge.recvfrom(false,fd,target,0,receivePacket,isConnected());
+    if (receivePacket != null && receivePacket.getAddress() != null) {
+      if (received > 0) {
+        target.position(oldposition + received);
+      }
+      retAddr=receivePacket.getSocketAddress();
+      break;
+    }
+  }
+ while (loop);
+  return retAddr;
+}

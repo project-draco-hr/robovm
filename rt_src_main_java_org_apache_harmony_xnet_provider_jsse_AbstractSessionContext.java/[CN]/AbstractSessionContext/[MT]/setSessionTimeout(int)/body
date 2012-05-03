@@ -1,0 +1,16 @@
+{
+  if (seconds < 0) {
+    throw new IllegalArgumentException("seconds < 0");
+  }
+  timeout=seconds;
+synchronized (sessions) {
+    Iterator<SSLSession> i=sessions.values().iterator();
+    while (i.hasNext()) {
+      SSLSession session=i.next();
+      if (!session.isValid()) {
+        i.remove();
+        sessionRemoved(session);
+      }
+    }
+  }
+}

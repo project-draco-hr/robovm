@@ -2,19 +2,12 @@
   if (is == null) {
     return null;
   }
-  byte[] clBuf=null;
+  byte[] clBuf;
   try {
-    clBuf=getBytes(is);
+    clBuf=Streams.readFully(is);
   }
  catch (  IOException e) {
     return null;
-  }
- finally {
-    try {
-      is.close();
-    }
- catch (    IOException e) {
-    }
   }
   if (packageName != null) {
     String packageDotName=packageName.replace('/','.');
@@ -24,7 +17,7 @@
     }
  else {
       if (packageObj.isSealed()) {
-        throw new SecurityException(Messages.getString("luni.A1"));
+        throw new SecurityException("Package is sealed");
       }
     }
   }

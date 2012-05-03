@@ -1,0 +1,40 @@
+{
+  if (position >= limit && !fillBuffer(1)) {
+    checkRelaxed("name expected");
+    return "";
+  }
+  int start=position;
+  StringBuilder result=null;
+  char c=buffer[position];
+  if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == ':' || c >= '\u00c0' || relaxed) {
+    position++;
+  }
+ else {
+    checkRelaxed("name expected");
+    return "";
+  }
+  while (true) {
+    if (position >= limit) {
+      if (result == null) {
+        result=new StringBuilder();
+      }
+      result.append(buffer,start,position - start);
+      if (!fillBuffer(1)) {
+        return result.toString();
+      }
+      start=position;
+    }
+    c=buffer[position];
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')|| c == '_' || c == '-' || c == ':' || c == '.' || c >= '\u00b7') {
+      position++;
+      continue;
+    }
+    if (result == null) {
+      return stringPool.get(buffer,start,position - start);
+    }
+ else {
+      result.append(buffer,start,position - start);
+      return result.toString();
+    }
+  }
+}

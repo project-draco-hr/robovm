@@ -1,0 +1,23 @@
+{
+  if (parserClasses == null)   throw new XmlPullParserException("Factory initialization was incomplete - has not tried " + classNamesLocation);
+  if (parserClasses.size() == 0)   throw new XmlPullParserException("No valid parser classes found in " + classNamesLocation);
+  final StringBuilder issues=new StringBuilder();
+  for (int i=0; i < parserClasses.size(); i++) {
+    final Class ppClass=(Class)parserClasses.get(i);
+    try {
+      final XmlPullParser pp=(XmlPullParser)ppClass.newInstance();
+      for (Iterator iter=features.keySet().iterator(); iter.hasNext(); ) {
+        final String key=(String)iter.next();
+        final Boolean value=(Boolean)features.get(key);
+        if (value != null && value.booleanValue()) {
+          pp.setFeature(key,true);
+        }
+      }
+      return pp;
+    }
+ catch (    Exception ex) {
+      issues.append(ppClass.getName() + ": " + ex.toString()+ "; ");
+    }
+  }
+  throw new XmlPullParserException("could not create parser: " + issues);
+}

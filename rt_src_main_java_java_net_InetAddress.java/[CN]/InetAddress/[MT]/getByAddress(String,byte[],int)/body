@@ -1,0 +1,19 @@
+{
+  if (ipAddress == null) {
+    throw new UnknownHostException("ipAddress == null");
+  }
+  if (ipAddress.length == 4) {
+    return new Inet4Address(ipAddress.clone(),hostName);
+  }
+ else   if (ipAddress.length == 16) {
+    if (isIPv4MappedAddress(ipAddress)) {
+      return new Inet4Address(ipv4MappedToIPv4(ipAddress),hostName);
+    }
+ else {
+      return new Inet6Address(ipAddress.clone(),hostName,scopeId);
+    }
+  }
+ else {
+    throw badAddressLength(ipAddress);
+  }
+}

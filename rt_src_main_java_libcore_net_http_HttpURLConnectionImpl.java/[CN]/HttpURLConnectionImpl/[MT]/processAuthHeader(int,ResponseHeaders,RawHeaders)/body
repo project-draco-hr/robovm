@@ -1,0 +1,16 @@
+{
+  if (responseCode != HTTP_PROXY_AUTH && responseCode != HTTP_UNAUTHORIZED) {
+    throw new IllegalArgumentException();
+  }
+  String challenge=responseCode == HTTP_PROXY_AUTH ? response.getProxyAuthenticate() : response.getWwwAuthenticate();
+  if (challenge == null) {
+    throw new IOException("Received authentication challenge is null");
+  }
+  String credentials=getAuthorizationCredentials(challenge);
+  if (credentials == null) {
+    return false;
+  }
+  String fieldName=responseCode == HTTP_PROXY_AUTH ? "Proxy-Authorization" : "Authorization";
+  successorRequestHeaders.set(fieldName,credentials);
+  return true;
+}

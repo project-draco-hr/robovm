@@ -1,0 +1,36 @@
+{
+  boolean hashedOk;
+  int index, next, hash;
+  int result;
+  Object object;
+  index=next=findIndex(key,keys);
+  if (keys[index] != key) {
+    return -1;
+  }
+  result=values[index];
+  int length=keys.length;
+  while (true) {
+    next=(next + 2) % length;
+    object=keys[next];
+    if (object == null) {
+      break;
+    }
+    hash=getModuloHash(object,length);
+    hashedOk=hash > index;
+    if (next < index) {
+      hashedOk=hashedOk || (hash <= next);
+    }
+ else {
+      hashedOk=hashedOk && (hash <= next);
+    }
+    if (!hashedOk) {
+      keys[index]=object;
+      values[index]=values[next];
+      index=next;
+    }
+  }
+  size--;
+  keys[index]=null;
+  values[index]=-1;
+  return result;
+}

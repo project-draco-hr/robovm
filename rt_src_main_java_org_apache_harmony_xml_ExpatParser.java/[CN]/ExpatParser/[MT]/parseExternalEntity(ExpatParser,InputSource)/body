@@ -1,0 +1,39 @@
+{
+  Reader reader=inputSource.getCharacterStream();
+  if (reader != null) {
+    try {
+      entityParser.append("<externalEntity>");
+      entityParser.parseFragment(reader);
+      entityParser.append("</externalEntity>");
+    }
+  finally {
+      IoUtils.closeQuietly(reader);
+    }
+    return;
+  }
+  InputStream in=inputSource.getByteStream();
+  if (in != null) {
+    try {
+      entityParser.append("<externalEntity>".getBytes(entityParser.encoding));
+      entityParser.parseFragment(in);
+      entityParser.append("</externalEntity>".getBytes(entityParser.encoding));
+    }
+  finally {
+      IoUtils.closeQuietly(in);
+    }
+    return;
+  }
+  String systemId=inputSource.getSystemId();
+  if (systemId == null) {
+    throw new ParseException("No input specified.",locator);
+  }
+  in=openUrl(systemId);
+  try {
+    entityParser.append("<externalEntity>".getBytes(entityParser.encoding));
+    entityParser.parseFragment(in);
+    entityParser.append("</externalEntity>".getBytes(entityParser.encoding));
+  }
+  finally {
+    IoUtils.closeQuietly(in);
+  }
+}

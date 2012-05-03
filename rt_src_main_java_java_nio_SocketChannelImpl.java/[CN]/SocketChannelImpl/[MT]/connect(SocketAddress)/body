@@ -1,0 +1,48 @@
+{
+  checkUnconnected();
+  InetSocketAddress inetSocketAddress=validateAddress(socketAddress);
+  InetAddress normalAddr=inetSocketAddress.getAddress();
+  int port=inetSocketAddress.getPort();
+  if (normalAddr.isAnyLocalAddress()) {
+    normalAddr=InetAddress.getLocalHost();
+  }
+  boolean finished=false;
+  try {
+    if (isBlocking()) {
+      begin();
+    }
+    finished=IoBridge.connect(fd,normalAddr,port);
+    isBound=finished;
+  }
+ catch (  IOException e) {
+    if (e instanceof ConnectException && !isBlocking()) {
+      status=SOCKET_STATUS_PENDING;
+    }
+ else {
+      if (isOpen()) {
+        close();
+        finished=true;
+      }
+      throw e;
+    }
+  }
+ finally {
+    if (isBlocking()) {
+      end(finished);
+    }
+  }
+  initLocalAddressAndPort();
+  connectAddress=inetSocketAddress;
+  if (socket != null) {
+    socket.socketImpl().initRemoteAddressAndPort(connectAddress.getAddress(),connectAddress.getPort());
+  }
+synchronized (this) {
+    if (isBlocking()) {
+      status=(finished ? SOCKET_STATUS_CONNECTED : SOCKET_STATUS_UNCONNECTED);
+    }
+ else {
+      status=SOCKET_STATUS_PENDING;
+    }
+  }
+  return finished;
+}

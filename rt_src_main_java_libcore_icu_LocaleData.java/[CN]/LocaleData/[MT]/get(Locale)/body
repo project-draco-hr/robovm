@@ -1,0 +1,21 @@
+{
+  if (locale == null) {
+    locale=Locale.getDefault();
+  }
+  String localeName=locale.toString();
+synchronized (localeDataCache) {
+    LocaleData localeData=localeDataCache.get(localeName);
+    if (localeData != null) {
+      return localeData;
+    }
+  }
+  LocaleData newLocaleData=makeLocaleData(locale);
+synchronized (localeDataCache) {
+    LocaleData localeData=localeDataCache.get(localeName);
+    if (localeData != null) {
+      return localeData;
+    }
+    localeDataCache.put(localeName,newLocaleData);
+    return newLocaleData;
+  }
+}

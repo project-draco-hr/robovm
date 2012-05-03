@@ -1,28 +1,28 @@
 {
   int ch;
-  for (int i=1; i < pemBegin.length; i++) {
-    if (pemBegin[i] != (ch=inStream.read())) {
+  for (int i=1; i < PEM_BEGIN.length; ++i) {
+    if (PEM_BEGIN[i] != (ch=inStream.read())) {
       throw new IOException("Incorrect PEM encoding: '-----BEGIN" + ((boundary_suffix == null) ? "" : new String(boundary_suffix)) + "' is expected as opening delimiter boundary.");
     }
   }
   if (boundary_suffix == null) {
     while ((ch=inStream.read()) != '\n') {
       if (ch == -1) {
-        throw new IOException(Messages.getString("security.156"));
+        throw new IOException("Incorrect PEM encoding: EOF before content");
       }
     }
   }
  else {
     for (int i=0; i < boundary_suffix.length; i++) {
       if (boundary_suffix[i] != inStream.read()) {
-        throw new IOException(Messages.getString("security.15B",new String(boundary_suffix)));
+        throw new IOException("Incorrect PEM encoding: '-----BEGIN" + new String(boundary_suffix) + "' is expected as opening delimiter boundary.");
       }
     }
     if ((ch=inStream.read()) == '\r') {
       ch=inStream.read();
     }
     if (ch != '\n') {
-      throw new IOException(Messages.getString("security.15B2"));
+      throw new IOException("Incorrect PEM encoding: newline expected after " + "opening delimiter boundary");
     }
   }
   int size=1024;
@@ -30,7 +30,7 @@
   int index=0;
   while ((ch=inStream.read()) != '-') {
     if (ch == -1) {
-      throw new IOException(Messages.getString("security.157"));
+      throw new IOException("Incorrect Base64 encoding: EOF without closing delimiter");
     }
     buff[index++]=(byte)ch;
     if (index == size) {
@@ -41,11 +41,11 @@
     }
   }
   if (buff[index - 1] != '\n') {
-    throw new IOException(Messages.getString("security.158"));
+    throw new IOException("Incorrect Base64 encoding: newline expected before " + "closing boundary delimiter");
   }
-  for (int i=1; i < pemClose.length; i++) {
-    if (pemClose[i] != inStream.read()) {
-      throw new IOException(Messages.getString("security.15B1",((boundary_suffix == null) ? "" : new String(boundary_suffix))));
+  for (int i=1; i < PEM_END.length; ++i) {
+    if (PEM_END[i] != inStream.read()) {
+      throw badEnd(boundary_suffix);
     }
   }
   if (boundary_suffix == null) {
@@ -55,7 +55,7 @@
  else {
     for (int i=0; i < boundary_suffix.length; i++) {
       if (boundary_suffix[i] != inStream.read()) {
-        throw new IOException(Messages.getString("security.15B1",new String(boundary_suffix)));
+        throw badEnd(boundary_suffix);
       }
     }
   }
@@ -66,7 +66,7 @@
   inStream.reset();
   buff=Base64.decode(buff,index);
   if (buff == null) {
-    throw new IOException(Messages.getString("security.159"));
+    throw new IOException("Incorrect Base64 encoding");
   }
   return buff;
 }

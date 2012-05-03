@@ -4,15 +4,15 @@ synchronized (CRL_CACHE) {
     byte[] buff=readBytes(inStream,CRL_CACHE_SEED_LENGTH);
     inStream.reset();
     if (buff == null) {
-      throw new CRLException(Messages.getString("security.152"));
+      throw new CRLException("InputStream doesn't contain enough data");
     }
     long hash=CRL_CACHE.getHash(buff);
     if (CRL_CACHE.contains(hash)) {
       byte[] encoding=new byte[BerInputStream.getLength(buff)];
       if (encoding.length < CRL_CACHE_SEED_LENGTH) {
-        throw new CRLException(Messages.getString("security.15B4"));
+        throw new CRLException("Bad CRL encoding");
       }
-      inStream.read(encoding);
+      Streams.readFully(inStream,encoding);
       CRL res=(CRL)CRL_CACHE.get(hash,encoding);
       if (res != null) {
         return res;

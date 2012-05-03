@@ -1,0 +1,14 @@
+{
+  if (listeners != null && !listeners.isEmpty()) {
+    HandshakeCompletedEvent event=new HandshakeCompletedEvent(this,sslSession);
+    for (    HandshakeCompletedListener listener : listeners) {
+      try {
+        listener.handshakeCompleted(event);
+      }
+ catch (      RuntimeException e) {
+        Thread thread=Thread.currentThread();
+        thread.getUncaughtExceptionHandler().uncaughtException(thread,e);
+      }
+    }
+  }
+}

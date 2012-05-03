@@ -1,28 +1,8 @@
 {
-  if (field < 0 || field >= FIELD_COUNT) {
-    throw new IllegalArgumentException();
-  }
-  if (ALL_STYLES == style) {
-    if (!lenient) {
-      throw new IllegalArgumentException();
-    }
+  if (style == ALL_STYLES) {
     style=SHORT;
   }
-  if (SHORT != style && LONG != style) {
-    throw new IllegalArgumentException();
-  }
-  DateFormatSymbols symbol=new DateFormatSymbols(locale);
-  int fid=get(field);
-switch (field) {
-case MONTH:
-    return (LONG == style ? symbol.getMonths()[fid] : symbol.getShortMonths()[fid]);
-case DAY_OF_WEEK:
-  return (LONG == style ? symbol.getWeekdays()[fid] : symbol.getShortWeekdays()[fid]);
-case AM_PM:
-return symbol.getAmPmStrings()[fid];
-case ERA:
-return symbol.getEras()[fid];
-default :
-return null;
-}
+  String[] array=getDisplayNameArray(field,style,locale);
+  int value=get(field);
+  return (array != null) ? array[value] : null;
 }

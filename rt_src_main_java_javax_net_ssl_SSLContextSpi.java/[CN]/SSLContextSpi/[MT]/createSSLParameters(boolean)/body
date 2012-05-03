@@ -1,0 +1,24 @@
+{
+  try {
+    SSLSocket s=(SSLSocket)engineGetSocketFactory().createSocket();
+    javax.net.ssl.SSLParameters p=new javax.net.ssl.SSLParameters();
+    String[] cipherSuites;
+    String[] protocols;
+    if (supported) {
+      cipherSuites=s.getSupportedCipherSuites();
+      protocols=s.getSupportedProtocols();
+    }
+ else {
+      cipherSuites=s.getEnabledCipherSuites();
+      protocols=s.getEnabledProtocols();
+    }
+    p.setCipherSuites(cipherSuites);
+    p.setProtocols(protocols);
+    p.setNeedClientAuth(s.getNeedClientAuth());
+    p.setWantClientAuth(s.getWantClientAuth());
+    return p;
+  }
+ catch (  IOException e) {
+    throw new UnsupportedOperationException("Could not access supported SSL parameters");
+  }
+}

@@ -1,0 +1,76 @@
+{
+  this.pp=pp;
+  final boolean namespaceAware=pp.getFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES);
+  try {
+    if (pp.getEventType() != XmlPullParser.START_TAG) {
+      throw new SAXException("start tag must be read before skiping subtree" + pp.getPositionDescription());
+    }
+    final int[] holderForStartAndLength=new int[2];
+    final StringBuilder rawName=new StringBuilder(16);
+    String prefix=null;
+    String name=null;
+    int level=pp.getDepth() - 1;
+    int type=XmlPullParser.START_TAG;
+    LOOP:     do {
+switch (type) {
+case XmlPullParser.START_TAG:
+        if (namespaceAware) {
+          final int depth=pp.getDepth() - 1;
+          final int countPrev=(level > depth) ? pp.getNamespaceCount(depth) : 0;
+          final int count=pp.getNamespaceCount(depth + 1);
+          for (int i=countPrev; i < count; i++) {
+            contentHandler.startPrefixMapping(pp.getNamespacePrefix(i),pp.getNamespaceUri(i));
+          }
+          name=pp.getName();
+          prefix=pp.getPrefix();
+          if (prefix != null) {
+            rawName.setLength(0);
+            rawName.append(prefix);
+            rawName.append(':');
+            rawName.append(name);
+          }
+          startElement(pp.getNamespace(),name,prefix == null ? name : rawName.toString());
+        }
+ else {
+          startElement(pp.getNamespace(),pp.getName(),pp.getName());
+        }
+      break;
+case XmlPullParser.TEXT:
+    final char[] chars=pp.getTextCharacters(holderForStartAndLength);
+  contentHandler.characters(chars,holderForStartAndLength[0],holderForStartAndLength[1]);
+break;
+case XmlPullParser.END_TAG:
+if (namespaceAware) {
+name=pp.getName();
+prefix=pp.getPrefix();
+if (prefix != null) {
+  rawName.setLength(0);
+  rawName.append(prefix);
+  rawName.append(':');
+  rawName.append(name);
+}
+contentHandler.endElement(pp.getNamespace(),name,prefix != null ? name : rawName.toString());
+final int depth=pp.getDepth();
+final int countPrev=(level > depth) ? pp.getNamespaceCount(pp.getDepth()) : 0;
+int count=pp.getNamespaceCount(pp.getDepth() - 1);
+for (int i=count - 1; i >= countPrev; i--) {
+  contentHandler.endPrefixMapping(pp.getNamespacePrefix(i));
+}
+}
+ else {
+contentHandler.endElement(pp.getNamespace(),pp.getName(),pp.getName());
+}
+break;
+case XmlPullParser.END_DOCUMENT:
+break LOOP;
+}
+type=pp.next();
+}
+ while (pp.getDepth() > level);
+}
+ catch (XmlPullParserException ex) {
+final SAXParseException saxException=new SAXParseException("parsing error: " + ex,this,ex);
+ex.printStackTrace();
+errorHandler.fatalError(saxException);
+}
+}

@@ -1,0 +1,26 @@
+{
+  boolean leave=false;
+  do {
+    int type=parser.getEventType();
+switch (type) {
+case XmlPullParser.START_TAG:
+{
+        Element child=createElement(parser.getNamespace(),parser.getName());
+        addChild(ELEMENT,child);
+        child.parse(parser);
+        break;
+      }
+case XmlPullParser.END_DOCUMENT:
+case XmlPullParser.END_TAG:
+    leave=true;
+  break;
+default :
+if (parser.getText() != null) addChild(type == XmlPullParser.ENTITY_REF ? TEXT : type,parser.getText());
+ else if (type == XmlPullParser.ENTITY_REF && parser.getName() != null) {
+  addChild(ENTITY_REF,parser.getName());
+}
+parser.nextToken();
+}
+}
+ while (!leave);
+}

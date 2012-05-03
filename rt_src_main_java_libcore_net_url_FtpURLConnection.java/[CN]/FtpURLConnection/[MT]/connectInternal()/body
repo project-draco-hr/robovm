@@ -1,0 +1,47 @@
+{
+  int port=url.getPort();
+  int connectTimeout=getConnectTimeout();
+  if (port <= 0) {
+    port=FTP_PORT;
+  }
+  if (currentProxy == null || Proxy.Type.HTTP == currentProxy.type()) {
+    controlSocket=new Socket();
+  }
+ else {
+    controlSocket=new Socket(currentProxy);
+  }
+  InetSocketAddress addr=new InetSocketAddress(hostName,port);
+  controlSocket.connect(addr,connectTimeout);
+  connected=true;
+  ctrlOutput=controlSocket.getOutputStream();
+  ctrlInput=controlSocket.getInputStream();
+  login();
+  setType();
+  if (!getDoInput()) {
+    cd();
+  }
+  try {
+    acceptSocket=new ServerSocket(0);
+    dataPort=acceptSocket.getLocalPort();
+    port();
+    if (connectTimeout == 0) {
+      connectTimeout=3000;
+    }
+    acceptSocket.setSoTimeout(getConnectTimeout());
+    if (getDoInput()) {
+      getFile();
+    }
+ else {
+      sendFile();
+    }
+    dataSocket=acceptSocket.accept();
+    dataSocket.setSoTimeout(getReadTimeout());
+    acceptSocket.close();
+  }
+ catch (  InterruptedIOException e) {
+    throw new IOException("Could not establish data connection");
+  }
+  if (getDoInput()) {
+    inputStream=new FtpURLInputStream(new BufferedInputStream(dataSocket.getInputStream()),controlSocket);
+  }
+}

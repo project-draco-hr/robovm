@@ -1,34 +1,40 @@
 {
-  if (transformation == null || "".equals(transformation)) {
-    throw new NoSuchAlgorithmException(Messages.getString("crypto.17",transformation));
+  if (transformation == null || transformation.isEmpty()) {
+    throw invalidTransformation(transformation);
   }
   String[] transf=checkTransformation(transformation);
   boolean needSetPadding=false;
   boolean needSetMode=false;
+  Object engineSpi=null;
+  Provider engineProvider=provider;
   if (transf[1] == null && transf[2] == null) {
     if (provider == null) {
-      engine.getInstance(transf[0],null);
+      Engine.SpiAndProvider sap=ENGINE.getInstance(transf[0],null);
+      engineSpi=sap.spi;
+      engineProvider=sap.provider;
     }
  else {
-      engine.getInstance(transf[0],provider,null);
+      engineSpi=ENGINE.getInstance(transf[0],provider,null);
     }
   }
  else {
-    String[] searhOrder={transf[0] + "/" + transf[1]+ "/"+ transf[2],transf[0] + "/" + transf[1],transf[0] + "//" + transf[2],transf[0]};
+    String[] searchOrder={transf[0] + "/" + transf[1]+ "/"+ transf[2],transf[0] + "/" + transf[1],transf[0] + "//" + transf[2],transf[0]};
     int i;
-    for (i=0; i < searhOrder.length; i++) {
+    for (i=0; i < searchOrder.length; i++) {
       try {
         if (provider == null) {
-          engine.getInstance(searhOrder[i],null);
+          Engine.SpiAndProvider sap=ENGINE.getInstance(searchOrder[i],null);
+          engineSpi=sap.spi;
+          engineProvider=sap.provider;
         }
  else {
-          engine.getInstance(searhOrder[i],provider,null);
+          engineSpi=ENGINE.getInstance(searchOrder[i],provider,null);
         }
         break;
       }
  catch (      NoSuchAlgorithmException e) {
-        if (i == searhOrder.length - 1) {
-          throw new NoSuchAlgorithmException(transformation);
+        if (i == searchOrder.length - 1) {
+          throw new NoSuchAlgorithmException(transformation,e);
         }
       }
     }
@@ -44,14 +50,14 @@ needSetPadding=true;
 needSetMode=true;
 }
 }
-CipherSpi cspi;
-try {
-cspi=(CipherSpi)engine.spi;
+if (engineSpi == null || engineProvider == null) {
+throw new NoSuchAlgorithmException(transformation);
 }
- catch (ClassCastException e) {
-throw new NoSuchAlgorithmException(e);
+if (!(engineSpi instanceof CipherSpi)) {
+throw new NoSuchAlgorithmException(engineSpi.getClass().getName());
 }
-Cipher c=new Cipher(cspi,engine.provider,transformation);
+CipherSpi cspi=(CipherSpi)engineSpi;
+Cipher c=new Cipher(cspi,engineProvider,transformation);
 if (needSetMode) {
 c.spiImpl.engineSetMode(transf[1]);
 }

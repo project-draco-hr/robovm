@@ -1,0 +1,16 @@
+{
+  if (maxAgeSeconds != -1) {
+    return TimeUnit.SECONDS.toMillis(maxAgeSeconds);
+  }
+ else   if (expires != null) {
+    long servedMillis=servedDate != null ? servedDate.getTime() : receivedResponseMillis;
+    long delta=expires.getTime() - servedMillis;
+    return delta > 0 ? delta : 0;
+  }
+ else   if (lastModified != null && uri.getRawQuery() == null) {
+    long servedMillis=servedDate != null ? servedDate.getTime() : sentRequestMillis;
+    long delta=servedMillis - lastModified.getTime();
+    return delta > 0 ? (delta / 10) : 0;
+  }
+  return 0;
+}

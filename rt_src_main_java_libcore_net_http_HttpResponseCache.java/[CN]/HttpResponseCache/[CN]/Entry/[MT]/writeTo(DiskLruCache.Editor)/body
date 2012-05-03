@@ -1,0 +1,22 @@
+{
+  OutputStream out=editor.newOutputStream(0);
+  Writer writer=new BufferedWriter(new OutputStreamWriter(out,Charsets.UTF_8));
+  writer.write(uri + '\n');
+  writer.write(requestMethod + '\n');
+  writer.write(Integer.toString(varyHeaders.length()) + '\n');
+  for (int i=0; i < varyHeaders.length(); i++) {
+    writer.write(varyHeaders.getFieldName(i) + ": " + varyHeaders.getValue(i)+ '\n');
+  }
+  writer.write(responseHeaders.getStatusLine() + '\n');
+  writer.write(Integer.toString(responseHeaders.length()) + '\n');
+  for (int i=0; i < responseHeaders.length(); i++) {
+    writer.write(responseHeaders.getFieldName(i) + ": " + responseHeaders.getValue(i)+ '\n');
+  }
+  if (isHttps()) {
+    writer.write('\n');
+    writer.write(cipherSuite + '\n');
+    writeCertArray(writer,peerCertificates);
+    writeCertArray(writer,localCertificates);
+  }
+  writer.close();
+}

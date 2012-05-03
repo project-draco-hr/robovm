@@ -1,0 +1,35 @@
+{
+  if (qualifiedName == null) {
+    throw new DOMException(DOMException.NAMESPACE_ERR,qualifiedName);
+  }
+  String prefix=null;
+  int p=qualifiedName.lastIndexOf(":");
+  if (p != -1) {
+    prefix=validatePrefix(qualifiedName.substring(0,p),true,namespaceURI);
+    qualifiedName=qualifiedName.substring(p + 1);
+  }
+  if (!DocumentImpl.isXMLIdentifier(qualifiedName)) {
+    throw new DOMException(DOMException.INVALID_CHARACTER_ERR,qualifiedName);
+  }
+switch (node.getNodeType()) {
+case ATTRIBUTE_NODE:
+    if ("xmlns".equals(qualifiedName) && !"http://www.w3.org/2000/xmlns/".equals(namespaceURI)) {
+      throw new DOMException(DOMException.NAMESPACE_ERR,qualifiedName);
+    }
+  AttrImpl attr=(AttrImpl)node;
+attr.namespaceAware=true;
+attr.namespaceURI=namespaceURI;
+attr.prefix=prefix;
+attr.localName=qualifiedName;
+break;
+case ELEMENT_NODE:
+ElementImpl element=(ElementImpl)node;
+element.namespaceAware=true;
+element.namespaceURI=namespaceURI;
+element.prefix=prefix;
+element.localName=qualifiedName;
+break;
+default :
+throw new DOMException(DOMException.NOT_SUPPORTED_ERR,"Cannot rename nodes of type " + node.getNodeType());
+}
+}

@@ -1,0 +1,25 @@
+{
+  try {
+    UriCodec.validateSimple(host,"-.");
+  }
+ catch (  URISyntaxException e) {
+    return false;
+  }
+  String lastLabel=null;
+  for (  String token : host.split("\\.")) {
+    lastLabel=token;
+    if (lastLabel.startsWith("-") || lastLabel.endsWith("-")) {
+      return false;
+    }
+  }
+  if (lastLabel == null) {
+    return false;
+  }
+  if (!lastLabel.equals(host)) {
+    char ch=lastLabel.charAt(0);
+    if (ch >= '0' && ch <= '9') {
+      return false;
+    }
+  }
+  return true;
+}

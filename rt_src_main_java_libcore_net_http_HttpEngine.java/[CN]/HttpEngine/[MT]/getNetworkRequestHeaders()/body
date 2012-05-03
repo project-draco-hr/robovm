@@ -1,0 +1,15 @@
+{
+  requestHeaders.getHeaders().setStatusLine(getRequestLine());
+  int fixedContentLength=policy.getFixedContentLength();
+  if (fixedContentLength != -1) {
+    requestHeaders.setContentLength(fixedContentLength);
+  }
+ else   if (sendChunked) {
+    requestHeaders.setChunked();
+  }
+ else   if (requestBodyOut instanceof RetryableOutputStream) {
+    int contentLength=((RetryableOutputStream)requestBodyOut).contentLength();
+    requestHeaders.setContentLength(contentLength);
+  }
+  return requestHeaders.getHeaders();
+}

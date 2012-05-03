@@ -1,0 +1,26 @@
+{
+  NodeList children=selectNodeList(node,"node");
+  NodeList entries=selectNodeList(node,"map/entry");
+  int childNumber=children.getLength();
+  Preferences[] prefChildren=new Preferences[childNumber];
+  int entryNumber=entries.getLength();
+synchronized (((AbstractPreferences)prefs).lock) {
+    if (((AbstractPreferences)prefs).isRemoved()) {
+      return;
+    }
+    for (int i=0; i < entryNumber; i++) {
+      Element entry=(Element)entries.item(i);
+      String key=entry.getAttribute("key");
+      String value=entry.getAttribute("value");
+      prefs.put(key,value);
+    }
+    for (int i=0; i < childNumber; i++) {
+      Element child=(Element)children.item(i);
+      String name=child.getAttribute("name");
+      prefChildren[i]=prefs.node(name);
+    }
+  }
+  for (int i=0; i < childNumber; i++) {
+    loadNode(prefChildren[i],(Element)children.item(i));
+  }
+}

@@ -1,15 +1,12 @@
 {
   if (uri == null || requestHeaders == null) {
-    throw new IllegalArgumentException(Msg.getString("KB004"));
+    throw new IllegalArgumentException();
   }
-  List<HttpCookie> cookies=store.get(uri);
-  for (int i=0; i < cookies.size(); i++) {
-    HttpCookie cookie=cookies.get(i);
-    String uriPath=uri.getPath();
-    String cookiePath=cookie.getPath();
-    if (cookiePath == null || uriPath.length() == 0 || !uriPath.startsWith(cookiePath)) {
-      cookies.remove(i);
+  List<HttpCookie> result=new ArrayList<HttpCookie>();
+  for (  HttpCookie cookie : store.get(uri)) {
+    if (HttpCookie.pathMatches(cookie,uri) && HttpCookie.secureMatches(cookie,uri) && HttpCookie.portMatches(cookie,uri)) {
+      result.add(cookie);
     }
   }
-  return getCookieMap(cookies,requestHeaders);
+  return cookiesToHeaders(result);
 }

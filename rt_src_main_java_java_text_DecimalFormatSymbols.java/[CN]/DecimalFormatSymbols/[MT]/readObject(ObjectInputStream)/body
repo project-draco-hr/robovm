@@ -1,6 +1,6 @@
 {
   ObjectInputStream.GetField fields=stream.readFields();
-  patternChars=new char[10];
+  final int serialVersionOnStream=fields.get("serialVersionOnStream",0);
   currencySymbol=(String)fields.get("currencySymbol","");
   setDecimalSeparator(fields.get("decimalSeparator",'.'));
   setDigit(fields.get("digit",'#'));
@@ -14,17 +14,17 @@
   setPerMill(fields.get("perMill",'\u2030'));
   setZeroDigit(fields.get("zeroDigit",'0'));
   locale=(Locale)fields.get("locale",null);
-  int serialVersionOnStream=fields.get("serialVersionOnStream",0);
   if (serialVersionOnStream == 0) {
     setMonetaryDecimalSeparator(getDecimalSeparator());
-    setExponential('E');
   }
  else {
     setMonetaryDecimalSeparator(fields.get("monetarySeparator",'.'));
-    setExponential(fields.get("exponential",'E'));
   }
-  if (serialVersionOnStream < 3) {
-    setExponentSeparator(String.valueOf(getExponential()));
+  if (serialVersionOnStream == 0) {
+    exponentSeparator="E";
+  }
+ else   if (serialVersionOnStream < 3) {
+    setExponentSeparator(String.valueOf(fields.get("exponential",'E')));
   }
  else {
     setExponentSeparator((String)fields.get("exponentialSeparator","E"));

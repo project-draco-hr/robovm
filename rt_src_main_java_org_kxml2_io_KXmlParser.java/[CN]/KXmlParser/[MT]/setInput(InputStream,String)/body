@@ -1,0 +1,107 @@
+{
+  position=0;
+  limit=0;
+  boolean detectCharset=(charset == null);
+  if (is == null) {
+    throw new IllegalArgumentException();
+  }
+  try {
+    if (detectCharset) {
+      int firstFourBytes=0;
+      while (limit < 4) {
+        int i=is.read();
+        if (i == -1) {
+          break;
+        }
+        firstFourBytes=(firstFourBytes << 8) | i;
+        buffer[limit++]=(char)i;
+      }
+      if (limit == 4) {
+switch (firstFourBytes) {
+case 0x00000FEFF:
+          charset="UTF-32BE";
+        limit=0;
+      break;
+case 0x0FFFE0000:
+    charset="UTF-32LE";
+  limit=0;
+break;
+case 0x0000003c:
+charset="UTF-32BE";
+buffer[0]='<';
+limit=1;
+break;
+case 0x03c000000:
+charset="UTF-32LE";
+buffer[0]='<';
+limit=1;
+break;
+case 0x0003c003f:
+charset="UTF-16BE";
+buffer[0]='<';
+buffer[1]='?';
+limit=2;
+break;
+case 0x03c003f00:
+charset="UTF-16LE";
+buffer[0]='<';
+buffer[1]='?';
+limit=2;
+break;
+case 0x03c3f786d:
+while (true) {
+int i=is.read();
+if (i == -1) {
+break;
+}
+buffer[limit++]=(char)i;
+if (i == '>') {
+String s=new String(buffer,0,limit);
+int i0=s.indexOf("encoding");
+if (i0 != -1) {
+while (s.charAt(i0) != '"' && s.charAt(i0) != '\'') {
+i0++;
+}
+char deli=s.charAt(i0++);
+int i1=s.indexOf(deli,i0);
+charset=s.substring(i0,i1);
+}
+break;
+}
+}
+break;
+default :
+if ((firstFourBytes & 0x0ffff0000) == 0x0feff0000) {
+charset="UTF-16BE";
+buffer[0]=(char)((buffer[2] << 8) | buffer[3]);
+limit=1;
+}
+ else if ((firstFourBytes & 0x0ffff0000) == 0x0fffe0000) {
+charset="UTF-16LE";
+buffer[0]=(char)((buffer[3] << 8) | buffer[2]);
+limit=1;
+}
+ else if ((firstFourBytes & 0x0ffffff00) == 0x0efbbbf00) {
+charset="UTF-8";
+buffer[0]=buffer[3];
+limit=1;
+}
+}
+}
+}
+if (charset == null) {
+charset="UTF-8";
+}
+int savedLimit=limit;
+setInput(new InputStreamReader(is,charset));
+encoding=charset;
+limit=savedLimit;
+if (!detectCharset && peekCharacter() == 0xfeff) {
+limit--;
+System.arraycopy(buffer,1,buffer,0,limit);
+}
+}
+ catch (Exception e) {
+throw new XmlPullParserException("Invalid stream or encoding: " + e,this,e);
+}
+}

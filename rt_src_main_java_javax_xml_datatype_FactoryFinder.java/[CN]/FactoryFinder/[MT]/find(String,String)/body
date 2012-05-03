@@ -1,17 +1,12 @@
 {
   ClassLoader classLoader=findClassLoader();
-  try {
-    String systemProp=SecuritySupport.getSystemProperty(factoryId);
-    if (systemProp != null && systemProp.length() > 0) {
-      if (debug)       debugPrintln("found " + systemProp + " in the system property "+ factoryId);
-      return newInstance(systemProp,classLoader);
-    }
-  }
- catch (  SecurityException se) {
-    ;
+  String systemProp=System.getProperty(factoryId);
+  if (systemProp != null && systemProp.length() > 0) {
+    if (debug)     debugPrintln("found " + systemProp + " in the system property "+ factoryId);
+    return newInstance(systemProp,classLoader);
   }
   try {
-    String javah=SecuritySupport.getSystemProperty("java.home");
+    String javah=System.getProperty("java.home");
     String configFile=javah + File.separator + "lib"+ File.separator+ "jaxp.properties";
     String factoryClassName=null;
     if (firstTime) {
@@ -19,9 +14,9 @@ synchronized (cacheProps) {
         if (firstTime) {
           File f=new File(configFile);
           firstTime=false;
-          if (SecuritySupport.doesFileExist(f)) {
+          if (f.exists()) {
             if (debug)             debugPrintln("Read properties file " + f);
-            cacheProps.load(SecuritySupport.getFileInputStream(f));
+            cacheProps.load(new FileInputStream(f));
           }
         }
       }

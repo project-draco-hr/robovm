@@ -1,0 +1,24 @@
+{
+  sb.append("X.509 CRL v").append(version);
+  sb.append("\nSignature Algorithm: [");
+  signature.dumpValue(sb);
+  sb.append(']');
+  sb.append("\nIssuer: ").append(issuer.getName(X500Principal.RFC2253));
+  sb.append("\n\nThis Update: ").append(thisUpdate);
+  sb.append("\nNext Update: ").append(nextUpdate).append('\n');
+  if (revokedCertificates != null) {
+    sb.append("\nRevoked Certificates: ").append(revokedCertificates.size()).append(" [");
+    int number=1;
+    for (    RevokedCertificate revokedCertificate : revokedCertificates) {
+      sb.append("\n  [").append(number++).append(']');
+      revokedCertificate.dumpValue(sb,"  ");
+      sb.append('\n');
+    }
+    sb.append("]\n");
+  }
+  if (crlExtensions != null) {
+    sb.append("\nCRL Extensions: ").append(crlExtensions.size()).append(" [");
+    crlExtensions.dumpValue(sb,"  ");
+    sb.append("]\n");
+  }
+}

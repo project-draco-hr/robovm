@@ -1,0 +1,27 @@
+{
+  try {
+    Document doc=builder.parse(new InputSource(in));
+    Element preferences;
+    preferences=doc.getDocumentElement();
+    String version=preferences.getAttribute("EXTERNAL_XML_VERSION");
+    if (version != null && Float.parseFloat(version) > XML_VERSION) {
+      throw new InvalidPreferencesFormatException("Preferences version " + version + " is not supported");
+    }
+    Element root=(Element)preferences.getElementsByTagName("root").item(0);
+    Preferences prefsRoot=null;
+    String type=root.getAttribute("type");
+    if (type.equals("user")) {
+      prefsRoot=Preferences.userRoot();
+    }
+ else {
+      prefsRoot=Preferences.systemRoot();
+    }
+    loadNode(prefsRoot,root);
+  }
+ catch (  FactoryConfigurationError e) {
+    throw new InvalidPreferencesFormatException(e);
+  }
+catch (  SAXException e) {
+    throw new InvalidPreferencesFormatException(e);
+  }
+}

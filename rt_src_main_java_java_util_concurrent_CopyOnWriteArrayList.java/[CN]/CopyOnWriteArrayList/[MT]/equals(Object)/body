@@ -1,25 +1,18 @@
 {
-  if (o == this) {
-    return true;
+  if (other instanceof CopyOnWriteArrayList) {
+    return this == other || Arrays.equals(elements,((CopyOnWriteArrayList<?>)other).elements);
   }
-  if (!(o instanceof List)) {
+ else   if (other instanceof List) {
+    Object[] snapshot=elements;
+    Iterator<?> i=((List<?>)other).iterator();
+    for (    Object o : snapshot) {
+      if (!i.hasNext() || !Objects.equal(o,i.next())) {
+        return false;
+      }
+    }
+    return !i.hasNext();
+  }
+ else {
     return false;
   }
-  List l=(List)o;
-  Iterator it=l.listIterator();
-  Iterator ourIt=listIterator();
-  while (it.hasNext()) {
-    if (!ourIt.hasNext()) {
-      return false;
-    }
-    Object thisListElem=it.next();
-    Object anotherListElem=ourIt.next();
-    if (!(thisListElem == null ? anotherListElem == null : thisListElem.equals(anotherListElem))) {
-      return false;
-    }
-  }
-  if (ourIt.hasNext()) {
-    return false;
-  }
-  return true;
 }

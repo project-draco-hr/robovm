@@ -1,0 +1,27 @@
+{
+  File parent=xmlFile.getParentFile();
+  File temporaryForWriting=new File(parent,"prefs-" + UUID.randomUUID() + ".xml.tmp");
+  BufferedWriter out=null;
+  try {
+    out=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(temporaryForWriting),"UTF-8"));
+    out.write(HEADER);
+    out.newLine();
+    out.write(FILE_PREFS);
+    out.newLine();
+    String[] keys=properties.keySet().toArray(new String[properties.size()]);
+    int length=keys.length;
+    String[] values=new String[length];
+    for (int i=0; i < length; i++) {
+      values[i]=properties.getProperty(keys[i]);
+    }
+    exportEntries(keys,values,out);
+    out.close();
+    if (!temporaryForWriting.renameTo(xmlFile)) {
+      throw new IOException("Failed to write preferences to " + xmlFile);
+    }
+  }
+  finally {
+    IoUtils.closeQuietly(out);
+    temporaryForWriting.delete();
+  }
+}

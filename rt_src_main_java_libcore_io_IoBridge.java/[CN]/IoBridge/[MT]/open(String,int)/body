@@ -1,0 +1,25 @@
+{
+  FileDescriptor fd=null;
+  try {
+    int mode=((flags & O_ACCMODE) == O_RDONLY) ? 0 : 0600;
+    fd=Libcore.os.open(path,flags,mode);
+    if (fd.valid()) {
+      if (S_ISDIR(Libcore.os.fstat(fd).st_mode)) {
+        throw new ErrnoException("open",EISDIR);
+      }
+    }
+    return fd;
+  }
+ catch (  ErrnoException errnoException) {
+    try {
+      if (fd != null) {
+        IoUtils.close(fd);
+      }
+    }
+ catch (    IOException ignored) {
+    }
+    FileNotFoundException ex=new FileNotFoundException(path + ": " + errnoException.getMessage());
+    ex.initCause(errnoException);
+    throw ex;
+  }
+}

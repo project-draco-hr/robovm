@@ -1,0 +1,19 @@
+{
+  Socket clientSocket=clientSocketChannel.socket();
+  boolean connectOK=false;
+  try {
+synchronized (this) {
+      super.implAccept(clientSocket);
+      clientSocketChannel.setConnected();
+      clientSocketChannel.setBound(true);
+      clientSocketChannel.finishAccept();
+    }
+    connectOK=true;
+  }
+  finally {
+    if (!connectOK) {
+      clientSocket.close();
+    }
+  }
+  return clientSocket;
+}

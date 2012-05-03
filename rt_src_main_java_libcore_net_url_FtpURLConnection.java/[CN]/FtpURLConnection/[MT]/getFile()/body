@@ -1,0 +1,13 @@
+{
+  int reply;
+  String file=url.getFile();
+  write("RETR " + file + "\r\n");
+  reply=getReply();
+  if (reply == FTP_NOTFOUND && file.length() > 0 && file.charAt(0) == '/') {
+    write("RETR " + file.substring(1) + "\r\n");
+    reply=getReply();
+  }
+  if (!(reply == FTP_OPENDATA || reply == FTP_TRANSFEROK)) {
+    throw new FileNotFoundException("Unable to retrieve file: " + reply);
+  }
+}

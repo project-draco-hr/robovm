@@ -1,17 +1,15 @@
 {
   if (provider == null) {
-    throw new IllegalArgumentException(Messages.getString("security.04"));
+    throw new IllegalArgumentException();
   }
   if (type == null) {
-    throw new NullPointerException(Messages.getString("security.07"));
+    throw new NullPointerException();
   }
-synchronized (engine) {
-    try {
-      engine.getInstance(type,provider,null);
-      return new KeyStore((KeyStoreSpi)engine.spi,provider,type);
-    }
- catch (    Exception e) {
-      throw new KeyStoreException(e.getMessage());
-    }
+  try {
+    Object spi=ENGINE.getInstance(type,provider,null);
+    return new KeyStore((KeyStoreSpi)spi,provider,type);
+  }
+ catch (  Exception e) {
+    throw new KeyStoreException(e);
   }
 }

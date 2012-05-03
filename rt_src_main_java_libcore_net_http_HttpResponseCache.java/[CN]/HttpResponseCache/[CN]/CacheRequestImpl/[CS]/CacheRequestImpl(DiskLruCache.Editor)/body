@@ -1,0 +1,18 @@
+{
+  this.editor=editor;
+  this.cacheOut=editor.newOutputStream(ENTRY_BODY);
+  this.body=new FilterOutputStream(cacheOut){
+    @Override public void close() throws IOException {
+synchronized (HttpResponseCache.this) {
+        if (done) {
+          return;
+        }
+        done=true;
+        writeSuccessCount++;
+      }
+      super.close();
+      editor.commit();
+    }
+  }
+;
+}

@@ -3,7 +3,7 @@
   String propertyName=SERVICE_CLASS.getName() + ":" + uri;
   try {
     if (debug)     debugPrintln("Looking up system property '" + propertyName + "'");
-    String r=SecuritySupport.getSystemProperty(propertyName);
+    String r=System.getProperty(propertyName);
     if (r != null && r.length() > 0) {
       if (debug)       debugPrintln("The value is '" + r + "'");
       xpf=createInstance(r);
@@ -13,19 +13,10 @@
       debugPrintln("The property is undefined.");
     }
   }
- catch (  VirtualMachineError vme) {
-    throw vme;
+ catch (  Exception e) {
+    e.printStackTrace();
   }
-catch (  ThreadDeath td) {
-    throw td;
-  }
-catch (  Throwable t) {
-    if (debug) {
-      debugPrintln("failed to look up system property '" + propertyName + "'");
-      t.printStackTrace();
-    }
-  }
-  String javah=SecuritySupport.getSystemProperty("java.home");
+  String javah=System.getProperty("java.home");
   String configFile=javah + File.separator + "lib"+ File.separator+ "jaxp.properties";
   String factoryClassName=null;
   try {
@@ -34,9 +25,9 @@ synchronized (cacheProps) {
         if (firstTime) {
           File f=new File(configFile);
           firstTime=false;
-          if (SecuritySupport.doesFileExist(f)) {
+          if (f.exists()) {
             if (debug)             debugPrintln("Read properties file " + f);
-            cacheProps.load(SecuritySupport.getFileInputStream(f));
+            cacheProps.load(new FileInputStream(f));
           }
         }
       }
@@ -55,12 +46,10 @@ synchronized (cacheProps) {
       ex.printStackTrace();
     }
   }
-  Iterator sitr=createServiceFileIterator();
-  while (sitr.hasNext()) {
-    URL resource=(URL)sitr.next();
+  for (  URL resource : createServiceFileIterator()) {
     if (debug)     debugPrintln("looking into " + resource);
     try {
-      xpf=loadFromServicesFile(uri,resource.toExternalForm(),SecuritySupport.getURLInputStream(resource));
+      xpf=loadFromServicesFile(uri,resource.toExternalForm(),resource.openStream());
       if (xpf != null)       return xpf;
     }
  catch (    IOException e) {

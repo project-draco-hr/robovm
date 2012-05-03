@@ -1,20 +1,19 @@
 {
-  checkAccess();
   boolean stopCurrent=false;
-synchronized (this.childrenThreadsLock) {
+synchronized (threadRefs) {
     Thread current=Thread.currentThread();
-    for (int i=0; i < numThreads; i++) {
-      if (this.childrenThreads[i] == current) {
+    for (    Thread thread : threads) {
+      if (thread == current) {
         stopCurrent=true;
       }
  else {
-        this.childrenThreads[i].stop();
+        thread.stop();
       }
     }
   }
-synchronized (this.childrenGroupsLock) {
-    for (int i=0; i < numGroups; i++) {
-      stopCurrent|=this.childrenGroups[i].stopHelper();
+synchronized (groups) {
+    for (    ThreadGroup group : groups) {
+      stopCurrent|=group.stopHelper();
     }
   }
   return stopCurrent;

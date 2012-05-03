@@ -1,0 +1,14 @@
+{
+  if (connection == null) {
+    connection=openSocketConnection();
+    if (connection.getAddress().getProxy() != null) {
+      makeTunnel(policy,connection,getRequestHeaders());
+    }
+  }
+  sslSocket=connection.getSecureSocketIfConnected();
+  if (sslSocket != null) {
+    return true;
+  }
+  connection.setupSecureSocket(enclosing.getSSLSocketFactory(),tlsTolerant);
+  return false;
+}

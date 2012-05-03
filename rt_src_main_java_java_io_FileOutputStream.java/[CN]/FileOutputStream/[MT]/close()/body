@@ -1,18 +1,14 @@
 {
-  if (fd == null) {
-    return;
-  }
-  if (channel != null) {
-synchronized (channel) {
-      if (channel.isOpen() && fd.descriptor >= 0) {
-        channel.close();
-      }
-    }
-  }
+  guard.close();
 synchronized (this) {
-    if (fd.descriptor >= 0 && innerFD) {
-      fileSystem.close(fd.descriptor);
-      fd.descriptor=-1;
+    if (channel != null) {
+      channel.close();
+    }
+    if (shouldClose) {
+      IoUtils.close(fd);
+    }
+ else {
+      fd=new FileDescriptor();
     }
   }
 }

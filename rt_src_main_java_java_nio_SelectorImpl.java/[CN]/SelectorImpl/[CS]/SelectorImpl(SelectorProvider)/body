@@ -1,0 +1,14 @@
+{
+  super(selectorProvider);
+  try {
+    FileDescriptor[] pipeFds=Libcore.os.pipe();
+    wakeupIn=pipeFds[0];
+    wakeupOut=pipeFds[1];
+    IoUtils.setBlocking(wakeupIn,false);
+    pollFds.add(new StructPollfd());
+    setPollFd(0,wakeupIn,POLLIN,null);
+  }
+ catch (  ErrnoException errnoException) {
+    throw errnoException.rethrowAsIOException();
+  }
+}

@@ -1,0 +1,62 @@
+{
+  int precision=formatToken.getPrecision();
+  if (precision == 0) {
+    precision=1;
+  }
+  formatToken.setPrecision(precision);
+  double d=((Number)arg).doubleValue();
+  if (d == 0.0) {
+    precision--;
+    formatToken.setPrecision(precision);
+    transformF(result);
+    return;
+  }
+  boolean requireScientificRepresentation=true;
+  d=Math.abs(d);
+  if (Double.isInfinite(d)) {
+    precision=formatToken.getPrecision();
+    precision--;
+    formatToken.setPrecision(precision);
+    transformE(result);
+    return;
+  }
+  BigDecimal b=new BigDecimal(d,new MathContext(precision));
+  d=b.doubleValue();
+  long l=b.longValue();
+  if (d >= 1 && d < Math.pow(10,precision)) {
+    if (l < Math.pow(10,precision)) {
+      requireScientificRepresentation=false;
+      precision-=String.valueOf(l).length();
+      precision=precision < 0 ? 0 : precision;
+      l=Math.round(d * Math.pow(10,precision + 1));
+      if (String.valueOf(l).length() <= formatToken.getPrecision()) {
+        precision++;
+      }
+      formatToken.setPrecision(precision);
+    }
+  }
+ else {
+    l=b.movePointRight(4).longValue();
+    if (d >= Math.pow(10,-4) && d < 1) {
+      requireScientificRepresentation=false;
+      precision+=4 - String.valueOf(l).length();
+      l=b.movePointRight(precision + 1).longValue();
+      if (String.valueOf(l).length() <= formatToken.getPrecision()) {
+        precision++;
+      }
+      l=b.movePointRight(precision).longValue();
+      if (l >= Math.pow(10,precision - 4)) {
+        formatToken.setPrecision(precision);
+      }
+    }
+  }
+  if (requireScientificRepresentation) {
+    precision=formatToken.getPrecision();
+    precision--;
+    formatToken.setPrecision(precision);
+    transformE(result);
+  }
+ else {
+    transformF(result);
+  }
+}

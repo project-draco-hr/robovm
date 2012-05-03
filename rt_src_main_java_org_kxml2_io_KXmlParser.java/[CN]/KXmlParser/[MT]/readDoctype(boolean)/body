@@ -1,0 +1,27 @@
+{
+  read(START_DOCTYPE);
+  int startPosition=-1;
+  if (saveDtdText) {
+    bufferCapture=new StringBuilder();
+    startPosition=position;
+  }
+  try {
+    skip();
+    rootElementName=readName();
+    readExternalId(true,true);
+    skip();
+    if (peekCharacter() == '[') {
+      readInternalSubset();
+    }
+    skip();
+  }
+  finally {
+    if (saveDtdText) {
+      bufferCapture.append(buffer,0,position);
+      bufferCapture.delete(0,startPosition);
+      text=bufferCapture.toString();
+      bufferCapture=null;
+    }
+  }
+  read('>');
+}

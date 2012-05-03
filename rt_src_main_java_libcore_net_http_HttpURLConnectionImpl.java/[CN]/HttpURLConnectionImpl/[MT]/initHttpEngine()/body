@@ -1,0 +1,24 @@
+{
+  if (httpEngineFailure != null) {
+    throw httpEngineFailure;
+  }
+ else   if (httpEngine != null) {
+    return;
+  }
+  connected=true;
+  try {
+    if (doOutput) {
+      if (method == HttpEngine.GET) {
+        method=HttpEngine.POST;
+      }
+ else       if (method != HttpEngine.POST && method != HttpEngine.PUT) {
+        throw new ProtocolException(method + " does not support writing");
+      }
+    }
+    httpEngine=newHttpEngine(method,rawRequestHeaders,null,null);
+  }
+ catch (  IOException e) {
+    httpEngineFailure=e;
+    throw e;
+  }
+}

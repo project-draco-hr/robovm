@@ -1,52 +1,19 @@
 {
-  ClassLoader cl=AccessController.doPrivileged(new PrivilegedAction<ClassLoader>(){
-    public ClassLoader run(){
-      return Thread.currentThread().getContextClassLoader();
-    }
-  }
-);
+  ClassLoader cl=Thread.currentThread().getContextClassLoader();
   if (cl != null) {
     try {
       return ResourceBundle.getBundle(resourceBundleName,Locale.getDefault(),cl);
     }
- catch (    MissingResourceException e) {
+ catch (    MissingResourceException ignored) {
     }
   }
-  cl=AccessController.doPrivileged(new PrivilegedAction<ClassLoader>(){
-    public ClassLoader run(){
-      return ClassLoader.getSystemClassLoader();
-    }
-  }
-);
+  cl=ClassLoader.getSystemClassLoader();
   if (cl != null) {
     try {
       return ResourceBundle.getBundle(resourceBundleName,Locale.getDefault(),cl);
     }
- catch (    MissingResourceException e) {
+ catch (    MissingResourceException ignored) {
     }
   }
-  final Class<?>[] classes=AccessController.doPrivileged(new PrivilegedAction<Class<?>[]>(){
-    public Class<?>[] run(){
-      return (new PrivateSecurityManager()).privateGetClassContext();
-    }
-  }
-);
-  for (int i=1; i < classes.length; i++) {
-    final int index=i;
-    try {
-      cl=AccessController.doPrivileged(new PrivilegedAction<ClassLoader>(){
-        public ClassLoader run(){
-          return classes[index].getClassLoader();
-        }
-      }
-);
-      if (cl == null) {
-        continue;
-      }
-      return ResourceBundle.getBundle(resourceBundleName,Locale.getDefault(),cl);
-    }
- catch (    MissingResourceException e) {
-    }
-  }
-  throw new MissingResourceException(Messages.getString("logging.8",resourceBundleName),resourceBundleName,null);
+  throw new MissingResourceException("Failed to load the specified resource bundle \"" + resourceBundleName + "\"",resourceBundleName,null);
 }

@@ -1,0 +1,21 @@
+{
+  String ttlString=System.getProperty(propertyName,null);
+  if (ttlString == null) {
+    return System.nanoTime() + defaultTtlNanos;
+  }
+  try {
+    long ttlS=Long.parseLong(ttlString);
+    if (ttlS == -1) {
+      return Long.MAX_VALUE;
+    }
+ else     if (ttlS == 0) {
+      return Long.MIN_VALUE;
+    }
+ else {
+      return System.nanoTime() + ttlS * 1000000000L;
+    }
+  }
+ catch (  NumberFormatException ex) {
+    return System.nanoTime() + defaultTtlNanos;
+  }
+}

@@ -1,0 +1,22 @@
+{
+  indent=-1;
+  BufferedWriter out=new BufferedWriter(new OutputStreamWriter(stream,"UTF-8"));
+  out.write(HEADER);
+  out.newLine();
+  out.newLine();
+  out.write(DOCTYPE);
+  out.write(" '");
+  out.write(PREFS_DTD_NAME);
+  out.write("'>");
+  out.newLine();
+  out.newLine();
+  flushStartTag("preferences",new String[]{"EXTERNAL_XML_VERSION"},new String[]{String.valueOf(XML_VERSION)},out);
+  flushStartTag("root",new String[]{"type"},new String[]{prefs.isUserNode() ? "user" : "system"},out);
+  flushEmptyElement("map",out);
+  StringTokenizer ancestors=new StringTokenizer(prefs.absolutePath(),"/");
+  exportNode(ancestors,prefs,withSubTree,out);
+  flushEndTag("root",out);
+  flushEndTag("preferences",out);
+  out.flush();
+  out=null;
+}

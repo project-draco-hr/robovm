@@ -1,0 +1,34 @@
+{
+  BufferIterator it=mappedFile.bigEndianIterator();
+  final int SIZEOF_TZNAME=40;
+  final int SIZEOF_TZINT=4;
+  byte[] idBytes=new byte[SIZEOF_TZNAME];
+  int numEntries=(int)mappedFile.size() / (SIZEOF_TZNAME + 3 * SIZEOF_TZINT);
+  char[] idChars=new char[numEntries * SIZEOF_TZNAME];
+  int[] idEnd=new int[numEntries];
+  int idOffset=0;
+  byteOffsets=new int[numEntries];
+  rawUtcOffsets=new int[numEntries];
+  for (int i=0; i < numEntries; i++) {
+    it.readByteArray(idBytes,0,idBytes.length);
+    byteOffsets[i]=it.readInt();
+    int length=it.readInt();
+    if (length < 44) {
+      throw new AssertionError("length in index file < sizeof(tzhead)");
+    }
+    rawUtcOffsets[i]=it.readInt();
+    int len=idBytes.length;
+    for (int j=0; j < len; j++) {
+      if (idBytes[j] == 0) {
+        break;
+      }
+      idChars[idOffset++]=(char)(idBytes[j] & 0xFF);
+    }
+    idEnd[i]=idOffset;
+  }
+  String allIds=new String(idChars,0,idOffset);
+  ids=new String[numEntries];
+  for (int i=0; i < numEntries; i++) {
+    ids[i]=allIds.substring(i == 0 ? 0 : idEnd[i - 1],idEnd[i]);
+  }
+}

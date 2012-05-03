@@ -4,15 +4,15 @@ synchronized (CERT_CACHE) {
     byte[] buff=readBytes(inStream,CERT_CACHE_SEED_LENGTH);
     inStream.reset();
     if (buff == null) {
-      throw new CertificateException(Messages.getString("security.152"));
+      throw new CertificateException("InputStream doesn't contain enough data");
     }
     long hash=CERT_CACHE.getHash(buff);
     if (CERT_CACHE.contains(hash)) {
       byte[] encoding=new byte[BerInputStream.getLength(buff)];
       if (encoding.length < CERT_CACHE_SEED_LENGTH) {
-        throw new CertificateException(Messages.getString("security.15B3"));
+        throw new CertificateException("Bad Certificate encoding");
       }
-      inStream.read(encoding);
+      Streams.readFully(inStream,encoding);
       Certificate res=(Certificate)CERT_CACHE.get(hash,encoding);
       if (res != null) {
         return res;

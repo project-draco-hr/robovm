@@ -2,15 +2,15 @@
   if (tag == ASN1Constants.TAG_GENERALIZEDTIME) {
     readContent();
     if (buffer[offset - 1] != 'Z') {
-      throw new ASN1Exception(Messages.getString("security.11E"));
+      throw new ASN1Exception("ASN.1 GeneralizedTime: encoded format is not implemented");
     }
     if (length != 15 && (length < 17 || length > 19)) {
-      throw new ASN1Exception(Messages.getString("security.11F",contentOffset));
+      throw new ASN1Exception("ASN.1 GeneralizedTime wrongly encoded at [" + contentOffset + "]");
     }
     if (length > 16) {
       byte char14=buffer[contentOffset + 14];
       if (char14 != '.' && char14 != ',') {
-        throw new ASN1Exception(Messages.getString("security.11F",contentOffset));
+        throw new ASN1Exception("ASN.1 GeneralizedTime wrongly encoded at [" + contentOffset + "]");
       }
     }
     if (times == null) {
@@ -33,9 +33,9 @@
     }
   }
  else   if (tag == ASN1Constants.TAG_C_GENERALIZEDTIME) {
-    throw new ASN1Exception(Messages.getString("security.120"));
+    throw new ASN1Exception("Decoding constructed ASN.1 GeneralizedTime type is not supported");
   }
  else {
-    throw new ASN1Exception(Messages.getString("security.121",tagOffset,Integer.toHexString(tag)));
+    throw expected("GeneralizedTime");
   }
 }

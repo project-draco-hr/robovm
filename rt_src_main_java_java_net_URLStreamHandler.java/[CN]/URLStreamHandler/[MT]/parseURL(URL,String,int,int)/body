@@ -1,134 +1,91 @@
 {
-  if (end < start || end < 0) {
-    if (end <= Integer.MIN_VALUE + 1 && (start >= str.length() || start < 0) || str.startsWith("//",start) && str.indexOf('/',start + 2) == -1) {
-      throw new StringIndexOutOfBoundsException(end);
-    }
-    if (this != u.strmHandler) {
-      throw new SecurityException();
-    }
-    return;
+  if (this != url.streamHandler) {
+    throw new SecurityException("Only a URL's stream handler is permitted to mutate it");
   }
-  String parseString=str.substring(start,end);
-  end-=start;
-  int fileIdx=0;
-  String host=u.getHost();
-  int port=u.getPort();
-  String ref=u.getRef();
-  String file=u.getPath();
-  String query=u.getQuery();
-  String authority=u.getAuthority();
-  String userInfo=u.getUserInfo();
-  int refIdx=parseString.indexOf('#',0);
-  if (parseString.startsWith("//") && !parseString.startsWith("////")) {
-    int hostIdx=2, portIdx=-1;
-    port=-1;
-    fileIdx=parseString.indexOf('/',hostIdx);
-    int questionMarkIndex=parseString.indexOf('?',hostIdx);
-    if ((questionMarkIndex != -1) && ((fileIdx == -1) || (fileIdx > questionMarkIndex))) {
-      fileIdx=questionMarkIndex;
-    }
-    if (fileIdx == -1) {
-      fileIdx=end;
-      file="";
-    }
-    int hostEnd=fileIdx;
-    if (refIdx != -1 && refIdx < fileIdx) {
-      hostEnd=refIdx;
-    }
-    int userIdx=parseString.lastIndexOf('@',hostEnd);
-    authority=parseString.substring(hostIdx,hostEnd);
-    if (userIdx > -1) {
-      userInfo=parseString.substring(hostIdx,userIdx);
-      hostIdx=userIdx + 1;
-    }
-    portIdx=parseString.indexOf(':',userIdx == -1 ? hostIdx : userIdx);
-    int endOfIPv6Addr=parseString.indexOf(']');
-    if (endOfIPv6Addr != -1) {
-      try {
-        if (parseString.length() > endOfIPv6Addr + 1) {
-          char c=parseString.charAt(endOfIPv6Addr + 1);
-          if (c == ':') {
-            portIdx=endOfIPv6Addr + 1;
-          }
- else {
-            portIdx=-1;
-          }
-        }
- else {
-          portIdx=-1;
-        }
-      }
- catch (      Exception e) {
-      }
-    }
-    if (portIdx == -1 || portIdx > fileIdx) {
-      host=parseString.substring(hostIdx,hostEnd);
+  if (end < start) {
+    throw new StringIndexOutOfBoundsException(spec,start,end - start);
+  }
+  int fileStart;
+  String authority;
+  String userInfo;
+  String host;
+  int port=-1;
+  String path;
+  String query;
+  String ref;
+  if (spec.regionMatches(start,"//",0,2)) {
+    int authorityStart=start + 2;
+    fileStart=UrlUtils.findFirstOf(spec,"/?#",authorityStart,end);
+    authority=spec.substring(authorityStart,fileStart);
+    int userInfoEnd=UrlUtils.findFirstOf(spec,"@",authorityStart,fileStart);
+    int hostStart;
+    if (userInfoEnd != fileStart) {
+      userInfo=spec.substring(authorityStart,userInfoEnd);
+      hostStart=userInfoEnd + 1;
     }
  else {
-      host=parseString.substring(hostIdx,portIdx);
-      String portString=parseString.substring(portIdx + 1,hostEnd);
-      if (portString.length() == 0) {
-        port=-1;
+      userInfo=null;
+      hostStart=authorityStart;
+    }
+    int colonSearchFrom=hostStart;
+    int ipv6End=UrlUtils.findFirstOf(spec,"]",hostStart,fileStart);
+    if (ipv6End != fileStart) {
+      if (UrlUtils.findFirstOf(spec,":",hostStart,ipv6End) == ipv6End) {
+        throw new IllegalArgumentException("Expected an IPv6 address: " + spec.substring(hostStart,ipv6End + 1));
       }
- else {
-        port=Integer.parseInt(portString);
+      colonSearchFrom=ipv6End;
+    }
+    int hostEnd=UrlUtils.findFirstOf(spec,":",colonSearchFrom,fileStart);
+    host=spec.substring(hostStart,hostEnd);
+    int portStart=hostEnd + 1;
+    if (portStart < fileStart) {
+      port=Integer.parseInt(spec.substring(portStart,fileStart));
+      if (port < 0) {
+        throw new IllegalArgumentException("port < 0: " + port);
       }
     }
-  }
-  if (refIdx > -1) {
-    ref=parseString.substring(refIdx + 1,end);
-  }
-  int fileEnd=(refIdx == -1 ? end : refIdx);
-  int queryIdx=parseString.lastIndexOf('?',fileEnd);
-  boolean canonicalize=false;
-  if (queryIdx > -1) {
-    query=parseString.substring(queryIdx + 1,fileEnd);
-    if (queryIdx == 0 && file != null) {
-      if (file.equals("")) {
-        file="/";
-      }
- else       if (file.startsWith("/")) {
-        canonicalize=true;
-      }
-      int last=file.lastIndexOf('/') + 1;
-      file=file.substring(0,last);
-    }
-    fileEnd=queryIdx;
-  }
- else   if (refIdx != 0) {
+    path=null;
     query=null;
+    ref=null;
   }
-  if (fileIdx > -1) {
-    if (fileIdx < end && parseString.charAt(fileIdx) == '/') {
-      file=parseString.substring(fileIdx,fileEnd);
-    }
- else     if (fileEnd > fileIdx) {
-      if (file == null) {
-        file="";
-      }
- else       if (file.equals("")) {
-        file="/";
-      }
- else       if (file.startsWith("/")) {
-        canonicalize=true;
-      }
-      int last=file.lastIndexOf('/') + 1;
-      if (last == 0) {
-        file=parseString.substring(fileIdx,fileEnd);
-      }
  else {
-        file=file.substring(0,last) + parseString.substring(fileIdx,fileEnd);
-      }
+    fileStart=start;
+    authority=url.getAuthority();
+    userInfo=url.getUserInfo();
+    host=url.getHost();
+    if (host == null) {
+      host="";
     }
+    port=url.getPort();
+    path=url.getPath();
+    query=url.getQuery();
+    ref=url.getRef();
   }
-  if (file == null) {
-    file="";
-  }
-  if (host == null) {
-    host="";
-  }
-  if (canonicalize) {
-    file=URLUtil.canonicalizePath(file);
-  }
-  setURL(u,u.getProtocol(),host,port,authority,userInfo,file,query,ref);
+  int pos=fileStart;
+  while (pos < end) {
+    int nextPos;
+switch (spec.charAt(pos)) {
+case '#':
+      nextPos=end;
+    ref=spec.substring(pos + 1,nextPos);
+  break;
+case '?':
+nextPos=UrlUtils.findFirstOf(spec,"#",pos,end);
+query=spec.substring(pos + 1,nextPos);
+ref=null;
+break;
+default :
+nextPos=UrlUtils.findFirstOf(spec,"?#",pos,end);
+path=relativePath(path,spec.substring(pos,nextPos));
+query=null;
+ref=null;
+break;
+}
+pos=nextPos;
+}
+if (path == null) {
+path="";
+}
+path=UrlUtils.authoritySafePath(authority,path);
+setURL(url,url.getProtocol(),host,port,authority,userInfo,path,query,ref);
 }

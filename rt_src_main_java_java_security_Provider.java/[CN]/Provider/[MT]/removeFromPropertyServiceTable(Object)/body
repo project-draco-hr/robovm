@@ -18,7 +18,7 @@
     serviceName=service_alias.substring(0,i);
     aliasName=service_alias.substring(i + 1);
     if (propertyAliasTable != null) {
-      propertyAliasTable.remove(serviceName,aliasName.toUpperCase());
+      propertyAliasTable.remove(serviceName,aliasName.toUpperCase(Locale.US));
     }
     if (propertyServiceTable != null) {
       for (Iterator<Service> it=propertyServiceTable.values().iterator(); it.hasNext(); ) {
@@ -40,10 +40,10 @@
     serviceName=k.substring(0,j);
     algorithm=k.substring(j + 1);
     if (propertyServiceTable != null) {
-      Provider.Service ser=propertyServiceTable.remove(serviceName,algorithm.toUpperCase());
+      Provider.Service ser=propertyServiceTable.remove(serviceName,algorithm.toUpperCase(Locale.US));
       if (ser != null && propertyAliasTable != null && ser.aliases != null) {
-        for (Iterator<String> it=ser.aliases.iterator(); it.hasNext(); ) {
-          propertyAliasTable.remove(serviceName,(it.next()).toUpperCase());
+        for (        String alias : ser.aliases) {
+          propertyAliasTable.remove(serviceName,alias.toUpperCase(Locale.US));
         }
       }
     }
@@ -53,7 +53,7 @@
     serviceName=k.substring(0,j);
     algorithm=k.substring(j + 1,i);
     if (propertyServiceTable != null) {
-      Object o=propertyServiceTable.get(serviceName,algorithm.toUpperCase());
+      Object o=propertyServiceTable.get(serviceName,algorithm.toUpperCase(Locale.US));
       if (o != null) {
         s=(Provider.Service)o;
         s.attributes.remove(attribute);

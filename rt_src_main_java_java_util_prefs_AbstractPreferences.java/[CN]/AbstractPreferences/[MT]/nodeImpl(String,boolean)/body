@@ -1,0 +1,18 @@
+{
+  String[] names=path.split("/");
+  AbstractPreferences currentNode=this;
+  AbstractPreferences temp;
+  for (  String name : names) {
+synchronized (currentNode.lock) {
+      temp=currentNode.cachedNode.get(name);
+      if (temp == null) {
+        temp=getNodeFromBackend(createNew,currentNode,name);
+      }
+    }
+    currentNode=temp;
+    if (currentNode == null) {
+      break;
+    }
+  }
+  return currentNode;
+}

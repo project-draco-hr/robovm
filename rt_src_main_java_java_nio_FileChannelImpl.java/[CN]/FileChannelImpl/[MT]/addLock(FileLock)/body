@@ -1,0 +1,12 @@
+{
+  long lockEnd=lock.position() + lock.size();
+  for (  FileLock existingLock : locks) {
+    if (existingLock.position() > lockEnd) {
+      break;
+    }
+    if (existingLock.overlaps(lock.position(),lock.size())) {
+      throw new OverlappingFileLockException();
+    }
+  }
+  locks.add(lock);
+}

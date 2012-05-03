@@ -1,0 +1,47 @@
+{
+  String host=session.getPeerHost();
+  if (sessionData == null) {
+    throw new NullPointerException("sessionData");
+  }
+  String name=fileName(host,session.getPeerPort());
+  File file=new File(directory,name);
+  boolean existedBefore=file.exists();
+  FileOutputStream out;
+  try {
+    out=new FileOutputStream(file);
+  }
+ catch (  FileNotFoundException e) {
+    logWriteError(host,file,e);
+    return;
+  }
+  if (!existedBefore) {
+    size++;
+    makeRoom();
+  }
+  boolean writeSuccessful=false;
+  try {
+    out.write(sessionData);
+    writeSuccessful=true;
+  }
+ catch (  IOException e) {
+    logWriteError(host,file,e);
+  }
+ finally {
+    boolean closeSuccessful=false;
+    try {
+      out.close();
+      closeSuccessful=true;
+    }
+ catch (    IOException e) {
+      logWriteError(host,file,e);
+    }
+ finally {
+      if (!writeSuccessful || !closeSuccessful) {
+        delete(file);
+      }
+ else {
+        accessOrder.put(name,file);
+      }
+    }
+  }
+}

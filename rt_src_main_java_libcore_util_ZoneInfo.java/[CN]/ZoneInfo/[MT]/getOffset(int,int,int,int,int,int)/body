@@ -1,0 +1,17 @@
+{
+  long calc=(year / 400) * MILLISECONDS_PER_400_YEARS;
+  year%=400;
+  calc+=year * (365 * MILLISECONDS_PER_DAY);
+  calc+=((year + 3) / 4) * MILLISECONDS_PER_DAY;
+  if (year > 0) {
+    calc-=((year - 1) / 100) * MILLISECONDS_PER_DAY;
+  }
+  boolean isLeap=(year == 0 || (year % 4 == 0 && year % 100 != 0));
+  int[] mlen=isLeap ? LEAP : NORMAL;
+  calc+=mlen[month] * MILLISECONDS_PER_DAY;
+  calc+=(day - 1) * MILLISECONDS_PER_DAY;
+  calc+=millis;
+  calc-=mRawOffset;
+  calc-=UNIX_OFFSET;
+  return getOffset(calc);
+}

@@ -1,0 +1,30 @@
+{
+  if (TRUST_MANAGERS != null) {
+    return TRUST_MANAGERS;
+  }
+  String keystore=System.getProperty("javax.net.ssl.trustStore");
+  if (keystore == null) {
+    return null;
+  }
+  String keystorepwd=System.getProperty("javax.net.ssl.trustStorePassword");
+  char[] pwd=(keystorepwd == null) ? null : keystorepwd.toCharArray();
+  KeyStore ks=KeyStore.getInstance(KeyStore.getDefaultType());
+  InputStream is=null;
+  try {
+    is=new BufferedInputStream(new FileInputStream(keystore));
+    ks.load(is,pwd);
+  }
+  finally {
+    if (is != null) {
+      is.close();
+    }
+  }
+  String tmfAlg=Security.getProperty("ssl.TrustManagerFactory.algorithm");
+  if (tmfAlg == null) {
+    tmfAlg="PKIX";
+  }
+  TrustManagerFactory tmf=TrustManagerFactory.getInstance(tmfAlg);
+  tmf.init(ks);
+  TRUST_MANAGERS=tmf.getTrustManagers();
+  return TRUST_MANAGERS;
+}

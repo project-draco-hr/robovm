@@ -1,44 +1,39 @@
 {
-  byte next;
   boolean lastCr=false;
   int mark=pos;
   int last=pos;
-  decoder.reset();
-  cBuf.clear();
+  valueBuffer.rewind();
   while (pos < buf.length) {
-    next=buf[pos++];
+    byte next=buf[pos++];
 switch (next) {
 case 0:
-      throw new IOException(Messages.getString("archive.2F"));
+      throw new IOException("NUL character in a manifest");
 case '\n':
     if (lastCr) {
       lastCr=false;
     }
  else {
-      linebreak++;
+      consecutiveLineBreaks++;
     }
   continue;
 case '\r':
 lastCr=true;
-linebreak++;
+consecutiveLineBreaks++;
 continue;
 case ' ':
-if (linebreak == 1) {
-decode(mark,last,false);
+if (consecutiveLineBreaks == 1) {
+valueBuffer.write(buf,mark,last - mark);
 mark=pos;
-linebreak=0;
+consecutiveLineBreaks=0;
 continue;
 }
 }
-if (linebreak >= 1) {
+if (consecutiveLineBreaks >= 1) {
 pos--;
 break;
 }
 last=pos;
 }
-decode(mark,last,true);
-while (CoderResult.OVERFLOW == decoder.flush(cBuf)) {
-enlargeBuffer();
-}
-value=new String(cBuf.array(),cBuf.arrayOffset(),cBuf.position());
+valueBuffer.write(buf,mark,last - mark);
+value=valueBuffer.toString(Charsets.UTF_8);
 }

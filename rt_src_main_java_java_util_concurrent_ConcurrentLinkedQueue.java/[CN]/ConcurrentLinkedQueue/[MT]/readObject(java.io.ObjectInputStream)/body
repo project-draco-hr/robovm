@@ -1,10 +1,16 @@
 {
   s.defaultReadObject();
-  head=new Node<E>(null);
-  tail=head;
-  for (; ; ) {
-    @SuppressWarnings("unchecked") E item=(E)s.readObject();
-    if (item == null)     break;
- else     offer(item);
+  Node<E> h=null, t=null;
+  Object item;
+  while ((item=s.readObject()) != null) {
+    @SuppressWarnings("unchecked") Node<E> newNode=new Node<E>((E)item);
+    if (h == null)     h=t=newNode;
+ else {
+      t.lazySetNext(newNode);
+      t=newNode;
+    }
   }
+  if (h == null)   h=t=new Node<E>(null);
+  head=h;
+  tail=t;
 }

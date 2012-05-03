@@ -1,0 +1,14 @@
+{
+  if (!doInput) {
+    throw new ProtocolException("This protocol does not support input");
+  }
+  HttpEngine response=getResponse();
+  if (getResponseCode() >= HTTP_BAD_REQUEST) {
+    throw new FileNotFoundException(url.toString());
+  }
+  InputStream result=response.getResponseBody();
+  if (result == null) {
+    throw new IOException("No response body exists; responseCode=" + getResponseCode());
+  }
+  return result;
+}

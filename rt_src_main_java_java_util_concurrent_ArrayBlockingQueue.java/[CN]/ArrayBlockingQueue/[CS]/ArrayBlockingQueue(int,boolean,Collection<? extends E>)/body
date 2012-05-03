@@ -1,5 +1,22 @@
 {
   this(capacity,fair);
-  if (capacity < c.size())   throw new IllegalArgumentException();
-  for (Iterator<? extends E> it=c.iterator(); it.hasNext(); )   add(it.next());
+  final ReentrantLock lock=this.lock;
+  lock.lock();
+  try {
+    int i=0;
+    try {
+      for (      E e : c) {
+        checkNotNull(e);
+        items[i++]=e;
+      }
+    }
+ catch (    ArrayIndexOutOfBoundsException ex) {
+      throw new IllegalArgumentException();
+    }
+    count=i;
+    putIndex=(i == capacity) ? 0 : i;
+  }
+  finally {
+    lock.unlock();
+  }
 }

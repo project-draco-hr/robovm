@@ -1,22 +1,22 @@
 {
-  if (null == host || "".equals(host)) {
-    throw new IllegalArgumentException(Messages.getString("logging.C"));
+  if (host == null || host.isEmpty()) {
+    throw new IllegalArgumentException("host == null || host.isEmpty()");
   }
   int p=0;
   try {
     p=Integer.parseInt(port);
   }
  catch (  NumberFormatException e) {
-    throw new IllegalArgumentException(Messages.getString("logging.D"));
+    throw new IllegalArgumentException("Illegal port argument");
   }
   if (p <= 0) {
-    throw new IllegalArgumentException(Messages.getString("logging.D"));
+    throw new IllegalArgumentException("Illegal port argument");
   }
   try {
     this.socket=new Socket(host,p);
   }
  catch (  IOException e) {
-    getErrorManager().error(Messages.getString("logging.E"),e,ErrorManager.OPEN_FAILURE);
+    getErrorManager().error("Failed to establish the network connection",e,ErrorManager.OPEN_FAILURE);
     throw e;
   }
   super.internalSetOutputStream(new BufferedOutputStream(this.socket.getOutputStream()));

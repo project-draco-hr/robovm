@@ -1,0 +1,29 @@
+{
+  if (isClosed()) {
+    throw new SocketException("Socket is closed");
+  }
+  if (!create) {
+    if (!isConnected()) {
+      throw new SocketException("Socket is not connected");
+    }
+    return;
+  }
+  if (isCreated) {
+    return;
+  }
+synchronized (this) {
+    if (isCreated) {
+      return;
+    }
+    try {
+      impl.create(true);
+    }
+ catch (    SocketException e) {
+      throw e;
+    }
+catch (    IOException e) {
+      throw new SocketException(e.toString());
+    }
+    isCreated=true;
+  }
+}

@@ -1,0 +1,17 @@
+{
+  String[] keyTypes=new String[keyTypeBytes.length];
+  for (int i=0; i < keyTypeBytes.length; i++) {
+    keyTypes[i]=CipherSuite.getClientKeyType(keyTypeBytes[i]);
+  }
+  X500Principal[] issuers;
+  if (asn1DerEncodedPrincipals == null) {
+    issuers=null;
+  }
+ else {
+    issuers=new X500Principal[asn1DerEncodedPrincipals.length];
+    for (int i=0; i < asn1DerEncodedPrincipals.length; i++) {
+      issuers[i]=new X500Principal(asn1DerEncodedPrincipals[i]);
+    }
+  }
+  setCertificate(sslParameters.getKeyManager().chooseClientAlias(keyTypes,issuers,this));
+}

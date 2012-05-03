@@ -1,23 +1,25 @@
 {
   String configClassName=System.getProperty("java.util.logging.config.class");
-  if (null == configClassName || null == getInstanceByClass(configClassName)) {
+  if (configClassName == null || getInstanceByClass(configClassName) == null) {
     String configFile=System.getProperty("java.util.logging.config.file");
-    if (null == configFile) {
-      configFile=new StringBuilder().append(System.getProperty("java.home")).append(File.separator).append("lib").append(File.separator).append("logging.properties").toString();
+    if (configFile == null) {
+      configFile=System.getProperty("java.home") + File.separator + "lib"+ File.separator+ "logging.properties";
     }
     InputStream input=null;
     try {
-      input=new BufferedInputStream(new FileInputStream(configFile));
-      readConfiguration(input);
-    }
-  finally {
-      if (input != null) {
-        try {
-          input.close();
-        }
- catch (        Exception e) {
+      try {
+        input=new FileInputStream(configFile);
+      }
+ catch (      IOException exception) {
+        input=LogManager.class.getResourceAsStream("logging.properties");
+        if (input == null) {
+          throw exception;
         }
       }
+      readConfiguration(new BufferedInputStream(input));
+    }
+  finally {
+      IoUtils.closeQuietly(input);
     }
   }
 }

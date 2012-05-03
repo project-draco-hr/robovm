@@ -1,0 +1,14 @@
+{
+  checkEnabledCipherSuites(cipherSuites);
+  List<String> opensslSuites=new ArrayList<String>();
+  for (int i=0; i < cipherSuites.length; i++) {
+    String cipherSuite=cipherSuites[i];
+    if (cipherSuite.equals(TLS_EMPTY_RENEGOTIATION_INFO_SCSV)) {
+      continue;
+    }
+    String openssl=STANDARD_TO_OPENSSL_CIPHER_SUITES.get(cipherSuite);
+    String cs=(openssl == null) ? cipherSuite : openssl;
+    opensslSuites.add(cs);
+  }
+  SSL_set_cipher_lists(ssl,opensslSuites.toArray(new String[opensslSuites.size()]));
+}

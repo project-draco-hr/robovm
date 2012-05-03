@@ -1,17 +1,17 @@
 {
   if (classLoader == null) {
-    SecurityManager smgr=System.getSecurityManager();
-    if (smgr != null) {
-      ClassLoader calling=ClassLoader.callerClassLoader();
-      if (calling != null) {
-        smgr.checkPermission(new RuntimePermission("getClassLoader"));
-      }
-    }
     classLoader=ClassLoader.getSystemClassLoader();
   }
-  Class<?> clazz=ClassLoader.nativeFindClassUsingLoader(className,classLoader);
-  if (initializeBoolean) {
-    initializeClass0(clazz);
+  Class<?> result;
+  try {
+    result=classForName(className,initializeBoolean,classLoader);
   }
-  return clazz;
+ catch (  ClassNotFoundException e) {
+    Throwable cause=e.getCause();
+    if (cause instanceof ExceptionInInitializerError) {
+      throw (ExceptionInInitializerError)cause;
+    }
+    throw e;
+  }
+  return result;
 }

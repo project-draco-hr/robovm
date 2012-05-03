@@ -1,0 +1,71 @@
+{
+  read(START_ATTLIST);
+  skip();
+  String elementName=readName();
+  while (true) {
+    skip();
+    int c=peekCharacter();
+    if (c == '>') {
+      position++;
+      return;
+    }
+    String attributeName=readName();
+    skip();
+    if (position + 1 >= limit && !fillBuffer(2)) {
+      throw new XmlPullParserException("Malformed attribute list",this,null);
+    }
+    if (buffer[position] == NOTATION[0] && buffer[position + 1] == NOTATION[1]) {
+      read(NOTATION);
+      skip();
+    }
+    c=peekCharacter();
+    if (c == '(') {
+      position++;
+      while (true) {
+        skip();
+        readName();
+        skip();
+        c=peekCharacter();
+        if (c == ')') {
+          position++;
+          break;
+        }
+ else         if (c == '|') {
+          position++;
+        }
+ else {
+          throw new XmlPullParserException("Malformed attribute type",this,null);
+        }
+      }
+    }
+ else {
+      readName();
+    }
+    skip();
+    c=peekCharacter();
+    if (c == '#') {
+      position++;
+      c=peekCharacter();
+      if (c == 'R') {
+        read(REQUIRED);
+      }
+ else       if (c == 'I') {
+        read(IMPLIED);
+      }
+ else       if (c == 'F') {
+        read(FIXED);
+      }
+ else {
+        throw new XmlPullParserException("Malformed attribute type",this,null);
+      }
+      skip();
+      c=peekCharacter();
+    }
+    if (c == '"' || c == '\'') {
+      position++;
+      String value=readValue((char)c,true,true,ValueContext.ATTRIBUTE);
+      position++;
+      defineAttributeDefault(elementName,attributeName,value);
+    }
+  }
+}

@@ -15,22 +15,17 @@
       break;
     }
   }
-  if (parent == null && null != (parent=loggers.get(""))) {
+  if (parent == null && (parent=loggers.get("")) != null) {
     setParent(logger,parent);
   }
+  String nameDot=name + '.';
   Collection<Logger> allLoggers=loggers.values();
   for (  final Logger child : allLoggers) {
     Logger oldParent=child.getParent();
-    if (parent == oldParent && (name.length() == 0 || child.getName().startsWith(name + '.'))) {
+    if (parent == oldParent && (name.length() == 0 || child.getName().startsWith(nameDot))) {
       final Logger thisLogger=logger;
-      AccessController.doPrivileged(new PrivilegedAction<Object>(){
-        public Object run(){
-          child.setParent(thisLogger);
-          return null;
-        }
-      }
-);
-      if (null != oldParent) {
+      child.setParent(thisLogger);
+      if (oldParent != null) {
         oldParent.children.remove(child);
       }
     }

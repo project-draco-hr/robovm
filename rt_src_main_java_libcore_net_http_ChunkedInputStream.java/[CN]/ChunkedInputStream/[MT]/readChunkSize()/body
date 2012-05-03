@@ -1,0 +1,21 @@
+{
+  if (bytesRemainingInChunk != NO_CHUNK_YET) {
+    Streams.readAsciiLine(in);
+  }
+  String chunkSizeString=Streams.readAsciiLine(in);
+  int index=chunkSizeString.indexOf(";");
+  if (index != -1) {
+    chunkSizeString=chunkSizeString.substring(0,index);
+  }
+  try {
+    bytesRemainingInChunk=Integer.parseInt(chunkSizeString.trim(),16);
+  }
+ catch (  NumberFormatException e) {
+    throw new IOException("Expected a hex chunk size, but was " + chunkSizeString);
+  }
+  if (bytesRemainingInChunk == 0) {
+    hasMoreChunks=false;
+    httpEngine.readTrailers();
+    endOfInput(true);
+  }
+}

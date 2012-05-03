@@ -1,10 +1,12 @@
 {
-synchronized (lock) {
-    if (closed) {
-      throw new IOException(Messages.getString("luni.CF"));
-    }
+  PipedReader reader=destination;
+  if (isClosed) {
+    throw new IOException("Pipe is closed");
   }
-  if (dest != null) {
-    dest.flush();
+  if (reader == null) {
+    return;
+  }
+synchronized (reader) {
+    reader.notifyAll();
   }
 }

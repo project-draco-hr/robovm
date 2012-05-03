@@ -1,0 +1,37 @@
+{
+  VMThread vmt=vmThread;
+  if (vmt == null) {
+    throw new AssertionError();
+  }
+synchronized (vmt) {
+switch (parkState) {
+case ParkState.PREEMPTIVELY_UNPARKED:
+{
+        parkState=ParkState.UNPARKED;
+        break;
+      }
+case ParkState.UNPARKED:
+{
+      long millis=nanos / NANOS_PER_MILLI;
+      nanos%=NANOS_PER_MILLI;
+      parkState=ParkState.PARKED;
+      try {
+        vmt.wait(millis,(int)nanos);
+      }
+ catch (      InterruptedException ex) {
+        interrupt();
+      }
+ finally {
+        if (parkState == ParkState.PARKED) {
+          parkState=ParkState.UNPARKED;
+        }
+      }
+      break;
+    }
+default :
+{
+    throw new AssertionError("shouldn't happen: attempt to repark");
+  }
+}
+}
+}

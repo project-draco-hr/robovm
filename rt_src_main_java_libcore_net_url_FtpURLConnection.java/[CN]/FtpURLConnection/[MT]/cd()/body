@@ -1,0 +1,15 @@
+{
+  int idx=url.getFile().lastIndexOf('/');
+  if (idx > 0) {
+    String dir=url.getFile().substring(0,idx);
+    write("CWD " + dir + "\r\n");
+    int reply=getReply();
+    if (reply != FTP_FILEOK && dir.length() > 0 && dir.charAt(0) == '/') {
+      write("CWD " + dir.substring(1) + "\r\n");
+      reply=getReply();
+    }
+    if (reply != FTP_FILEOK) {
+      throw new IOException("Unable to change directories");
+    }
+  }
+}

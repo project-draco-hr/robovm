@@ -1,0 +1,40 @@
+{
+  if (!isCacheable(request)) {
+    return ResponseSource.NETWORK;
+  }
+  if (request.isNoCache() || request.hasConditions()) {
+    return ResponseSource.NETWORK;
+  }
+  long ageMillis=computeAge(nowMillis);
+  long freshMillis=computeFreshnessLifetime();
+  if (request.getMaxAgeSeconds() != -1) {
+    freshMillis=Math.min(freshMillis,TimeUnit.SECONDS.toMillis(request.getMaxAgeSeconds()));
+  }
+  long minFreshMillis=0;
+  if (request.getMinFreshSeconds() != -1) {
+    minFreshMillis=TimeUnit.SECONDS.toMillis(request.getMinFreshSeconds());
+  }
+  long maxStaleMillis=0;
+  if (!mustRevalidate && request.getMaxStaleSeconds() != -1) {
+    maxStaleMillis=TimeUnit.SECONDS.toMillis(request.getMaxStaleSeconds());
+  }
+  if (!noCache && ageMillis + minFreshMillis < freshMillis + maxStaleMillis) {
+    if (ageMillis + minFreshMillis >= freshMillis) {
+      headers.add("Warning","110 HttpURLConnection \"Response is stale\"");
+    }
+    if (ageMillis > TimeUnit.HOURS.toMillis(24) && isFreshnessLifetimeHeuristic()) {
+      headers.add("Warning","113 HttpURLConnection \"Heuristic expiration\"");
+    }
+    return ResponseSource.CACHE;
+  }
+  if (lastModified != null) {
+    request.setIfModifiedSince(lastModified);
+  }
+ else   if (servedDate != null) {
+    request.setIfModifiedSince(servedDate);
+  }
+  if (etag != null) {
+    request.setIfNoneMatch(etag);
+  }
+  return request.hasConditions() ? ResponseSource.CONDITIONAL_CACHE : ResponseSource.NETWORK;
+}

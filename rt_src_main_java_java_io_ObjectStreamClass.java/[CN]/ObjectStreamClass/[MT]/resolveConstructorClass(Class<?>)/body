@@ -1,0 +1,40 @@
+{
+  if (resolvedConstructorClass != null) {
+    return resolvedConstructorClass;
+  }
+  Class<?> constructorClass=objectClass;
+  boolean wasSerializable=(flags & ObjectStreamConstants.SC_SERIALIZABLE) != 0;
+  if (wasSerializable) {
+    while (constructorClass != null && ObjectStreamClass.isSerializable(constructorClass)) {
+      constructorClass=constructorClass.getSuperclass();
+    }
+  }
+  Constructor<?> constructor=null;
+  if (constructorClass != null) {
+    try {
+      constructor=constructorClass.getDeclaredConstructor(EmptyArray.CLASS);
+    }
+ catch (    NoSuchMethodException ignored) {
+    }
+  }
+  if (constructor == null) {
+    String className=constructorClass != null ? constructorClass.getName() : null;
+    throw new InvalidClassException(className,"IllegalAccessException");
+  }
+  int constructorModifiers=constructor.getModifiers();
+  boolean isPublic=Modifier.isPublic(constructorModifiers);
+  boolean isProtected=Modifier.isProtected(constructorModifiers);
+  boolean isPrivate=Modifier.isPrivate(constructorModifiers);
+  boolean wasExternalizable=(flags & ObjectStreamConstants.SC_EXTERNALIZABLE) != 0;
+  if (isPrivate || (wasExternalizable && !isPublic)) {
+    throw new InvalidClassException(constructorClass.getName(),"IllegalAccessException");
+  }
+  if (!isPublic && !isProtected) {
+    if (!inSamePackage(constructorClass,objectClass)) {
+      throw new InvalidClassException(constructorClass.getName(),"IllegalAccessException");
+    }
+  }
+  resolvedConstructorClass=constructorClass;
+  resolvedConstructorMethodId=getConstructorId(resolvedConstructorClass);
+  return constructorClass;
+}

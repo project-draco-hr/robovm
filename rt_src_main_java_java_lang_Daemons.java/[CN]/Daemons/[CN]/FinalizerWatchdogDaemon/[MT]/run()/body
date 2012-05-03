@@ -1,0 +1,27 @@
+{
+  while (isRunning()) {
+    Object object=FinalizerDaemon.INSTANCE.finalizingObject;
+    long startedNanos=FinalizerDaemon.INSTANCE.finalizingStartedNanos;
+    long sleepMillis=MAX_FINALIZE_MILLIS;
+    if (object != null) {
+      long elapsedMillis=(System.nanoTime() - startedNanos) / NANOS_PER_MILLI;
+      sleepMillis-=elapsedMillis;
+    }
+    if (sleepMillis > 0) {
+      try {
+        Thread.sleep(sleepMillis);
+      }
+ catch (      InterruptedException e) {
+        continue;
+      }
+    }
+    if (object == null || object != FinalizerDaemon.INSTANCE.finalizingObject || VMRuntime.getRuntime().isDebuggerActive()) {
+      continue;
+    }
+    long elapsedMillis=(System.nanoTime() - startedNanos) / NANOS_PER_MILLI;
+    Exception syntheticException=new TimeoutException();
+    syntheticException.setStackTrace(FinalizerDaemon.INSTANCE.getStackTrace());
+    System.logE(object.getClass().getName() + ".finalize() timed out after " + elapsedMillis+ " ms; limit is "+ MAX_FINALIZE_MILLIS+ " ms",syntheticException);
+    System.exit(2);
+  }
+}

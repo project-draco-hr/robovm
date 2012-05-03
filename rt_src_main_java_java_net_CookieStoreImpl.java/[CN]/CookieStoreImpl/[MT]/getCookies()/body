@@ -1,15 +1,15 @@
 {
-  List<HttpCookie> cookies=new ArrayList<HttpCookie>();
-  Collection<ArrayList<HttpCookie>> values=storeMap.values();
-  for (  ArrayList<HttpCookie> list : values) {
-    for (    HttpCookie cookie : list) {
+  List<HttpCookie> result=new ArrayList<HttpCookie>();
+  for (  List<HttpCookie> list : map.values()) {
+    for (Iterator<HttpCookie> i=list.iterator(); i.hasNext(); ) {
+      HttpCookie cookie=i.next();
       if (cookie.hasExpired()) {
-        list.remove(cookie);
+        i.remove();
       }
- else       if (!cookies.contains(cookie)) {
-        cookies.add(cookie);
+ else       if (!result.contains(cookie)) {
+        result.add(cookie);
       }
     }
   }
-  return Collections.unmodifiableList(cookies);
+  return Collections.unmodifiableList(result);
 }

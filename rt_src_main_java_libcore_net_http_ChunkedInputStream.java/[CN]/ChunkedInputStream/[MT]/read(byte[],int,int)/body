@@ -1,0 +1,24 @@
+{
+  Arrays.checkOffsetAndCount(buffer.length,offset,count);
+  checkNotClosed();
+  if (!hasMoreChunks) {
+    return -1;
+  }
+  if (bytesRemainingInChunk == 0 || bytesRemainingInChunk == NO_CHUNK_YET) {
+    readChunkSize();
+    if (!hasMoreChunks) {
+      return -1;
+    }
+  }
+  int read=in.read(buffer,offset,Math.min(count,bytesRemainingInChunk));
+  if (read == -1) {
+    unexpectedEndOfInput();
+    throw new IOException("unexpected end of stream");
+  }
+  bytesRemainingInChunk-=read;
+  cacheWrite(buffer,offset,read);
+  if (bytesRemainingInChunk == 0 && in.available() >= MIN_LAST_CHUNK_LENGTH) {
+    readChunkSize();
+  }
+  return read;
+}

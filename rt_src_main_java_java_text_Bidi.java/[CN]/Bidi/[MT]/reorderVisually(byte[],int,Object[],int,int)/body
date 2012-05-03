@@ -1,6 +1,13 @@
 {
   if (count < 0 || levelStart < 0 || objectStart < 0 || count > levels.length - levelStart || count > objects.length - objectStart) {
-    throw new IllegalArgumentException(Messages.getString("text.13",new Object[]{levels.length,levelStart,objects.length,objectStart,count}));
+    throw new IllegalArgumentException("Invalid ranges (levels=" + levels.length + ", levelStart="+ levelStart+ ", objects="+ objects.length+ ", objectStart="+ objectStart+ ", count="+ count+ ")");
   }
-  com.ibm.icu.text.Bidi.reorderVisually(levels,levelStart,objects,objectStart,count);
+  byte[] realLevels=new byte[count];
+  System.arraycopy(levels,levelStart,realLevels,0,count);
+  int[] indices=ubidi_reorderVisual(realLevels,count);
+  ArrayList<Object> result=new ArrayList<Object>(count);
+  for (int i=0; i < count; i++) {
+    result.add(objects[objectStart + indices[i]]);
+  }
+  System.arraycopy(result.toArray(),0,objects,objectStart,count);
 }

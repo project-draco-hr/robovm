@@ -1,0 +1,23 @@
+{
+  target.checkWritable();
+  checkOpenConnected();
+  if (!target.hasRemaining()) {
+    return 0;
+  }
+  int readCount=0;
+  if (target.isDirect() || target.hasArray()) {
+    readCount=readImpl(target);
+    if (readCount > 0) {
+      target.position(target.position() + readCount);
+    }
+  }
+ else {
+    byte[] readArray=new byte[target.remaining()];
+    ByteBuffer readBuffer=ByteBuffer.wrap(readArray);
+    readCount=readImpl(readBuffer);
+    if (readCount > 0) {
+      target.put(readArray,0,readCount);
+    }
+  }
+  return readCount;
+}

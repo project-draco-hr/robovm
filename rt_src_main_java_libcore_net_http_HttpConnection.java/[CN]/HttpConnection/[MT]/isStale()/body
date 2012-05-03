@@ -1,0 +1,30 @@
+{
+  if (!isEligibleForRecycling()) {
+    return true;
+  }
+  InputStream in=getInputStream();
+  if (in.available() > 0) {
+    return false;
+  }
+  Socket socket=getSocket();
+  int soTimeout=socket.getSoTimeout();
+  try {
+    socket.setSoTimeout(1);
+    in.mark(1);
+    int byteRead=in.read();
+    if (byteRead != -1) {
+      in.reset();
+      return false;
+    }
+    return true;
+  }
+ catch (  SocketTimeoutException e) {
+    return false;
+  }
+catch (  IOException e) {
+    return true;
+  }
+ finally {
+    socket.setSoTimeout(soTimeout);
+  }
+}

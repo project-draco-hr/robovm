@@ -1,0 +1,26 @@
+{
+  VMThread vmt=vmThread;
+  if (vmt == null) {
+    parkState=ParkState.PREEMPTIVELY_UNPARKED;
+    return;
+  }
+synchronized (vmt) {
+switch (parkState) {
+case ParkState.PREEMPTIVELY_UNPARKED:
+{
+        break;
+      }
+case ParkState.UNPARKED:
+{
+      parkState=ParkState.PREEMPTIVELY_UNPARKED;
+      break;
+    }
+default :
+{
+    parkState=ParkState.UNPARKED;
+    vmt.notifyAll();
+    break;
+  }
+}
+}
+}

@@ -1,0 +1,31 @@
+{
+  if (s == null) {
+    throw new NullPointerException();
+  }
+  int charCount=s.length();
+  int i=0;
+  if (charCount > 0) {
+    char ch=s.charAt(0);
+    if (ch == '+') {
+      s=s.substring(1);
+      --charCount;
+    }
+ else     if (ch == '-') {
+      ++i;
+    }
+  }
+  if (charCount - i == 0) {
+    throw invalidBigInteger(s);
+  }
+  boolean nonAscii=false;
+  for (; i < charCount; ++i) {
+    char ch=s.charAt(i);
+    if (Character.digit(ch,base) == -1) {
+      throw invalidBigInteger(s);
+    }
+    if (ch > 128) {
+      nonAscii=true;
+    }
+  }
+  return nonAscii ? toAscii(s,base) : s;
+}

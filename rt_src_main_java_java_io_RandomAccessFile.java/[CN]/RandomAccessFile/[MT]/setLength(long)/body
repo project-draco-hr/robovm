@@ -1,12 +1,16 @@
 {
-  openCheck();
   if (newLength < 0) {
-    throw new IllegalArgumentException();
+    throw new IllegalArgumentException("newLength < 0");
   }
-synchronized (repositionLock) {
-    long position=fileSystem.seek(fd.descriptor,0,IFileSystem.SEEK_CUR);
-    fileSystem.truncate(fd.descriptor,newLength);
-    seek(position > newLength ? newLength : position);
+  try {
+    Libcore.os.ftruncate(fd,newLength);
+  }
+ catch (  ErrnoException errnoException) {
+    throw errnoException.rethrowAsIOException();
+  }
+  long filePointer=getFilePointer();
+  if (filePointer > newLength) {
+    seek(newLength);
   }
   if (syncMetadata) {
     fd.sync();

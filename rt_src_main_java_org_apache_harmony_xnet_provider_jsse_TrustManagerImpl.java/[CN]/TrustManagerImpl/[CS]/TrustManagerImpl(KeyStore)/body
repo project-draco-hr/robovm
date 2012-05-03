@@ -1,20 +1,35 @@
 {
+  CertPathValidator validatorLocal=null;
+  CertificateFactory factoryLocal=null;
+  KeyStore rootKeyStoreLocal=null;
+  TrustedCertificateStore trustedCertificateStoreLocal=null;
+  TrustedCertificateIndex trustedCertificateIndexLocal=null;
+  X509Certificate[] acceptedIssuersLocal=null;
+  Exception errLocal=null;
   try {
-    validator=CertPathValidator.getInstance("PKIX");
-    factory=CertificateFactory.getInstance("X509");
-    byte[] nameConstrains=null;
-    Set<TrustAnchor> trusted=new HashSet<TrustAnchor>();
-    for (Enumeration<String> en=ks.aliases(); en.hasMoreElements(); ) {
-      final String alias=en.nextElement();
-      final X509Certificate cert=(X509Certificate)ks.getCertificate(alias);
-      if (cert != null) {
-        trusted.add(new TrustAnchor(cert,nameConstrains));
-      }
+    validatorLocal=CertPathValidator.getInstance("PKIX");
+    factoryLocal=CertificateFactory.getInstance("X509");
+    if ("AndroidCAStore".equals(keyStore.getType())) {
+      rootKeyStoreLocal=keyStore;
+      trustedCertificateStoreLocal=new TrustedCertificateStore();
+      acceptedIssuersLocal=null;
+      trustedCertificateIndexLocal=new TrustedCertificateIndex();
     }
-    params=new PKIXParameters(trusted);
-    params.setRevocationEnabled(false);
+ else {
+      rootKeyStoreLocal=null;
+      trustedCertificateStoreLocal=null;
+      acceptedIssuersLocal=acceptedIssuers(keyStore);
+      trustedCertificateIndexLocal=new TrustedCertificateIndex(trustAnchors(acceptedIssuersLocal));
+    }
   }
  catch (  Exception e) {
-    err=e;
+    errLocal=e;
   }
+  this.rootKeyStore=rootKeyStoreLocal;
+  this.trustedCertificateStore=trustedCertificateStoreLocal;
+  this.validator=validatorLocal;
+  this.factory=factoryLocal;
+  this.trustedCertificateIndex=trustedCertificateIndexLocal;
+  this.acceptedIssuers=acceptedIssuersLocal;
+  this.err=errLocal;
 }

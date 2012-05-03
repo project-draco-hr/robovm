@@ -1,0 +1,35 @@
+{
+  String name=fileName(host,port);
+  File file=accessOrder.get(name);
+  if (file == null) {
+    if (initialFiles == null) {
+      return null;
+    }
+    if (Arrays.binarySearch(initialFiles,name) < 0) {
+      return null;
+    }
+    file=new File(directory,name);
+    accessOrder.put(name,file);
+  }
+  FileInputStream in;
+  try {
+    in=new FileInputStream(file);
+  }
+ catch (  FileNotFoundException e) {
+    logReadError(host,file,e);
+    return null;
+  }
+  try {
+    int size=(int)file.length();
+    byte[] data=new byte[size];
+    new DataInputStream(in).readFully(data);
+    return data;
+  }
+ catch (  IOException e) {
+    logReadError(host,file,e);
+    return null;
+  }
+ finally {
+    IoUtils.closeQuietly(in);
+  }
+}

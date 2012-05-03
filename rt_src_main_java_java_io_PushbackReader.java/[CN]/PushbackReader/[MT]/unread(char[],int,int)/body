@@ -1,17 +1,10 @@
 {
 synchronized (lock) {
-    if (buf == null) {
-      throw new IOException(Messages.getString("luni.24"));
-    }
+    checkNotClosed();
     if (length > pos) {
-      throw new IOException(Messages.getString("luni.D3"));
+      throw new IOException("Pushback buffer full");
     }
-    if (offset > buffer.length - length || offset < 0) {
-      throw new ArrayIndexOutOfBoundsException(Messages.getString("luni.12",offset));
-    }
-    if (length < 0) {
-      throw new ArrayIndexOutOfBoundsException(Messages.getString("luni.18",length));
-    }
+    Arrays.checkOffsetAndCount(buffer.length,offset,length);
     for (int i=offset + length - 1; i >= offset; i--) {
       unread(buffer[i]);
     }

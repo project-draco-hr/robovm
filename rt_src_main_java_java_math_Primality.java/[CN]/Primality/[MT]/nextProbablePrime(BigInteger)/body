@@ -1,31 +1,22 @@
 {
   int i, j;
-  int certainty;
   int gapSize=1024;
-  int modules[]=new int[primes.length];
+  int[] modules=new int[primes.length];
   boolean isDivisible[]=new boolean[gapSize];
-  BigInteger startPoint;
-  BigInteger probPrime;
-  if ((n.numberLength == 1) && (n.digits[0] >= 0) && (n.digits[0] < primes[primes.length - 1])) {
-    for (i=0; n.digits[0] >= primes[i]; i++) {
-      ;
+  BigInt ni=n.getBigInt();
+  if (ni.bitLength() <= 10) {
+    int l=(int)ni.longInt();
+    if (l < primes[primes.length - 1]) {
+      for (i=0; l >= primes[i]; i++) {
+      }
+      return BIprimes[i];
     }
-    return BIprimes[i];
   }
-  startPoint=new BigInteger(1,n.numberLength,new int[n.numberLength + 1]);
-  System.arraycopy(n.digits,0,startPoint.digits,0,n.numberLength);
-  if (n.testBit(0)) {
-    Elementary.inplaceAdd(startPoint,2);
-  }
- else {
-    startPoint.digits[0]|=1;
-  }
-  j=startPoint.bitLength();
-  for (certainty=2; j < BITS[certainty]; certainty++) {
-    ;
-  }
+  BigInt startPoint=ni.copy();
+  BigInt probPrime=new BigInt();
+  startPoint.addPositiveInt(BigInt.remainderByPositiveInt(ni,2) + 1);
   for (i=0; i < primes.length; i++) {
-    modules[i]=Division.remainder(startPoint,primes[i]) - gapSize;
+    modules[i]=BigInt.remainderByPositiveInt(startPoint,primes[i]) - gapSize;
   }
   while (true) {
     Arrays.fill(isDivisible,false);
@@ -38,13 +29,13 @@
     }
     for (j=0; j < gapSize; j++) {
       if (!isDivisible[j]) {
-        probPrime=startPoint.copy();
-        Elementary.inplaceAdd(probPrime,j);
-        if (millerRabin(probPrime,certainty)) {
-          return probPrime;
+        probPrime.putCopy(startPoint);
+        probPrime.addPositiveInt(j);
+        if (probPrime.isPrime(100)) {
+          return new BigInteger(probPrime);
         }
       }
     }
-    Elementary.inplaceAdd(startPoint,gapSize);
+    startPoint.addPositiveInt(gapSize);
   }
 }

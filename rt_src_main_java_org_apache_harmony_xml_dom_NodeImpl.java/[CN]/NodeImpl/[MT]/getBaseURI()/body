@@ -1,0 +1,41 @@
+{
+switch (getNodeType()) {
+case DOCUMENT_NODE:
+    return sanitizeUri(((Document)this).getDocumentURI());
+case ELEMENT_NODE:
+  Element element=(Element)this;
+String uri=element.getAttributeNS("http://www.w3.org/XML/1998/namespace","base");
+try {
+if (uri == null || uri.isEmpty()) {
+  return getParentBaseUri();
+}
+if (new URI(uri).isAbsolute()) {
+  return uri;
+}
+String parentUri=getParentBaseUri();
+if (parentUri == null) {
+  return null;
+}
+return new URI(parentUri).resolve(uri).toString();
+}
+ catch (URISyntaxException e) {
+return null;
+}
+case PROCESSING_INSTRUCTION_NODE:
+return getParentBaseUri();
+case NOTATION_NODE:
+case ENTITY_NODE:
+return null;
+case ENTITY_REFERENCE_NODE:
+return null;
+case DOCUMENT_TYPE_NODE:
+case DOCUMENT_FRAGMENT_NODE:
+case ATTRIBUTE_NODE:
+case TEXT_NODE:
+case CDATA_SECTION_NODE:
+case COMMENT_NODE:
+return null;
+default :
+throw new DOMException(DOMException.NOT_SUPPORTED_ERR,"Unsupported node type " + getNodeType());
+}
+}

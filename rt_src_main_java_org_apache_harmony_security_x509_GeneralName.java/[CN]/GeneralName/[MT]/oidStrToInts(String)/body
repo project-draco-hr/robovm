@@ -1,33 +1,34 @@
 {
-  byte[] bytes=oid.getBytes("UTF-8");
-  if (bytes[bytes.length - 1] == '.') {
-    throw new IOException(Messages.getString("security.56",oid));
+  int length=oid.length();
+  if (oid.charAt(length - 1) == '.') {
+    throw new IOException("Bad OID: " + oid);
   }
-  int[] result=new int[bytes.length / 2 + 1];
+  int[] result=new int[length / 2 + 1];
   int number=0;
-  for (int i=0; i < bytes.length; i++) {
+  for (int i=0; i < length; i++) {
     int value=0;
     int pos=i;
-    while ((i < bytes.length) && (bytes[i] >= '0') && (bytes[i] <= '9')) {
-      value=10 * value + (bytes[i++] - 48);
+    for (; i < length; i++) {
+      char ch=oid.charAt(i);
+      if ((ch < '0') || (ch > '9')) {
+        break;
+      }
+      value=10 * value + (ch - '0');
     }
     if (i == pos) {
-      throw new IOException(Messages.getString("security.56",oid));
+      throw new IOException("Bad OID: " + oid);
     }
     result[number++]=value;
-    if (i >= bytes.length) {
+    if (i == length) {
       break;
     }
-    if (bytes[i] != '.') {
-      throw new IOException(Messages.getString("security.56",oid));
+    char ch=oid.charAt(i);
+    if (ch != '.') {
+      throw new IOException("Bad OID: " + oid);
     }
   }
   if (number < 2) {
-    throw new IOException(Messages.getString("security.18A",oid));
+    throw new IOException("OID should consist of no less than 2 components: " + oid);
   }
-  int[] res=new int[number];
-  for (int i=0; i < number; i++) {
-    res[i]=result[i];
-  }
-  return res;
+  return Arrays.copyOfRange(result,0,number);
 }

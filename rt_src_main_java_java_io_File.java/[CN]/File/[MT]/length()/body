@@ -1,7 +1,8 @@
 {
-  SecurityManager security=System.getSecurityManager();
-  if (security != null) {
-    security.checkRead(path);
+  try {
+    return Libcore.os.stat(path).st_size;
   }
-  return lengthImpl(properPath(true));
+ catch (  ErrnoException errnoException) {
+    return 0;
+  }
 }

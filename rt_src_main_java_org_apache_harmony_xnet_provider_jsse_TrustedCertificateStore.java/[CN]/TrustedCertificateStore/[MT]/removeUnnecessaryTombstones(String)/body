@@ -1,0 +1,24 @@
+{
+  if (!isUser(alias)) {
+    throw new AssertionError(alias);
+  }
+  int dotIndex=alias.lastIndexOf('.');
+  if (dotIndex == -1) {
+    throw new AssertionError(alias);
+  }
+  String hash=alias.substring(PREFIX_USER.length(),dotIndex);
+  int lastTombstoneIndex=Integer.parseInt(alias.substring(dotIndex + 1));
+  if (file(addedDir,hash,lastTombstoneIndex + 1).exists()) {
+    return;
+  }
+  while (lastTombstoneIndex >= 0) {
+    File file=file(addedDir,hash,lastTombstoneIndex);
+    if (!isTombstone(file)) {
+      break;
+    }
+    if (!file.delete()) {
+      throw new IOException("Could not remove " + file);
+    }
+    lastTombstoneIndex--;
+  }
+}

@@ -1,17 +1,17 @@
 {
   if (finished) {
-    return ((o_buffer == null) || (index == o_buffer.length)) ? -1 : o_buffer[index++] & 0xFF;
+    return ((outputBuffer == null) || (index == outputBuffer.length)) ? -1 : outputBuffer[index++] & 0xFF;
   }
-  if ((o_buffer != null) && (index < o_buffer.length)) {
-    return o_buffer[index++] & 0xFF;
+  if ((outputBuffer != null) && (index < outputBuffer.length)) {
+    return outputBuffer[index++] & 0xFF;
   }
   index=0;
-  o_buffer=null;
-  int num_read;
-  while (o_buffer == null) {
-    if ((num_read=in.read(i_buffer)) == -1) {
+  outputBuffer=null;
+  int byteCount;
+  while (outputBuffer == null) {
+    if ((byteCount=in.read(inputBuffer)) == -1) {
       try {
-        o_buffer=cipher.doFinal();
+        outputBuffer=cipher.doFinal();
       }
  catch (      Exception e) {
         throw new IOException(e.getMessage());
@@ -19,7 +19,7 @@
       finished=true;
       break;
     }
-    o_buffer=cipher.update(i_buffer,0,num_read);
+    outputBuffer=cipher.update(inputBuffer,0,byteCount);
   }
   return read();
 }

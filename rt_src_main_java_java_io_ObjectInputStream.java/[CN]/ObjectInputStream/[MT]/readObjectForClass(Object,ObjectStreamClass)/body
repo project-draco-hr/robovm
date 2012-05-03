@@ -1,7 +1,7 @@
 {
   currentObject=object;
   currentClass=classDesc;
-  boolean hadWriteMethod=(classDesc.getFlags() & SC_WRITE_METHOD) > 0;
+  boolean hadWriteMethod=(classDesc.getFlags() & SC_WRITE_METHOD) != 0;
   Class<?> targetClass=classDesc.forClass();
   final Method readMethod;
   if (targetClass == null || !mustResolve) {
@@ -12,9 +12,9 @@
   }
   try {
     if (readMethod != null) {
-      AccessController.doPrivileged(new PriviAction<Object>(readMethod));
+      readMethod.setAccessible(true);
       try {
-        readMethod.invoke(object,new Object[]{this});
+        readMethod.invoke(object,this);
       }
  catch (      InvocationTargetException e) {
         Throwable ex=e.getTargetException();

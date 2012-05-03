@@ -1,0 +1,17 @@
+{
+  Map<String,UserData> userData=node.document.getUserDataMapForRead(node);
+  if (!userData.isEmpty()) {
+    getUserDataMap(node).putAll(userData);
+  }
+  node.document=this;
+  NodeList list=node.getChildNodes();
+  for (int i=0; i < list.getLength(); i++) {
+    changeDocumentToThis((NodeImpl)list.item(i));
+  }
+  if (node.getNodeType() == Node.ELEMENT_NODE) {
+    NamedNodeMap attributes=node.getAttributes();
+    for (int i=0; i < attributes.getLength(); i++) {
+      changeDocumentToThis((AttrImpl)attributes.item(i));
+    }
+  }
+}

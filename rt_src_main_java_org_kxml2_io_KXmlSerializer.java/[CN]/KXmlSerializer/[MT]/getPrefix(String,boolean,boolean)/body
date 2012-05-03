@@ -1,0 +1,34 @@
+{
+  for (int i=nspCounts[depth + 1] * 2 - 2; i >= 0; i-=2) {
+    if (nspStack[i + 1].equals(namespace) && (includeDefault || !nspStack[i].isEmpty())) {
+      String cand=nspStack[i];
+      for (int j=i + 2; j < nspCounts[depth + 1] * 2; j++) {
+        if (nspStack[j].equals(cand)) {
+          cand=null;
+          break;
+        }
+      }
+      if (cand != null)       return cand;
+    }
+  }
+  if (!create)   return null;
+  String prefix;
+  if (namespace.isEmpty())   prefix="";
+ else {
+    do {
+      prefix="n" + (auto++);
+      for (int i=nspCounts[depth + 1] * 2 - 2; i >= 0; i-=2) {
+        if (prefix.equals(nspStack[i])) {
+          prefix=null;
+          break;
+        }
+      }
+    }
+ while (prefix == null);
+  }
+  boolean p=pending;
+  pending=false;
+  setPrefix(prefix,namespace);
+  pending=p;
+  return prefix;
+}

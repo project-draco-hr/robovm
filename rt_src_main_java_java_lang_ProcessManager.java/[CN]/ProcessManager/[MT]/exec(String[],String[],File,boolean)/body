@@ -1,0 +1,42 @@
+{
+  if (taintedCommand == null) {
+    throw new NullPointerException();
+  }
+  if (taintedCommand.length == 0) {
+    throw new IndexOutOfBoundsException();
+  }
+  String[] command=taintedCommand.clone();
+  String[] environment=taintedEnvironment != null ? taintedEnvironment.clone() : null;
+  for (  String arg : command) {
+    if (arg == null) {
+      throw new NullPointerException();
+    }
+  }
+  if (environment != null) {
+    for (    String env : environment) {
+      if (env == null) {
+        throw new NullPointerException();
+      }
+    }
+  }
+  FileDescriptor in=new FileDescriptor();
+  FileDescriptor out=new FileDescriptor();
+  FileDescriptor err=new FileDescriptor();
+  String workingPath=(workingDirectory == null) ? null : workingDirectory.getPath();
+synchronized (processReferences) {
+    int pid;
+    try {
+      pid=exec(command,environment,workingPath,in,out,err,redirectErrorStream);
+    }
+ catch (    IOException e) {
+      IOException wrapper=new IOException("Error running exec()." + " Command: " + Arrays.toString(command) + " Working Directory: "+ workingDirectory+ " Environment: "+ Arrays.toString(environment));
+      wrapper.initCause(e);
+      throw wrapper;
+    }
+    ProcessImpl process=new ProcessImpl(pid,in,out,err);
+    ProcessReference processReference=new ProcessReference(process,referenceQueue);
+    processReferences.put(pid,processReference);
+    processReferences.notifyAll();
+    return process;
+  }
+}

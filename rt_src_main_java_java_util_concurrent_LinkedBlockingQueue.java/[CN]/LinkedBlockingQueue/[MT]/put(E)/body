@@ -1,6 +1,7 @@
 {
   if (e == null)   throw new NullPointerException();
   int c=-1;
+  Node<E> node=new Node(e);
   final ReentrantLock putLock=this.putLock;
   final AtomicInteger count=this.count;
   putLock.lockInterruptibly();
@@ -8,7 +9,7 @@
     while (count.get() == capacity) {
       notFull.await();
     }
-    enqueue(e);
+    enqueue(node);
     c=count.getAndIncrement();
     if (c + 1 < capacity)     notFull.signal();
   }

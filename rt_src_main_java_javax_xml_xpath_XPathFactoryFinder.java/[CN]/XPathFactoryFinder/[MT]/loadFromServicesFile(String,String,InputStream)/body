@@ -7,7 +7,7 @@
  catch (  java.io.UnsupportedEncodingException e) {
     rd=new BufferedReader(new InputStreamReader(in),DEFAULT_LINE_LENGTH);
   }
-  String factoryClassName=null;
+  String factoryClassName;
   XPathFactory resultFactory=null;
   while (true) {
     try {
@@ -26,23 +26,19 @@
         continue;
       }
       try {
-        XPathFactory foundFactory=(XPathFactory)createInstance(factoryClassName);
+        XPathFactory foundFactory=createInstance(factoryClassName);
         if (foundFactory.isObjectModelSupported(uri)) {
           resultFactory=foundFactory;
           break;
         }
       }
- catch (      Exception e) {
+ catch (      Exception ignored) {
       }
     }
  else {
       break;
     }
   }
-  try {
-    rd.close();
-  }
- catch (  IOException exc) {
-  }
+  IoUtils.closeQuietly(rd);
   return resultFactory;
 }

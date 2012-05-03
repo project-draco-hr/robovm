@@ -1,0 +1,23 @@
+{
+  for (int i=start; i < end; ) {
+    char ch=uri.charAt(i);
+    if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')|| isRetained(ch)) {
+      i++;
+    }
+ else     if (ch == '%') {
+      if (i + 2 >= end) {
+        throw new URISyntaxException(uri,"Incomplete % sequence in " + name,i);
+      }
+      int d1=hexToInt(uri.charAt(i + 1));
+      int d2=hexToInt(uri.charAt(i + 2));
+      if (d1 == -1 || d2 == -1) {
+        throw new URISyntaxException(uri,"Invalid % sequence: " + uri.substring(i,i + 3) + " in "+ name,i);
+      }
+      i+=3;
+    }
+ else {
+      throw new URISyntaxException(uri,"Illegal character in " + name,i);
+    }
+  }
+  return uri.substring(start,end);
+}

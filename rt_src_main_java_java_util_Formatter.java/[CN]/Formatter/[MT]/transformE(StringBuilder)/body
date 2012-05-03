@@ -1,0 +1,30 @@
+{
+  final int precision=formatToken.getPrecision();
+  String pattern="0E+00";
+  if (precision > 0) {
+    StringBuilder sb=new StringBuilder("0.");
+    char[] zeros=new char[precision];
+    Arrays.fill(zeros,'0');
+    sb.append(zeros);
+    sb.append("E+00");
+    pattern=sb.toString();
+  }
+  NativeDecimalFormat nf=getDecimalFormat(pattern);
+  char[] chars;
+  if (arg instanceof BigDecimal) {
+    chars=nf.formatBigDecimal((BigDecimal)arg,null);
+  }
+ else {
+    chars=nf.formatDouble(((Number)arg).doubleValue(),null);
+  }
+  for (int i=0; i < chars.length; ++i) {
+    if (chars[i] == 'E') {
+      chars[i]='e';
+    }
+  }
+  result.append(chars);
+  if (formatToken.flagSharp && precision == 0) {
+    int indexOfE=result.indexOf("e");
+    result.insert(indexOfE,localeData.decimalSeparator);
+  }
+}

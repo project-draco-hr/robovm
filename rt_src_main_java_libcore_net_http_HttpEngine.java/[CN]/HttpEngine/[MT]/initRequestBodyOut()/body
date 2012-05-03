@@ -1,0 +1,33 @@
+{
+  int chunkLength=policy.getChunkLength();
+  if (chunkLength > 0 || requestHeaders.isChunked()) {
+    sendChunked=true;
+    if (chunkLength == -1) {
+      chunkLength=DEFAULT_CHUNK_LENGTH;
+    }
+  }
+  if (socketOut == null) {
+    throw new IllegalStateException("No socket to write to; was a POST cached?");
+  }
+  if (httpMinorVersion == 0) {
+    sendChunked=false;
+  }
+  int fixedContentLength=policy.getFixedContentLength();
+  if (requestBodyOut != null) {
+  }
+ else   if (fixedContentLength != -1) {
+    writeRequestHeaders(fixedContentLength);
+    requestBodyOut=new FixedLengthOutputStream(requestOut,fixedContentLength);
+  }
+ else   if (sendChunked) {
+    writeRequestHeaders(-1);
+    requestBodyOut=new ChunkedOutputStream(requestOut,chunkLength);
+  }
+ else   if (requestHeaders.getContentLength() != -1) {
+    writeRequestHeaders(requestHeaders.getContentLength());
+    requestBodyOut=new RetryableOutputStream(requestHeaders.getContentLength());
+  }
+ else {
+    requestBodyOut=new RetryableOutputStream();
+  }
+}

@@ -1,0 +1,12 @@
+{
+  if (driver == null) {
+    return;
+  }
+  ClassLoader callerClassLoader=VMStack.getCallingClassLoader();
+  if (!DriverManager.isClassFromClassLoader(driver,callerClassLoader)) {
+    throw new SecurityException("calling class not authorized to deregister JDBC driver");
+  }
+synchronized (theDrivers) {
+    theDrivers.remove(driver);
+  }
+}

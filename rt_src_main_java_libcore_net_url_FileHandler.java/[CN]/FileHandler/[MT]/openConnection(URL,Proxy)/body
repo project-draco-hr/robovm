@@ -1,0 +1,11 @@
+{
+  if (url == null) {
+    throw new IllegalArgumentException("url == null");
+  }
+  String host=url.getHost();
+  if (host == null || host.isEmpty() || host.equalsIgnoreCase("localhost")) {
+    return new FileURLConnection(url);
+  }
+  URL ftpURL=new URL("ftp",host,url.getFile());
+  return (proxy == null) ? ftpURL.openConnection() : ftpURL.openConnection(proxy);
+}

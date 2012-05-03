@@ -1,5 +1,9 @@
 {
-  E[] data=getData();
-  checkIndexInclusive(index,data.length);
-  return new ListIteratorImpl(data,index);
+  Object[] snapshot=elements;
+  if (index < 0 || index > snapshot.length) {
+    throw new IndexOutOfBoundsException("index=" + index + ", length="+ snapshot.length);
+  }
+  CowIterator<E> result=new CowIterator<E>(snapshot,0,snapshot.length);
+  result.index=index;
+  return result;
 }

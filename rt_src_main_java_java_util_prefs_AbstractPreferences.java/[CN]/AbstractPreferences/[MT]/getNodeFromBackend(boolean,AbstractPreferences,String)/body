@@ -1,0 +1,17 @@
+{
+  if (name.length() > MAX_NAME_LENGTH) {
+    throw new IllegalArgumentException("Name '" + name + "' too long");
+  }
+  AbstractPreferences temp;
+  if (createNew) {
+    temp=currentNode.childSpi(name);
+    currentNode.cachedNode.put(name,temp);
+    if (temp.newNode && currentNode.nodeChangeListeners.size() > 0) {
+      currentNode.notifyChildAdded(temp);
+    }
+  }
+ else {
+    temp=currentNode.getChild(name);
+  }
+  return temp;
+}

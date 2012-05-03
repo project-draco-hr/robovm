@@ -1,54 +1,11 @@
 {
-  int nFindStartIndex=0;
-  int nPreStartIndex=0;
-  int nBufferLength=0;
-  int nLimit=0;
-  int nPostion=0;
-  int nCachehasNextIndex=0;
-  int oldLength=bufferLength;
-  int oldPostion=buffer.position();
-  int oldLimit=buffer.limit();
+  int oldPosition=buffer.position();
   int oldCapacity=buffer.capacity();
-  int startIndex=0;
-  if (preStartIndex == -1) {
-    startIndex=findStartIndex;
-    nPreStartIndex=-1;
-    nFindStartIndex=0;
-  }
- else {
-    startIndex=preStartIndex;
-    nPreStartIndex=0;
-    nFindStartIndex=findStartIndex - startIndex;
-  }
-  int nCapacity=oldCapacity;
-  char[] newBuffer=null;
-  if (startIndex < oldCapacity / 2) {
-    nCapacity=nCapacity << 1;
-    newBuffer=new char[nCapacity];
-  }
- else {
-    newBuffer=buffer.array();
-  }
-  nBufferLength=oldLength - startIndex;
-  nLimit=oldLimit - startIndex;
-  if (oldPostion < startIndex) {
-    nPostion=0;
-  }
- else {
-    nPostion=oldPostion - startIndex;
-  }
-  if (cachehasNextIndex != -1) {
-    nCachehasNextIndex=cachehasNextIndex - startIndex;
-  }
- else {
-    nCachehasNextIndex=-1;
-  }
-  System.arraycopy(buffer.array(),startIndex,newBuffer,0,nLimit);
-  buffer=CharBuffer.wrap(newBuffer,0,nCapacity);
-  buffer.position(nPostion);
-  buffer.limit(nLimit);
-  preStartIndex=nPreStartIndex;
-  findStartIndex=nFindStartIndex;
-  bufferLength=nBufferLength;
-  cachehasNextIndex=nCachehasNextIndex;
+  int oldLimit=buffer.limit();
+  int newCapacity=oldCapacity * DIPLOID;
+  char[] newBuffer=new char[newCapacity];
+  System.arraycopy(buffer.array(),0,newBuffer,0,oldLimit);
+  buffer=CharBuffer.wrap(newBuffer,0,newCapacity);
+  buffer.position(oldPosition);
+  buffer.limit(oldLimit);
 }

@@ -1,38 +1,29 @@
 {
-  int ttl=-1;
-  String ttlValue=AccessController.doPrivileged(new PriviAction<String>("networkaddress.cache.ttl"));
-  try {
-    if (ttlValue != null) {
-      ttl=Integer.decode(ttlValue).intValue();
+  BlockGuard.getThreadPolicy().onNetwork();
+  Object cachedResult=addressCache.get(host);
+  if (cachedResult != null) {
+    if (cachedResult instanceof InetAddress[]) {
+      return (InetAddress[])cachedResult;
     }
-  }
- catch (  NumberFormatException e) {
-  }
-  CacheElement element=null;
-  if (ttl == 0) {
-    Cache.clear();
-  }
  else {
-    element=Cache.get(host);
-    if (element != null && ttl > 0 && element.timeAdded + (ttl * 1000) < System.currentTimeMillis()) {
-      element=null;
+      throw new UnknownHostException((String)cachedResult);
     }
   }
-  if (element != null) {
-    return element.inetAddress();
-  }
-  String failedMessage=NegativeCache.getFailedMessage(host);
-  if (failedMessage != null) {
-    throw new UnknownHostException(host);
-  }
-  InetAddress anInetAddress;
   try {
-    anInetAddress=getHostByNameImpl(host,preferIPv6Addresses());
+    StructAddrinfo hints=new StructAddrinfo();
+    hints.ai_flags=AI_ADDRCONFIG;
+    hints.ai_family=AF_UNSPEC;
+    hints.ai_socktype=SOCK_STREAM;
+    InetAddress[] addresses=Libcore.os.getaddrinfo(host,hints);
+    for (    InetAddress address : addresses) {
+      address.hostName=host;
+    }
+    addressCache.put(host,addresses);
+    return addresses;
   }
- catch (  UnknownHostException e) {
-    NegativeCache.put(host,e.getMessage());
-    throw (UnknownHostException)new UnknownHostException(host).initCause(e);
+ catch (  GaiException gaiException) {
+    String detailMessage="Unable to resolve host \"" + host + "\": "+ Libcore.os.gai_strerror(gaiException.error);
+    addressCache.putUnknownHost(host,detailMessage);
+    throw gaiException.rethrowAsUnknownHostException(detailMessage);
   }
-  Cache.add(anInetAddress);
-  return anInetAddress;
 }

@@ -1,21 +1,35 @@
 {
-  if (millis < 0 || nanos < 0 || nanos > 999999) {
+  if (millis < 0 || nanos < 0 || nanos >= NANOS_PER_MILLI) {
     throw new IllegalArgumentException();
   }
- else   if (millis == 0 && nanos == 0) {
-    while (isAlive()) {
-      wait();
-    }
+  boolean overflow=millis >= (Long.MAX_VALUE - nanos) / NANOS_PER_MILLI;
+  boolean forever=(millis | nanos) == 0;
+  if (forever | overflow) {
+    join();
+    return;
   }
- else {
-    long end=System.nanoTime() + 1000000 * millis + (long)nanos;
-    long rest;
-    while (isAlive()) {
-      wait(millis,nanos);
-      rest=end - System.nanoTime();
-      if (rest <= 0)       break;
-      nanos=(int)(rest % 1000000);
-      millis=rest / 1000000;
+  VMThread t=vmThread;
+  if (t == null) {
+    return;
+  }
+synchronized (t) {
+    if (!isAlive()) {
+      return;
+    }
+    long nanosToWait=millis * NANOS_PER_MILLI + nanos;
+    long start=System.nanoTime();
+    while (true) {
+      t.wait(millis,nanos);
+      if (!isAlive()) {
+        break;
+      }
+      long nanosElapsed=System.nanoTime() - start;
+      long nanosRemaining=nanosToWait - nanosElapsed;
+      if (nanosRemaining <= 0) {
+        break;
+      }
+      millis=nanosRemaining / NANOS_PER_MILLI;
+      nanos=(int)(nanosRemaining - millis * NANOS_PER_MILLI);
     }
   }
 }

@@ -1,22 +1,10 @@
 {
-synchronized (this) {
-    if (!empty && head == tail) {
-      int newQueueSize=(int)(references.length * 1.10);
-      Reference<? extends T> newQueue[]=newArray(newQueueSize);
-      System.arraycopy(references,head,newQueue,0,references.length - head);
-      if (tail > 0) {
-        System.arraycopy(references,0,newQueue,references.length - head,tail);
-      }
-      head=0;
-      tail=references.length;
-      references=newQueue;
-    }
-    references[tail++]=reference;
-    if (tail == references.length) {
-      tail=0;
-    }
-    empty=false;
-    notifyAll();
+  if (head == null) {
+    reference.queueNext=reference;
   }
-  return true;
+ else {
+    reference.queueNext=head;
+  }
+  head=reference;
+  notify();
 }

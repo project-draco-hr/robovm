@@ -1,0 +1,29 @@
+{
+  String[] parts=line.split(" ");
+  if (parts.length < 2) {
+    throw new IOException("unexpected journal line: " + line);
+  }
+  String key=parts[1];
+  if (parts[0].equals(REMOVE) && parts.length == 2) {
+    lruEntries.remove(key);
+    return;
+  }
+  Entry entry=lruEntries.get(key);
+  if (entry == null) {
+    entry=new Entry(key);
+    lruEntries.put(key,entry);
+  }
+  if (parts[0].equals(CLEAN) && parts.length == 2 + valueCount) {
+    entry.readable=true;
+    entry.currentEditor=null;
+    entry.setLengths(Arrays.copyOfRange(parts,2,parts.length));
+  }
+ else   if (parts[0].equals(DIRTY) && parts.length == 2) {
+    entry.currentEditor=new Editor(entry);
+  }
+ else   if (parts[0].equals(READ) && parts.length == 2) {
+  }
+ else {
+    throw new IOException("unexpected journal line: " + line);
+  }
+}

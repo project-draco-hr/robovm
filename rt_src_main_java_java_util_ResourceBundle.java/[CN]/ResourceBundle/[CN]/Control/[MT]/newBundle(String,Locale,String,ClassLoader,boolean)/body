@@ -1,28 +1,20 @@
 {
-  if (null == format || null == loader) {
+  if (format == null || loader == null) {
     throw new NullPointerException();
   }
-  InputStream streams=null;
   final String bundleName=toBundleName(baseName,locale);
   final ClassLoader clsloader=loader;
   ResourceBundle ret;
-  Class<?> cls=null;
-  if (JAVACLASS == format) {
-    cls=AccessController.doPrivileged(new PrivilegedAction<Class<?>>(){
-      public Class<?> run(){
-        try {
-          return clsloader.loadClass(bundleName);
-        }
- catch (        Exception e) {
-          return null;
-        }
-catch (        NoClassDefFoundError e) {
-          return null;
-        }
-      }
+  if (format.equals(JAVACLASS)) {
+    Class<?> cls=null;
+    try {
+      cls=clsloader.loadClass(bundleName);
     }
-);
-    if (null == cls) {
+ catch (    Exception e) {
+    }
+catch (    NoClassDefFoundError e) {
+    }
+    if (cls == null) {
       return null;
     }
     try {
@@ -34,7 +26,8 @@ catch (        NoClassDefFoundError e) {
       return null;
     }
   }
-  if (JAVAPROPERTIES == format) {
+  if (format.equals(JAVAPROPERTIES)) {
+    InputStream streams=null;
     final String resourceName=toResourceName(bundleName,"properties");
     if (reload) {
       URL url=null;
@@ -43,7 +36,7 @@ catch (        NoClassDefFoundError e) {
       }
  catch (      NullPointerException e) {
       }
-      if (null != url) {
+      if (url != null) {
         URLConnection con=url.openConnection();
         con.setUseCaches(false);
         streams=con.getInputStream();
@@ -51,12 +44,7 @@ catch (        NoClassDefFoundError e) {
     }
  else {
       try {
-        streams=AccessController.doPrivileged(new PrivilegedAction<InputStream>(){
-          public InputStream run(){
-            return clsloader.getResourceAsStream(resourceName);
-          }
-        }
-);
+        streams=clsloader.getResourceAsStream(resourceName);
       }
  catch (      NullPointerException e) {
       }

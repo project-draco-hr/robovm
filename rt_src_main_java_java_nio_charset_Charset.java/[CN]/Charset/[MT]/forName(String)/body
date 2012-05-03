@@ -1,7 +1,24 @@
 {
-  Charset c=forNameInternal(charsetName);
-  if (null == c) {
-    throw new UnsupportedCharsetException(charsetName);
+  Charset cs;
+synchronized (CACHED_CHARSETS) {
+    cs=CACHED_CHARSETS.get(charsetName);
+    if (cs != null) {
+      return cs;
+    }
   }
-  return c;
+  if (charsetName == null) {
+    throw new IllegalCharsetNameException(null);
+  }
+  checkCharsetName(charsetName);
+  cs=NativeConverter.charsetForName(charsetName);
+  if (cs != null) {
+    return cacheCharset(charsetName,cs);
+  }
+  for (  CharsetProvider charsetProvider : ServiceLoader.load(CharsetProvider.class)) {
+    cs=charsetProvider.charsetForName(charsetName);
+    if (cs != null) {
+      return cacheCharset(charsetName,cs);
+    }
+  }
+  throw new UnsupportedCharsetException(charsetName);
 }

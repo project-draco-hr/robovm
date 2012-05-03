@@ -1,6 +1,11 @@
 {
-  if (locale.getCountry().equals("")) {
+  if (locale.getCountry().length() == 0) {
     return currencyCode;
   }
-  return com.ibm.icu.util.Currency.getInstance(currencyCode).getSymbol(locale);
+  LocaleData localeData=LocaleData.get(locale);
+  if (localeData.internationalCurrencySymbol.equals(currencyCode)) {
+    return localeData.currencySymbol;
+  }
+  String symbol=ICU.getCurrencySymbol(locale.toString(),currencyCode);
+  return symbol != null ? symbol : currencyCode;
 }

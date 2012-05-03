@@ -1,33 +1,37 @@
 {
   if (uri == null) {
-    throw new NullPointerException(Msg.getString("KA019"));
+    throw new NullPointerException("uri == null");
   }
-  List<HttpCookie> cookies=storeMap.get(uri);
-  if (cookies == null) {
-    cookies=new ArrayList<HttpCookie>();
-  }
- else {
-    for (    HttpCookie cookie : cookies) {
+  List<HttpCookie> result=new ArrayList<HttpCookie>();
+  List<HttpCookie> cookiesForUri=map.get(uri);
+  if (cookiesForUri != null) {
+    for (Iterator<HttpCookie> i=cookiesForUri.iterator(); i.hasNext(); ) {
+      HttpCookie cookie=i.next();
       if (cookie.hasExpired()) {
-        cookies.remove(cookie);
+        i.remove();
+      }
+ else {
+        result.add(cookie);
       }
     }
   }
-  Set<URI> uris=storeMap.keySet();
-  for (  URI u : uris) {
-    if (!u.equals(uri)) {
-      List<HttpCookie> listCookie=storeMap.get(u);
-      for (      HttpCookie cookie : listCookie) {
-        if (HttpCookie.domainMatches(cookie.getDomain(),uri.getHost())) {
-          if (cookie.hasExpired()) {
-            listCookie.remove(cookie);
-          }
- else           if (!(cookie.hasExpired() || cookies.contains(cookie))) {
-            cookies.add(cookie);
-          }
-        }
+  for (  Map.Entry<URI,List<HttpCookie>> entry : map.entrySet()) {
+    if (uri.equals(entry.getKey())) {
+      continue;
+    }
+    List<HttpCookie> entryCookies=entry.getValue();
+    for (Iterator<HttpCookie> i=entryCookies.iterator(); i.hasNext(); ) {
+      HttpCookie cookie=i.next();
+      if (!HttpCookie.domainMatches(cookie.getDomain(),uri.getHost())) {
+        continue;
+      }
+      if (cookie.hasExpired()) {
+        i.remove();
+      }
+ else       if (!result.contains(cookie)) {
+        result.add(cookie);
       }
     }
   }
-  return cookies;
+  return Collections.unmodifiableList(result);
 }

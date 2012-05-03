@@ -1,0 +1,15 @@
+{
+  StringBuilder sb=new StringBuilder();
+  sb.append(getClass().getName() + "[" + getID()+ ",mRawOffset="+ mRawOffset+ ",mUseDst="+ mUseDst+ "]");
+  sb.append("\n");
+  Formatter f=new Formatter(sb);
+  for (int i=0; i < mTransitions.length; ++i) {
+    int type=mTypes[i] & 0xff;
+    String utcTime=formatTime(mTransitions[i],TimeZone.getTimeZone("UTC"));
+    String localTime=formatTime(mTransitions[i],this);
+    int offset=mOffsets[type];
+    int gmtOffset=mRawOffset / 1000 + offset;
+    f.format("%4d : time=%11d %s = %s isDst=%d offset=%5d gmtOffset=%d\n",i,mTransitions[i],utcTime,localTime,mIsDsts[type],offset,gmtOffset);
+  }
+  return sb.toString();
+}

@@ -2,7 +2,16 @@
   final ReentrantLock lock=this.lock;
   lock.lock();
   try {
-    return super.toString();
+    int k=count;
+    if (k == 0)     return "[]";
+    StringBuilder sb=new StringBuilder();
+    sb.append('[');
+    for (int i=takeIndex; ; i=inc(i)) {
+      Object e=items[i];
+      sb.append(e == this ? "(this Collection)" : e);
+      if (--k == 0)       return sb.append(']').toString();
+      sb.append(',').append(' ');
+    }
   }
   finally {
     lock.unlock();

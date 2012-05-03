@@ -1,0 +1,17 @@
+{
+  int deselected=0;
+  Set<SelectionKey> cancelledKeys=cancelledKeys();
+synchronized (cancelledKeys) {
+    if (cancelledKeys.size() > 0) {
+      for (      SelectionKey currentKey : cancelledKeys) {
+        mutableKeys.remove(currentKey);
+        deregister((AbstractSelectionKey)currentKey);
+        if (mutableSelectedKeys.remove(currentKey)) {
+          deselected++;
+        }
+      }
+      cancelledKeys.clear();
+    }
+  }
+  return deselected;
+}

@@ -1,26 +1,17 @@
 {
-  checkClosedAndBind(false);
-  InetAddress packAddr=pack.getAddress();
-  SecurityManager security=System.getSecurityManager();
-  if (security != null) {
-    if (packAddr.isMulticastAddress()) {
-      security.checkMulticast(packAddr,ttl);
-    }
- else {
-      security.checkConnect(packAddr.getHostName(),pack.getPort());
-    }
-  }
+  checkOpen();
+  InetAddress packAddr=packet.getAddress();
   int currTTL=getTimeToLive();
   if (packAddr.isMulticastAddress() && (byte)currTTL != ttl) {
     try {
       setTimeToLive(ttl & 0xff);
-      impl.send(pack);
+      impl.send(packet);
     }
   finally {
       setTimeToLive(currTTL);
     }
   }
  else {
-    impl.send(pack);
+    impl.send(packet);
   }
 }

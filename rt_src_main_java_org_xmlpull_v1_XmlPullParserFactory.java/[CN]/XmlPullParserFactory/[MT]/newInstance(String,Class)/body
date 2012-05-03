@@ -1,0 +1,48 @@
+{
+  classNames="org.kxml2.io.KXmlParser,org.kxml2.io.KXmlSerializer";
+  XmlPullParserFactory factory=null;
+  final ArrayList parserClasses=new ArrayList();
+  final ArrayList serializerClasses=new ArrayList();
+  int pos=0;
+  while (pos < classNames.length()) {
+    int cut=classNames.indexOf(',',pos);
+    if (cut == -1)     cut=classNames.length();
+    final String name=classNames.substring(pos,cut);
+    Class candidate=null;
+    Object instance=null;
+    try {
+      candidate=Class.forName(name);
+      instance=candidate.newInstance();
+    }
+ catch (    Exception e) {
+    }
+    if (candidate != null) {
+      boolean recognized=false;
+      if (instance instanceof XmlPullParser) {
+        parserClasses.add(candidate);
+        recognized=true;
+      }
+      if (instance instanceof XmlSerializer) {
+        serializerClasses.add(candidate);
+        recognized=true;
+      }
+      if (instance instanceof XmlPullParserFactory) {
+        if (factory == null) {
+          factory=(XmlPullParserFactory)instance;
+        }
+        recognized=true;
+      }
+      if (!recognized) {
+        throw new XmlPullParserException("incompatible class: " + name);
+      }
+    }
+    pos=cut + 1;
+  }
+  if (factory == null) {
+    factory=new XmlPullParserFactory();
+  }
+  factory.parserClasses=parserClasses;
+  factory.serializerClasses=serializerClasses;
+  factory.classNamesLocation="org.kxml2.io.kXmlParser,org.kxml2.io.KXmlSerializer";
+  return factory;
+}

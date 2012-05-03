@@ -6,25 +6,20 @@
   if (attributes == null) {
     return null;
   }
-  Vector<Certificate> certs=new Vector<Certificate>();
+  ArrayList<Certificate> certs=new ArrayList<Certificate>();
   Iterator<Map.Entry<String,HashMap<String,Attributes>>> it=signatures.entrySet().iterator();
   while (it.hasNext()) {
     Map.Entry<String,HashMap<String,Attributes>> entry=it.next();
     HashMap<String,Attributes> hm=entry.getValue();
     if (hm.get(name) != null) {
       String signatureFile=entry.getKey();
-      Vector<Certificate> newCerts=getSignerCertificates(signatureFile,certificates);
-      Iterator<Certificate> iter=newCerts.iterator();
-      while (iter.hasNext()) {
-        certs.add(iter.next());
-      }
+      certs.addAll(getSignerCertificates(signatureFile,certificates));
     }
   }
-  if (certs.size() == 0) {
+  if (certs.isEmpty()) {
     return null;
   }
-  Certificate[] certificatesArray=new Certificate[certs.size()];
-  certs.toArray(certificatesArray);
+  Certificate[] certificatesArray=certs.toArray(new Certificate[certs.size()]);
   String algorithms=attributes.getValue("Digest-Algorithms");
   if (algorithms == null) {
     algorithms="SHA SHA1";
@@ -36,13 +31,7 @@
     if (hash == null) {
       continue;
     }
-    byte[] hashBytes;
-    try {
-      hashBytes=hash.getBytes("ISO-8859-1");
-    }
- catch (    UnsupportedEncodingException e) {
-      throw new RuntimeException(e.toString());
-    }
+    byte[] hashBytes=hash.getBytes(Charsets.ISO_8859_1);
     try {
       return new VerifierEntry(name,MessageDigest.getInstance(algorithm),hashBytes,certificatesArray);
     }

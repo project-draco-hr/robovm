@@ -1,0 +1,43 @@
+{
+  if (super.getInetAddress() == null || super.getInetAddress().getHostAddress() == null || super.getInetAddress().getHostName() == null) {
+    return null;
+  }
+  OpenSSLSessionImpl session=(OpenSSLSessionImpl)sessionContext.getSession(super.getInetAddress().getHostName(),super.getPort());
+  if (session == null) {
+    return null;
+  }
+  String protocol=session.getProtocol();
+  boolean protocolFound=false;
+  for (  String enabledProtocol : enabledProtocols) {
+    if (protocol.equals(enabledProtocol)) {
+      protocolFound=true;
+      break;
+    }
+  }
+  if (!protocolFound) {
+    return null;
+  }
+  String cipherSuite=session.getCipherSuite();
+  boolean cipherSuiteFound=false;
+  for (  String enabledCipherSuite : enabledCipherSuites) {
+    if (cipherSuite.equals(enabledCipherSuite)) {
+      cipherSuiteFound=true;
+      break;
+    }
+  }
+  if (!cipherSuiteFound) {
+    return null;
+  }
+  String compressionMethod=session.getCompressionMethod();
+  boolean compressionMethodFound=false;
+  for (  String enabledCompressionMethod : enabledCompressionMethods) {
+    if (compressionMethod.equals(enabledCompressionMethod)) {
+      compressionMethodFound=true;
+      break;
+    }
+  }
+  if (!compressionMethodFound) {
+    return null;
+  }
+  return session;
+}

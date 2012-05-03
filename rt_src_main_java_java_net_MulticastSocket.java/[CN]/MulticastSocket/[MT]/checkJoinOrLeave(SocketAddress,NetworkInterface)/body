@@ -1,0 +1,19 @@
+{
+  checkOpen();
+  if (groupAddress == null) {
+    throw new IllegalArgumentException("groupAddress == null");
+  }
+  if (netInterface != null && !netInterface.getInetAddresses().hasMoreElements()) {
+    throw new SocketException("No address associated with interface: " + netInterface);
+  }
+  if (!(groupAddress instanceof InetSocketAddress)) {
+    throw new IllegalArgumentException("Group address not an InetSocketAddress: " + groupAddress.getClass());
+  }
+  InetAddress groupAddr=((InetSocketAddress)groupAddress).getAddress();
+  if (groupAddr == null) {
+    throw new SocketException("Group address has no address: " + groupAddress);
+  }
+  if (!groupAddr.isMulticastAddress()) {
+    throw new IOException("Not a multicast group: " + groupAddr);
+  }
+}

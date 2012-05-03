@@ -1,9 +1,73 @@
 {
-  String id=calendar.getTimeZone().getID();
-  if (!tzId.equals(id)) {
-    tzId=id;
-    icuFormat.setTimeZone(com.ibm.icu.util.TimeZone.getTimeZone(tzId));
+  boolean quote=false;
+  int next, last=-1, count=0, offset=position.getIndex();
+  int length=string.length();
+  calendar.clear();
+  TimeZone zone=calendar.getTimeZone();
+  final int patternLength=pattern.length();
+  for (int i=0; i < patternLength; i++) {
+    next=pattern.charAt(i);
+    if (next == '\'') {
+      if (count > 0) {
+        if ((offset=parse(string,offset,(char)last,count)) < 0) {
+          return error(position,-offset - 1,zone);
+        }
+        count=0;
+      }
+      if (last == next) {
+        if (offset >= length || string.charAt(offset) != '\'') {
+          return error(position,offset,zone);
+        }
+        offset++;
+        last=-1;
+      }
+ else {
+        last=next;
+      }
+      quote=!quote;
+      continue;
+    }
+    if (!quote && (last == next || (next >= 'a' && next <= 'z') || (next >= 'A' && next <= 'Z'))) {
+      if (last == next) {
+        count++;
+      }
+ else {
+        if (count > 0) {
+          if ((offset=parse(string,offset,(char)last,-count)) < 0) {
+            return error(position,-offset - 1,zone);
+          }
+        }
+        last=next;
+        count=1;
+      }
+    }
+ else {
+      if (count > 0) {
+        if ((offset=parse(string,offset,(char)last,count)) < 0) {
+          return error(position,-offset - 1,zone);
+        }
+        count=0;
+      }
+      last=-1;
+      if (offset >= length || string.charAt(offset) != next) {
+        return error(position,offset,zone);
+      }
+      offset++;
+    }
   }
-  icuFormat.setLenient(calendar.isLenient());
-  return icuFormat.parse(string,position);
+  if (count > 0) {
+    if ((offset=parse(string,offset,(char)last,count)) < 0) {
+      return error(position,-offset - 1,zone);
+    }
+  }
+  Date date;
+  try {
+    date=calendar.getTime();
+  }
+ catch (  IllegalArgumentException e) {
+    return error(position,offset,zone);
+  }
+  position.setIndex(offset);
+  calendar.setTimeZone(zone);
+  return date;
 }

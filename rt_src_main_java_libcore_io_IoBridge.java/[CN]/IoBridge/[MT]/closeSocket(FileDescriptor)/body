@@ -1,0 +1,15 @@
+{
+  if (!fd.valid()) {
+    return;
+  }
+  int intFd=fd.getInt$();
+  fd.setInt$(-1);
+  FileDescriptor oldFd=new FileDescriptor();
+  oldFd.setInt$(intFd);
+  AsynchronousCloseMonitor.signalBlockedThreads(oldFd);
+  try {
+    Libcore.os.close(oldFd);
+  }
+ catch (  ErrnoException errnoException) {
+  }
+}

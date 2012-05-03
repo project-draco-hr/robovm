@@ -2,23 +2,16 @@
   if (name == null) {
     return null;
   }
-  URL result=AccessController.doPrivileged(new PrivilegedAction<URL>(){
-    public URL run(){
-      return findResourceImpl(name);
+  int n=0;
+  while (true) {
+    URLHandler handler=getHandler(n++);
+    if (handler == null) {
+      break;
+    }
+    URL res=handler.findResource(name);
+    if (res != null) {
+      return res;
     }
   }
-,currentContext);
-  SecurityManager sm;
-  if (result != null && (sm=System.getSecurityManager()) != null) {
-    try {
-      sm.checkPermission(result.openConnection().getPermission());
-    }
- catch (    IOException e) {
-      return null;
-    }
-catch (    SecurityException e) {
-      return null;
-    }
-  }
-  return result;
+  return null;
 }

@@ -1,0 +1,23 @@
+{
+switch (this.getNodeType()) {
+case ELEMENT_NODE:
+    return this;
+case DOCUMENT_NODE:
+  return (NodeImpl)((Document)this).getDocumentElement();
+case ENTITY_NODE:
+case NOTATION_NODE:
+case DOCUMENT_FRAGMENT_NODE:
+case DOCUMENT_TYPE_NODE:
+return null;
+case ATTRIBUTE_NODE:
+return (NodeImpl)((Attr)this).getOwnerElement();
+case TEXT_NODE:
+case CDATA_SECTION_NODE:
+case ENTITY_REFERENCE_NODE:
+case PROCESSING_INSTRUCTION_NODE:
+case COMMENT_NODE:
+return getContainingElement();
+default :
+throw new DOMException(DOMException.NOT_SUPPORTED_ERR,"Unsupported node type " + getNodeType());
+}
+}

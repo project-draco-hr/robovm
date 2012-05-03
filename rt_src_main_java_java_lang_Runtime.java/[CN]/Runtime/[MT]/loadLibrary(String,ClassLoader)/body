@@ -1,0 +1,31 @@
+{
+  if (loader != null) {
+    String filename=loader.findLibrary(libraryName);
+    if (filename == null) {
+      throw new UnsatisfiedLinkError("Couldn't load " + libraryName + ": "+ "findLibrary returned null");
+    }
+    String error=nativeLoad(filename,loader);
+    if (error != null) {
+      throw new UnsatisfiedLinkError(error);
+    }
+    return;
+  }
+  String filename=System.mapLibraryName(libraryName);
+  List<String> candidates=new ArrayList<String>();
+  String lastError=null;
+  for (  String directory : mLibPaths) {
+    String candidate=directory + filename;
+    candidates.add(candidate);
+    if (new File(candidate).exists()) {
+      String error=nativeLoad(candidate,loader);
+      if (error == null) {
+        return;
+      }
+      lastError=error;
+    }
+  }
+  if (lastError != null) {
+    throw new UnsatisfiedLinkError(lastError);
+  }
+  throw new UnsatisfiedLinkError("Library " + libraryName + " not found; tried "+ candidates);
+}

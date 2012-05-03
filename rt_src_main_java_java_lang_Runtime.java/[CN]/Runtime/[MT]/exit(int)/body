@@ -1,8 +1,4 @@
 {
-  SecurityManager smgr=System.getSecurityManager();
-  if (smgr != null) {
-    smgr.checkExit(code);
-  }
 synchronized (this) {
     if (!shuttingDown) {
       shuttingDown=true;
@@ -11,8 +7,8 @@ synchronized (shutdownHooks) {
         hooks=new Thread[shutdownHooks.size()];
         shutdownHooks.toArray(hooks);
       }
-      for (int i=0; i < hooks.length; i++) {
-        hooks[i].start();
+      for (      Thread hook : hooks) {
+        hook.start();
       }
       for (      Thread hook : hooks) {
         try {
@@ -22,7 +18,7 @@ synchronized (shutdownHooks) {
         }
       }
       if (finalizeOnExit) {
-        runFinalization(true);
+        runFinalization();
       }
       nativeExit(code,true);
     }

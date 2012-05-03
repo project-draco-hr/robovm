@@ -2,7 +2,7 @@
   BigInteger p, q, y;
   int n1;
   if (publicKey == null || !(publicKey instanceof DSAPublicKey)) {
-    throw new InvalidKeyException(Messages.getString("security.16C"));
+    throw new InvalidKeyException("publicKey is not an instance of DSAPublicKey");
   }
   DSAParams params=((DSAPublicKey)publicKey).getParams();
   p=params.getP();
@@ -10,13 +10,13 @@
   y=((DSAPublicKey)publicKey).getY();
   n1=p.bitLength();
   if (p.compareTo(BigInteger.valueOf(1)) != 1 || n1 < 512 || n1 > 1024 || (n1 & 077) != 0) {
-    throw new InvalidKeyException(Messages.getString("security.169"));
+    throw new InvalidKeyException("bad p");
   }
   if (q.signum() != 1 || q.bitLength() != 160) {
-    throw new InvalidKeyException(Messages.getString("security.16A"));
+    throw new InvalidKeyException("bad q");
   }
   if (y.signum() != 1) {
-    throw new InvalidKeyException(Messages.getString("security.16D"));
+    throw new InvalidKeyException("y <= 0");
   }
   dsaKey=(DSAKey)publicKey;
   msgDigest.reset();

@@ -1,5 +1,5 @@
 {
-  long lastTime=(timed) ? System.nanoTime() : 0;
+  long lastTime=timed ? System.nanoTime() : 0;
   Thread w=Thread.currentThread();
   SNode h=head;
   int spins=(shouldSpin(s) ? (timed ? maxTimedSpins : maxUntimedSpins) : 0);
@@ -18,7 +18,7 @@
     }
     if (spins > 0)     spins=shouldSpin(s) ? (spins - 1) : 0;
  else     if (s.waiter == null)     s.waiter=w;
- else     if (!timed)     LockSupport.park();
- else     if (nanos > spinForTimeoutThreshold)     LockSupport.parkNanos(nanos);
+ else     if (!timed)     LockSupport.park(this);
+ else     if (nanos > spinForTimeoutThreshold)     LockSupport.parkNanos(this,nanos);
   }
 }

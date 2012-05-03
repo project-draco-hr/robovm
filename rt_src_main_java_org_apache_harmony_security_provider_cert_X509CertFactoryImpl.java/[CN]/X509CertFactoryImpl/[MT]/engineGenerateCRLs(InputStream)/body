@@ -1,8 +1,8 @@
 {
   if (inStream == null) {
-    throw new CRLException(Messages.getString("security.153"));
+    throw new CRLException("inStream == null");
   }
-  ArrayList result=new ArrayList();
+  ArrayList<CRL> result=new ArrayList<CRL>();
   try {
     if (!inStream.markSupported()) {
       inStream=new RestoringInputStream(inStream);
@@ -22,7 +22,7 @@
       }
  else {
         if (result.size() == 0) {
-          throw new CRLException(Messages.getString("security.15F"));
+          throw new CRLException("Unsupported encoding");
         }
  else {
           inStream.reset();
@@ -56,23 +56,23 @@
       return result;
     }
  else     if (ch == -1) {
-      throw new CRLException(Messages.getString("security.155"));
+      throw new CRLException("There is no data in the stream");
     }
     if (second_asn1_tag == ASN1Constants.TAG_OID) {
       ContentInfo info=(ContentInfo)((encoding != null) ? ContentInfo.ASN1.decode(encoding) : ContentInfo.ASN1.decode(inStream));
       SignedData data=info.getSignedData();
       if (data == null) {
-        throw new CRLException(Messages.getString("security.154"));
+        throw new CRLException("Invalid PKCS7 data provided");
       }
-      List crls=data.getCRLs();
+      List<CertificateList> crls=data.getCRLs();
       if (crls != null) {
-        for (int i=0; i < crls.size(); i++) {
-          result.add(new X509CRLImpl((CertificateList)crls.get(i)));
+        for (        CertificateList crl : crls) {
+          result.add(new X509CRLImpl(crl));
         }
       }
       return result;
     }
-    throw new CRLException(Messages.getString("security.15F"));
+    throw new CRLException("Unsupported encoding");
   }
  catch (  IOException e) {
     throw new CRLException(e);

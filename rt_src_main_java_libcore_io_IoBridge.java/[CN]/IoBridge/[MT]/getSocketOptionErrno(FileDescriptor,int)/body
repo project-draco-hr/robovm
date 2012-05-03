@@ -1,0 +1,38 @@
+{
+switch (option) {
+case SocketOptions.IP_MULTICAST_IF:
+    return Libcore.os.getsockoptInAddr(fd,IPPROTO_IP,IP_MULTICAST_IF);
+case SocketOptions.IP_MULTICAST_IF2:
+  return Libcore.os.getsockoptInt(fd,IPPROTO_IPV6,IPV6_MULTICAST_IF);
+case SocketOptions.IP_MULTICAST_LOOP:
+return booleanFromInt(Libcore.os.getsockoptInt(fd,IPPROTO_IPV6,IPV6_MULTICAST_LOOP));
+case IoBridge.JAVA_IP_MULTICAST_TTL:
+return Libcore.os.getsockoptInt(fd,IPPROTO_IPV6,IPV6_MULTICAST_HOPS);
+case SocketOptions.IP_TOS:
+return Libcore.os.getsockoptInt(fd,IPPROTO_IPV6,IPV6_TCLASS);
+case SocketOptions.SO_BROADCAST:
+return booleanFromInt(Libcore.os.getsockoptInt(fd,SOL_SOCKET,SO_BROADCAST));
+case SocketOptions.SO_KEEPALIVE:
+return booleanFromInt(Libcore.os.getsockoptInt(fd,SOL_SOCKET,SO_KEEPALIVE));
+case SocketOptions.SO_LINGER:
+StructLinger linger=Libcore.os.getsockoptLinger(fd,SOL_SOCKET,SO_LINGER);
+if (!linger.isOn()) {
+return false;
+}
+return linger.l_linger;
+case SocketOptions.SO_OOBINLINE:
+return booleanFromInt(Libcore.os.getsockoptInt(fd,SOL_SOCKET,SO_OOBINLINE));
+case SocketOptions.SO_RCVBUF:
+return Libcore.os.getsockoptInt(fd,SOL_SOCKET,SO_SNDBUF);
+case SocketOptions.SO_REUSEADDR:
+return booleanFromInt(Libcore.os.getsockoptInt(fd,SOL_SOCKET,SO_REUSEADDR));
+case SocketOptions.SO_SNDBUF:
+return Libcore.os.getsockoptInt(fd,SOL_SOCKET,SO_SNDBUF);
+case SocketOptions.SO_TIMEOUT:
+return (int)Libcore.os.getsockoptTimeval(fd,SOL_SOCKET,SO_RCVTIMEO).toMillis();
+case SocketOptions.TCP_NODELAY:
+return booleanFromInt(Libcore.os.getsockoptInt(fd,IPPROTO_TCP,TCP_NODELAY));
+default :
+throw new SocketException("Unknown socket option: " + option);
+}
+}

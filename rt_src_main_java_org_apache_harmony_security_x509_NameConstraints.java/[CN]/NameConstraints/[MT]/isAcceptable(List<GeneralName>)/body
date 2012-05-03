@@ -1,0 +1,31 @@
+{
+  if (permitted_names == null) {
+    prepareNames();
+  }
+  boolean[] types_presented=new boolean[9];
+  boolean[] permitted_found=new boolean[9];
+  for (  GeneralName name : names) {
+    int type=name.getTag();
+    if (excluded_names[type] != null) {
+      for (int i=0; i < excluded_names[type].size(); i++) {
+        if (excluded_names[type].get(i).isAcceptable(name)) {
+          return false;
+        }
+      }
+    }
+    if ((permitted_names[type] != null) && (!permitted_found[type])) {
+      types_presented[type]=true;
+      for (int i=0; i < permitted_names[type].size(); i++) {
+        if (permitted_names[type].get(i).isAcceptable(name)) {
+          permitted_found[type]=true;
+        }
+      }
+    }
+  }
+  for (int type=0; type < 9; type++) {
+    if (types_presented[type] && !permitted_found[type]) {
+      return false;
+    }
+  }
+  return true;
+}

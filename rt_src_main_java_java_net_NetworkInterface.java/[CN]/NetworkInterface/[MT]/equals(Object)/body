@@ -5,28 +5,6 @@
   if (!(obj instanceof NetworkInterface)) {
     return false;
   }
-  NetworkInterface netif=(NetworkInterface)obj;
-  if (netif.getIndex() != interfaceIndex) {
-    return false;
-  }
-  if (!(name.equals("")) && (!netif.getName().equals(name))) {
-    return false;
-  }
-  if ((name.equals("")) && (!netif.getName().equals(displayName))) {
-    return false;
-  }
-  Enumeration<InetAddress> netifAddresses=netif.getInetAddresses();
-  Enumeration<InetAddress> localifAddresses=getInetAddresses();
-  if (netifAddresses == null) {
-    return localifAddresses == null;
-  }
-  if (localifAddresses == null) {
-    return false;
-  }
-  while (netifAddresses.hasMoreElements() && localifAddresses.hasMoreElements()) {
-    if (!(localifAddresses.nextElement()).equals(netifAddresses.nextElement())) {
-      return false;
-    }
-  }
-  return !netifAddresses.hasMoreElements() && !localifAddresses.hasMoreElements();
+  NetworkInterface rhs=(NetworkInterface)obj;
+  return interfaceIndex == rhs.interfaceIndex && name.equals(rhs.name) && addresses.equals(rhs.addresses);
 }

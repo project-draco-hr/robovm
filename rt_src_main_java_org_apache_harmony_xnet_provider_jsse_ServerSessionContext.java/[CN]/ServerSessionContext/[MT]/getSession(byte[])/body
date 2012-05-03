@@ -1,0 +1,17 @@
+{
+  SSLSession session=super.getSession(sessionId);
+  if (session != null) {
+    return session;
+  }
+  if (persistentCache != null) {
+    byte[] data=persistentCache.getSessionData(sessionId);
+    if (data != null) {
+      session=toSession(data,null,-1);
+      if (session != null && session.isValid()) {
+        super.putSession(session);
+        return session;
+      }
+    }
+  }
+  return null;
+}

@@ -1,0 +1,33 @@
+{
+  err.append(toString());
+  err.append("\n");
+  StackTraceElement[] stack=getInternalStackTrace();
+  if (stack != null) {
+    int duplicates=parentStack != null ? countDuplicates(stack,parentStack) : 0;
+    for (int i=0; i < stack.length - duplicates; i++) {
+      err.append(indent);
+      err.append("\tat ");
+      err.append(stack[i].toString());
+      err.append("\n");
+    }
+    if (duplicates > 0) {
+      err.append(indent);
+      err.append("\t... ");
+      err.append(Integer.toString(duplicates));
+      err.append(" more\n");
+    }
+  }
+  if (suppressedExceptions != null) {
+    for (    Throwable throwable : suppressedExceptions) {
+      err.append(indent);
+      err.append("\tSuppressed: ");
+      throwable.printStackTrace(err,indent + "\t",stack);
+    }
+  }
+  Throwable cause=getCause();
+  if (cause != null) {
+    err.append(indent);
+    err.append("Caused by: ");
+    cause.printStackTrace(err,indent,stack);
+  }
+}

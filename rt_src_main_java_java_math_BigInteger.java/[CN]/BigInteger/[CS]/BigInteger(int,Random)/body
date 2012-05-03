@@ -1,20 +1,19 @@
 {
   if (numBits < 0) {
-    throw new IllegalArgumentException(Messages.getString("math.1B"));
+    throw new IllegalArgumentException("numBits < 0: " + numBits);
   }
   if (numBits == 0) {
-    sign=0;
-    numberLength=1;
-    digits=new int[]{0};
+    setJavaRepresentation(0,1,new int[]{0});
   }
  else {
-    sign=1;
-    numberLength=(numBits + 31) >> 5;
-    digits=new int[numberLength];
+    int sign=1;
+    int numberLength=(numBits + 31) >> 5;
+    int[] digits=new int[numberLength];
     for (int i=0; i < numberLength; i++) {
-      digits[i]=rnd.nextInt();
+      digits[i]=random.nextInt();
     }
     digits[numberLength - 1]>>>=(-numBits) & 31;
-    cutOffLeadingZeroes();
+    setJavaRepresentation(sign,numberLength,digits);
   }
+  javaIsValid=true;
 }

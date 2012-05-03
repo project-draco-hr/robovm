@@ -10,7 +10,7 @@
   int i=1;
   int lastPow=FIVE_POW.length - 1;
   if (divisor.isZero()) {
-    throw new ArithmeticException(Messages.getString("math.04"));
+    throw new ArithmeticException("Division by zero");
   }
   if (p.signum() == 0) {
     return zeroScaledBy(diffScale);
@@ -38,12 +38,12 @@
   }
  while (true);
   if (!q.abs().equals(BigInteger.ONE)) {
-    throw new ArithmeticException(Messages.getString("math.05"));
+    throw new ArithmeticException("Non-terminating decimal expansion; no exact representable decimal result");
   }
   if (q.signum() < 0) {
     p=p.negate();
   }
-  newScale=toIntScale(diffScale + Math.max(k,l));
+  newScale=safeLongToInt(diffScale + Math.max(k,l));
   i=k - l;
   p=(i > 0) ? Multiplication.multiplyByFivePow(p,i) : p.shiftLeft(-i);
   return new BigDecimal(p,newScale);

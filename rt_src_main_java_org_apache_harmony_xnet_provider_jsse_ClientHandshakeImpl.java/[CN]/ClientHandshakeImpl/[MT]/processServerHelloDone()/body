@@ -1,31 +1,48 @@
 {
   PrivateKey clientKey=null;
   if (serverCert != null) {
-    if (session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DH_anon || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DH_anon_EXPORT) {
+    if (session.cipherSuite.isAnonymous()) {
       unexpectedMessage();
       return;
     }
     verifyServerCert();
   }
  else {
-    if (session.cipherSuite.keyExchange != CipherSuite.KeyExchange_DH_anon && session.cipherSuite.keyExchange != CipherSuite.KeyExchange_DH_anon_EXPORT) {
+    if (!session.cipherSuite.isAnonymous()) {
       unexpectedMessage();
       return;
     }
   }
   if (certificateRequest != null) {
     X509Certificate[] certs=null;
-    String clientAlias=((X509ExtendedKeyManager)parameters.getKeyManager()).chooseClientAlias(certificateRequest.getTypesAsString(),certificateRequest.certificate_authorities,null);
-    if (clientAlias != null) {
-      X509ExtendedKeyManager km=(X509ExtendedKeyManager)parameters.getKeyManager();
-      certs=km.getCertificateChain((clientAlias));
-      clientKey=km.getPrivateKey(clientAlias);
+    String alias=null;
+    String[] certTypes=certificateRequest.getTypesAsString();
+    X500Principal[] issuers=certificateRequest.certificate_authorities;
+    X509KeyManager km=parameters.getKeyManager();
+    if (km instanceof X509ExtendedKeyManager) {
+      X509ExtendedKeyManager ekm=(X509ExtendedKeyManager)km;
+      if (this.socketOwner != null) {
+        alias=ekm.chooseClientAlias(certTypes,issuers,this.socketOwner);
+      }
+ else {
+        alias=ekm.chooseEngineClientAlias(certTypes,issuers,this.engineOwner);
+      }
+      if (alias != null) {
+        certs=ekm.getCertificateChain(alias);
+      }
+    }
+ else {
+      alias=km.chooseClientAlias(certTypes,issuers,this.socketOwner);
+      if (alias != null) {
+        certs=km.getCertificateChain(alias);
+      }
     }
     session.localCertificates=certs;
     clientCert=new CertificateMessage(certs);
+    clientKey=km.getPrivateKey(alias);
     send(clientCert);
   }
-  if (session.cipherSuite.keyExchange == CipherSuite.KeyExchange_RSA || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_RSA_EXPORT) {
+  if (session.cipherSuite.keyExchange == CipherSuite.KEY_EXCHANGE_RSA || session.cipherSuite.keyExchange == CipherSuite.KEY_EXCHANGE_RSA_EXPORT) {
     Cipher c;
     try {
       c=Cipher.getInstance("RSA/ECB/PKCS1Padding");
@@ -52,30 +69,12 @@
     }
   }
  else {
-    PublicKey serverPublic;
-    KeyAgreement agreement=null;
-    DHParameterSpec spec;
     try {
-      KeyFactory kf=null;
-      try {
-        kf=KeyFactory.getInstance("DH");
-      }
- catch (      NoSuchAlgorithmException e) {
-        kf=KeyFactory.getInstance("DiffieHellman");
-      }
-      try {
-        agreement=KeyAgreement.getInstance("DH");
-      }
- catch (      NoSuchAlgorithmException ee) {
-        agreement=KeyAgreement.getInstance("DiffieHellman");
-      }
-      KeyPairGenerator kpg=null;
-      try {
-        kpg=KeyPairGenerator.getInstance("DH");
-      }
- catch (      NoSuchAlgorithmException e) {
-        kpg=KeyPairGenerator.getInstance("DiffieHellman");
-      }
+      KeyFactory kf=KeyFactory.getInstance("DH");
+      KeyAgreement agreement=KeyAgreement.getInstance("DH");
+      KeyPairGenerator kpg=KeyPairGenerator.getInstance("DH");
+      PublicKey serverPublic;
+      DHParameterSpec spec;
       if (serverKeyExchange != null) {
         serverPublic=kf.generatePublic(new DHPublicKeySpec(serverKeyExchange.par3,serverKeyExchange.par1,serverKeyExchange.par2));
         spec=new DHParameterSpec(serverKeyExchange.par1,serverKeyExchange.par2);
@@ -87,7 +86,7 @@
       kpg.initialize(spec);
       KeyPair kp=kpg.generateKeyPair();
       Key key=kp.getPublic();
-      if (clientCert != null && serverCert != null && (session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DHE_RSA || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DHE_DSS)) {
+      if (clientCert != null && serverCert != null && (session.cipherSuite.keyExchange == CipherSuite.KEY_EXCHANGE_DHE_RSA || session.cipherSuite.keyExchange == CipherSuite.KEY_EXCHANGE_DHE_DSS)) {
         PublicKey client_pk=clientCert.certs[0].getPublicKey();
         PublicKey server_pk=serverCert.certs[0].getPublicKey();
         if (client_pk instanceof DHKey && server_pk instanceof DHKey) {
@@ -114,13 +113,14 @@
   }
   computerMasterSecret();
   if (clientCert != null && !clientKeyExchange.isEmpty()) {
-    DigitalSignature ds=new DigitalSignature(session.cipherSuite.keyExchange);
+    String authType=clientKey.getAlgorithm();
+    DigitalSignature ds=new DigitalSignature(authType);
     ds.init(clientKey);
-    if (session.cipherSuite.keyExchange == CipherSuite.KeyExchange_RSA_EXPORT || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_RSA || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DHE_RSA || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DHE_RSA_EXPORT) {
+    if ("RSA".equals(authType)) {
       ds.setMD5(io_stream.getDigestMD5());
       ds.setSHA(io_stream.getDigestSHA());
     }
- else     if (session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DHE_DSS || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DHE_DSS_EXPORT) {
+ else     if ("DSA".equals(authType)) {
       ds.setSHA(io_stream.getDigestSHA());
     }
     certificateVerify=new CertificateVerify(ds.sign());

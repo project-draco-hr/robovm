@@ -1,0 +1,13 @@
+{
+  unverifiedSocket=(SSLSocket)sslSocketFactory.createSocket(socket,address.uriHost,address.uriPort,true);
+  if (tlsTolerant && unverifiedSocket instanceof OpenSSLSocketImpl) {
+    OpenSSLSocketImpl openSslSocket=(OpenSSLSocketImpl)unverifiedSocket;
+    openSslSocket.setEnabledCompressionMethods(new String[]{"ZLIB"});
+    openSslSocket.setUseSessionTickets(true);
+    openSslSocket.setHostname(address.socketHost);
+  }
+ else {
+    unverifiedSocket.setEnabledProtocols(new String[]{"SSLv3"});
+  }
+  unverifiedSocket.startHandshake();
+}

@@ -1,22 +1,22 @@
 {
-  checkClosedAndBind(false);
-  if (interfaceSet == null) {
-    InetAddress ipvXaddress=(InetAddress)impl.getOption(SocketOptions.IP_MULTICAST_IF);
-    if (ipvXaddress.isAnyLocalAddress()) {
-      NetworkInterface theInterface=getNetworkInterface();
-      if (theInterface != null) {
-        Enumeration<InetAddress> addresses=theInterface.getInetAddresses();
-        if (addresses != null) {
-          while (addresses.hasMoreElements()) {
-            InetAddress nextAddress=addresses.nextElement();
-            if (nextAddress instanceof Inet6Address) {
-              return nextAddress;
-            }
+  checkOpen();
+  if (setAddress != null) {
+    return setAddress;
+  }
+  InetAddress ipvXaddress=(InetAddress)impl.getOption(SocketOptions.IP_MULTICAST_IF);
+  if (ipvXaddress.isAnyLocalAddress()) {
+    NetworkInterface theInterface=getNetworkInterface();
+    if (theInterface != null) {
+      Enumeration<InetAddress> addresses=theInterface.getInetAddresses();
+      if (addresses != null) {
+        while (addresses.hasMoreElements()) {
+          InetAddress nextAddress=addresses.nextElement();
+          if (nextAddress instanceof Inet6Address) {
+            return nextAddress;
           }
         }
       }
     }
-    return ipvXaddress;
   }
-  return interfaceSet;
+  return ipvXaddress;
 }

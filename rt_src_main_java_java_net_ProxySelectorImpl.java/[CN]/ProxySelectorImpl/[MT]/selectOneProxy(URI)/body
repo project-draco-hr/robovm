@@ -1,0 +1,51 @@
+{
+  if (uri == null) {
+    throw new IllegalArgumentException("uri == null");
+  }
+  String scheme=uri.getScheme();
+  if (scheme == null) {
+    throw new IllegalArgumentException("scheme == null");
+  }
+  int port=-1;
+  Proxy proxy=null;
+  String nonProxyHostsKey=null;
+  boolean httpProxyOkay=true;
+  if ("http".equalsIgnoreCase(scheme)) {
+    port=80;
+    nonProxyHostsKey="http.nonProxyHosts";
+    proxy=lookupProxy("http.proxyHost","http.proxyPort",Proxy.Type.HTTP,port);
+  }
+ else   if ("https".equalsIgnoreCase(scheme)) {
+    port=443;
+    nonProxyHostsKey="https.nonProxyHosts";
+    proxy=lookupProxy("https.proxyHost","https.proxyPort",Proxy.Type.HTTP,port);
+  }
+ else   if ("ftp".equalsIgnoreCase(scheme)) {
+    port=80;
+    nonProxyHostsKey="ftp.nonProxyHosts";
+    proxy=lookupProxy("ftp.proxyHost","ftp.proxyPort",Proxy.Type.HTTP,port);
+  }
+ else   if ("socket".equalsIgnoreCase(scheme)) {
+    httpProxyOkay=false;
+  }
+ else {
+    return Proxy.NO_PROXY;
+  }
+  if (nonProxyHostsKey != null && isNonProxyHost(uri.getHost(),System.getProperty(nonProxyHostsKey))) {
+    return Proxy.NO_PROXY;
+  }
+  if (proxy != null) {
+    return proxy;
+  }
+  if (httpProxyOkay) {
+    proxy=lookupProxy("proxyHost","proxyPort",Proxy.Type.HTTP,port);
+    if (proxy != null) {
+      return proxy;
+    }
+  }
+  proxy=lookupProxy("socksProxyHost","socksProxyPort",Proxy.Type.SOCKS,1080);
+  if (proxy != null) {
+    return proxy;
+  }
+  return Proxy.NO_PROXY;
+}

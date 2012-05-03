@@ -1,0 +1,21 @@
+{
+  Collection<List<?>> subjectAlternativeNames;
+  try {
+    subjectAlternativeNames=cert.getSubjectAlternativeNames();
+  }
+ catch (  CertificateParsingException cpe) {
+    System.logI("Error parsing certificate",cpe);
+    return Collections.emptyList();
+  }
+  if (subjectAlternativeNames == null) {
+    return Collections.emptyList();
+  }
+  List<String> subjectAltList=new ArrayList<String>();
+  for (  List<?> pair : subjectAlternativeNames) {
+    int type=(Integer)pair.get(0);
+    if (type == 2) {
+      subjectAltList.add((String)pair.get(1));
+    }
+  }
+  return subjectAltList;
+}

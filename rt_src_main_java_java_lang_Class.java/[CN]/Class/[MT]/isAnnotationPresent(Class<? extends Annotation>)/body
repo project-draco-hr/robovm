@@ -1,3 +1,16 @@
 {
-  return getAnnotation(annotationClass) != null;
+  if (annotationType == null) {
+    throw new NullPointerException("annotationType == null");
+  }
+  if (isDeclaredAnnotationPresent(annotationType)) {
+    return true;
+  }
+  if (annotationType.isDeclaredAnnotationPresent(Inherited.class)) {
+    for (Class<?> sup=getSuperclass(); sup != null; sup=sup.getSuperclass()) {
+      if (sup.isDeclaredAnnotationPresent(annotationType)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }

@@ -1,7 +1,7 @@
 {
   ObjectStreamClass classDesc;
   primitiveData=input;
-  Integer oldHandle=descriptorHandle;
+  int oldHandle=descriptorHandle;
   descriptorHandle=nextHandle();
   classDesc=readClassDescriptor();
   registerObjectRead(classDesc,descriptorHandle,false);
@@ -12,7 +12,7 @@
   ObjectStreamClass superClass=readClassDesc();
   checkedSetSuperClassDesc(classDesc,superClass);
   if (0L != classDesc.getSerialVersionUID() || 0L != superClass.getSerialVersionUID()) {
-    throw new InvalidClassException(superClass.getName(),Messages.getString("luni.C3",superClass,superClass));
+    throw new InvalidClassException(superClass.getName(),"Incompatible class (SUID): " + superClass + " but expected "+ superClass);
   }
   byte tc=nextTC();
   if (tc == TC_ENDBLOCKDATA) {

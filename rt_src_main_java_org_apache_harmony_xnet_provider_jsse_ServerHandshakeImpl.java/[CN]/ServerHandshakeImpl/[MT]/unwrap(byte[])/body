@@ -20,13 +20,12 @@ case 1:
       needSendHelloRequest=false;
     clientHello=new ClientHello(io_stream,length);
   if (nonBlocking) {
-    delegatedTasks.add(new DelegatedTask(new PrivilegedExceptionAction<Void>(){
-      public Void run() throws Exception {
+    delegatedTasks.add(new DelegatedTask(new Runnable(){
+      public void run(){
         processClientHello();
-        return null;
       }
     }
-,this,AccessController.getContext()));
+,this));
     return;
   }
 processClientHello();
@@ -43,7 +42,7 @@ fatalAlert(AlertProtocol.HANDSHAKE_FAILURE,"HANDSHAKE FAILURE: no client certifi
 }
 }
  else {
-String authType=clientCert.certs[0].getPublicKey().getAlgorithm();
+String authType=clientCert.getAuthType();
 try {
 parameters.getTrustManager().checkClientTrusted(clientCert.certs,authType);
 }
@@ -59,18 +58,17 @@ unexpectedMessage();
 return;
 }
 certificateVerify=new CertificateVerify(io_stream,length);
-DigitalSignature ds=new DigitalSignature(session.cipherSuite.keyExchange);
-ds.init(serverCert.certs[0]);
+String authType=clientCert.getAuthType();
+DigitalSignature ds=new DigitalSignature(authType);
+ds.init(clientCert.certs[0]);
 byte[] md5_hash=null;
 byte[] sha_hash=null;
-if (session.cipherSuite.keyExchange == CipherSuite.KeyExchange_RSA_EXPORT || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_RSA || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DHE_RSA || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DHE_RSA_EXPORT) {
+if ("RSA".equals(authType)) {
 md5_hash=io_stream.getDigestMD5withoutLast();
 sha_hash=io_stream.getDigestSHAwithoutLast();
 }
- else if (session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DHE_DSS || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DHE_DSS_EXPORT) {
+ else if ("DSA".equals(authType)) {
 sha_hash=io_stream.getDigestSHAwithoutLast();
-}
- else if (session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DH_anon || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_DH_anon_EXPORT) {
 }
 ds.setMD5(md5_hash);
 ds.setSHA(sha_hash);
@@ -83,7 +81,7 @@ if (isResuming || serverHelloDone == null || clientKeyExchange != null || (clien
 unexpectedMessage();
 return;
 }
-if (session.cipherSuite.keyExchange == CipherSuite.KeyExchange_RSA || session.cipherSuite.keyExchange == CipherSuite.KeyExchange_RSA_EXPORT) {
+if (session.cipherSuite.keyExchange == CipherSuite.KEY_EXCHANGE_RSA || session.cipherSuite.keyExchange == CipherSuite.KEY_EXCHANGE_RSA_EXPORT) {
 clientKeyExchange=new ClientKeyExchange(io_stream,length,serverHello.server_version[1] == 1,true);
 Cipher c=null;
 try {
@@ -105,23 +103,10 @@ if (clientKeyExchange.isEmpty()) {
 preMasterSecret=((DHPublicKey)clientCert.certs[0].getPublicKey()).getY().toByteArray();
 }
  else {
-PublicKey clientPublic;
-KeyAgreement agreement;
 try {
-KeyFactory kf=null;
-try {
-kf=KeyFactory.getInstance("DH");
-}
- catch (NoSuchAlgorithmException ee) {
-kf=KeyFactory.getInstance("DiffieHellman");
-}
-try {
-agreement=KeyAgreement.getInstance("DH");
-}
- catch (NoSuchAlgorithmException ee) {
-agreement=KeyAgreement.getInstance("DiffieHellman");
-}
-clientPublic=kf.generatePublic(new DHPublicKeySpec(new BigInteger(1,clientKeyExchange.exchange_keys),serverKeyExchange.par1,serverKeyExchange.par2));
+KeyFactory kf=KeyFactory.getInstance("DH");
+KeyAgreement agreement=KeyAgreement.getInstance("DH");
+PublicKey clientPublic=kf.generatePublic(new DHPublicKeySpec(new BigInteger(1,clientKeyExchange.exchange_keys),serverKeyExchange.par1,serverKeyExchange.par2));
 agreement.init(privKey);
 agreement.doPhase(clientPublic,true);
 preMasterSecret=agreement.generateSecret();
@@ -141,6 +126,7 @@ return;
 }
 clientFinished=new Finished(io_stream,length);
 verifyFinished(clientFinished.getData());
+session.context=parameters.getServerSessionContext();
 parameters.getServerSessionContext().putSession(session);
 if (!isResuming) {
 sendChangeCipherSpec();

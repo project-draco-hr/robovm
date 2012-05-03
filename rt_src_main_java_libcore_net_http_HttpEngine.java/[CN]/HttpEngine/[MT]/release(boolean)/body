@@ -1,0 +1,33 @@
+{
+  if (responseBodyIn == cachedResponseBody) {
+    IoUtils.closeQuietly(responseBodyIn);
+  }
+  if (!connectionReleased && connection != null) {
+    connectionReleased=true;
+    if (requestBodyOut != null && !requestBodyOut.closed) {
+      reusable=false;
+    }
+    if (hasConnectionCloseHeader()) {
+      reusable=false;
+    }
+    if (responseBodyIn instanceof UnknownLengthHttpInputStream) {
+      reusable=false;
+    }
+    if (reusable && responseBodyIn != null) {
+      try {
+        Streams.skipAll(responseBodyIn);
+      }
+ catch (      IOException e) {
+        reusable=false;
+      }
+    }
+    if (!reusable) {
+      connection.closeSocketAndStreams();
+      connection=null;
+    }
+ else     if (automaticallyReleaseConnectionToPool) {
+      HttpConnectionPool.INSTANCE.recycle(connection);
+      connection=null;
+    }
+  }
+}

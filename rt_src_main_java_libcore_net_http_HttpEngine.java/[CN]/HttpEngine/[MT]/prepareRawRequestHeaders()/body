@@ -1,0 +1,27 @@
+{
+  requestHeaders.getHeaders().setStatusLine(getRequestLine());
+  if (requestHeaders.getUserAgent() == null) {
+    requestHeaders.setUserAgent(getDefaultUserAgent());
+  }
+  if (requestHeaders.getHost() == null) {
+    requestHeaders.setHost(getOriginAddress(policy.getURL()));
+  }
+  if (httpMinorVersion > 0 && requestHeaders.getConnection() == null) {
+    requestHeaders.setConnection("Keep-Alive");
+  }
+  if (requestHeaders.getAcceptEncoding() == null) {
+    transparentGzip=true;
+    requestHeaders.setAcceptEncoding("gzip");
+  }
+  if (hasRequestBody() && requestHeaders.getContentType() == null) {
+    requestHeaders.setContentType("application/x-www-form-urlencoded");
+  }
+  long ifModifiedSince=policy.getIfModifiedSince();
+  if (ifModifiedSince != 0) {
+    requestHeaders.setIfModifiedSince(new Date(ifModifiedSince));
+  }
+  CookieHandler cookieHandler=CookieHandler.getDefault();
+  if (cookieHandler != null) {
+    requestHeaders.addCookies(cookieHandler.get(uri,requestHeaders.getHeaders().toMultimap()));
+  }
+}

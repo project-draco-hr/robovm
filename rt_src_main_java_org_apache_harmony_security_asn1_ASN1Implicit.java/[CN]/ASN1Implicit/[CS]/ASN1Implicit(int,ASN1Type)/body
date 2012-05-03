@@ -1,3 +1,18 @@
 {
-  this(CLASS_CONTEXTSPECIFIC,tagNumber,type);
+  super(CLASS_CONTEXTSPECIFIC,tagNumber);
+  if ((type instanceof ASN1Choice) || (type instanceof ASN1Any)) {
+    throw new IllegalArgumentException("Implicit tagging can not be used for ASN.1 ANY or CHOICE type");
+  }
+  this.type=type;
+  if (type.checkTag(type.id)) {
+    if (type.checkTag(type.constrId)) {
+      taggingType=TAGGING_STRING;
+    }
+ else {
+      taggingType=TAGGING_PRIMITIVE;
+    }
+  }
+ else {
+    taggingType=TAGGING_CONSTRUCTED;
+  }
 }

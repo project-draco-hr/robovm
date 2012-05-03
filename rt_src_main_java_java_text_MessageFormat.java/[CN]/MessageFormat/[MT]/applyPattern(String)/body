@@ -2,31 +2,31 @@
   int length=template.length();
   StringBuffer buffer=new StringBuffer();
   ParsePosition position=new ParsePosition(0);
-  Vector<String> localStrings=new Vector<String>();
+  ArrayList<String> localStrings=new ArrayList<String>();
   int argCount=0;
   int[] args=new int[10];
   int maxArg=-1;
-  Vector<Format> localFormats=new Vector<Format>();
+  ArrayList<Format> localFormats=new ArrayList<Format>();
   while (position.getIndex() < length) {
     if (Format.upTo(template,position,buffer,'{')) {
       int arg=0;
       int offset=position.getIndex();
       if (offset >= length) {
-        throw new IllegalArgumentException(Messages.getString("text.19"));
+        throw new IllegalArgumentException("Invalid argument number");
       }
       char ch;
       while ((ch=template.charAt(offset++)) != '}' && ch != ',') {
         if (ch < '0' && ch > '9') {
-          throw new IllegalArgumentException(Messages.getString("text.19"));
+          throw new IllegalArgumentException("Invalid argument number");
         }
         arg=arg * 10 + (ch - '0');
         if (arg < 0 || offset >= length) {
-          throw new IllegalArgumentException(Messages.getString("text.19"));
+          throw new IllegalArgumentException("Invalid argument number");
         }
       }
       offset--;
       position.setIndex(offset);
-      localFormats.addElement(parseVariable(template,position));
+      localFormats.add(parseVariable(template,position));
       if (argCount >= args.length) {
         int[] newArgs=new int[args.length * 2];
         System.arraycopy(args,0,newArgs,0,args.length);
@@ -37,18 +37,12 @@
         maxArg=arg;
       }
     }
-    localStrings.addElement(buffer.toString());
+    localStrings.add(buffer.toString());
     buffer.setLength(0);
   }
-  this.strings=new String[localStrings.size()];
-  for (int i=0; i < localStrings.size(); i++) {
-    this.strings[i]=localStrings.elementAt(i);
-  }
+  this.strings=localStrings.toArray(new String[localStrings.size()]);
   argumentNumbers=args;
-  this.formats=new Format[argCount];
-  for (int i=0; i < argCount; i++) {
-    this.formats[i]=localFormats.elementAt(i);
-  }
+  this.formats=localFormats.toArray(new Format[argCount]);
   maxOffset=argCount - 1;
   maxArgumentIndex=maxArg;
 }

@@ -1,0 +1,20 @@
+{
+  RawHeaders result=new RawHeaders();
+  for (int i=0; i < headers.length(); i++) {
+    String fieldName=headers.getFieldName(i);
+    String value=headers.getValue(i);
+    if (fieldName.equals("Warning") && value.startsWith("1")) {
+      continue;
+    }
+    if (!isEndToEnd(fieldName) || network.headers.get(fieldName) == null) {
+      result.add(fieldName,value);
+    }
+  }
+  for (int i=0; i < network.headers.length(); i++) {
+    String fieldName=network.headers.getFieldName(i);
+    if (isEndToEnd(fieldName)) {
+      result.add(fieldName,network.headers.getValue(i));
+    }
+  }
+  return new ResponseHeaders(uri,result);
+}

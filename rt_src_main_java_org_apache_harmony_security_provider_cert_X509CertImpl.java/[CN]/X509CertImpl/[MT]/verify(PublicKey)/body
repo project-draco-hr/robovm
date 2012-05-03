@@ -1,11 +1,15 @@
 {
-  Signature signature=Signature.getInstance(getSigAlgName());
-  signature.initVerify(key);
-  if (tbsCertificate == null) {
-    tbsCertificate=tbsCert.getEncoded();
+  Signature signature;
+  try {
+    signature=OpenSSLSignature.getInstance(getSigAlgName());
   }
-  signature.update(tbsCertificate,0,tbsCertificate.length);
+ catch (  NoSuchAlgorithmException ignored) {
+    signature=Signature.getInstance(getSigAlgName());
+  }
+  signature.initVerify(key);
+  byte[] tbsCertificateLocal=getTbsCertificateInternal();
+  signature.update(tbsCertificateLocal,0,tbsCertificateLocal.length);
   if (!signature.verify(certificate.getSignatureValue())) {
-    throw new SignatureException(Messages.getString("security.15C"));
+    throw new SignatureException("Signature was not verified");
   }
 }

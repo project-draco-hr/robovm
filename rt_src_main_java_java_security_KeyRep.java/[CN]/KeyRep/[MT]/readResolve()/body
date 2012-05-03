@@ -6,10 +6,10 @@ case SECRET:
         return new SecretKeySpec(encoded,algorithm);
       }
  catch (      IllegalArgumentException e) {
-        throw new NotSerializableException(Messages.getString("security.0B",e));
+        throw new NotSerializableException("Could not create SecretKeySpec: " + e);
       }
     }
-  throw new NotSerializableException(Messages.getString("security.0C",type,format));
+  throw new NotSerializableException("unrecognized type/format combination: " + type + "/"+ format);
 case PUBLIC:
 if ("X.509".equals(format)) {
   try {
@@ -17,13 +17,13 @@ if ("X.509".equals(format)) {
     return kf.generatePublic(new X509EncodedKeySpec(encoded));
   }
  catch (  NoSuchAlgorithmException e) {
-    throw new NotSerializableException(Messages.getString("security.0D",e));
+    throw new NotSerializableException("Could not resolve key: " + e);
   }
 catch (  InvalidKeySpecException e) {
-    throw new NotSerializableException(Messages.getString("security.0D",e));
+    throw new NotSerializableException("Could not resolve key: " + e);
   }
 }
-throw new NotSerializableException(Messages.getString("security.0C",type,format));
+throw new NotSerializableException("unrecognized type/format combination: " + type + "/"+ format);
 case PRIVATE:
 if ("PKCS#8".equals(format)) {
 try {
@@ -31,13 +31,13 @@ KeyFactory kf=KeyFactory.getInstance(algorithm);
 return kf.generatePrivate(new PKCS8EncodedKeySpec(encoded));
 }
  catch (NoSuchAlgorithmException e) {
-throw new NotSerializableException(Messages.getString("security.0D",e));
+throw new NotSerializableException("Could not resolve key: " + e);
 }
 catch (InvalidKeySpecException e) {
-throw new NotSerializableException(Messages.getString("security.0D",e));
+throw new NotSerializableException("Could not resolve key: " + e);
 }
 }
-throw new NotSerializableException(Messages.getString("security.0C",type,format));
+throw new NotSerializableException("unrecognized type/format combination: " + type + "/"+ format);
 }
-throw new NotSerializableException(Messages.getString("security.0E",type));
+throw new NotSerializableException("unrecognized key type: " + type);
 }

@@ -1,17 +1,17 @@
 {
   if (in == null) {
-    throw new IOException(Messages.getString("luni.24"));
+    throw streamClosed();
   }
-  if (count <= 0) {
+  if (byteCount <= 0) {
     return 0;
   }
   int numSkipped=0;
   if (pos < buf.length) {
-    numSkipped+=(count < buf.length - pos) ? count : buf.length - pos;
+    numSkipped+=(byteCount < buf.length - pos) ? byteCount : buf.length - pos;
     pos+=numSkipped;
   }
-  if (numSkipped < count) {
-    numSkipped+=in.skip(count - numSkipped);
+  if (numSkipped < byteCount) {
+    numSkipped+=in.skip(byteCount - numSkipped);
   }
   return numSkipped;
 }

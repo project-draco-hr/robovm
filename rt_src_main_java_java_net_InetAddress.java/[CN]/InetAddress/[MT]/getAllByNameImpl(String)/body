@@ -1,0 +1,14 @@
+{
+  if (host == null || host.isEmpty()) {
+    return loopbackAddresses();
+  }
+  InetAddress result=parseNumericAddressNoThrow(host);
+  if (result != null) {
+    result=disallowDeprecatedFormats(host,result);
+    if (result == null) {
+      throw new UnknownHostException("Deprecated IPv4 address format: " + host);
+    }
+    return new InetAddress[]{result};
+  }
+  return lookupHostByName(host).clone();
+}

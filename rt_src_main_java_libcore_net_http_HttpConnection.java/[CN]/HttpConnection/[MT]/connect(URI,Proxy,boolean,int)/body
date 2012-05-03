@@ -1,0 +1,23 @@
+{
+  if (proxy != null) {
+    Address address=(proxy.type() == Proxy.Type.DIRECT) ? new Address(uri) : new Address(uri,proxy,requiresTunnel);
+    return HttpConnectionPool.INSTANCE.get(address,connectTimeout);
+  }
+  ProxySelector selector=ProxySelector.getDefault();
+  List<Proxy> proxyList=selector.select(uri);
+  if (proxyList != null) {
+    for (    Proxy selectedProxy : proxyList) {
+      if (selectedProxy.type() == Proxy.Type.DIRECT) {
+        continue;
+      }
+      try {
+        Address address=new Address(uri,selectedProxy,requiresTunnel);
+        return HttpConnectionPool.INSTANCE.get(address,connectTimeout);
+      }
+ catch (      IOException e) {
+        selector.connectFailed(uri,selectedProxy.address(),e);
+      }
+    }
+  }
+  return HttpConnectionPool.INSTANCE.get(new Address(uri),connectTimeout);
+}

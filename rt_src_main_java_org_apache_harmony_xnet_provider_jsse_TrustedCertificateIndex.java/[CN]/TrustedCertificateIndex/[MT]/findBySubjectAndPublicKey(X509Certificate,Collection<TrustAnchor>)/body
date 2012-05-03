@@ -1,0 +1,21 @@
+{
+  PublicKey certPublicKey=cert.getPublicKey();
+  for (  TrustAnchor anchor : anchors) {
+    PublicKey caPublicKey;
+    try {
+      X509Certificate caCert=anchor.getTrustedCert();
+      if (caCert != null) {
+        caPublicKey=caCert.getPublicKey();
+      }
+ else {
+        caPublicKey=anchor.getCAPublicKey();
+      }
+      if (caPublicKey.equals(certPublicKey)) {
+        return anchor;
+      }
+    }
+ catch (    Exception e) {
+    }
+  }
+  return null;
+}

@@ -1,16 +1,11 @@
 {
-  if (null == provider) {
-    provider=loadProviderByProperty();
-    if (null == provider) {
+  if (provider == null) {
+    provider=ServiceLoader.loadFromSystemProperty(SelectorProvider.class);
+    if (provider == null) {
       provider=loadProviderByJar();
     }
-    if (null == provider) {
-      provider=AccessController.doPrivileged(new PrivilegedAction<SelectorProvider>(){
-        public SelectorProvider run(){
-          return new SelectorProviderImpl();
-        }
-      }
-);
+    if (provider == null) {
+      provider=new SelectorProviderImpl();
     }
   }
   return provider;

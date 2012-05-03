@@ -1,18 +1,21 @@
 {
-  if (loader == null) {
+  if (loader == null || bundleName == null) {
     throw new NullPointerException();
   }
-  if (bundleName != null) {
-    ResourceBundle bundle;
-    if (!locale.equals(Locale.getDefault())) {
-      if ((bundle=handleGetBundle(bundleName,UNDER_SCORE + locale,false,loader)) != null) {
-        return bundle;
-      }
-    }
-    if ((bundle=handleGetBundle(bundleName,UNDER_SCORE + Locale.getDefault(),true,loader)) != null) {
-      return bundle;
-    }
-    throw new MissingResourceException(Messages.getString("luni.3A",bundleName,locale),bundleName + '_' + locale,EMPTY_STRING);
+  Locale defaultLocale=Locale.getDefault();
+  if (!cacheLocale.equals(defaultLocale)) {
+    cache.clear();
+    cacheLocale=defaultLocale;
   }
-  throw new NullPointerException();
+  ResourceBundle bundle=null;
+  if (!locale.equals(defaultLocale)) {
+    bundle=handleGetBundle(false,bundleName,locale,loader);
+  }
+  if (bundle == null) {
+    bundle=handleGetBundle(true,bundleName,defaultLocale,loader);
+    if (bundle == null) {
+      throw missingResourceException(bundleName + '_' + locale,"");
+    }
+  }
+  return bundle;
 }

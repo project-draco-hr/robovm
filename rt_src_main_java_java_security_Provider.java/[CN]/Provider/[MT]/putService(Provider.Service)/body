@@ -2,10 +2,6 @@
   if (s == null) {
     throw new NullPointerException();
   }
-  SecurityManager sm=System.getSecurityManager();
-  if (sm != null) {
-    sm.checkSecurityAccess("putProviderProperty." + name);
-  }
   if ("Provider".equals(s.getType())) {
     return;
   }
@@ -13,13 +9,13 @@
   if (serviceTable == null) {
     serviceTable=new TwoKeyHashMap<String,String,Service>(128);
   }
-  serviceTable.put(s.type,s.algorithm.toUpperCase(),s);
+  serviceTable.put(s.type,s.algorithm.toUpperCase(Locale.US),s);
   if (s.aliases != null) {
     if (aliasTable == null) {
       aliasTable=new TwoKeyHashMap<String,String,Service>(256);
     }
-    for (Iterator<String> it=s.getAliases(); it.hasNext(); ) {
-      aliasTable.put(s.type,(it.next()).toUpperCase(),s);
+    for (    String alias : s.getAliases()) {
+      aliasTable.put(s.type,alias.toUpperCase(Locale.US),s);
     }
   }
   serviceInfoToProperties(s);

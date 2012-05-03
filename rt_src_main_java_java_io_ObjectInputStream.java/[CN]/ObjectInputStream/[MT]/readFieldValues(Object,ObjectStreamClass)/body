@@ -1,105 +1,82 @@
 {
   ObjectStreamField[] fields=classDesc.getLoadFields();
-  fields=(null == fields ? new ObjectStreamField[]{} : fields);
+  fields=(fields == null) ? ObjectStreamClass.NO_FIELDS : fields;
   Class<?> declaringClass=classDesc.forClass();
   if (declaringClass == null && mustResolve) {
     throw new ClassNotFoundException(classDesc.getName());
   }
   for (  ObjectStreamField fieldDesc : fields) {
-    long fieldID=fieldDesc.getFieldID(accessor,declaringClass);
-    if (fieldDesc.isPrimitive()) {
-      try {
-switch (fieldDesc.getTypeCode()) {
-case 'B':
-          byte srcByte=input.readByte();
-        if (fieldID != ObjectStreamField.FIELD_IS_ABSENT) {
-          accessor.setByte(obj,fieldID,srcByte);
+    Field field=classDesc.getReflectionField(fieldDesc);
+    try {
+      Class<?> type=fieldDesc.getTypeInternal();
+      if (type == byte.class) {
+        byte b=input.readByte();
+        if (field != null) {
+          field.setByte(obj,b);
         }
-      break;
-case 'C':
-    char srcChar=input.readChar();
-  if (fieldID != ObjectStreamField.FIELD_IS_ABSENT) {
-    accessor.setChar(obj,fieldID,srcChar);
+      }
+ else       if (type == char.class) {
+        char c=input.readChar();
+        if (field != null) {
+          field.setChar(obj,c);
+        }
+      }
+ else       if (type == double.class) {
+        double d=input.readDouble();
+        if (field != null) {
+          field.setDouble(obj,d);
+        }
+      }
+ else       if (type == float.class) {
+        float f=input.readFloat();
+        if (field != null) {
+          field.setFloat(obj,f);
+        }
+      }
+ else       if (type == int.class) {
+        int i=input.readInt();
+        if (field != null) {
+          field.setInt(obj,i);
+        }
+      }
+ else       if (type == long.class) {
+        long j=input.readLong();
+        if (field != null) {
+          field.setLong(obj,j);
+        }
+      }
+ else       if (type == short.class) {
+        short s=input.readShort();
+        if (field != null) {
+          field.setShort(obj,s);
+        }
+      }
+ else       if (type == boolean.class) {
+        boolean z=input.readBoolean();
+        if (field != null) {
+          field.setBoolean(obj,z);
+        }
+      }
+ else {
+        Object toSet=fieldDesc.isUnshared() ? readUnshared() : readObject();
+        if (toSet != null) {
+          String fieldName=fieldDesc.getName();
+          ObjectStreamField localFieldDesc=classDesc.getField(fieldName);
+          Class<?> fieldType=localFieldDesc.getTypeInternal();
+          Class<?> valueType=toSet.getClass();
+          if (!fieldType.isAssignableFrom(valueType)) {
+            throw new ClassCastException(classDesc.getName() + "." + fieldName+ " - "+ fieldType+ " not compatible with "+ valueType);
+          }
+          if (field != null) {
+            field.set(obj,toSet);
+          }
+        }
+      }
+    }
+ catch (    IllegalAccessException iae) {
+      throw new AssertionError(iae);
+    }
+catch (    NoSuchFieldError ignored) {
+    }
   }
-break;
-case 'D':
-double srcDouble=input.readDouble();
-if (fieldID != ObjectStreamField.FIELD_IS_ABSENT) {
-accessor.setDouble(obj,fieldID,srcDouble);
-}
-break;
-case 'F':
-float srcFloat=input.readFloat();
-if (fieldID != ObjectStreamField.FIELD_IS_ABSENT) {
-accessor.setFloat(obj,fieldID,srcFloat);
-}
-break;
-case 'I':
-int srcInt=input.readInt();
-if (fieldID != ObjectStreamField.FIELD_IS_ABSENT) {
-accessor.setInt(obj,fieldID,srcInt);
-}
-break;
-case 'J':
-long srcLong=input.readLong();
-if (fieldID != ObjectStreamField.FIELD_IS_ABSENT) {
-accessor.setLong(obj,fieldID,srcLong);
-}
-break;
-case 'S':
-short srcShort=input.readShort();
-if (fieldID != ObjectStreamField.FIELD_IS_ABSENT) {
-accessor.setShort(obj,fieldID,srcShort);
-}
-break;
-case 'Z':
-boolean srcBoolean=input.readBoolean();
-if (fieldID != ObjectStreamField.FIELD_IS_ABSENT) {
-accessor.setBoolean(obj,fieldID,srcBoolean);
-}
-break;
-default :
-throw new StreamCorruptedException(Messages.getString("luni.BF",fieldDesc.getTypeCode()));
-}
-}
- catch (NoSuchFieldError err) {
-}
-}
- else {
-String fieldName=fieldDesc.getName();
-boolean setBack=false;
-if (mustResolve && fieldDesc == null) {
-setBack=true;
-mustResolve=false;
-}
-Object toSet;
-if (fieldDesc != null && fieldDesc.isUnshared()) {
-toSet=readUnshared();
-}
- else {
-toSet=readObject();
-}
-if (setBack) {
-mustResolve=true;
-}
-if (fieldDesc != null) {
-if (toSet != null) {
-Class<?> fieldType=getFieldClass(obj,fieldName);
-Class<?> valueType=toSet.getClass();
-if (fieldType != null) {
-if (!fieldType.isAssignableFrom(valueType)) {
-throw new ClassCastException(Messages.getString("luni.C0",new String[]{fieldType.toString(),valueType.toString(),classDesc.getName() + "." + fieldName}));
-}
-try {
-if (fieldID != ObjectStreamField.FIELD_IS_ABSENT) {
-accessor.setObject(obj,fieldID,toSet);
-}
-}
- catch (NoSuchFieldError e) {
-}
-}
-}
-}
-}
-}
 }

@@ -1,0 +1,14 @@
+{
+  if (text.isEmpty()) {
+    return;
+  }
+  if (coalescing || token != XmlPullParser.CDSECT) {
+    Node lastChild=parent.getLastChild();
+    if (lastChild != null && lastChild.getNodeType() == Node.TEXT_NODE) {
+      Text textNode=(Text)lastChild;
+      textNode.appendData(text);
+      return;
+    }
+  }
+  parent.appendChild(token == XmlPullParser.CDSECT ? new CDATASectionImpl(document,text) : new TextImpl(document,text));
+}

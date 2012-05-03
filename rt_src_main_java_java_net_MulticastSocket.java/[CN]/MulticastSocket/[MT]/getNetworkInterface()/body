@@ -1,33 +1,8 @@
 {
-  checkClosedAndBind(false);
-  Integer theIndex=Integer.valueOf(0);
-  try {
-    theIndex=(Integer)impl.getOption(SocketOptions.IP_MULTICAST_IF2);
+  checkOpen();
+  int index=(Integer)impl.getOption(SocketOptions.IP_MULTICAST_IF2);
+  if (index != 0) {
+    return NetworkInterface.getByIndex(index);
   }
- catch (  SocketException e) {
-  }
-  if (theIndex.intValue() != 0) {
-    Enumeration<NetworkInterface> theInterfaces=NetworkInterface.getNetworkInterfaces();
-    while (theInterfaces.hasMoreElements()) {
-      NetworkInterface nextInterface=theInterfaces.nextElement();
-      if (nextInterface.getIndex() == theIndex.intValue()) {
-        return nextInterface;
-      }
-    }
-  }
-  InetAddress theAddress=(InetAddress)impl.getOption(SocketOptions.IP_MULTICAST_IF);
-  if (theAddress != null) {
-    if (!theAddress.isAnyLocalAddress()) {
-      return NetworkInterface.getByInetAddress(theAddress);
-    }
-    InetAddress theAddresses[]=new InetAddress[1];
-    if ((Socket.preferIPv4Stack() == false) && (InetAddress.preferIPv6Addresses() == true)) {
-      theAddresses[0]=Inet6Address.ANY;
-    }
- else {
-      theAddresses[0]=InetAddress.ANY;
-    }
-    return new NetworkInterface(null,null,theAddresses,NetworkInterface.UNSET_INTERFACE_INDEX);
-  }
-  return null;
+  return NetworkInterface.forUnboundMulticastSocket();
 }

@@ -1,0 +1,20 @@
+{
+synchronized (reflectionFields) {
+    Field field=reflectionFields.get(osf);
+    if (field != null) {
+      return field;
+    }
+  }
+  try {
+    Class<?> declaringClass=forClass();
+    Field field=declaringClass.getDeclaredField(osf.getName());
+    field.setAccessible(true);
+synchronized (reflectionFields) {
+      reflectionFields.put(osf,field);
+    }
+    return reflectionFields.get(osf);
+  }
+ catch (  NoSuchFieldException ex) {
+    return null;
+  }
+}

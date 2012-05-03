@@ -1,30 +1,11 @@
 {
-  try {
-    if (hostName == null) {
-      int address=0;
-      if (ipaddress.length == 4) {
-        address=bytesToInt(ipaddress,0);
-        if (address == 0) {
-          return hostName=inetNtoaImpl(address);
-        }
-      }
-      hostName=getHostByAddrImpl(ipaddress).hostName;
-      if (hostName.equals("localhost") && ipaddress.length == 4 && address != 0x7f000001) {
-        return hostName=inetNtoaImpl(address);
-      }
+  if (hostName == null) {
+    try {
+      hostName=getHostByAddrImpl(this).hostName;
     }
-  }
- catch (  UnknownHostException e) {
-    return hostName=Inet6Util.createIPAddrStringFromByteArray(ipaddress);
-  }
-  SecurityManager security=System.getSecurityManager();
-  try {
-    if (security != null && isHostName(hostName)) {
-      security.checkConnect(hostName,-1);
+ catch (    UnknownHostException ex) {
+      hostName=getHostAddress();
     }
-  }
- catch (  SecurityException e) {
-    return Inet6Util.createIPAddrStringFromByteArray(ipaddress);
   }
   return hostName;
 }

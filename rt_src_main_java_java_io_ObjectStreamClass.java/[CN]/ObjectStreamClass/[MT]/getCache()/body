@@ -1,0 +1,13 @@
+{
+  ThreadLocal<WeakHashMap<Class<?>,ObjectStreamClass>> tls=storage.get();
+  if (tls == null) {
+    tls=new ThreadLocal<WeakHashMap<Class<?>,ObjectStreamClass>>(){
+      public WeakHashMap<Class<?>,ObjectStreamClass> initialValue(){
+        return new WeakHashMap<Class<?>,ObjectStreamClass>();
+      }
+    }
+;
+    storage=new SoftReference<ThreadLocal<WeakHashMap<Class<?>,ObjectStreamClass>>>(tls);
+  }
+  return tls.get();
+}

@@ -1,8 +1,17 @@
 {
-  if (domain == null || host == null) {
+  if (domainPattern == null || host == null) {
     return false;
   }
-  String newDomain=domain.toLowerCase();
-  String newHost=host.toLowerCase();
-  return isValidDomain(newDomain) && effDomainMatches(newDomain,newHost) && isValidHost(newDomain,newHost);
+  String a=host.toLowerCase(Locale.US);
+  String b=domainPattern.toLowerCase(Locale.US);
+  if (a.equals(b) && (isFullyQualifiedDomainName(a,0) || InetAddress.isNumeric(a))) {
+    return true;
+  }
+  if (!isFullyQualifiedDomainName(a,0)) {
+    return b.equals(".local");
+  }
+  if (b.length() == 1 + a.length() && b.startsWith(".") && b.endsWith(a) && isFullyQualifiedDomainName(b,1)) {
+    return true;
+  }
+  return a.length() > b.length() && a.endsWith(b) && ((b.startsWith(".") && isFullyQualifiedDomainName(b,1)) || b.equals(".local"));
 }

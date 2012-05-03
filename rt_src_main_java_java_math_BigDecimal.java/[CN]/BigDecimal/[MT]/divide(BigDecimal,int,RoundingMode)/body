@@ -3,7 +3,7 @@
     throw new NullPointerException();
   }
   if (divisor.isZero()) {
-    throw new ArithmeticException(Messages.getString("math.04"));
+    throw new ArithmeticException("Division by zero");
   }
   long diffScale=((long)this.scale - divisor.scale) - scale;
   if (this.bitLength < 64 && divisor.bitLength < 64) {
@@ -11,13 +11,13 @@
       return dividePrimitiveLongs(this.smallValue,divisor.smallValue,scale,roundingMode);
     }
  else     if (diffScale > 0) {
-      if (diffScale < LONG_TEN_POW.length && divisor.bitLength + LONG_TEN_POW_BIT_LENGTH[(int)diffScale] < 64) {
-        return dividePrimitiveLongs(this.smallValue,divisor.smallValue * LONG_TEN_POW[(int)diffScale],scale,roundingMode);
+      if (diffScale < MathUtils.LONG_POWERS_OF_TEN.length && divisor.bitLength + LONG_POWERS_OF_TEN_BIT_LENGTH[(int)diffScale] < 64) {
+        return dividePrimitiveLongs(this.smallValue,divisor.smallValue * MathUtils.LONG_POWERS_OF_TEN[(int)diffScale],scale,roundingMode);
       }
     }
  else {
-      if (-diffScale < LONG_TEN_POW.length && this.bitLength + LONG_TEN_POW_BIT_LENGTH[(int)-diffScale] < 64) {
-        return dividePrimitiveLongs(this.smallValue * LONG_TEN_POW[(int)-diffScale],divisor.smallValue,scale,roundingMode);
+      if (-diffScale < MathUtils.LONG_POWERS_OF_TEN.length && this.bitLength + LONG_POWERS_OF_TEN_BIT_LENGTH[(int)-diffScale] < 64) {
+        return dividePrimitiveLongs(this.smallValue * MathUtils.LONG_POWERS_OF_TEN[(int)-diffScale],divisor.smallValue,scale,roundingMode);
       }
     }
   }

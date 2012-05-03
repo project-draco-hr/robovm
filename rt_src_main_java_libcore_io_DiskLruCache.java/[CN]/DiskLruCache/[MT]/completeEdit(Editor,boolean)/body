@@ -1,0 +1,43 @@
+{
+  Entry entry=editor.entry;
+  if (entry.currentEditor != editor) {
+    throw new IllegalStateException();
+  }
+  if (success && !entry.readable) {
+    for (int i=0; i < valueCount; i++) {
+      if (!entry.getDirtyFile(i).exists()) {
+        editor.abort();
+        throw new IllegalStateException("edit didn't create file " + i);
+      }
+    }
+  }
+  for (int i=0; i < valueCount; i++) {
+    File dirty=entry.getDirtyFile(i);
+    if (success) {
+      if (dirty.exists()) {
+        File clean=entry.getCleanFile(i);
+        dirty.renameTo(clean);
+        long oldLength=entry.lengths[i];
+        long newLength=clean.length();
+        entry.lengths[i]=newLength;
+        size=size - oldLength + newLength;
+      }
+    }
+ else {
+      deleteIfExists(dirty);
+    }
+  }
+  redundantOpCount++;
+  entry.currentEditor=null;
+  if (entry.readable | success) {
+    entry.readable=true;
+    journalWriter.write(CLEAN + ' ' + entry.key+ entry.getLengths()+ '\n');
+  }
+ else {
+    lruEntries.remove(entry.key);
+    journalWriter.write(REMOVE + ' ' + entry.key+ '\n');
+  }
+  if (size > maxSize || journalRebuildRequired()) {
+    executorService.submit(cleanupCallable);
+  }
+}

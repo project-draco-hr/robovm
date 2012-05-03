@@ -1,0 +1,119 @@
+{
+  int field=-1;
+  int index=PATTERN_CHARS.indexOf(format);
+  if (index == -1) {
+    throw new IllegalArgumentException("Unknown pattern character '" + format + "'");
+  }
+  int beginPosition=buffer.length();
+  Field dateFormatField=null;
+switch (index) {
+case ERA_FIELD:
+    dateFormatField=Field.ERA;
+  buffer.append(formatData.eras[calendar.get(Calendar.ERA)]);
+break;
+case YEAR_FIELD:
+dateFormatField=Field.YEAR;
+int year=calendar.get(Calendar.YEAR);
+if (count == 2) {
+appendNumber(buffer,2,year % 100);
+}
+ else {
+appendNumber(buffer,count,year);
+}
+break;
+case STAND_ALONE_MONTH_FIELD:
+dateFormatField=Field.MONTH;
+appendMonth(buffer,count,formatData.longStandAloneMonths,formatData.shortStandAloneMonths);
+break;
+case MONTH_FIELD:
+dateFormatField=Field.MONTH;
+appendMonth(buffer,count,formatData.months,formatData.shortMonths);
+break;
+case DATE_FIELD:
+dateFormatField=Field.DAY_OF_MONTH;
+field=Calendar.DATE;
+break;
+case HOUR_OF_DAY1_FIELD:
+dateFormatField=Field.HOUR_OF_DAY1;
+int hour=calendar.get(Calendar.HOUR_OF_DAY);
+appendNumber(buffer,count,hour == 0 ? 24 : hour);
+break;
+case HOUR_OF_DAY0_FIELD:
+dateFormatField=Field.HOUR_OF_DAY0;
+field=Calendar.HOUR_OF_DAY;
+break;
+case MINUTE_FIELD:
+dateFormatField=Field.MINUTE;
+field=Calendar.MINUTE;
+break;
+case SECOND_FIELD:
+dateFormatField=Field.SECOND;
+field=Calendar.SECOND;
+break;
+case MILLISECOND_FIELD:
+dateFormatField=Field.MILLISECOND;
+int value=calendar.get(Calendar.MILLISECOND);
+appendNumber(buffer,count,value);
+break;
+case STAND_ALONE_DAY_OF_WEEK_FIELD:
+dateFormatField=Field.DAY_OF_WEEK;
+appendDayOfWeek(buffer,count,formatData.longStandAloneWeekdays,formatData.shortStandAloneWeekdays);
+break;
+case DAY_OF_WEEK_FIELD:
+dateFormatField=Field.DAY_OF_WEEK;
+appendDayOfWeek(buffer,count,formatData.weekdays,formatData.shortWeekdays);
+break;
+case DAY_OF_YEAR_FIELD:
+dateFormatField=Field.DAY_OF_YEAR;
+field=Calendar.DAY_OF_YEAR;
+break;
+case DAY_OF_WEEK_IN_MONTH_FIELD:
+dateFormatField=Field.DAY_OF_WEEK_IN_MONTH;
+field=Calendar.DAY_OF_WEEK_IN_MONTH;
+break;
+case WEEK_OF_YEAR_FIELD:
+dateFormatField=Field.WEEK_OF_YEAR;
+field=Calendar.WEEK_OF_YEAR;
+break;
+case WEEK_OF_MONTH_FIELD:
+dateFormatField=Field.WEEK_OF_MONTH;
+field=Calendar.WEEK_OF_MONTH;
+break;
+case AM_PM_FIELD:
+dateFormatField=Field.AM_PM;
+buffer.append(formatData.ampms[calendar.get(Calendar.AM_PM)]);
+break;
+case HOUR1_FIELD:
+dateFormatField=Field.HOUR1;
+hour=calendar.get(Calendar.HOUR);
+appendNumber(buffer,count,hour == 0 ? 12 : hour);
+break;
+case HOUR0_FIELD:
+dateFormatField=Field.HOUR0;
+field=Calendar.HOUR;
+break;
+case TIMEZONE_FIELD:
+dateFormatField=Field.TIME_ZONE;
+appendTimeZone(buffer,count,true);
+break;
+case RFC_822_TIMEZONE_FIELD:
+dateFormatField=Field.TIME_ZONE;
+appendNumericTimeZone(buffer,false);
+break;
+}
+if (field != -1) {
+appendNumber(buffer,count,calendar.get(field));
+}
+if (fields != null) {
+position=new FieldPosition(dateFormatField);
+position.setBeginIndex(beginPosition);
+position.setEndIndex(buffer.length());
+fields.add(position);
+}
+ else {
+if ((position.getFieldAttribute() == dateFormatField || (position.getFieldAttribute() == null && position.getField() == index)) && position.getEndIndex() == 0) {
+position.setBeginIndex(beginPosition);
+position.setEndIndex(buffer.length());
+}
+}
+}

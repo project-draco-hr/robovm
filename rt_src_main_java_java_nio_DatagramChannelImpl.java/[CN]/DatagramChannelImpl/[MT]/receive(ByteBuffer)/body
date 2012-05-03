@@ -1,0 +1,27 @@
+{
+  target.checkWritable();
+  checkOpen();
+  if (!isBound) {
+    return null;
+  }
+  SocketAddress retAddr=null;
+  try {
+    begin();
+synchronized (readLock) {
+      boolean loop=isBlocking();
+      if (!target.isDirect()) {
+        retAddr=receiveImpl(target,loop);
+      }
+ else {
+        retAddr=receiveDirectImpl(target,loop);
+      }
+    }
+  }
+ catch (  InterruptedIOException e) {
+    return null;
+  }
+ finally {
+    end(retAddr != null);
+  }
+  return retAddr;
+}

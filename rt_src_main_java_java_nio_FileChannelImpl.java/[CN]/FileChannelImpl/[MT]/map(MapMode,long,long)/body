@@ -1,0 +1,30 @@
+{
+  checkOpen();
+  if (mapMode == null) {
+    throw new NullPointerException("mapMode == null");
+  }
+  if (position < 0 || size < 0 || size > Integer.MAX_VALUE) {
+    throw new IllegalArgumentException("position=" + position + " size="+ size);
+  }
+  int accessMode=(mode & O_ACCMODE);
+  if (accessMode == O_RDONLY) {
+    if (mapMode != MapMode.READ_ONLY) {
+      throw new NonWritableChannelException();
+    }
+  }
+ else   if (accessMode == O_WRONLY) {
+    throw new NonReadableChannelException();
+  }
+  if (position + size > size()) {
+    try {
+      Libcore.os.ftruncate(fd,position + size);
+    }
+ catch (    ErrnoException errnoException) {
+      throw errnoException.rethrowAsIOException();
+    }
+  }
+  long alignment=position - position % Libcore.os.sysconf(_SC_PAGE_SIZE);
+  int offset=(int)(position - alignment);
+  MemoryBlock block=MemoryBlock.mmap(fd,alignment,size + offset,mapMode);
+  return new MappedByteBufferAdapter(block,(int)size,offset,mapMode);
+}

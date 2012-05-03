@@ -3,23 +3,18 @@
     return precision;
   }
   int bitLength=this.bitLength;
-  int decimalDigits=1;
-  double doubleUnsc=1;
-  if (bitLength < 1024) {
-    if (bitLength >= 64) {
-      doubleUnsc=getUnscaledValue().doubleValue();
-    }
- else     if (bitLength >= 1) {
-      doubleUnsc=smallValue;
-    }
-    decimalDigits+=Math.log10(Math.abs(doubleUnsc));
+  if (bitLength == 0) {
+    precision=1;
+  }
+ else   if (bitLength < 64) {
+    precision=decimalDigitsInLong(smallValue);
   }
  else {
-    decimalDigits+=(bitLength - 1) * LOG10_2;
+    int decimalDigits=1 + (int)((bitLength - 1) * LOG10_2);
     if (getUnscaledValue().divide(Multiplication.powerOf10(decimalDigits)).signum() != 0) {
       decimalDigits++;
     }
+    precision=decimalDigits;
   }
-  precision=decimalDigits;
   return precision;
 }

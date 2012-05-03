@@ -1,25 +1,18 @@
 {
   if (magnitude == null) {
-    throw new NullPointerException();
+    throw new NullPointerException("magnitude == null");
   }
-  if ((signum < -1) || (signum > 1)) {
-    throw new NumberFormatException(Messages.getString("math.13"));
+  if (signum < -1 || signum > 1) {
+    throw new NumberFormatException("Invalid signum: " + signum);
   }
   if (signum == 0) {
     for (    byte element : magnitude) {
       if (element != 0) {
-        throw new NumberFormatException(Messages.getString("math.14"));
+        throw new NumberFormatException("signum-magnitude mismatch");
       }
     }
   }
-  if (magnitude.length == 0) {
-    sign=0;
-    numberLength=1;
-    digits=new int[]{0};
-  }
- else {
-    sign=signum;
-    putBytesPositiveToIntegers(magnitude);
-    cutOffLeadingZeroes();
-  }
+  BigInt bigInt=new BigInt();
+  bigInt.putBigEndian(magnitude,signum < 0);
+  setBigInt(bigInt);
 }

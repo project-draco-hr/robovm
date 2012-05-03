@@ -1,22 +1,11 @@
 {
-  int s=internalGetState(this);
-  if (s == State.BLOCKED.ordinal()) {
-    return State.BLOCKED;
+  VMThread vmt=this.vmThread;
+  VMThread thread=vmThread;
+  if (thread != null) {
+    int state=thread.getStatus();
+    if (state != -1) {
+      return VMThread.STATE_MAP[state];
+    }
   }
- else   if (s == State.NEW.ordinal()) {
-    return State.NEW;
-  }
- else   if (s == State.RUNNABLE.ordinal()) {
-    return State.RUNNABLE;
-  }
- else   if (s == State.TERMINATED.ordinal()) {
-    return State.TERMINATED;
-  }
- else   if (s == State.TIMED_WAITING.ordinal()) {
-    return State.TIMED_WAITING;
-  }
- else   if (s == State.WAITING.ordinal()) {
-    return State.WAITING;
-  }
-  throw new IllegalStateException();
+  return hasBeenStarted ? Thread.State.TERMINATED : Thread.State.NEW;
 }

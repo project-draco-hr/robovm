@@ -1,0 +1,49 @@
+{
+  FieldPosition passedField=new FieldPosition(0);
+  for (int i=0; i <= maxOffset; i++) {
+    buffer.append(strings[i]);
+    int begin=buffer.length();
+    Object arg;
+    if (objects != null && argumentNumbers[i] < objects.length) {
+      arg=objects[argumentNumbers[i]];
+    }
+ else {
+      buffer.append('{');
+      buffer.append(argumentNumbers[i]);
+      buffer.append('}');
+      handleArgumentField(begin,buffer.length(),argumentNumbers[i],position,fields);
+      continue;
+    }
+    Format format=formats[i];
+    if (format == null || arg == null) {
+      if (arg instanceof Number) {
+        format=NumberFormat.getInstance();
+      }
+ else       if (arg instanceof Date) {
+        format=DateFormat.getInstance();
+      }
+ else {
+        buffer.append(arg);
+        handleArgumentField(begin,buffer.length(),argumentNumbers[i],position,fields);
+        continue;
+      }
+    }
+    if (format instanceof ChoiceFormat) {
+      String result=format.format(arg);
+      MessageFormat mf=new MessageFormat(result);
+      mf.setLocale(locale);
+      mf.format(objects,buffer,passedField);
+      handleArgumentField(begin,buffer.length(),argumentNumbers[i],position,fields);
+      handleFormat(format,arg,begin,fields);
+    }
+ else {
+      format.format(arg,buffer,passedField);
+      handleArgumentField(begin,buffer.length(),argumentNumbers[i],position,fields);
+      handleFormat(format,arg,begin,fields);
+    }
+  }
+  if (maxOffset + 1 < strings.length) {
+    buffer.append(strings[maxOffset + 1]);
+  }
+  return buffer;
+}

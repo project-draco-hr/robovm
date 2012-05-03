@@ -1,21 +1,19 @@
 {
-  int i=0;
   int mark=pos;
   while (pos < buf.length) {
-    byte b=buf[pos++];
-    if (b == ':') {
-      byte[] nameBuffer=wrap(mark,pos - 1);
-      if (buf[pos++] != ' ') {
-        throw new IOException(Messages.getString("archive.30",nameBuffer));
-      }
-      name=new Attributes.Name(nameBuffer);
-      return;
+    if (buf[pos++] != ':') {
+      continue;
     }
-    if (!((b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || b == '_' || b == '-' || (b >= '0' && b <= '9'))) {
-      throw new IOException(Messages.getString("archive.30",b));
+    String name=new String(buf,mark,pos - mark - 1,Charsets.US_ASCII);
+    if (buf[pos++] != ' ') {
+      throw new IOException(String.format("Invalid value for attribute '%s'",name));
     }
-  }
-  if (i > 0) {
-    throw new IOException(Messages.getString("archive.30",wrap(mark,buf.length)));
+    try {
+      this.name=new Attributes.Name(name);
+    }
+ catch (    IllegalArgumentException e) {
+      throw new IOException(e.getMessage());
+    }
+    return;
   }
 }

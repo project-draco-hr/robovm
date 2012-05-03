@@ -2,7 +2,11 @@
   final ReentrantLock lock=this.lock;
   lock.lock();
   try {
-    return q.toArray(a);
+    int n=size;
+    if (a.length < n)     return (T[])Arrays.copyOf(queue,size,a.getClass());
+    System.arraycopy(queue,0,a,0,n);
+    if (a.length > n)     a[n]=null;
+    return a;
   }
   finally {
     lock.unlock();

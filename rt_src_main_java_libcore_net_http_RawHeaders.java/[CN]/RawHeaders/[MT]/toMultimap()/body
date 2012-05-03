@@ -1,0 +1,18 @@
+{
+  Map<String,List<String>> result=new TreeMap<String,List<String>>(FIELD_NAME_COMPARATOR);
+  for (int i=0; i < namesAndValues.size(); i+=2) {
+    String fieldName=namesAndValues.get(i);
+    String value=namesAndValues.get(i + 1);
+    List<String> allValues=new ArrayList<String>();
+    List<String> otherValues=result.get(fieldName);
+    if (otherValues != null) {
+      allValues.addAll(otherValues);
+    }
+    allValues.add(value);
+    result.put(fieldName,Collections.unmodifiableList(allValues));
+  }
+  if (statusLine != null) {
+    result.put(null,Collections.unmodifiableList(Collections.singletonList(statusLine)));
+  }
+  return Collections.unmodifiableMap(result);
+}

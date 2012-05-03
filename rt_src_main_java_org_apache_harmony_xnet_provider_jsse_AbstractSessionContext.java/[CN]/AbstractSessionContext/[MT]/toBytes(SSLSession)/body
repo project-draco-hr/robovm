@@ -1,0 +1,30 @@
+{
+  if (!(session instanceof OpenSSLSessionImpl)) {
+    return null;
+  }
+  OpenSSLSessionImpl sslSession=(OpenSSLSessionImpl)session;
+  try {
+    ByteArrayOutputStream baos=new ByteArrayOutputStream();
+    DataOutputStream daos=new DataOutputStream(baos);
+    daos.writeInt(OPEN_SSL);
+    byte[] data=sslSession.getEncoded();
+    daos.writeInt(data.length);
+    daos.write(data);
+    Certificate[] certs=session.getPeerCertificates();
+    daos.writeInt(certs.length);
+    for (    Certificate cert : certs) {
+      data=cert.getEncoded();
+      daos.writeInt(data.length);
+      daos.write(data);
+    }
+    return baos.toByteArray();
+  }
+ catch (  IOException e) {
+    log(e);
+    return null;
+  }
+catch (  CertificateEncodingException e) {
+    log(e);
+    return null;
+  }
+}

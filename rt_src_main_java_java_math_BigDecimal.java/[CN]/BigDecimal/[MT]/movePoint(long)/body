@@ -4,12 +4,12 @@
   }
   if (newScale >= 0) {
     if (bitLength < 64) {
-      return valueOf(smallValue,toIntScale(newScale));
+      return valueOf(smallValue,safeLongToInt(newScale));
     }
-    return new BigDecimal(getUnscaledValue(),toIntScale(newScale));
+    return new BigDecimal(getUnscaledValue(),safeLongToInt(newScale));
   }
-  if (-newScale < LONG_TEN_POW.length && bitLength + LONG_TEN_POW_BIT_LENGTH[(int)-newScale] < 64) {
-    return valueOf(smallValue * LONG_TEN_POW[(int)-newScale],0);
+  if (-newScale < MathUtils.LONG_POWERS_OF_TEN.length && bitLength + LONG_POWERS_OF_TEN_BIT_LENGTH[(int)-newScale] < 64) {
+    return valueOf(smallValue * MathUtils.LONG_POWERS_OF_TEN[(int)-newScale],0);
   }
-  return new BigDecimal(Multiplication.multiplyByTenPow(getUnscaledValue(),(int)-newScale),0);
+  return new BigDecimal(Multiplication.multiplyByTenPow(getUnscaledValue(),safeLongToInt(-newScale)),0);
 }

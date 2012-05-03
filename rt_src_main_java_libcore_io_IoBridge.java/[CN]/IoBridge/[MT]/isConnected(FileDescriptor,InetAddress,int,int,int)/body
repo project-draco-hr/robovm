@@ -1,0 +1,36 @@
+{
+  ErrnoException cause;
+  try {
+    StructPollfd[] pollFds=new StructPollfd[]{new StructPollfd()};
+    pollFds[0].fd=fd;
+    pollFds[0].events=(short)POLLOUT;
+    int rc=Libcore.os.poll(pollFds,remainingTimeoutMs);
+    if (rc == 0) {
+      return false;
+    }
+    int connectError=Libcore.os.getsockoptInt(fd,SOL_SOCKET,SO_ERROR);
+    if (connectError == 0) {
+      return true;
+    }
+    throw new ErrnoException("isConnected",connectError);
+  }
+ catch (  ErrnoException errnoException) {
+    if (errnoException.errno == EINTR) {
+      return false;
+    }
+ else {
+      cause=errnoException;
+    }
+  }
+  String detail=connectDetail(inetAddress,port,timeoutMs,cause);
+  if (cause.errno == ECONNRESET || cause.errno == ECONNREFUSED || cause.errno == EADDRNOTAVAIL || cause.errno == EADDRINUSE || cause.errno == ENETUNREACH) {
+    throw new ConnectException(detail,cause);
+  }
+ else   if (cause.errno == EACCES) {
+    throw new SecurityException(detail,cause);
+  }
+ else   if (cause.errno == ETIMEDOUT) {
+    throw new SocketTimeoutException(detail,cause);
+  }
+  throw new SocketException(detail,cause);
+}

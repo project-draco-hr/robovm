@@ -1,53 +1,30 @@
 {
   ObjectInputStream.GetField fields=stream.readFields();
-  String positivePrefix=(String)fields.get("positivePrefix","");
-  String positiveSuffix=(String)fields.get("positiveSuffix","");
-  String negativePrefix=(String)fields.get("negativePrefix","-");
-  String negativeSuffix=(String)fields.get("negativeSuffix","");
-  String posPrefixPattern=(String)fields.get("posPrefixPattern","");
-  String posSuffixPattern=(String)fields.get("posSuffixPattern","");
-  String negPrefixPattern=(String)fields.get("negPrefixPattern","-");
-  String negSuffixPattern=(String)fields.get("negSuffixPattern","");
-  int multiplier=fields.get("multiplier",1);
-  byte groupingSize=fields.get("groupingSize",(byte)3);
-  boolean decimalSeparatorAlwaysShown=fields.get("decimalSeparatorAlwaysShown",false);
-  boolean parseBigDecimal=fields.get("parseBigDecimal",false);
-  symbols=(DecimalFormatSymbols)fields.get("symbols",null);
-  boolean useExponentialNotation=fields.get("useExponentialNotation",false);
-  byte minExponentDigits=fields.get("minExponentDigits",(byte)0);
-  int maximumIntegerDigits=fields.get("maximumIntegerDigits",309);
-  int minimumIntegerDigits=fields.get("minimumIntegerDigits",309);
-  int maximumFractionDigits=fields.get("maximumFractionDigits",340);
-  int minimumFractionDigits=fields.get("minimumFractionDigits",340);
-  this.serialVersionOnStream=fields.get("serialVersionOnStream",0);
-  Locale locale=(Locale)Format.getInternalField("locale",symbols);
-  dform=new com.ibm.icu.text.DecimalFormat("",new com.ibm.icu.text.DecimalFormatSymbols(locale));
-  setInternalField("useExponentialNotation",dform,Boolean.valueOf(useExponentialNotation));
-  setInternalField("minExponentDigits",dform,new Byte(minExponentDigits));
-  dform.setPositivePrefix(positivePrefix);
-  dform.setPositiveSuffix(positiveSuffix);
-  dform.setNegativePrefix(negativePrefix);
-  dform.setNegativeSuffix(negativeSuffix);
-  setInternalField("posPrefixPattern",dform,posPrefixPattern);
-  setInternalField("posSuffixPattern",dform,posSuffixPattern);
-  setInternalField("negPrefixPattern",dform,negPrefixPattern);
-  setInternalField("negSuffixPattern",dform,negSuffixPattern);
-  dform.setMultiplier(multiplier);
-  dform.setGroupingSize(groupingSize);
-  dform.setDecimalSeparatorAlwaysShown(decimalSeparatorAlwaysShown);
-  dform.setMinimumIntegerDigits(minimumIntegerDigits);
+  this.symbols=(DecimalFormatSymbols)fields.get("symbols",null);
+  initNative("");
+  dform.setPositivePrefix((String)fields.get("positivePrefix",""));
+  dform.setPositiveSuffix((String)fields.get("positiveSuffix",""));
+  dform.setNegativePrefix((String)fields.get("negativePrefix","-"));
+  dform.setNegativeSuffix((String)fields.get("negativeSuffix",""));
+  dform.setMultiplier(fields.get("multiplier",1));
+  dform.setGroupingSize(fields.get("groupingSize",(byte)3));
+  dform.setGroupingUsed(fields.get("groupingUsed",true));
+  dform.setDecimalSeparatorAlwaysShown(fields.get("decimalSeparatorAlwaysShown",false));
+  setRoundingMode((RoundingMode)fields.get("roundingMode",RoundingMode.HALF_EVEN));
+  final int maximumIntegerDigits=fields.get("maximumIntegerDigits",309);
+  final int minimumIntegerDigits=fields.get("minimumIntegerDigits",309);
+  final int maximumFractionDigits=fields.get("maximumFractionDigits",340);
+  final int minimumFractionDigits=fields.get("minimumFractionDigits",340);
   dform.setMaximumIntegerDigits(maximumIntegerDigits);
-  dform.setMinimumFractionDigits(minimumFractionDigits);
-  dform.setMaximumFractionDigits(maximumFractionDigits);
-  this.setParseBigDecimal(parseBigDecimal);
-  if (serialVersionOnStream < 3) {
+  super.setMaximumIntegerDigits(dform.getMaximumIntegerDigits());
+  setMinimumIntegerDigits(minimumIntegerDigits);
+  setMinimumFractionDigits(minimumFractionDigits);
+  setMaximumFractionDigits(maximumFractionDigits);
+  setParseBigDecimal(fields.get("parseBigDecimal",false));
+  if (fields.get("serialVersionOnStream",0) < 3) {
     setMaximumIntegerDigits(super.getMaximumIntegerDigits());
     setMinimumIntegerDigits(super.getMinimumIntegerDigits());
     setMaximumFractionDigits(super.getMaximumFractionDigits());
     setMinimumFractionDigits(super.getMinimumFractionDigits());
   }
-  if (serialVersionOnStream < 1) {
-    this.setInternalField("useExponentialNotation",dform,Boolean.FALSE);
-  }
-  serialVersionOnStream=3;
 }

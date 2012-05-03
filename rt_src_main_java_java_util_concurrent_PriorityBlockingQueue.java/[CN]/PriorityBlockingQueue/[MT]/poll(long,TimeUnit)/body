@@ -2,21 +2,12 @@
   long nanos=unit.toNanos(timeout);
   final ReentrantLock lock=this.lock;
   lock.lockInterruptibly();
+  E result;
   try {
-    for (; ; ) {
-      E x=q.poll();
-      if (x != null)       return x;
-      if (nanos <= 0)       return null;
-      try {
-        nanos=notEmpty.awaitNanos(nanos);
-      }
- catch (      InterruptedException ie) {
-        notEmpty.signal();
-        throw ie;
-      }
-    }
+    while ((result=extract()) == null && nanos > 0)     nanos=notEmpty.awaitNanos(nanos);
   }
   finally {
     lock.unlock();
   }
+  return result;
 }

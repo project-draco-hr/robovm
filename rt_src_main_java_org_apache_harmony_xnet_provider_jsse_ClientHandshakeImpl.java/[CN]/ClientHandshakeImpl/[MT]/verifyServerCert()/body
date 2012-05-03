@@ -1,43 +1,14 @@
 {
-  String authType=null;
-switch (session.cipherSuite.keyExchange) {
-case 1:
-    authType="RSA";
-  break;
-case 2:
-if (serverKeyExchange != null) {
-  authType="RSA_EXPORT";
-}
- else {
-  authType="RSA";
-}
-break;
-case 3:
-case 4:
-authType="DHE_DSS";
-break;
-case 5:
-case 6:
-authType="DHE_RSA";
-break;
-case 7:
-case 11:
-authType="DH_DSS";
-break;
-case 8:
-case 12:
-authType="DH_RSA";
-break;
-case 9:
-case 10:
-return;
-}
-try {
-parameters.getTrustManager().checkServerTrusted(serverCert.certs,authType);
-}
- catch (CertificateException e) {
-fatalAlert(AlertProtocol.BAD_CERTIFICATE,"Not trusted server certificate",e);
-return;
-}
-session.peerCertificates=serverCert.certs;
+  String authType=session.cipherSuite.getAuthType(serverKeyExchange != null);
+  if (authType == null) {
+    return;
+  }
+  try {
+    parameters.getTrustManager().checkServerTrusted(serverCert.certs,authType);
+  }
+ catch (  CertificateException e) {
+    fatalAlert(AlertProtocol.BAD_CERTIFICATE,"Not trusted server certificate",e);
+    return;
+  }
+  session.peerCertificates=serverCert.certs;
 }

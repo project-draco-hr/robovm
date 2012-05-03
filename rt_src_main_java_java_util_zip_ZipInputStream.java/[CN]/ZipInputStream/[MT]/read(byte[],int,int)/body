@@ -1,14 +1,10 @@
 {
-  if (closed) {
-    throw new IOException(Messages.getString("archive.1E"));
-  }
+  checkClosed();
+  Arrays.checkOffsetAndCount(buffer.length,offset,byteCount);
   if (inf.finished() || currentEntry == null) {
     return -1;
   }
-  if (start > buffer.length || length < 0 || start < 0 || buffer.length - start < length) {
-    throw new ArrayIndexOutOfBoundsException();
-  }
-  if (currentEntry.compressionMethod == STORED) {
+  if (currentEntry.compressionMethod == ZipEntry.STORED) {
     int csize=(int)currentEntry.size;
     if (inRead >= csize) {
       return -1;
@@ -21,14 +17,14 @@
       }
       entryIn+=len;
     }
-    int toRead=length > (len - lastRead) ? len - lastRead : length;
+    int toRead=byteCount > (len - lastRead) ? len - lastRead : byteCount;
     if ((csize - inRead) < toRead) {
       toRead=csize - inRead;
     }
-    System.arraycopy(buf,lastRead,buffer,start,toRead);
+    System.arraycopy(buf,lastRead,buffer,offset,toRead);
     lastRead+=toRead;
     inRead+=toRead;
-    crc.update(buffer,start,toRead);
+    crc.update(buffer,offset,toRead);
     return toRead;
   }
   if (inf.needsInput()) {
@@ -39,7 +35,7 @@
   }
   int read;
   try {
-    read=inf.inflate(buffer,start,length);
+    read=inf.inflate(buffer,offset,byteCount);
   }
  catch (  DataFormatException e) {
     throw new ZipException(e.getMessage());
@@ -47,6 +43,6 @@
   if (read == 0 && inf.finished()) {
     return -1;
   }
-  crc.update(buffer,start,read);
+  crc.update(buffer,offset,read);
   return read;
 }

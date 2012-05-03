@@ -1,14 +1,13 @@
 {
-  checkAccess();
   if (newMax <= this.maxPriority) {
     if (newMax < Thread.MIN_PRIORITY) {
       newMax=Thread.MIN_PRIORITY;
     }
     int parentPriority=parent == null ? newMax : parent.getMaxPriority();
     this.maxPriority=parentPriority <= newMax ? parentPriority : newMax;
-synchronized (this.childrenGroupsLock) {
-      for (int i=0; i < numGroups; i++) {
-        this.childrenGroups[i].setMaxPriority(newMax);
+synchronized (groups) {
+      for (      ThreadGroup group : groups) {
+        group.setMaxPriority(newMax);
       }
     }
   }

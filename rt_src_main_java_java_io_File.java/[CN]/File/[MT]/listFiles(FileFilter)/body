@@ -1,26 +1,13 @@
 {
-  SecurityManager security=System.getSecurityManager();
-  if (security != null) {
-    security.checkRead(path);
+  File[] files=listFiles();
+  if (filter == null || files == null) {
+    return files;
   }
-  if (path.length() == 0) {
-    return null;
-  }
-  byte[] bs=properPath(true);
-  if (!isDirectoryImpl(bs) || !existsImpl(bs) || isWriteOnlyImpl(bs)) {
-    return null;
-  }
-  byte[][] implList=listImpl(bs);
-  if (implList == null) {
-    return new File[0];
-  }
-  List<File> tempResult=new ArrayList<File>();
-  for (int index=0; index < implList.length; index++) {
-    String aName=Util.toString(implList[index]);
-    File aFile=new File(this,aName);
-    if (filter == null || filter.accept(aFile)) {
-      tempResult.add(aFile);
+  List<File> result=new ArrayList<File>(files.length);
+  for (  File file : files) {
+    if (filter.accept(file)) {
+      result.add(file);
     }
   }
-  return tempResult.toArray(new File[tempResult.size()]);
+  return result.toArray(new File[result.size()]);
 }

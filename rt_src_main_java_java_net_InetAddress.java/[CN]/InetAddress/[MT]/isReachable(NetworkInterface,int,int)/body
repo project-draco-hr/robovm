@@ -1,22 +1,40 @@
 {
-  if (0 > ttl || 0 > timeout) {
-    throw new IllegalArgumentException(Messages.getString("luni.61"));
+  if (ttl < 0 || timeout < 0) {
+    throw new IllegalArgumentException("ttl < 0 || timeout < 0");
   }
-  boolean reachable=false;
-  if (null == netif) {
-    reachable=NETIMPL.isReachableByICMP(this,null,ttl,timeout);
-    if (!reachable) {
-      reachable=isReachableByTCP(this,null,timeout);
-    }
+  if (networkInterface == null) {
+    return isReachable(this,null,timeout);
   }
- else {
-    if (null == netif.addresses) {
-      return false;
-    }
-    reachable=isReachableByICMPUseMultiThread(netif,ttl,timeout);
-    if (!reachable) {
-      reachable=isReachableByTCPUseMultiThread(netif,ttl,timeout);
-    }
+  List<InetAddress> sourceAddresses=Collections.list(networkInterface.getInetAddresses());
+  if (sourceAddresses.isEmpty()) {
+    return false;
   }
-  return reachable;
+  final InetAddress destinationAddress=this;
+  final CountDownLatch latch=new CountDownLatch(sourceAddresses.size());
+  final AtomicBoolean isReachable=new AtomicBoolean(false);
+  for (  final InetAddress sourceAddress : sourceAddresses) {
+    new Thread(){
+      @Override public void run(){
+        try {
+          if (isReachable(destinationAddress,sourceAddress,timeout)) {
+            isReachable.set(true);
+            while (latch.getCount() > 0) {
+              latch.countDown();
+            }
+          }
+        }
+ catch (        IOException ignored) {
+        }
+        latch.countDown();
+      }
+    }
+.start();
+  }
+  try {
+    latch.await();
+  }
+ catch (  InterruptedException ignored) {
+    Thread.currentThread().interrupt();
+  }
+  return isReachable.get();
 }

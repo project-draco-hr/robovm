@@ -1,15 +1,17 @@
 {
-  ois.defaultReadObject();
-  this.globalListeners=new LinkedList<PropertyChangeListener>();
-  if (null == this.children) {
-    this.children=new Hashtable<String,PropertyChangeSupport>();
-  }
-  Object listener=null;
-  do {
-    listener=ois.readObject();
-    if (listener != null) {
-      addPropertyChangeListener((PropertyChangeListener)listener);
+  ObjectInputStream.GetField readFields=in.readFields();
+  sourceBean=readFields.get("source",null);
+  listeners=new CopyOnWriteArrayList<PropertyChangeListener>();
+  Map<String,PropertyChangeSupport> children=(Map<String,PropertyChangeSupport>)readFields.get("children",null);
+  if (children != null) {
+    for (    Map.Entry<String,PropertyChangeSupport> entry : children.entrySet()) {
+      for (      PropertyChangeListener p : entry.getValue().listeners) {
+        listeners.add(new PropertyChangeListenerProxy(entry.getKey(),p));
+      }
     }
   }
- while (listener != null);
+  PropertyChangeListener listener;
+  while ((listener=(PropertyChangeListener)in.readObject()) != null) {
+    listeners.add(listener);
+  }
 }

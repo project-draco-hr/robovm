@@ -1,0 +1,78 @@
+{
+  int start=position;
+  StringBuilder result=null;
+  if (valueContext == ValueContext.TEXT && text != null) {
+    result=new StringBuilder();
+    result.append(text);
+  }
+  while (true) {
+    if (position >= limit) {
+      if (start < position) {
+        if (result == null) {
+          result=new StringBuilder();
+        }
+        result.append(buffer,start,position - start);
+      }
+      if (!fillBuffer(1)) {
+        return result != null ? result.toString() : "";
+      }
+      start=position;
+    }
+    char c=buffer[position];
+    if (c == delimiter || (delimiter == ' ' && (c <= ' ' || c == '>')) || c == '&' && !resolveEntities) {
+      break;
+    }
+    if (c != '\r' && (c != '\n' || valueContext != ValueContext.ATTRIBUTE) && c != '&' && c != '<' && (c != ']' || valueContext != ValueContext.TEXT) && (c != '%' || valueContext != ValueContext.ENTITY_DECLARATION)) {
+      isWhitespace&=(c <= ' ');
+      position++;
+      continue;
+    }
+    if (result == null) {
+      result=new StringBuilder();
+    }
+    result.append(buffer,start,position - start);
+    if (c == '\r') {
+      if ((position + 1 < limit || fillBuffer(2)) && buffer[position + 1] == '\n') {
+        position++;
+      }
+      c=(valueContext == ValueContext.ATTRIBUTE) ? ' ' : '\n';
+    }
+ else     if (c == '\n') {
+      c=' ';
+    }
+ else     if (c == '&') {
+      isWhitespace=false;
+      readEntity(result,false,throwOnResolveFailure,valueContext);
+      start=position;
+      continue;
+    }
+ else     if (c == '<') {
+      if (valueContext == ValueContext.ATTRIBUTE) {
+        checkRelaxed("Illegal: \"<\" inside attribute value");
+      }
+      isWhitespace=false;
+    }
+ else     if (c == ']') {
+      if ((position + 2 < limit || fillBuffer(3)) && buffer[position + 1] == ']' && buffer[position + 2] == '>') {
+        checkRelaxed("Illegal: \"]]>\" outside CDATA section");
+      }
+      isWhitespace=false;
+    }
+ else     if (c == '%') {
+      throw new XmlPullParserException("This parser doesn't support parameter entities",this,null);
+    }
+ else {
+      throw new AssertionError();
+    }
+    position++;
+    result.append(c);
+    start=position;
+  }
+  if (result == null) {
+    return stringPool.get(buffer,start,position - start);
+  }
+ else {
+    result.append(buffer,start,position - start);
+    return result.toString();
+  }
+}

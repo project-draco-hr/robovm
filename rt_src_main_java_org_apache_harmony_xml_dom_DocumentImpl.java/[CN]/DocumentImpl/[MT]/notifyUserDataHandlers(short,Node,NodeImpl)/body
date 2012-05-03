@@ -1,0 +1,15 @@
+{
+  if (!(source instanceof NodeImpl)) {
+    return;
+  }
+  NodeImpl srcImpl=(NodeImpl)source;
+  if (srcImpl.document == null) {
+    return;
+  }
+  for (  Map.Entry<String,UserData> entry : srcImpl.document.getUserDataMapForRead(srcImpl).entrySet()) {
+    UserData userData=entry.getValue();
+    if (userData.handler != null) {
+      userData.handler.handle(operation,entry.getKey(),userData.value,source,destination);
+    }
+  }
+}

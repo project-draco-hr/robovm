@@ -2,18 +2,11 @@
   if (!hasNext()) {
     throw new NoSuchElementException();
   }
-  String clsName=que.remove();
+  String className=queue.remove();
   try {
-    S ret;
-    if (null == cl) {
-      ret=service.cast(Class.forName(clsName).newInstance());
-    }
- else {
-      ret=service.cast(cl.loadClass(clsName).newInstance());
-    }
-    return ret;
+    return service.cast(classLoader.loadClass(className).newInstance());
   }
  catch (  Exception e) {
-    throw new ServiceConfigurationError(Msg.getString("KB005",clsName),e);
+    throw new ServiceConfigurationError("Couldn't instantiate class " + className,e);
   }
 }

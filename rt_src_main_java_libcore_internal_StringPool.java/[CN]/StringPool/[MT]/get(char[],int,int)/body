@@ -1,0 +1,16 @@
+{
+  int hashCode=0;
+  for (int i=start; i < start + length; i++) {
+    hashCode=(hashCode * 31) + array[i];
+  }
+  hashCode^=(hashCode >>> 20) ^ (hashCode >>> 12);
+  hashCode^=(hashCode >>> 7) ^ (hashCode >>> 4);
+  int index=hashCode & (pool.length - 1);
+  String pooled=pool[index];
+  if (pooled != null && contentEquals(pooled,array,start,length)) {
+    return pooled;
+  }
+  String result=new String(array,start,length);
+  pool[index]=result;
+  return result;
+}

@@ -1,0 +1,22 @@
+{
+  checkNotClosed();
+  Arrays.checkOffsetAndCount(buffer.length,offset,count);
+  while (count > 0) {
+    int numBytesWritten;
+    if (bufferedChunk.size() > 0 || count < maxChunkLength) {
+      numBytesWritten=Math.min(count,maxChunkLength - bufferedChunk.size());
+      bufferedChunk.write(buffer,offset,numBytesWritten);
+      if (bufferedChunk.size() == maxChunkLength) {
+        writeBufferedChunkToSocket();
+      }
+    }
+ else {
+      numBytesWritten=maxChunkLength;
+      writeHex(numBytesWritten);
+      socketOut.write(buffer,offset,numBytesWritten);
+      socketOut.write(CRLF);
+    }
+    offset+=numBytesWritten;
+    count-=numBytesWritten;
+  }
+}

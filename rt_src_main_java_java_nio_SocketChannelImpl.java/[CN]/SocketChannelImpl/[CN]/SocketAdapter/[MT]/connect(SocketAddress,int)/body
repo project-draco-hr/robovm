@@ -1,0 +1,14 @@
+{
+  if (!channel.isBlocking()) {
+    throw new IllegalBlockingModeException();
+  }
+  if (isConnected()) {
+    throw new AlreadyConnectedException();
+  }
+  super.connect(remoteAddr,timeout);
+  channel.initLocalAddressAndPort();
+  if (super.isConnected()) {
+    channel.setConnected();
+    channel.isBound=super.isBound();
+  }
+}

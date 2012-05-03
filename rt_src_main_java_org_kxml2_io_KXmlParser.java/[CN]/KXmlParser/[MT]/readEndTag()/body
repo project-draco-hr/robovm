@@ -1,0 +1,21 @@
+{
+  read('<');
+  read('/');
+  name=readName();
+  skip();
+  read('>');
+  int sp=(depth - 1) * 4;
+  if (depth == 0) {
+    checkRelaxed("read end tag " + name + " with no tags open");
+    type=COMMENT;
+    return;
+  }
+  if (name.equals(elementStack[sp + 3])) {
+    namespace=elementStack[sp];
+    prefix=elementStack[sp + 1];
+    name=elementStack[sp + 2];
+  }
+ else   if (!relaxed) {
+    throw new XmlPullParserException("expected: /" + elementStack[sp + 3] + " read: "+ name,this,null);
+  }
+}

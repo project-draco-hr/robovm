@@ -1,51 +1,50 @@
 {
-  ObjectStreamField[] fields=classDesc.fields();
-  Class<?> declaringClass=classDesc.forClass();
-  for (  ObjectStreamField fieldDesc : fields) {
+  for (  ObjectStreamField fieldDesc : classDesc.fields()) {
     try {
-      long fieldID=fieldDesc.getFieldID(accessor,declaringClass);
-      if (fieldDesc.isPrimitive()) {
-switch (fieldDesc.getTypeCode()) {
-case 'B':
-          output.writeByte(accessor.getByte(obj,fieldID));
-        break;
-case 'C':
-      output.writeChar(accessor.getChar(obj,fieldID));
-    break;
-case 'D':
-  output.writeDouble(accessor.getDouble(obj,fieldID));
-break;
-case 'F':
-output.writeFloat(accessor.getFloat(obj,fieldID));
-break;
-case 'I':
-output.writeInt(accessor.getInt(obj,fieldID));
-break;
-case 'J':
-output.writeLong(accessor.getLong(obj,fieldID));
-break;
-case 'S':
-output.writeShort(accessor.getShort(obj,fieldID));
-break;
-case 'Z':
-output.writeBoolean(accessor.getBoolean(obj,fieldID));
-break;
-default :
-throw new IOException(Messages.getString("luni.BF",fieldDesc.getTypeCode()));
-}
-}
+      Class<?> type=fieldDesc.getTypeInternal();
+      Field field=classDesc.getReflectionField(fieldDesc);
+      if (field == null) {
+        throw new InvalidClassException(classDesc.getName() + " doesn't have a field " + fieldDesc.getName()+ " of type "+ type);
+      }
+      if (type == byte.class) {
+        output.writeByte(field.getByte(obj));
+      }
+ else       if (type == char.class) {
+        output.writeChar(field.getChar(obj));
+      }
+ else       if (type == double.class) {
+        output.writeDouble(field.getDouble(obj));
+      }
+ else       if (type == float.class) {
+        output.writeFloat(field.getFloat(obj));
+      }
+ else       if (type == int.class) {
+        output.writeInt(field.getInt(obj));
+      }
+ else       if (type == long.class) {
+        output.writeLong(field.getLong(obj));
+      }
+ else       if (type == short.class) {
+        output.writeShort(field.getShort(obj));
+      }
+ else       if (type == boolean.class) {
+        output.writeBoolean(field.getBoolean(obj));
+      }
  else {
-Object objField=accessor.getObject(obj,fieldID);
-if (fieldDesc.isUnshared()) {
-writeUnshared(objField);
-}
+        Object objField=field.get(obj);
+        if (fieldDesc.isUnshared()) {
+          writeUnshared(objField);
+        }
  else {
-writeObject(objField);
-}
-}
-}
- catch (NoSuchFieldError nsf) {
-throw new InvalidClassException(classDesc.getName());
-}
-}
+          writeObject(objField);
+        }
+      }
+    }
+ catch (    IllegalAccessException iae) {
+      throw new AssertionError(iae);
+    }
+catch (    NoSuchFieldError nsf) {
+      throw new InvalidClassException(classDesc.getName());
+    }
+  }
 }

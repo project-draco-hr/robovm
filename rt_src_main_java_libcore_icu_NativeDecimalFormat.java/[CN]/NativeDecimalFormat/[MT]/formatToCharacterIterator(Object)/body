@@ -1,0 +1,25 @@
+{
+  if (!(object instanceof Number)) {
+    throw new IllegalArgumentException();
+  }
+  Number number=(Number)object;
+  FieldPositionIterator fpIter=new FieldPositionIterator();
+  String text;
+  if (number instanceof BigInteger || number instanceof BigDecimal) {
+    text=new String(formatDigitList(this.address,number.toString(),fpIter));
+  }
+ else   if (number instanceof Double || number instanceof Float) {
+    double dv=number.doubleValue();
+    text=new String(formatDouble(this.address,dv,fpIter));
+  }
+ else {
+    long lv=number.longValue();
+    text=new String(formatLong(this.address,lv,fpIter));
+  }
+  AttributedString as=new AttributedString(text);
+  while (fpIter.next()) {
+    Format.Field field=fpIter.field();
+    as.addAttribute(field,field,fpIter.start(),fpIter.limit());
+  }
+  return as.getIterator();
+}

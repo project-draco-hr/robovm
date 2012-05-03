@@ -1,7 +1,9 @@
 {
-  SecurityManager security=System.getSecurityManager();
-  if (security != null) {
-    security.checkWrite(path);
+  try {
+    Libcore.os.mkdir(path,S_IRWXU);
+    return true;
   }
-  return mkdirImpl(properPath(true));
+ catch (  ErrnoException errnoException) {
+    return false;
+  }
 }

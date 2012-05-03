@@ -1,0 +1,38 @@
+{
+  return new SecureCacheResponse(){
+    @Override public Map<String,List<String>> getHeaders(){
+      return responseHeaders.toMultimap();
+    }
+    @Override public InputStream getBody(){
+      return in;
+    }
+    @Override public String getCipherSuite(){
+      return cipherSuite;
+    }
+    @Override public List<Certificate> getServerCertificateChain() throws SSLPeerUnverifiedException {
+      if (peerCertificates == null || peerCertificates.length == 0) {
+        throw new SSLPeerUnverifiedException(null);
+      }
+      return Arrays.asList(peerCertificates.clone());
+    }
+    @Override public Principal getPeerPrincipal() throws SSLPeerUnverifiedException {
+      if (peerCertificates == null || peerCertificates.length == 0) {
+        throw new SSLPeerUnverifiedException(null);
+      }
+      return ((X509Certificate)peerCertificates[0]).getSubjectX500Principal();
+    }
+    @Override public List<Certificate> getLocalCertificateChain(){
+      if (localCertificates == null || localCertificates.length == 0) {
+        return null;
+      }
+      return Arrays.asList(localCertificates.clone());
+    }
+    @Override public Principal getLocalPrincipal(){
+      if (localCertificates == null || localCertificates.length == 0) {
+        return null;
+      }
+      return ((X509Certificate)localCertificates[0]).getSubjectX500Principal();
+    }
+  }
+;
+}

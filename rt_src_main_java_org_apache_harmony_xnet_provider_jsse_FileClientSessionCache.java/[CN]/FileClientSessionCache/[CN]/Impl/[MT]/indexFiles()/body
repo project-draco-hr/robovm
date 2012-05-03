@@ -1,0 +1,20 @@
+{
+  String[] initialFiles=this.initialFiles;
+  if (initialFiles != null) {
+    this.initialFiles=null;
+    Set<CacheFile> diskOnly=new TreeSet<CacheFile>();
+    for (    String name : initialFiles) {
+      if (!accessOrder.containsKey(name)) {
+        diskOnly.add(new CacheFile(directory,name));
+      }
+    }
+    if (!diskOnly.isEmpty()) {
+      Map<String,File> newOrder=newAccessOrder();
+      for (      CacheFile cacheFile : diskOnly) {
+        newOrder.put(cacheFile.name,cacheFile);
+      }
+      newOrder.putAll(accessOrder);
+      this.accessOrder=newOrder;
+    }
+  }
+}

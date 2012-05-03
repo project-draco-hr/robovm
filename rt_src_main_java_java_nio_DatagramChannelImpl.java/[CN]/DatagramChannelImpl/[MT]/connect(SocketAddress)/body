@@ -1,0 +1,20 @@
+{
+  checkOpen();
+  if (connected) {
+    throw new IllegalStateException();
+  }
+  InetSocketAddress inetSocketAddress=SocketChannelImpl.validateAddress(address);
+  try {
+    begin();
+    IoBridge.connect(fd,inetSocketAddress.getAddress(),inetSocketAddress.getPort());
+  }
+ catch (  ConnectException e) {
+  }
+ finally {
+    end(true);
+  }
+  connectAddress=inetSocketAddress;
+  connected=true;
+  isBound=true;
+  return this;
+}

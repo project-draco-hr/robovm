@@ -1,0 +1,40 @@
+{
+  buffer.checkWritable();
+  checkOpen();
+  checkReadable();
+  if (!buffer.hasRemaining()) {
+    return 0;
+  }
+  int bytesRead=0;
+  boolean completed=false;
+  try {
+    begin();
+    try {
+      if (position == -1) {
+        bytesRead=Libcore.os.read(fd,buffer);
+      }
+ else {
+        bytesRead=Libcore.os.pread(fd,buffer,position);
+      }
+      if (bytesRead == 0) {
+        bytesRead=-1;
+      }
+    }
+ catch (    ErrnoException errnoException) {
+      if (errnoException.errno == EAGAIN) {
+        bytesRead=0;
+      }
+ else {
+        throw errnoException.rethrowAsIOException();
+      }
+    }
+    completed=true;
+  }
+  finally {
+    end(completed && bytesRead >= 0);
+  }
+  if (bytesRead > 0) {
+    buffer.position(buffer.position() + bytesRead);
+  }
+  return bytesRead;
+}

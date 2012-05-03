@@ -1,8 +1,17 @@
 {
-  if (null == replacement || 0 == replacement.length || maxBytes < replacement.length || !isLegalReplacement(replacement)) {
-    throw new IllegalArgumentException(Messages.getString("niochar.0E"));
+  if (replacement == null) {
+    throw new IllegalArgumentException("replacement == null");
   }
-  replace=replacement;
-  implReplaceWith(replacement);
+  if (replacement.length == 0) {
+    throw new IllegalArgumentException("replacement.length == 0");
+  }
+  if (replacement.length > maxBytesPerChar()) {
+    throw new IllegalArgumentException("replacement length > maxBytesPerChar: " + replacement.length + " > "+ maxBytesPerChar());
+  }
+  if (!isLegalReplacement(replacement)) {
+    throw new IllegalArgumentException("bad replacement: " + Arrays.toString(replacement));
+  }
+  this.replacementBytes=replacement;
+  implReplaceWith(replacementBytes);
   return this;
 }

@@ -4,19 +4,19 @@
   BigInteger p, q, g, y;
   DSAParams params;
   int n1, n2;
-  byte bytes[];
-  byte digest[];
+  byte[] bytes;
+  byte[] digest;
   try {
     byte dummy;
     n1=sigBytes[offset + 3];
     n2=sigBytes[offset + n1 + 5];
     if (sigBytes[offset + 0] != 0x30 || sigBytes[offset + 2] != 2 || sigBytes[offset + n1 + 4] != 2 || sigBytes[offset + 1] != (n1 + n2 + 4) || n1 > 21 || n2 > 21 || (length != 0 && (sigBytes[offset + 1] + 2) > length)) {
-      throw new SignatureException(Messages.getString("security.16F"));
+      throw new SignatureException("signature bytes have invalid encoding");
     }
     dummy=sigBytes[5 + n1 + n2];
   }
  catch (  ArrayIndexOutOfBoundsException e) {
-    throw new SignatureException(Messages.getString("security.170"));
+    throw new SignatureException("bad argument: byte[] is too small");
   }
   digest=msgDigest.digest();
   bytes=new byte[n1];

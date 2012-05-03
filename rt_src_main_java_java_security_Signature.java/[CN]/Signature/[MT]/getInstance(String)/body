@@ -1,18 +1,15 @@
 {
   if (algorithm == null) {
-    throw new NullPointerException(Messages.getString("security.01"));
+    throw new NullPointerException();
   }
-  Signature result;
-synchronized (engine) {
-    engine.getInstance(algorithm,null);
-    if (engine.spi instanceof Signature) {
-      result=(Signature)engine.spi;
-      result.algorithm=algorithm;
-      result.provider=engine.provider;
-    }
- else {
-      result=new SignatureImpl((SignatureSpi)engine.spi,engine.provider,algorithm);
-    }
+  Engine.SpiAndProvider sap=ENGINE.getInstance(algorithm,null);
+  Object spi=sap.spi;
+  Provider provider=sap.provider;
+  if (spi instanceof Signature) {
+    Signature result=(Signature)spi;
+    result.algorithm=algorithm;
+    result.provider=provider;
+    return result;
   }
-  return result;
+  return new SignatureImpl((SignatureSpi)spi,provider,algorithm);
 }

@@ -1,0 +1,57 @@
+{
+  List<HttpCookie> cookies=new ArrayList<HttpCookie>(2);
+  boolean pre2965=true;
+  if (inputLowerCase.startsWith("set-cookie2:")) {
+    pos+="set-cookie2:".length();
+    pre2965=false;
+    hasVersion=true;
+  }
+ else   if (inputLowerCase.startsWith("set-cookie:")) {
+    pos+="set-cookie:".length();
+  }
+  while (true) {
+    String name=readAttributeName(false);
+    if (name == null) {
+      if (cookies.isEmpty()) {
+        throw new IllegalArgumentException("No cookies in " + input);
+      }
+      return cookies;
+    }
+    if (!readEqualsSign()) {
+      throw new IllegalArgumentException("Expected '=' after " + name + " in "+ input);
+    }
+    String value=readAttributeValue(pre2965 ? ";" : ",;");
+    HttpCookie cookie=new HttpCookie(name,value);
+    cookie.version=pre2965 ? 0 : 1;
+    cookies.add(cookie);
+    while (true) {
+      skipWhitespace();
+      if (pos == input.length()) {
+        break;
+      }
+      if (input.charAt(pos) == ',') {
+        pos++;
+        break;
+      }
+ else       if (input.charAt(pos) == ';') {
+        pos++;
+      }
+      String attributeName=readAttributeName(true);
+      if (attributeName == null) {
+        continue;
+      }
+      String terminators=pre2965 || "expires".equals(attributeName) || "port".equals(attributeName) ? ";" : ";,";
+      String attributeValue=null;
+      if (readEqualsSign()) {
+        attributeValue=readAttributeValue(terminators);
+      }
+      setAttribute(cookie,attributeName,attributeValue);
+    }
+    if (hasExpires) {
+      cookie.version=0;
+    }
+ else     if (hasMaxAge) {
+      cookie.version=1;
+    }
+  }
+}

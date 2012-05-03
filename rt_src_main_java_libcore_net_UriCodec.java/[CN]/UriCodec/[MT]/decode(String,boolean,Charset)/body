@@ -1,0 +1,35 @@
+{
+  if (s.indexOf('%') == -1 && (!convertPlus || s.indexOf('+') == -1)) {
+    return s;
+  }
+  StringBuilder result=new StringBuilder(s.length());
+  ByteArrayOutputStream out=new ByteArrayOutputStream();
+  for (int i=0; i < s.length(); ) {
+    char c=s.charAt(i);
+    if (c == '%') {
+      do {
+        if (i + 2 >= s.length()) {
+          throw new IllegalArgumentException("Incomplete % sequence at: " + i);
+        }
+        int d1=hexToInt(s.charAt(i + 1));
+        int d2=hexToInt(s.charAt(i + 2));
+        if (d1 == -1 || d2 == -1) {
+          throw new IllegalArgumentException("Invalid % sequence " + s.substring(i,i + 3) + " at "+ i);
+        }
+        out.write((byte)((d1 << 4) + d2));
+        i+=3;
+      }
+ while (i < s.length() && s.charAt(i) == '%');
+      result.append(new String(out.toByteArray(),charset));
+      out.reset();
+    }
+ else {
+      if (convertPlus && c == '+') {
+        c=' ';
+      }
+      result.append(c);
+      i++;
+    }
+  }
+  return result.toString();
+}

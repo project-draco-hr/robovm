@@ -1,10 +1,27 @@
 {
-  oos.defaultWriteObject();
-  PropertyChangeListener[] gListeners=globalListeners.toArray(new PropertyChangeListener[0]);
-  for (int i=0; i < gListeners.length; i++) {
-    if (gListeners[i] instanceof Serializable) {
-      oos.writeObject(gListeners[i]);
+  Map<String,PropertyChangeSupport> map=new Hashtable<String,PropertyChangeSupport>();
+  for (  PropertyChangeListener p : listeners) {
+    if (p instanceof PropertyChangeListenerProxy && !(p instanceof Serializable)) {
+      PropertyChangeListenerProxy proxy=(PropertyChangeListenerProxy)p;
+      PropertyChangeListener listener=(PropertyChangeListener)proxy.getListener();
+      if (listener instanceof Serializable) {
+        PropertyChangeSupport list=map.get(proxy.getPropertyName());
+        if (list == null) {
+          list=new PropertyChangeSupport(sourceBean);
+          map.put(proxy.getPropertyName(),list);
+        }
+        list.listeners.add(listener);
+      }
     }
   }
-  oos.writeObject(null);
+  ObjectOutputStream.PutField putFields=out.putFields();
+  putFields.put("source",sourceBean);
+  putFields.put("children",map);
+  out.writeFields();
+  for (  PropertyChangeListener p : listeners) {
+    if (p instanceof Serializable) {
+      out.writeObject(p);
+    }
+  }
+  out.writeObject(null);
 }

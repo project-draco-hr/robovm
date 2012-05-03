@@ -1,17 +1,15 @@
 {
-  Reference<? extends T> ref;
-synchronized (this) {
-    if (empty) {
-      return null;
-    }
-    ref=references[head++];
-    ref.dequeue();
-    if (head == references.length) {
-      head=0;
-    }
-    if (head == tail) {
-      empty=true;
-    }
+  if (head == null) {
+    return null;
   }
-  return ref;
+  Reference<? extends T> ret;
+  ret=head;
+  if (head == head.queueNext) {
+    head=null;
+  }
+ else {
+    head=head.queueNext;
+  }
+  ret.queueNext=null;
+  return ret;
 }

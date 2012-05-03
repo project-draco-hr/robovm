@@ -1,37 +1,35 @@
 {
 synchronized (lock) {
     if (!isOpen()) {
-      throw new IOException(Messages.getString("luni.BA"));
+      throw new IOException("InputStreamReader is closed");
     }
-    if (offset < 0 || offset > buf.length - length || length < 0) {
-      throw new IndexOutOfBoundsException();
-    }
+    Arrays.checkOffsetAndCount(buffer.length,offset,length);
     if (length == 0) {
       return 0;
     }
-    CharBuffer out=CharBuffer.wrap(buf,offset,length);
+    CharBuffer out=CharBuffer.wrap(buffer,offset,length);
     CoderResult result=CoderResult.UNDERFLOW;
     boolean needInput=!bytes.hasRemaining();
     while (out.hasRemaining()) {
       if (needInput) {
         try {
-          if ((in.available() == 0) && (out.position() > offset)) {
+          if (in.available() == 0 && out.position() > offset) {
             break;
           }
         }
  catch (        IOException e) {
         }
-        int to_read=bytes.capacity() - bytes.limit();
+        int desiredByteCount=bytes.capacity() - bytes.limit();
         int off=bytes.arrayOffset() + bytes.limit();
-        int was_red=in.read(bytes.array(),off,to_read);
-        if (was_red == -1) {
+        int actualByteCount=in.read(bytes.array(),off,desiredByteCount);
+        if (actualByteCount == -1) {
           endOfInput=true;
           break;
         }
- else         if (was_red == 0) {
+ else         if (actualByteCount == 0) {
           break;
         }
-        bytes.limit(bytes.limit() + was_red);
+        bytes.limit(bytes.limit() + actualByteCount);
         needInput=false;
       }
       result=decoder.decode(bytes,out,false);
@@ -52,11 +50,8 @@ synchronized (lock) {
       decoder.flush(out);
       decoder.reset();
     }
-    if (result.isMalformed()) {
-      throw new MalformedInputException(result.length());
-    }
- else     if (result.isUnmappable()) {
-      throw new UnmappableCharacterException(result.length());
+    if (result.isMalformed() || result.isUnmappable()) {
+      result.throwException();
     }
     return out.position() - offset == 0 ? -1 : out.position() - offset;
   }

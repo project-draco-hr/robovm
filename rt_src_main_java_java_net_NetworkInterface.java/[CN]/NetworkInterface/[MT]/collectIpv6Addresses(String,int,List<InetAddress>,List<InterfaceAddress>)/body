@@ -1,0 +1,27 @@
+{
+  BufferedReader in=null;
+  try {
+    in=new BufferedReader(new FileReader("/proc/net/if_inet6"));
+    String suffix=" " + interfaceName;
+    String line;
+    while ((line=in.readLine()) != null) {
+      if (!line.endsWith(suffix)) {
+        continue;
+      }
+      byte[] addressBytes=new byte[16];
+      for (int i=0; i < addressBytes.length; ++i) {
+        addressBytes[i]=(byte)Integer.parseInt(line.substring(2 * i,2 * i + 2),16);
+      }
+      short prefixLength=Short.parseShort(line.substring(36,38),16);
+      Inet6Address inet6Address=new Inet6Address(addressBytes,null,interfaceIndex);
+      addresses.add(inet6Address);
+      interfaceAddresses.add(new InterfaceAddress(inet6Address,prefixLength));
+    }
+  }
+ catch (  Exception ex) {
+    throw rethrowAsSocketException(ex);
+  }
+ finally {
+    IoUtils.closeQuietly(in);
+  }
+}

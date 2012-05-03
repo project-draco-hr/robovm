@@ -1,16 +1,16 @@
 {
   classDesc.setFlags((byte)(SC_SERIALIZABLE | SC_ENUM));
-  Integer previousHandle=null;
+  int previousHandle=-1;
   if (unshared) {
     previousHandle=objectsWritten.get(classDesc);
   }
-  Integer handle=null;
+  int handle=-1;
   if (!unshared) {
     handle=dumpCycle(classDesc);
   }
-  if (handle == null) {
+  if (handle == -1) {
     Class<?> classToWrite=classDesc.forClass();
-    objectsWritten.put(classDesc,nextHandle());
+    registerObjectWritten(classDesc);
     output.writeByte(TC_CLASSDESC);
     if (protocolVersion == PROTOCOL_VERSION_1) {
       writeNewClassDesc(classDesc);
@@ -24,7 +24,7 @@
     drain();
     output.writeByte(TC_ENDBLOCKDATA);
     ObjectStreamClass superClassDesc=classDesc.getSuperclass();
-    if (null != superClassDesc) {
+    if (superClassDesc != null) {
       superClassDesc.setFlags((byte)(SC_SERIALIZABLE | SC_ENUM));
       writeEnumDesc(superClassDesc.forClass(),superClassDesc,unshared);
     }

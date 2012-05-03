@@ -1,0 +1,39 @@
+{
+  List<Proxy> proxyList=null;
+  if (proxy != null) {
+    proxyList=new ArrayList<Proxy>(1);
+    proxyList.add(proxy);
+  }
+ else {
+    ProxySelector selector=ProxySelector.getDefault();
+    if (selector != null) {
+      proxyList=selector.select(uri);
+    }
+  }
+  if (proxyList == null) {
+    currentProxy=null;
+    connectInternal();
+  }
+ else {
+    ProxySelector selector=ProxySelector.getDefault();
+    Iterator<Proxy> iter=proxyList.iterator();
+    boolean connectOK=false;
+    String failureReason="";
+    while (iter.hasNext() && !connectOK) {
+      currentProxy=iter.next();
+      try {
+        connectInternal();
+        connectOK=true;
+      }
+ catch (      IOException ioe) {
+        failureReason=ioe.getLocalizedMessage();
+        if (selector != null && Proxy.NO_PROXY != currentProxy) {
+          selector.connectFailed(uri,currentProxy.address(),ioe);
+        }
+      }
+    }
+    if (!connectOK) {
+      throw new IOException("Unable to connect to server: " + failureReason);
+    }
+  }
+}

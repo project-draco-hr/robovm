@@ -1,12 +1,12 @@
 {
   if (object == null) {
     writeNull();
-    return null;
+    return -1;
   }
-  Integer handle=null;
+  int handle=-1;
   if (!unshared) {
     handle=dumpCycle(object);
-    if (handle != null) {
+    if (handle != -1) {
       return handle;
     }
   }
@@ -45,8 +45,8 @@ catch (        InvocationTargetException ite) {
           }
         }
         if (replObj != object) {
-          Integer replacementHandle=writeObjectInternal(replObj,false,false,computeStreamReplacement);
-          if (replacementHandle != null) {
+          int replacementHandle=writeObjectInternal(replObj,false,false,computeStreamReplacement);
+          if (replacementHandle != -1) {
             objectsWritten.put(object,replacementHandle);
           }
           return replacementHandle;
@@ -56,8 +56,8 @@ catch (        InvocationTargetException ite) {
     if (enableReplace && computeStreamReplacement) {
       Object streamReplacement=replaceObject(object);
       if (streamReplacement != object) {
-        Integer replacementHandle=writeObjectInternal(streamReplacement,false,computeClassBasedReplacement,false);
-        if (replacementHandle != null) {
+        int replacementHandle=writeObjectInternal(streamReplacement,false,computeClassBasedReplacement,false);
+        if (replacementHandle != -1) {
           objectsWritten.put(object,replacementHandle);
         }
         return replacementHandle;

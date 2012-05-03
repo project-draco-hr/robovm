@@ -1,6 +1,6 @@
 {
   if (tag != ASN1Constants.TAG_C_SEQUENCE) {
-    throw new ASN1Exception(Messages.getString("security.12F",tagOffset,Integer.toHexString(tag)));
+    throw expected("sequence");
   }
   int begOffset=offset;
   int endOffset=begOffset + length;
@@ -11,7 +11,7 @@
       next();
       while (!type[i].checkTag(tag)) {
         if (!sequence.OPTIONAL[i] || (i == type.length - 1)) {
-          throw new ASN1Exception(Messages.getString("security.130",tagOffset));
+          throw new ASN1Exception("ASN.1 Sequence: mandatory value is missing at [" + tagOffset + "]");
         }
         i++;
       }
@@ -19,7 +19,7 @@
     }
     for (; i < type.length; i++) {
       if (!sequence.OPTIONAL[i]) {
-        throw new ASN1Exception(Messages.getString("security.131",tagOffset));
+        throw new ASN1Exception("ASN.1 Sequence: mandatory value is missing at [" + tagOffset + "]");
       }
     }
   }
@@ -30,7 +30,7 @@
       next();
       while (!type[i].checkTag(tag)) {
         if (!sequence.OPTIONAL[i] || (i == type.length - 1)) {
-          throw new ASN1Exception(Messages.getString("security.132",tagOffset));
+          throw new ASN1Exception("ASN.1 Sequence: mandatory value is missing at [" + tagOffset + "]");
         }
         if (sequence.DEFAULT[i] != null) {
           values[i]=sequence.DEFAULT[i];
@@ -41,7 +41,7 @@
     }
     for (; i < type.length; i++) {
       if (!sequence.OPTIONAL[i]) {
-        throw new ASN1Exception(Messages.getString("security.133",tagOffset));
+        throw new ASN1Exception("ASN.1 Sequence: mandatory value is missing at [" + tagOffset + "]");
       }
       if (sequence.DEFAULT[i] != null) {
         values[i]=sequence.DEFAULT[i];
@@ -51,6 +51,6 @@
     tagOffset=seqTagOffset;
   }
   if (offset != endOffset) {
-    throw new ASN1Exception(Messages.getString("security.134",begOffset));
+    throw new ASN1Exception("Wrong encoding at [" + begOffset + "]. Content's length and encoded length are not the same");
   }
 }

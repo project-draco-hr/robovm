@@ -1,0 +1,18 @@
+{
+  this.address=config;
+  Socket socketCandidate=null;
+  InetAddress[] addresses=InetAddress.getAllByName(config.socketHost);
+  for (int i=0; i < addresses.length; i++) {
+    socketCandidate=(config.proxy != null && config.proxy.type() != Proxy.Type.HTTP) ? new Socket(config.proxy) : new Socket();
+    try {
+      socketCandidate.connect(new InetSocketAddress(addresses[i],config.socketPort),connectTimeout);
+      break;
+    }
+ catch (    IOException e) {
+      if (i == addresses.length - 1) {
+        throw e;
+      }
+    }
+  }
+  this.socket=socketCandidate;
+}

@@ -1,14 +1,6 @@
 {
-  if (off < 0 || len < 0 || (long)off + (long)len > src.length) {
-    throw new IndexOutOfBoundsException();
-  }
-  if (len > remaining()) {
-    throw new BufferOverflowException();
-  }
-  if (isReadOnly()) {
-    throw new ReadOnlyBufferException();
-  }
-  System.arraycopy(src,off,backingArray,offset + position,len);
-  position+=len;
+  checkPutBounds(1,src.length,srcOffset,byteCount);
+  System.arraycopy(src,srcOffset,backingArray,offset + position,byteCount);
+  position+=byteCount;
   return this;
 }

@@ -1,46 +1,52 @@
 {
-  strmHandler=streamHandlers.get(protocol);
-  if (strmHandler != null) {
+  streamHandler=streamHandlers.get(protocol);
+  if (streamHandler != null) {
     return;
   }
   if (streamHandlerFactory != null) {
-    strmHandler=streamHandlerFactory.createURLStreamHandler(protocol);
-    if (strmHandler != null) {
-      streamHandlers.put(protocol,strmHandler);
+    streamHandler=streamHandlerFactory.createURLStreamHandler(protocol);
+    if (streamHandler != null) {
+      streamHandlers.put(protocol,streamHandler);
       return;
     }
   }
-  String packageList=AccessController.doPrivileged(new PriviAction<String>("java.protocol.handler.pkgs"));
-  if (packageList != null) {
-    StringTokenizer st=new StringTokenizer(packageList,"|");
-    while (st.hasMoreTokens()) {
-      String className=st.nextToken() + "." + protocol+ ".Handler";
+  String packageList=System.getProperty("java.protocol.handler.pkgs");
+  ClassLoader contextClassLoader=Thread.currentThread().getContextClassLoader();
+  if (packageList != null && contextClassLoader != null) {
+    for (    String packageName : packageList.split("\\|")) {
+      String className=packageName + "." + protocol+ ".Handler";
       try {
-        strmHandler=(URLStreamHandler)Class.forName(className,true,ClassLoader.getSystemClassLoader()).newInstance();
-        if (strmHandler != null) {
-          streamHandlers.put(protocol,strmHandler);
+        Class<?> c=contextClassLoader.loadClass(className);
+        streamHandler=(URLStreamHandler)c.newInstance();
+        if (streamHandler != null) {
+          streamHandlers.put(protocol,streamHandler);
         }
         return;
       }
- catch (      IllegalAccessException e) {
+ catch (      IllegalAccessException ignored) {
       }
-catch (      InstantiationException e) {
+catch (      InstantiationException ignored) {
       }
-catch (      ClassNotFoundException e) {
+catch (      ClassNotFoundException ignored) {
       }
     }
   }
-  String className="org.apache.harmony.luni.internal.net.www.protocol." + protocol + ".Handler";
-  try {
-    strmHandler=(URLStreamHandler)Class.forName(className).newInstance();
+  if (protocol.equals("file")) {
+    streamHandler=new FileHandler();
   }
- catch (  IllegalAccessException e) {
+ else   if (protocol.equals("ftp")) {
+    streamHandler=new FtpHandler();
   }
-catch (  InstantiationException e) {
+ else   if (protocol.equals("http")) {
+    streamHandler=new HttpHandler();
   }
-catch (  ClassNotFoundException e) {
+ else   if (protocol.equals("https")) {
+    streamHandler=new HttpsHandler();
   }
-  if (strmHandler != null) {
-    streamHandlers.put(protocol,strmHandler);
+ else   if (protocol.equals("jar")) {
+    streamHandler=new JarHandler();
+  }
+  if (streamHandler != null) {
+    streamHandlers.put(protocol,streamHandler);
   }
 }

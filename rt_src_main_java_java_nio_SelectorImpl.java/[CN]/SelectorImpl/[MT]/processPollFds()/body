@@ -1,0 +1,46 @@
+{
+  if (pollFds.get(0).revents == POLLIN) {
+    byte[] buffer=new byte[8];
+    while (IoBridge.read(wakeupIn,buffer,0,1) > 0) {
+    }
+  }
+  int readyKeyCount=0;
+  for (int i=1; i < pollFds.size(); ++i) {
+    StructPollfd pollFd=pollFds.get(i);
+    if (pollFd.revents == 0) {
+      continue;
+    }
+    if (pollFd.fd == null) {
+      break;
+    }
+    SelectionKeyImpl key=(SelectionKeyImpl)pollFd.userData;
+    pollFd.fd=null;
+    pollFd.userData=null;
+    int ops=key.interestOpsNoCheck();
+    int selectedOp=0;
+    if ((pollFd.revents & POLLIN) != 0) {
+      selectedOp=ops & (OP_ACCEPT | OP_READ);
+    }
+ else     if ((pollFd.revents & POLLOUT) != 0) {
+      if (key.isConnected()) {
+        selectedOp=ops & OP_WRITE;
+      }
+ else {
+        selectedOp=ops & OP_CONNECT;
+      }
+    }
+    if (selectedOp != 0) {
+      boolean wasSelected=mutableSelectedKeys.contains(key);
+      if (wasSelected && key.readyOps() != selectedOp) {
+        key.setReadyOps(key.readyOps() | selectedOp);
+        ++readyKeyCount;
+      }
+ else       if (!wasSelected) {
+        key.setReadyOps(selectedOp);
+        mutableSelectedKeys.add(key);
+        ++readyKeyCount;
+      }
+    }
+  }
+  return readyKeyCount;
+}

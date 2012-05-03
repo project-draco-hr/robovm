@@ -1,10 +1,11 @@
 {
-  checkClosedAndBind(true);
+  checkOpen();
+  ensureBound();
   InetAddress packAddr=pack.getAddress();
   if (address != null) {
     if (packAddr != null) {
       if (!address.equals(packAddr) || port != pack.getPort()) {
-        throw new IllegalArgumentException(Messages.getString("luni.58"));
+        throw new IllegalArgumentException("Packet address mismatch with connected address");
       }
     }
  else {
@@ -14,16 +15,7 @@
   }
  else {
     if (packAddr == null) {
-      throw new NullPointerException(Messages.getString("luni.59"));
-    }
-    SecurityManager security=System.getSecurityManager();
-    if (security != null) {
-      if (packAddr.isMulticastAddress()) {
-        security.checkMulticast(packAddr);
-      }
- else {
-        security.checkConnect(packAddr.getHostName(),pack.getPort());
-      }
+      throw new NullPointerException("Destination address is null");
     }
   }
   impl.send(pack);

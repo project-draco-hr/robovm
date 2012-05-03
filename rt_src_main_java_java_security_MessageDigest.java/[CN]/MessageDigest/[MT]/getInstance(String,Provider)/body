@@ -1,20 +1,16 @@
 {
   if (provider == null) {
-    throw new IllegalArgumentException(Messages.getString("security.04"));
+    throw new IllegalArgumentException();
   }
   if (algorithm == null) {
-    throw new NullPointerException(Messages.getString("security.01"));
+    throw new NullPointerException();
   }
-  MessageDigest result;
-synchronized (engine) {
-    engine.getInstance(algorithm,provider,null);
-    if (engine.spi instanceof MessageDigest) {
-      result=(MessageDigest)engine.spi;
-      result.algorithm=algorithm;
-      result.provider=provider;
-      return result;
-    }
-    result=new MessageDigestImpl((MessageDigestSpi)engine.spi,provider,algorithm);
+  Object spi=ENGINE.getInstance(algorithm,provider,null);
+  if (spi instanceof MessageDigest) {
+    MessageDigest result=(MessageDigest)spi;
+    result.algorithm=algorithm;
+    result.provider=provider;
     return result;
   }
+  return new MessageDigestImpl((MessageDigestSpi)spi,provider,algorithm);
 }

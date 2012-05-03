@@ -1,22 +1,20 @@
 {
   if (closed) {
-    throw new IOException(Messages.getString("archive.1E"));
+    throw new IOException("Stream is closed");
   }
   if (eos) {
     return -1;
   }
-  if (off > buffer.length || nbytes < 0 || off < 0 || buffer.length - off < nbytes) {
-    throw new ArrayIndexOutOfBoundsException();
-  }
+  Arrays.checkOffsetAndCount(buffer.length,offset,byteCount);
   int bytesRead;
   try {
-    bytesRead=super.read(buffer,off,nbytes);
+    bytesRead=super.read(buffer,offset,byteCount);
   }
   finally {
     eos=eof;
   }
   if (bytesRead != -1) {
-    crc.update(buffer,off,bytesRead);
+    crc.update(buffer,offset,bytesRead);
   }
   if (eos) {
     verifyCrc();

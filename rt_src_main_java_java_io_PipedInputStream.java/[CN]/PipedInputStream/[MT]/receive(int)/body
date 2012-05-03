@@ -1,31 +1,29 @@
 {
   if (buffer == null || isClosed) {
-    throw new IOException(Messages.getString("luni.CF"));
-  }
-  if (lastReader != null && !lastReader.isAlive()) {
-    throw new IOException(Messages.getString("luni.CE"));
+    throw new IOException("Pipe is closed");
   }
   lastWriter=Thread.currentThread();
   try {
     while (buffer != null && out == in) {
+      if (lastReader != null && !lastReader.isAlive()) {
+        throw new IOException("Pipe broken");
+      }
       notifyAll();
       wait(1000);
-      if (lastReader != null && !lastReader.isAlive()) {
-        throw new IOException(Messages.getString("luni.CE"));
-      }
     }
   }
  catch (  InterruptedException e) {
     throw new InterruptedIOException();
   }
-  if (buffer != null) {
-    if (in == -1) {
-      in=0;
-    }
-    buffer[in++]=(byte)oneByte;
-    if (in == buffer.length) {
-      in=0;
-    }
-    return;
+  if (buffer == null) {
+    throw new IOException("Pipe is closed");
   }
+  if (in == -1) {
+    in=0;
+  }
+  buffer[in++]=(byte)oneByte;
+  if (in == buffer.length) {
+    in=0;
+  }
+  notifyAll();
 }

@@ -1,0 +1,27 @@
+{
+  int prefixSeparator=name.lastIndexOf(":");
+  if (prefixSeparator != -1) {
+    String prefix=name.substring(0,prefixSeparator);
+    String localName=name.substring(prefixSeparator + 1);
+    if (!DocumentImpl.isXMLIdentifier(prefix) || !DocumentImpl.isXMLIdentifier(localName)) {
+      throw new DOMException(DOMException.INVALID_CHARACTER_ERR,name);
+    }
+  }
+ else   if (!DocumentImpl.isXMLIdentifier(name)) {
+    throw new DOMException(DOMException.INVALID_CHARACTER_ERR,name);
+  }
+switch (node.getNodeType()) {
+case ATTRIBUTE_NODE:
+    AttrImpl attr=(AttrImpl)node;
+  attr.namespaceAware=false;
+attr.localName=name;
+break;
+case ELEMENT_NODE:
+ElementImpl element=(ElementImpl)node;
+element.namespaceAware=false;
+element.localName=name;
+break;
+default :
+throw new DOMException(DOMException.NOT_SUPPORTED_ERR,"Cannot rename nodes of type " + node.getNodeType());
+}
+}

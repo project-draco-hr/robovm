@@ -1,0 +1,27 @@
+{
+  ByteArrayInputStream bais=new ByteArrayInputStream(data);
+  DataInputStream dais=new DataInputStream(bais);
+  try {
+    int type=dais.readInt();
+    if (type != OPEN_SSL) {
+      log(new AssertionError("Unexpected type ID: " + type));
+      return null;
+    }
+    int length=dais.readInt();
+    byte[] sessionData=new byte[length];
+    dais.readFully(sessionData);
+    int count=dais.readInt();
+    X509CertImpl[] certs=new X509CertImpl[count];
+    for (int i=0; i < count; i++) {
+      length=dais.readInt();
+      byte[] certData=new byte[length];
+      dais.readFully(certData);
+      certs[i]=new X509CertImpl(certData);
+    }
+    return new OpenSSLSessionImpl(sessionData,host,port,certs,this);
+  }
+ catch (  IOException e) {
+    log(e);
+    return null;
+  }
+}

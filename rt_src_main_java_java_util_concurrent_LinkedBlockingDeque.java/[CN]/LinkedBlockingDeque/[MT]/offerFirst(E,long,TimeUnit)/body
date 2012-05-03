@@ -1,10 +1,11 @@
 {
   if (e == null)   throw new NullPointerException();
+  Node<E> node=new Node<E>(e);
   long nanos=unit.toNanos(timeout);
   final ReentrantLock lock=this.lock;
   lock.lockInterruptibly();
   try {
-    while (!linkFirst(e)) {
+    while (!linkFirst(node)) {
       if (nanos <= 0)       return false;
       nanos=notFull.awaitNanos(nanos);
     }

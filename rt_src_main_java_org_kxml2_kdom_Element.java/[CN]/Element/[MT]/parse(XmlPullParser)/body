@@ -1,0 +1,15 @@
+{
+  for (int i=parser.getNamespaceCount(parser.getDepth() - 1); i < parser.getNamespaceCount(parser.getDepth()); i++) {
+    setPrefix(parser.getNamespacePrefix(i),parser.getNamespaceUri(i));
+  }
+  for (int i=0; i < parser.getAttributeCount(); i++)   setAttribute(parser.getAttributeNamespace(i),parser.getAttributeName(i),parser.getAttributeValue(i));
+  init();
+  if (parser.isEmptyElementTag())   parser.nextToken();
+ else {
+    parser.nextToken();
+    super.parse(parser);
+    if (getChildCount() == 0)     addChild(IGNORABLE_WHITESPACE,"");
+  }
+  parser.require(XmlPullParser.END_TAG,getNamespace(),getName());
+  parser.nextToken();
+}

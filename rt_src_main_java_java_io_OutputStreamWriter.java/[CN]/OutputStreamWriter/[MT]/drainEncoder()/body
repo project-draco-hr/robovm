@@ -1,0 +1,24 @@
+{
+  CharBuffer chars=CharBuffer.allocate(0);
+  while (true) {
+    CoderResult result=encoder.encode(chars,bytes,true);
+    if (result.isError()) {
+      result.throwException();
+    }
+ else     if (result.isOverflow()) {
+      flushBytes(false);
+      continue;
+    }
+    break;
+  }
+  CoderResult result=encoder.flush(bytes);
+  while (!result.isUnderflow()) {
+    if (result.isOverflow()) {
+      flushBytes(false);
+      result=encoder.flush(bytes);
+    }
+ else {
+      result.throwException();
+    }
+  }
+}

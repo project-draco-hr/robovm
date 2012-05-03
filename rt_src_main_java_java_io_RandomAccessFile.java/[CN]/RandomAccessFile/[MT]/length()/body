@@ -1,4 +1,8 @@
 {
-  openCheck();
-  return fileSystem.size(fd.descriptor);
+  try {
+    return Libcore.os.fstat(fd).st_size;
+  }
+ catch (  ErrnoException errnoException) {
+    throw errnoException.rethrowAsIOException();
+  }
 }

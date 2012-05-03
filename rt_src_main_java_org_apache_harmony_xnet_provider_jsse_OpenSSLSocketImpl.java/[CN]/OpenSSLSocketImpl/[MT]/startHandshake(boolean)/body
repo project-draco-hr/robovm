@@ -1,0 +1,157 @@
+{
+synchronized (handshakeLock) {
+    checkOpen();
+    if (!handshakeStarted) {
+      handshakeStarted=true;
+    }
+ else {
+      return;
+    }
+  }
+  final int seedLengthInBytes=NativeCrypto.RAND_SEED_LENGTH_IN_BYTES;
+  final SecureRandom secureRandom=sslParameters.getSecureRandomMember();
+  if (secureRandom == null) {
+    NativeCrypto.RAND_load_file("/dev/urandom",seedLengthInBytes);
+  }
+ else {
+    NativeCrypto.RAND_seed(secureRandom.generateSeed(seedLengthInBytes));
+  }
+  final boolean client=sslParameters.getUseClientMode();
+  final int sslCtxNativePointer=(client) ? sslParameters.getClientSessionContext().sslCtxNativePointer : sslParameters.getServerSessionContext().sslCtxNativePointer;
+  this.sslNativePointer=0;
+  boolean exception=true;
+  try {
+    sslNativePointer=NativeCrypto.SSL_new(sslCtxNativePointer);
+    guard.open("close");
+    if (!client) {
+      Set<String> keyTypes=new HashSet<String>();
+      for (      String enabledCipherSuite : enabledCipherSuites) {
+        if (enabledCipherSuite.equals(NativeCrypto.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)) {
+          continue;
+        }
+        String keyType=CipherSuite.getByName(enabledCipherSuite).getServerKeyType();
+        if (keyType != null) {
+          keyTypes.add(keyType);
+        }
+      }
+      for (      String keyType : keyTypes) {
+        try {
+          setCertificate(sslParameters.getKeyManager().chooseServerAlias(keyType,null,this));
+        }
+ catch (        CertificateEncodingException e) {
+          throw new IOException(e);
+        }
+      }
+    }
+    NativeCrypto.setEnabledProtocols(sslNativePointer,enabledProtocols);
+    NativeCrypto.setEnabledCipherSuites(sslNativePointer,enabledCipherSuites);
+    if (enabledCompressionMethods.length != 0) {
+      NativeCrypto.setEnabledCompressionMethods(sslNativePointer,enabledCompressionMethods);
+    }
+    if (useSessionTickets) {
+      NativeCrypto.SSL_clear_options(sslNativePointer,NativeCrypto.SSL_OP_NO_TICKET);
+    }
+    if (hostname != null) {
+      NativeCrypto.SSL_set_tlsext_host_name(sslNativePointer,hostname);
+    }
+    boolean enableSessionCreation=sslParameters.getEnableSessionCreation();
+    if (!enableSessionCreation) {
+      NativeCrypto.SSL_set_session_creation_enabled(sslNativePointer,enableSessionCreation);
+    }
+    AbstractSessionContext sessionContext;
+    if (client) {
+      ClientSessionContext clientSessionContext=sslParameters.getClientSessionContext();
+      sessionContext=clientSessionContext;
+      OpenSSLSessionImpl session=getCachedClientSession(clientSessionContext);
+      if (session != null) {
+        NativeCrypto.SSL_set_session(sslNativePointer,session.sslSessionNativePointer);
+      }
+    }
+ else {
+      sessionContext=sslParameters.getServerSessionContext();
+    }
+    if (client) {
+    }
+ else {
+      boolean certRequested;
+      if (sslParameters.getNeedClientAuth()) {
+        NativeCrypto.SSL_set_verify(sslNativePointer,NativeCrypto.SSL_VERIFY_PEER | NativeCrypto.SSL_VERIFY_FAIL_IF_NO_PEER_CERT);
+        certRequested=true;
+      }
+ else       if (sslParameters.getWantClientAuth()) {
+        NativeCrypto.SSL_set_verify(sslNativePointer,NativeCrypto.SSL_VERIFY_PEER);
+        certRequested=true;
+      }
+ else {
+        certRequested=false;
+      }
+      if (certRequested) {
+        X509TrustManager trustManager=sslParameters.getTrustManager();
+        X509Certificate[] issuers=trustManager.getAcceptedIssuers();
+        if (issuers != null && issuers.length != 0) {
+          byte[][] issuersBytes;
+          try {
+            issuersBytes=NativeCrypto.encodeIssuerX509Principals(issuers);
+          }
+ catch (          CertificateEncodingException e) {
+            throw new IOException("Problem encoding principals",e);
+          }
+          NativeCrypto.SSL_set_client_CA_list(sslNativePointer,issuersBytes);
+        }
+      }
+    }
+    if (client && full) {
+      NativeCrypto.SSL_clear_mode(sslNativePointer,NativeCrypto.SSL_MODE_HANDSHAKE_CUTTHROUGH);
+    }
+    int savedTimeoutMilliseconds=getSoTimeout();
+    if (handshakeTimeoutMilliseconds >= 0) {
+      setSoTimeout(handshakeTimeoutMilliseconds);
+    }
+    int sslSessionNativePointer;
+    try {
+      sslSessionNativePointer=NativeCrypto.SSL_do_handshake(sslNativePointer,socket.getFileDescriptor$(),this,getSoTimeout(),client);
+    }
+ catch (    CertificateException e) {
+      SSLHandshakeException wrapper=new SSLHandshakeException(e.getMessage());
+      wrapper.initCause(e);
+      throw wrapper;
+    }
+    byte[] sessionId=NativeCrypto.SSL_SESSION_session_id(sslSessionNativePointer);
+    sslSession=(OpenSSLSessionImpl)sessionContext.getSession(sessionId);
+    if (sslSession != null) {
+      sslSession.lastAccessedTime=System.currentTimeMillis();
+      NativeCrypto.SSL_SESSION_free(sslSessionNativePointer);
+    }
+ else {
+      if (!enableSessionCreation) {
+        throw new IllegalStateException("SSL Session may not be created");
+      }
+      X509Certificate[] localCertificates=createCertChain(NativeCrypto.SSL_get_certificate(sslNativePointer));
+      X509Certificate[] peerCertificates=createCertChain(NativeCrypto.SSL_get_peer_cert_chain(sslNativePointer));
+      if (wrappedHost == null) {
+        sslSession=new OpenSSLSessionImpl(sslSessionNativePointer,localCertificates,peerCertificates,super.getInetAddress().getHostName(),super.getPort(),sessionContext);
+      }
+ else {
+        sslSession=new OpenSSLSessionImpl(sslSessionNativePointer,localCertificates,peerCertificates,wrappedHost,wrappedPort,sessionContext);
+      }
+      if (handshakeCompleted) {
+        sessionContext.putSession(sslSession);
+      }
+    }
+    if (handshakeTimeoutMilliseconds >= 0) {
+      setSoTimeout(savedTimeoutMilliseconds);
+    }
+    if (handshakeCompleted) {
+      notifyHandshakeCompletedListeners();
+    }
+    exception=false;
+  }
+ catch (  SSLProtocolException e) {
+    throw new SSLHandshakeException(e);
+  }
+ finally {
+    if (exception) {
+      close();
+    }
+  }
+}

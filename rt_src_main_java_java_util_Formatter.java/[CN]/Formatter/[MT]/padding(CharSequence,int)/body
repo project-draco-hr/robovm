@@ -1,0 +1,44 @@
+{
+  int start=startIndex;
+  int width=formatToken.getWidth();
+  int precision=formatToken.getPrecision();
+  int length=source.length();
+  if (precision >= 0) {
+    length=Math.min(length,precision);
+    if (source instanceof StringBuilder) {
+      ((StringBuilder)source).setLength(length);
+    }
+ else {
+      source=source.subSequence(0,length);
+    }
+  }
+  if (width > 0) {
+    width=Math.max(source.length(),width);
+  }
+  if (length >= width) {
+    return source;
+  }
+  char paddingChar='\u0020';
+  if (formatToken.flagZero) {
+    if (formatToken.getConversionType() == 'd') {
+      paddingChar=localeData.zeroDigit;
+    }
+ else {
+      paddingChar='0';
+    }
+  }
+ else {
+    start=0;
+  }
+  char[] paddingChars=new char[width - length];
+  Arrays.fill(paddingChars,paddingChar);
+  boolean paddingRight=formatToken.flagMinus;
+  StringBuilder result=toStringBuilder(source);
+  if (paddingRight) {
+    result.append(paddingChars);
+  }
+ else {
+    result.insert(start,paddingChars);
+  }
+  return result;
+}

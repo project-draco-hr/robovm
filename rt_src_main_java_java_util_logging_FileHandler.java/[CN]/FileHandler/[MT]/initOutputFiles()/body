@@ -6,7 +6,7 @@
     }
     fileName=files[0].getAbsolutePath();
 synchronized (allLocks) {
-      if (null != allLocks.get(fileName)) {
+      if (allLocks.get(fileName) != null) {
         continue;
       }
       if (files[0].exists() && (!append || files[0].length() >= limit)) {
@@ -20,12 +20,8 @@ synchronized (allLocks) {
       FileOutputStream fileStream=new FileOutputStream(fileName + LCK_EXT);
       FileChannel channel=fileStream.getChannel();
       lock=channel.tryLock();
-      if (null == lock) {
-        try {
-          fileStream.close();
-        }
- catch (        Exception e) {
-        }
+      if (lock == null) {
+        IoUtils.closeQuietly(fileStream);
         continue;
       }
       allLocks.put(fileName,lock);

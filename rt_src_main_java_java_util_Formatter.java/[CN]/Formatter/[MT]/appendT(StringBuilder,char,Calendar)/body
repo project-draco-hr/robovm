@@ -1,0 +1,135 @@
+{
+switch (conversion) {
+case 'A':
+    result.append(localeData.longWeekdayNames[calendar.get(Calendar.DAY_OF_WEEK)]);
+  return true;
+case 'a':
+result.append(localeData.shortWeekdayNames[calendar.get(Calendar.DAY_OF_WEEK)]);
+return true;
+case 'B':
+result.append(localeData.longMonthNames[calendar.get(Calendar.MONTH)]);
+return true;
+case 'b':
+case 'h':
+result.append(localeData.shortMonthNames[calendar.get(Calendar.MONTH)]);
+return true;
+case 'C':
+appendLocalized(result,calendar.get(Calendar.YEAR) / 100,2);
+return true;
+case 'D':
+appendT(result,'m',calendar);
+result.append('/');
+appendT(result,'d',calendar);
+result.append('/');
+appendT(result,'y',calendar);
+return true;
+case 'F':
+appendT(result,'Y',calendar);
+result.append('-');
+appendT(result,'m',calendar);
+result.append('-');
+appendT(result,'d',calendar);
+return true;
+case 'H':
+appendLocalized(result,calendar.get(Calendar.HOUR_OF_DAY),2);
+return true;
+case 'I':
+appendLocalized(result,to12Hour(calendar.get(Calendar.HOUR)),2);
+return true;
+case 'L':
+appendLocalized(result,calendar.get(Calendar.MILLISECOND),3);
+return true;
+case 'M':
+appendLocalized(result,calendar.get(Calendar.MINUTE),2);
+return true;
+case 'N':
+appendLocalized(result,calendar.get(Calendar.MILLISECOND) * 1000000L,9);
+return true;
+case 'Q':
+appendLocalized(result,calendar.getTimeInMillis(),0);
+return true;
+case 'R':
+appendT(result,'H',calendar);
+result.append(':');
+appendT(result,'M',calendar);
+return true;
+case 'S':
+appendLocalized(result,calendar.get(Calendar.SECOND),2);
+return true;
+case 'T':
+appendT(result,'H',calendar);
+result.append(':');
+appendT(result,'M',calendar);
+result.append(':');
+appendT(result,'S',calendar);
+return true;
+case 'Y':
+appendLocalized(result,calendar.get(Calendar.YEAR),4);
+return true;
+case 'Z':
+TimeZone timeZone=calendar.getTimeZone();
+result.append(timeZone.getDisplayName(timeZone.inDaylightTime(calendar.getTime()),TimeZone.SHORT,locale));
+return true;
+case 'c':
+appendT(result,'a',calendar);
+result.append(' ');
+appendT(result,'b',calendar);
+result.append(' ');
+appendT(result,'d',calendar);
+result.append(' ');
+appendT(result,'T',calendar);
+result.append(' ');
+appendT(result,'Z',calendar);
+result.append(' ');
+appendT(result,'Y',calendar);
+return true;
+case 'd':
+appendLocalized(result,calendar.get(Calendar.DAY_OF_MONTH),2);
+return true;
+case 'e':
+appendLocalized(result,calendar.get(Calendar.DAY_OF_MONTH),0);
+return true;
+case 'j':
+appendLocalized(result,calendar.get(Calendar.DAY_OF_YEAR),3);
+return true;
+case 'k':
+appendLocalized(result,calendar.get(Calendar.HOUR_OF_DAY),0);
+return true;
+case 'l':
+appendLocalized(result,to12Hour(calendar.get(Calendar.HOUR)),0);
+return true;
+case 'm':
+appendLocalized(result,calendar.get(Calendar.MONTH) + 1,2);
+return true;
+case 'p':
+result.append(localeData.amPm[calendar.get(Calendar.AM_PM)].toLowerCase(locale));
+return true;
+case 'r':
+appendT(result,'I',calendar);
+result.append(':');
+appendT(result,'M',calendar);
+result.append(':');
+appendT(result,'S',calendar);
+result.append(' ');
+result.append(localeData.amPm[calendar.get(Calendar.AM_PM)]);
+return true;
+case 's':
+appendLocalized(result,calendar.getTimeInMillis() / 1000,0);
+return true;
+case 'y':
+appendLocalized(result,calendar.get(Calendar.YEAR) % 100,2);
+return true;
+case 'z':
+long offset=calendar.get(Calendar.ZONE_OFFSET) + calendar.get(Calendar.DST_OFFSET);
+char sign='+';
+if (offset < 0) {
+sign='-';
+offset=-offset;
+}
+result.append(sign);
+appendLocalized(result,offset / 3600000,2);
+appendLocalized(result,(offset % 3600000) / 60000,2);
+return true;
+}
+return false;
+}

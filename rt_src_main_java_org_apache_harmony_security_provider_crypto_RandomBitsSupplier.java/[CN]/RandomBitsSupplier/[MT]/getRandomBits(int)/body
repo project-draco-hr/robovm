@@ -1,19 +1,9 @@
 {
   if (numBytes <= 0) {
-    throw new IllegalArgumentException(Messages.getString("security.195",numBytes));
+    throw new IllegalArgumentException(Integer.toString(numBytes));
   }
   if (!serviceAvailable) {
-    throw new ProviderException(Messages.getString("security.196"));
+    throw new ProviderException("ATTENTION: service is not available : no random devices");
   }
-  byte[] randomBits;
-  if (bis != null) {
-    randomBits=getUnixDeviceRandom(numBytes);
-  }
- else {
-    randomBits=new byte[numBytes];
-    if (!getUnixSystemRandom(randomBits,numBytes)) {
-      throw new ProviderException(Messages.getString("security.196"));
-    }
-  }
-  return randomBits;
+  return getUnixDeviceRandom(numBytes);
 }

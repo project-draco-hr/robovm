@@ -1,11 +1,12 @@
 {
   Set<String> result=new HashSet<String>();
-  Provider[] p=getProviders();
-  for (int i=0; i < p.length; i++) {
-    for (Iterator it=p[i].getServices().iterator(); it.hasNext(); ) {
-      Provider.Service s=(Provider.Service)it.next();
-      if (Util.equalsIgnoreCase(s.getType(),serviceName)) {
-        result.add(s.getAlgorithm());
+  if (serviceName == null) {
+    return result;
+  }
+  for (  Provider provider : getProviders()) {
+    for (    Provider.Service service : provider.getServices()) {
+      if (service.getType().equalsIgnoreCase(serviceName)) {
+        result.add(service.getAlgorithm());
       }
     }
   }

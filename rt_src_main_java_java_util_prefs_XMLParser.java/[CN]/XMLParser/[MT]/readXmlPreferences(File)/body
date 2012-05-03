@@ -1,0 +1,32 @@
+{
+  Properties result=new Properties();
+  if (!xmlFile.exists()) {
+    xmlFile.getParentFile().mkdirs();
+  }
+ else   if (xmlFile.canRead()) {
+    Reader reader=null;
+    try {
+      reader=new InputStreamReader(new FileInputStream(xmlFile),"UTF-8");
+      Document document=builder.parse(new InputSource(reader));
+      NodeList entries=selectNodeList(document.getDocumentElement(),"entry");
+      int length=entries.getLength();
+      for (int i=0; i < length; i++) {
+        Element node=(Element)entries.item(i);
+        String key=node.getAttribute("key");
+        String value=node.getAttribute("value");
+        result.setProperty(key,value);
+      }
+    }
+ catch (    IOException ignored) {
+    }
+catch (    SAXException ignored) {
+    }
+ finally {
+      IoUtils.closeQuietly(reader);
+    }
+  }
+ else {
+    xmlFile.delete();
+  }
+  return result;
+}

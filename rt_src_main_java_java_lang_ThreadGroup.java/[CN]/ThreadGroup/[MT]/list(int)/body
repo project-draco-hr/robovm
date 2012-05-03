@@ -1,19 +1,16 @@
 {
-  for (int i=0; i < levels; i++) {
-    System.out.print("    ");
-  }
+  indent(levels);
   System.out.println(this.toString());
-synchronized (this.childrenThreadsLock) {
-    for (int i=0; i < numThreads; i++) {
-      for (int j=0; j <= levels; j++) {
-        System.out.print("    ");
-      }
-      System.out.println(this.childrenThreads[i]);
+  ++levels;
+synchronized (threadRefs) {
+    for (    Thread thread : threads) {
+      indent(levels);
+      System.out.println(thread);
     }
   }
-synchronized (this.childrenGroupsLock) {
-    for (int i=0; i < numGroups; i++) {
-      this.childrenGroups[i].list(levels + 1);
+synchronized (groups) {
+    for (    ThreadGroup group : groups) {
+      group.list(levels);
     }
   }
 }

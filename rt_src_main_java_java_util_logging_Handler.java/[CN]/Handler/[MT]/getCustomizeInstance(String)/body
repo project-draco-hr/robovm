@@ -1,13 +1,8 @@
 {
-  Class<?> c=AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>(){
-    public Class<?> run() throws Exception {
-      ClassLoader loader=Thread.currentThread().getContextClassLoader();
-      if (null == loader) {
-        loader=ClassLoader.getSystemClassLoader();
-      }
-      return loader.loadClass(className);
-    }
+  ClassLoader loader=Thread.currentThread().getContextClassLoader();
+  if (loader == null) {
+    loader=ClassLoader.getSystemClassLoader();
   }
-);
+  Class<?> c=loader.loadClass(className);
   return c.newInstance();
 }

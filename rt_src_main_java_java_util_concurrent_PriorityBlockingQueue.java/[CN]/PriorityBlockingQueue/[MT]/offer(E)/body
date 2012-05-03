@@ -1,13 +1,19 @@
 {
+  if (e == null)   throw new NullPointerException();
   final ReentrantLock lock=this.lock;
   lock.lock();
+  int n, cap;
+  Object[] array;
+  while ((n=size) >= (cap=(array=queue).length))   tryGrow(array,cap);
   try {
-    boolean ok=q.offer(e);
-    assert ok;
+    Comparator<? super E> cmp=comparator;
+    if (cmp == null)     siftUpComparable(n,e,array);
+ else     siftUpUsingComparator(n,e,array,cmp);
+    size=n + 1;
     notEmpty.signal();
-    return true;
   }
   finally {
     lock.unlock();
   }
+  return true;
 }

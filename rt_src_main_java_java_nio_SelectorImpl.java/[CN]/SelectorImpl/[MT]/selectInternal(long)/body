@@ -1,0 +1,34 @@
+{
+  checkClosed();
+synchronized (this) {
+synchronized (unmodifiableKeys) {
+synchronized (selectedKeys) {
+        doCancel();
+        boolean isBlock=(timeout != 0);
+synchronized (keysLock) {
+          preparePollFds();
+        }
+        int rc;
+        try {
+          if (isBlock) {
+            begin();
+          }
+          try {
+            rc=Libcore.os.poll(pollFds.array(),(int)timeout);
+          }
+ catch (          ErrnoException errnoException) {
+            throw errnoException.rethrowAsIOException();
+          }
+        }
+  finally {
+          if (isBlock) {
+            end();
+          }
+        }
+        int readyCount=(rc > 0) ? processPollFds() : 0;
+        readyCount-=doCancel();
+        return readyCount;
+      }
+    }
+  }
+}

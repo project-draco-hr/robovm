@@ -1,0 +1,34 @@
+{
+  String hash=hash(subject);
+  for (int index=0; true; index++) {
+    File file=file(dir,hash,index);
+    if (!file.isFile()) {
+      if (desiredReturnType == Boolean.class) {
+        return (T)Boolean.FALSE;
+      }
+      if (desiredReturnType == File.class) {
+        return (T)file;
+      }
+      return null;
+    }
+    if (isTombstone(file)) {
+      continue;
+    }
+    X509Certificate cert=readCertificate(file);
+    if (cert == null) {
+      continue;
+    }
+    if (selector.match(cert)) {
+      if (desiredReturnType == X509Certificate.class) {
+        return (T)cert;
+      }
+      if (desiredReturnType == Boolean.class) {
+        return (T)Boolean.TRUE;
+      }
+      if (desiredReturnType == File.class) {
+        return (T)file;
+      }
+      throw new AssertionError();
+    }
+  }
+}

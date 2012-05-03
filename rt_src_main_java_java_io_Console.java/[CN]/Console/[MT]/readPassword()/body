@@ -1,9 +1,13 @@
 {
-  String password;
 synchronized (CONSOLE_LOCK) {
-    setEchoOffImpl();
-    password=readLine();
-    setEchoOnImpl();
+    int previousState=setEcho(false,0);
+    try {
+      String password=readLine();
+      writer.println();
+      return (password == null) ? null : password.toCharArray();
+    }
+  finally {
+      setEcho(true,previousState);
+    }
   }
-  return null == password ? null : password.toCharArray();
 }

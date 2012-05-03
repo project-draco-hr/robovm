@@ -5,10 +5,13 @@
     int i=lastRet;
     if (i == -1)     throw new IllegalStateException();
     lastRet=-1;
-    int ti=takeIndex;
-    removeAt(i);
-    nextIndex=(i == ti) ? takeIndex : i;
-    checkNext();
+    E x=lastItem;
+    lastItem=null;
+    if (x != null && x == items[i]) {
+      boolean removingHead=(i == takeIndex);
+      removeAt(i);
+      if (!removingHead)       nextIndex=dec(nextIndex);
+    }
   }
   finally {
     lock.unlock();

@@ -1,0 +1,98 @@
+{
+  if (reader == null) {
+    throw new XmlPullParserException("setInput() must be called first.",this,null);
+  }
+  if (type == END_TAG) {
+    depth--;
+  }
+  if (degenerated) {
+    degenerated=false;
+    type=END_TAG;
+    return type;
+  }
+  if (error != null) {
+    if (justOneToken) {
+      text=error;
+      type=COMMENT;
+      error=null;
+      return type;
+    }
+ else {
+      error=null;
+    }
+  }
+  type=peekType(false);
+  if (type == XML_DECLARATION) {
+    readXmlDeclaration();
+    type=peekType(false);
+  }
+  text=null;
+  isWhitespace=true;
+  prefix=null;
+  name=null;
+  namespace=null;
+  attributeCount=-1;
+  boolean throwOnResolveFailure=!justOneToken;
+  while (true) {
+switch (type) {
+case START_TAG:
+      parseStartTag(false,throwOnResolveFailure);
+    return type;
+case END_TAG:
+  readEndTag();
+return type;
+case END_DOCUMENT:
+return type;
+case ENTITY_REF:
+if (justOneToken) {
+StringBuilder entityTextBuilder=new StringBuilder();
+readEntity(entityTextBuilder,true,throwOnResolveFailure,ValueContext.TEXT);
+text=entityTextBuilder.toString();
+break;
+}
+case TEXT:
+text=readValue('<',!justOneToken,throwOnResolveFailure,ValueContext.TEXT);
+if (depth == 0 && isWhitespace) {
+type=IGNORABLE_WHITESPACE;
+}
+break;
+case CDSECT:
+read(START_CDATA);
+text=readUntil(END_CDATA,true);
+break;
+case COMMENT:
+String commentText=readComment(justOneToken);
+if (justOneToken) {
+text=commentText;
+}
+break;
+case PROCESSING_INSTRUCTION:
+read(START_PROCESSING_INSTRUCTION);
+String processingInstruction=readUntil(END_PROCESSING_INSTRUCTION,justOneToken);
+if (justOneToken) {
+text=processingInstruction;
+}
+break;
+case DOCDECL:
+readDoctype(justOneToken);
+break;
+default :
+throw new XmlPullParserException("Unexpected token",this,null);
+}
+if (depth == 0 && (type == ENTITY_REF || type == TEXT || type == CDSECT)) {
+throw new XmlPullParserException("Unexpected token",this,null);
+}
+if (justOneToken) {
+return type;
+}
+if (type == IGNORABLE_WHITESPACE) {
+text=null;
+}
+int peek=peekType(false);
+if (text != null && !text.isEmpty() && peek < TEXT) {
+type=TEXT;
+return type;
+}
+type=peek;
+}
+}

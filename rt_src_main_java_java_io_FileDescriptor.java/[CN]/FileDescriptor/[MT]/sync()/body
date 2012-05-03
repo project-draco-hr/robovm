@@ -1,5 +1,10 @@
 {
-  if (!readOnly) {
-    syncImpl();
+  try {
+    Libcore.os.fsync(this);
+  }
+ catch (  ErrnoException errnoException) {
+    SyncFailedException sfe=new SyncFailedException(errnoException.getMessage());
+    sfe.initCause(errnoException);
+    throw sfe;
   }
 }

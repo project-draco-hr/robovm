@@ -1,7 +1,7 @@
 {
-  if (c == null)   throw new NullPointerException();
+  checkNotNull(c);
   if (c == this)   throw new IllegalArgumentException();
-  final E[] items=this.items;
+  final Object[] items=this.items;
   final ReentrantLock lock=this.lock;
   lock.lock();
   try {
@@ -9,7 +9,7 @@
     int n=0;
     int max=count;
     while (n < max) {
-      c.add(items[i]);
+      c.add(this.<E>cast(items[i]));
       items[i]=null;
       i=inc(i);
       ++n;

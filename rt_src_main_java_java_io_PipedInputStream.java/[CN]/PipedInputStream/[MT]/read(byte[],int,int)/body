@@ -1,21 +1,13 @@
 {
-  if (bytes == null) {
-    throw new NullPointerException();
-  }
-  if (offset < 0 || offset > bytes.length || count < 0 || count > bytes.length - offset) {
-    throw new IndexOutOfBoundsException();
-  }
-  if (count == 0) {
+  Arrays.checkOffsetAndCount(bytes.length,offset,byteCount);
+  if (byteCount == 0) {
     return 0;
   }
   if (!isConnected) {
-    throw new IOException(Messages.getString("luni.CB"));
+    throw new IOException("Not connected");
   }
   if (buffer == null) {
-    throw new IOException(Messages.getString("luni.CC"));
-  }
-  if (lastWriter != null && !lastWriter.isAlive() && (in < 0)) {
-    throw new IOException(Messages.getString("luni.CD"));
+    throw new IOException("InputStream is closed");
   }
   lastReader=Thread.currentThread();
   try {
@@ -25,7 +17,7 @@
         return -1;
       }
       if ((attempts-- <= 0) && lastWriter != null && !lastWriter.isAlive()) {
-        throw new IOException(Messages.getString("luni.CE"));
+        throw new IOException("Pipe broken");
       }
       notifyAll();
       wait(1000);
@@ -34,11 +26,12 @@
  catch (  InterruptedException e) {
     throw new InterruptedIOException();
   }
-  int copyLength=0;
+  int totalCopied=0;
   if (out >= in) {
-    copyLength=count > (buffer.length - out) ? buffer.length - out : count;
-    System.arraycopy(buffer,out,bytes,offset,copyLength);
-    out+=copyLength;
+    int leftInBuffer=buffer.length - out;
+    int length=leftInBuffer < byteCount ? leftInBuffer : byteCount;
+    System.arraycopy(buffer,out,bytes,offset,length);
+    out+=length;
     if (out == buffer.length) {
       out=0;
     }
@@ -46,17 +39,20 @@
       in=-1;
       out=0;
     }
+    totalCopied+=length;
   }
-  if (copyLength == count || in == -1) {
-    return copyLength;
+  if (totalCopied < byteCount && in != -1) {
+    int leftInBuffer=in - out;
+    int leftToCopy=byteCount - totalCopied;
+    int length=leftToCopy < leftInBuffer ? leftToCopy : leftInBuffer;
+    System.arraycopy(buffer,out,bytes,offset + totalCopied,length);
+    out+=length;
+    if (out == in) {
+      in=-1;
+      out=0;
+    }
+    totalCopied+=length;
   }
-  int bytesCopied=copyLength;
-  copyLength=in - out > (count - bytesCopied) ? count - bytesCopied : in - out;
-  System.arraycopy(buffer,out,bytes,offset + bytesCopied,copyLength);
-  out+=copyLength;
-  if (out == in) {
-    in=-1;
-    out=0;
-  }
-  return bytesCopied + copyLength;
+  notifyAll();
+  return totalCopied;
 }

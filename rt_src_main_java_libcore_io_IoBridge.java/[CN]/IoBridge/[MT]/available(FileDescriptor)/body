@@ -1,0 +1,16 @@
+{
+  try {
+    MutableInt available=new MutableInt(0);
+    Libcore.os.ioctlInt(fd,FIONREAD,available);
+    if (available.value < 0) {
+      available.value=0;
+    }
+    return available.value;
+  }
+ catch (  ErrnoException errnoException) {
+    if (errnoException.errno == ENOTTY) {
+      return 0;
+    }
+    throw errnoException.rethrowAsIOException();
+  }
+}

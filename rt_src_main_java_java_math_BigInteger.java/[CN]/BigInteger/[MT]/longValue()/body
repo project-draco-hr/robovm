@@ -1,4 +1,8 @@
 {
-  long value=(numberLength > 1) ? (((long)digits[1]) << 32) | (digits[0] & 0xFFFFFFFFL) : (digits[0] & 0xFFFFFFFFL);
-  return (sign * value);
+  if (nativeIsValid && bigInt.twosCompFitsIntoBytes(8)) {
+    return bigInt.longInt();
+  }
+  prepareJavaRepresentation();
+  long value=numberLength > 1 ? ((long)digits[1]) << 32 | digits[0] & 0xFFFFFFFFL : digits[0] & 0xFFFFFFFFL;
+  return sign * value;
 }

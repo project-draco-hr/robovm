@@ -1,15 +1,14 @@
 {
   if (interfaceName == null) {
-    throw new NullPointerException(Messages.getString("luni.6D"));
+    throw new NullPointerException("interfaceName == null");
   }
-  Enumeration<NetworkInterface> interfaces=getNetworkInterfaces();
-  if (interfaces != null) {
-    while (interfaces.hasMoreElements()) {
-      NetworkInterface netif=interfaces.nextElement();
-      if (netif.getName().equals(interfaceName)) {
-        return netif;
-      }
-    }
+  if (!isValidInterfaceName(interfaceName)) {
+    return null;
   }
-  return null;
+  int interfaceIndex=readIntFile("/sys/class/net/" + interfaceName + "/ifindex");
+  List<InetAddress> addresses=new ArrayList<InetAddress>();
+  List<InterfaceAddress> interfaceAddresses=new ArrayList<InterfaceAddress>();
+  collectIpv6Addresses(interfaceName,interfaceIndex,addresses,interfaceAddresses);
+  collectIpv4Address(interfaceName,addresses,interfaceAddresses);
+  return new NetworkInterface(interfaceName,interfaceIndex,addresses,interfaceAddresses);
 }

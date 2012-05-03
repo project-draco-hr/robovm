@@ -1,25 +1,22 @@
 {
-  List list=new ArrayList();
-  String attValue;
+  List<List<AttributeTypeAndValue>> list=new ArrayList<List<AttributeTypeAndValue>>();
   String attType=nextAT();
   if (attType == null) {
     return list;
   }
-  List atav=new ArrayList();
+  List<AttributeTypeAndValue> atav=new ArrayList<AttributeTypeAndValue>();
   while (true) {
-    if (pos == length) {
+    if (pos == chars.length) {
       atav.add(new AttributeTypeAndValue(attType,new AttributeValue("",false)));
       list.add(0,atav);
       return list;
     }
 switch (chars[pos]) {
 case '"':
-      attValue=quotedAV();
-    atav.add(new AttributeTypeAndValue(attType,new AttributeValue(attValue,hasQE)));
-  break;
+      atav.add(new AttributeTypeAndValue(attType,new AttributeValue(quotedAV(),hasQE)));
+    break;
 case '#':
-attValue=hexAV();
-atav.add(new AttributeTypeAndValue(attType,new AttributeValue(attValue,encoded)));
+  atav.add(new AttributeTypeAndValue(attType,new AttributeValue(hexAV(),encoded)));
 break;
 case '+':
 case ',':
@@ -27,24 +24,23 @@ case ';':
 atav.add(new AttributeTypeAndValue(attType,new AttributeValue("",false)));
 break;
 default :
-attValue=escapedAV();
-atav.add(new AttributeTypeAndValue(attType,new AttributeValue(attValue,hasQE)));
+atav.add(new AttributeTypeAndValue(attType,new AttributeValue(escapedAV(),hasQE)));
 }
-if (pos >= length) {
+if (pos >= chars.length) {
 list.add(0,atav);
 return list;
 }
 if (chars[pos] == ',' || chars[pos] == ';') {
 list.add(0,atav);
-atav=new ArrayList();
+atav=new ArrayList<AttributeTypeAndValue>();
 }
  else if (chars[pos] != '+') {
-throw new IOException(Messages.getString("security.192"));
+throw new IOException("Invalid distinguished name string");
 }
 pos++;
 attType=nextAT();
 if (attType == null) {
-throw new IOException(Messages.getString("security.192"));
+throw new IOException("Invalid distinguished name string");
 }
 }
 }

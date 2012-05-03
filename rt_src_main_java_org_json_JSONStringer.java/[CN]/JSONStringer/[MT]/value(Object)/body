@@ -1,0 +1,24 @@
+{
+  if (stack.isEmpty()) {
+    throw new JSONException("Nesting problem");
+  }
+  if (value instanceof JSONArray) {
+    ((JSONArray)value).writeTo(this);
+    return this;
+  }
+ else   if (value instanceof JSONObject) {
+    ((JSONObject)value).writeTo(this);
+    return this;
+  }
+  beforeValue();
+  if (value == null || value instanceof Boolean || value == JSONObject.NULL) {
+    out.append(value);
+  }
+ else   if (value instanceof Number) {
+    out.append(JSONObject.numberToString((Number)value));
+  }
+ else {
+    string(value.toString());
+  }
+  return this;
+}

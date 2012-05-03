@@ -1,13 +1,10 @@
 {
-synchronized (channel) {
-    if (channel.isOpen()) {
-      channel.close();
-    }
-  }
+  guard.close();
 synchronized (this) {
-    if (fd != null && fd.descriptor >= 0) {
-      fileSystem.close(fd.descriptor);
-      fd.descriptor=-1;
+    if (channel != null && channel.isOpen()) {
+      channel.close();
+      channel=null;
     }
+    IoUtils.close(fd);
   }
 }

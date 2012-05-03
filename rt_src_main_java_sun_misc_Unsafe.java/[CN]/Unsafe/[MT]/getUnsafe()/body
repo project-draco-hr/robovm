@@ -1,6 +1,7 @@
 {
-  if (VM.callerClassLoader() != null) {
-    throw new SecurityException("Unsafe");
+  ClassLoader calling=VMStack.getCallingClassLoader();
+  if ((calling != null) && (calling != Unsafe.class.getClassLoader())) {
+    throw new SecurityException("Unsafe access denied");
   }
-  return INSTANCE;
+  return THE_ONE;
 }

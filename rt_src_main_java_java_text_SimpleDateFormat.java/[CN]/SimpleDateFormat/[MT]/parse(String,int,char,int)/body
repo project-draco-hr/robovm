@@ -1,0 +1,109 @@
+{
+  int index=PATTERN_CHARS.indexOf(format);
+  if (index == -1) {
+    throw new IllegalArgumentException("Unknown pattern character '" + format + "'");
+  }
+  int field=-1;
+  int absolute=0;
+  if (count < 0) {
+    count=-count;
+    absolute=count;
+  }
+switch (index) {
+case ERA_FIELD:
+    return parseText(string,offset,formatData.eras,Calendar.ERA);
+case YEAR_FIELD:
+  if (count >= 3) {
+    field=Calendar.YEAR;
+  }
+ else {
+    ParsePosition position=new ParsePosition(offset);
+    Number result=parseNumber(absolute,string,position);
+    if (result == null) {
+      return -position.getErrorIndex() - 1;
+    }
+    int year=result.intValue();
+    if ((position.getIndex() - offset) == 2 && year >= 0) {
+      year+=creationYear / 100 * 100;
+      if (year < creationYear) {
+        year+=100;
+      }
+    }
+    calendar.set(Calendar.YEAR,year);
+    return position.getIndex();
+  }
+break;
+case STAND_ALONE_MONTH_FIELD:
+return parseMonth(string,offset,count,absolute,formatData.longStandAloneMonths,formatData.shortStandAloneMonths);
+case MONTH_FIELD:
+return parseMonth(string,offset,count,absolute,formatData.months,formatData.shortMonths);
+case DATE_FIELD:
+field=Calendar.DATE;
+break;
+case HOUR_OF_DAY1_FIELD:
+ParsePosition position=new ParsePosition(offset);
+Number result=parseNumber(absolute,string,position);
+if (result == null) {
+return -position.getErrorIndex() - 1;
+}
+int hour=result.intValue();
+if (hour == 24) {
+hour=0;
+}
+calendar.set(Calendar.HOUR_OF_DAY,hour);
+return position.getIndex();
+case HOUR_OF_DAY0_FIELD:
+field=Calendar.HOUR_OF_DAY;
+break;
+case MINUTE_FIELD:
+field=Calendar.MINUTE;
+break;
+case SECOND_FIELD:
+field=Calendar.SECOND;
+break;
+case MILLISECOND_FIELD:
+field=Calendar.MILLISECOND;
+break;
+case STAND_ALONE_DAY_OF_WEEK_FIELD:
+return parseDayOfWeek(string,offset,formatData.longStandAloneWeekdays,formatData.shortStandAloneWeekdays);
+case DAY_OF_WEEK_FIELD:
+return parseDayOfWeek(string,offset,formatData.weekdays,formatData.shortWeekdays);
+case DAY_OF_YEAR_FIELD:
+field=Calendar.DAY_OF_YEAR;
+break;
+case DAY_OF_WEEK_IN_MONTH_FIELD:
+field=Calendar.DAY_OF_WEEK_IN_MONTH;
+break;
+case WEEK_OF_YEAR_FIELD:
+field=Calendar.WEEK_OF_YEAR;
+break;
+case WEEK_OF_MONTH_FIELD:
+field=Calendar.WEEK_OF_MONTH;
+break;
+case AM_PM_FIELD:
+return parseText(string,offset,formatData.ampms,Calendar.AM_PM);
+case HOUR1_FIELD:
+position=new ParsePosition(offset);
+result=parseNumber(absolute,string,position);
+if (result == null) {
+return -position.getErrorIndex() - 1;
+}
+hour=result.intValue();
+if (hour == 12) {
+hour=0;
+}
+calendar.set(Calendar.HOUR,hour);
+return position.getIndex();
+case HOUR0_FIELD:
+field=Calendar.HOUR;
+break;
+case TIMEZONE_FIELD:
+return parseTimeZone(string,offset);
+case RFC_822_TIMEZONE_FIELD:
+return parseTimeZone(string,offset);
+}
+if (field != -1) {
+return parseNumber(absolute,string,offset,field,0);
+}
+return offset;
+}

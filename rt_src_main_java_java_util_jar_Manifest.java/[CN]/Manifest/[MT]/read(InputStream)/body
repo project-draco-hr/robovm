@@ -1,20 +1,19 @@
 {
   byte[] buf;
-  try {
-    buf=InputStreamHelper.expose(is);
+  if (is instanceof ByteArrayInputStream) {
+    buf=exposeByteArrayInputStreamBytes((ByteArrayInputStream)is);
   }
- catch (  UnsupportedOperationException uoe) {
-    buf=readFully(is);
+ else {
+    buf=Streams.readFullyNoClose(is);
   }
   if (buf.length == 0) {
     return;
   }
   byte b=buf[buf.length - 1];
-  if (0 == b || 26 == b) {
+  if (b == 0 || b == 26) {
     buf[buf.length - 1]='\n';
   }
-  im=new InitManifest(buf,mainAttributes,null);
+  InitManifest im=new InitManifest(buf,mainAttributes,null);
   mainEnd=im.getPos();
   im.initEntries(entries,chunks);
-  im=null;
 }

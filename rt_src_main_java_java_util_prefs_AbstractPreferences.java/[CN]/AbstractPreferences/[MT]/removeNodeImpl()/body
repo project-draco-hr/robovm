@@ -1,0 +1,23 @@
+{
+synchronized (lock) {
+    checkState();
+    String[] childrenNames=childrenNamesSpi();
+    for (    String childrenName : childrenNames) {
+      if (cachedNode.get(childrenName) == null) {
+        AbstractPreferences child=childSpi(childrenName);
+        cachedNode.put(childrenName,child);
+      }
+    }
+    final Collection<AbstractPreferences> values=cachedNode.values();
+    final AbstractPreferences[] children=values.toArray(new AbstractPreferences[values.size()]);
+    for (    AbstractPreferences child : children) {
+      child.removeNodeImpl();
+    }
+    removeNodeSpi();
+    isRemoved=true;
+    parentPref.cachedNode.remove(nodeName);
+  }
+  if (parentPref.nodeChangeListeners.size() > 0) {
+    parentPref.notifyChildRemoved(this);
+  }
+}

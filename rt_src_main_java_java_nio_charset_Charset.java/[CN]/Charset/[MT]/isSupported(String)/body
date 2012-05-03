@@ -1,25 +1,9 @@
 {
-  if (inForNameInternal) {
-    Charset cs=cachedCharsetTable.get(charsetName);
-    if (null != cs) {
-      return true;
-    }
-    if (null == charsetName) {
-      throw new IllegalArgumentException();
-    }
-    checkCharsetName(charsetName);
-    if (_builtInProvider == null) {
-      _builtInProvider=new CharsetProviderImpl();
-    }
-    cs=_builtInProvider.charsetForName(charsetName);
-    if (null != cs) {
-      cacheCharset(cs,charsetName);
-      return true;
-    }
-    return false;
+  try {
+    forName(charsetName);
+    return true;
   }
- else {
-    Charset cs=forNameInternal(charsetName);
-    return (null != cs);
+ catch (  UnsupportedCharsetException ex) {
+    return false;
   }
 }

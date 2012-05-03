@@ -1,15 +1,8 @@
 {
   boolean expired=false;
   String bundleName=control.toBundleName(baseName,targetLocale);
-  Object cacheKey=loader != null ? (Object)loader : (Object)"null";
-  Hashtable<String,ResourceBundle> loaderCache;
-synchronized (cache) {
-    loaderCache=cache.get(cacheKey);
-    if (loaderCache == null) {
-      loaderCache=new Hashtable<String,ResourceBundle>();
-      cache.put(cacheKey,loaderCache);
-    }
-  }
+  Object cacheKey=loader != null ? loader : "null";
+  Hashtable<String,ResourceBundle> loaderCache=getLoaderCache(cacheKey);
   ResourceBundle result=loaderCache.get(bundleName);
   if (result != null) {
     long time=control.getTimeToLive(baseName,targetLocale);
@@ -22,7 +15,7 @@ synchronized (cache) {
     expired=true;
   }
   ResourceBundle ret=processGetBundle(baseName,targetLocale,loader,control,expired,result);
-  if (null != ret) {
+  if (ret != null) {
     loaderCache.put(bundleName,ret);
     ret.lastLoadTime=System.currentTimeMillis();
     return ret;

@@ -3,14 +3,7 @@
   if (mode != OPEN_READ && mode != (OPEN_READ | OPEN_DELETE)) {
     throw new IllegalArgumentException();
   }
-  SecurityManager security=System.getSecurityManager();
-  if (security != null) {
-    security.checkRead(fileName);
-  }
   if ((mode & OPEN_DELETE) != 0) {
-    if (security != null) {
-      security.checkDelete(fileName);
-    }
     fileToDeleteOnClose=file;
   }
  else {
@@ -18,4 +11,5 @@
   }
   mRaf=new RandomAccessFile(fileName,"r");
   readCentralDir();
+  guard.open("close");
 }

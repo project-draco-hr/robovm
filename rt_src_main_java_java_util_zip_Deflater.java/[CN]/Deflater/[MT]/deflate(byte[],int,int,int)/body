@@ -1,12 +1,6 @@
 {
-  if (streamHandle == -1) {
-    throw new IllegalStateException();
+  if (flush != NO_FLUSH && flush != SYNC_FLUSH && flush != FULL_FLUSH) {
+    throw new IllegalArgumentException("Bad flush value: " + flush);
   }
-  if (off > buf.length || nbytes < 0 || off < 0 || buf.length - off < nbytes) {
-    throw new ArrayIndexOutOfBoundsException();
-  }
-  if (inputBuffer == null) {
-    setInput(STUB_INPUT_BUFFER);
-  }
-  return deflateImpl(buf,off,nbytes,streamHandle,flushParam);
+  return deflateImpl(buf,offset,byteCount,flush);
 }

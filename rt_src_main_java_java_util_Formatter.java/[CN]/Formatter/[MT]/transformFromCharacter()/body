@@ -1,0 +1,19 @@
+{
+  if (arg == null) {
+    return padding("null",0);
+  }
+  if (arg instanceof Character) {
+    return padding(String.valueOf(arg),0);
+  }
+ else   if (arg instanceof Byte || arg instanceof Short || arg instanceof Integer) {
+    int codePoint=((Number)arg).intValue();
+    if (!Character.isValidCodePoint(codePoint)) {
+      throw new IllegalFormatCodePointException(codePoint);
+    }
+    CharSequence result=(codePoint < Character.MIN_SUPPLEMENTARY_CODE_POINT) ? String.valueOf((char)codePoint) : String.valueOf(Character.toChars(codePoint));
+    return padding(result,0);
+  }
+ else {
+    throw badArgumentType();
+  }
+}

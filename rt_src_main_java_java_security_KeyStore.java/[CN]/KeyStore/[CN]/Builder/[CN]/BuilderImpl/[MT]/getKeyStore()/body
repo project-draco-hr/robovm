@@ -7,9 +7,8 @@
     return keyStore;
   }
   try {
-    final KeyStore ks;
+    final KeyStore ks=(providerForKeyStore == null ? KeyStore.getInstance(typeForKeyStore) : KeyStore.getInstance(typeForKeyStore,providerForKeyStore));
     final char[] passwd;
-    ks=(providerForKeyStore == null ? KeyStore.getInstance(typeForKeyStore) : KeyStore.getInstance(typeForKeyStore,providerForKeyStore));
     if (protParameter instanceof PasswordProtection) {
       passwd=((PasswordProtection)protParameter).getPassword();
     }
@@ -17,29 +16,21 @@
       passwd=KeyStoreSpi.getPasswordFromCallBack(protParameter);
     }
  else {
-      throw new KeyStoreException(Messages.getString("security.35"));
+      throw new KeyStoreException("protectionParameter is neither " + "PasswordProtection nor CallbackHandlerProtection instance");
     }
-    AccessController.doPrivileged(new PrivilegedExceptionAction<Object>(){
-      public Object run() throws Exception {
-        if (fileForLoad != null) {
-          FileInputStream fis=null;
-          try {
-            fis=new FileInputStream(fileForLoad);
-            ks.load(fis,passwd);
-          }
+    if (fileForLoad != null) {
+      FileInputStream fis=null;
+      try {
+        fis=new FileInputStream(fileForLoad);
+        ks.load(fis,passwd);
+      }
   finally {
-            if (fis != null) {
-              fis.close();
-            }
-          }
-        }
- else {
-          ks.load(new TmpLSParameter(protParameter));
-        }
-        return null;
+        IoUtils.closeQuietly(fis);
       }
     }
-,accControlContext);
+ else {
+      ks.load(new TmpLSParameter(protParameter));
+    }
     isGetKeyStore=true;
     return ks;
   }

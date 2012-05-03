@@ -1,35 +1,31 @@
 {
   long time=r.getMillis();
-  String date=dataFormat.format(new Date(time)).replace(' ','T');
+  String date=MessageFormat.format("{0, date} {0, time}",new Object[]{new Date(time)});
+  String nl=System.lineSeparator();
   StringBuilder sb=new StringBuilder();
-  sb.append("<record>").append(lineSeperator);
-  sb.append(indent).append("<date>").append(date).append("</date>").append(lineSeperator);
-  sb.append(indent).append("<millis>").append(time).append("</millis>").append(lineSeperator);
-  sb.append(indent).append("<sequence>").append(r.getSequenceNumber()).append("</sequence>").append(lineSeperator);
-  String content=r.getLoggerName();
-  if (null != content) {
-    sb.append(indent).append("<logger>").append(convertSpecialSymbol(content)).append("</logger>").append(lineSeperator);
+  sb.append("<record>").append(nl);
+  append(sb,1,"date",date);
+  append(sb,1,"millis",time);
+  append(sb,1,"sequence",r.getSequenceNumber());
+  if (r.getLoggerName() != null) {
+    append(sb,1,"logger",r.getLoggerName());
   }
-  sb.append(indent).append("<level>").append(r.getLevel().getName()).append("</level>").append(lineSeperator);
-  content=r.getSourceClassName();
-  if (null != content) {
-    sb.append(indent).append("<class>").append(content).append("</class>").append(lineSeperator);
+  append(sb,1,"level",r.getLevel().getName());
+  if (r.getSourceClassName() != null) {
+    append(sb,1,"class",r.getSourceClassName());
   }
-  content=r.getSourceMethodName();
-  if (null != content) {
-    sb.append(indent).append("<method>").append(convertSpecialSymbol(content)).append("</method>").append(lineSeperator);
+  if (r.getSourceMethodName() != null) {
+    append(sb,1,"method",r.getSourceMethodName());
   }
-  sb.append(indent).append("<thread>").append(r.getThreadID()).append("</thread>").append(lineSeperator);
+  append(sb,1,"thread",r.getThreadID());
   formatMessages(r,sb);
-  Object[] params;
-  if ((params=r.getParameters()) != null) {
-    String elementString=null;
+  Object[] params=r.getParameters();
+  if (params != null) {
     for (    Object element : params) {
-      elementString=element.toString();
-      sb.append(indent).append("<param>").append(convertSpecialSymbol(elementString)).append("</param>").append(lineSeperator);
+      append(sb,1,"param",element);
     }
   }
   formatThrowable(r,sb);
-  sb.append("</record>").append(lineSeperator);
+  sb.append("</record>").append(nl);
   return sb.toString();
 }

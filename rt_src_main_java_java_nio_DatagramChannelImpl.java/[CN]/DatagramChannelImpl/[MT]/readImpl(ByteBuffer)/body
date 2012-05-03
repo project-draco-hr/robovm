@@ -1,0 +1,16 @@
+{
+synchronized (readLock) {
+    int readCount=0;
+    try {
+      begin();
+      readCount=IoBridge.recvfrom(false,fd,dst,0,null,isConnected());
+    }
+ catch (    InterruptedIOException e) {
+      return 0;
+    }
+ finally {
+      end(readCount > 0);
+    }
+    return readCount;
+  }
+}

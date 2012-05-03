@@ -1,0 +1,46 @@
+{
+  checkOpen();
+  if (!target.isOpen()) {
+    throw new ClosedChannelException();
+  }
+  checkReadable();
+  if (target instanceof FileChannelImpl) {
+    ((FileChannelImpl)target).checkWritable();
+  }
+  if (position < 0 || count < 0) {
+    throw new IllegalArgumentException("position=" + position + " count="+ count);
+  }
+  if (count == 0 || position >= size()) {
+    return 0;
+  }
+  count=Math.min(count,size() - position);
+  boolean completed=false;
+  if (target instanceof SocketChannelImpl) {
+    FileDescriptor outFd=((SocketChannelImpl)target).getFD();
+    try {
+      begin();
+      try {
+        MutableLong offset=new MutableLong(position);
+        long rc=Libcore.os.sendfile(outFd,fd,offset,count);
+        completed=true;
+        return rc;
+      }
+ catch (      ErrnoException errnoException) {
+        if (errnoException.errno != ENOSYS && errnoException.errno != EINVAL) {
+          throw errnoException.rethrowAsIOException();
+        }
+      }
+    }
+  finally {
+      end(completed);
+    }
+  }
+  ByteBuffer buffer=null;
+  try {
+    buffer=map(MapMode.READ_ONLY,position,count);
+    return target.write(buffer);
+  }
+  finally {
+    NioUtils.freeDirectBuffer(buffer);
+  }
+}

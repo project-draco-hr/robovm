@@ -1,21 +1,10 @@
 {
   if (address == null) {
-    throw new NullPointerException(Messages.getString("luni.68"));
+    throw new NullPointerException("address == null");
   }
-  Enumeration<NetworkInterface> interfaces=getNetworkInterfaces();
-  if (interfaces != null) {
-    while (interfaces.hasMoreElements()) {
-      NetworkInterface netif=interfaces.nextElement();
-      if (netif.addresses.size() != 0) {
-        Enumeration<InetAddress> netifAddresses=new Vector<InetAddress>(netif.addresses).elements();
-        if (netifAddresses != null) {
-          while (netifAddresses.hasMoreElements()) {
-            if (address.equals(netifAddresses.nextElement())) {
-              return netif;
-            }
-          }
-        }
-      }
+  for (  NetworkInterface networkInterface : getNetworkInterfacesList()) {
+    if (networkInterface.addresses.contains(address)) {
+      return networkInterface;
     }
   }
   return null;

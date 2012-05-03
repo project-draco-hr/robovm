@@ -1,0 +1,117 @@
+{
+  boolean allowComma=false;
+  boolean allowMinus=true;
+  boolean allowParenthesis=false;
+  boolean allowPlus=false;
+  boolean allowSharp=false;
+  boolean allowSpace=false;
+  boolean allowZero=false;
+  boolean allowPrecision=true;
+  boolean allowWidth=true;
+  boolean allowArgument=true;
+switch (conversionType) {
+case 'c':
+case 'C':
+case 't':
+case 'T':
+    allowPrecision=false;
+  break;
+case 's':
+case 'S':
+if (arg instanceof Formattable) {
+  allowSharp=true;
+}
+break;
+case 'g':
+case 'G':
+allowComma=allowParenthesis=allowPlus=allowSpace=allowZero=true;
+break;
+case 'f':
+allowComma=allowParenthesis=allowPlus=allowSharp=allowSpace=allowZero=true;
+break;
+case 'e':
+case 'E':
+allowParenthesis=allowPlus=allowSharp=allowSpace=allowZero=true;
+break;
+case 'a':
+case 'A':
+allowPlus=allowSharp=allowSpace=allowZero=true;
+break;
+case 'd':
+allowComma=allowParenthesis=allowPlus=allowSpace=allowZero=true;
+allowPrecision=false;
+break;
+case 'o':
+case 'x':
+case 'X':
+allowSharp=allowZero=true;
+if (arg == null || arg instanceof BigInteger) {
+allowParenthesis=allowPlus=allowSpace=true;
+}
+allowPrecision=false;
+break;
+case 'n':
+allowMinus=false;
+allowArgument=allowPrecision=allowWidth=false;
+break;
+case '%':
+allowArgument=false;
+allowPrecision=false;
+break;
+case 'b':
+case 'B':
+case 'h':
+case 'H':
+break;
+default :
+throw unknownFormatConversionException();
+}
+String mismatch=null;
+if (!allowComma && flagComma) {
+mismatch=",";
+}
+ else if (!allowMinus && flagMinus) {
+mismatch="-";
+}
+ else if (!allowParenthesis && flagParenthesis) {
+mismatch="(";
+}
+ else if (!allowPlus && flagPlus) {
+mismatch="+";
+}
+ else if (!allowSharp && flagSharp) {
+mismatch="#";
+}
+ else if (!allowSpace && flagSpace) {
+mismatch=" ";
+}
+ else if (!allowZero && flagZero) {
+mismatch="0";
+}
+if (mismatch != null) {
+if (conversionType == 'n') {
+throw new IllegalFormatFlagsException(mismatch);
+}
+ else {
+throw new FormatFlagsConversionMismatchException(mismatch,conversionType);
+}
+}
+if ((flagMinus || flagZero) && width == UNSET) {
+throw new MissingFormatWidthException("-" + conversionType);
+}
+if (!allowArgument && argIndex != UNSET) {
+throw new IllegalFormatFlagsException("%" + conversionType + " doesn't take an argument");
+}
+if (!allowPrecision && precision != UNSET) {
+throw new IllegalFormatPrecisionException(precision);
+}
+if (!allowWidth && width != UNSET) {
+throw new IllegalFormatWidthException(width);
+}
+if (flagPlus && flagSpace) {
+throw new IllegalFormatFlagsException("the '+' and ' ' flags are incompatible");
+}
+if (flagMinus && flagZero) {
+throw new IllegalFormatFlagsException("the '-' and '0' flags are incompatible");
+}
+}

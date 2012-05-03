@@ -6,8 +6,10 @@
   RandomAccessFile raf=mRaf;
 synchronized (raf) {
     RAFStream rafstrm=new RAFStream(raf,entry.mLocalHeaderRelOffset + 28);
-    int localExtraLenOrWhatever=ler.readShortLE(rafstrm);
-    rafstrm.skip(entry.nameLen + localExtraLenOrWhatever);
+    DataInputStream is=new DataInputStream(rafstrm);
+    int localExtraLenOrWhatever=Short.reverseBytes(is.readShort());
+    is.close();
+    rafstrm.skip(entry.nameLength + localExtraLenOrWhatever);
     rafstrm.mLength=rafstrm.mOffset + entry.compressedSize;
     if (entry.compressionMethod == ZipEntry.DEFLATED) {
       int bufSize=Math.max(1024,(int)Math.min(entry.getSize(),65535L));

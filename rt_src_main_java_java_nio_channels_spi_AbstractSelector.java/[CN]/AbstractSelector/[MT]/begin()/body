@@ -1,15 +1,3 @@
 {
-  if (AbstractInterruptibleChannel.setInterruptAction != null) {
-    try {
-      AbstractInterruptibleChannel.setInterruptAction.invoke(Thread.currentThread(),new Object[]{new Runnable(){
-        public void run(){
-          AbstractSelector.this.wakeup();
-        }
-      }
-});
-    }
- catch (    Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
+  Thread.currentThread().pushInterruptAction$(wakeupRunnable);
 }

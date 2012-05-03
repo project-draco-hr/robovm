@@ -9,9 +9,8 @@
   output.writeShort(fieldCount);
   for (int i=0; i < fieldCount; i++) {
     ObjectStreamField f=fields[i];
-    output.writeByte(f.getTypeCode());
-    output.writeUTF(f.getName());
-    if (!f.isPrimitive()) {
+    boolean wasPrimitive=f.writeField(output);
+    if (!wasPrimitive) {
       writeObject(f.getTypeString());
     }
   }

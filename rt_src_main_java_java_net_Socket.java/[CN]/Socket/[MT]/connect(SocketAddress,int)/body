@@ -1,34 +1,35 @@
 {
-  checkClosedAndCreate(true);
+  checkOpenAndCreate(true);
   if (timeout < 0) {
-    throw new IllegalArgumentException(Messages.getString("luni.5B"));
+    throw new IllegalArgumentException("timeout < 0");
   }
   if (isConnected()) {
-    throw new SocketException(Messages.getString("luni.5F"));
+    throw new SocketException("Already connected");
   }
   if (remoteAddr == null) {
-    throw new IllegalArgumentException(Messages.getString("luni.5D"));
+    throw new IllegalArgumentException("remoteAddr == null");
   }
   if (!(remoteAddr instanceof InetSocketAddress)) {
-    throw new IllegalArgumentException(Messages.getString("luni.49",remoteAddr.getClass()));
+    throw new IllegalArgumentException("Remote address not an InetSocketAddress: " + remoteAddr.getClass());
   }
   InetSocketAddress inetAddr=(InetSocketAddress)remoteAddr;
   InetAddress addr;
   if ((addr=inetAddr.getAddress()) == null) {
-    throw new UnknownHostException(Messages.getString("luni.1A",remoteAddr));
+    throw new UnknownHostException("Host is unresolved: " + inetAddr.getHostName());
   }
   int port=inetAddr.getPort();
   checkDestination(addr,port);
 synchronized (connectLock) {
     try {
       if (!isBound()) {
-        if (!NetUtil.usingSocks(proxy)) {
-          impl.bind(InetAddress.ANY,0);
+        if (!usingSocks()) {
+          impl.bind(Inet4Address.ANY,0);
         }
         isBound=true;
       }
       impl.connect(remoteAddr,timeout);
       isConnected=true;
+      cacheLocalAddress();
     }
  catch (    IOException e) {
       impl.close();

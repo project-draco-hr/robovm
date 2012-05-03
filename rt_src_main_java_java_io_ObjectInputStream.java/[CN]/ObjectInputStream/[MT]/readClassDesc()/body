@@ -6,7 +6,7 @@ case TC_CLASSDESC:
 case TC_PROXYCLASSDESC:
   Class<?> proxyClass=readNewProxyClassDesc();
 ObjectStreamClass streamClass=ObjectStreamClass.lookup(proxyClass);
-streamClass.setLoadFields(new ObjectStreamField[0]);
+streamClass.setLoadFields(ObjectStreamClass.NO_FIELDS);
 registerObjectRead(streamClass,nextHandle(),false);
 checkedSetSuperClassDesc(streamClass,readClassDesc());
 return streamClass;
@@ -15,6 +15,6 @@ return (ObjectStreamClass)readCyclicReference();
 case TC_NULL:
 return null;
 default :
-throw new StreamCorruptedException(Messages.getString("luni.BC",Integer.toHexString(tc & 0xff)));
+throw corruptStream(tc);
 }
 }

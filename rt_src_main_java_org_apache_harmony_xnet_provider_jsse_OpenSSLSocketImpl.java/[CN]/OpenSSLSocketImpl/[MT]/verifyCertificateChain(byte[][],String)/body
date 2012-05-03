@@ -1,0 +1,28 @@
+{
+  try {
+    if (bytes == null || bytes.length == 0) {
+      throw new SSLException("Peer sent no certificate");
+    }
+    X509Certificate[] peerCertificateChain=new X509Certificate[bytes.length];
+    for (int i=0; i < bytes.length; i++) {
+      peerCertificateChain[i]=new X509CertImpl(bytes[i]);
+    }
+    boolean client=sslParameters.getUseClientMode();
+    if (client) {
+      sslParameters.getTrustManager().checkServerTrusted(peerCertificateChain,authMethod);
+    }
+ else {
+      String authType=peerCertificateChain[0].getPublicKey().getAlgorithm();
+      sslParameters.getTrustManager().checkClientTrusted(peerCertificateChain,authType);
+    }
+  }
+ catch (  CertificateException e) {
+    throw e;
+  }
+catch (  RuntimeException e) {
+    throw e;
+  }
+catch (  Exception e) {
+    throw new RuntimeException(e);
+  }
+}

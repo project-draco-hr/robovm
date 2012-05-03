@@ -1,0 +1,47 @@
+{
+  char[] realText=null;
+  byte[] realEmbeddings=null;
+  if (text == null || text.length - textStart < paragraphLength) {
+    throw new IllegalArgumentException();
+  }
+  realText=new char[paragraphLength];
+  System.arraycopy(text,textStart,realText,0,paragraphLength);
+  if (embeddings != null) {
+    if (embeddings.length - embStart < paragraphLength) {
+      throw new IllegalArgumentException();
+    }
+    if (paragraphLength > 0) {
+      Bidi temp=new Bidi(text,textStart,null,0,paragraphLength,flags);
+      realEmbeddings=new byte[paragraphLength];
+      System.arraycopy(temp.offsetLevel,0,realEmbeddings,0,paragraphLength);
+      for (int i=0; i < paragraphLength; i++) {
+        byte e=embeddings[i];
+        if (e < 0) {
+          realEmbeddings[i]=(byte)(UBIDI_LEVEL_OVERRIDE - e);
+        }
+ else         if (e > 0) {
+          realEmbeddings[i]=e;
+        }
+ else {
+          realEmbeddings[i]|=(byte)UBIDI_LEVEL_OVERRIDE;
+        }
+      }
+    }
+  }
+  if (flags > 1 || flags < -2) {
+    flags=0;
+  }
+  long bidi=0;
+  boolean needsDeletion=true;
+  try {
+    bidi=ubidi_open();
+    ubidi_setPara(bidi,realText,paragraphLength,flags,realEmbeddings);
+    needsDeletion=false;
+  }
+  finally {
+    if (needsDeletion) {
+      ubidi_close(bidi);
+    }
+  }
+  return bidi;
+}

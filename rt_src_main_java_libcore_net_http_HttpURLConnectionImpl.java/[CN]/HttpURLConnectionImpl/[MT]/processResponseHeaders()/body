@@ -1,0 +1,38 @@
+{
+switch (getResponseCode()) {
+case HTTP_PROXY_AUTH:
+    if (!usingProxy()) {
+      throw new IOException("Received HTTP_PROXY_AUTH (407) code while not using proxy");
+    }
+case HTTP_UNAUTHORIZED:
+  boolean credentialsFound=processAuthHeader(getResponseCode(),httpEngine.getResponseHeaders(),rawRequestHeaders);
+return credentialsFound ? Retry.SAME_CONNECTION : Retry.NONE;
+case HTTP_MULT_CHOICE:
+case HTTP_MOVED_PERM:
+case HTTP_MOVED_TEMP:
+case HTTP_SEE_OTHER:
+if (!getInstanceFollowRedirects()) {
+return Retry.NONE;
+}
+if (++redirectionCount > HttpEngine.MAX_REDIRECTS) {
+throw new ProtocolException("Too many redirects");
+}
+String location=getHeaderField("Location");
+if (location == null) {
+return Retry.NONE;
+}
+URL previousUrl=url;
+url=new URL(previousUrl,location);
+if (!previousUrl.getProtocol().equals(url.getProtocol())) {
+return Retry.NONE;
+}
+if (previousUrl.getHost().equals(url.getHost()) && previousUrl.getEffectivePort() == url.getEffectivePort()) {
+return Retry.SAME_CONNECTION;
+}
+ else {
+return Retry.DIFFERENT_CONNECTION;
+}
+default :
+return Retry.NONE;
+}
+}

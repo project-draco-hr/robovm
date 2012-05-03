@@ -1,0 +1,28 @@
+{
+  if (arg == null) {
+    return transformFromNull();
+  }
+  Calendar calendar;
+  if (arg instanceof Calendar) {
+    calendar=(Calendar)arg;
+  }
+ else {
+    Date date=null;
+    if (arg instanceof Long) {
+      date=new Date(((Long)arg).longValue());
+    }
+ else     if (arg instanceof Date) {
+      date=(Date)arg;
+    }
+ else {
+      throw badArgumentType();
+    }
+    calendar=Calendar.getInstance(locale);
+    calendar.setTime(date);
+  }
+  StringBuilder result=new StringBuilder();
+  if (!appendT(result,formatToken.getDateSuffix(),calendar)) {
+    throw formatToken.unknownFormatConversionException();
+  }
+  return padding(result,0);
+}

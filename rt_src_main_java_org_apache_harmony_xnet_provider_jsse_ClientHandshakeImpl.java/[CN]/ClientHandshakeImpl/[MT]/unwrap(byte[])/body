@@ -50,7 +50,7 @@ fatalAlert(AlertProtocol.HANDSHAKE_FAILURE,"Bad server hello protocol version");
 if (serverHello.compression_method != 0) {
 fatalAlert(AlertProtocol.HANDSHAKE_FAILURE,"Bad server hello compression method");
 }
-CipherSuite[] enabledSuites=parameters.enabledCipherSuites;
+CipherSuite[] enabledSuites=parameters.getEnabledCipherSuitesMember();
 find: {
 for (int i=0; i < enabledSuites.length; i++) {
 if (serverHello.cipher_suite.equals(enabledSuites[i])) {
@@ -113,13 +113,12 @@ return;
 }
 serverHelloDone=new ServerHelloDone(io_stream,length);
 if (this.nonBlocking) {
-delegatedTasks.add(new DelegatedTask(new PrivilegedExceptionAction<Void>(){
-public Void run() throws Exception {
+delegatedTasks.add(new DelegatedTask(new Runnable(){
+public void run(){
 processServerHelloDone();
-return null;
 }
 }
-,this,AccessController.getContext()));
+,this));
 return;
 }
 processServerHelloDone();
@@ -132,6 +131,7 @@ return;
 serverFinished=new Finished(io_stream,length);
 verifyFinished(serverFinished.getData());
 session.lastAccessedTime=System.currentTimeMillis();
+session.context=parameters.getClientSessionContext();
 parameters.getClientSessionContext().putSession(session);
 if (isResuming) {
 sendChangeCipherSpec();

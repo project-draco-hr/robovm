@@ -1,0 +1,18 @@
+{
+  X500Principal subject;
+  X509Certificate cert=anchor.getTrustedCert();
+  if (cert != null) {
+    subject=cert.getSubjectX500Principal();
+  }
+ else {
+    subject=anchor.getCA();
+  }
+synchronized (subjectToTrustAnchors) {
+    List<TrustAnchor> anchors=subjectToTrustAnchors.get(subject);
+    if (anchors == null) {
+      anchors=new ArrayList<TrustAnchor>(1);
+      subjectToTrustAnchors.put(subject,anchors);
+    }
+    anchors.add(anchor);
+  }
+}

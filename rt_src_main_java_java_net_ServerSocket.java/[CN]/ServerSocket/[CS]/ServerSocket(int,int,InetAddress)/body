@@ -1,15 +1,13 @@
 {
-  super();
-  checkListen(aport);
-  impl=factory != null ? factory.createSocketImpl() : new PlainServerSocketImpl();
-  InetAddress addr=localAddr == null ? InetAddress.ANY : localAddr;
+  checkListen(port);
+  this.impl=factory != null ? factory.createSocketImpl() : new PlainServerSocketImpl();
+  InetAddress addr=(localAddress == null) ? Inet4Address.ANY : localAddress;
 synchronized (this) {
     impl.create(true);
-    isCreated=true;
     try {
-      impl.bind(addr,aport);
+      impl.bind(addr,port);
       isBound=true;
-      impl.listen(backlog > 0 ? backlog : defaultBacklog());
+      impl.listen(backlog > 0 ? backlog : DEFAULT_BACKLOG);
     }
  catch (    IOException e) {
       close();

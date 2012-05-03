@@ -1,0 +1,39 @@
+{
+  if (arg == this) {
+    return true;
+  }
+  List<Object> listA=createEqualityKey(this);
+  List<Object> listB=createEqualityKey(arg);
+  if (listA.size() != listB.size()) {
+    return false;
+  }
+  for (int i=0; i < listA.size(); i++) {
+    Object a=listA.get(i);
+    Object b=listB.get(i);
+    if (a == b) {
+      continue;
+    }
+ else     if (a == null || b == null) {
+      return false;
+    }
+ else     if (a instanceof String || a instanceof Short) {
+      if (!a.equals(b)) {
+        return false;
+      }
+    }
+ else     if (a instanceof NamedNodeMap) {
+      if (!(b instanceof NamedNodeMap) || !namedNodeMapsEqual((NamedNodeMap)a,(NamedNodeMap)b)) {
+        return false;
+      }
+    }
+ else     if (a instanceof Node) {
+      if (!(b instanceof Node) || !((Node)a).isEqualNode((Node)b)) {
+        return false;
+      }
+    }
+ else {
+      throw new AssertionError();
+    }
+  }
+  return true;
+}

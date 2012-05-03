@@ -1,0 +1,34 @@
+{
+  try {
+    uri=Streams.readAsciiLine(in);
+    requestMethod=Streams.readAsciiLine(in);
+    varyHeaders=new RawHeaders();
+    int varyRequestHeaderLineCount=readInt(in);
+    for (int i=0; i < varyRequestHeaderLineCount; i++) {
+      varyHeaders.addLine(Streams.readAsciiLine(in));
+    }
+    responseHeaders=new RawHeaders();
+    responseHeaders.setStatusLine(Streams.readAsciiLine(in));
+    int responseHeaderLineCount=readInt(in);
+    for (int i=0; i < responseHeaderLineCount; i++) {
+      responseHeaders.addLine(Streams.readAsciiLine(in));
+    }
+    if (isHttps()) {
+      String blank=Streams.readAsciiLine(in);
+      if (!blank.isEmpty()) {
+        throw new IOException("expected \"\" but was \"" + blank + "\"");
+      }
+      cipherSuite=Streams.readAsciiLine(in);
+      peerCertificates=readCertArray(in);
+      localCertificates=readCertArray(in);
+    }
+ else {
+      cipherSuite=null;
+      peerCertificates=null;
+      localCertificates=null;
+    }
+  }
+  finally {
+    in.close();
+  }
+}

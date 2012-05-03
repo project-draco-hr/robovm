@@ -1,0 +1,22 @@
+{
+  RequestHeaders privateHeaders=getRequestHeaders();
+  URL url=policy.getURL();
+  RawHeaders result=new RawHeaders();
+  result.setStatusLine("CONNECT " + url.getHost() + ":"+ url.getEffectivePort()+ " HTTP/1.1");
+  String host=privateHeaders.getHost();
+  if (host == null) {
+    host=getOriginAddress(url);
+  }
+  result.set("Host",host);
+  String userAgent=privateHeaders.getUserAgent();
+  if (userAgent == null) {
+    userAgent=getDefaultUserAgent();
+  }
+  result.set("User-Agent",userAgent);
+  String proxyAuthorization=privateHeaders.getProxyAuthorization();
+  if (proxyAuthorization != null) {
+    result.set("Proxy-Authorization",proxyAuthorization);
+  }
+  result.set("Proxy-Connection","Keep-Alive");
+  return result;
+}

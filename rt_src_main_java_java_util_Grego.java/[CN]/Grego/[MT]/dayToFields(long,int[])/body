@@ -1,0 +1,38 @@
+{
+  if (fields == null || fields.length < 5) {
+    fields=new int[5];
+  }
+  day+=JULIAN_1970_CE - JULIAN_1_CE;
+  long[] rem=new long[1];
+  long n400=floorDivide(day,146097,rem);
+  long n100=floorDivide(rem[0],36524,rem);
+  long n4=floorDivide(rem[0],1461,rem);
+  long n1=floorDivide(rem[0],365,rem);
+  int year=(int)(400 * n400 + 100 * n100 + 4 * n4 + n1);
+  int dayOfYear=(int)rem[0];
+  if (n100 == 4 || n1 == 4) {
+    dayOfYear=365;
+  }
+ else {
+    ++year;
+  }
+  boolean isLeap=isLeapYear(year);
+  int correction=0;
+  int march1=isLeap ? 60 : 59;
+  if (dayOfYear >= march1) {
+    correction=isLeap ? 1 : 2;
+  }
+  int month=(12 * (dayOfYear + correction) + 6) / 367;
+  int dayOfMonth=dayOfYear - DAYS_BEFORE[isLeap ? month + 12 : month] + 1;
+  int dayOfWeek=(int)((day + 2) % 7);
+  if (dayOfWeek < 1) {
+    dayOfWeek+=7;
+  }
+  dayOfYear++;
+  fields[0]=year;
+  fields[1]=month;
+  fields[2]=dayOfMonth;
+  fields[3]=dayOfWeek;
+  fields[4]=dayOfYear;
+  return fields;
+}

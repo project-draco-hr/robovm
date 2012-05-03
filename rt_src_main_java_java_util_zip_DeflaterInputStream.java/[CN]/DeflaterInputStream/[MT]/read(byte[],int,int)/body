@@ -1,34 +1,32 @@
 {
   checkClosed();
-  if (null == b) {
-    throw new NullPointerException();
-  }
-  if (off < 0 || len < 0 || len > b.length - off) {
-    throw new IndexOutOfBoundsException();
+  Arrays.checkOffsetAndCount(buffer.length,offset,byteCount);
+  if (byteCount == 0) {
+    return 0;
   }
   if (!available) {
-    return EOF;
+    return -1;
   }
   int count=0;
-  while (count < len && !def.finished()) {
+  while (count < byteCount && !def.finished()) {
     if (def.needsInput()) {
-      int readed=in.read(buf);
-      if (EOF == readed) {
+      int bytesRead=in.read(buf);
+      if (bytesRead == -1) {
         def.finish();
       }
  else {
-        def.setInput(buf,0,readed);
+        def.setInput(buf,0,bytesRead);
       }
     }
-    int readed=def.deflate(buf,0,Math.min(buf.length,len - count));
-    if (EOF == readed) {
+    int bytesDeflated=def.deflate(buf,0,Math.min(buf.length,byteCount - count));
+    if (bytesDeflated == -1) {
       break;
     }
-    System.arraycopy(buf,0,b,off + count,readed);
-    count+=readed;
+    System.arraycopy(buf,0,buffer,offset + count,bytesDeflated);
+    count+=bytesDeflated;
   }
-  if (0 == count) {
-    count=EOF;
+  if (count == 0) {
+    count=-1;
     available=false;
   }
   return count;

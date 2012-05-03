@@ -1,0 +1,11 @@
+{
+  ClassLoader callerClassLoader=VMStack.getCallingClassLoader();
+synchronized (theDrivers) {
+    for (    Driver driver : theDrivers) {
+      if (driver.acceptsURL(url) && DriverManager.isClassFromClassLoader(driver,callerClassLoader)) {
+        return driver;
+      }
+    }
+  }
+  throw new SQLException("No suitable driver","08001");
+}

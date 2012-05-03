@@ -1,0 +1,49 @@
+{
+  boolean hexFormat=false;
+  if (X500Principal.RFC1779.equals(attrFormat)) {
+    if (RFC1779_NAMES == oid.getGroup()) {
+      sb.append(oid.getName());
+    }
+ else {
+      sb.append(oid.toOIDString());
+    }
+    sb.append('=');
+    if (value.escapedString == value.getHexString()) {
+      sb.append(value.getHexString().toUpperCase(Locale.US));
+    }
+ else     if (value.escapedString.length() != value.rawString.length()) {
+      value.appendQEString(sb);
+    }
+ else {
+      sb.append(value.escapedString);
+    }
+  }
+ else {
+    Object group=oid.getGroup();
+    if (RFC1779_NAMES == group || RFC2253_NAMES == group) {
+      sb.append(oid.getName());
+      if (X500Principal.CANONICAL.equals(attrFormat)) {
+        int tag=value.getTag();
+        if (!ASN1StringType.UTF8STRING.checkTag(tag) && !ASN1StringType.PRINTABLESTRING.checkTag(tag) && !ASN1StringType.TELETEXSTRING.checkTag(tag)) {
+          hexFormat=true;
+        }
+      }
+    }
+ else {
+      sb.append(oid.toString());
+      hexFormat=true;
+    }
+    sb.append('=');
+    if (hexFormat) {
+      sb.append(value.getHexString());
+    }
+ else {
+      if (X500Principal.CANONICAL.equals(attrFormat)) {
+        sb.append(value.makeCanonical());
+      }
+ else {
+        sb.append(value.escapedString);
+      }
+    }
+  }
+}

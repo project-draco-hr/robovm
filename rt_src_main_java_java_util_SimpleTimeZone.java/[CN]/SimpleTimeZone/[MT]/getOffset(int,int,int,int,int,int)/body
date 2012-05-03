@@ -1,10 +1,108 @@
 {
   if (era != GregorianCalendar.BC && era != GregorianCalendar.AD) {
-    throw new IllegalArgumentException(Messages.getString("luni.3C",era));
+    throw new IllegalArgumentException("Invalid era: " + era);
   }
   checkRange(month,dayOfWeek,time);
   if (month != Calendar.FEBRUARY || day != 29 || !isLeapYear(year)) {
     checkDay(month,day);
   }
-  return icuTZ.getOffset(era,year,month,day,dayOfWeek,time);
+  if (!useDaylightTime() || era != GregorianCalendar.AD || year < startYear) {
+    return rawOffset;
+  }
+  if (endMonth < startMonth) {
+    if (month > endMonth && month < startMonth) {
+      return rawOffset;
+    }
+  }
+ else {
+    if (month < startMonth || month > endMonth) {
+      return rawOffset;
+    }
+  }
+  int ruleDay=0, daysInMonth, firstDayOfMonth=mod7(dayOfWeek - day);
+  if (month == startMonth) {
+switch (startMode) {
+case DOM_MODE:
+      ruleDay=startDay;
+    break;
+case DOW_IN_MONTH_MODE:
+  if (startDay >= 0) {
+    ruleDay=mod7(startDayOfWeek - firstDayOfMonth) + 1 + (startDay - 1) * 7;
+  }
+ else {
+    daysInMonth=GregorianCalendar.DaysInMonth[startMonth];
+    if (startMonth == Calendar.FEBRUARY && isLeapYear(year)) {
+      daysInMonth+=1;
+    }
+    ruleDay=daysInMonth + 1 + mod7(startDayOfWeek - (firstDayOfMonth + daysInMonth))+ startDay * 7;
+  }
+break;
+case DOW_GE_DOM_MODE:
+ruleDay=startDay + mod7(startDayOfWeek - (firstDayOfMonth + startDay - 1));
+break;
+case DOW_LE_DOM_MODE:
+ruleDay=startDay + mod7(startDayOfWeek - (firstDayOfMonth + startDay - 1));
+if (ruleDay != startDay) {
+ruleDay-=7;
+}
+break;
+}
+if (ruleDay > day || ruleDay == day && time < startTime) {
+return rawOffset;
+}
+}
+int ruleTime=endTime - dstSavings;
+int nextMonth=(month + 1) % 12;
+if (month == endMonth || (ruleTime < 0 && nextMonth == endMonth)) {
+switch (endMode) {
+case DOM_MODE:
+ruleDay=endDay;
+break;
+case DOW_IN_MONTH_MODE:
+if (endDay >= 0) {
+ruleDay=mod7(endDayOfWeek - firstDayOfMonth) + 1 + (endDay - 1) * 7;
+}
+ else {
+daysInMonth=GregorianCalendar.DaysInMonth[endMonth];
+if (endMonth == Calendar.FEBRUARY && isLeapYear(year)) {
+daysInMonth++;
+}
+ruleDay=daysInMonth + 1 + mod7(endDayOfWeek - (firstDayOfMonth + daysInMonth))+ endDay * 7;
+}
+break;
+case DOW_GE_DOM_MODE:
+ruleDay=endDay + mod7(endDayOfWeek - (firstDayOfMonth + endDay - 1));
+break;
+case DOW_LE_DOM_MODE:
+ruleDay=endDay + mod7(endDayOfWeek - (firstDayOfMonth + endDay - 1));
+if (ruleDay != endDay) {
+ruleDay-=7;
+}
+break;
+}
+int ruleMonth=endMonth;
+if (ruleTime < 0) {
+int changeDays=1 - (ruleTime / 86400000);
+ruleTime=(ruleTime % 86400000) + 86400000;
+ruleDay-=changeDays;
+if (ruleDay <= 0) {
+if (--ruleMonth < Calendar.JANUARY) {
+ruleMonth=Calendar.DECEMBER;
+}
+ruleDay+=GregorianCalendar.DaysInMonth[ruleMonth];
+if (ruleMonth == Calendar.FEBRUARY && isLeapYear(year)) {
+ruleDay++;
+}
+}
+}
+if (month == ruleMonth) {
+if (ruleDay < day || ruleDay == day && time >= ruleTime) {
+return rawOffset;
+}
+}
+ else if (nextMonth != ruleMonth) {
+return rawOffset;
+}
+}
+return rawOffset + dstSavings;
 }

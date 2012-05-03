@@ -1,8 +1,4 @@
 {
-  SecurityManager sm=System.getSecurityManager();
-  if (sm != null) {
-    sm.checkSecurityAccess("removeProviderProperty." + name);
-  }
   if (key instanceof String && ((String)key).startsWith("Provider.")) {
     return null;
   }
@@ -11,6 +7,9 @@
   }
   if (changedProperties != null && changedProperties.remove(key) == null) {
     removeFromPropertyServiceTable(key);
+    if (changedProperties.size() == 0) {
+      changedProperties=null;
+    }
   }
   return super.remove(key);
 }

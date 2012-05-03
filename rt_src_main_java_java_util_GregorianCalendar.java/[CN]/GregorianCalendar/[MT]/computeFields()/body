@@ -1,11 +1,11 @@
 {
-  int zoneOffset=getTimeZone().getRawOffset();
-  if (!isSet[ZONE_OFFSET]) {
-    fields[ZONE_OFFSET]=zoneOffset;
-  }
+  TimeZone timeZone=getTimeZone();
+  int dstOffset=timeZone.inDaylightTime(new Date(time)) ? timeZone.getDSTSavings() : 0;
+  int zoneOffset=timeZone.getRawOffset();
+  fields[DST_OFFSET]=dstOffset;
+  fields[ZONE_OFFSET]=zoneOffset;
   int millis=(int)(time % 86400000);
   int savedMillis=millis;
-  int dstOffset=fields[DST_OFFSET];
   int offset=zoneOffset + dstOffset;
   long newTime=time + offset;
   if (time > 0L && newTime < 0L && offset > 0) {
@@ -37,8 +37,8 @@
     fields[AM_PM]=fields[HOUR_OF_DAY] > 11 ? 1 : 0;
     fields[HOUR]=fields[HOUR_OF_DAY] % 12;
     long newTimeAdjusted=newTime;
-    if (getTimeZone().useDaylightTime()) {
-      int dstSavings=((SimpleTimeZone)getTimeZone()).getDSTSavings();
+    if (timeZone.useDaylightTime()) {
+      int dstSavings=timeZone.getDSTSavings();
       newTimeAdjusted+=(dstOffset == 0) ? dstSavings : -dstSavings;
     }
     if (newTime > 0L && newTimeAdjusted < 0L && dstOffset == 0) {
@@ -55,7 +55,7 @@
   for (int i=0; i < FIELD_COUNT; i++) {
     isSet[i]=true;
   }
-  if (!isCached && newTime != 0x7fffffffffffffffL && newTime != 0x8000000000000000L && (!getTimeZone().useDaylightTime() || getTimeZone() instanceof SimpleTimeZone)) {
+  if (!isCached && newTime != 0x7fffffffffffffffL && newTime != 0x8000000000000000L && (!timeZone.useDaylightTime() || timeZone instanceof SimpleTimeZone)) {
     int cacheMillis=0;
     cachedFields[0]=fields[YEAR];
     cachedFields[1]=fields[MONTH];

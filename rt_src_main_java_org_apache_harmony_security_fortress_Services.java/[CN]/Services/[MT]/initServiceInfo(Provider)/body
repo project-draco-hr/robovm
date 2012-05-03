@@ -1,21 +1,15 @@
 {
-  Provider.Service serv;
-  String key;
-  String type;
-  String alias;
-  StringBuilder sb=new StringBuilder(128);
-  for (Iterator<Provider.Service> it1=p.getServices().iterator(); it1.hasNext(); ) {
-    serv=it1.next();
-    type=serv.getType();
-    sb.delete(0,sb.length());
-    key=sb.append(type).append(".").append(Util.toUpperCase(serv.getAlgorithm())).toString();
+  for (  Provider.Service serv : p.getServices()) {
+    String type=serv.getType();
+    if (secureRandom == null && type.equals("SecureRandom")) {
+      secureRandom=serv;
+    }
+    String key=type + "." + serv.getAlgorithm().toUpperCase(Locale.US);
     if (!services.containsKey(key)) {
       services.put(key,serv);
     }
-    for (Iterator<String> it2=Engine.door.getAliases(serv); it2.hasNext(); ) {
-      alias=it2.next();
-      sb.delete(0,sb.length());
-      key=sb.append(type).append(".").append(Util.toUpperCase(alias)).toString();
+    for (    String alias : Engine.door.getAliases(serv)) {
+      key=type + "." + alias.toUpperCase(Locale.US);
       if (!services.containsKey(key)) {
         services.put(key,serv);
       }

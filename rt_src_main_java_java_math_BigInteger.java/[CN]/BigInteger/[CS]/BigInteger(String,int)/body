@@ -1,12 +1,24 @@
 {
-  if (val == null) {
-    throw new NullPointerException();
+  if (value == null) {
+    throw new NullPointerException("value == null");
   }
-  if ((radix < Character.MIN_RADIX) || (radix > Character.MAX_RADIX)) {
-    throw new NumberFormatException(Messages.getString("math.11"));
+  if (radix == 10) {
+    BigInt bigInt=new BigInt();
+    bigInt.putDecString(value);
+    setBigInt(bigInt);
   }
-  if (val.length() == 0) {
-    throw new NumberFormatException(Messages.getString("math.12"));
+ else   if (radix == 16) {
+    BigInt bigInt=new BigInt();
+    bigInt.putHexString(value);
+    setBigInt(bigInt);
   }
-  setFromString(this,val,radix);
+ else {
+    if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX) {
+      throw new NumberFormatException("Invalid radix: " + radix);
+    }
+    if (value.isEmpty()) {
+      throw new NumberFormatException("value.isEmpty()");
+    }
+    BigInteger.parseFromString(this,value,radix);
+  }
 }

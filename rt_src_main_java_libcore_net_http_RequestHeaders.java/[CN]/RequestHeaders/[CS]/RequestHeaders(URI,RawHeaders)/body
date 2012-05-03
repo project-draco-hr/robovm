@@ -1,0 +1,73 @@
+{
+  this.uri=uri;
+  this.headers=headers;
+  HeaderParser.CacheControlHandler handler=new HeaderParser.CacheControlHandler(){
+    @Override public void handle(    String directive,    String parameter){
+      if (directive.equalsIgnoreCase("no-cache")) {
+        noCache=true;
+      }
+ else       if (directive.equalsIgnoreCase("max-age")) {
+        maxAgeSeconds=HeaderParser.parseSeconds(parameter);
+      }
+ else       if (directive.equalsIgnoreCase("max-stale")) {
+        maxStaleSeconds=HeaderParser.parseSeconds(parameter);
+      }
+ else       if (directive.equalsIgnoreCase("min-fresh")) {
+        minFreshSeconds=HeaderParser.parseSeconds(parameter);
+      }
+ else       if (directive.equalsIgnoreCase("only-if-cached")) {
+        onlyIfCached=true;
+      }
+    }
+  }
+;
+  for (int i=0; i < headers.length(); i++) {
+    String fieldName=headers.getFieldName(i);
+    String value=headers.getValue(i);
+    if ("Cache-Control".equalsIgnoreCase(fieldName)) {
+      HeaderParser.parseCacheControl(value,handler);
+    }
+ else     if ("Pragma".equalsIgnoreCase(fieldName)) {
+      if (value.equalsIgnoreCase("no-cache")) {
+        noCache=true;
+      }
+    }
+ else     if ("If-None-Match".equalsIgnoreCase(fieldName)) {
+      ifNoneMatch=value;
+    }
+ else     if ("If-Modified-Since".equalsIgnoreCase(fieldName)) {
+      ifModifiedSince=value;
+    }
+ else     if ("Authorization".equalsIgnoreCase(fieldName)) {
+      hasAuthorization=true;
+    }
+ else     if ("Content-Length".equalsIgnoreCase(fieldName)) {
+      try {
+        contentLength=Integer.parseInt(value);
+      }
+ catch (      NumberFormatException ignored) {
+      }
+    }
+ else     if ("Transfer-Encoding".equalsIgnoreCase(fieldName)) {
+      transferEncoding=value;
+    }
+ else     if ("User-Agent".equalsIgnoreCase(fieldName)) {
+      userAgent=value;
+    }
+ else     if ("Host".equalsIgnoreCase(fieldName)) {
+      host=value;
+    }
+ else     if ("Connection".equalsIgnoreCase(fieldName)) {
+      connection=value;
+    }
+ else     if ("Accept-Encoding".equalsIgnoreCase(fieldName)) {
+      acceptEncoding=value;
+    }
+ else     if ("Content-Type".equalsIgnoreCase(fieldName)) {
+      contentType=value;
+    }
+ else     if ("Proxy-Authorization".equalsIgnoreCase(fieldName)) {
+      proxyAuthorization=value;
+    }
+  }
+}

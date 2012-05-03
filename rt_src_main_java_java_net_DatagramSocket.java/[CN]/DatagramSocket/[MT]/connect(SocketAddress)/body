@@ -1,32 +1,20 @@
 {
-  if (remoteAddr == null) {
-    throw new IllegalArgumentException(Messages.getString("luni.5D"));
+  if (peer == null) {
+    throw new IllegalArgumentException("peer == null");
   }
-  if (!(remoteAddr instanceof InetSocketAddress)) {
-    throw new IllegalArgumentException(Messages.getString("luni.49",remoteAddr.getClass()));
+  if (!(peer instanceof InetSocketAddress)) {
+    throw new IllegalArgumentException("peer not an InetSocketAddress: " + peer.getClass());
   }
-  InetSocketAddress inetAddr=(InetSocketAddress)remoteAddr;
-  if (inetAddr.getAddress() == null) {
-    throw new SocketException(Messages.getString("luni.1A",inetAddr.getHostName()));
+  InetSocketAddress isa=(InetSocketAddress)peer;
+  if (isa.getAddress() == null) {
+    throw new SocketException("Host is unresolved: " + isa.getHostName());
   }
 synchronized (lock) {
-    checkClosedAndBind(true);
-    SecurityManager security=System.getSecurityManager();
-    if (security != null) {
-      if (inetAddr.getAddress().isMulticastAddress()) {
-        security.checkMulticast(inetAddr.getAddress());
-      }
- else {
-        security.checkConnect(inetAddr.getAddress().getHostName(),inetAddr.getPort());
-      }
-    }
-    try {
-      impl.connect(inetAddr.getAddress(),inetAddr.getPort());
-    }
- catch (    Exception e) {
-    }
-    address=inetAddr.getAddress();
-    port=inetAddr.getPort();
-    isConnected=true;
+    checkOpen();
+    ensureBound();
+    this.address=isa.getAddress();
+    this.port=isa.getPort();
+    this.isConnected=true;
+    impl.connect(address,port);
   }
 }

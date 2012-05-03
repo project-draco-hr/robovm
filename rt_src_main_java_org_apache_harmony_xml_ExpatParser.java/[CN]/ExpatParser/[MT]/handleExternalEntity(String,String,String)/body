@@ -1,0 +1,32 @@
+{
+  EntityResolver entityResolver=xmlReader.entityResolver;
+  if (entityResolver == null) {
+    return;
+  }
+  if (this.systemId != null) {
+    try {
+      URI systemUri=new URI(systemId);
+      if (!systemUri.isAbsolute() && !systemUri.isOpaque()) {
+        URI baseUri=new URI(this.systemId);
+        systemUri=baseUri.resolve(systemUri);
+        systemId=systemUri.toString();
+      }
+    }
+ catch (    Exception e) {
+      System.logI("Could not resolve '" + systemId + "' relative to"+ " '"+ this.systemId+ "' at "+ locator,e);
+    }
+  }
+  InputSource inputSource=entityResolver.resolveEntity(publicId,systemId);
+  if (inputSource == null) {
+    return;
+  }
+  String encoding=pickEncoding(inputSource);
+  int pointer=createEntityParser(this.pointer,context);
+  try {
+    EntityParser entityParser=new EntityParser(encoding,xmlReader,pointer,inputSource.getPublicId(),inputSource.getSystemId());
+    parseExternalEntity(entityParser,inputSource);
+  }
+  finally {
+    releaseParser(pointer);
+  }
+}

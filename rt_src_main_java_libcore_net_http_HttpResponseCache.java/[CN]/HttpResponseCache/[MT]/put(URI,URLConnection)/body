@@ -1,0 +1,48 @@
+{
+  if (!(urlConnection instanceof HttpURLConnection)) {
+    return null;
+  }
+  HttpURLConnection httpConnection=(HttpURLConnection)urlConnection;
+  String requestMethod=httpConnection.getRequestMethod();
+  String key=uriToKey(uri);
+  if (requestMethod.equals(HttpEngine.POST) || requestMethod.equals(HttpEngine.PUT) || requestMethod.equals(HttpEngine.DELETE)) {
+    try {
+      cache.remove(key);
+    }
+ catch (    IOException ignored) {
+    }
+    return null;
+  }
+ else   if (!requestMethod.equals(HttpEngine.GET)) {
+    return null;
+  }
+  HttpEngine httpEngine=getHttpEngine(httpConnection);
+  if (httpEngine == null) {
+    return null;
+  }
+  ResponseHeaders response=httpEngine.getResponseHeaders();
+  if (response.hasVaryAll()) {
+    return null;
+  }
+  RawHeaders varyHeaders=httpEngine.getRequestHeaders().getHeaders().getAll(response.getVaryFields());
+  Entry entry=new Entry(uri,varyHeaders,httpConnection);
+  DiskLruCache.Editor editor=null;
+  try {
+    editor=cache.edit(key);
+    if (editor == null) {
+      return null;
+    }
+    entry.writeTo(editor);
+    return new CacheRequestImpl(editor);
+  }
+ catch (  IOException e) {
+    try {
+      if (editor != null) {
+        editor.abort();
+      }
+    }
+ catch (    IOException ignored) {
+    }
+    return null;
+  }
+}

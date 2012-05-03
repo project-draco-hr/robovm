@@ -1,0 +1,26 @@
+{
+  NodeImpl target=getNamespacingElement();
+  for (NodeImpl node=target; node != null; node=node.getContainingElement()) {
+    String nodePrefix=node.getPrefix();
+    if (node.getNamespaceURI() != null) {
+      if (prefix == null ? nodePrefix == null : prefix.equals(nodePrefix)) {
+        return node.getNamespaceURI();
+      }
+    }
+    if (!node.hasAttributes()) {
+      continue;
+    }
+    NamedNodeMap attributes=node.getAttributes();
+    for (int i=0, length=attributes.getLength(); i < length; i++) {
+      Node attr=attributes.item(i);
+      if (!"http://www.w3.org/2000/xmlns/".equals(attr.getNamespaceURI())) {
+        continue;
+      }
+      if (prefix == null ? "xmlns".equals(attr.getNodeName()) : "xmlns".equals(attr.getPrefix()) && prefix.equals(attr.getLocalName())) {
+        String value=attr.getNodeValue();
+        return value.length() > 0 ? value : null;
+      }
+    }
+  }
+  return null;
+}

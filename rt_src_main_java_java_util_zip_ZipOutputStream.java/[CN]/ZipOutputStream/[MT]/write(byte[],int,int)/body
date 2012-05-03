@@ -1,15 +1,13 @@
 {
-  if ((off < 0 || (nbytes < 0) || off > buffer.length) || (buffer.length - off < nbytes)) {
-    throw new IndexOutOfBoundsException();
-  }
+  Arrays.checkOffsetAndCount(buffer.length,offset,byteCount);
   if (currentEntry == null) {
-    throw new ZipException(Messages.getString("archive.2C"));
+    throw new ZipException("No active entry");
   }
   if (currentEntry.getMethod() == STORED) {
-    out.write(buffer,off,nbytes);
+    out.write(buffer,offset,byteCount);
   }
  else {
-    super.write(buffer,off,nbytes);
+    super.write(buffer,offset,byteCount);
   }
-  crc.update(buffer,off,nbytes);
+  crc.update(buffer,offset,byteCount);
 }

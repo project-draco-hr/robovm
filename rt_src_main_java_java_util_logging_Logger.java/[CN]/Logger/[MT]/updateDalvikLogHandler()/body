@@ -1,0 +1,25 @@
+{
+  DalvikLogHandler newLogHandler=GENERAL_LOG_HANDLER;
+  Logger parent=this.parent;
+  if (getClass() != Logger.class) {
+  }
+ else   if (parent == null) {
+    Iterator<Handler> h=handlers.iterator();
+    if (h.hasNext()) {
+      Handler firstHandler=h.next();
+      if (!h.hasNext() && firstHandler instanceof DalvikLogHandler) {
+        newLogHandler=(DalvikLogHandler)firstHandler;
+      }
+    }
+  }
+ else   if (handlers.isEmpty() && notifyParentHandlers) {
+    newLogHandler=parent.dalvikLogHandler;
+  }
+  if (newLogHandler == this.dalvikLogHandler) {
+    return;
+  }
+  this.dalvikLogHandler=newLogHandler;
+  for (  Logger logger : children) {
+    logger.updateDalvikLogHandler();
+  }
+}

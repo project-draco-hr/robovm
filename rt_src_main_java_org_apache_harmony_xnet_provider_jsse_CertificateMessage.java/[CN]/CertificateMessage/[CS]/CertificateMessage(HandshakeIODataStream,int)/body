@@ -17,14 +17,14 @@
     fatalAlert(AlertProtocol.INTERNAL_ERROR,"INTERNAL ERROR",e);
     return;
   }
-  Vector<Certificate> certs_vector=new Vector<Certificate>();
+  ArrayList<X509Certificate> certsList=new ArrayList<X509Certificate>();
   int size=0;
   int enc_size=0;
   while (l > 0) {
     size=in.readUint24();
     l-=3;
     try {
-      certs_vector.add(cf.generateCertificate(in));
+      certsList.add((X509Certificate)cf.generateCertificate(in));
     }
  catch (    CertificateException e) {
       fatalAlert(AlertProtocol.DECODE_ERROR,"DECODE ERROR",e);
@@ -32,10 +32,7 @@
     l-=size;
     enc_size+=size;
   }
-  certs=new X509Certificate[certs_vector.size()];
-  for (int i=0; i < certs.length; i++) {
-    certs[i]=(X509Certificate)certs_vector.elementAt(i);
-  }
+  certs=certsList.toArray(new X509Certificate[certsList.size()]);
   this.length=3 + 3 * certs.length + enc_size;
   if (this.length != length) {
     fatalAlert(AlertProtocol.DECODE_ERROR,"DECODE ERROR: incorrect CertificateMessage");

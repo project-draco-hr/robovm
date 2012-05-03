@@ -1,34 +1,22 @@
 {
-  super();
-  int options=0;
-  fd=new FileDescriptor();
+  int flags;
   if (mode.equals("r")) {
-    isReadOnly=true;
-    fd.readOnly=true;
-    options=IFileSystem.O_RDONLY;
+    flags=O_RDONLY;
   }
  else   if (mode.equals("rw") || mode.equals("rws") || mode.equals("rwd")) {
-    isReadOnly=false;
-    options=IFileSystem.O_RDWR;
+    flags=O_RDWR | O_CREAT;
     if (mode.equals("rws")) {
       syncMetadata=true;
     }
  else     if (mode.equals("rwd")) {
-      options=IFileSystem.O_RDWRSYNC;
+      flags|=O_SYNC;
     }
   }
  else {
-    throw new IllegalArgumentException(Messages.getString("luni.A2"));
+    throw new IllegalArgumentException("Invalid mode: " + mode);
   }
-  SecurityManager security=System.getSecurityManager();
-  if (security != null) {
-    security.checkRead(file.getPath());
-    if (!isReadOnly) {
-      security.checkWrite(file.getPath());
-    }
-  }
-  fd.descriptor=fileSystem.open(file.properPath(true),options);
-  channel=FileChannelFactory.getFileChannel(this,fd.descriptor,options);
+  this.mode=flags;
+  this.fd=IoBridge.open(file.getAbsolutePath(),flags);
   if (syncMetadata) {
     try {
       fd.sync();
@@ -36,4 +24,5 @@
  catch (    IOException e) {
     }
   }
+  guard.open("close");
 }

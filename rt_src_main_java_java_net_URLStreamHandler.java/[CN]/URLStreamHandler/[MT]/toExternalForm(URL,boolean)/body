@@ -1,0 +1,35 @@
+{
+  StringBuilder result=new StringBuilder();
+  result.append(url.getProtocol());
+  result.append(':');
+  String authority=url.getAuthority();
+  if (authority != null) {
+    result.append("//");
+    if (escapeIllegalCharacters) {
+      URI.AUTHORITY_ENCODER.appendPartiallyEncoded(result,authority);
+    }
+ else {
+      result.append(authority);
+    }
+  }
+  String fileAndQuery=url.getFile();
+  if (fileAndQuery != null) {
+    if (escapeIllegalCharacters) {
+      URI.FILE_AND_QUERY_ENCODER.appendPartiallyEncoded(result,fileAndQuery);
+    }
+ else {
+      result.append(fileAndQuery);
+    }
+  }
+  String ref=url.getRef();
+  if (ref != null) {
+    result.append('#');
+    if (escapeIllegalCharacters) {
+      URI.ALL_LEGAL_ENCODER.appendPartiallyEncoded(result,ref);
+    }
+ else {
+      result.append(ref);
+    }
+  }
+  return result.toString();
+}

@@ -3,10 +3,20 @@
   for (int i=0; i <= maxOffset; i++) {
     Format format=formats[i];
     if (format instanceof DecimalFormat) {
-      formats[i]=new DecimalFormat(((DecimalFormat)format).toPattern(),new DecimalFormatSymbols(locale));
+      try {
+        formats[i]=new DecimalFormat(((DecimalFormat)format).toPattern(),new DecimalFormatSymbols(locale));
+      }
+ catch (      NullPointerException npe) {
+        formats[i]=null;
+      }
     }
  else     if (format instanceof SimpleDateFormat) {
-      formats[i]=new SimpleDateFormat(((SimpleDateFormat)format).toPattern(),locale);
+      try {
+        formats[i]=new SimpleDateFormat(((SimpleDateFormat)format).toPattern(),locale);
+      }
+ catch (      NullPointerException npe) {
+        formats[i]=null;
+      }
     }
   }
 }

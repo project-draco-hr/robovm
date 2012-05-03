@@ -1,0 +1,18 @@
+{
+  if (cookies.isEmpty()) {
+    return Collections.emptyMap();
+  }
+  StringBuilder result=new StringBuilder();
+  int minVersion=1;
+  for (  HttpCookie cookie : cookies) {
+    minVersion=Math.min(minVersion,cookie.getVersion());
+  }
+  if (minVersion == 1) {
+    result.append("$Version=\"1\"; ");
+  }
+  result.append(cookies.get(0).toString());
+  for (int i=1; i < cookies.size(); i++) {
+    result.append("; ").append(cookies.get(i).toString());
+  }
+  return Collections.singletonMap("Cookie",Collections.singletonList(result.toString()));
+}

@@ -1,25 +1,3 @@
 {
-  if (n <= 0) {
-    return 0;
-  }
-  long skipped=0;
-  int toRead=n < 4096 ? (int)n : 4096;
-  byte[] localBuf=skipBuf;
-  if (localBuf == null || localBuf.length < toRead) {
-    skipBuf=localBuf=new byte[toRead];
-  }
-  while (skipped < n) {
-    int read=read(localBuf,0,toRead);
-    if (read == -1) {
-      return skipped;
-    }
-    skipped+=read;
-    if (read < toRead) {
-      return skipped;
-    }
-    if (n - skipped < toRead) {
-      toRead=(int)(n - skipped);
-    }
-  }
-  return skipped;
+  return Streams.skipByReading(this,byteCount);
 }

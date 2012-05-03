@@ -1,9 +1,24 @@
 {
   if (uri == null || responseHeaders == null) {
-    throw new IllegalArgumentException(Msg.getString("KA019"));
+    throw new IllegalArgumentException();
   }
   List<HttpCookie> cookies=parseCookie(responseHeaders);
   for (  HttpCookie cookie : cookies) {
+    if (cookie.getDomain() == null) {
+      cookie.setDomain(uri.getHost());
+    }
+    if (cookie.getPath() == null) {
+      cookie.setPath(pathToCookiePath(uri.getPath()));
+    }
+ else     if (!HttpCookie.pathMatches(cookie,uri)) {
+      continue;
+    }
+    if ("".equals(cookie.getPortlist())) {
+      cookie.setPortlist(Integer.toString(uri.getEffectivePort()));
+    }
+ else     if (cookie.getPortlist() != null && !HttpCookie.portMatches(cookie,uri)) {
+      continue;
+    }
     if (policy.shouldAccept(uri,cookie)) {
       store.add(uri,cookie);
     }

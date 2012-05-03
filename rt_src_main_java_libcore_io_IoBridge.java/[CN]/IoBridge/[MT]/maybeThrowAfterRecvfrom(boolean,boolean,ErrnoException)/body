@@ -1,0 +1,21 @@
+{
+  if (isRead) {
+    if (errnoException.errno == EAGAIN || errnoException.errno == EWOULDBLOCK) {
+      return 0;
+    }
+ else {
+      throw errnoException.rethrowAsSocketException();
+    }
+  }
+ else {
+    if (isConnected && errnoException.errno == ECONNREFUSED) {
+      throw new PortUnreachableException("",errnoException);
+    }
+ else     if (errnoException.errno == EAGAIN || errnoException.errno == EWOULDBLOCK) {
+      throw new SocketTimeoutException(errnoException);
+    }
+ else {
+      throw errnoException.rethrowAsSocketException();
+    }
+  }
+}

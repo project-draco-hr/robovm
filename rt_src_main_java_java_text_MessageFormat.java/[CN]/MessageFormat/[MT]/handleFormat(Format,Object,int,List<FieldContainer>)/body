@@ -1,0 +1,17 @@
+{
+  if (fields == null) {
+    return;
+  }
+  AttributedCharacterIterator iterator=format.formatToCharacterIterator(arg);
+  while (iterator.getIndex() != iterator.getEndIndex()) {
+    int start=iterator.getRunStart();
+    int end=iterator.getRunLimit();
+    Iterator<?> it=iterator.getAttributes().keySet().iterator();
+    while (it.hasNext()) {
+      AttributedCharacterIterator.Attribute attribute=(AttributedCharacterIterator.Attribute)it.next();
+      Object value=iterator.getAttribute(attribute);
+      fields.add(new FieldContainer(begin + start,begin + end,attribute,value));
+    }
+    iterator.setIndex(end);
+  }
+}

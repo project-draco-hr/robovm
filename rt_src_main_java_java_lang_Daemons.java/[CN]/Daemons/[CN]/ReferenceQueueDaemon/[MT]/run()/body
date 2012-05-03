@@ -1,0 +1,18 @@
+{
+  while (isRunning()) {
+    Reference<?> list;
+    try {
+synchronized (ReferenceQueue.class) {
+        while (ReferenceQueue.unenqueued == null) {
+          ReferenceQueue.class.wait();
+        }
+        list=ReferenceQueue.unenqueued;
+        ReferenceQueue.unenqueued=null;
+      }
+    }
+ catch (    InterruptedException e) {
+      continue;
+    }
+    enqueue(list);
+  }
+}

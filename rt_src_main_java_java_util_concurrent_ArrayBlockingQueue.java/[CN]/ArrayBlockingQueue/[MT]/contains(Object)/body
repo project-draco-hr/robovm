@@ -1,15 +1,10 @@
 {
   if (o == null)   return false;
-  final E[] items=this.items;
+  final Object[] items=this.items;
   final ReentrantLock lock=this.lock;
   lock.lock();
   try {
-    int i=takeIndex;
-    int k=0;
-    while (k++ < count) {
-      if (o.equals(items[i]))       return true;
-      i=inc(i);
-    }
+    for (int i=takeIndex, k=count; k > 0; i=inc(i), k--)     if (o.equals(items[i]))     return true;
     return false;
   }
   finally {

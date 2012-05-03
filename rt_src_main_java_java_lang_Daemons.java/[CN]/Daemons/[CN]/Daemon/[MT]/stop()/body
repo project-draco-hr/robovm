@@ -1,0 +1,19 @@
+{
+  Thread threadToStop;
+synchronized (this) {
+    threadToStop=thread;
+    thread=null;
+  }
+  if (threadToStop == null) {
+    throw new IllegalStateException("not running");
+  }
+  threadToStop.interrupt();
+  while (true) {
+    try {
+      threadToStop.join();
+      return;
+    }
+ catch (    InterruptedException ignored) {
+    }
+  }
+}

@@ -5,10 +5,10 @@
   int copySize=(size > trailerSize) ? trailerSize : size;
   System.arraycopy(buf,len - size,b,0,copySize);
   readFully(b,copySize,trailerSize - copySize);
-  if (getLong(b,0) != crc.getValue()) {
-    throw new IOException(Messages.getString("archive.20"));
+  if (Memory.peekInt(b,0,ByteOrder.LITTLE_ENDIAN) != (int)crc.getValue()) {
+    throw new IOException("CRC mismatch");
   }
-  if ((int)getLong(b,4) != inf.getTotalOut()) {
-    throw new IOException(Messages.getString("archive.21"));
+  if (Memory.peekInt(b,4,ByteOrder.LITTLE_ENDIAN) != inf.getTotalOut()) {
+    throw new IOException("Size mismatch");
   }
 }

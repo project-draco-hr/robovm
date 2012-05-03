@@ -1,0 +1,19 @@
+{
+  Arrays.checkOffsetAndCount(bytes.length,byteOffset,byteCount);
+  if (byteCount == 0) {
+    return 0;
+  }
+  try {
+    int readCount=Libcore.os.read(fd,bytes,byteOffset,byteCount);
+    if (readCount == 0) {
+      return -1;
+    }
+    return readCount;
+  }
+ catch (  ErrnoException errnoException) {
+    if (errnoException.errno == EAGAIN) {
+      return 0;
+    }
+    throw errnoException.rethrowAsIOException();
+  }
+}

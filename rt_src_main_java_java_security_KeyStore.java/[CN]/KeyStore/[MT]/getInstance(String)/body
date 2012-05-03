@@ -1,14 +1,12 @@
 {
   if (type == null) {
-    throw new NullPointerException(Messages.getString("security.07"));
+    throw new NullPointerException();
   }
-synchronized (engine) {
-    try {
-      engine.getInstance(type,null);
-      return new KeyStore((KeyStoreSpi)engine.spi,engine.provider,type);
-    }
- catch (    NoSuchAlgorithmException e) {
-      throw new KeyStoreException(e.getMessage());
-    }
+  try {
+    Engine.SpiAndProvider sap=ENGINE.getInstance(type,null);
+    return new KeyStore((KeyStoreSpi)sap.spi,sap.provider,type);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    throw new KeyStoreException(e);
   }
 }

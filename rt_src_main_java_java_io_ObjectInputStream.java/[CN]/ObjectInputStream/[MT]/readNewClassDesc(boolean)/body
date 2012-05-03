@@ -1,6 +1,6 @@
 {
   primitiveData=input;
-  Integer oldHandle=descriptorHandle;
+  int oldHandle=descriptorHandle;
   descriptorHandle=nextHandle();
   ObjectStreamClass newClassDesc=readClassDescriptor();
   registerObjectRead(newClassDesc,descriptorHandle,unshared);
@@ -16,7 +16,7 @@
     }
   }
   ObjectStreamField[] fields=newClassDesc.getLoadFields();
-  fields=(null == fields ? new ObjectStreamField[]{} : fields);
+  fields=(fields == null) ? ObjectStreamClass.NO_FIELDS : fields;
   ClassLoader loader=newClassDesc.forClass() == null ? callerClassLoader : newClassDesc.forClass().getClassLoader();
   for (  ObjectStreamField element : fields) {
     element.resolve(loader);

@@ -1,6 +1,18 @@
 {
-  if (0 == addresses.size()) {
-    return new byte[0];
+  try {
+    String s=IoUtils.readFileAsString("/sys/class/net/" + name + "/address");
+    byte[] result=new byte[s.length() / 3];
+    for (int i=0; i < result.length; ++i) {
+      result[i]=(byte)Integer.parseInt(s.substring(3 * i,3 * i + 2),16);
+    }
+    for (int i=0; i < result.length; ++i) {
+      if (result[i] != 0) {
+        return result;
+      }
+    }
+    return null;
   }
-  return getHardwareAddressImpl(name,interfaceIndex);
+ catch (  Exception ex) {
+    throw rethrowAsSocketException(ex);
+  }
 }

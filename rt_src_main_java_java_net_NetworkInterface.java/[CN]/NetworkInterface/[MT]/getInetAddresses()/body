@@ -1,29 +1,3 @@
 {
-  if (0 == addresses.size()) {
-    return new Vector<InetAddress>(0).elements();
-  }
-  Vector<InetAddress> accessibleAddresses=new Vector<InetAddress>(addresses.size());
-  SecurityManager security=System.getSecurityManager();
-  if (security == null) {
-    return (new Vector<InetAddress>(addresses)).elements();
-  }
-  for (  InetAddress element : addresses) {
-    if (security != null) {
-      try {
-        String hostName=element.getHostName();
-        if (hostName.contains("::")) {
-          hostName=getFullFormOfCompressedIPV6Address(hostName);
-        }
-        security.checkConnect(hostName,CHECK_CONNECT_NO_PORT);
-        accessibleAddresses.add(element);
-      }
- catch (      SecurityException e) {
-      }
-    }
-  }
-  Enumeration<InetAddress> theAccessibleElements=accessibleAddresses.elements();
-  if (theAccessibleElements.hasMoreElements()) {
-    return accessibleAddresses.elements();
-  }
-  return new Vector<InetAddress>(0).elements();
+  return Collections.enumeration(addresses);
 }

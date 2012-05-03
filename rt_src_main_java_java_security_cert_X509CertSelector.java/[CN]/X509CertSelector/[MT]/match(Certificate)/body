@@ -118,20 +118,18 @@ catch (    CertificateNotYetValidException e) {
       if (bytes == null) {
         return false;
       }
-      List sans=((GeneralNames)GeneralNames.ASN1.decode(bytes)).getNames();
+      List<GeneralName> sans=((GeneralNames)GeneralNames.ASN1.decode(bytes)).getNames();
       if ((sans == null) || (sans.size() == 0)) {
         return false;
       }
       boolean[][] map=new boolean[9][];
       for (int i=0; i < 9; i++) {
-        map[i]=(subjectAltNames[i] == null) ? new boolean[0] : new boolean[subjectAltNames[i].size()];
+        map[i]=(subjectAltNames[i] == null) ? EmptyArray.BOOLEAN : new boolean[subjectAltNames[i].size()];
       }
-      Iterator it=sans.iterator();
-      while (it.hasNext()) {
-        GeneralName name=(GeneralName)it.next();
+      for (      GeneralName name : sans) {
         int tag=name.getTag();
         for (int i=0; i < map[tag].length; i++) {
-          if (((GeneralName)subjectAltNames[tag].get(i)).equals(name)) {
+          if (subjectAltNames[tag].get(i).equals(name)) {
             if (!matchAllNames) {
               break PASSED;
             }
@@ -169,10 +167,9 @@ catch (    CertificateNotYetValidException e) {
       return true;
     }
     PASSED:     try {
-      List policyInformations=((CertificatePolicies)CertificatePolicies.ASN1.decode(bytes)).getPolicyInformations();
-      Iterator it=policyInformations.iterator();
-      while (it.hasNext()) {
-        if (policies.contains(((PolicyInformation)it.next()).getPolicyIdentifier())) {
+      List<PolicyInformation> policyInformations=((CertificatePolicies)CertificatePolicies.ASN1.decode(bytes)).getPolicyInformations();
+      for (      PolicyInformation policyInformation : policyInformations) {
+        if (policies.contains(policyInformation.getPolicyIdentifier())) {
           break PASSED;
         }
       }

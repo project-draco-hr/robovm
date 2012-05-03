@@ -1,28 +1,15 @@
 {
-  ArrayList<URL> result=AccessController.doPrivileged(new PrivilegedAction<ArrayList<URL>>(){
-    public ArrayList<URL> run(){
-      ArrayList<URL> results=new ArrayList<URL>();
-      findResourcesImpl(name,results);
-      return results;
-    }
+  if (name == null) {
+    return null;
   }
-,currentContext);
-  SecurityManager sm;
-  int length=result.size();
-  if (length > 0 && (sm=System.getSecurityManager()) != null) {
-    ArrayList<URL> reduced=new ArrayList<URL>(length);
-    for (int i=0; i < length; i++) {
-      URL url=result.get(i);
-      try {
-        sm.checkPermission(url.openConnection().getPermission());
-        reduced.add(url);
-      }
- catch (      IOException e) {
-      }
-catch (      SecurityException e) {
-      }
+  ArrayList<URL> result=new ArrayList<URL>();
+  int n=0;
+  while (true) {
+    URLHandler handler=getHandler(n++);
+    if (handler == null) {
+      break;
     }
-    result=reduced;
+    handler.findResources(name,result);
   }
   return Collections.enumeration(result);
 }

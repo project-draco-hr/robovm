@@ -1,0 +1,21 @@
+{
+  int cnt=0;
+  int e, reason;
+  while ((e=NativeBN.ERR_get_error()) != 0) {
+    reason=e & 255;
+    if (reason == 103) {
+      throw new ArithmeticException("BigInteger division by zero");
+    }
+    if (reason == 108) {
+      throw new ArithmeticException("BigInteger not invertible");
+    }
+    if (reason == 65) {
+      throw new OutOfMemoryError();
+    }
+    sb.append(e).append(": ");
+    String s=NativeBN.ERR_error_string(e);
+    sb.append(s);
+    cnt++;
+  }
+  return cnt;
+}

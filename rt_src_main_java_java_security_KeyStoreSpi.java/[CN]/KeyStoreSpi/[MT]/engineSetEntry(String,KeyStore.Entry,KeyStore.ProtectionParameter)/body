@@ -1,6 +1,6 @@
 {
   if (entry == null) {
-    throw new KeyStoreException(Messages.getString("security.39"));
+    throw new KeyStoreException("entry == null");
   }
   if (engineContainsAlias(alias)) {
     engineDeleteEntry(alias);
@@ -16,7 +16,7 @@
       passW=((KeyStore.PasswordProtection)protParam).getPassword();
     }
  catch (    IllegalStateException ee) {
-      throw new KeyStoreException(Messages.getString("security.36"),ee);
+      throw new KeyStoreException("Password was destroyed",ee);
     }
   }
  else {
@@ -29,7 +29,7 @@
       }
     }
  else {
-      throw new KeyStoreException(Messages.getString("security.3A"));
+      throw new KeyStoreException("protParam should be PasswordProtection or " + "CallbackHandlerProtection");
     }
   }
   if (entry instanceof KeyStore.PrivateKeyEntry) {
@@ -42,5 +42,5 @@
     engineSetKeyEntry(alias,skE.getSecretKey(),passW,null);
     return;
   }
-  throw new KeyStoreException(Messages.getString("security.3B",entry.toString()));
+  throw new KeyStoreException("Entry object is neither PrivateKeyObject nor SecretKeyEntry " + "nor TrustedCertificateEntry: " + entry);
 }

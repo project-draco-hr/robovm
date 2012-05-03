@@ -1,0 +1,27 @@
+{
+  if (right - left + 1 < INSERTION_SORT_THRESHOLD) {
+    for (int i=left + 1; i <= right; i++) {
+      short ai=a[i];
+      int j;
+      for (j=i - 1; j >= left && ai < a[j]; j--) {
+        a[j + 1]=a[j];
+      }
+      a[j + 1]=ai;
+    }
+  }
+ else   if (right - left + 1 > COUNTING_SORT_THRESHOLD_FOR_SHORT_OR_CHAR) {
+    int[] count=new int[NUM_SHORT_VALUES];
+    for (int i=left; i <= right; i++) {
+      count[a[i] - Short.MIN_VALUE]++;
+    }
+    for (int i=0, k=left; i < count.length && k <= right; i++) {
+      short value=(short)(i + Short.MIN_VALUE);
+      for (int s=count[i]; s > 0; s--) {
+        a[k++]=value;
+      }
+    }
+  }
+ else {
+    dualPivotQuicksort(a,left,right);
+  }
+}

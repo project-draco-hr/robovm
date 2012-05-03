@@ -1,21 +1,21 @@
 {
-  if (scheme == null && userinfo == null && host == null && path == null && query == null && fragment == null) {
+  if (scheme == null && userInfo == null && host == null && path == null && query == null && fragment == null) {
     this.path="";
     return;
   }
-  if (scheme != null && path != null && path.length() > 0 && path.charAt(0) != '/') {
-    throw new URISyntaxException(path,Messages.getString("luni.82"));
+  if (scheme != null && path != null && !path.isEmpty() && path.charAt(0) != '/') {
+    throw new URISyntaxException(path,"Relative path");
   }
   StringBuilder uri=new StringBuilder();
   if (scheme != null) {
     uri.append(scheme);
     uri.append(':');
   }
-  if (userinfo != null || host != null || port != -1) {
+  if (userInfo != null || host != null || port != -1) {
     uri.append("//");
   }
-  if (userinfo != null) {
-    uri.append(quoteComponent(userinfo,someLegal));
+  if (userInfo != null) {
+    USER_INFO_ENCODER.appendEncoded(uri,userInfo);
     uri.append('@');
   }
   if (host != null) {
@@ -29,15 +29,15 @@
     uri.append(port);
   }
   if (path != null) {
-    uri.append(quoteComponent(path,"/@" + someLegal));
+    PATH_ENCODER.appendEncoded(uri,path);
   }
   if (query != null) {
     uri.append('?');
-    uri.append(quoteComponent(query,allLegal));
+    ALL_LEGAL_ENCODER.appendEncoded(uri,query);
   }
   if (fragment != null) {
     uri.append('#');
-    uri.append(quoteComponent(fragment,allLegal));
+    ALL_LEGAL_ENCODER.appendEncoded(uri,fragment);
   }
-  new Helper().parseURI(uri.toString(),true);
+  parseURI(uri.toString(),true);
 }

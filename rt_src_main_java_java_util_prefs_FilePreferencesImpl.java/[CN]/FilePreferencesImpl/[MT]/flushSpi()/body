@@ -1,0 +1,24 @@
+{
+  try {
+    if (isRemoved()) {
+      return;
+    }
+    Properties currentPrefs=XMLParser.readXmlPreferences(prefsFile);
+    Iterator<String> it=removed.iterator();
+    while (it.hasNext()) {
+      currentPrefs.remove(it.next());
+    }
+    removed.clear();
+    it=updated.iterator();
+    while (it.hasNext()) {
+      Object key=it.next();
+      currentPrefs.put(key,prefs.get(key));
+    }
+    updated.clear();
+    prefs=currentPrefs;
+    XMLParser.writeXmlPreferences(prefsFile,prefs);
+  }
+ catch (  Exception e) {
+    throw new BackingStoreException(e);
+  }
+}

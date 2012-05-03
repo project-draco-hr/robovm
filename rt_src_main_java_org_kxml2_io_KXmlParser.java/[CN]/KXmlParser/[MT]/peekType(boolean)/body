@@ -1,0 +1,52 @@
+{
+  if (position >= limit && !fillBuffer(1)) {
+    return END_DOCUMENT;
+  }
+switch (buffer[position]) {
+case '&':
+    return ENTITY_REF;
+case '<':
+  if (position + 3 >= limit && !fillBuffer(4)) {
+    throw new XmlPullParserException("Dangling <",this,null);
+  }
+switch (buffer[position + 1]) {
+case '/':
+  return END_TAG;
+case '?':
+if ((position + 5 < limit || fillBuffer(6)) && (buffer[position + 2] == 'x' || buffer[position + 2] == 'X') && (buffer[position + 3] == 'm' || buffer[position + 3] == 'M')&& (buffer[position + 4] == 'l' || buffer[position + 4] == 'L')&& (buffer[position + 5] == ' ')) {
+  return XML_DECLARATION;
+}
+ else {
+  return PROCESSING_INSTRUCTION;
+}
+case '!':
+switch (buffer[position + 2]) {
+case 'D':
+return DOCDECL;
+case '[':
+return CDSECT;
+case '-':
+return COMMENT;
+case 'E':
+switch (buffer[position + 3]) {
+case 'L':
+return ELEMENTDECL;
+case 'N':
+return ENTITYDECL;
+}
+break;
+case 'A':
+return ATTLISTDECL;
+case 'N':
+return NOTATIONDECL;
+}
+throw new XmlPullParserException("Unexpected <!",this,null);
+default :
+return START_TAG;
+}
+case '%':
+return inDeclaration ? PARAMETER_ENTITY_REF : TEXT;
+default :
+return TEXT;
+}
+}

@@ -1,0 +1,22 @@
+{
+  if (cipherSuites == null) {
+    throw new IllegalArgumentException("cipherSuites == null");
+  }
+  for (int i=0; i < cipherSuites.length; i++) {
+    String cipherSuite=cipherSuites[i];
+    if (cipherSuite == null) {
+      throw new IllegalArgumentException("cipherSuites[" + i + "] == null");
+    }
+    if (cipherSuite.equals(TLS_EMPTY_RENEGOTIATION_INFO_SCSV)) {
+      continue;
+    }
+    if (STANDARD_TO_OPENSSL_CIPHER_SUITES.containsKey(cipherSuite)) {
+      continue;
+    }
+    if (OPENSSL_TO_STANDARD_CIPHER_SUITES.containsKey(cipherSuite)) {
+      continue;
+    }
+    throw new IllegalArgumentException("cipherSuite " + cipherSuite + " is not supported.");
+  }
+  return cipherSuites;
+}

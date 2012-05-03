@@ -1,20 +1,19 @@
 {
   if (classDesc == null) {
     writeNull();
-    return null;
+    return -1;
   }
-  Integer handle=null;
+  int handle=-1;
   if (!unshared) {
     handle=dumpCycle(classDesc);
   }
-  if (handle == null) {
+  if (handle == -1) {
     Class<?> classToWrite=classDesc.forClass();
-    Integer previousHandle=null;
+    int previousHandle=-1;
     if (unshared) {
       previousHandle=objectsWritten.get(classDesc);
     }
-    handle=nextHandle();
-    objectsWritten.put(classDesc,handle);
+    handle=registerObjectWritten(classDesc);
     if (classDesc.isProxy()) {
       output.writeByte(TC_PROXYCLASSDESC);
       Class<?>[] interfaces=classToWrite.getInterfaces();

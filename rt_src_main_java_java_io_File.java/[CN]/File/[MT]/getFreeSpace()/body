@@ -1,8 +1,9 @@
 {
-  SecurityManager security=System.getSecurityManager();
-  if (security != null) {
-    security.checkPermission(new RuntimePermission("getFileSystemAttributes"));
-    security.checkRead(path);
+  try {
+    StructStatFs sb=Libcore.os.statfs(path);
+    return sb.f_bfree * sb.f_bsize;
   }
-  return getFreeSpaceImpl(properPath(true));
+ catch (  ErrnoException errnoException) {
+    return 0;
+  }
 }

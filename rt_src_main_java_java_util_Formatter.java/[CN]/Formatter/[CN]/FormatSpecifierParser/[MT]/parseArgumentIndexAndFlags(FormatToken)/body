@@ -1,0 +1,39 @@
+{
+  int position=i;
+  int ch=peek();
+  if (Character.isDigit(ch)) {
+    int number=nextInt();
+    if (peek() == '$') {
+      advance();
+      if (number == FormatToken.UNSET) {
+        throw new MissingFormatArgumentException(getFormatSpecifierText());
+      }
+      token.setArgIndex(Math.max(0,number - 1));
+    }
+ else {
+      if (ch == '0') {
+        i=position;
+      }
+ else {
+        return parseWidth(token,number);
+      }
+    }
+  }
+ else   if (ch == '<') {
+    token.setArgIndex(FormatToken.LAST_ARGUMENT_INDEX);
+    advance();
+  }
+  while (token.setFlag(peek())) {
+    advance();
+  }
+  ch=peek();
+  if (Character.isDigit(ch)) {
+    return parseWidth(token,nextInt());
+  }
+ else   if (ch == '.') {
+    return parsePrecision(token);
+  }
+ else {
+    return parseConversionType(token);
+  }
+}

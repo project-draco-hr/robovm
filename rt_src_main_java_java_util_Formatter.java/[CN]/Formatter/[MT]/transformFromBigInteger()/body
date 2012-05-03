@@ -1,0 +1,51 @@
+{
+  int startIndex=0;
+  StringBuilder result=new StringBuilder();
+  BigInteger bigInt=(BigInteger)arg;
+  char currentConversionType=formatToken.getConversionType();
+  if (bigInt == null) {
+    return transformFromNull();
+  }
+  boolean isNegative=(bigInt.compareTo(BigInteger.ZERO) < 0);
+  if (currentConversionType == 'd') {
+    CharSequence digits=bigInt.toString(10);
+    if (formatToken.flagComma) {
+      digits=insertGrouping(digits);
+    }
+    result.append(digits);
+  }
+ else   if (currentConversionType == 'o') {
+    result.append(bigInt.toString(8));
+  }
+ else {
+    result.append(bigInt.toString(16));
+  }
+  if (formatToken.flagSharp) {
+    startIndex=isNegative ? 1 : 0;
+    if (currentConversionType == 'o') {
+      result.insert(startIndex,"0");
+      startIndex+=1;
+    }
+ else     if (currentConversionType == 'x' || currentConversionType == 'X') {
+      result.insert(startIndex,"0x");
+      startIndex+=2;
+    }
+  }
+  if (!isNegative) {
+    if (formatToken.flagPlus) {
+      result.insert(0,'+');
+      startIndex+=1;
+    }
+    if (formatToken.flagSpace) {
+      result.insert(0,' ');
+      startIndex+=1;
+    }
+  }
+  if (isNegative && formatToken.flagParenthesis) {
+    return wrapParentheses(result);
+  }
+  if (isNegative && formatToken.flagZero) {
+    startIndex++;
+  }
+  return padding(result,startIndex);
+}

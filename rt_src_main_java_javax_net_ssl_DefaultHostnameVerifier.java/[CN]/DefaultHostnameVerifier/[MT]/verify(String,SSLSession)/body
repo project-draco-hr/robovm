@@ -1,3 +1,21 @@
 {
+  Certificate[] certs;
+  try {
+    certs=session.getPeerCertificates();
+  }
+ catch (  SSLException e) {
+    return false;
+  }
+  X509Certificate x509=(X509Certificate)certs[0];
+  String hostName=host.trim().toLowerCase(Locale.ENGLISH);
+  String firstCn=getFirstCn(x509);
+  if (matches(hostName,firstCn)) {
+    return true;
+  }
+  for (  String cn : getDNSSubjectAlts(x509)) {
+    if (matches(hostName,cn)) {
+      return true;
+    }
+  }
   return false;
 }

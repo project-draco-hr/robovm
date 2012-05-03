@@ -1,3 +1,19 @@
 {
-  return dform.format(value,buffer,position);
+  checkBufferAndFieldPosition(buffer,position);
+  if (roundingMode == RoundingMode.UNNECESSARY) {
+    try {
+      setRoundingMode(RoundingMode.UP);
+      String upResult=format(value,new StringBuffer(),new FieldPosition(0)).toString();
+      setRoundingMode(RoundingMode.DOWN);
+      String downResult=format(value,new StringBuffer(),new FieldPosition(0)).toString();
+      if (!upResult.equals(downResult)) {
+        throw new ArithmeticException("rounding mode UNNECESSARY but rounding required");
+      }
+    }
+  finally {
+      setRoundingMode(RoundingMode.UNNECESSARY);
+    }
+  }
+  buffer.append(dform.formatDouble(value,position));
+  return buffer;
 }

@@ -8,13 +8,20 @@
     }
   }
   if (textStart < 0) {
-    throw new IllegalArgumentException(Messages.getString("text.0D",textStart));
+    throw new IllegalArgumentException("Negative textStart value " + textStart);
   }
   if (embStart < 0) {
-    throw new IllegalArgumentException(Messages.getString("text.10",embStart));
+    throw new IllegalArgumentException("Negative embStart value " + embStart);
   }
   if (paragraphLength < 0) {
-    throw new IllegalArgumentException(Messages.getString("text.11",paragraphLength));
+    throw new IllegalArgumentException("Negative paragraph length " + paragraphLength);
   }
-  icuBidi=new com.ibm.icu.text.Bidi(text,textStart,embeddings,embStart,paragraphLength,convertDirectionConstant(flags));
+  long bidi=0;
+  try {
+    bidi=createUBiDi(text,textStart,embeddings,embStart,paragraphLength,flags);
+    readBidiInfo(bidi);
+  }
+  finally {
+    ubidi_close(bidi);
+  }
 }

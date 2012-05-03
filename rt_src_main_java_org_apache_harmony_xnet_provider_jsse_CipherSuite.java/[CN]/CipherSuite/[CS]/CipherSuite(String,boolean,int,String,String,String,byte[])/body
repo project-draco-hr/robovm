@@ -1,0 +1,105 @@
+{
+  this.name=name;
+  this.keyExchange=keyExchange;
+  this.authType=authType;
+  this.isExportable=isExportable;
+  if (cipherName == null) {
+    this.cipherName=null;
+    keyMaterial=0;
+    expandedKeyMaterial=0;
+    effectiveKeyBytes=0;
+    ivSize=0;
+    blockSize=0;
+  }
+ else   if ("RC4_40".equals(cipherName)) {
+    this.cipherName="RC4";
+    keyMaterial=5;
+    expandedKeyMaterial=16;
+    effectiveKeyBytes=5;
+    ivSize=0;
+    blockSize=0;
+  }
+ else   if ("RC4_128".equals(cipherName)) {
+    this.cipherName="RC4";
+    keyMaterial=16;
+    expandedKeyMaterial=16;
+    effectiveKeyBytes=16;
+    ivSize=0;
+    blockSize=0;
+  }
+ else   if ("DES40_CBC".equals(cipherName)) {
+    this.cipherName="DES/CBC/NoPadding";
+    keyMaterial=5;
+    expandedKeyMaterial=8;
+    effectiveKeyBytes=5;
+    ivSize=8;
+    blockSize=8;
+  }
+ else   if ("DES_CBC".equals(cipherName)) {
+    this.cipherName="DES/CBC/NoPadding";
+    keyMaterial=8;
+    expandedKeyMaterial=8;
+    effectiveKeyBytes=7;
+    ivSize=8;
+    blockSize=8;
+  }
+ else   if ("3DES_EDE_CBC".equals(cipherName)) {
+    this.cipherName="DESede/CBC/NoPadding";
+    keyMaterial=24;
+    expandedKeyMaterial=24;
+    effectiveKeyBytes=24;
+    ivSize=8;
+    blockSize=8;
+  }
+ else   if ("AES_128_CBC".equals(cipherName)) {
+    this.cipherName="AES/CBC/NoPadding";
+    keyMaterial=16;
+    expandedKeyMaterial=16;
+    effectiveKeyBytes=16;
+    ivSize=16;
+    blockSize=16;
+  }
+ else   if ("AES_256_CBC".equals(cipherName)) {
+    this.cipherName="AES/CBC/NoPadding";
+    keyMaterial=32;
+    expandedKeyMaterial=32;
+    effectiveKeyBytes=32;
+    ivSize=16;
+    blockSize=16;
+  }
+ else {
+    this.cipherName=cipherName;
+    keyMaterial=0;
+    expandedKeyMaterial=0;
+    effectiveKeyBytes=0;
+    ivSize=0;
+    blockSize=0;
+  }
+  if ("MD5".equals(hash)) {
+    this.hmacName="HmacMD5";
+    this.hashName="MD5";
+    hashSize=16;
+  }
+ else   if ("SHA".equals(hash)) {
+    this.hmacName="HmacSHA1";
+    this.hashName="SHA-1";
+    hashSize=20;
+  }
+ else {
+    this.hmacName=null;
+    this.hashName=null;
+    hashSize=0;
+  }
+  cipherSuiteCode=code;
+  if (this.cipherName != null) {
+    try {
+      Cipher.getInstance(this.cipherName);
+    }
+ catch (    GeneralSecurityException e) {
+      supported=false;
+    }
+  }
+  if (this.name.startsWith("TLS_EC")) {
+    supported=false;
+  }
+}

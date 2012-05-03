@@ -1,25 +1,26 @@
 {
-  byte[] bytes=dns.toLowerCase().getBytes("UTF-8");
+  String string=dns.toLowerCase(Locale.US);
+  int length=string.length();
   boolean first_letter=true;
-  for (int i=0; i < bytes.length; i++) {
-    byte ch=bytes[i];
+  for (int i=0; i < length; i++) {
+    char ch=string.charAt(i);
     if (first_letter) {
-      if ((bytes.length > 2) && (ch == '*') && (bytes[1] == '.')) {
+      if ((length > 2) && (ch == '*') && (string.charAt(1) == '.')) {
         first_letter=false;
         continue;
       }
       if ((ch > 'z' || ch < 'a') && (ch < '0' || ch > '9')) {
-        throw new IOException(Messages.getString("security.184",(char)ch,dns));
+        throw new IOException("DNS name must start with a letter: " + dns);
       }
       first_letter=false;
       continue;
     }
     if (!((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || (ch == '-')|| (ch == '.'))) {
-      throw new IOException(Messages.getString("security.185",dns));
+      throw new IOException("Incorrect DNS name: " + dns);
     }
     if (ch == '.') {
-      if (bytes[i - 1] == '-') {
-        throw new IOException(Messages.getString("security.186",dns));
+      if (string.charAt(i - 1) == '-') {
+        throw new IOException("Incorrect DNS name: label ends with '-': " + dns);
       }
       first_letter=true;
     }

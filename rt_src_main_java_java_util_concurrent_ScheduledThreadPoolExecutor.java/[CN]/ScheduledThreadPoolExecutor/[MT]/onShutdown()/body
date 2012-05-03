@@ -2,7 +2,10 @@
   BlockingQueue<Runnable> q=super.getQueue();
   boolean keepDelayed=getExecuteExistingDelayedTasksAfterShutdownPolicy();
   boolean keepPeriodic=getContinueExistingPeriodicTasksAfterShutdownPolicy();
-  if (!keepDelayed && !keepPeriodic)   q.clear();
+  if (!keepDelayed && !keepPeriodic) {
+    for (    Object e : q.toArray())     if (e instanceof RunnableScheduledFuture<?>)     ((RunnableScheduledFuture<?>)e).cancel(false);
+    q.clear();
+  }
  else {
     for (    Object e : q.toArray()) {
       if (e instanceof RunnableScheduledFuture) {

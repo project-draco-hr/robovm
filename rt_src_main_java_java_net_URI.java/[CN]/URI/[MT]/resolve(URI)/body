@@ -2,29 +2,32 @@
   if (relative.absolute || opaque) {
     return relative;
   }
-  URI result;
-  if (relative.path.equals("") && relative.scheme == null && relative.authority == null && relative.query == null && relative.fragment != null) {
-    result=duplicate();
+  if (relative.authority != null) {
+    URI result=relative.duplicate();
+    result.scheme=scheme;
+    result.absolute=absolute;
+    return result;
+  }
+  if (relative.path.isEmpty() && relative.scheme == null && relative.query == null) {
+    URI result=duplicate();
     result.fragment=relative.fragment;
     return result;
   }
-  if (relative.authority != null) {
-    result=relative.duplicate();
-    result.scheme=scheme;
-    result.absolute=absolute;
+  URI result=duplicate();
+  result.fragment=relative.fragment;
+  result.query=relative.query;
+  String resolvedPath;
+  if (relative.path.startsWith("/")) {
+    resolvedPath=relative.path;
+  }
+ else   if (relative.path.isEmpty()) {
+    resolvedPath=path;
   }
  else {
-    result=duplicate();
-    result.fragment=relative.fragment;
-    result.query=relative.query;
-    if (relative.path.startsWith("/")) {
-      result.path=relative.path;
-    }
- else {
-      int endindex=path.lastIndexOf('/') + 1;
-      result.path=normalize(path.substring(0,endindex) + relative.path);
-    }
-    result.setSchemeSpecificPart();
+    int endIndex=path.lastIndexOf('/') + 1;
+    resolvedPath=path.substring(0,endIndex) + relative.path;
   }
+  result.path=UrlUtils.authoritySafePath(result.authority,normalize(resolvedPath,true));
+  result.setSchemeSpecificPart();
   return result;
 }

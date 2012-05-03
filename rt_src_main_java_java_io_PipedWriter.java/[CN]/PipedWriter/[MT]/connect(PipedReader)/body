@@ -1,12 +1,13 @@
 {
-synchronized (lock) {
-    if (this.dest != null) {
-      throw new IOException(Messages.getString("luni.5F"));
+  if (reader == null) {
+    throw new NullPointerException();
+  }
+synchronized (reader) {
+    if (this.destination != null) {
+      throw new IOException("Pipe already connected");
     }
-    if (closed) {
-      throw new IOException(Messages.getString("luni.CF"));
-    }
-    stream.establishConnection();
-    this.dest=stream;
+    reader.establishConnection();
+    this.lock=reader;
+    this.destination=reader;
   }
 }

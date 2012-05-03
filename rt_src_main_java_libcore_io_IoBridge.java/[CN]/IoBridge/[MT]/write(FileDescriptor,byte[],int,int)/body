@@ -1,0 +1,16 @@
+{
+  Arrays.checkOffsetAndCount(bytes.length,byteOffset,byteCount);
+  if (byteCount == 0) {
+    return;
+  }
+  try {
+    while (byteCount > 0) {
+      int bytesWritten=Libcore.os.write(fd,bytes,byteOffset,byteCount);
+      byteCount-=bytesWritten;
+      byteOffset+=bytesWritten;
+    }
+  }
+ catch (  ErrnoException errnoException) {
+    throw errnoException.rethrowAsIOException();
+  }
+}

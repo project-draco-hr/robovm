@@ -1,0 +1,43 @@
+{
+  int start=position;
+  StringBuilder result=null;
+  if (returnText && text != null) {
+    result=new StringBuilder();
+    result.append(text);
+  }
+  search:   while (true) {
+    if (position + delimiter.length >= limit) {
+      if (start < position && returnText) {
+        if (result == null) {
+          result=new StringBuilder();
+        }
+        result.append(buffer,start,position - start);
+      }
+      if (!fillBuffer(delimiter.length)) {
+        checkRelaxed(UNEXPECTED_EOF);
+        type=COMMENT;
+        return null;
+      }
+      start=position;
+    }
+    for (int i=0; i < delimiter.length; i++) {
+      if (buffer[position + i] != delimiter[i]) {
+        position++;
+        continue search;
+      }
+    }
+    break;
+  }
+  int end=position;
+  position+=delimiter.length;
+  if (!returnText) {
+    return null;
+  }
+ else   if (result == null) {
+    return stringPool.get(buffer,start,end - start);
+  }
+ else {
+    result.append(buffer,start,end - start);
+    return result.toString();
+  }
+}

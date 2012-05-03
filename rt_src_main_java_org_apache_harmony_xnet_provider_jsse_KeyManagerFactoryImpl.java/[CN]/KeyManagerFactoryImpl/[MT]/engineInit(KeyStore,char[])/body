@@ -5,19 +5,14 @@
       pwd=password.clone();
     }
  else {
-      pwd=new char[0];
+      pwd=EmptyArray.CHAR;
     }
   }
  else {
     keyStore=KeyStore.getInstance(KeyStore.getDefaultType());
-    String keyStoreName=AccessController.doPrivileged(new java.security.PrivilegedAction<String>(){
-      public String run(){
-        return System.getProperty("javax.net.ssl.keyStore");
-      }
-    }
-);
+    String keyStoreName=System.getProperty("javax.net.ssl.keyStore");
     String keyStorePwd=null;
-    if (keyStoreName == null || keyStoreName.equalsIgnoreCase("NONE") || keyStoreName.length() == 0) {
+    if (keyStoreName == null || keyStoreName.equalsIgnoreCase("NONE") || keyStoreName.isEmpty()) {
       try {
         keyStore.load(null,null);
       }
@@ -29,14 +24,9 @@ catch (      CertificateException e) {
       }
     }
  else {
-      keyStorePwd=AccessController.doPrivileged(new java.security.PrivilegedAction<String>(){
-        public String run(){
-          return System.getProperty("javax.net.ssl.keyStorePassword");
-        }
-      }
-);
+      keyStorePwd=System.getProperty("javax.net.ssl.keyStorePassword");
       if (keyStorePwd == null) {
-        pwd=new char[0];
+        pwd=EmptyArray.CHAR;
       }
  else {
         pwd=keyStorePwd.toCharArray();

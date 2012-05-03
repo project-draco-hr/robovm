@@ -1,0 +1,26 @@
+{
+  checkNotNull(source);
+  checkOpen();
+  InetSocketAddress isa=(InetSocketAddress)socketAddress;
+  if (isa.getAddress() == null) {
+    throw new IOException();
+  }
+  if (isConnected() && !connectAddress.equals(isa)) {
+    throw new IllegalArgumentException();
+  }
+synchronized (writeLock) {
+    int sendCount=0;
+    try {
+      begin();
+      int oldPosition=source.position();
+      sendCount=IoBridge.sendto(fd,source,0,isa.getAddress(),isa.getPort());
+      if (sendCount > 0) {
+        source.position(oldPosition + sendCount);
+      }
+    }
+  finally {
+      end(sendCount >= 0);
+    }
+    return sendCount;
+  }
+}

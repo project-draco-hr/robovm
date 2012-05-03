@@ -1,0 +1,16 @@
+{
+  checkOpen();
+  if (size < 0) {
+    throw new IllegalArgumentException("size: " + size);
+  }
+  checkWritable();
+  if (size < size()) {
+    try {
+      Libcore.os.ftruncate(fd,size);
+    }
+ catch (    ErrnoException errnoException) {
+      throw errnoException.rethrowAsIOException();
+    }
+  }
+  return this;
+}

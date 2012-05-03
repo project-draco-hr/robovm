@@ -1,12 +1,10 @@
 {
   if (type == null) {
-    throw new NullPointerException(Messages.getString("security.07"));
+    throw new NullPointerException();
   }
   try {
-synchronized (engine) {
-      engine.getInstance(type,params);
-      return new CertStore((CertStoreSpi)engine.spi,engine.provider,type,params);
-    }
+    Engine.SpiAndProvider sap=ENGINE.getInstance(type,params);
+    return new CertStore((CertStoreSpi)sap.spi,sap.provider,type,params);
   }
  catch (  NoSuchAlgorithmException e) {
     Throwable th=e.getCause();

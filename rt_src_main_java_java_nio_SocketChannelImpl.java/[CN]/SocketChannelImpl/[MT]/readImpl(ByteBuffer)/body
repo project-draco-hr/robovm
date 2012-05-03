@@ -1,0 +1,20 @@
+{
+synchronized (readLock) {
+    int readCount=0;
+    try {
+      if (isBlocking()) {
+        begin();
+      }
+      readCount=IoBridge.recvfrom(true,fd,dst,0,null,false);
+      if (readCount > 0) {
+        dst.position(dst.position() + readCount);
+      }
+    }
+  finally {
+      if (isBlocking()) {
+        end(readCount > 0);
+      }
+    }
+    return readCount;
+  }
+}

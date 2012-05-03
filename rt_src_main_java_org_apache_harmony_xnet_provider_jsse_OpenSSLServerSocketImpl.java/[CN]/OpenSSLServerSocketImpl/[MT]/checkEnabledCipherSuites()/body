@@ -1,0 +1,31 @@
+{
+  for (  String enabledCipherSuite : enabledCipherSuites) {
+    if (enabledCipherSuite.equals(NativeCrypto.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)) {
+      continue;
+    }
+    String keyType=CipherSuite.getByName(enabledCipherSuite).getServerKeyType();
+    if (keyType == null) {
+      return;
+    }
+    if (keyType.equals(CipherSuite.KEY_TYPE_RSA) || keyType.equals(CipherSuite.KEY_TYPE_DH_RSA)) {
+      if (checkForPrivateKey(keyType,RSAPrivateKey.class)) {
+        return;
+      }
+      continue;
+    }
+    if (keyType.equals(CipherSuite.KEY_TYPE_DSA) || keyType.equals(CipherSuite.KEY_TYPE_DH_DSA)) {
+      if (checkForPrivateKey(keyType,DSAPrivateKey.class)) {
+        return;
+      }
+      continue;
+    }
+    if (keyType.equals(CipherSuite.KEY_TYPE_EC) || keyType.equals(CipherSuite.KEY_TYPE_EC_RSA) || keyType.equals(CipherSuite.KEY_TYPE_EC_EC)) {
+      if (checkForPrivateKey(keyType,ECPrivateKey.class)) {
+        return;
+      }
+      continue;
+    }
+    throw new IllegalStateException("Unknown key type " + keyType);
+  }
+  throw new SSLException("Could not find any key store entries " + "to support the enabled cipher suites.");
+}

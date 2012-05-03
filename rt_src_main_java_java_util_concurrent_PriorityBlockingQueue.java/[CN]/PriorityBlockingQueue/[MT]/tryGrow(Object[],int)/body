@@ -1,0 +1,24 @@
+{
+  lock.unlock();
+  Object[] newArray=null;
+  if (allocationSpinLock == 0 && UNSAFE.compareAndSwapInt(this,allocationSpinLockOffset,0,1)) {
+    try {
+      int newCap=oldCap + ((oldCap < 64) ? (oldCap + 2) : (oldCap >> 1));
+      if (newCap - MAX_ARRAY_SIZE > 0) {
+        int minCap=oldCap + 1;
+        if (minCap < 0 || minCap > MAX_ARRAY_SIZE)         throw new OutOfMemoryError();
+        newCap=MAX_ARRAY_SIZE;
+      }
+      if (newCap > oldCap && queue == array)       newArray=new Object[newCap];
+    }
+  finally {
+      allocationSpinLock=0;
+    }
+  }
+  if (newArray == null)   Thread.yield();
+  lock.lock();
+  if (newArray != null && queue == array) {
+    queue=newArray;
+    System.arraycopy(array,0,newArray,0,oldCap);
+  }
+}

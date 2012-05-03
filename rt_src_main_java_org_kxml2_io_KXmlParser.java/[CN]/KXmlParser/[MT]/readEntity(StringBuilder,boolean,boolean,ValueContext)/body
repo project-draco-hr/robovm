@@ -1,0 +1,74 @@
+{
+  int start=out.length();
+  if (buffer[position++] != '&') {
+    throw new AssertionError();
+  }
+  out.append('&');
+  while (true) {
+    int c=peekCharacter();
+    if (c == ';') {
+      out.append(';');
+      position++;
+      break;
+    }
+ else     if (c >= 128 || (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '-' || c == '#') {
+      position++;
+      out.append((char)c);
+    }
+ else     if (relaxed) {
+      return;
+    }
+ else {
+      throw new XmlPullParserException("unterminated entity ref",this,null);
+    }
+  }
+  String code=out.substring(start + 1,out.length() - 1);
+  if (isEntityToken) {
+    name=code;
+  }
+  if (code.startsWith("#")) {
+    try {
+      int c=code.startsWith("#x") ? Integer.parseInt(code.substring(2),16) : Integer.parseInt(code.substring(1));
+      out.delete(start,out.length());
+      out.appendCodePoint(c);
+      unresolved=false;
+      return;
+    }
+ catch (    NumberFormatException notANumber) {
+      throw new XmlPullParserException("Invalid character reference: &" + code);
+    }
+catch (    IllegalArgumentException invalidCodePoint) {
+      throw new XmlPullParserException("Invalid character reference: &" + code);
+    }
+  }
+  if (valueContext == ValueContext.ENTITY_DECLARATION) {
+    return;
+  }
+  String defaultEntity=DEFAULT_ENTITIES.get(code);
+  if (defaultEntity != null) {
+    out.delete(start,out.length());
+    unresolved=false;
+    out.append(defaultEntity);
+    return;
+  }
+  char[] resolved;
+  if (documentEntities != null && (resolved=documentEntities.get(code)) != null) {
+    out.delete(start,out.length());
+    unresolved=false;
+    if (processDocDecl) {
+      pushContentSource(resolved);
+    }
+ else {
+      out.append(resolved);
+    }
+    return;
+  }
+  if (systemId != null) {
+    out.delete(start,out.length());
+    return;
+  }
+  unresolved=true;
+  if (throwOnResolveFailure) {
+    checkRelaxed("unresolved: &" + code + ";");
+  }
+}

@@ -1,34 +1,4 @@
 {
-  final Class<?> implementationClass=getClass();
-  final Class<?> thisClass=ObjectInputStream.class;
-  SecurityManager sm=System.getSecurityManager();
-  if (sm != null && implementationClass != thisClass) {
-    boolean mustCheck=(AccessController.doPrivileged(new PrivilegedAction<Boolean>(){
-      public Boolean run(){
-        try {
-          Method method=implementationClass.getMethod("readFields",ObjectStreamClass.EMPTY_CONSTRUCTOR_PARAM_TYPES);
-          if (method.getDeclaringClass() != thisClass) {
-            return Boolean.TRUE;
-          }
-        }
- catch (        NoSuchMethodException e) {
-        }
-        try {
-          Method method=implementationClass.getMethod("readUnshared",ObjectStreamClass.EMPTY_CONSTRUCTOR_PARAM_TYPES);
-          if (method.getDeclaringClass() != thisClass) {
-            return Boolean.TRUE;
-          }
-        }
- catch (        NoSuchMethodException e) {
-        }
-        return Boolean.FALSE;
-      }
-    }
-)).booleanValue();
-    if (mustCheck) {
-      sm.checkPermission(ObjectStreamConstants.SUBCLASS_IMPLEMENTATION_PERMISSION);
-    }
-  }
   this.input=(input instanceof DataInputStream) ? (DataInputStream)input : new DataInputStream(input);
   primitiveTypes=new DataInputStream(this);
   enableResolve=false;

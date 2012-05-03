@@ -1,0 +1,28 @@
+{
+  if (c == this)   throw new IllegalArgumentException();
+  Node<E> beginningOfTheEnd=null, last=null;
+  for (  E e : c) {
+    checkNotNull(e);
+    Node<E> newNode=new Node<E>(e);
+    if (beginningOfTheEnd == null)     beginningOfTheEnd=last=newNode;
+ else {
+      last.lazySetNext(newNode);
+      last=newNode;
+    }
+  }
+  if (beginningOfTheEnd == null)   return false;
+  for (Node<E> t=tail, p=t; ; ) {
+    Node<E> q=p.next;
+    if (q == null) {
+      if (p.casNext(null,beginningOfTheEnd)) {
+        if (!casTail(t,last)) {
+          t=tail;
+          if (last.next == null)           casTail(t,last);
+        }
+        return true;
+      }
+    }
+ else     if (p == q)     p=(t != (t=tail)) ? t : head;
+ else     p=(p != t && t != (t=tail)) ? t : q;
+  }
+}

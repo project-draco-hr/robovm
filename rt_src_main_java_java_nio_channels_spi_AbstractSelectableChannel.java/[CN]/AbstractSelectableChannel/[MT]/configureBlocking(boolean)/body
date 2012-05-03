@@ -1,16 +1,16 @@
 {
-  if (isOpen()) {
-synchronized (blockingLock) {
-      if (isBlocking == blockingMode) {
-        return this;
-      }
-      if (blockingMode && containsValidKeys()) {
-        throw new IllegalBlockingModeException();
-      }
-      implConfigureBlocking(blockingMode);
-      isBlocking=blockingMode;
-    }
-    return this;
+  if (!isOpen()) {
+    throw new ClosedChannelException();
   }
-  throw new ClosedChannelException();
+synchronized (blockingLock) {
+    if (isBlocking == blockingMode) {
+      return this;
+    }
+    if (blockingMode && containsValidKeys()) {
+      throw new IllegalBlockingModeException();
+    }
+    implConfigureBlocking(blockingMode);
+    isBlocking=blockingMode;
+  }
+  return this;
 }

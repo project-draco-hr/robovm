@@ -1,13 +1,13 @@
 {
   if (tag != ASN1Constants.TAG_OID) {
-    throw new ASN1Exception(Messages.getString("security.12C",tagOffset,Integer.toHexString(tag)));
+    throw expected("OID");
   }
   if (length < 1) {
-    throw new ASN1Exception(Messages.getString("security.12D",tagOffset));
+    throw new ASN1Exception("Wrong length for ASN.1 object identifier at [" + tagOffset + "]");
   }
   readContent();
   if ((buffer[offset - 1] & 0x80) != 0) {
-    throw new ASN1Exception(Messages.getString("security.12E",(offset - 1)));
+    throw new ASN1Exception("Wrong encoding at [" + (offset - 1) + "]");
   }
   oidElement=1;
   for (int i=0; i < length; i++, ++oidElement) {

@@ -1,0 +1,44 @@
+{
+  mTransitions=transitions;
+  mTypes=type;
+  mIsDsts=isDsts;
+  setID(name);
+  int lastStd;
+  for (lastStd=mTransitions.length - 1; lastStd >= 0; lastStd--) {
+    if (mIsDsts[mTypes[lastStd] & 0xff] == 0) {
+      break;
+    }
+  }
+  if (lastStd < 0) {
+    lastStd=0;
+  }
+  if (lastStd >= mTypes.length) {
+    mRawOffset=gmtOffsets[0];
+  }
+ else {
+    mRawOffset=gmtOffsets[mTypes[lastStd] & 0xff];
+  }
+  int firstStd=-1;
+  for (int i=0; i < mTransitions.length; ++i) {
+    if (mIsDsts[mTypes[i] & 0xff] == 0) {
+      firstStd=i;
+      break;
+    }
+  }
+  int earliestRawOffset=(firstStd != -1) ? gmtOffsets[mTypes[firstStd] & 0xff] : mRawOffset;
+  mOffsets=gmtOffsets;
+  for (int i=0; i < mOffsets.length; i++) {
+    mOffsets[i]-=mRawOffset;
+  }
+  boolean usesDst=false;
+  long currentUnixTime=System.currentTimeMillis() / 1000;
+  if (mTransitions.length > 0) {
+    long latestScheduleTime=((long)mTransitions[mTransitions.length - 1]) & 0xffffffff;
+    if (currentUnixTime < latestScheduleTime) {
+      usesDst=true;
+    }
+  }
+  mUseDst=usesDst;
+  mRawOffset*=1000;
+  mEarliestRawOffset=earliestRawOffset * 1000;
+}

@@ -1,0 +1,54 @@
+{
+  if (s == null) {
+    throw new IllegalArgumentException("Argument cannot be null");
+  }
+  s=s.trim();
+  if (!Pattern.matches(TIME_FORMAT_REGEX,s)) {
+    throw badTimestampString(s);
+  }
+  SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+  ParsePosition pp=new ParsePosition(0);
+  Date theDate;
+  try {
+    theDate=df.parse(s,pp);
+  }
+ catch (  Exception e) {
+    throw badTimestampString(s);
+  }
+  if (theDate == null) {
+    throw badTimestampString(s);
+  }
+  int position=pp.getIndex();
+  int remaining=s.length() - position;
+  int theNanos;
+  if (remaining == 0) {
+    theNanos=0;
+  }
+ else {
+    if ((s.length() - position) < ".n".length()) {
+      throw badTimestampString(s);
+    }
+    if ((s.length() - position) > ".nnnnnnnnn".length()) {
+      throw badTimestampString(s);
+    }
+    if (s.charAt(position) != '.') {
+      throw new NumberFormatException("Bad input string format: expected '.' not '" + s.charAt(position) + "' in \""+ s+ "\"");
+    }
+    int nanoLength=s.length() - position - 1;
+    String theNanoString=s.substring(position + 1,position + 1 + nanoLength);
+    theNanoString=theNanoString + "000000000";
+    theNanoString=theNanoString.substring(0,9);
+    try {
+      theNanos=Integer.parseInt(theNanoString);
+    }
+ catch (    Exception e) {
+      throw badTimestampString(s);
+    }
+  }
+  if (theNanos < 0 || theNanos > 999999999) {
+    throw badTimestampString(s);
+  }
+  Timestamp theTimestamp=new Timestamp(theDate.getTime());
+  theTimestamp.setNanos(theNanos);
+  return theTimestamp;
+}

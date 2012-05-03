@@ -1,0 +1,17 @@
+{
+synchronized (connectionPool) {
+    List<HttpConnection> connections=connectionPool.get(address);
+    if (connections != null) {
+      while (!connections.isEmpty()) {
+        HttpConnection connection=connections.remove(connections.size() - 1);
+        if (!connection.isStale()) {
+          final Socket socket=connection.getSocket();
+          SocketTagger.get().tag(socket);
+          return connection;
+        }
+      }
+      connectionPool.remove(address);
+    }
+  }
+  return address.connect(connectTimeout);
+}

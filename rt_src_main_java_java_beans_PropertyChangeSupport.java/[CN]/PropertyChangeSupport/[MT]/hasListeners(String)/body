@@ -1,11 +1,8 @@
 {
-  if (globalListeners.size() > 0) {
-    return true;
+  for (  PropertyChangeListener p : listeners) {
+    if (!(p instanceof PropertyChangeListenerProxy) || Objects.equal(propertyName,((PropertyChangeListenerProxy)p).getPropertyName())) {
+      return true;
+    }
   }
-  boolean result=false;
-  if (propertyName != null) {
-    PropertyChangeSupport listeners=children.get(propertyName);
-    result=(listeners != null && listeners.hasListeners(propertyName));
-  }
-  return result;
+  return false;
 }

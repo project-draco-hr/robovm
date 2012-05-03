@@ -1,0 +1,26 @@
+{
+  AbstractPreferences startNode=null;
+synchronized (lock) {
+    checkState();
+    validateName(name);
+    if (name.isEmpty()) {
+      return this;
+    }
+ else     if ("/".equals(name)) {
+      return root;
+    }
+    if (name.startsWith("/")) {
+      startNode=root;
+      name=name.substring(1);
+    }
+ else {
+      startNode=this;
+    }
+  }
+  try {
+    return startNode.nodeImpl(name,true);
+  }
+ catch (  BackingStoreException e) {
+    return null;
+  }
+}

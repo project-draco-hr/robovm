@@ -1,0 +1,23 @@
+{
+  int reply;
+  reply=getReply();
+  if (reply == FTP_USERREADY) {
+  }
+ else {
+    throw new IOException("Unable to connect to server: " + url.getHost());
+  }
+  write("USER " + username + "\r\n");
+  reply=getReply();
+  if (reply == FTP_PASWD || reply == FTP_LOGGEDIN) {
+  }
+ else {
+    throw new IOException("Unable to log in to server (USER): " + url.getHost());
+  }
+  if (reply == FTP_PASWD) {
+    write("PASS " + password + "\r\n");
+    reply=getReply();
+    if (!(reply == FTP_OK || reply == FTP_USERREADY || reply == FTP_LOGGEDIN)) {
+      throw new IOException("Unable to log in to server (PASS): " + url.getHost());
+    }
+  }
+}

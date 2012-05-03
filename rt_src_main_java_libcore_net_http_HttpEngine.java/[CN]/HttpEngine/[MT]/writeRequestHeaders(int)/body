@@ -1,0 +1,12 @@
+{
+  if (sentRequestMillis != -1) {
+    throw new IllegalStateException();
+  }
+  RawHeaders headersToSend=getNetworkRequestHeaders();
+  byte[] bytes=headersToSend.toHeaderString().getBytes(Charsets.ISO_8859_1);
+  if (contentLength != -1 && bytes.length + contentLength <= MAX_REQUEST_BUFFER_LENGTH) {
+    requestOut=new BufferedOutputStream(socketOut,bytes.length + contentLength);
+  }
+  sentRequestMillis=System.currentTimeMillis();
+  requestOut.write(bytes);
+}

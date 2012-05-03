@@ -1,0 +1,23 @@
+{
+synchronized (writeLock) {
+    if (!src.hasRemaining()) {
+      return 0;
+    }
+    int writeCount=0;
+    try {
+      if (isBlocking()) {
+        begin();
+      }
+      writeCount=IoBridge.sendto(fd,src,0,null,0);
+      if (writeCount > 0) {
+        src.position(src.position() + writeCount);
+      }
+    }
+  finally {
+      if (isBlocking()) {
+        end(writeCount >= 0);
+      }
+    }
+    return writeCount;
+  }
+}

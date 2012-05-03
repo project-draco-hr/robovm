@@ -1,0 +1,23 @@
+{
+  int idx=challenge.indexOf(" ");
+  if (idx == -1) {
+    return null;
+  }
+  String scheme=challenge.substring(0,idx);
+  int realm=challenge.indexOf("realm=\"") + 7;
+  String prompt=null;
+  if (realm != -1) {
+    int end=challenge.indexOf('"',realm);
+    if (end != -1) {
+      prompt=challenge.substring(realm,end);
+    }
+  }
+  PasswordAuthentication pa=Authenticator.requestPasswordAuthentication(getConnectToInetAddress(),getConnectToPort(),url.getProtocol(),prompt,scheme);
+  if (pa == null) {
+    return null;
+  }
+  String usernameAndPassword=pa.getUserName() + ":" + new String(pa.getPassword());
+  byte[] bytes=usernameAndPassword.getBytes(Charsets.ISO_8859_1);
+  String encoded=Base64.encode(bytes);
+  return scheme + " " + encoded;
+}

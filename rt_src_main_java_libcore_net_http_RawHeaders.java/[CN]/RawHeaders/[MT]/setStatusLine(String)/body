@@ -1,0 +1,23 @@
+{
+  statusLine=statusLine.trim();
+  this.statusLine=statusLine;
+  if (statusLine == null || !statusLine.startsWith("HTTP/")) {
+    return;
+  }
+  statusLine=statusLine.trim();
+  int mark=statusLine.indexOf(" ") + 1;
+  if (mark == 0) {
+    return;
+  }
+  if (statusLine.charAt(mark - 2) != '1') {
+    this.httpMinorVersion=0;
+  }
+  int last=mark + 3;
+  if (last > statusLine.length()) {
+    last=statusLine.length();
+  }
+  this.responseCode=Integer.parseInt(statusLine.substring(mark,last));
+  if (last + 1 <= statusLine.length()) {
+    this.responseMessage=statusLine.substring(last + 1);
+  }
+}

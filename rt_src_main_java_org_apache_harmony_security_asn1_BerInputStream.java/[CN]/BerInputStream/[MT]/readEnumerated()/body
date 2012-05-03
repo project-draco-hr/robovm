@@ -1,9 +1,9 @@
 {
   if (tag != ASN1Constants.TAG_ENUM) {
-    throw new ASN1Exception(Messages.getString("security.119",tagOffset,Integer.toHexString(tag)));
+    throw expected("enumerated");
   }
   if (length == 0) {
-    throw new ASN1Exception(Messages.getString("security.11A",tagOffset));
+    throw new ASN1Exception("ASN.1 enumerated: wrong length for identifier at [" + tagOffset + "]");
   }
   readContent();
   if (length > 1) {
@@ -12,7 +12,7 @@
       bits+=0x100;
     }
     if (bits == 0 || bits == 0x1FF) {
-      throw new ASN1Exception(Messages.getString("security.11B",contentOffset));
+      throw new ASN1Exception("ASN.1 enumerated: wrong content at [" + contentOffset + "]. An integer MUST be encoded in minimum number of octets");
     }
   }
 }

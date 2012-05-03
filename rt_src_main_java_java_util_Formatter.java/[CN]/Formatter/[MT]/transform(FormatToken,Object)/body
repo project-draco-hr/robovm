@@ -1,0 +1,90 @@
+{
+  this.formatToken=token;
+  this.arg=argument;
+  if (token.isDefault()) {
+switch (token.getConversionType()) {
+case 's':
+      if (arg == null) {
+        return "null";
+      }
+ else       if (!(arg instanceof Formattable)) {
+        return arg.toString();
+      }
+    break;
+case 'd':
+  boolean needLocalizedDigits=(localeData.zeroDigit != '0');
+if (out instanceof StringBuilder && !needLocalizedDigits) {
+  if (arg instanceof Integer || arg instanceof Short || arg instanceof Byte) {
+    IntegralToString.appendInt((StringBuilder)out,((Number)arg).intValue());
+    return null;
+  }
+ else   if (arg instanceof Long) {
+    IntegralToString.appendLong((StringBuilder)out,((Long)arg).longValue());
+    return null;
+  }
+}
+if (arg instanceof Integer || arg instanceof Long || arg instanceof Short|| arg instanceof Byte) {
+String result=arg.toString();
+return needLocalizedDigits ? localizeDigits(result) : result;
+}
+}
+}
+formatToken.checkFlags(arg);
+CharSequence result;
+switch (token.getConversionType()) {
+case 'B':
+case 'b':
+result=transformFromBoolean();
+break;
+case 'H':
+case 'h':
+result=transformFromHashCode();
+break;
+case 'S':
+case 's':
+result=transformFromString();
+break;
+case 'C':
+case 'c':
+result=transformFromCharacter();
+break;
+case 'd':
+case 'o':
+case 'x':
+case 'X':
+if (arg == null || arg instanceof BigInteger) {
+result=transformFromBigInteger();
+}
+ else {
+result=transformFromInteger();
+}
+break;
+case 'A':
+case 'a':
+case 'E':
+case 'e':
+case 'f':
+case 'G':
+case 'g':
+result=transformFromFloat();
+break;
+case '%':
+result=transformFromPercent();
+break;
+case 'n':
+result=System.lineSeparator();
+break;
+case 't':
+case 'T':
+result=transformFromDateTime();
+break;
+default :
+throw token.unknownFormatConversionException();
+}
+if (Character.isUpperCase(token.getConversionType())) {
+if (result != null) {
+result=result.toString().toUpperCase(locale);
+}
+}
+return result;
+}

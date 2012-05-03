@@ -1,0 +1,56 @@
+{
+  final Node<E> prev=x.prev;
+  final Node<E> next=x.next;
+  if (prev == null) {
+    unlinkFirst(x,next);
+  }
+ else   if (next == null) {
+    unlinkLast(x,prev);
+  }
+ else {
+    Node<E> activePred, activeSucc;
+    boolean isFirst, isLast;
+    int hops=1;
+    for (Node<E> p=prev; ; ++hops) {
+      if (p.item != null) {
+        activePred=p;
+        isFirst=false;
+        break;
+      }
+      Node<E> q=p.prev;
+      if (q == null) {
+        if (p.next == p)         return;
+        activePred=p;
+        isFirst=true;
+        break;
+      }
+ else       if (p == q)       return;
+ else       p=q;
+    }
+    for (Node<E> p=next; ; ++hops) {
+      if (p.item != null) {
+        activeSucc=p;
+        isLast=false;
+        break;
+      }
+      Node<E> q=p.next;
+      if (q == null) {
+        if (p.prev == p)         return;
+        activeSucc=p;
+        isLast=true;
+        break;
+      }
+ else       if (p == q)       return;
+ else       p=q;
+    }
+    if (hops < HOPS && (isFirst | isLast))     return;
+    skipDeletedSuccessors(activePred);
+    skipDeletedPredecessors(activeSucc);
+    if ((isFirst | isLast) && (activePred.next == activeSucc) && (activeSucc.prev == activePred)&& (isFirst ? activePred.prev == null : activePred.item != null)&& (isLast ? activeSucc.next == null : activeSucc.item != null)) {
+      updateHead();
+      updateTail();
+      x.lazySetPrev(isFirst ? prevTerminator() : x);
+      x.lazySetNext(isLast ? nextTerminator() : x);
+    }
+  }
+}

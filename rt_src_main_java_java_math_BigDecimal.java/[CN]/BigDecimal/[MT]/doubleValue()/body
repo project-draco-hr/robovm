@@ -6,16 +6,16 @@
   long powerOfTwo=this.bitLength - (long)(scale / LOG10_2);
   long bits;
   long tempBits;
-  BigInteger mantisa;
+  BigInteger mantissa;
   if ((powerOfTwo < -1074) || (sign == 0)) {
     return (sign * 0.0d);
   }
  else   if (powerOfTwo > 1025) {
     return (sign * Double.POSITIVE_INFINITY);
   }
-  mantisa=getUnscaledValue().abs();
+  mantissa=getUnscaledValue().abs();
   if (scale <= 0) {
-    mantisa=mantisa.multiply(Multiplication.powerOf10(-scale));
+    mantissa=mantissa.multiply(Multiplication.powerOf10(-scale));
   }
  else {
     BigInteger quotAndRem[];
@@ -23,25 +23,25 @@
     int k=100 - (int)powerOfTwo;
     int compRem;
     if (k > 0) {
-      mantisa=mantisa.shiftLeft(k);
+      mantissa=mantissa.shiftLeft(k);
       exponent-=k;
     }
-    quotAndRem=mantisa.divideAndRemainder(powerOfTen);
+    quotAndRem=mantissa.divideAndRemainder(powerOfTen);
     compRem=quotAndRem[1].shiftLeftOneBit().compareTo(powerOfTen);
-    mantisa=quotAndRem[0].shiftLeft(2).add(BigInteger.valueOf((compRem * (compRem + 3)) / 2 + 1));
+    mantissa=quotAndRem[0].shiftLeft(2).add(BigInteger.valueOf((compRem * (compRem + 3)) / 2 + 1));
     exponent-=2;
   }
-  lowestSetBit=mantisa.getLowestSetBit();
-  discardedSize=mantisa.bitLength() - 54;
+  lowestSetBit=mantissa.getLowestSetBit();
+  discardedSize=mantissa.bitLength() - 54;
   if (discardedSize > 0) {
-    bits=mantisa.shiftRight(discardedSize).longValue();
+    bits=mantissa.shiftRight(discardedSize).longValue();
     tempBits=bits;
     if ((((bits & 1) == 1) && (lowestSetBit < discardedSize)) || ((bits & 3) == 3)) {
       bits+=2;
     }
   }
  else {
-    bits=mantisa.longValue() << -discardedSize;
+    bits=mantissa.longValue() << -discardedSize;
     tempBits=bits;
     if ((bits & 3) == 3) {
       bits+=2;

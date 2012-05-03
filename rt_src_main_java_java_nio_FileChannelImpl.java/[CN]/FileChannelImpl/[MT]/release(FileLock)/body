@@ -1,0 +1,15 @@
+{
+  checkOpen();
+  StructFlock flock=new StructFlock();
+  flock.l_type=(short)F_UNLCK;
+  flock.l_whence=(short)SEEK_SET;
+  flock.l_start=lock.position();
+  flock.l_len=translateLockLength(lock.size());
+  try {
+    Libcore.os.fcntlFlock(fd,F_SETLKW64,flock);
+  }
+ catch (  ErrnoException errnoException) {
+    throw errnoException.rethrowAsIOException();
+  }
+  removeLock(lock);
+}

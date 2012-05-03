@@ -1,0 +1,27 @@
+{
+  final long NEGATIVE_ZERO=Double.doubleToLongBits(-0.0d);
+  int numNegativeZeros=0;
+  int n=right;
+  for (int k=left; k <= n; k++) {
+    double ak=a[k];
+    if (ak == 0.0d && NEGATIVE_ZERO == Double.doubleToLongBits(ak)) {
+      a[k]=0.0d;
+      numNegativeZeros++;
+    }
+ else     if (ak != ak) {
+      a[k--]=a[n];
+      a[n--]=Double.NaN;
+    }
+  }
+  doSort(a,left,n);
+  if (numNegativeZeros == 0) {
+    return;
+  }
+  int zeroIndex=findAnyZero(a,left,n);
+  for (int i=zeroIndex - 1; i >= left && a[i] == 0.0d; i--) {
+    zeroIndex=i;
+  }
+  for (int i=zeroIndex, m=zeroIndex + numNegativeZeros; i < m; i++) {
+    a[i]=-0.0d;
+  }
+}

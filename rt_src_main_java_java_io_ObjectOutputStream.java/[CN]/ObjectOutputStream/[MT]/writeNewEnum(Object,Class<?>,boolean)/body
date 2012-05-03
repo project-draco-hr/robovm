@@ -7,22 +7,29 @@
   }
   ObjectStreamClass classDesc=ObjectStreamClass.lookup(theClass);
   writeEnumDesc(theClass,classDesc,unshared);
-  Integer previousHandle=null;
+  int previousHandle=-1;
   if (unshared) {
     previousHandle=objectsWritten.get(object);
   }
-  Integer handle=nextHandle();
-  objectsWritten.put(object,handle);
+  int handle=registerObjectWritten(object);
   ObjectStreamField[] fields=classDesc.getSuperclass().fields();
-  Class<?> declaringClass=classDesc.getSuperclass().forClass();
-  if (null != fields && fields.length > 1) {
-    String str=(String)accessor.getObject(object,fields[1].getFieldID(accessor,declaringClass));
-    Integer strhandle=null;
-    if (!unshared) {
-      strhandle=dumpCycle(str);
+  if (fields != null && fields.length > 1) {
+    Field field=classDesc.getSuperclass().getReflectionField(fields[1]);
+    if (field == null) {
+      throw new NoSuchFieldError();
     }
-    if (null == strhandle) {
-      writeNewString(str,unshared);
+    try {
+      String str=(String)field.get(object);
+      int strHandle=-1;
+      if (!unshared) {
+        strHandle=dumpCycle(str);
+      }
+      if (strHandle == -1) {
+        writeNewString(str,unshared);
+      }
+    }
+ catch (    IllegalAccessException iae) {
+      throw new AssertionError(iae);
     }
   }
   if (unshared) {

@@ -1,0 +1,18 @@
+{
+  if (in.hasArray()) {
+    input=in.array();
+    inEnd=in.arrayOffset() + in.limit();
+    return in.arrayOffset() + in.position();
+  }
+ else {
+    inEnd=in.remaining();
+    if (allocatedInput == null || inEnd > allocatedInput.length) {
+      allocatedInput=new byte[inEnd];
+    }
+    int pos=in.position();
+    in.get(allocatedInput,0,inEnd);
+    in.position(pos);
+    input=allocatedInput;
+    return 0;
+  }
+}

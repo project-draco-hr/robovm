@@ -1,0 +1,18 @@
+{
+  FileDescriptor fd=IoBridge.socket(true);
+  boolean reached=false;
+  try {
+    if (source != null) {
+      IoBridge.bind(fd,source,0);
+    }
+    IoBridge.connect(fd,destination,7,timeout);
+    reached=true;
+  }
+ catch (  IOException e) {
+    if (e.getCause() instanceof ErrnoException) {
+      reached=(((ErrnoException)e.getCause()).errno == ECONNREFUSED);
+    }
+  }
+  IoBridge.closeSocket(fd);
+  return reached;
+}

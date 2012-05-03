@@ -1,0 +1,15 @@
+{
+  VMThread vmt=vmThread;
+  if (vmt == null) {
+    throw new AssertionError();
+  }
+synchronized (vmt) {
+    long delayMillis=time - System.currentTimeMillis();
+    if (delayMillis <= 0) {
+      parkState=ParkState.UNPARKED;
+    }
+ else {
+      parkFor(delayMillis * NANOS_PER_MILLI);
+    }
+  }
+}

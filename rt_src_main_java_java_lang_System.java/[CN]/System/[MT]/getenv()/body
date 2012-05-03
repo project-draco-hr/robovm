@@ -1,17 +1,10 @@
 {
-  SecurityManager secMgr=System.getSecurityManager();
-  if (secMgr != null) {
-    secMgr.checkPermission(new RuntimePermission("getenv.*"));
-  }
   Map<String,String> map=new HashMap<String,String>();
-  int index=0;
-  String entry=getEnvByIndex(index++);
-  while (entry != null) {
-    int pos=entry.indexOf('=');
-    if (pos != -1) {
-      map.put(entry.substring(0,pos),entry.substring(pos + 1));
+  for (  String entry : Libcore.os.environ()) {
+    int index=entry.indexOf('=');
+    if (index != -1) {
+      map.put(entry.substring(0,index),entry.substring(index + 1));
     }
-    entry=getEnvByIndex(index++);
   }
   return new SystemEnvironment(map);
 }

@@ -1,0 +1,30 @@
+{
+  if (!in.hasRemaining()) {
+    return CoderResult.UNDERFLOW;
+  }
+  data[INPUT_OFFSET]=getArray(in);
+  data[OUTPUT_OFFSET]=getArray(out);
+  data[INVALID_CHARS]=0;
+  try {
+    ec=NativeConverter.encode(converterHandle,input,inEnd,output,outEnd,data,false);
+    if (ErrorCode.isFailure(ec)) {
+      if (ec == ErrorCode.U_BUFFER_OVERFLOW_ERROR) {
+        return CoderResult.OVERFLOW;
+      }
+ else       if (ec == ErrorCode.U_INVALID_CHAR_FOUND) {
+        return CoderResult.unmappableForLength(data[INVALID_CHARS]);
+      }
+ else       if (ec == ErrorCode.U_ILLEGAL_CHAR_FOUND) {
+        return CoderResult.malformedForLength(data[INVALID_CHARS]);
+      }
+ else {
+        throw new AssertionError("unexpected failure: " + ec);
+      }
+    }
+    return CoderResult.UNDERFLOW;
+  }
+  finally {
+    setPosition(in);
+    setPosition(out);
+  }
+}

@@ -1,0 +1,37 @@
+{
+  if (processNamespacePrefixes && processNamespaces) {
+    throw new SAXNotSupportedException("The 'namespace-prefix' " + "feature is not supported while the 'namespaces' " + "feature is enabled.");
+  }
+  Reader reader=input.getCharacterStream();
+  if (reader != null) {
+    try {
+      parse(reader,input.getPublicId(),input.getSystemId());
+    }
+  finally {
+      IoUtils.closeQuietly(reader);
+    }
+    return;
+  }
+  InputStream in=input.getByteStream();
+  String encoding=input.getEncoding();
+  if (in != null) {
+    try {
+      parse(in,encoding,input.getPublicId(),input.getSystemId());
+    }
+  finally {
+      IoUtils.closeQuietly(in);
+    }
+    return;
+  }
+  String systemId=input.getSystemId();
+  if (systemId == null) {
+    throw new SAXException("No input specified.");
+  }
+  in=ExpatParser.openUrl(systemId);
+  try {
+    parse(in,encoding,input.getPublicId(),systemId);
+  }
+  finally {
+    IoUtils.closeQuietly(in);
+  }
+}

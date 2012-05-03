@@ -1,44 +1,22 @@
 {
-  char[] charVal=val.toCharArray();
-  int i;
-  int j;
-  int digit;
-  if ((charVal.length < 27) || (charVal.length > 45)) {
-    throw new IllegalArgumentException(Messages.getString("math.0E"));
+  int precisionLength="precision=".length();
+  int roundingModeLength="roundingMode=".length();
+  int spaceIndex;
+  if (!s.startsWith("precision=") || (spaceIndex=s.indexOf(' ',precisionLength)) == -1) {
+    throw invalidMathContext("Missing precision",s);
   }
-  for (i=0; (i < chPrecision.length) && (charVal[i] == chPrecision[i]); i++) {
-    ;
+  String precisionString=s.substring(precisionLength,spaceIndex);
+  try {
+    this.precision=Integer.parseInt(precisionString);
   }
-  if (i < chPrecision.length) {
-    throw new IllegalArgumentException(Messages.getString("math.0E"));
+ catch (  NumberFormatException nfe) {
+    throw invalidMathContext("Bad precision",s);
   }
-  digit=Character.digit(charVal[i],10);
-  if (digit == -1) {
-    throw new IllegalArgumentException(Messages.getString("math.0E"));
+  int roundingModeStart=spaceIndex + 1;
+  if (!s.regionMatches(roundingModeStart,"roundingMode=",0,roundingModeLength)) {
+    throw invalidMathContext("Missing rounding mode",s);
   }
-  this.precision=this.precision * 10 + digit;
-  i++;
-  do {
-    digit=Character.digit(charVal[i],10);
-    if (digit == -1) {
-      if (charVal[i] == ' ') {
-        i++;
-        break;
-      }
-      throw new IllegalArgumentException(Messages.getString("math.0E"));
-    }
-    this.precision=this.precision * 10 + digit;
-    if (this.precision < 0) {
-      throw new IllegalArgumentException(Messages.getString("math.0E"));
-    }
-    i++;
-  }
- while (true);
-  for (j=0; (j < chRoundingMode.length) && (charVal[i] == chRoundingMode[j]); i++, j++) {
-    ;
-  }
-  if (j < chRoundingMode.length) {
-    throw new IllegalArgumentException(Messages.getString("math.0E"));
-  }
-  this.roundingMode=RoundingMode.valueOf(String.valueOf(charVal,i,charVal.length - i));
+  roundingModeStart+=roundingModeLength;
+  this.roundingMode=RoundingMode.valueOf(s.substring(roundingModeStart));
+  checkValid();
 }

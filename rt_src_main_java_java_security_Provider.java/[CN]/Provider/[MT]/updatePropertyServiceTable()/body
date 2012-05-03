@@ -27,7 +27,7 @@
       serviceName=service_alias.substring(0,i);
       aliasName=service_alias.substring(i + 1);
       algorithm=value;
-      String algUp=algorithm.toUpperCase();
+      String algUp=algorithm.toUpperCase(Locale.US);
       Object o=null;
       if (propertyServiceTable == null) {
         propertyServiceTable=new TwoKeyHashMap<String,String,Service>(128);
@@ -37,11 +37,11 @@
       }
       if (o != null) {
         s=(Provider.Service)o;
-        s.aliases.add(aliasName);
+        s.addAlias(aliasName);
         if (propertyAliasTable == null) {
           propertyAliasTable=new TwoKeyHashMap<String,String,Service>(256);
         }
-        propertyAliasTable.put(serviceName,aliasName.toUpperCase(),s);
+        propertyAliasTable.put(serviceName,aliasName.toUpperCase(Locale.US),s);
       }
  else {
         String className=(String)changedProperties.get(serviceName + "." + algorithm);
@@ -53,7 +53,7 @@
           if (propertyAliasTable == null) {
             propertyAliasTable=new TwoKeyHashMap<String,String,Service>(256);
           }
-          propertyAliasTable.put(serviceName,aliasName.toUpperCase(),s);
+          propertyAliasTable.put(serviceName,aliasName.toUpperCase(Locale.US),s);
         }
       }
       continue;
@@ -66,7 +66,7 @@
     if (i == -1) {
       serviceName=key.substring(0,j);
       algorithm=key.substring(j + 1);
-      String alg=algorithm.toUpperCase();
+      String alg=algorithm.toUpperCase(Locale.US);
       Object o=null;
       if (propertyServiceTable != null) {
         o=propertyServiceTable.get(serviceName,alg);
@@ -76,7 +76,7 @@
         s.className=value;
       }
  else {
-        s=new Provider.Service(this,serviceName,algorithm,value,new ArrayList<String>(),new HashMap<String,String>());
+        s=new Provider.Service(this,serviceName,algorithm,value,Collections.<String>emptyList(),Collections.<String,String>emptyMap());
         if (propertyServiceTable == null) {
           propertyServiceTable=new TwoKeyHashMap<String,String,Service>(128);
         }
@@ -87,14 +87,14 @@
       serviceName=key.substring(0,j);
       algorithm=key.substring(j + 1,i);
       String attribute=key.substring(i + 1);
-      String alg=algorithm.toUpperCase();
+      String alg=algorithm.toUpperCase(Locale.US);
       Object o=null;
       if (propertyServiceTable != null) {
         o=propertyServiceTable.get(serviceName,alg);
       }
       if (o != null) {
         s=(Provider.Service)o;
-        s.attributes.put(attribute,value);
+        s.putAttribute(attribute,value);
       }
  else {
         String className=(String)changedProperties.get(serviceName + "." + algorithm);
@@ -111,5 +111,5 @@
     }
   }
   servicesChanged();
-  changedProperties.clear();
+  changedProperties=null;
 }

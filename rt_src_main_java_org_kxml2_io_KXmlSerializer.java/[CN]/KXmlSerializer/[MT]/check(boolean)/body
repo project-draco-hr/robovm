@@ -1,0 +1,30 @@
+{
+  if (!pending)   return;
+  depth++;
+  pending=false;
+  if (indent.length <= depth) {
+    boolean[] hlp=new boolean[depth + 4];
+    System.arraycopy(indent,0,hlp,0,depth);
+    indent=hlp;
+  }
+  indent[depth]=indent[depth - 1];
+  for (int i=nspCounts[depth - 1]; i < nspCounts[depth]; i++) {
+    writer.write(' ');
+    writer.write("xmlns");
+    if (!nspStack[i * 2].isEmpty()) {
+      writer.write(':');
+      writer.write(nspStack[i * 2]);
+    }
+ else     if (getNamespace().isEmpty() && !nspStack[i * 2 + 1].isEmpty())     throw new IllegalStateException("Cannot set default namespace for elements in no namespace");
+    writer.write("=\"");
+    writeEscaped(nspStack[i * 2 + 1],'"');
+    writer.write('"');
+  }
+  if (nspCounts.length <= depth + 1) {
+    int[] hlp=new int[depth + 8];
+    System.arraycopy(nspCounts,0,hlp,0,depth + 1);
+    nspCounts=hlp;
+  }
+  nspCounts[depth + 1]=nspCounts[depth];
+  writer.write(close ? " />" : ">");
+}

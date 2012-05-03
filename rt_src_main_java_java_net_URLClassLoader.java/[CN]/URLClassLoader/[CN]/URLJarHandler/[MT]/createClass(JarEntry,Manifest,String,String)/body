@@ -1,21 +1,11 @@
 {
-  InputStream is=null;
-  byte[] clBuf=null;
+  byte[] clBuf;
   try {
-    is=jf.getInputStream(entry);
-    clBuf=getBytes(is);
+    InputStream is=jf.getInputStream(entry);
+    clBuf=Streams.readFully(is);
   }
  catch (  IOException e) {
     return null;
-  }
- finally {
-    if (is != null) {
-      try {
-        is.close();
-      }
- catch (      IOException e) {
-      }
-    }
   }
   if (packageName != null) {
     String packageDotName=packageName.replace('/','.');
@@ -36,7 +26,7 @@
         }
       }
       if (exception) {
-        throw new SecurityException(Messages.getString("luni.A1",packageName));
+        throw new SecurityException(String.format("Package %s is sealed",packageName));
       }
     }
   }

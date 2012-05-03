@@ -1,25 +1,19 @@
 {
-  super();
   String className=this.getClass().getName();
   final String targetName=manager.getProperty(className + ".target");
   try {
-    Class<?> targetClass=AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>(){
-      public Class<?> run() throws Exception {
-        ClassLoader loader=Thread.currentThread().getContextClassLoader();
-        if (loader == null) {
-          loader=ClassLoader.getSystemClassLoader();
-        }
-        return loader.loadClass(targetName);
-      }
+    ClassLoader loader=Thread.currentThread().getContextClassLoader();
+    if (loader == null) {
+      loader=ClassLoader.getSystemClassLoader();
     }
-);
+    Class<?> targetClass=loader.loadClass(targetName);
     target=(Handler)targetClass.newInstance();
   }
  catch (  Exception e) {
-    throw new RuntimeException(Messages.getString("logging.10",targetName));
+    throw new RuntimeException("Cannot load target handler '" + targetName + "'");
   }
   String sizeString=manager.getProperty(className + ".size");
-  if (null != sizeString) {
+  if (sizeString != null) {
     try {
       size=Integer.parseInt(sizeString);
       if (size <= 0) {
@@ -31,7 +25,7 @@
     }
   }
   String pushName=manager.getProperty(className + ".push");
-  if (null != pushName) {
+  if (pushName != null) {
     try {
       push=Level.parse(pushName);
     }

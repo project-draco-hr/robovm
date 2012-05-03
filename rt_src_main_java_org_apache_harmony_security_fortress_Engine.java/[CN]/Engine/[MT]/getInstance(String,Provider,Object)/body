@@ -1,12 +1,10 @@
 {
-  Provider.Service serv=null;
   if (algorithm == null) {
-    throw new NoSuchAlgorithmException(Messages.getString("security.14B",serviceName));
+    throw new NoSuchAlgorithmException("algorithm == null");
   }
-  serv=provider.getService(serviceName,algorithm);
-  if (serv == null) {
-    throw new NoSuchAlgorithmException(Messages.getString("security.14A",serviceName,algorithm));
+  Provider.Service service=provider.getService(serviceName,algorithm);
+  if (service == null) {
+    throw notFound(serviceName,algorithm);
   }
-  spi=serv.newInstance(param);
-  this.provider=provider;
+  return service.newInstance(param);
 }

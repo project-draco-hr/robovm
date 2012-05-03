@@ -1,26 +1,32 @@
 {
-  if (timeout < 0) {
-    throw new IllegalArgumentException();
+  if (timeoutMillis < 0) {
+    throw new IllegalArgumentException("timeout < 0: " + timeoutMillis);
   }
-  Reference<? extends T> ref;
-synchronized (this) {
-    if (empty) {
-      wait(timeout);
-      if (empty) {
-        return null;
-      }
-    }
-    ref=references[head++];
-    ref.dequeue();
-    if (head == references.length) {
-      head=0;
-    }
-    if (head == tail) {
-      empty=true;
-    }
- else {
-      notifyAll();
-    }
+  if (head != null) {
+    return poll();
   }
-  return ref;
+  if (timeoutMillis == 0 || (timeoutMillis > Long.MAX_VALUE / NANOS_PER_MILLI)) {
+    do {
+      wait(0);
+    }
+ while (head == null);
+    return poll();
+  }
+  long nanosToWait=timeoutMillis * NANOS_PER_MILLI;
+  int timeoutNanos=0;
+  long startTime=System.nanoTime();
+  while (true) {
+    wait(timeoutMillis,timeoutNanos);
+    if (head != null) {
+      break;
+    }
+    long nanosElapsed=System.nanoTime() - startTime;
+    long nanosRemaining=nanosToWait - nanosElapsed;
+    if (nanosRemaining <= 0) {
+      break;
+    }
+    timeoutMillis=nanosRemaining / NANOS_PER_MILLI;
+    timeoutNanos=(int)(nanosRemaining - timeoutMillis * NANOS_PER_MILLI);
+  }
+  return poll();
 }

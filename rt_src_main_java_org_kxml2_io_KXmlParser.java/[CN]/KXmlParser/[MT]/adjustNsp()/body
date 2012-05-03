@@ -1,0 +1,75 @@
+{
+  boolean any=false;
+  for (int i=0; i < attributeCount << 2; i+=4) {
+    String attrName=attributes[i + 2];
+    int cut=attrName.indexOf(':');
+    String prefix;
+    if (cut != -1) {
+      prefix=attrName.substring(0,cut);
+      attrName=attrName.substring(cut + 1);
+    }
+ else     if (attrName.equals("xmlns")) {
+      prefix=attrName;
+      attrName=null;
+    }
+ else {
+      continue;
+    }
+    if (!prefix.equals("xmlns")) {
+      any=true;
+    }
+ else {
+      int j=(nspCounts[depth]++) << 1;
+      nspStack=ensureCapacity(nspStack,j + 2);
+      nspStack[j]=attrName;
+      nspStack[j + 1]=attributes[i + 3];
+      if (attrName != null && attributes[i + 3].isEmpty()) {
+        checkRelaxed("illegal empty namespace");
+      }
+      if (keepNamespaceAttributes) {
+        attributes[i]="http://www.w3.org/2000/xmlns/";
+        any=true;
+      }
+ else {
+        System.arraycopy(attributes,i + 4,attributes,i,((--attributeCount) << 2) - i);
+        i-=4;
+      }
+    }
+  }
+  if (any) {
+    for (int i=(attributeCount << 2) - 4; i >= 0; i-=4) {
+      String attrName=attributes[i + 2];
+      int cut=attrName.indexOf(':');
+      if (cut == 0 && !relaxed) {
+        throw new RuntimeException("illegal attribute name: " + attrName + " at "+ this);
+      }
+ else       if (cut != -1) {
+        String attrPrefix=attrName.substring(0,cut);
+        attrName=attrName.substring(cut + 1);
+        String attrNs=getNamespace(attrPrefix);
+        if (attrNs == null && !relaxed) {
+          throw new RuntimeException("Undefined Prefix: " + attrPrefix + " in "+ this);
+        }
+        attributes[i]=attrNs;
+        attributes[i + 1]=attrPrefix;
+        attributes[i + 2]=attrName;
+      }
+    }
+  }
+  int cut=name.indexOf(':');
+  if (cut == 0) {
+    checkRelaxed("illegal tag name: " + name);
+  }
+  if (cut != -1) {
+    prefix=name.substring(0,cut);
+    name=name.substring(cut + 1);
+  }
+  this.namespace=getNamespace(prefix);
+  if (this.namespace == null) {
+    if (prefix != null) {
+      checkRelaxed("undefined prefix: " + prefix);
+    }
+    this.namespace=NO_NAMESPACE;
+  }
+  return any;
+}

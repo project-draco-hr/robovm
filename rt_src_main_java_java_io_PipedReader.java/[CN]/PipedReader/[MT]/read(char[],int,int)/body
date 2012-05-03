@@ -1,59 +1,55 @@
 {
-synchronized (lock) {
-    if (!isConnected) {
-      throw new IOException(Messages.getString("luni.D1"));
-    }
-    if (data == null) {
-      throw new IOException(Messages.getString("luni.CF"));
-    }
-    if (offset < 0 || count > buffer.length - offset || count < 0) {
-      throw new IndexOutOfBoundsException();
-    }
-    if (count == 0) {
-      return 0;
-    }
-    lastReader=Thread.currentThread();
-    try {
-      boolean first=true;
-      while (in == -1) {
-        if (isClosed) {
-          return -1;
-        }
-        if (!first && lastWriter != null && !lastWriter.isAlive()) {
-          throw new IOException(Messages.getString("luni.CE"));
-        }
-        first=false;
-        lock.notifyAll();
-        lock.wait(1000);
+  if (!isConnected) {
+    throw new IOException("Pipe not connected");
+  }
+  if (this.buffer == null) {
+    throw new IOException("Pipe is closed");
+  }
+  Arrays.checkOffsetAndCount(buffer.length,offset,count);
+  if (count == 0) {
+    return 0;
+  }
+  lastReader=Thread.currentThread();
+  try {
+    boolean first=true;
+    while (in == -1) {
+      if (isClosed) {
+        return -1;
       }
-    }
- catch (    InterruptedException e) {
-      throw new InterruptedIOException();
-    }
-    int copyLength=0;
-    if (out >= in) {
-      copyLength=count > data.length - out ? data.length - out : count;
-      System.arraycopy(data,out,buffer,offset,copyLength);
-      out+=copyLength;
-      if (out == data.length) {
-        out=0;
+      if (!first && lastWriter != null && !lastWriter.isAlive()) {
+        throw new IOException("Pipe broken");
       }
-      if (out == in) {
-        in=-1;
-        out=0;
-      }
+      first=false;
+      notifyAll();
+      wait(1000);
     }
-    if (copyLength == count || in == -1) {
-      return copyLength;
-    }
-    int charsCopied=copyLength;
-    copyLength=in - out > count - copyLength ? count - copyLength : in - out;
-    System.arraycopy(data,out,buffer,offset + charsCopied,copyLength);
+  }
+ catch (  InterruptedException e) {
+    throw new InterruptedIOException();
+  }
+  int copyLength=0;
+  if (out >= in) {
+    copyLength=count > this.buffer.length - out ? this.buffer.length - out : count;
+    System.arraycopy(this.buffer,out,buffer,offset,copyLength);
     out+=copyLength;
+    if (out == this.buffer.length) {
+      out=0;
+    }
     if (out == in) {
       in=-1;
       out=0;
     }
-    return charsCopied + copyLength;
   }
+  if (copyLength == count || in == -1) {
+    return copyLength;
+  }
+  int charsCopied=copyLength;
+  copyLength=in - out > count - copyLength ? count - copyLength : in - out;
+  System.arraycopy(this.buffer,out,buffer,offset + charsCopied,copyLength);
+  out+=copyLength;
+  if (out == in) {
+    in=-1;
+    out=0;
+  }
+  return charsCopied + copyLength;
 }

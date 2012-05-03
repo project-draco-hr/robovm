@@ -1,0 +1,20 @@
+{
+  if (serializerClasses == null) {
+    throw new XmlPullParserException("Factory initialization incomplete - has not tried " + classNamesLocation);
+  }
+  if (serializerClasses.size() == 0) {
+    throw new XmlPullParserException("No valid serializer classes found in " + classNamesLocation);
+  }
+  final StringBuilder issues=new StringBuilder();
+  for (int i=0; i < serializerClasses.size(); i++) {
+    final Class ppClass=(Class)serializerClasses.get(i);
+    try {
+      final XmlSerializer ser=(XmlSerializer)ppClass.newInstance();
+      return ser;
+    }
+ catch (    Exception ex) {
+      issues.append(ppClass.getName() + ": " + ex.toString()+ "; ");
+    }
+  }
+  throw new XmlPullParserException("could not create serializer: " + issues);
+}

@@ -1,0 +1,14 @@
+{
+  check(false);
+  data=data.replace("]]>","]]]]><![CDATA[>");
+  char[] chars=data.toCharArray();
+  for (  char ch : chars) {
+    boolean valid=(ch >= 0x20 && ch <= 0xd7ff) || (ch == '\t' || ch == '\n' || ch == '\r') || (ch >= 0xe000 && ch <= 0xfffd);
+    if (!valid) {
+      reportInvalidCharacter(ch);
+    }
+  }
+  writer.write("<![CDATA[");
+  writer.write(chars,0,chars.length);
+  writer.write("]]>");
+}

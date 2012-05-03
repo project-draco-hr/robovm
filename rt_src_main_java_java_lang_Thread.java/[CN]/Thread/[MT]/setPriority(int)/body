@@ -1,12 +1,13 @@
 {
   if (priority < Thread.MIN_PRIORITY || priority > Thread.MAX_PRIORITY) {
-    throw new IllegalArgumentException("Prioritiy out of range");
+    throw new IllegalArgumentException("Priority out of range");
   }
-  if (priority > threadGroup.getMaxPriority()) {
-    priority=threadGroup.getMaxPriority();
-  }
-  if (threadPtr != 0) {
-    internalSetPriority(this,priority);
+  if (priority > group.getMaxPriority()) {
+    priority=group.getMaxPriority();
   }
   this.priority=priority;
+  VMThread vmt=this.vmThread;
+  if (vmt != null) {
+    vmt.setPriority(priority);
+  }
 }

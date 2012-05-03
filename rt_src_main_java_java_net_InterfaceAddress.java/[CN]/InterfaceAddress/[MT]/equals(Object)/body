@@ -2,15 +2,9 @@
   if (obj == this) {
     return true;
   }
-  if (obj instanceof InterfaceAddress) {
-    InterfaceAddress anotherInterAddr=(InterfaceAddress)obj;
-    boolean equals=addr == null ? anotherInterAddr.getAddress() == null : addr.equals(anotherInterAddr.getAddress());
-    if (equals && (anotherInterAddr.getNetworkPrefixLength() == prefixLength)) {
-      InetAddress boardcast=cacheBroadcast.ipaddress == null ? getBroadcast() : cacheBroadcast;
-      InetAddress anotherBoardcast=anotherInterAddr.getBroadcast();
-      equals=boardcast == null ? anotherBoardcast == null : boardcast.equals(anotherBoardcast);
-    }
-    return equals;
+  if (!(obj instanceof InterfaceAddress)) {
+    return false;
   }
-  return false;
+  InterfaceAddress rhs=(InterfaceAddress)obj;
+  return ((address == null) ? rhs.address == null : address.equals(rhs.address)) && (rhs.prefixLength == prefixLength) && ((broadcastAddress == null) ? rhs.broadcastAddress == null : broadcastAddress.equals(rhs.broadcastAddress));
 }

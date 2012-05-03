@@ -3,33 +3,8 @@
     throw new NullPointerException();
   }
   this.roundingMode=roundingMode;
-switch (roundingMode) {
-case CEILING:
-    dform.setRoundingMode(com.ibm.icu.math.BigDecimal.ROUND_CEILING);
-  break;
-case DOWN:
-dform.setRoundingMode(com.ibm.icu.math.BigDecimal.ROUND_DOWN);
-break;
-case UP:
-dform.setRoundingMode(com.ibm.icu.math.BigDecimal.ROUND_UP);
-break;
-case FLOOR:
-dform.setRoundingMode(com.ibm.icu.math.BigDecimal.ROUND_FLOOR);
-break;
-case HALF_DOWN:
-dform.setRoundingMode(com.ibm.icu.math.BigDecimal.ROUND_HALF_DOWN);
-break;
-case HALF_UP:
-dform.setRoundingMode(com.ibm.icu.math.BigDecimal.ROUND_HALF_UP);
-break;
-case UNNECESSARY:
-dform.setRoundingMode(com.ibm.icu.math.BigDecimal.ROUND_UNNECESSARY);
-break;
-case HALF_EVEN:
-dform.setRoundingMode(com.ibm.icu.math.BigDecimal.ROUND_HALF_EVEN);
-break;
-default :
-break;
-}
-setRoundingIncrement(getMaximumFractionDigits());
+  if (roundingMode != RoundingMode.UNNECESSARY) {
+    double roundingIncrement=1.0 / Math.pow(10,Math.max(0,getMaximumFractionDigits()));
+    dform.setRoundingMode(roundingMode,roundingIncrement);
+  }
 }

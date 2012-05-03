@@ -1,0 +1,66 @@
+{
+  if (arg == null) {
+    return transformFromNull();
+  }
+ else   if (arg instanceof Float || arg instanceof Double) {
+    Number number=(Number)arg;
+    double d=number.doubleValue();
+    if (d != d || d == Double.POSITIVE_INFINITY || d == Double.NEGATIVE_INFINITY) {
+      return transformFromSpecialNumber(d);
+    }
+  }
+ else   if (arg instanceof BigDecimal) {
+  }
+ else {
+    throw badArgumentType();
+  }
+  char conversionType=formatToken.getConversionType();
+  if (conversionType != 'a' && conversionType != 'A' && !formatToken.isPrecisionSet()) {
+    formatToken.setPrecision(FormatToken.DEFAULT_PRECISION);
+  }
+  StringBuilder result=new StringBuilder();
+switch (conversionType) {
+case 'a':
+case 'A':
+    transformA(result);
+  break;
+case 'e':
+case 'E':
+transformE(result);
+break;
+case 'f':
+transformF(result);
+break;
+case 'g':
+case 'G':
+transformG(result);
+break;
+default :
+throw formatToken.unknownFormatConversionException();
+}
+formatToken.setPrecision(FormatToken.UNSET);
+int startIndex=0;
+if (result.charAt(0) == localeData.minusSign) {
+if (formatToken.flagParenthesis) {
+return wrapParentheses(result);
+}
+}
+ else {
+if (formatToken.flagSpace) {
+result.insert(0,' ');
+startIndex++;
+}
+if (formatToken.flagPlus) {
+result.insert(0,'+');
+startIndex++;
+}
+}
+char firstChar=result.charAt(0);
+if (formatToken.flagZero && (firstChar == '+' || firstChar == localeData.minusSign)) {
+startIndex=1;
+}
+if (conversionType == 'a' || conversionType == 'A') {
+startIndex+=2;
+}
+return padding(result,startIndex);
+}

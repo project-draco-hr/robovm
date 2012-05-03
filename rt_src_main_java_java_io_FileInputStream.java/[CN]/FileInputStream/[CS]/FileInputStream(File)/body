@@ -1,16 +1,8 @@
 {
-  super();
-  SecurityManager security=System.getSecurityManager();
-  if (security != null) {
-    String filePath=(null == file ? null : file.getPath());
-    security.checkRead(filePath);
-  }
   if (file == null) {
-    throw new NullPointerException(Messages.getString("luni.4D"));
+    throw new NullPointerException("file == null");
   }
-  fd=new FileDescriptor();
-  fd.readOnly=true;
-  fd.descriptor=fileSystem.open(file.properPath(true),IFileSystem.O_RDONLY);
-  innerFD=true;
-  channel=FileChannelFactory.getFileChannel(this,fd.descriptor,IFileSystem.O_RDONLY);
+  this.fd=IoBridge.open(file.getAbsolutePath(),O_RDONLY);
+  this.shouldClose=true;
+  guard.open("close");
 }

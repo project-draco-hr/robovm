@@ -12,29 +12,24 @@
         passW=((KeyStore.PasswordProtection)protParam).getPassword();
       }
  catch (      IllegalStateException ee) {
-        throw new KeyStoreException(Messages.getString("security.36"),ee);
+        throw new KeyStoreException("Password was destroyed",ee);
       }
     }
  else     if (protParam instanceof KeyStore.CallbackHandlerProtection) {
       passW=getPasswordFromCallBack(protParam);
     }
  else {
-      throw new UnrecoverableEntryException(Messages.getString("security.37",protParam.toString()));
+      throw new UnrecoverableEntryException("ProtectionParameter object is not " + "PasswordProtection: " + protParam);
     }
   }
   if (engineIsKeyEntry(alias)) {
-    try {
-      Key key=engineGetKey(alias,passW);
-      if (key instanceof PrivateKey) {
-        return new KeyStore.PrivateKeyEntry((PrivateKey)key,engineGetCertificateChain(alias));
-      }
-      if (key instanceof SecretKey) {
-        return new KeyStore.SecretKeyEntry((SecretKey)key);
-      }
+    Key key=engineGetKey(alias,passW);
+    if (key instanceof PrivateKey) {
+      return new KeyStore.PrivateKeyEntry((PrivateKey)key,engineGetCertificateChain(alias));
     }
- catch (    UnrecoverableKeyException e) {
-      throw new KeyStoreException(e);
+    if (key instanceof SecretKey) {
+      return new KeyStore.SecretKeyEntry((SecretKey)key);
     }
   }
-  throw new NoSuchAlgorithmException(Messages.getString("security.38"));
+  throw new NoSuchAlgorithmException("Unknown KeyStore.Entry object");
 }

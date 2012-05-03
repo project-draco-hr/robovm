@@ -1,7 +1,5 @@
 {
-  if (cDir == null) {
-    throw new IOException(Messages.getString("archive.1E"));
-  }
+  checkClosed();
   if (currentEntry == null) {
     return;
   }
@@ -10,10 +8,10 @@
   }
   if (currentEntry.getMethod() == STORED) {
     if (crc.getValue() != currentEntry.crc) {
-      throw new ZipException(Messages.getString("archive.20"));
+      throw new ZipException("CRC mismatch");
     }
     if (currentEntry.size != crc.tbytes) {
-      throw new ZipException(Messages.getString("archive.21"));
+      throw new ZipException("Size mismatch");
     }
   }
   curOffset=LOCHDR;
@@ -24,10 +22,12 @@
     writeLong(out,currentEntry.compressedSize=def.getTotalOut());
     writeLong(out,currentEntry.size=def.getTotalIn());
   }
+  int flags=currentEntry.getMethod() == STORED ? 0 : ZipFile.GPBF_DATA_DESCRIPTOR_FLAG;
+  flags|=ZipFile.GPBF_UTF8_FLAG;
   writeLong(cDir,CENSIG);
   writeShort(cDir,ZIPLocalHeaderVersionNeeded);
   writeShort(cDir,ZIPLocalHeaderVersionNeeded);
-  writeShort(cDir,currentEntry.getMethod() == STORED ? 0 : ZIPDataDescriptorFlag);
+  writeShort(cDir,flags);
   writeShort(cDir,currentEntry.getMethod());
   writeShort(cDir,currentEntry.time);
   writeShort(cDir,currentEntry.modDate);

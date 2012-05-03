@@ -1,21 +1,17 @@
 {
-  Node<E> h=head;
-  Node<E> p=h;
-  for (int hops=0; ; hops++) {
-    E item=p.getItem();
-    if (item != null && p.casItem(item,null)) {
-      if (hops >= HOPS) {
-        Node<E> q=p.getNext();
-        updateHead(h,(q != null) ? q : p);
+  restartFromHead:   for (; ; ) {
+    for (Node<E> h=head, p=h, q; ; ) {
+      E item=p.item;
+      if (item != null && p.casItem(item,null)) {
+        if (p != h)         updateHead(h,((q=p.next) != null) ? q : p);
+        return item;
       }
-      return item;
+ else       if ((q=p.next) == null) {
+        updateHead(h,p);
+        return null;
+      }
+ else       if (p == q)       continue restartFromHead;
+ else       p=q;
     }
-    Node<E> next=succ(p);
-    if (next == null) {
-      updateHead(h,p);
-      break;
-    }
-    p=next;
   }
-  return null;
 }

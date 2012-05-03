@@ -1,19 +1,18 @@
 {
   if (prefix.length() < 3) {
-    throw new IllegalArgumentException(Messages.getString("luni.B5"));
+    throw new IllegalArgumentException("prefix must be at least 3 characters");
   }
-  String newSuffix=suffix == null ? ".tmp" : suffix;
-  File tmpDirFile;
-  if (directory == null) {
-    String tmpDir=AccessController.doPrivileged(new PriviAction<String>("java.io.tmpdir","."));
+  if (suffix == null) {
+    suffix=".tmp";
+  }
+  File tmpDirFile=directory;
+  if (tmpDirFile == null) {
+    String tmpDir=System.getProperty("java.io.tmpdir",".");
     tmpDirFile=new File(tmpDir);
-  }
- else {
-    tmpDirFile=directory;
   }
   File result;
   do {
-    result=genTempFile(prefix,newSuffix,tmpDirFile);
+    result=new File(tmpDirFile,prefix + tempFileRandom.nextInt() + suffix);
   }
  while (!result.createNewFile());
   return result;

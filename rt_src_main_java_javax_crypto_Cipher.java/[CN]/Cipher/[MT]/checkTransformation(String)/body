@@ -1,25 +1,23 @@
 {
-  String[] transf={null,null,null};
-  StringTokenizer st;
-  int i=0;
-  for (st=new StringTokenizer(transformation,"/"); st.hasMoreElements(); ) {
-    if (i > 2) {
-      throw new NoSuchAlgorithmException(Messages.getString("crypto.17",transformation));
-    }
-    transf[i]=st.nextToken();
-    if (transf[i] != null) {
-      transf[i]=transf[i].trim();
-      if ("".equals(transf[i])) {
-        transf[i]=null;
-      }
-      i++;
+  if (transformation.startsWith("/")) {
+    transformation=transformation.substring(1);
+  }
+  String[] pieces=transformation.split("/");
+  if (pieces.length > 3) {
+    throw invalidTransformation(transformation);
+  }
+  String[] result=new String[3];
+  for (int i=0; i < pieces.length; ++i) {
+    String piece=pieces[i].trim();
+    if (!piece.isEmpty()) {
+      result[i]=piece;
     }
   }
-  if (transf[0] == null) {
-    throw new NoSuchAlgorithmException(Messages.getString("crypto.17",transformation));
+  if (result[0] == null) {
+    throw invalidTransformation(transformation);
   }
-  if (!(transf[1] == null && transf[2] == null) && (transf[1] == null || transf[2] == null)) {
-    throw new NoSuchAlgorithmException(Messages.getString("crypto.17",transformation));
+  if (!(result[1] == null && result[2] == null) && (result[1] == null || result[2] == null)) {
+    throw invalidTransformation(transformation);
   }
-  return transf;
+  return result;
 }

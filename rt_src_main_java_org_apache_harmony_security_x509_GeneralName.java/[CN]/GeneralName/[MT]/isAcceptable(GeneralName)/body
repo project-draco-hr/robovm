@@ -4,7 +4,7 @@
   }
 switch (this.tag) {
 case RFC822_NAME:
-    return ((String)gname.getName()).toLowerCase().endsWith(((String)name).toLowerCase());
+    return ((String)gname.getName()).toLowerCase(Locale.US).endsWith(((String)name).toLowerCase(Locale.US));
 case DNS_NAME:
   String dns=(String)name;
 String _dns=(String)gname.getName();
@@ -12,7 +12,7 @@ if (dns.equalsIgnoreCase(_dns)) {
 return true;
 }
  else {
-return _dns.toLowerCase().endsWith("." + dns.toLowerCase());
+return _dns.toLowerCase(Locale.US).endsWith("." + dns.toLowerCase(Locale.US));
 }
 case UR_ID:
 String uri=(String)name;
@@ -24,7 +24,7 @@ begin=uri.indexOf("://") + 3;
 end=uri.indexOf('/',begin);
 String _host=(end == -1) ? uri.substring(begin) : uri.substring(begin,end);
 if (host.startsWith(".")) {
-return _host.toLowerCase().endsWith(host.toLowerCase());
+return _host.toLowerCase(Locale.US).endsWith(host.toLowerCase(Locale.US));
 }
  else {
 return host.equalsIgnoreCase(_host);
@@ -39,7 +39,10 @@ return Arrays.equals(address,_address);
 }
  else if (length == 2 * _length) {
 for (int i=0; i < _address.length; i++) {
-if ((_address[i] < address[i]) || (_address[i] > address[i + _length])) {
+int octet=_address[i] & 0xff;
+int min=address[i] & 0xff;
+int max=address[i + _length] & 0xff;
+if ((octet < min) || (octet > max)) {
 return false;
 }
 }

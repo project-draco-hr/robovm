@@ -1,0 +1,32 @@
+{
+  if (name == null) {
+    throw new NullPointerException();
+  }
+  AbstractPreferences startNode=null;
+synchronized (lock) {
+    if (isRemoved()) {
+      if (name.isEmpty()) {
+        return false;
+      }
+      throw new IllegalStateException("This node has been removed");
+    }
+    validateName(name);
+    if (name.isEmpty() || "/".equals(name)) {
+      return true;
+    }
+    if (name.startsWith("/")) {
+      startNode=root;
+      name=name.substring(1);
+    }
+ else {
+      startNode=this;
+    }
+  }
+  try {
+    Preferences result=startNode.nodeImpl(name,false);
+    return (result != null);
+  }
+ catch (  IllegalArgumentException e) {
+    return false;
+  }
+}

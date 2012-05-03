@@ -1,0 +1,36 @@
+{
+  if (!(node instanceof NodeImpl)) {
+    return null;
+  }
+  NodeImpl nodeImpl=(NodeImpl)node;
+switch (nodeImpl.getNodeType()) {
+case Node.ATTRIBUTE_NODE:
+    AttrImpl attr=(AttrImpl)node;
+  if (attr.ownerElement != null) {
+    attr.ownerElement.removeAttributeNode(attr);
+  }
+break;
+case Node.DOCUMENT_FRAGMENT_NODE:
+case Node.ENTITY_REFERENCE_NODE:
+case Node.PROCESSING_INSTRUCTION_NODE:
+case Node.TEXT_NODE:
+case Node.CDATA_SECTION_NODE:
+case Node.COMMENT_NODE:
+case Node.ELEMENT_NODE:
+break;
+case Node.DOCUMENT_NODE:
+case Node.DOCUMENT_TYPE_NODE:
+case Node.ENTITY_NODE:
+case Node.NOTATION_NODE:
+throw new DOMException(DOMException.NOT_SUPPORTED_ERR,"Cannot adopt nodes of type " + nodeImpl.getNodeType());
+default :
+throw new DOMException(DOMException.NOT_SUPPORTED_ERR,"Unsupported node type " + node.getNodeType());
+}
+Node parent=nodeImpl.getParentNode();
+if (parent != null) {
+parent.removeChild(nodeImpl);
+}
+changeDocumentToThis(nodeImpl);
+notifyUserDataHandlers(UserDataHandler.NODE_ADOPTED,node,null);
+return nodeImpl;
+}

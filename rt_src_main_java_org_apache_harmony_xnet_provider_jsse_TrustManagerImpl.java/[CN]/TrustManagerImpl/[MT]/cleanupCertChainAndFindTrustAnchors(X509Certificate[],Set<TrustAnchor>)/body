@@ -1,0 +1,39 @@
+{
+  X509Certificate[] original=chain;
+  int currIndex;
+  for (currIndex=0; currIndex < chain.length; currIndex++) {
+    TrustAnchor trustAnchor=findTrustAnchorBySubjectAndPublicKey(chain[currIndex]);
+    if (trustAnchor != null) {
+      trustAnchors.add(trustAnchor);
+      currIndex--;
+      break;
+    }
+    boolean foundNext=false;
+    for (int nextIndex=currIndex + 1; nextIndex < chain.length; nextIndex++) {
+      if (chain[currIndex].getIssuerDN().equals(chain[nextIndex].getSubjectDN())) {
+        foundNext=true;
+        if (nextIndex != currIndex + 1) {
+          if (chain == original) {
+            chain=original.clone();
+          }
+          X509Certificate tempCertificate=chain[nextIndex];
+          chain[nextIndex]=chain[currIndex + 1];
+          chain[currIndex + 1]=tempCertificate;
+        }
+        break;
+      }
+    }
+    if (!foundNext) {
+      break;
+    }
+  }
+  int chainLength=currIndex + 1;
+  X509Certificate[] newChain=((chainLength == chain.length) ? chain : Arrays.copyOf(chain,chainLength));
+  if (trustAnchors.isEmpty()) {
+    TrustAnchor trustAnchor=findTrustAnchorByIssuerAndSignature(newChain[chainLength - 1]);
+    if (trustAnchor != null) {
+      trustAnchors.add(trustAnchor);
+    }
+  }
+  return newChain;
+}

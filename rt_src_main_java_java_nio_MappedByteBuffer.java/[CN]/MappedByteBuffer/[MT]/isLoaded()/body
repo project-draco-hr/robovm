@@ -1,3 +1,25 @@
 {
-  return ((MappedPlatformAddress)address).mmapIsLoaded();
+  long address=block.toInt();
+  long size=block.getSize();
+  if (size == 0) {
+    return true;
+  }
+  try {
+    int pageSize=(int)Libcore.os.sysconf(_SC_PAGE_SIZE);
+    int pageOffset=(int)(address % pageSize);
+    address-=pageOffset;
+    size+=pageOffset;
+    int pageCount=(int)((size + pageSize - 1) / pageSize);
+    byte[] vector=new byte[pageCount];
+    Libcore.os.mincore(address,size,vector);
+    for (int i=0; i < vector.length; ++i) {
+      if ((vector[i] & 1) != 1) {
+        return false;
+      }
+    }
+    return true;
+  }
+ catch (  ErrnoException errnoException) {
+    return false;
+  }
 }

@@ -1,7 +1,5 @@
 {
-  if (opmode != ENCRYPT_MODE && opmode != DECRYPT_MODE && opmode != UNWRAP_MODE && opmode != WRAP_MODE) {
-    throw new InvalidParameterException(Messages.getString("crypto.19"));
-  }
+  checkMode(opmode);
   if (certificate instanceof X509Certificate) {
     Set<String> ce=((X509Certificate)certificate).getCriticalExtensionOIDs();
     boolean critical=false;
@@ -15,11 +13,11 @@
       if (critical) {
         boolean[] keyUsage=((X509Certificate)certificate).getKeyUsage();
         if (keyUsage != null) {
-          if (opmode == ENCRYPT_MODE && (!keyUsage[7])) {
-            throw new InvalidKeyException(Messages.getString("crypto.1A"));
+          if (opmode == ENCRYPT_MODE && !keyUsage[3]) {
+            throw new InvalidKeyException("The public key in the certificate " + "cannot be used for ENCRYPT_MODE");
           }
- else           if (opmode == DECRYPT_MODE && (!keyUsage[8])) {
-            throw new InvalidKeyException(Messages.getString("crypto.1B"));
+ else           if (opmode == WRAP_MODE && !keyUsage[2]) {
+            throw new InvalidKeyException("The public key in the certificate " + "cannot be used for WRAP_MODE");
           }
         }
       }

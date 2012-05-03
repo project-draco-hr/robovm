@@ -1,0 +1,30 @@
+{
+  if (publicKey instanceof DSAPublicKey) {
+    try {
+      DSAPublicKey dsaPublicKey=(DSAPublicKey)publicKey;
+      DSAParams dsaParams=dsaPublicKey.getParams();
+      dsa=NativeCrypto.EVP_PKEY_new_DSA(dsaParams.getP().toByteArray(),dsaParams.getQ().toByteArray(),dsaParams.getG().toByteArray(),dsaPublicKey.getY().toByteArray(),null);
+    }
+ catch (    Exception e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else   if (publicKey instanceof RSAPublicKey) {
+    try {
+      RSAPublicKey rsaPublicKey=(RSAPublicKey)publicKey;
+      rsa=NativeCrypto.EVP_PKEY_new_RSA(rsaPublicKey.getModulus().toByteArray(),rsaPublicKey.getPublicExponent().toByteArray(),null,null,null);
+    }
+ catch (    Exception e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else {
+    throw new InvalidKeyException("Need DSA or RSA public key");
+  }
+  try {
+    ctx=NativeCrypto.EVP_VerifyInit(evpAlgorithm);
+  }
+ catch (  Exception ex) {
+    throw new RuntimeException(ex);
+  }
+}

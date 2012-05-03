@@ -1,39 +1,12 @@
 {
-  checkClosed();
-  CharBuffer formatBuffer=CharBuffer.wrap(format);
-  ParserStateMachine parser=new ParserStateMachine(formatBuffer);
-  Transformer transformer=new Transformer(this,l);
-  int currentObjectIndex=0;
-  Object lastArgument=null;
-  boolean hasLastArgumentSet=false;
-  while (formatBuffer.hasRemaining()) {
-    parser.reset();
-    FormatToken token=parser.getNextFormatToken();
-    String result;
-    String plainText=token.getPlainText();
-    if (token.getConversionType() == (char)FormatToken.UNSET) {
-      result=plainText;
-    }
- else {
-      plainText=plainText.substring(0,plainText.indexOf('%'));
-      Object argument=null;
-      if (token.requireArgument()) {
-        int index=token.getArgIndex() == FormatToken.UNSET ? currentObjectIndex++ : token.getArgIndex();
-        argument=getArgument(args,index,token,lastArgument,hasLastArgumentSet);
-        lastArgument=argument;
-        hasLastArgumentSet=true;
-      }
-      result=transformer.transform(token,argument);
-      result=(null == result ? plainText : plainText + result);
-    }
-    if (null != result) {
-      try {
-        out.append(result);
-      }
- catch (      IOException e) {
-        lastIOException=e;
-      }
-    }
+  Locale originalLocale=locale;
+  try {
+    this.locale=(l == null ? Locale.US : l);
+    this.localeData=LocaleData.get(locale);
+    doFormat(format,args);
+  }
+  finally {
+    this.locale=originalLocale;
   }
   return this;
 }

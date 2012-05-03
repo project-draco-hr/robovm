@@ -1,46 +1,49 @@
 {
   if (Double.isInfinite(val) || Double.isNaN(val)) {
-    throw new NumberFormatException(Messages.getString("math.03"));
+    throw new NumberFormatException("Infinity or NaN: " + val);
   }
   long bits=Double.doubleToLongBits(val);
-  long mantisa;
+  long mantissa;
   int trailingZeros;
   scale=1075 - (int)((bits >> 52) & 0x7FFL);
-  mantisa=(scale == 1075) ? (bits & 0xFFFFFFFFFFFFFL) << 1 : (bits & 0xFFFFFFFFFFFFFL) | 0x10000000000000L;
-  if (mantisa == 0) {
+  mantissa=(scale == 1075) ? (bits & 0xFFFFFFFFFFFFFL) << 1 : (bits & 0xFFFFFFFFFFFFFL) | 0x10000000000000L;
+  if (mantissa == 0) {
     scale=0;
     precision=1;
   }
   if (scale > 0) {
-    trailingZeros=Math.min(scale,Long.numberOfTrailingZeros(mantisa));
-    mantisa>>>=trailingZeros;
+    trailingZeros=Math.min(scale,Long.numberOfTrailingZeros(mantissa));
+    mantissa>>>=trailingZeros;
     scale-=trailingZeros;
   }
   if ((bits >> 63) != 0) {
-    mantisa=-mantisa;
+    mantissa=-mantissa;
   }
-  int mantisaBits=bitLength(mantisa);
+  int mantissaBits=bitLength(mantissa);
   if (scale < 0) {
-    bitLength=mantisaBits == 0 ? 0 : mantisaBits - scale;
+    bitLength=mantissaBits == 0 ? 0 : mantissaBits - scale;
     if (bitLength < 64) {
-      smallValue=mantisa << (-scale);
+      smallValue=mantissa << (-scale);
     }
  else {
-      intVal=BigInteger.valueOf(mantisa).shiftLeft(-scale);
+      BigInt bi=new BigInt();
+      bi.putLongInt(mantissa);
+      bi.shift(-scale);
+      intVal=new BigInteger(bi);
     }
     scale=0;
   }
  else   if (scale > 0) {
-    if (scale < LONG_FIVE_POW.length && mantisaBits + LONG_FIVE_POW_BIT_LENGTH[scale] < 64) {
-      smallValue=mantisa * LONG_FIVE_POW[scale];
+    if (scale < LONG_FIVE_POW.length && mantissaBits + LONG_FIVE_POW_BIT_LENGTH[scale] < 64) {
+      smallValue=mantissa * LONG_FIVE_POW[scale];
       bitLength=bitLength(smallValue);
     }
  else {
-      setUnscaledValue(Multiplication.multiplyByFivePow(BigInteger.valueOf(mantisa),scale));
+      setUnscaledValue(Multiplication.multiplyByFivePow(BigInteger.valueOf(mantissa),scale));
     }
   }
  else {
-    smallValue=mantisa;
-    bitLength=mantisaBits;
+    smallValue=mantissa;
+    bitLength=mantissaBits;
   }
 }

@@ -1,0 +1,18 @@
+{
+  if (alias == null) {
+    return;
+  }
+  PrivateKey privateKey=sslParameters.getKeyManager().getPrivateKey(alias);
+  if (privateKey == null) {
+    return;
+  }
+  X509Certificate[] certificates=sslParameters.getKeyManager().getCertificateChain(alias);
+  if (certificates == null) {
+    return;
+  }
+  byte[] privateKeyBytes=privateKey.getEncoded();
+  byte[][] certificateBytes=NativeCrypto.encodeCertificates(certificates);
+  NativeCrypto.SSL_use_PrivateKey(sslNativePointer,privateKeyBytes);
+  NativeCrypto.SSL_use_certificate(sslNativePointer,certificateBytes);
+  NativeCrypto.SSL_check_private_key(sslNativePointer);
+}

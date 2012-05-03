@@ -1,20 +1,17 @@
 {
   Throwable t;
   if ((t=r.getThrown()) != null) {
-    sb.append(indent).append("<exception>").append(lineSeperator);
-{
-      sb.append(indent).append(indent).append("<message>").append(convertSpecialSymbol(t.toString())).append("</message>").append(lineSeperator);
-      StackTraceElement[] elements=t.getStackTrace();
-      for (      StackTraceElement e : elements) {
-        sb.append(indent).append(indent).append("<frame>").append(lineSeperator);
-{
-          sb.append(indent).append(indent).append(indent).append("<class>").append(e.getClassName()).append("</class>").append(lineSeperator);
-          sb.append(indent).append(indent).append(indent).append("<method>").append(convertSpecialSymbol(e.getMethodName())).append("</method>").append(lineSeperator);
-          sb.append(indent).append(indent).append(indent).append("<line>").append(e.getLineNumber()).append("</line>").append(lineSeperator);
-        }
-        sb.append(indent).append(indent).append("</frame>").append(lineSeperator);
-      }
+    String nl=System.lineSeparator();
+    sb.append(indent).append("<exception>").append(nl);
+    append(sb,2,"message",t.toString());
+    StackTraceElement[] elements=t.getStackTrace();
+    for (    StackTraceElement e : elements) {
+      sb.append(indent).append(indent).append("<frame>").append(nl);
+      append(sb,3,"class",e.getClassName());
+      append(sb,3,"method",e.getMethodName());
+      append(sb,3,"line",e.getLineNumber());
+      sb.append(indent).append(indent).append("</frame>").append(nl);
     }
-    sb.append(indent).append("</exception>").append(lineSeperator);
+    sb.append(indent).append("</exception>").append(nl);
   }
 }

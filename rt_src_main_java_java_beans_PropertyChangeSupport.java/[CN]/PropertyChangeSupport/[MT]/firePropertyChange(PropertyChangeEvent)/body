@@ -1,3 +1,18 @@
 {
-  doFirePropertyChange(event);
+  String propertyName=event.getPropertyName();
+  Object oldValue=event.getOldValue();
+  Object newValue=event.getNewValue();
+  if (newValue != null && oldValue != null && newValue.equals(oldValue)) {
+    return;
+  }
+  notifyEachListener:   for (  PropertyChangeListener p : listeners) {
+    while (p instanceof PropertyChangeListenerProxy) {
+      PropertyChangeListenerProxy proxy=(PropertyChangeListenerProxy)p;
+      if (!Objects.equal(proxy.getPropertyName(),propertyName)) {
+        continue notifyEachListener;
+      }
+      p=(PropertyChangeListener)proxy.getListener();
+    }
+    p.propertyChange(event);
+  }
 }

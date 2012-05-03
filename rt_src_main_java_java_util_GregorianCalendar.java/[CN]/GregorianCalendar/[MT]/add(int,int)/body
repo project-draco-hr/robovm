@@ -74,15 +74,20 @@ case DAY_OF_WEEK_IN_MONTH:
 multiplier=604800000L;
 break;
 }
-if (multiplier > 0) {
+if (multiplier == 0) {
+areFieldsSet=false;
+complete();
+return;
+}
+long delta=value * multiplier;
 int zoneOffset=getTimeZone().getRawOffset();
-int offset=getOffset(time + zoneOffset);
-time+=value * multiplier;
-int newOffset=getOffset(time + zoneOffset);
-if (newOffset != offset) {
-time+=offset - newOffset;
+int offsetBefore=getOffset(time + zoneOffset);
+int offsetAfter=getOffset(time + zoneOffset + delta);
+int dstDelta=offsetBefore - offsetAfter;
+if (getOffset(time + zoneOffset + delta+ dstDelta) == offsetAfter) {
+delta+=dstDelta;
 }
-}
+time+=delta;
 areFieldsSet=false;
 complete();
 }

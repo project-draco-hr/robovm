@@ -1,0 +1,34 @@
+{
+  if (bufferStartLine != 0 || bufferStartColumn != 0 || position != 0) {
+    checkRelaxed("processing instructions must not start with xml");
+  }
+  read(START_PROCESSING_INSTRUCTION);
+  parseStartTag(true,true);
+  if (attributeCount < 1 || !"version".equals(attributes[2])) {
+    checkRelaxed("version expected");
+  }
+  version=attributes[3];
+  int pos=1;
+  if (pos < attributeCount && "encoding".equals(attributes[2 + 4])) {
+    encoding=attributes[3 + 4];
+    pos++;
+  }
+  if (pos < attributeCount && "standalone".equals(attributes[4 * pos + 2])) {
+    String st=attributes[3 + 4 * pos];
+    if ("yes".equals(st)) {
+      standalone=Boolean.TRUE;
+    }
+ else     if ("no".equals(st)) {
+      standalone=Boolean.FALSE;
+    }
+ else {
+      checkRelaxed("illegal standalone value: " + st);
+    }
+    pos++;
+  }
+  if (pos != attributeCount) {
+    checkRelaxed("unexpected attributes in XML declaration");
+  }
+  isWhitespace=true;
+  text=null;
+}

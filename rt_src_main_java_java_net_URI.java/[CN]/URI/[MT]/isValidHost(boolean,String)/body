@@ -1,0 +1,36 @@
+{
+  if (host.startsWith("[")) {
+    if (!host.endsWith("]")) {
+      throw new URISyntaxException(host,"Expected a closing square bracket for IPv6 address",0);
+    }
+    if (InetAddress.isNumeric(host)) {
+      return true;
+    }
+    throw new URISyntaxException(host,"Malformed IPv6 address");
+  }
+  if (host.indexOf('[') != -1 || host.indexOf(']') != -1) {
+    throw new URISyntaxException(host,"Illegal character in host name",0);
+  }
+  int index=host.lastIndexOf('.');
+  if (index < 0 || index == host.length() - 1 || !Character.isDigit(host.charAt(index + 1))) {
+    if (isValidDomainName(host)) {
+      return true;
+    }
+    if (forceServer) {
+      throw new URISyntaxException(host,"Illegal character in host name",0);
+    }
+    return false;
+  }
+  try {
+    InetAddress ia=InetAddress.parseNumericAddress(host);
+    if (ia instanceof Inet4Address) {
+      return true;
+    }
+  }
+ catch (  IllegalArgumentException ignored) {
+  }
+  if (forceServer) {
+    throw new URISyntaxException(host,"Malformed IPv4 address",0);
+  }
+  return false;
+}

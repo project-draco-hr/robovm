@@ -1,0 +1,29 @@
+{
+  String[] interfaceNames=new File("/sys/class/net").list();
+  NetworkInterface[] interfaces=new NetworkInterface[interfaceNames.length];
+  for (int i=0; i < interfaceNames.length; ++i) {
+    interfaces[i]=NetworkInterface.getByName(interfaceNames[i]);
+  }
+  List<NetworkInterface> result=new ArrayList<NetworkInterface>();
+  boolean[] peeked=new boolean[interfaces.length];
+  for (int counter=0; counter < interfaces.length; counter++) {
+    if (peeked[counter]) {
+      continue;
+    }
+    int counter2=counter;
+    for (; counter2 < interfaces.length; counter2++) {
+      if (peeked[counter2]) {
+        continue;
+      }
+      if (interfaces[counter2].name.startsWith(interfaces[counter].name + ":")) {
+        peeked[counter2]=true;
+        interfaces[counter].children.add(interfaces[counter2]);
+        interfaces[counter2].parent=interfaces[counter];
+        interfaces[counter].addresses.addAll(interfaces[counter2].addresses);
+      }
+    }
+    result.add(interfaces[counter]);
+    peeked[counter]=true;
+  }
+  return result;
+}

@@ -1,14 +1,12 @@
 {
-  CoderResult result=encoder.encode(chars,bytes,true);
-  encoderFlush=true;
   while (true) {
-    if (result.isError()) {
-      throw new IOException(result.toString());
-    }
- else     if (result.isOverflow()) {
-      flush();
-      result=encoder.encode(chars,bytes,true);
+    CoderResult result=encoder.encode(chars,bytes,false);
+    if (result.isOverflow()) {
+      flushBytes(false);
       continue;
+    }
+ else     if (result.isError()) {
+      result.throwException();
     }
     break;
   }

@@ -1,0 +1,109 @@
+{
+  if (!xmldecl) {
+    read('<');
+  }
+  name=readName();
+  attributeCount=0;
+  while (true) {
+    skip();
+    if (position >= limit && !fillBuffer(1)) {
+      checkRelaxed(UNEXPECTED_EOF);
+      return;
+    }
+    int c=buffer[position];
+    if (xmldecl) {
+      if (c == '?') {
+        position++;
+        read('>');
+        return;
+      }
+    }
+ else {
+      if (c == '/') {
+        degenerated=true;
+        position++;
+        skip();
+        read('>');
+        break;
+      }
+ else       if (c == '>') {
+        position++;
+        break;
+      }
+    }
+    String attrName=readName();
+    int i=(attributeCount++) * 4;
+    attributes=ensureCapacity(attributes,i + 4);
+    attributes[i]="";
+    attributes[i + 1]=null;
+    attributes[i + 2]=attrName;
+    skip();
+    if (position >= limit && !fillBuffer(1)) {
+      checkRelaxed(UNEXPECTED_EOF);
+      return;
+    }
+    if (buffer[position] == '=') {
+      position++;
+      skip();
+      if (position >= limit && !fillBuffer(1)) {
+        checkRelaxed(UNEXPECTED_EOF);
+        return;
+      }
+      char delimiter=buffer[position];
+      if (delimiter == '\'' || delimiter == '"') {
+        position++;
+      }
+ else       if (relaxed) {
+        delimiter=' ';
+      }
+ else {
+        throw new XmlPullParserException("attr value delimiter missing!",this,null);
+      }
+      attributes[i + 3]=readValue(delimiter,true,throwOnResolveFailure,ValueContext.ATTRIBUTE);
+      if (delimiter != ' ') {
+        position++;
+      }
+    }
+ else     if (relaxed) {
+      attributes[i + 3]=attrName;
+    }
+ else {
+      checkRelaxed("Attr.value missing f. " + attrName);
+      attributes[i + 3]=attrName;
+    }
+  }
+  int sp=depth++ * 4;
+  elementStack=ensureCapacity(elementStack,sp + 4);
+  elementStack[sp + 3]=name;
+  if (depth >= nspCounts.length) {
+    int[] bigger=new int[depth + 4];
+    System.arraycopy(nspCounts,0,bigger,0,nspCounts.length);
+    nspCounts=bigger;
+  }
+  nspCounts[depth]=nspCounts[depth - 1];
+  if (processNsp) {
+    adjustNsp();
+  }
+ else {
+    namespace="";
+  }
+  if (defaultAttributes != null) {
+    Map<String,String> elementDefaultAttributes=defaultAttributes.get(name);
+    if (elementDefaultAttributes != null) {
+      for (      Map.Entry<String,String> entry : elementDefaultAttributes.entrySet()) {
+        if (getAttributeValue(null,entry.getKey()) != null) {
+          continue;
+        }
+        int i=(attributeCount++) * 4;
+        attributes=ensureCapacity(attributes,i + 4);
+        attributes[i]="";
+        attributes[i + 1]=null;
+        attributes[i + 2]=entry.getKey();
+        attributes[i + 3]=entry.getValue();
+      }
+    }
+  }
+  elementStack[sp]=namespace;
+  elementStack[sp + 1]=prefix;
+  elementStack[sp + 2]=name;
+}

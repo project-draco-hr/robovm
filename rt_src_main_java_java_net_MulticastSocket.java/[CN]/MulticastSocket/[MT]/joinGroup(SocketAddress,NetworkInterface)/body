@@ -1,24 +1,4 @@
 {
-  checkClosedAndBind(false);
-  if (null == groupAddress) {
-    throw new IllegalArgumentException(Messages.getString("luni.5D"));
-  }
-  if ((netInterface != null) && (netInterface.getFirstAddress() == null)) {
-    throw new SocketException(Messages.getString("luni.67"));
-  }
-  if (!(groupAddress instanceof InetSocketAddress)) {
-    throw new IllegalArgumentException(Messages.getString("luni.49",groupAddress.getClass()));
-  }
-  InetAddress groupAddr=((InetSocketAddress)groupAddress).getAddress();
-  if (groupAddr == null) {
-    throw new SocketException(Messages.getString("luni.68"));
-  }
-  if (!groupAddr.isMulticastAddress()) {
-    throw new IOException(Messages.getString("luni.66"));
-  }
-  SecurityManager security=System.getSecurityManager();
-  if (security != null) {
-    security.checkMulticast(groupAddr);
-  }
+  checkJoinOrLeave(groupAddress,netInterface);
   impl.joinGroup(groupAddress,netInterface);
 }

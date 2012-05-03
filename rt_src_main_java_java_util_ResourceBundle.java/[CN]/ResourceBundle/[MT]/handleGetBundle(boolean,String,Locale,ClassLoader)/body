@@ -1,0 +1,72 @@
+{
+  String localeName=locale.toString();
+  String bundleName=localeName.isEmpty() ? base : (base + "_" + localeName);
+  Object cacheKey=loader != null ? loader : "null";
+  Hashtable<String,ResourceBundle> loaderCache=getLoaderCache(cacheKey);
+  ResourceBundle cached=loaderCache.get(bundleName);
+  if (cached != null) {
+    if (cached == MISSINGBASE) {
+      return null;
+    }
+ else     if (cached == MISSING) {
+      if (!loadBase) {
+        return null;
+      }
+      Locale newLocale=strip(locale);
+      if (newLocale == null) {
+        return null;
+      }
+      return handleGetBundle(loadBase,base,newLocale,loader);
+    }
+    return cached;
+  }
+  ResourceBundle bundle=null;
+  try {
+    Class<?> bundleClass=Class.forName(bundleName,true,loader);
+    if (ResourceBundle.class.isAssignableFrom(bundleClass)) {
+      bundle=(ResourceBundle)bundleClass.newInstance();
+    }
+  }
+ catch (  LinkageError ignored) {
+  }
+catch (  Exception ignored) {
+  }
+  if (bundle != null) {
+    bundle.setLocale(locale);
+  }
+ else {
+    String fileName=bundleName.replace('.','/') + ".properties";
+    InputStream stream=loader != null ? loader.getResourceAsStream(fileName) : ClassLoader.getSystemResourceAsStream(fileName);
+    if (stream != null) {
+      try {
+        bundle=new PropertyResourceBundle(new InputStreamReader(stream,UTF_8));
+        bundle.setLocale(locale);
+      }
+ catch (      IOException ignored) {
+      }
+ finally {
+        IoUtils.closeQuietly(stream);
+      }
+    }
+  }
+  Locale strippedLocale=strip(locale);
+  if (bundle != null) {
+    if (strippedLocale != null) {
+      ResourceBundle parent=handleGetBundle(loadBase,base,strippedLocale,loader);
+      if (parent != null) {
+        bundle.setParent(parent);
+      }
+    }
+    loaderCache.put(bundleName,bundle);
+    return bundle;
+  }
+  if (strippedLocale != null && (loadBase || !strippedLocale.toString().isEmpty())) {
+    bundle=handleGetBundle(loadBase,base,strippedLocale,loader);
+    if (bundle != null) {
+      loaderCache.put(bundleName,bundle);
+      return bundle;
+    }
+  }
+  loaderCache.put(bundleName,loadBase ? MISSINGBASE : MISSING);
+  return null;
+}

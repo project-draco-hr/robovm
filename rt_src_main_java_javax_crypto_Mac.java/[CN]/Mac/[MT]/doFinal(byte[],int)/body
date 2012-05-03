@@ -1,16 +1,16 @@
 {
   if (!isInitMac) {
-    throw new IllegalStateException(Messages.getString("crypto.01"));
+    throw new IllegalStateException();
   }
   if (output == null) {
-    throw new ShortBufferException(Messages.getString("crypto.08"));
+    throw new ShortBufferException("output == null");
   }
   if ((outOffset < 0) || (outOffset >= output.length)) {
-    throw new ShortBufferException(Messages.getString("crypto.09",Integer.toString(outOffset)));
+    throw new ShortBufferException("Incorrect outOffset: " + outOffset);
   }
   int t=spiImpl.engineGetMacLength();
   if (t > (output.length - outOffset)) {
-    throw new ShortBufferException(Messages.getString("crypto.0A",Integer.toString(t)));
+    throw new ShortBufferException("Output buffer is short. Needed " + t + " bytes.");
   }
   byte[] result=spiImpl.engineDoFinal();
   System.arraycopy(result,0,output,outOffset,result.length);

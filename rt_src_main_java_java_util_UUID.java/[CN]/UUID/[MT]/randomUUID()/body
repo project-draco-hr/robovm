@@ -1,28 +1,10 @@
 {
-  byte[] data;
+  byte[] data=new byte[16];
 synchronized (UUID.class) {
     if (rng == null) {
       rng=new SecureRandom();
     }
   }
-  rng.nextBytes(data=new byte[16]);
-  long msb=(data[0] & 0xFFL) << 56;
-  msb|=(data[1] & 0xFFL) << 48;
-  msb|=(data[2] & 0xFFL) << 40;
-  msb|=(data[3] & 0xFFL) << 32;
-  msb|=(data[4] & 0xFFL) << 24;
-  msb|=(data[5] & 0xFFL) << 16;
-  msb|=(data[6] & 0x0FL) << 8;
-  msb|=(0x4L << 12);
-  msb|=(data[7] & 0xFFL);
-  long lsb=(data[8] & 0x3FL) << 56;
-  lsb|=(0x2L << 62);
-  lsb|=(data[9] & 0xFFL) << 48;
-  lsb|=(data[10] & 0xFFL) << 40;
-  lsb|=(data[11] & 0xFFL) << 32;
-  lsb|=(data[12] & 0xFFL) << 24;
-  lsb|=(data[13] & 0xFFL) << 16;
-  lsb|=(data[14] & 0xFFL) << 8;
-  lsb|=(data[15] & 0xFFL);
-  return new UUID(msb,lsb);
+  rng.nextBytes(data);
+  return makeUuid(data,4);
 }

@@ -1,17 +1,10 @@
 {
-  SecurityManager smgr=System.getSecurityManager();
-  ClassLoader loader=getClassLoaderImpl();
-  if (smgr != null && loader != null) {
-    ClassLoader calling=ClassLoader.callerClassLoader();
-    if (calling != null && !calling.isAncestorOf(loader)) {
-      smgr.checkPermission(new RuntimePermission("getClassLoader"));
-    }
-  }
   if (this.isPrimitive()) {
     return null;
   }
-  if (loader == ClassLoader.BootClassLoaderHolder.loader) {
-    return null;
+  ClassLoader loader=getClassLoaderImpl();
+  if (loader == null) {
+    loader=BootClassLoader.getInstance();
   }
   return loader;
 }

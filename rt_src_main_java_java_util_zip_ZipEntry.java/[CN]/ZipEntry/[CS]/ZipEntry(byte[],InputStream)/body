@@ -1,0 +1,32 @@
+{
+  Streams.readFully(in,hdrBuf,0,hdrBuf.length);
+  BufferIterator it=HeapBufferIterator.iterator(hdrBuf,0,hdrBuf.length,ByteOrder.LITTLE_ENDIAN);
+  int sig=it.readInt();
+  if (sig != CENSIG) {
+    throw new ZipException("Central Directory Entry not found");
+  }
+  it.seek(10);
+  compressionMethod=it.readShort();
+  time=it.readShort();
+  modDate=it.readShort();
+  crc=((long)it.readInt()) & 0xffffffffL;
+  compressedSize=((long)it.readInt()) & 0xffffffffL;
+  size=((long)it.readInt()) & 0xffffffffL;
+  nameLength=it.readShort();
+  int extraLength=it.readShort();
+  int commentLength=it.readShort();
+  it.seek(42);
+  mLocalHeaderRelOffset=((long)it.readInt()) & 0xffffffffL;
+  byte[] nameBytes=new byte[nameLength];
+  Streams.readFully(in,nameBytes,0,nameBytes.length);
+  name=new String(nameBytes,0,nameBytes.length,Charsets.UTF_8);
+  if (commentLength > 0) {
+    byte[] commentBytes=new byte[commentLength];
+    Streams.readFully(in,commentBytes,0,commentLength);
+    comment=new String(commentBytes,0,commentBytes.length,Charsets.UTF_8);
+  }
+  if (extraLength > 0) {
+    extra=new byte[extraLength];
+    Streams.readFully(in,extra,0,extraLength);
+  }
+}

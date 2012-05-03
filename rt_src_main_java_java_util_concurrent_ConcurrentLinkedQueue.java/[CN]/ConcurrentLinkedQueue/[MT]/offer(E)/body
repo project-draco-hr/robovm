@@ -1,22 +1,15 @@
 {
-  if (e == null)   throw new NullPointerException();
-  Node<E> n=new Node<E>(e);
-  retry:   for (; ; ) {
-    Node<E> t=tail;
-    Node<E> p=t;
-    for (int hops=0; ; hops++) {
-      Node<E> next=succ(p);
-      if (next != null) {
-        if (hops > HOPS && t != tail)         continue retry;
-        p=next;
-      }
- else       if (p.casNext(null,n)) {
-        if (hops >= HOPS)         casTail(t,n);
+  checkNotNull(e);
+  final Node<E> newNode=new Node<E>(e);
+  for (Node<E> t=tail, p=t; ; ) {
+    Node<E> q=p.next;
+    if (q == null) {
+      if (p.casNext(null,newNode)) {
+        if (p != t)         casTail(t,newNode);
         return true;
       }
- else {
-        p=succ(p);
-      }
     }
+ else     if (p == q)     p=(t != (t=tail)) ? t : head;
+ else     p=(p != t && t != (t=tail)) ? t : q;
   }
 }

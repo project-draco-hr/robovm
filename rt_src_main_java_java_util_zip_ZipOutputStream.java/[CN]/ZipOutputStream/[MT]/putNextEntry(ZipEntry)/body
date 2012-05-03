@@ -4,24 +4,23 @@
   }
   if (ze.getMethod() == STORED || (compressMethod == STORED && ze.getMethod() == -1)) {
     if (ze.crc == -1) {
-      throw new ZipException(Messages.getString("archive.20"));
+      throw new ZipException("CRC mismatch");
     }
     if (ze.size == -1 && ze.compressedSize == -1) {
-      throw new ZipException(Messages.getString("archive.21"));
+      throw new ZipException("Size mismatch");
     }
     if (ze.size != ze.compressedSize && ze.compressedSize != -1 && ze.size != -1) {
-      throw new ZipException(Messages.getString("archive.21"));
+      throw new ZipException("Size mismatch");
     }
   }
-  if (cDir == null) {
-    throw new IOException(Messages.getString("archive.1E"));
-  }
+  checkClosed();
   if (entries.contains(ze.name)) {
-    throw new ZipException(Messages.getString("archive.29",ze.name));
+    throw new ZipException("Entry already exists: " + ze.name);
   }
-  nameLength=utf8Count(ze.name);
+  nameBytes=ze.name.getBytes(Charsets.UTF_8);
+  nameLength=nameBytes.length;
   if (nameLength > 0xffff) {
-    throw new IllegalArgumentException(Messages.getString("archive.2A",ze.name));
+    throw new IllegalArgumentException("Name too long: " + nameLength + " UTF-8 bytes");
   }
   def.setLevel(compressLevel);
   currentEntry=ze;
@@ -29,9 +28,11 @@
   if (currentEntry.getMethod() == -1) {
     currentEntry.setMethod(compressMethod);
   }
+  int flags=currentEntry.getMethod() == STORED ? 0 : ZipFile.GPBF_DATA_DESCRIPTOR_FLAG;
+  flags|=ZipFile.GPBF_UTF8_FLAG;
   writeLong(out,LOCSIG);
   writeShort(out,ZIPLocalHeaderVersionNeeded);
-  writeShort(out,currentEntry.getMethod() == STORED ? 0 : ZIPDataDescriptorFlag);
+  writeShort(out,flags);
   writeShort(out,currentEntry.getMethod());
   if (currentEntry.getTime() == -1) {
     currentEntry.setTime(System.currentTimeMillis());
@@ -61,7 +62,6 @@
  else {
     writeShort(out,0);
   }
-  nameBytes=toUTF8Bytes(currentEntry.name,nameLength);
   out.write(nameBytes);
   if (currentEntry.extra != null) {
     out.write(currentEntry.extra);

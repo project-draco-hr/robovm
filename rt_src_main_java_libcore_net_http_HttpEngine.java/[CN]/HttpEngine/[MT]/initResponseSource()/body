@@ -1,0 +1,33 @@
+{
+  responseSource=ResponseSource.NETWORK;
+  if (!policy.getUseCaches() || responseCache == null) {
+    return;
+  }
+  CacheResponse candidate=responseCache.get(uri,method,requestHeaders.getHeaders().toMultimap());
+  if (candidate == null) {
+    return;
+  }
+  Map<String,List<String>> responseHeadersMap=candidate.getHeaders();
+  cachedResponseBody=candidate.getBody();
+  if (!acceptCacheResponseType(candidate) || responseHeadersMap == null || cachedResponseBody == null) {
+    IoUtils.closeQuietly(cachedResponseBody);
+    return;
+  }
+  RawHeaders rawResponseHeaders=RawHeaders.fromMultimap(responseHeadersMap);
+  cachedResponseHeaders=new ResponseHeaders(uri,rawResponseHeaders);
+  long now=System.currentTimeMillis();
+  this.responseSource=cachedResponseHeaders.chooseResponseSource(now,requestHeaders);
+  if (responseSource == ResponseSource.CACHE) {
+    this.cacheResponse=candidate;
+    setResponse(cachedResponseHeaders,cachedResponseBody);
+  }
+ else   if (responseSource == ResponseSource.CONDITIONAL_CACHE) {
+    this.cacheResponse=candidate;
+  }
+ else   if (responseSource == ResponseSource.NETWORK) {
+    IoUtils.closeQuietly(cachedResponseBody);
+  }
+ else {
+    throw new AssertionError();
+  }
+}

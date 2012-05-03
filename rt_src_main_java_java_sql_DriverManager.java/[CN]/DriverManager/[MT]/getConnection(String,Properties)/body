@@ -1,0 +1,15 @@
+{
+  String sqlState="08001";
+  if (url == null) {
+    throw new SQLException("The url cannot be null",sqlState);
+  }
+synchronized (theDrivers) {
+    for (    Driver theDriver : theDrivers) {
+      Connection theConnection=theDriver.connect(url,info);
+      if (theConnection != null) {
+        return theConnection;
+      }
+    }
+  }
+  throw new SQLException("No suitable driver",sqlState);
+}

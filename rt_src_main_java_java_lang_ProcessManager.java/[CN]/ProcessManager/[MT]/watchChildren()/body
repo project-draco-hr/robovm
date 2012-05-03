@@ -1,0 +1,31 @@
+{
+  MutableInt status=new MutableInt(-1);
+  while (true) {
+    try {
+      int pid=Libcore.os.waitpid(0,status,0);
+      int exitValue;
+      if (WIFEXITED(status.value)) {
+        exitValue=WEXITSTATUS(status.value);
+      }
+ else       if (WIFSIGNALED(status.value)) {
+        exitValue=WTERMSIG(status.value);
+      }
+ else       if (WIFSTOPPED(status.value)) {
+        exitValue=WSTOPSIG(status.value);
+      }
+ else {
+        throw new AssertionError("unexpected status from waitpid: " + status.value);
+      }
+      onExit(pid,exitValue);
+    }
+ catch (    ErrnoException errnoException) {
+      if (errnoException.errno == ECHILD) {
+        waitForMoreChildren();
+        continue;
+      }
+ else {
+        throw new AssertionError(errnoException);
+      }
+    }
+  }
+}

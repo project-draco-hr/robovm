@@ -1,6 +1,28 @@
 {
-  if (icuTimeZone == null || !ID.equals(icuTimeZone.getID())) {
-    icuTimeZone=com.ibm.icu.util.TimeZone.getTimeZone(ID);
+  if (style != SHORT && style != LONG) {
+    throw new IllegalArgumentException();
   }
-  return icuTimeZone.getDisplayName(daylightTime,style,locale);
+  boolean useDaylight=daylightTime && useDaylightTime();
+  String[][] zoneStrings=TimeZones.getZoneStrings(locale);
+  String result=TimeZones.getDisplayName(zoneStrings,getID(),daylightTime,style);
+  if (result != null) {
+    return result;
+  }
+  int offset=getRawOffset();
+  if (useDaylight && this instanceof SimpleTimeZone) {
+    offset+=getDSTSavings();
+  }
+  offset/=60000;
+  char sign='+';
+  if (offset < 0) {
+    sign='-';
+    offset=-offset;
+  }
+  StringBuilder builder=new StringBuilder(9);
+  builder.append("GMT");
+  builder.append(sign);
+  appendNumber(builder,2,offset / 60);
+  builder.append(':');
+  appendNumber(builder,2,offset % 60);
+  return builder.toString();
 }

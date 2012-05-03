@@ -1,0 +1,28 @@
+{
+  StringBuilder builder=null;
+  int start=pos;
+  while (pos < in.length()) {
+    int c=in.charAt(pos++);
+    if (c == quote) {
+      if (builder == null) {
+        return new String(in.substring(start,pos - 1));
+      }
+ else {
+        builder.append(in,start,pos - 1);
+        return builder.toString();
+      }
+    }
+    if (c == '\\') {
+      if (pos == in.length()) {
+        throw syntaxError("Unterminated escape sequence");
+      }
+      if (builder == null) {
+        builder=new StringBuilder();
+      }
+      builder.append(in,start,pos - 1);
+      builder.append(readEscapeCharacter());
+      start=pos;
+    }
+  }
+  throw syntaxError("Unterminated string");
+}

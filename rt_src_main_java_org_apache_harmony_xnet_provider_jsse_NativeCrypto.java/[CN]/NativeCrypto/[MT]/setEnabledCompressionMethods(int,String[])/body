@@ -1,0 +1,19 @@
+{
+  checkEnabledCompressionMethods(methods);
+  long optionsToSet=(SSL_OP_NO_COMPRESSION);
+  long optionsToClear=0;
+  for (int i=0; i < methods.length; i++) {
+    String method=methods[i];
+    if (method.equals(SUPPORTED_COMPRESSION_METHOD_NULL)) {
+    }
+ else     if (method.equals(SUPPORTED_COMPRESSION_METHOD_ZLIB)) {
+      optionsToSet&=~SSL_OP_NO_COMPRESSION;
+      optionsToClear|=SSL_OP_NO_COMPRESSION;
+    }
+ else {
+      throw new IllegalStateException();
+    }
+  }
+  SSL_set_options(ssl,optionsToSet);
+  SSL_clear_options(ssl,optionsToClear);
+}

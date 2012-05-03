@@ -1,6 +1,6 @@
 {
   Inet6Address address=Inet6Address.getByAddress(host,addr,0);
-  if (null == nif) {
+  if (nif == null) {
     return address;
   }
   Enumeration<InetAddress> addressList=nif.getInetAddresses();
@@ -14,13 +14,12 @@
         address.scope_id=v6ia.scope_id;
         address.scope_ifname_set=true;
         address.ifname=nif.getName();
-        address.scopedIf=nif;
         break;
       }
     }
   }
   if (!address.scope_id_set) {
-    throw new UnknownHostException(Messages.getString("luni.63"));
+    throw new UnknownHostException("Scope id not found for address: " + Arrays.toString(addr));
   }
   return address;
 }

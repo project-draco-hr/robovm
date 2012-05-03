@@ -1,0 +1,30 @@
+{
+  if (KEY_MANAGERS != null) {
+    return KEY_MANAGERS;
+  }
+  String keystore=System.getProperty("javax.net.ssl.keyStore");
+  if (keystore == null) {
+    return null;
+  }
+  String keystorepwd=System.getProperty("javax.net.ssl.keyStorePassword");
+  char[] pwd=(keystorepwd == null) ? null : keystorepwd.toCharArray();
+  KeyStore ks=KeyStore.getInstance(KeyStore.getDefaultType());
+  InputStream is=null;
+  try {
+    is=new BufferedInputStream(new FileInputStream(keystore));
+    ks.load(is,pwd);
+  }
+  finally {
+    if (is != null) {
+      is.close();
+    }
+  }
+  String kmfAlg=Security.getProperty("ssl.KeyManagerFactory.algorithm");
+  if (kmfAlg == null) {
+    kmfAlg="SunX509";
+  }
+  KeyManagerFactory kmf=KeyManagerFactory.getInstance(kmfAlg);
+  kmf.init(ks,pwd);
+  KEY_MANAGERS=kmf.getKeyManagers();
+  return KEY_MANAGERS;
+}

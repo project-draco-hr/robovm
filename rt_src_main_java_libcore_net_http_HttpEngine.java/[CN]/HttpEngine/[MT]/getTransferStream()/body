@@ -1,0 +1,12 @@
+{
+  if (!hasResponseBody()) {
+    return new FixedLengthInputStream(socketIn,cacheRequest,this,0);
+  }
+  if (responseHeaders.isChunked()) {
+    return new ChunkedInputStream(socketIn,cacheRequest,this);
+  }
+  if (responseHeaders.getContentLength() != -1) {
+    return new FixedLengthInputStream(socketIn,cacheRequest,this,responseHeaders.getContentLength());
+  }
+  return new UnknownLengthHttpInputStream(socketIn,cacheRequest,this);
+}

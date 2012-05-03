@@ -1,0 +1,42 @@
+{
+  if (hasResponse()) {
+    return;
+  }
+  if (responseSource == null) {
+    throw new IllegalStateException("readResponse() without sendRequest()");
+  }
+  if (!responseSource.requiresConnection()) {
+    return;
+  }
+  if (sentRequestMillis == -1) {
+    int contentLength=requestBodyOut instanceof RetryableOutputStream ? ((RetryableOutputStream)requestBodyOut).contentLength() : -1;
+    writeRequestHeaders(contentLength);
+  }
+  if (requestBodyOut != null) {
+    requestBodyOut.close();
+    if (requestBodyOut instanceof RetryableOutputStream) {
+      ((RetryableOutputStream)requestBodyOut).writeToSocket(requestOut);
+    }
+  }
+  requestOut.flush();
+  requestOut=socketOut;
+  readResponseHeaders();
+  responseHeaders.setLocalTimestamps(sentRequestMillis,System.currentTimeMillis());
+  if (responseSource == ResponseSource.CONDITIONAL_CACHE) {
+    if (cachedResponseHeaders.validate(responseHeaders)) {
+      if (responseCache instanceof HttpResponseCache) {
+        ((HttpResponseCache)responseCache).trackConditionalCacheHit();
+      }
+      release(true);
+      setResponse(cachedResponseHeaders.combine(responseHeaders),cachedResponseBody);
+      return;
+    }
+ else {
+      IoUtils.closeQuietly(cachedResponseBody);
+    }
+  }
+  if (hasResponseBody()) {
+    maybeCache();
+  }
+  initContentStream(getTransferStream());
+}

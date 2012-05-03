@@ -1,0 +1,14 @@
+{
+synchronized (DefaultSSLContextImpl.class) {
+    if (DEFAULT_SSL_CONTEXT_IMPL == null) {
+      clientSessionContext=new ClientSessionContext();
+      serverSessionContext=new ServerSessionContext();
+      DEFAULT_SSL_CONTEXT_IMPL=(DefaultSSLContextImpl)this;
+    }
+ else {
+      clientSessionContext=DEFAULT_SSL_CONTEXT_IMPL.engineGetClientSessionContext();
+      serverSessionContext=DEFAULT_SSL_CONTEXT_IMPL.engineGetServerSessionContext();
+    }
+    sslParameters=new SSLParametersImpl(DEFAULT_SSL_CONTEXT_IMPL.getKeyManagers(),DEFAULT_SSL_CONTEXT_IMPL.getTrustManagers(),null,clientSessionContext,serverSessionContext);
+  }
+}

@@ -1,23 +1,21 @@
 {
-  if (null == host || null == nonProxyHosts) {
+  if (host == null || nonProxyHosts == null) {
     return false;
   }
-  int length=nonProxyHosts.length();
-  char ch;
-  StringBuilder buf=new StringBuilder(length);
+  StringBuilder patternBuilder=new StringBuilder();
   for (int i=0; i < nonProxyHosts.length(); i++) {
-    ch=nonProxyHosts.charAt(i);
-switch (ch) {
+    char c=nonProxyHosts.charAt(i);
+switch (c) {
 case '.':
-      buf.append("\\.");
+      patternBuilder.append("\\.");
     break;
 case '*':
-  buf.append(".*");
+  patternBuilder.append(".*");
 break;
 default :
-buf.append(ch);
+patternBuilder.append(c);
 }
 }
-String nonProxyHostsReg=buf.toString();
-return host.matches(nonProxyHostsReg);
+String pattern=patternBuilder.toString();
+return host.matches(pattern);
 }

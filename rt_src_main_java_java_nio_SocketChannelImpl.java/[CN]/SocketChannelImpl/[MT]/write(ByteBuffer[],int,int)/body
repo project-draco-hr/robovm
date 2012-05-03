@@ -1,0 +1,27 @@
+{
+  Arrays.checkOffsetAndCount(sources.length,offset,length);
+  checkOpenConnected();
+  int count=FileChannelImpl.calculateTotalRemaining(sources,offset,length,false);
+  if (count == 0) {
+    return 0;
+  }
+  ByteBuffer writeBuf=ByteBuffer.allocate(count);
+  for (int val=offset; val < length + offset; val++) {
+    ByteBuffer source=sources[val];
+    int oldPosition=source.position();
+    writeBuf.put(source);
+    source.position(oldPosition);
+  }
+  writeBuf.flip();
+  int result=writeImpl(writeBuf);
+  int val=offset;
+  int written=result;
+  while (result > 0) {
+    ByteBuffer source=sources[val];
+    int gap=Math.min(result,source.remaining());
+    source.position(source.position() + gap);
+    val++;
+    result-=gap;
+  }
+  return written;
+}

@@ -1,0 +1,21 @@
+{
+  int totalRemaining=0;
+  for (int i=0; i < bufferCount; ++i) {
+    ByteBuffer b=byteBuffers[i + offset];
+    if (direction == Direction.READV) {
+      b.checkWritable();
+    }
+    int remaining=b.remaining();
+    if (b.isDirect()) {
+      ioBuffers[i]=b;
+      offsets[i]=b.position();
+    }
+ else {
+      ioBuffers[i]=NioUtils.unsafeArray(b);
+      offsets[i]=NioUtils.unsafeArrayOffset(b) + b.position();
+    }
+    byteCounts[i]=remaining;
+    totalRemaining+=remaining;
+  }
+  return totalRemaining;
+}

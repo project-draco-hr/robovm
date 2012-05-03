@@ -1,6 +1,8 @@
 {
   for (; ; ) {
-    int p=getState();
-    if (compareAndSetState(p,p + releases))     return true;
+    int current=getState();
+    int next=current + releases;
+    if (next < current)     throw new Error("Maximum permit count exceeded");
+    if (compareAndSetState(current,next))     return true;
   }
 }

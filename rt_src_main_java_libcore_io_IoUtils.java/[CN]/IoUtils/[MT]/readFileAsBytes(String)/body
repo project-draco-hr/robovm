@@ -1,0 +1,18 @@
+{
+  RandomAccessFile f=null;
+  try {
+    f=new RandomAccessFile(path,"r");
+    UnsafeByteSequence bytes=new UnsafeByteSequence((int)f.length());
+    byte[] buffer=new byte[8192];
+    while (true) {
+      int byteCount=f.read(buffer);
+      if (byteCount == -1) {
+        return bytes;
+      }
+      bytes.write(buffer,0,byteCount);
+    }
+  }
+  finally {
+    IoUtils.closeQuietly(f);
+  }
+}

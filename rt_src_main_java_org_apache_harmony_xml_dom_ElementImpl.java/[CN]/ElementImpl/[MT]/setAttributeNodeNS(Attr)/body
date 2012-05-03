@@ -1,0 +1,18 @@
+{
+  AttrImpl newAttrImpl=(AttrImpl)newAttr;
+  if (newAttrImpl.document != this.document) {
+    throw new DOMException(DOMException.WRONG_DOCUMENT_ERR,null);
+  }
+  if (newAttrImpl.getOwnerElement() != null) {
+    throw new DOMException(DOMException.INUSE_ATTRIBUTE_ERR,null);
+  }
+  AttrImpl oldAttrImpl=null;
+  int i=indexOfAttributeNS(newAttr.getNamespaceURI(),newAttr.getLocalName());
+  if (i != -1) {
+    oldAttrImpl=attributes.get(i);
+    attributes.remove(i);
+  }
+  attributes.add(newAttrImpl);
+  newAttrImpl.ownerElement=this;
+  return oldAttrImpl;
+}

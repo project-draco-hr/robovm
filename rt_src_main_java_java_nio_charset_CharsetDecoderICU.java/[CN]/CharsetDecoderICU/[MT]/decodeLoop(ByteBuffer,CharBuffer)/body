@@ -1,0 +1,24 @@
+{
+  if (!in.hasRemaining()) {
+    return CoderResult.UNDERFLOW;
+  }
+  data[INPUT_OFFSET]=getArray(in);
+  data[OUTPUT_OFFSET]=getArray(out);
+  try {
+    ec=NativeConverter.decode(converterHandle,input,inEnd,output,outEnd,data,false);
+    if (ec == ErrorCode.U_BUFFER_OVERFLOW_ERROR) {
+      return CoderResult.OVERFLOW;
+    }
+ else     if (ec == ErrorCode.U_INVALID_CHAR_FOUND) {
+      return CoderResult.unmappableForLength(data[INVALID_BYTES]);
+    }
+ else     if (ec == ErrorCode.U_ILLEGAL_CHAR_FOUND) {
+      return CoderResult.malformedForLength(data[INVALID_BYTES]);
+    }
+    return CoderResult.UNDERFLOW;
+  }
+  finally {
+    setPosition(in);
+    setPosition(out);
+  }
+}

@@ -1,4 +1,11 @@
 {
-  E[] data=getData();
-  return (T[])toArray(a,data,0,data.length);
+  Object[] snapshot=elements;
+  if (snapshot.length > contents.length) {
+    return (T[])Arrays.copyOf(snapshot,snapshot.length,contents.getClass());
+  }
+  System.arraycopy(snapshot,0,contents,0,snapshot.length);
+  if (snapshot.length < contents.length) {
+    contents[snapshot.length]=null;
+  }
+  return contents;
 }

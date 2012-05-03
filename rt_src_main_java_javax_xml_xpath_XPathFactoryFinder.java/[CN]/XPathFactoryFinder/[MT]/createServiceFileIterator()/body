@@ -1,38 +1,22 @@
 {
   if (classLoader == null) {
-    return new SingleIterator(){
-      protected Object value(){
-        ClassLoader classLoader=XPathFactoryFinder.class.getClassLoader();
-        return SecuritySupport.getResourceAsURL(classLoader,SERVICE_ID);
-      }
-    }
-;
+    URL resource=XPathFactoryFinder.class.getClassLoader().getResource(SERVICE_ID);
+    return Collections.singleton(resource);
   }
  else {
     try {
-      final Enumeration e=SecuritySupport.getResources(classLoader,SERVICE_ID);
+      Enumeration<URL> e=classLoader.getResources(SERVICE_ID);
       if (debug && !e.hasMoreElements()) {
         debugPrintln("no " + SERVICE_ID + " file was found");
       }
-      return new Iterator(){
-        public void remove(){
-          throw new UnsupportedOperationException();
-        }
-        public boolean hasNext(){
-          return e.hasMoreElements();
-        }
-        public Object next(){
-          return e.nextElement();
-        }
-      }
-;
+      return Collections.list(e);
     }
  catch (    IOException e) {
       if (debug) {
         debugPrintln("failed to enumerate resources " + SERVICE_ID);
         e.printStackTrace();
       }
-      return new ArrayList().iterator();
+      return Collections.emptySet();
     }
   }
 }

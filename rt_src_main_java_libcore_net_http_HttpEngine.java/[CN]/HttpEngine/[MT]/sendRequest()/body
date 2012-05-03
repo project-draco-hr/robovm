@@ -1,0 +1,26 @@
+{
+  if (responseSource != null) {
+    return;
+  }
+  prepareRawRequestHeaders();
+  initResponseSource();
+  if (responseCache instanceof HttpResponseCache) {
+    ((HttpResponseCache)responseCache).trackResponse(responseSource);
+  }
+  if (requestHeaders.isOnlyIfCached() && responseSource.requiresConnection()) {
+    if (responseSource == ResponseSource.CONDITIONAL_CACHE) {
+      IoUtils.closeQuietly(cachedResponseBody);
+    }
+    this.responseSource=ResponseSource.CACHE;
+    this.cacheResponse=BAD_GATEWAY_RESPONSE;
+    RawHeaders rawResponseHeaders=RawHeaders.fromMultimap(cacheResponse.getHeaders());
+    setResponse(new ResponseHeaders(uri,rawResponseHeaders),cacheResponse.getBody());
+  }
+  if (responseSource.requiresConnection()) {
+    sendSocketRequest();
+  }
+ else   if (connection != null) {
+    HttpConnectionPool.INSTANCE.recycle(connection);
+    connection=null;
+  }
+}

@@ -1,16 +1,15 @@
 {
   if (algorithm == null) {
-    throw new NullPointerException(Messages.getString("security.01"));
+    throw new NullPointerException();
   }
-  MessageDigest result;
-synchronized (engine) {
-    engine.getInstance(algorithm,null);
-    if (engine.spi instanceof MessageDigest) {
-      result=(MessageDigest)engine.spi;
-      result.algorithm=algorithm;
-      result.provider=engine.provider;
-      return result;
-    }
-    return new MessageDigestImpl((MessageDigestSpi)engine.spi,engine.provider,algorithm);
+  Engine.SpiAndProvider sap=ENGINE.getInstance(algorithm,null);
+  Object spi=sap.spi;
+  Provider provider=sap.provider;
+  if (spi instanceof MessageDigest) {
+    MessageDigest result=(MessageDigest)spi;
+    result.algorithm=algorithm;
+    result.provider=provider;
+    return result;
   }
+  return new MessageDigestImpl((MessageDigestSpi)sap.spi,sap.provider,algorithm);
 }

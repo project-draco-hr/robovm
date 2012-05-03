@@ -1,16 +1,16 @@
 {
   if (tag != ASN1Constants.TAG_INTEGER) {
-    throw new ASN1Exception(Messages.getString("security.127",tagOffset,Integer.toHexString(tag)));
+    throw expected("integer");
   }
   if (length < 1) {
-    throw new ASN1Exception(Messages.getString("security.128",tagOffset));
+    throw new ASN1Exception("Wrong length for ASN.1 integer at [" + tagOffset + "]");
   }
   readContent();
   if (length > 1) {
     byte firstByte=buffer[offset - length];
     byte secondByte=(byte)(buffer[offset - length + 1] & 0x80);
     if (firstByte == 0 && secondByte == 0 || firstByte == (byte)0xFF && secondByte == (byte)0x80) {
-      throw new ASN1Exception(Messages.getString("security.129",(offset - length)));
+      throw new ASN1Exception("Wrong content for ASN.1 integer at [" + (offset - length) + "]. An integer MUST be encoded in minimum number of octets");
     }
   }
 }

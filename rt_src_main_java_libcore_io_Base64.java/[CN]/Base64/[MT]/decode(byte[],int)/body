@@ -1,0 +1,66 @@
+{
+  int length=len / 4 * 3;
+  if (length == 0) {
+    return EmptyArray.BYTE;
+  }
+  byte[] out=new byte[length];
+  int pad=0;
+  byte chr;
+  for (; ; len--) {
+    chr=in[len - 1];
+    if ((chr == '\n') || (chr == '\r') || (chr == ' ')|| (chr == '\t')) {
+      continue;
+    }
+    if (chr == '=') {
+      pad++;
+    }
+ else {
+      break;
+    }
+  }
+  int outIndex=0;
+  int inIndex=0;
+  int bits=0;
+  int quantum=0;
+  for (int i=0; i < len; i++) {
+    chr=in[i];
+    if ((chr == '\n') || (chr == '\r') || (chr == ' ')|| (chr == '\t')) {
+      continue;
+    }
+    if ((chr >= 'A') && (chr <= 'Z')) {
+      bits=chr - 65;
+    }
+ else     if ((chr >= 'a') && (chr <= 'z')) {
+      bits=chr - 71;
+    }
+ else     if ((chr >= '0') && (chr <= '9')) {
+      bits=chr + 4;
+    }
+ else     if (chr == '+') {
+      bits=62;
+    }
+ else     if (chr == '/') {
+      bits=63;
+    }
+ else {
+      return null;
+    }
+    quantum=(quantum << 6) | (byte)bits;
+    if (inIndex % 4 == 3) {
+      out[outIndex++]=(byte)(quantum >> 16);
+      out[outIndex++]=(byte)(quantum >> 8);
+      out[outIndex++]=(byte)quantum;
+    }
+    inIndex++;
+  }
+  if (pad > 0) {
+    quantum=quantum << (6 * pad);
+    out[outIndex++]=(byte)(quantum >> 16);
+    if (pad == 1) {
+      out[outIndex++]=(byte)(quantum >> 8);
+    }
+  }
+  byte[] result=new byte[outIndex];
+  System.arraycopy(out,0,result,0,outIndex);
+  return result;
+}

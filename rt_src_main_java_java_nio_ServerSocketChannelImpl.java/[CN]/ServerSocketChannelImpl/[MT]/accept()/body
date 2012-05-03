@@ -1,0 +1,30 @@
+{
+  if (!isOpen()) {
+    throw new ClosedChannelException();
+  }
+  if (!isBound) {
+    throw new NotYetBoundException();
+  }
+  SocketChannelImpl result=new SocketChannelImpl(provider(),false);
+  boolean connected=false;
+  try {
+    begin();
+synchronized (acceptLock) {
+synchronized (blockingLock()) {
+        do {
+          try {
+            socket.implAccept(result);
+            break;
+          }
+ catch (          SocketTimeoutException e) {
+          }
+        }
+ while (isBlocking());
+      }
+    }
+  }
+  finally {
+    end(result.socket().isConnected());
+  }
+  return result.socket().isConnected() ? result : null;
+}

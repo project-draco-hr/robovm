@@ -1,0 +1,27 @@
+{
+  int index=Arrays.binarySearch(ids,id);
+  if (index < 0) {
+    return null;
+  }
+  BufferIterator data=ALL_ZONE_DATA.bigEndianIterator();
+  data.skip(byteOffsets[index]);
+  if (data.readInt() != 0x545a6966) {
+    return null;
+  }
+  data.skip(28);
+  int tzh_timecnt=data.readInt();
+  int tzh_typecnt=data.readInt();
+  data.skip(4);
+  int[] transitions=new int[tzh_timecnt];
+  data.readIntArray(transitions,0,transitions.length);
+  byte[] type=new byte[tzh_timecnt];
+  data.readByteArray(type,0,type.length);
+  int[] gmtOffsets=new int[tzh_typecnt];
+  byte[] isDsts=new byte[tzh_typecnt];
+  for (int i=0; i < tzh_typecnt; ++i) {
+    gmtOffsets[i]=data.readInt();
+    isDsts[i]=data.readByte();
+    data.skip(1);
+  }
+  return new ZoneInfo(id,transitions,type,gmtOffsets,isDsts);
+}

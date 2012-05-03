@@ -1,0 +1,19 @@
+{
+  int length=readInt(in);
+  if (length == -1) {
+    return null;
+  }
+  try {
+    CertificateFactory certificateFactory=CertificateFactory.getInstance("X.509");
+    Certificate[] result=new Certificate[length];
+    for (int i=0; i < result.length; i++) {
+      String line=Streams.readAsciiLine(in);
+      byte[] bytes=Base64.decode(line.getBytes(Charsets.US_ASCII));
+      result[i]=certificateFactory.generateCertificate(new ByteArrayInputStream(bytes));
+    }
+    return result;
+  }
+ catch (  CertificateException e) {
+    throw new IOException(e);
+  }
+}

@@ -1,0 +1,29 @@
+{
+  SocketAddress retAddr=null;
+  DatagramPacket receivePacket;
+  int oldposition=target.position();
+  int received=0;
+  if (target.hasArray()) {
+    receivePacket=new DatagramPacket(target.array(),target.position() + target.arrayOffset(),target.remaining());
+  }
+ else {
+    receivePacket=new DatagramPacket(new byte[target.remaining()],target.remaining());
+  }
+  do {
+    received=IoBridge.recvfrom(false,fd,receivePacket.getData(),receivePacket.getOffset(),receivePacket.getLength(),0,receivePacket,isConnected());
+    if (receivePacket != null && receivePacket.getAddress() != null) {
+      if (received > 0) {
+        if (target.hasArray()) {
+          target.position(oldposition + received);
+        }
+ else {
+          target.put(receivePacket.getData(),0,received);
+        }
+      }
+      retAddr=receivePacket.getSocketAddress();
+      break;
+    }
+  }
+ while (loop);
+  return retAddr;
+}

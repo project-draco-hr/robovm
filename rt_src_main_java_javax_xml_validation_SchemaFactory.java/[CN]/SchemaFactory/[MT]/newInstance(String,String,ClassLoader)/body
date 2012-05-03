@@ -1,16 +1,25 @@
 {
-  if (schemaLanguage == null) {
-    throw new NullPointerException();
-  }
-  if (factoryClassName == null) {
-    throw new IllegalArgumentException("factoryClassName cannot be null.");
+  if (schemaLanguage == null || factoryClassName == null) {
+    throw new NullPointerException("schemaLanguage == null || factoryClassName == null");
   }
   if (classLoader == null) {
-    classLoader=SecuritySupport.getContextClassLoader();
+    classLoader=Thread.currentThread().getContextClassLoader();
   }
-  SchemaFactory f=new SchemaFactoryFinder(classLoader).createInstance(factoryClassName);
-  if (f == null || !f.isSchemaLanguageSupported(schemaLanguage)) {
-    throw new IllegalArgumentException(schemaLanguage);
+  try {
+    Class<?> type=classLoader != null ? classLoader.loadClass(factoryClassName) : Class.forName(factoryClassName);
+    SchemaFactory result=(SchemaFactory)type.newInstance();
+    if (result == null || !result.isSchemaLanguageSupported(schemaLanguage)) {
+      throw new IllegalArgumentException(schemaLanguage);
+    }
+    return result;
   }
-  return f;
+ catch (  ClassNotFoundException e) {
+    throw new IllegalArgumentException(e);
+  }
+catch (  InstantiationException e) {
+    throw new IllegalArgumentException(e);
+  }
+catch (  IllegalAccessException e) {
+    throw new IllegalArgumentException(e);
+  }
 }

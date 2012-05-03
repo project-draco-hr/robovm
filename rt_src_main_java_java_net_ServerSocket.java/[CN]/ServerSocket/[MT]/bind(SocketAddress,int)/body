@@ -1,29 +1,25 @@
 {
-  checkClosedAndCreate(true);
+  checkOpen();
   if (isBound()) {
-    throw new BindException(Messages.getString("luni.71"));
+    throw new BindException("Socket is already bound");
   }
   int port=0;
-  InetAddress addr=InetAddress.ANY;
+  InetAddress addr=Inet4Address.ANY;
   if (localAddr != null) {
     if (!(localAddr instanceof InetSocketAddress)) {
-      throw new IllegalArgumentException(Messages.getString("luni.49",localAddr.getClass()));
+      throw new IllegalArgumentException("Local address not an InetSocketAddress: " + localAddr.getClass());
     }
     InetSocketAddress inetAddr=(InetSocketAddress)localAddr;
     if ((addr=inetAddr.getAddress()) == null) {
-      throw new SocketException(Messages.getString("luni.1A",inetAddr.getHostName()));
+      throw new SocketException("Host is unresolved: " + inetAddr.getHostName());
     }
     port=inetAddr.getPort();
-  }
-  SecurityManager security=System.getSecurityManager();
-  if (security != null) {
-    security.checkListen(port);
   }
 synchronized (this) {
     try {
       impl.bind(addr,port);
       isBound=true;
-      impl.listen(backlog > 0 ? backlog : defaultBacklog());
+      impl.listen(backlog > 0 ? backlog : DEFAULT_BACKLOG);
     }
  catch (    IOException e) {
       close();

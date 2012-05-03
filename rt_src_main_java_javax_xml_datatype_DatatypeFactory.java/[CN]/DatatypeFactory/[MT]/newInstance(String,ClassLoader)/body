@@ -1,14 +1,21 @@
 {
   if (factoryClassName == null) {
-    throw new DatatypeConfigurationException("factoryClassName cannot be null.");
+    throw new DatatypeConfigurationException("factoryClassName == null");
   }
   if (classLoader == null) {
-    classLoader=SecuritySupport.getContextClassLoader();
+    classLoader=Thread.currentThread().getContextClassLoader();
   }
   try {
-    return (DatatypeFactory)FactoryFinder.newInstance(factoryClassName,classLoader);
+    Class<?> type=classLoader != null ? classLoader.loadClass(factoryClassName) : Class.forName(factoryClassName);
+    return (DatatypeFactory)type.newInstance();
   }
- catch (  FactoryFinder.ConfigurationError e) {
-    throw new DatatypeConfigurationException(e.getMessage(),e.getException());
+ catch (  ClassNotFoundException e) {
+    throw new DatatypeConfigurationException(e);
+  }
+catch (  InstantiationException e) {
+    throw new DatatypeConfigurationException(e);
+  }
+catch (  IllegalAccessException e) {
+    throw new DatatypeConfigurationException(e);
   }
 }

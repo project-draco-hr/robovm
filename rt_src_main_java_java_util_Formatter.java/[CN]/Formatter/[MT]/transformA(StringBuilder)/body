@@ -1,0 +1,31 @@
+{
+  if (arg instanceof Float) {
+    result.append(Float.toHexString(((Float)arg).floatValue()));
+  }
+ else   if (arg instanceof Double) {
+    result.append(Double.toHexString(((Double)arg).doubleValue()));
+  }
+ else {
+    throw badArgumentType();
+  }
+  if (!formatToken.isPrecisionSet()) {
+    return;
+  }
+  int precision=formatToken.getPrecision();
+  if (precision == 0) {
+    precision=1;
+  }
+  int indexOfFirstFractionalDigit=result.indexOf(".") + 1;
+  int indexOfP=result.indexOf("p");
+  int fractionalLength=indexOfP - indexOfFirstFractionalDigit;
+  if (fractionalLength == precision) {
+    return;
+  }
+  if (fractionalLength < precision) {
+    char[] zeros=new char[precision - fractionalLength];
+    Arrays.fill(zeros,'0');
+    result.insert(indexOfP,zeros);
+    return;
+  }
+  result.delete(indexOfFirstFractionalDigit + precision,indexOfP);
+}

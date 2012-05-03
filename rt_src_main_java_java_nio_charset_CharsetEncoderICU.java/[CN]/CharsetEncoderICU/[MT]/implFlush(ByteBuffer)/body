@@ -1,0 +1,28 @@
+{
+  try {
+    input=EmptyArray.CHAR;
+    inEnd=0;
+    data[INPUT_OFFSET]=0;
+    data[OUTPUT_OFFSET]=getArray(out);
+    data[INVALID_CHARS]=0;
+    ec=NativeConverter.encode(converterHandle,input,inEnd,output,outEnd,data,true);
+    if (ErrorCode.isFailure(ec)) {
+      if (ec == ErrorCode.U_BUFFER_OVERFLOW_ERROR) {
+        return CoderResult.OVERFLOW;
+      }
+ else       if (ec == ErrorCode.U_TRUNCATED_CHAR_FOUND) {
+        if (data[INPUT_OFFSET] > 0) {
+          return CoderResult.malformedForLength(data[INPUT_OFFSET]);
+        }
+      }
+ else {
+        throw ErrorCode.throwException(ec);
+      }
+    }
+    return CoderResult.UNDERFLOW;
+  }
+  finally {
+    setPosition(out);
+    implReset();
+  }
+}

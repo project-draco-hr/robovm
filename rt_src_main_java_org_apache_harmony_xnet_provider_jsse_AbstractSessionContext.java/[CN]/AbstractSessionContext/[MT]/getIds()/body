@@ -1,0 +1,29 @@
+{
+  final Iterator<SSLSession> i=sessionIterator();
+  return new Enumeration<byte[]>(){
+    private SSLSession next;
+    public boolean hasMoreElements(){
+      if (next != null) {
+        return true;
+      }
+      while (i.hasNext()) {
+        SSLSession session=i.next();
+        if (session.isValid()) {
+          next=session;
+          return true;
+        }
+      }
+      next=null;
+      return false;
+    }
+    public byte[] nextElement(){
+      if (hasMoreElements()) {
+        byte[] id=next.getId();
+        next=null;
+        return id;
+      }
+      throw new NoSuchElementException();
+    }
+  }
+;
+}

@@ -1,11 +1,9 @@
 {
-  super();
-  SecurityManager security=System.getSecurityManager();
-  if (security != null) {
-    security.checkWrite(file.getPath());
+  if (file == null) {
+    throw new NullPointerException("file == null");
   }
-  fd=new FileDescriptor();
-  fd.descriptor=fileSystem.open(file.properPath(true),append ? IFileSystem.O_APPEND : IFileSystem.O_WRONLY);
-  innerFD=true;
-  channel=FileChannelFactory.getFileChannel(this,fd.descriptor,append ? IFileSystem.O_APPEND : IFileSystem.O_WRONLY);
+  this.mode=O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC);
+  this.fd=IoBridge.open(file.getAbsolutePath(),mode);
+  this.shouldClose=true;
+  this.guard.open("close");
 }

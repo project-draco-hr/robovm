@@ -3,21 +3,21 @@
   ContentInfo info=(ContentInfo)ContentInfo.ASN1.decode(bis);
   SignedData signedData=info.getSignedData();
   if (signedData == null) {
-    throw new IOException(Messages.getString("security.173"));
+    throw new IOException("No SignedData found");
   }
-  Collection encCerts=signedData.getCertificates();
+  Collection<org.apache.harmony.security.x509.Certificate> encCerts=signedData.getCertificates();
   if (encCerts.isEmpty()) {
     return null;
   }
   X509Certificate[] certs=new X509Certificate[encCerts.size()];
   int i=0;
-  for (Iterator it=encCerts.iterator(); it.hasNext(); ) {
-    certs[i++]=new X509CertImpl((org.apache.harmony.security.x509.Certificate)it.next());
+  for (  org.apache.harmony.security.x509.Certificate encCert : encCerts) {
+    certs[i++]=new X509CertImpl(encCert);
   }
-  List sigInfos=signedData.getSignerInfos();
+  List<SignerInfo> sigInfos=signedData.getSignerInfos();
   SignerInfo sigInfo;
   if (!sigInfos.isEmpty()) {
-    sigInfo=(SignerInfo)sigInfos.get(0);
+    sigInfo=sigInfos.get(0);
   }
  else {
     return null;
@@ -35,16 +35,16 @@
     return null;
   }
   if (certs[issuerSertIndex].hasUnsupportedCriticalExtension()) {
-    throw new SecurityException(Messages.getString("security.174"));
+    throw new SecurityException("Can not recognize a critical extension");
   }
   Signature sig=null;
-  String da=sigInfo.getdigestAlgorithm();
+  String da=sigInfo.getDigestAlgorithm();
   String dea=sigInfo.getDigestEncryptionAlgorithm();
   String alg=null;
   if (da != null && dea != null) {
     alg=da + "with" + dea;
     try {
-      sig=Signature.getInstance(alg);
+      sig=OpenSSLSignature.getInstance(alg);
     }
  catch (    NoSuchAlgorithmException e) {
     }
@@ -55,23 +55,23 @@
       return null;
     }
     try {
-      sig=Signature.getInstance(alg);
+      sig=OpenSSLSignature.getInstance(alg);
     }
  catch (    NoSuchAlgorithmException e) {
       return null;
     }
   }
   sig.initVerify(certs[issuerSertIndex]);
-  List atr=sigInfo.getAuthenticatedAttributes();
-  byte[] sfBytes=InputStreamHelper.readFullyAndClose(signature);
+  List<AttributeTypeAndValue> atr=sigInfo.getAuthenticatedAttributes();
+  byte[] sfBytes=new byte[signature.available()];
+  signature.read(sfBytes);
   if (atr == null) {
     sig.update(sfBytes);
   }
  else {
     sig.update(sigInfo.getEncodedAuthenticatedAttributes());
     byte[] existingDigest=null;
-    for (Iterator it=atr.iterator(); it.hasNext(); ) {
-      AttributeTypeAndValue a=(AttributeTypeAndValue)it.next();
+    for (    AttributeTypeAndValue a : atr) {
       if (Arrays.equals(a.getType().getOid(),MESSAGE_DIGEST_OID)) {
       }
     }
@@ -79,12 +79,12 @@
       MessageDigest md=MessageDigest.getInstance(sigInfo.getDigestAlgorithm());
       byte[] computedDigest=md.digest(sfBytes);
       if (!Arrays.equals(existingDigest,computedDigest)) {
-        throw new SecurityException(Messages.getString("security.175"));
+        throw new SecurityException("Incorrect MD");
       }
     }
   }
   if (!sig.verify(sigInfo.getEncryptedDigest())) {
-    throw new SecurityException(Messages.getString("security.176"));
+    throw new SecurityException("Incorrect signature");
   }
   return createChain(certs[issuerSertIndex],certs);
 }

@@ -1,11 +1,16 @@
 {
   super(is);
-  if (is == null || inf == null) {
+  if (is == null || inflater == null) {
     throw new NullPointerException();
   }
   if (bsize <= 0) {
     throw new IllegalArgumentException();
   }
-  this.inf=inf;
-  buf=new byte[bsize];
+  this.inf=inflater;
+  if (is instanceof ZipFile.RAFStream) {
+    nativeEndBufSize=bsize;
+  }
+ else {
+    buf=new byte[bsize];
+  }
 }

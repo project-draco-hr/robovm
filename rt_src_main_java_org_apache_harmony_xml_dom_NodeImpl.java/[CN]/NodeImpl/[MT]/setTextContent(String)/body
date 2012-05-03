@@ -1,0 +1,29 @@
+{
+switch (getNodeType()) {
+case DOCUMENT_TYPE_NODE:
+case DOCUMENT_NODE:
+    return;
+case ELEMENT_NODE:
+case ENTITY_NODE:
+case ENTITY_REFERENCE_NODE:
+case DOCUMENT_FRAGMENT_NODE:
+  Node child;
+while ((child=getFirstChild()) != null) {
+  removeChild(child);
+}
+if (textContent != null && textContent.length() != 0) {
+appendChild(document.createTextNode(textContent));
+}
+return;
+case ATTRIBUTE_NODE:
+case TEXT_NODE:
+case CDATA_SECTION_NODE:
+case PROCESSING_INSTRUCTION_NODE:
+case COMMENT_NODE:
+case NOTATION_NODE:
+setNodeValue(textContent);
+return;
+default :
+throw new DOMException(DOMException.NOT_SUPPORTED_ERR,"Unsupported node type " + getNodeType());
+}
+}

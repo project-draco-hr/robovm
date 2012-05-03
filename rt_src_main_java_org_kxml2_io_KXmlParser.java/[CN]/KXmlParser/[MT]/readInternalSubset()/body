@@ -1,0 +1,36 @@
+{
+  read('[');
+  while (true) {
+    skip();
+    if (peekCharacter() == ']') {
+      position++;
+      return;
+    }
+    int declarationType=peekType(true);
+switch (declarationType) {
+case ELEMENTDECL:
+      readElementDeclaration();
+    break;
+case ATTLISTDECL:
+  readAttributeListDeclaration();
+break;
+case ENTITYDECL:
+readEntityDeclaration();
+break;
+case NOTATIONDECL:
+readNotationDeclaration();
+break;
+case PROCESSING_INSTRUCTION:
+read(START_PROCESSING_INSTRUCTION);
+readUntil(END_PROCESSING_INSTRUCTION,false);
+break;
+case COMMENT:
+readComment(false);
+break;
+case PARAMETER_ENTITY_REF:
+throw new XmlPullParserException("Parameter entity references are not supported",this,null);
+default :
+throw new XmlPullParserException("Unexpected token",this,null);
+}
+}
+}

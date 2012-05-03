@@ -3,20 +3,11 @@
   final ReentrantLock lock=this.lock;
   lock.lockInterruptibly();
   try {
-    for (; ; ) {
-      if (count != 0) {
-        E x=extract();
-        return x;
-      }
+    while (count == 0) {
       if (nanos <= 0)       return null;
-      try {
-        nanos=notEmpty.awaitNanos(nanos);
-      }
- catch (      InterruptedException ie) {
-        notEmpty.signal();
-        throw ie;
-      }
+      nanos=notEmpty.awaitNanos(nanos);
     }
+    return extract();
   }
   finally {
     lock.unlock();

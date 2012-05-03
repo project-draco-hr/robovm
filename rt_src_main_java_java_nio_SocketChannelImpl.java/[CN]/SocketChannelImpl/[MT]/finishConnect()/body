@@ -1,0 +1,36 @@
+{
+synchronized (this) {
+    if (!isOpen()) {
+      throw new ClosedChannelException();
+    }
+    if (status == SOCKET_STATUS_CONNECTED) {
+      return true;
+    }
+    if (status != SOCKET_STATUS_PENDING) {
+      throw new NoConnectionPendingException();
+    }
+  }
+  boolean finished=false;
+  try {
+    begin();
+    InetAddress inetAddress=connectAddress.getAddress();
+    int port=connectAddress.getPort();
+    finished=IoBridge.isConnected(fd,inetAddress,port,0,0);
+    isBound=finished;
+  }
+ catch (  ConnectException e) {
+    if (isOpen()) {
+      close();
+      finished=true;
+    }
+    throw e;
+  }
+ finally {
+    end(finished);
+  }
+synchronized (this) {
+    status=(finished ? SOCKET_STATUS_CONNECTED : status);
+    isBound=finished;
+  }
+  return finished;
+}

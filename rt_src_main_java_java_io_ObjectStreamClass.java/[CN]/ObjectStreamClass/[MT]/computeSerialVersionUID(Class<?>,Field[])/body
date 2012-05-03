@@ -1,16 +1,16 @@
 {
   for (int i=0; i < fields.length; i++) {
     final Field field=fields[i];
-    if (Long.TYPE == field.getType()) {
+    if (field.getType() == long.class) {
       int modifiers=field.getModifiers();
       if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)) {
         if (UID_FIELD_NAME.equals(field.getName())) {
-          AccessController.doPrivileged(new PriviAction<Object>(field));
+          field.setAccessible(true);
           try {
             return field.getLong(null);
           }
  catch (          IllegalAccessException iae) {
-            throw new RuntimeException(Messages.getString("luni.C9",iae));
+            throw new RuntimeException("Error fetching SUID: " + iae);
           }
         }
       }
@@ -121,8 +121,8 @@
     }
   }
  catch (  IOException e) {
-    throw new RuntimeException(Messages.getString("luni.CA",e));
+    throw new RuntimeException(e + " computing SHA-1/SUID");
   }
   byte[] hash=digest.digest(sha.toByteArray());
-  return littleEndianLongAt(hash,0);
+  return Memory.peekLong(hash,0,ByteOrder.LITTLE_ENDIAN);
 }

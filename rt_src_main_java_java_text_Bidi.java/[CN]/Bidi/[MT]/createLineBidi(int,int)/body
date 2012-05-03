@@ -1,9 +1,23 @@
 {
-  int length=icuBidi.getLength();
   if (lineStart < 0 || lineLimit < 0 || lineLimit > length || lineStart > lineLimit) {
-    throw new IllegalArgumentException(Messages.getString("text.12",new Object[]{lineStart,lineLimit,length}));
+    throw new IllegalArgumentException("Invalid ranges (start=" + lineStart + ", "+ "limit="+ lineLimit+ ", length="+ length+ ")");
   }
-  Bidi bidi=new Bidi();
-  bidi.icuBidi=icuBidi.createLineBidi(lineStart,lineLimit);
-  return bidi;
+  char[] text=new char[this.length];
+  Arrays.fill(text,'a');
+  byte[] embeddings=new byte[this.length];
+  for (int i=0; i < embeddings.length; i++) {
+    embeddings[i]=(byte)-this.offsetLevel[i];
+  }
+  int dir=this.baseIsLeftToRight() ? Bidi.DIRECTION_LEFT_TO_RIGHT : Bidi.DIRECTION_RIGHT_TO_LEFT;
+  long parent=0;
+  try {
+    parent=createUBiDi(text,0,embeddings,0,this.length,dir);
+    if (lineStart == lineLimit) {
+      return createEmptyLineBidi(parent);
+    }
+    return new Bidi(ubidi_setLine(parent,lineStart,lineLimit));
+  }
+  finally {
+    ubidi_close(parent);
+  }
 }
