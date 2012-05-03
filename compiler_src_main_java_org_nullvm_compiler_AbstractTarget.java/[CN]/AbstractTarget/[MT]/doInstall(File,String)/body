@@ -1,0 +1,13 @@
+{
+  if (!config.getTmpDir().equals(installDir) || !executable.equals(config.getExecutable())) {
+    File destFile=new File(installDir,executable);
+    FileUtils.copyFile(new File(config.getTmpDir(),config.getExecutable()),destFile);
+    destFile.setExecutable(true,false);
+  }
+  for (  File f : config.getOsArchDepLibDir().listFiles()) {
+    if (f.getName().matches(".*\\.(so|dylib)(\\.1)?")) {
+      FileUtils.copyFileToDirectory(f,installDir);
+    }
+  }
+  stripArchives(installDir);
+}

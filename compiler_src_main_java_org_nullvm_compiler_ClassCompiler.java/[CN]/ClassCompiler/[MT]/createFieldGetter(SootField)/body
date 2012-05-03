@@ -11,7 +11,18 @@
     fieldPtr=getInstanceFieldPtr(fn,new VariableRef("this",OBJECT_PTR),field);
   }
   Variable result=fn.newVariable(getType(field.getType()));
-  fn.add(new Load(result,fieldPtr));
+  if (Modifier.isVolatile(field.getModifiers())) {
+    fn.add(new Fence(Ordering.seq_cst));
+    if (LongType.v().equals(field.getType())) {
+      fn.add(new Load(result,fieldPtr,Ordering.unordered,8));
+    }
+ else {
+      fn.add(new Load(result,fieldPtr));
+    }
+  }
+ else {
+    fn.add(new Load(result,fieldPtr));
+  }
   fn.add(new Ret(new VariableRef(result)));
   return fn;
 }

@@ -1,0 +1,64 @@
+{
+  if (processErr != null) {
+    errThread=new Thread(){
+      @Override public void run(){
+        try {
+          byte[] buf=new byte[4096];
+          int n;
+          while ((n=processErr.read(buf)) > 0) {
+            fruitstrapErr.write(buf,0,n);
+          }
+        }
+ catch (        IOException e) {
+        }
+        IOUtils.closeQuietly(processErr);
+        IOUtils.closeQuietly(fruitstrapErr);
+        IOUtils.closeQuietly(err);
+      }
+    }
+;
+    errThread.start();
+  }
+  if (processOut != null) {
+    outThread=new Thread(){
+      @Override public void run(){
+        try {
+          byte[] buf=new byte[4096];
+          int n=0;
+          boolean gdb=false;
+          int dashes=0;
+          outer:           while ((n=processOut.read(buf)) > 0) {
+            for (int i=0; i < n; i++) {
+              if (buf[i] == '-') {
+                dashes++;
+              }
+ else               if (dashes == 25 && buf[i] == '\n') {
+                fruitstrapOut.write(buf,0,i + 1);
+                n-=i + 1;
+                if (n > 0) {
+                  System.arraycopy(buf,i + 1,buf,0,n);
+                }
+                gdb=true;
+                break outer;
+              }
+ else {
+                dashes=0;
+              }
+            }
+            fruitstrapOut.write(buf,0,n);
+          }
+          if (gdb) {
+            startGdbProcessor(new SequenceInputStream(new ByteArrayInputStream(buf,0,n),processOut));
+          }
+        }
+ catch (        IOException e) {
+        }
+        IOUtils.closeQuietly(processOut);
+        IOUtils.closeQuietly(fruitstrapOut);
+        IOUtils.closeQuietly(out);
+      }
+    }
+;
+    outThread.start();
+  }
+}

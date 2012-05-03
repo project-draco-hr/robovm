@@ -1,0 +1,33 @@
+{
+  Map<String,NSObject> dict=null;
+  if (infoPListDict != null) {
+    dict=new HashMap<String,NSObject>(infoPListDict.getValue());
+  }
+ else {
+    dict=new HashMap<String,NSObject>();
+  }
+  if (!dict.containsKey("CFBundleExecutable")) {
+    dict.put("CFBundleExecutable",new NSString(config.getExecutable()));
+  }
+  if (!dict.containsKey("CFBundleName")) {
+    dict.put("CFBundleName",new NSString(config.getExecutable()));
+  }
+  if (!dict.containsKey("CFBundleIdentifier")) {
+    dict.put("CFBundleIdentifier",new NSString(config.getMainClass()));
+  }
+  customizeInfoPList(dict);
+  File tmpInfoPlistXml=new File(config.getTmpDir(),"Info.plist.xml");
+  File tmpInfoPlist=new File(config.getTmpDir(),"Info.plist");
+  try {
+    PropertyListWriter.write(new NSDictionary(dict),tmpInfoPlistXml,Format.XML);
+  }
+ catch (  PropertyListException e) {
+    throw new CompilerException(e);
+  }
+catch (  ParserConfigurationException e) {
+    throw new CompilerException(e);
+  }
+  CompilerUtil.exec(config,"plutil","-convert","binary1","-o",tmpInfoPlist,tmpInfoPlistXml);
+  config.getLogger().debug("Installing Info.plist to %s",dir);
+  FileUtils.copyFile(tmpInfoPlist,new File(dir,tmpInfoPlist.getName()));
+}

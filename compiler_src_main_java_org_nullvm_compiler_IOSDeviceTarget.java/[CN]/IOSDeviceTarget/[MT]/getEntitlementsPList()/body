@@ -1,0 +1,20 @@
+{
+  try {
+    File destFile=new File(config.getTmpDir(),"Entitlements.plist");
+    if (entitlementsPList != null) {
+      NSDictionary dict=(NSDictionary)PropertyListParser.parse(entitlementsPList);
+      dict.getValue().put("get-task-allow",NSBoolean.TRUE);
+      PropertyListWriter.write(dict,destFile);
+    }
+ else {
+      FileUtils.copyURLToFile(getClass().getResource("/Entitlements.plist"),destFile);
+    }
+    return destFile;
+  }
+ catch (  PropertyListException e) {
+    throw new RuntimeException(e);
+  }
+catch (  ParserConfigurationException e) {
+    throw new RuntimeException(e);
+  }
+}

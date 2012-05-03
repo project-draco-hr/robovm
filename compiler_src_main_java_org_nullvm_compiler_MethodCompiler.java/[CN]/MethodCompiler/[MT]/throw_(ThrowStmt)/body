@@ -1,14 +1,6 @@
 {
   Value obj=immediate(stmt,(Immediate)stmt.getOp());
   checkNull(stmt,obj);
-  List<Trap> traps=getTrapsAt(stmt);
-  if (!traps.isEmpty()) {
-    function.add(new Call(NVM_BC_EXCEPTION_SET,env,obj));
-    function.add(new Br(function.newBasicBlockRef(new Label(new Label(traps)))));
-    recordedTraps.add(traps);
-  }
- else {
-    function.add(new Call(NVM_BC_THROW,env,obj));
-    function.add(new Unreachable());
-  }
+  callOrInvoke(stmt,NVM_BC_THROW,env,obj);
+  function.add(new Unreachable());
 }
