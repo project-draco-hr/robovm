@@ -1,9 +1,8 @@
 {
-  VMThread vmt=vmThread;
-  if (vmt == null) {
+  if (threadPtr == 0) {
     throw new AssertionError();
   }
-synchronized (vmt) {
+synchronized (lock) {
 switch (parkState) {
 case ParkState.PREEMPTIVELY_UNPARKED:
 {
@@ -16,7 +15,7 @@ case ParkState.UNPARKED:
       nanos%=NANOS_PER_MILLI;
       parkState=ParkState.PARKED;
       try {
-        vmt.wait(millis,(int)nanos);
+        lock.wait(millis,(int)nanos);
       }
  catch (      InterruptedException ex) {
         interrupt();

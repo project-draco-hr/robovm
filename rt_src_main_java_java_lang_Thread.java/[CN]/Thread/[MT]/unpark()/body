@@ -1,10 +1,9 @@
 {
-  VMThread vmt=vmThread;
-  if (vmt == null) {
+  if (threadPtr == 0) {
     parkState=ParkState.PREEMPTIVELY_UNPARKED;
     return;
   }
-synchronized (vmt) {
+synchronized (lock) {
 switch (parkState) {
 case ParkState.PREEMPTIVELY_UNPARKED:
 {
@@ -18,7 +17,7 @@ case ParkState.UNPARKED:
 default :
 {
     parkState=ParkState.UNPARKED;
-    vmt.notifyAll();
+    lock.notifyAll();
     break;
   }
 }

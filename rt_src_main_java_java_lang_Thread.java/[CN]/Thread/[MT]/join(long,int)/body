@@ -8,18 +8,17 @@
     join();
     return;
   }
-  VMThread t=vmThread;
-  if (t == null) {
+  if (threadPtr == 0) {
     return;
   }
-synchronized (t) {
+synchronized (lock) {
     if (!isAlive()) {
       return;
     }
     long nanosToWait=millis * NANOS_PER_MILLI + nanos;
     long start=System.nanoTime();
     while (true) {
-      t.wait(millis,nanos);
+      lock.wait(millis,nanos);
       if (!isAlive()) {
         break;
       }
