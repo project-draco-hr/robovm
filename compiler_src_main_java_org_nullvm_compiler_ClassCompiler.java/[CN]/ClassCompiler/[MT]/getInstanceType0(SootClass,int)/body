@@ -1,0 +1,24 @@
+{
+  List<Type> types=new ArrayList<Type>();
+  List<SootField> fields=getInstanceFields(clazz);
+  int superAlignment=1;
+  if (!fields.isEmpty()) {
+    SootField field=fields.get(0);
+    superAlignment=getFieldSize(field);
+  }
+  if (clazz.hasSuperclass()) {
+    types.add(getInstanceType0(clazz.getSuperclass(),superAlignment));
+  }
+  int size=0;
+  for (  SootField field : fields) {
+    size+=getFieldSize(field);
+    types.add(getType(field.getType()));
+  }
+  if (size > 0 && alignment > 1) {
+    int padding=alignment - size % alignment;
+    for (int i=0; i < padding; i++) {
+      types.add(I8);
+    }
+  }
+  return new StructureType(types.toArray(new Type[types.size()]));
+}
