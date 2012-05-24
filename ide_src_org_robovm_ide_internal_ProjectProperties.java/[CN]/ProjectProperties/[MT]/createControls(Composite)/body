@@ -1,0 +1,63 @@
+{
+  Label archLabel=new Label(parent,SWT.NONE);
+  archLabel.setFont(parent.getFont());
+  archLabel.setText("Arch for incremental builds:");
+  archLabel.setLayoutData(new GridData(GridData.BEGINNING,GridData.CENTER,false,false));
+  archCombo=new Combo(parent,SWT.READ_ONLY | SWT.BORDER);
+  archCombo.setItems(new String[]{"Use workspace default","Auto (build for current host)",Arch.armv6.toString(),Arch.armv7.toString(),Arch.thumbv6.toString(),Arch.thumbv7.toString(),Arch.x86.toString()});
+  archCombo.select(0);
+  archCombo.setLayoutData(new GridData(GridData.FILL,GridData.CENTER,true,false));
+  archCombo.addSelectionListener(new SelectionAdapter(){
+    @Override public void widgetSelected(    SelectionEvent e){
+      int index=archCombo.getSelectionIndex();
+      if (index == 0) {
+        arch=null;
+      }
+ else       if (index == 1) {
+        arch=RoboVMPlugin.ARCH_AUTO;
+      }
+ else {
+        arch=archCombo.getItem(index);
+      }
+    }
+  }
+);
+  Label osLabel=new Label(parent,SWT.NONE);
+  osLabel.setFont(parent.getFont());
+  osLabel.setText("OS for incremental builds:");
+  osLabel.setLayoutData(new GridData(GridData.BEGINNING,GridData.CENTER,false,false));
+  osCombo=new Combo(parent,SWT.READ_ONLY | SWT.BORDER);
+  osCombo.setItems(new String[]{"Use workspace default","Auto (build for current host)",OS.macosx.toString(),OS.ios.toString(),OS.linux.toString()});
+  osCombo.select(0);
+  osCombo.setLayoutData(new GridData(GridData.FILL,GridData.CENTER,true,false));
+  osCombo.addSelectionListener(new SelectionAdapter(){
+    @Override public void widgetSelected(    SelectionEvent e){
+      int index=osCombo.getSelectionIndex();
+      if (index == 0) {
+        os=null;
+      }
+ else       if (index == 1) {
+        os=RoboVMPlugin.OS_AUTO;
+      }
+ else {
+        os=osCombo.getItem(index);
+      }
+    }
+  }
+);
+  Link prefsLink=new Link(parent,SWT.NONE);
+  prefsLink.setText("<a>Configure default RoboVM settings...</a>");
+  GridData prefsLinkGridData=new GridData(GridData.END,GridData.END,false,false);
+  prefsLinkGridData.horizontalSpan=2;
+  prefsLink.setLayoutData(prefsLinkGridData);
+  prefsLink.addSelectionListener(new SelectionAdapter(){
+    @Override public void widgetDefaultSelected(    SelectionEvent e){
+      widgetSelected(e);
+    }
+    @Override public void widgetSelected(    SelectionEvent e){
+      String id=RoboVMPreferencePage.ID;
+      PreferencesUtil.createPreferenceDialogOn(RoboVMPlugin.getShell(),id,new String[]{id},null).open();
+    }
+  }
+);
+}

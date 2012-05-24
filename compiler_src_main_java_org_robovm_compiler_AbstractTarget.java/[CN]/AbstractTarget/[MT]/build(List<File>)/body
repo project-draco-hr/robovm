@@ -1,0 +1,39 @@
+{
+  File outFile=new File(config.getTmpDir(),config.getExecutable());
+  config.getLogger().debug("Building executable %s",outFile);
+  LinkedList<String> ccArgs=new LinkedList<String>();
+  LinkedList<String> libs=new LinkedList<String>();
+  libs.add("-lrobovm-bc");
+  if (config.getOs().getFamily() == OS.Family.darwin) {
+    libs.add("-force_load");
+    libs.add(new File(config.getOsArchDepLibDir(),"librobovm-rt.a").getAbsolutePath());
+  }
+ else {
+    libs.addAll(Arrays.asList("-Wl,--whole-archive","-lrobovm-rt","-Wl,--no-whole-archive"));
+  }
+  libs.addAll(Arrays.asList("-lrobovm-core","-lrobovm-hyprt","-lrobovm-hythr","-lrobovm-hypool","-lrobovm-hycommon","-lgc","-lpthread","-ldl","-lm","-lstdc++"));
+  if (config.getOs().getFamily() == OS.Family.linux) {
+    libs.add("-lrt");
+  }
+  if (config.getOs().getFamily() == OS.Family.darwin) {
+    libs.add("-liconv");
+  }
+  ccArgs.add("-L");
+  ccArgs.add(config.getOsArchDepLibDir().getAbsolutePath());
+  if (config.getOs().getFamily() == OS.Family.linux) {
+    ccArgs.add("-Wl,-rpath=$ORIGIN");
+    ccArgs.add("-Wl,--gc-sections");
+    ccArgs.add("-Wl,-u,_nvmPersonality");
+    ccArgs.add("-Wl,-u,_nvmBcPersonality");
+  }
+ else   if (config.getOs().getFamily() == OS.Family.darwin) {
+    File unexportedSymbolsFile=new File(config.getTmpDir(),"unexported_symbols");
+    FileUtils.writeStringToFile(unexportedSymbolsFile,"*\n","ASCII");
+    ccArgs.add("-unexported_symbols_list");
+    ccArgs.add(unexportedSymbolsFile.getAbsolutePath());
+    ccArgs.add("-Wl,-no_implicit_dylibs");
+    ccArgs.add("-Wl,-no_compact_unwind");
+    ccArgs.add("-Wl,-dead_strip");
+  }
+  doBuild(outFile,ccArgs,objectFiles,libs);
+}

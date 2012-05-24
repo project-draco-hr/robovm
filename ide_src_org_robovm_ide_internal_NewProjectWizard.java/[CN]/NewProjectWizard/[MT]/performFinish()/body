@@ -1,0 +1,26 @@
+{
+  try {
+    page2.performFinish(new NullProgressMonitor());
+    IJavaProject javaProject=page2.getJavaProject();
+    IProject project=javaProject.getProject();
+    page1.storePreferences(project);
+    IClasspathEntry[] oldClasspath=javaProject.getRawClasspath();
+    List<IClasspathEntry> newClasspath=new ArrayList<IClasspathEntry>();
+    for (    IClasspathEntry entry : oldClasspath) {
+      if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER && entry.getPath().toString().equals("org.eclipse.jdt.launching.JRE_CONTAINER")) {
+        newClasspath.add(JavaCore.newContainerEntry(new Path(RoboVMClasspathContainer.ID)));
+      }
+ else {
+        newClasspath.add(entry);
+      }
+    }
+    javaProject.setRawClasspath(newClasspath.toArray(new IClasspathEntry[newClasspath.size()]),new NullProgressMonitor());
+    RoboVMNature.configureNatures(project,new NullProgressMonitor());
+  }
+ catch (  Exception e) {
+    return false;
+  }
+  OpenJavaPerspectiveAction action=new OpenJavaPerspectiveAction();
+  action.run();
+  return true;
+}

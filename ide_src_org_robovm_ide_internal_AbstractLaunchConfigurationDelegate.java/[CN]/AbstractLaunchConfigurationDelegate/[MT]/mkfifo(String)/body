@@ -1,0 +1,15 @@
+{
+  File f=File.createTempFile("robovm-" + type + "-",".fifo");
+  f.delete();
+  ProcessBuilder pb=new ProcessBuilder("mkfifo","-m","600",f.getAbsolutePath());
+  try {
+    int exitValue=pb.start().waitFor();
+    if (exitValue != 0) {
+      throw new IOException("Failed to create " + type + " fifo");
+    }
+  }
+ catch (  InterruptedException e) {
+    throw new RuntimeException(e);
+  }
+  return f;
+}
