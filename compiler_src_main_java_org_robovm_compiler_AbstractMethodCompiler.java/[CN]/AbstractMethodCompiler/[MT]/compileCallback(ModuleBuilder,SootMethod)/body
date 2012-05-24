@@ -2,7 +2,7 @@
   validateCallbackMethod(method);
   Function callbackFn=new Function(external,new FunctionAttribute[]{noinline,optsize},mangleMethod(method) + "_callback",getCallbackFunctionType(method));
   moduleBuilder.addFunction(callbackFn);
-  Value env=call(callbackFn,NVM_BC_ATTACH_THREAD_FROM_CALLBACK);
+  Value env=call(callbackFn,BC_ATTACH_THREAD_FROM_CALLBACK);
   pushCallbackFrame(callbackFn,env);
   ArrayList<Value> args=new ArrayList<Value>();
   args.add(env);
@@ -29,13 +29,13 @@
     result=resultI8Ptr.ref();
   }
   popCallbackFrame(callbackFn,env);
-  call(callbackFn,NVM_BC_DETACH_THREAD_FROM_CALLBACK,env);
+  call(callbackFn,BC_DETACH_THREAD_FROM_CALLBACK,env);
   callbackFn.add(new Ret(result));
   callbackFn.newBasicBlock(new Label("failure"));
   Variable lpResult=callbackFn.newVariable(new StructureType(I8_PTR,I32));
-  callbackFn.add(new Landingpad(lpResult,new ConstantBitcast(NVM_BC_PERSONALITY,I8_PTR),new Catch(new NullConstant(I8_PTR))));
+  callbackFn.add(new Landingpad(lpResult,new ConstantBitcast(BC_PERSONALITY,I8_PTR),new Catch(new NullConstant(I8_PTR))));
   popCallbackFrame(callbackFn,env);
-  call(callbackFn,NVM_BC_DETACH_THREAD_FROM_CALLBACK,env);
-  call(callbackFn,NVM_BC_RETHROW,env,lpResult.ref());
+  call(callbackFn,BC_DETACH_THREAD_FROM_CALLBACK,env);
+  call(callbackFn,BC_RETHROW,env,lpResult.ref());
   callbackFn.add(new Unreachable());
 }
