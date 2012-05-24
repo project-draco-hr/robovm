@@ -24,18 +24,13 @@
     sootClass.addMethod(sizeOf);
   }
   mb.addInclude(getClass().getClassLoader().getResource("header.ll"));
+  mb.addFunction(createInstanceof());
+  mb.addFunction(createCheckcast());
+  mb.addFunction(createLdcClass());
+  mb.addFunction(createLdcClassWrapper());
   Function allocator=createAllocator();
   mb.addFunction(allocator);
   mb.addFunction(createClassInitWrapperFunction(allocator.ref()));
-  Function instanceof_=createInstanceof();
-  mb.addFunction(instanceof_);
-  mb.addFunction(createClassInitWrapperFunction(instanceof_.ref()));
-  Function checkcast=createCheckcast();
-  mb.addFunction(checkcast);
-  mb.addFunction(createClassInitWrapperFunction(checkcast.ref()));
-  Function ldcClass=createLdcClass();
-  mb.addFunction(ldcClass);
-  mb.addFunction(createClassInitWrapperFunction(ldcClass.ref()));
   for (  SootField f : sootClass.getFields()) {
     Function getter=createFieldGetter(f);
     Function setter=createFieldSetter(f);
