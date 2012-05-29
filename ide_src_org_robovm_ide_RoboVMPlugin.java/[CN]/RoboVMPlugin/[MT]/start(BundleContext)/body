@@ -22,18 +22,4 @@
     }
   }
 );
-  String version=getBundle().getHeaders().get("Bundle-Version");
-  File versionFile=new File(getMetadataDir(),"version");
-  if (!versionFile.exists() || !FileUtils.readFileToString(versionFile,"UTF8").equals(version)) {
-    File lib=new File(getBundledRoboVMDir(),"lib");
-    try {
-      FileUtils.deleteDirectory(lib);
-    }
- catch (    IOException ignored) {
-    }
-    lib.mkdirs();
-    FileUtils.copyURLToFile(getBundle().getResource("/lib/robovm-rt.jar"),new File(lib,"robovm-rt.jar"));
-    unzip(getBundle().getResource("/lib/binaries.zip"),lib);
-    FileUtils.writeStringToFile(versionFile,version,"UTF8");
-  }
 }

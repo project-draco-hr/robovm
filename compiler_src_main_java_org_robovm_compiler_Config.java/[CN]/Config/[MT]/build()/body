@@ -1,24 +1,14 @@
 {
-  if (roboVMHomeDir == null) {
-    if (System.getenv("ROBOVM_HOME") == null) {
-      throw new IllegalArgumentException("Environment variable ROBOVM_HOME not set");
-    }
-    roboVMHomeDir=new File(System.getenv("ROBOVM_HOME"));
-    if (!roboVMHomeDir.exists()) {
-      throw new IllegalArgumentException("ROBOVM_HOME directory " + roboVMHomeDir.getAbsolutePath() + " not found");
-    }
-    if (!roboVMHomeDir.isDirectory()) {
-      throw new IllegalArgumentException("Value of ROBOVM_HOME environment " + "variable does not point to a directory");
-    }
-  }
+  findHomeDir();
   if (mainJar != null) {
+    mainClass=getMainClass(mainJar);
     classpath.add(mainJar);
-  }
-  if (classpath.isEmpty()) {
-    throw new IllegalArgumentException("No classpath specified");
   }
   if (!skipLinking && executable == null && mainClass == null) {
     throw new IllegalArgumentException("No target and no main class specified");
+  }
+  if (!skipLinking && classpath.isEmpty()) {
+    throw new IllegalArgumentException("No classpath specified");
   }
   if (os == null) {
     os=OS.getDefaultOS(llvmHomeDir);
@@ -29,8 +19,7 @@
   if (skipLinking) {
     skipInstall=true;
   }
-  File homeLib=new File(roboVMHomeDir,"lib");
-  osArchDepLibDir=new File(new File(new File(homeLib,os.toString()),arch.toString()),debug ? "Debug" : "Release");
+  osArchDepLibDir=new File(new File(new File(libVmDir,os.toString()),arch.toString()),debug ? "Debug" : "Release");
   File osDir=new File(cacheDir,os.toString());
   File archDir=new File(osDir,arch.toString());
   cacheDir=new File(archDir,cpu == null ? "default" : cpu);
@@ -39,12 +28,7 @@
     executable=mainClass;
   }
   if (!skipRuntimeLib) {
-    bootclasspath.add(0,new File(homeLib,"robovm-rt.jar"));
-  }
-  if (tmpDir == null) {
-    tmpDir=File.createTempFile("robovm",".tmp");
-    tmpDir.delete();
-    tmpDir.mkdirs();
+    bootclasspath.add(0,rtPath);
   }
   this.clazzes=new Clazzes(this,bootclasspath,classpath);
   if (!skipInstall) {

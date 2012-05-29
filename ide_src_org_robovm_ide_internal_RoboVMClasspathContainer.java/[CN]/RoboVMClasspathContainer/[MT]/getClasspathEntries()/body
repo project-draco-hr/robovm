@@ -1,5 +1,18 @@
 {
-  File roboVMHomeDir=RoboVMPlugin.useBundledRoboVM() ? RoboVMPlugin.getBundledRoboVMDir() : RoboVMPlugin.getRoboVMHomeDir();
-  File f=new File(new File(roboVMHomeDir,"lib"),"robovm-rt.jar");
-  return new IClasspathEntry[]{JavaCore.newLibraryEntry(new Path(f.getAbsolutePath()),null,null)};
+  try {
+    Config.Builder configBuilder=new Config.Builder();
+    configBuilder.skipLinking(true);
+    if (!RoboVMPlugin.useSystemRoboVM()) {
+      configBuilder.homeDir(RoboVMPlugin.getRoboVMHomeDir());
+    }
+    if (!RoboVMPlugin.useSystemLlvm()) {
+      configBuilder.llvmHomeDir(RoboVMPlugin.getLlvmHomeDir());
+    }
+    Config config=configBuilder.build();
+    File f=config.getRtPath();
+    return new IClasspathEntry[]{JavaCore.newLibraryEntry(new Path(f.getAbsolutePath()),null,null,new IAccessRule[]{},new IClasspathAttribute[]{},false)};
+  }
+ catch (  IOException e) {
+    throw new RuntimeException(e);
+  }
 }

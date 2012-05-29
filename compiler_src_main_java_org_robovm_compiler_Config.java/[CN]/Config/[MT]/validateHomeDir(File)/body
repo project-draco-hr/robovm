@@ -1,0 +1,34 @@
+{
+  String error="Path " + dir + " is not a valid RoboVM install directory: ";
+  if (!dir.exists()) {
+    throw new IllegalArgumentException(error + "no such path");
+  }
+  if (!dir.isDirectory()) {
+    throw new IllegalArgumentException(error + "not a directory");
+  }
+  File libDir=new File(dir,"lib");
+  if (!libDir.exists() || !libDir.isDirectory()) {
+    throw new IllegalArgumentException(error + "lib/ missing or invalid");
+  }
+  File binDir=new File(dir,"bin");
+  if (!binDir.exists() || !binDir.isDirectory()) {
+    throw new IllegalArgumentException(error + "bin/ missing or invalid");
+  }
+  File libVmDir=new File(libDir,"vm");
+  if (!libVmDir.exists() || !libVmDir.isDirectory()) {
+    throw new IllegalArgumentException(error + "lib/vm/ missing or invalid");
+  }
+  File compilerJarFile=new File(libDir,"robovm-compiler.jar");
+  if (!compilerJarFile.exists() || !compilerJarFile.isFile()) {
+    throw new IllegalArgumentException(error + "lib/robovm-compiler.jar missing or invalid");
+  }
+  File rtJarFile=new File(libDir,"robovm-rt.jar");
+  if (!rtJarFile.exists() || !rtJarFile.isFile()) {
+    throw new IllegalArgumentException(error + "lib/robovm-rt.jar missing or invalid");
+  }
+  String thisVersion=Config.class.getPackage().getImplementationVersion();
+  String thatVersion=getImplementationVersion(compilerJarFile);
+  if (thisVersion == null || thatVersion == null || !thisVersion.equals(thatVersion)) {
+    throw new IllegalArgumentException(error + "compiler version mismatch (expected: " + thisVersion+ ", was: "+ thatVersion+ ")");
+  }
+}

@@ -5,11 +5,18 @@
     out=new DebugOutputStream(config.getLogger());
     err=new ErrorOutputStream(config.getLogger());
   }
- else   if (launchParameters.getStdoutFifo() != null) {
-    out=new OpenOnWriteFileOutputStream(launchParameters.getStdoutFifo());
+ else {
+    if (launchParameters.getStdoutFifo() != null) {
+      out=new OpenOnWriteFileOutputStream(launchParameters.getStdoutFifo());
+    }
+    if (launchParameters.getStderrFifo() != null) {
+      err=new OpenOnWriteFileOutputStream(launchParameters.getStderrFifo());
+    }
   }
- else   if (launchParameters.getStderrFifo() != null) {
-    err=new OpenOnWriteFileOutputStream(launchParameters.getStderrFifo());
+  executor.setStreamHandler(new PumpStreamHandler(out,err){
+    @Override protected Thread createPump(    InputStream is,    OutputStream os,    boolean closeWhenExhausted){
+      return super.createPump(is,os,true);
+    }
   }
-  executor.setStreamHandler(new PumpStreamHandler(out,err));
+);
 }

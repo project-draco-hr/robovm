@@ -4,12 +4,19 @@
   addField(archFieldEditor);
   ComboFieldEditor osFieldEditor=new ComboFieldEditor(PREFERENCE_INCREMENTAL_BUILD_OS,"Default OS:",new String[][]{{"Auto (build for current host)",OS_AUTO},{OS.macosx.toString(),OS.macosx.toString()},{OS.ios.toString(),OS.ios.toString()},{OS.linux.toString(),OS.linux.toString()}},parent);
   addField(osFieldEditor);
-  final BoolFieldEditor useBundledRoboVMEditor=new BoolFieldEditor(PREFERENCE_USE_BUNDLED_ROBOVM,"Use bundled RoboVM",parent);
+  final BoolFieldEditor useBundledRoboVMEditor=new BoolFieldEditor(PREFERENCE_USE_SYSTEM_ROBOVM,"Use system RoboVM",parent);
   final RequiredDirectoryFieldEditor roboVMHomeFieldEditor=new RequiredDirectoryFieldEditor(PREFERENCE_ROBOVM_HOME_DIR,"RoboVM home:",parent){
     @Override protected boolean validateDir(    File dir){
-      File lib=new File(dir,"lib");
-      File rt=new File(lib,"robovm-rt.jar");
-      return lib.exists() && lib.isDirectory() && rt.exists()&& rt.isFile();
+      try {
+        Config.validateHomeDir(dir);
+        return true;
+      }
+ catch (      IllegalArgumentException e) {
+        return false;
+      }
+catch (      IOException e) {
+        return false;
+      }
     }
   }
 ;
@@ -61,7 +68,7 @@
     }
   }
 );
-  if (RoboVMPlugin.getDefault().getPreferenceStore().getBoolean(PREFERENCE_USE_BUNDLED_ROBOVM)) {
+  if (RoboVMPlugin.getDefault().getPreferenceStore().getBoolean(PREFERENCE_USE_SYSTEM_ROBOVM)) {
     roboVMHomeFieldEditor.setEnabled(false);
     roboVMHomeFieldEditor.setStringValue("");
   }
