@@ -1,5 +1,7 @@
 {
-  findHomeDir();
+  if (home == null) {
+    home=Home.find();
+  }
   if (mainJar != null) {
     mainClass=getMainClass(mainJar);
     classpath.add(mainJar);
@@ -19,7 +21,7 @@
   if (skipLinking) {
     skipInstall=true;
   }
-  osArchDepLibDir=new File(new File(new File(libVmDir,os.toString()),arch.toString()),debug ? "Debug" : "Release");
+  osArchDepLibDir=new File(new File(new File(home.libVmDir,os.toString()),arch.toString()),debug ? "Debug" : "Release");
   File osDir=new File(cacheDir,os.toString());
   File archDir=new File(osDir,arch.toString());
   cacheDir=new File(archDir,cpu == null ? "default" : cpu);
@@ -28,7 +30,7 @@
     executable=mainClass;
   }
   if (!skipRuntimeLib) {
-    bootclasspath.add(0,rtPath);
+    bootclasspath.add(0,home.rtPath);
   }
   this.clazzes=new Clazzes(this,bootclasspath,classpath);
   if (!skipInstall) {

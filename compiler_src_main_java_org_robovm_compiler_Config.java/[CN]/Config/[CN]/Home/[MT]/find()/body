@@ -1,20 +1,12 @@
 {
-  if (homeDir != null) {
-    useHomeDir(homeDir);
-    return;
-  }
   if (System.getenv("ROBOVM_DEV_ROOT") != null) {
     File dir=new File(System.getenv("ROBOVM_DEV_ROOT"));
     validateDevRootDir(dir);
-    binDir=new File(dir,"bin");
-    libVmDir=new File(dir,"vm/binaries");
-    rtPath=new File(dir,"rt/target/classes");
-    return;
+    return new Home(new File(dir,"bin"),new File(dir,"vm/binaries"),new File(dir,"rt/target/classes"));
   }
   if (System.getenv("ROBOVM_HOME") != null) {
     File dir=new File(System.getenv("ROBOVM_HOME"));
-    useHomeDir(dir);
-    return;
+    return new Home(dir);
   }
   List<File> candidates=new ArrayList<File>();
   File userHome=new File(System.getProperty("user.home"));
@@ -25,8 +17,7 @@
   candidates.add(new File("/usr/lib/robovm"));
   for (  File dir : candidates) {
     if (dir.exists()) {
-      useHomeDir(dir);
-      return;
+      return new Home(dir);
     }
   }
   throw new IllegalArgumentException("ROBOVM_HOME not set and no RoboVM " + "installation found in " + candidates);

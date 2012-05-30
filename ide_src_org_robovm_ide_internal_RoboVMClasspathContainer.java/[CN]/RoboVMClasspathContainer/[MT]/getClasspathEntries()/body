@@ -1,18 +1,11 @@
 {
-  try {
-    Config.Builder configBuilder=new Config.Builder();
-    configBuilder.skipLinking(true);
-    if (!RoboVMPlugin.useSystemRoboVM()) {
-      configBuilder.homeDir(RoboVMPlugin.getRoboVMHomeDir());
-    }
-    if (!RoboVMPlugin.useSystemLlvm()) {
-      configBuilder.llvmHomeDir(RoboVMPlugin.getLlvmHomeDir());
-    }
-    Config config=configBuilder.build();
-    File f=config.getRtPath();
-    return new IClasspathEntry[]{JavaCore.newLibraryEntry(new Path(f.getAbsolutePath()),null,null,new IAccessRule[]{},new IClasspathAttribute[]{},false)};
+  Config.Home home=null;
+  if (!RoboVMPlugin.useSystemRoboVM()) {
+    home=new Config.Home(RoboVMPlugin.getRoboVMHomeDir());
   }
- catch (  IOException e) {
-    throw new RuntimeException(e);
+ else {
+    home=Config.Home.find();
   }
+  File f=home.getRtPath();
+  return new IClasspathEntry[]{JavaCore.newLibraryEntry(new Path(f.getAbsolutePath()),null,null,new IAccessRule[]{},new IClasspathAttribute[]{},false)};
 }

@@ -26,9 +26,14 @@
   if (!rtJarFile.exists() || !rtJarFile.isFile()) {
     throw new IllegalArgumentException(error + "lib/robovm-rt.jar missing or invalid");
   }
-  String thisVersion=Config.class.getPackage().getImplementationVersion();
-  String thatVersion=getImplementationVersion(compilerJarFile);
-  if (thisVersion == null || thatVersion == null || !thisVersion.equals(thatVersion)) {
-    throw new IllegalArgumentException(error + "compiler version mismatch (expected: " + thisVersion+ ", was: "+ thatVersion+ ")");
+  try {
+    String thisVersion=Config.class.getPackage().getImplementationVersion();
+    String thatVersion=getImplementationVersion(compilerJarFile);
+    if (thisVersion == null || thatVersion == null || !thisVersion.equals(thatVersion)) {
+      throw new IllegalArgumentException(error + "compiler version mismatch (expected: " + thisVersion+ ", was: "+ thatVersion+ ")");
+    }
+  }
+ catch (  IOException e) {
+    throw new IllegalArgumentException(error + "failed to get version of compiler jar",e);
   }
 }
