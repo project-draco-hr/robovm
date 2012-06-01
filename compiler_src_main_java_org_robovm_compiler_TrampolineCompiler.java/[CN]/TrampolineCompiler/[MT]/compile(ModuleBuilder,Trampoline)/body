@@ -15,7 +15,7 @@
   if (t instanceof New) {
     SootClass target=config.getClazzes().load(t.getTarget()).getSootClass();
     if (target.isAbstract() || target.isInterface()) {
-      call(f,BC_THROW_INSTANTIATION_ERROR,f.getParameterRef(0),mb.getString(t.getTarget()));
+      call(f,BC_THROW_INSTANTIATION_ERROR,f.getParameterRef(0),mb.getString(t.getTarget().replace('/','.')));
       f.add(new Unreachable());
       mb.addFunction(f);
       return;
@@ -112,7 +112,7 @@
     if (target.isInBootClasspath()) {
       Function fnLong=new Function(weak,longName,nc.getFunctionType());
       popNativeFrame(fnLong);
-      call(fnLong,BC_THROW_UNSATISIFED_LINK_ERROR,fnLong.getParameterRef(0));
+      call(fnLong,BC_THROW_UNSATISIFED_LINK_ERROR,fnLong.getParameterRef(0),mb.getString(String.format(UNSATISFIED_LINK_ERROR,target.getClassName(),nc.getMethodName(),nc.getMethodDesc())));
       fnLong.add(new Unreachable());
       mb.addFunction(fnLong);
       FunctionRef targetFn=fnLong.ref();

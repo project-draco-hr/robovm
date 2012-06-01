@@ -4,10 +4,7 @@
     if (filename == null) {
       throw new UnsatisfiedLinkError("Couldn't load " + libraryName + ": "+ "findLibrary returned null");
     }
-    String error=nativeLoad(filename,loader);
-    if (error != null) {
-      throw new UnsatisfiedLinkError(error);
-    }
+    nativeLoad(filename,loader);
     return;
   }
   String filename=System.mapLibraryName(libraryName);
@@ -17,11 +14,13 @@
     String candidate=directory + filename;
     candidates.add(candidate);
     if (new File(candidate).exists()) {
-      String error=nativeLoad(candidate,loader);
-      if (error == null) {
+      try {
+        nativeLoad(candidate,loader);
         return;
       }
-      lastError=error;
+ catch (      UnsatisfiedLinkError e) {
+        lastError=e.getMessage();
+      }
     }
   }
   if (lastError != null) {
