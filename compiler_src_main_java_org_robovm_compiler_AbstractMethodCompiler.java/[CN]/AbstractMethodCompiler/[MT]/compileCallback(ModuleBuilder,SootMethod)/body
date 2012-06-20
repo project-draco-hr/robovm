@@ -1,6 +1,6 @@
 {
   validateCallbackMethod(method);
-  Function callbackFn=new Function(external,new FunctionAttribute[]{noinline,optsize},mangleMethod(method) + "_callback",getCallbackFunctionType(method));
+  Function callbackFn=FunctionBuilder.callback(method);
   moduleBuilder.addFunction(callbackFn);
   Value env=call(callbackFn,BC_ATTACH_THREAD_FROM_CALLBACK);
   pushCallbackFrame(callbackFn,env);
@@ -21,21 +21,22 @@
   FunctionRef targetFn=new FunctionRef(targetName,getFunctionType(method));
   BasicBlockRef bbSuccess=callbackFn.newBasicBlockRef(new Label("success"));
   BasicBlockRef bbFailure=callbackFn.newBasicBlockRef(new Label("failure"));
-  Value result=invoke(callbackFn,targetFn,bbSuccess,bbFailure,args);
-  callbackFn.newBasicBlock(new Label("success"));
+  trycatchAllEnter(callbackFn,env,bbSuccess,bbFailure);
+  callbackFn.newBasicBlock(bbSuccess.getLabel());
+  Value result=call(callbackFn,targetFn,args);
   if (callbackFn.getType().getReturnType() == I8_PTR) {
     Variable resultI8Ptr=callbackFn.newVariable(I8_PTR);
     callbackFn.add(new Inttoptr(resultI8Ptr,result,I8_PTR));
     result=resultI8Ptr.ref();
   }
+  trycatchLeave(callbackFn,env);
   popCallbackFrame(callbackFn,env);
   call(callbackFn,BC_DETACH_THREAD_FROM_CALLBACK,env);
   callbackFn.add(new Ret(result));
-  callbackFn.newBasicBlock(new Label("failure"));
-  Variable lpResult=callbackFn.newVariable(new StructureType(I8_PTR,I32));
-  callbackFn.add(new Landingpad(lpResult,new ConstantBitcast(BC_PERSONALITY,I8_PTR),new Catch(new NullConstant(I8_PTR))));
+  callbackFn.newBasicBlock(bbFailure.getLabel());
+  trycatchLeave(callbackFn,env);
   popCallbackFrame(callbackFn,env);
   call(callbackFn,BC_DETACH_THREAD_FROM_CALLBACK,env);
-  call(callbackFn,BC_RETHROW,env,lpResult.ref());
+  call(callbackFn,BC_THROW_IF_EXCEPTION_OCCURRED,env);
   callbackFn.add(new Unreachable());
 }

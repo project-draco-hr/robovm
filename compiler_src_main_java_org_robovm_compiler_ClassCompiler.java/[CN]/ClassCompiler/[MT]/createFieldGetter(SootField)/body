@@ -1,20 +1,17 @@
 {
-  String name=mangleField(field) + "_getter";
-  Function fn=null;
+  Function fn=FunctionBuilder.getter(field);
   Value fieldPtr=null;
   if (field.isStatic()) {
-    fn=new Function(_private,new FunctionAttribute[]{alwaysinline,optsize},name,new FunctionType(getType(field.getType()),ENV_PTR),"env");
     fieldPtr=getClassFieldPtr(fn,field);
   }
  else {
-    fn=new Function(field.isPrivate() ? _private : external,new FunctionAttribute[]{alwaysinline,optsize},name,new FunctionType(getType(field.getType()),ENV_PTR,OBJECT_PTR),"env","this");
-    fieldPtr=getInstanceFieldPtr(fn,new VariableRef("this",OBJECT_PTR),field);
+    fieldPtr=getInstanceFieldPtr(fn,fn.getParameterRef(1),field);
   }
   Variable result=fn.newVariable(getType(field.getType()));
   if (Modifier.isVolatile(field.getModifiers())) {
     fn.add(new Fence(Ordering.seq_cst));
     if (LongType.v().equals(field.getType())) {
-      fn.add(new Load(result,fieldPtr,Ordering.unordered,8));
+      fn.add(new Load(result,fieldPtr,false,Ordering.unordered,8));
     }
  else {
       fn.add(new Load(result,fieldPtr));

@@ -17,11 +17,12 @@
   Value result=null;
   if (canCallDirectly(expr)) {
     SootMethod method=this.sootMethod.getDeclaringClass().getMethod(methodRef.name(),methodRef.parameterTypes(),methodRef.returnType());
-    String functionName=mangleMethod(method);
     if (method.isSynchronized()) {
-      functionName+="_synchronized";
+      functionRef=FunctionBuilder.synchronizedWrapper(method).ref();
     }
-    functionRef=new FunctionRef(functionName,getFunctionType(method));
+ else {
+      functionRef=FunctionBuilder.method(method).ref();
+    }
   }
  else {
     Trampoline trampoline=null;
@@ -47,7 +48,7 @@
     trampolines.add(trampoline);
     functionRef=trampoline.getFunctionRef();
   }
-  result=callOrInvoke(stmt,functionRef,args.toArray(new Value[0]));
+  result=call(functionRef,args.toArray(new Value[0]));
   if (result != null) {
     return widenToI32Value(result,methodRef.returnType().equals(CharType.v()));
   }

@@ -4,7 +4,7 @@
     Type type=getLocalType(v.getType());
     VariableRef var=new VariableRef(local.getName(),new PointerType(type));
     Variable tmp=function.newVariable(type);
-    function.add(new Load(tmp,var));
+    function.add(new Load(tmp,var,!sootMethod.getActiveBody().getTraps().isEmpty()));
     return new VariableRef(tmp);
   }
  else   if (v instanceof soot.jimple.IntConstant) {
@@ -26,7 +26,7 @@
     String s=((soot.jimple.StringConstant)v).value;
     Trampoline trampoline=new LdcString(className,s);
     trampolines.add(trampoline);
-    return callOrInvoke(unit,trampoline.getFunctionRef(),env);
+    return call(trampoline.getFunctionRef(),env);
   }
  else   if (v instanceof soot.jimple.ClassConstant) {
     String targetClassName=((soot.jimple.ClassConstant)v).getValue();
@@ -39,14 +39,14 @@
  else {
       FunctionRef fn=null;
       if (targetClassName.equals(this.className)) {
-        fn=new FunctionRef(mangleClass(sootMethod.getDeclaringClass()) + "_ldc",new FunctionType(OBJECT_PTR,ENV_PTR));
+        fn=FunctionBuilder.ldcInternal(sootMethod.getDeclaringClass()).ref();
       }
  else {
         Trampoline trampoline=new LdcClass(className,((soot.jimple.ClassConstant)v).getValue());
         trampolines.add(trampoline);
         fn=trampoline.getFunctionRef();
       }
-      return callOrInvoke(unit,fn,env);
+      return call(fn,env);
     }
   }
   throw new IllegalArgumentException("Unknown Immediate type: " + v.getClass());

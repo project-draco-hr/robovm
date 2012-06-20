@@ -1,0 +1,9 @@
+{
+  String name=mangleField(field) + "_setter";
+  if (field.isStatic()) {
+    return new FunctionBuilder(name,new FunctionType(VOID,ENV_PTR,getType(field.getType()))).linkage(_private).attribs(alwaysinline,optsize).build();
+  }
+ else {
+    return new FunctionBuilder(name,new FunctionType(VOID,ENV_PTR,OBJECT_PTR,getType(field.getType()))).linkage(field.isPrivate() || field.isFinal() ? _private : external).attribs(alwaysinline,optsize).build();
+  }
+}

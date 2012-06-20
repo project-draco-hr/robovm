@@ -36,19 +36,17 @@
     }
   }
   if (errorType == ClassCompiler.CI_ERROR_TYPE_NONE) {
-    for (    Trampoline t : trampolines) {
-      if (t instanceof ExceptionMatch) {
-        Clazz ex=config.getClazzes().load(t.getTarget());
-        if (ex == null || ex.getSootClass().isPhantom()) {
-          errorType=ClassCompiler.CI_ERROR_TYPE_NO_CLASS_DEF_FOUND;
-          errorMessage=t.getTarget();
-          break;
-        }
- else         if (!checkClassAccessible(ex.getSootClass(),sootClass)) {
-          errorType=ClassCompiler.CI_ERROR_TYPE_ILLEGAL_ACCESS;
-          errorMessage=String.format(ILLEGAL_ACCESS_ERROR_CLASS,ex,sootClass);
-          break;
-        }
+    for (    String exName : catches) {
+      Clazz ex=config.getClazzes().load(exName);
+      if (ex == null || ex.getSootClass().isPhantom()) {
+        errorType=ClassCompiler.CI_ERROR_TYPE_NO_CLASS_DEF_FOUND;
+        errorMessage=exName;
+        break;
+      }
+ else       if (!checkClassAccessible(ex.getSootClass(),sootClass)) {
+        errorType=ClassCompiler.CI_ERROR_TYPE_ILLEGAL_ACCESS;
+        errorMessage=String.format(ILLEGAL_ACCESS_ERROR_CLASS,ex,sootClass);
+        break;
       }
     }
   }

@@ -1,28 +1,29 @@
 {
   String targetName=mangleMethod(method);
-  Function syncFn=createFunction(targetName + "_synchronized",method,external,noinline);
+  Function syncFn=FunctionBuilder.synchronizedWrapper(method);
   moduleBuilder.addFunction(syncFn);
   FunctionType functionType=syncFn.getType();
   FunctionRef target=new FunctionRef(targetName,functionType);
   Value monitor=null;
   if (method.isStatic()) {
-    FunctionRef fn=new FunctionRef(mangleClass(sootMethod.getDeclaringClass()) + "_ldc",new FunctionType(OBJECT_PTR,ENV_PTR));
+    FunctionRef fn=FunctionBuilder.ldcInternal(sootMethod.getDeclaringClass()).ref();
     monitor=call(syncFn,fn,syncFn.getParameterRef(0));
   }
  else {
-    monitor=new VariableRef("this",OBJECT_PTR);
+    monitor=syncFn.getParameterRef(1);
   }
   call(syncFn,BC_MONITOR_ENTER,syncFn.getParameterRef(0),monitor);
   BasicBlockRef bbSuccess=syncFn.newBasicBlockRef(new Label("success"));
   BasicBlockRef bbFailure=syncFn.newBasicBlockRef(new Label("failure"));
-  Value result=invoke(syncFn,target,bbSuccess,bbFailure,syncFn.getParameterRefs());
-  syncFn.newBasicBlock(new Label("success"));
+  trycatchAllEnter(syncFn,bbSuccess,bbFailure);
+  syncFn.newBasicBlock(bbSuccess.getLabel());
+  Value result=call(syncFn,target,syncFn.getParameterRefs());
+  trycatchLeave(syncFn);
   call(syncFn,BC_MONITOR_EXIT,syncFn.getParameterRef(0),monitor);
   syncFn.add(new Ret(result));
-  syncFn.newBasicBlock(new Label("failure"));
-  Variable lpResult=syncFn.newVariable(new StructureType(I8_PTR,I32));
-  syncFn.add(new Landingpad(lpResult,new ConstantBitcast(BC_PERSONALITY,I8_PTR),new Catch(new NullConstant(I8_PTR))));
+  syncFn.newBasicBlock(bbFailure.getLabel());
+  trycatchLeave(syncFn);
   call(syncFn,BC_MONITOR_EXIT,syncFn.getParameterRef(0),monitor);
-  call(syncFn,BC_RETHROW,syncFn.getParameterRef(0),lpResult.ref());
+  call(syncFn,BC_THROW_IF_EXCEPTION_OCCURRED,syncFn.getParameterRef(0));
   syncFn.add(new Unreachable());
 }

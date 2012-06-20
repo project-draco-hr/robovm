@@ -1,37 +1,29 @@
 {
-  jumpTargets=new HashSet<Unit>();
-  trapHandlers=new HashSet<Unit>();
+  function=FunctionBuilder.method(method);
   trapsAt=new HashMap<Unit,List<Trap>>();
-  recordedTraps=new HashSet<List<Trap>>();
-  function=createFunction(method,external,noinline);
   moduleBuilder.addFunction(function);
   env=function.getParameterRef(0);
   Body body=method.retrieveActiveBody();
   PackManager.v().getPack("jtp").apply(body);
   PackManager.v().getPack("jop").apply(body);
   PackManager.v().getPack("jap").apply(body);
-  Set<String> seen=new HashSet<String>();
-  for (  Unit unit : body.getUnits()) {
+  PatchingChain<Unit> units=body.getUnits();
+  Map<Unit,List<Unit>> branchTargets=getBranchTargets(body);
+  Map<Unit,Integer> trapHandlers=getTrapHandlers(body);
+  Map<Unit,Integer> selChanges=new HashMap<Unit,Integer>();
+  int multiANewArrayMaxDims=0;
+  Set<Local> locals=new HashSet<Local>();
+  for (  Unit unit : units) {
     if (unit instanceof DefinitionStmt) {
       DefinitionStmt stmt=(DefinitionStmt)unit;
       if (stmt.getLeftOp() instanceof Local) {
         Local local=(Local)stmt.getLeftOp();
-        if (!seen.contains(local.getName())) {
+        if (!locals.contains(local)) {
           Type type=getLocalType(local.getType());
           function.add(new Alloca(function.newVariable(local.getName(),type),type));
-          seen.add(local.getName());
+          locals.add(local);
         }
       }
-    }
-  }
-  if ("<clinit>".equals(method.getName())) {
-    initializeClassFields();
-  }
-  PatchingChain<Unit> units=body.getUnits();
-  int multiANewArrayMaxDims=0;
-  for (  Unit unit : units) {
-    if (unit instanceof DefinitionStmt) {
-      DefinitionStmt stmt=(DefinitionStmt)unit;
       if (stmt.getRightOp() instanceof NewMultiArrayExpr) {
         NewMultiArrayExpr expr=(NewMultiArrayExpr)stmt.getRightOp();
         multiANewArrayMaxDims=Math.max(multiANewArrayMaxDims,expr.getSizeCount());
@@ -43,43 +35,83 @@
     dims=function.newVariable("dims",new PointerType(new ArrayType(multiANewArrayMaxDims,I32)));
     function.add(new Alloca(dims,new ArrayType(multiANewArrayMaxDims,I32)));
   }
-  for (  Unit unit : units) {
-    for (    Unit u : units) {
-      if (u instanceof GotoStmt) {
-        Unit target=((GotoStmt)u).getTarget();
-        if (target == unit) {
-          jumpTargets.add(unit);
-        }
+  Value trycatchContext=null;
+  if (!body.getTraps().isEmpty()) {
+    List<List<Trap>> recordedTraps=new ArrayList<List<Trap>>();
+    for (    Unit unit : units) {
+      Set<Unit> incoming=new HashSet<Unit>();
+      if (units.getFirst() != unit && units.getPredOf(unit).fallsThrough()) {
+        incoming.add(units.getPredOf(unit));
       }
- else       if (u instanceof IfStmt) {
-        Unit target=((IfStmt)u).getTarget();
-        if (target == unit || unit == units.getSuccOf(u)) {
-          jumpTargets.add(unit);
-        }
+      if (branchTargets.keySet().contains(unit)) {
+        incoming.addAll(branchTargets.get(unit));
       }
- else       if (u instanceof LookupSwitchStmt) {
-        LookupSwitchStmt stmt=(LookupSwitchStmt)u;
-        if (unit == stmt.getDefaultTarget() || stmt.getTargets().contains(unit)) {
-          jumpTargets.add(unit);
+      if (unit == units.getFirst() || trapHandlers.containsKey(unit) || trapsDiffer(unit,incoming)) {
+        List<Trap> traps=getTrapsAt(unit);
+        if (traps.isEmpty()) {
+          selChanges.put(unit,0);
         }
-      }
- else       if (u instanceof TableSwitchStmt) {
-        TableSwitchStmt stmt=(TableSwitchStmt)u;
-        if (unit == stmt.getDefaultTarget() || stmt.getTargets().contains(unit)) {
-          jumpTargets.add(unit);
+ else {
+          int index=recordedTraps.indexOf(traps);
+          if (index == -1) {
+            index=recordedTraps.size();
+            recordedTraps.add(traps);
+          }
+          selChanges.put(unit,index + 1);
         }
       }
     }
-    for (    Trap trap : body.getTraps()) {
-      Unit beginUnit=trap.getBeginUnit();
-      Unit endUnit=trap.getEndUnit();
-      if (beginUnit != endUnit && unit == trap.getHandlerUnit()) {
-        trapHandlers.add(unit);
+    StructureConstantBuilder landingPadsPtrs=new StructureConstantBuilder();
+    for (    List<Trap> traps : recordedTraps) {
+      StructureConstantBuilder landingPads=new StructureConstantBuilder();
+      for (      Trap trap : traps) {
+        SootClass exClass=trap.getException();
+        StructureConstantBuilder landingPad=new StructureConstantBuilder();
+        if ("java.lang.Throwable".equals(exClass.getName()) || exClass.isPhantom()) {
+          landingPad.add(new NullConstant(I8_PTR));
+        }
+ else {
+          catches.add(getInternalName(exClass));
+          Global g=new Global(mangleClass(exClass) + "_info_struct",I8_PTR,true);
+          if (!moduleBuilder.hasSymbol(g.getName())) {
+            moduleBuilder.addGlobal(g);
+          }
+          landingPad.add(g.ref());
+        }
+        landingPad.add(new IntegerConstant(trapHandlers.get(trap.getHandlerUnit()) + 1));
+        landingPads.add(landingPad.build());
       }
+      landingPads.add(new StructureConstantBuilder().add(new NullConstant(I8_PTR)).add(new IntegerConstant(0)).build());
+      Global g=moduleBuilder.newGlobal(landingPads.build(),true);
+      landingPadsPtrs.add(new ConstantBitcast(g.ref(),I8_PTR));
+    }
+    Global g=moduleBuilder.newGlobal(landingPadsPtrs.build(),true);
+    Variable ctx=function.newVariable(TRYCATCH_CONTEXT_PTR);
+    Variable bcCtx=function.newVariable(BC_TRYCATCH_CONTEXT_PTR);
+    function.add(new Alloca(bcCtx,BC_TRYCATCH_CONTEXT));
+    Variable selPtr=function.newVariable(new PointerType(I32));
+    function.add(new Getelementptr(selPtr,bcCtx.ref(),0,0,1));
+    function.add(new Store(new IntegerConstant(0),selPtr.ref()));
+    Variable bcCtxLandingPadsPtr=function.newVariable(I8_PTR_PTR);
+    function.add(new Getelementptr(bcCtxLandingPadsPtr,bcCtx.ref(),0,1));
+    function.add(new Store(new ConstantBitcast(g.ref(),I8_PTR),bcCtxLandingPadsPtr.ref()));
+    function.add(new Bitcast(ctx,bcCtx.ref(),TRYCATCH_CONTEXT_PTR));
+    trycatchContext=ctx.ref();
+    Value result=call(RVM_TRYCATCH_ENTER,env,trycatchContext);
+    Map<IntegerConstant,BasicBlockRef> alt=new TreeMap<IntegerConstant,BasicBlockRef>();
+    for (    Entry<Unit,Integer> entry : trapHandlers.entrySet()) {
+      alt.put(new IntegerConstant(entry.getValue() + 1),function.newBasicBlockRef(new Label(entry.getKey())));
+    }
+    function.add(new Switch(result,function.newBasicBlockRef(new Label(units.getFirst())),alt));
+    if (!branchTargets.containsKey(units.getFirst())) {
+      function.newBasicBlock(new Label(units.getFirst()));
     }
   }
+  if ("<clinit>".equals(method.getName())) {
+    initializeClassFields();
+  }
   for (  Unit unit : units) {
-    if (jumpTargets.contains(unit) || trapHandlers.contains(unit)) {
+    if (branchTargets.containsKey(unit) || trapHandlers.containsKey(unit)) {
       BasicBlock oldBlock=function.getCurrentBasicBlock();
       function.newBasicBlock(new Label(unit));
       if (oldBlock != null) {
@@ -89,13 +121,25 @@
         }
       }
     }
+    if (selChanges.containsKey(unit)) {
+      int sel=selChanges.get(unit);
+      Variable selPtr=function.newVariable(new PointerType(I32));
+      function.add(new Getelementptr(selPtr,trycatchContext,0,1));
+      function.add(new Store(new IntegerConstant(sel),selPtr.ref()));
+    }
     if (unit instanceof DefinitionStmt) {
       assign((DefinitionStmt)unit);
     }
  else     if (unit instanceof ReturnStmt) {
+      if (!body.getTraps().isEmpty()) {
+        trycatchLeave(function);
+      }
       return_((ReturnStmt)unit);
     }
  else     if (unit instanceof ReturnVoidStmt) {
+      if (!body.getTraps().isEmpty()) {
+        trycatchLeave(function);
+      }
       returnVoid();
     }
  else     if (unit instanceof IfStmt) {
@@ -125,28 +169,5 @@
  else {
       throw new IllegalArgumentException("Unknown Unit type: " + unit.getClass());
     }
-  }
-  next:   for (  List<Trap> traps : recordedTraps) {
-    BasicBlock bb=function.newBasicBlock(new Label(traps));
-    Variable result=function.newVariable(new StructureType(I8_PTR,I32));
-    bb.add(new Landingpad(result,new ConstantBitcast(BC_PERSONALITY,I8_PTR),new Catch(new NullConstant(I8_PTR))));
-    for (    Trap trap : traps) {
-      String exName=trap.getException().getName();
-      if ("java.lang.Throwable".equals(exName)) {
-        bb.add(new Br(function.newBasicBlockRef(new Label(trap.getHandlerUnit()))));
-        continue next;
-      }
-      Trampoline trampoline=new ExceptionMatch(this.className,getInternalName(trap.getException()));
-      trampolines.add(trampoline);
-      Variable v=function.newVariable(I32);
-      bb.add(new Call(v,trampoline.getFunctionRef(),env));
-      Variable cond=function.newVariable(I1);
-      bb.add(new Trunc(cond,new VariableRef(v),I1));
-      BasicBlockRef falseBlock=function.newBasicBlockRef(new Label());
-      bb.add(new Br(new VariableRef(cond),function.newBasicBlockRef(new Label(trap.getHandlerUnit())),falseBlock));
-      bb=function.newBasicBlock(falseBlock.getLabel());
-    }
-    bb.add(new Call(BC_RETHROW,env,result.ref()));
-    bb.add(new Unreachable());
   }
 }

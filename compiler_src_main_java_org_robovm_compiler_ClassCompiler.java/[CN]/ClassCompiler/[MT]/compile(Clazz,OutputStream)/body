@@ -2,6 +2,7 @@
   sootClass=clazz.getSootClass();
   mb=new ModuleBuilder();
   trampolines=new HashSet<Trampoline>();
+  catches=new HashSet<String>();
   classFields=getClassFields(sootClass);
   instanceFields=getInstanceFields(sootClass);
   classType=getClassType(sootClass);
@@ -23,6 +24,7 @@
     SootMethod sizeOf=new SootMethod("sizeOf",Collections.EMPTY_LIST,IntType.v(),Modifier.PUBLIC | Modifier.STATIC);
     sootClass.addMethod(sizeOf);
   }
+  mb.addInclude(getClass().getClassLoader().getResource(String.format("header-%s-%s.ll",config.getOs(),config.getArch())));
   mb.addInclude(getClass().getClassLoader().getResource("header.ll"));
   mb.addFunction(createInstanceof());
   mb.addFunction(createCheckcast());
@@ -81,7 +83,7 @@
     classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",createClassInfoStruct());
   }
   mb.addGlobal(classInfoStruct);
-  Function infoFn=new Function(external,new FunctionAttribute[]{alwaysinline,optsize},getInfoStructFn(getInternalName(sootClass)));
+  Function infoFn=FunctionBuilder.infoStruct(sootClass);
   infoFn.add(new Ret(new ConstantBitcast(classInfoStruct.ref(),I8_PTR_PTR)));
   mb.addFunction(infoFn);
   out.write(mb.build().toString().getBytes("UTF-8"));
@@ -112,5 +114,6 @@
   clazzInfo.setStruct(isStruct(this.sootClass));
   clazzInfo.setAttributeDependencies(attributesEncoder.getDependencies());
   clazzInfo.setTrampolines(trampolines);
+  clazzInfo.setCatches(catches);
   clazz.commitClazzInfo();
 }

@@ -1,0 +1,9 @@
+{
+  Variable ctx=fn.newVariable(TRYCATCH_CONTEXT_PTR);
+  fn.add(new Alloca(ctx,TRYCATCH_CONTEXT));
+  Variable selPtr=fn.newVariable(new PointerType(I32));
+  fn.add(new Getelementptr(selPtr,ctx.ref(),0,1));
+  fn.add(new Store(new IntegerConstant(-1),selPtr.ref()));
+  Value result=call(fn,RVM_TRYCATCH_ENTER,env,ctx.ref());
+  fn.add(new Switch(result,onException,new IntegerConstant(0),onNoException));
+}

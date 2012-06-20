@@ -3,8 +3,6 @@
     if (!field.isStatic()) {
       continue;
     }
-    String fieldName=field.getName();
-    String fieldDesc=getDescriptor(field.getType());
     for (    Tag tag : field.getTags()) {
       Value value=null;
       if (tag instanceof DoubleConstantValueTag) {
@@ -34,7 +32,7 @@
         value=call(trampoline.getFunctionRef(),env);
       }
       if (value != null) {
-        FunctionRef fn=new FunctionRef(mangleField(this.className,fieldName,fieldDesc) + "_setter",new FunctionType(VOID,ENV_PTR,getType(fieldDesc)));
+        FunctionRef fn=FunctionBuilder.setter(field).ref();
         call(fn,env,value);
       }
     }

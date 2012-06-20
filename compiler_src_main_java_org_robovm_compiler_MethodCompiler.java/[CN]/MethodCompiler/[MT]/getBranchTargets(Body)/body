@@ -1,0 +1,23 @@
+{
+  Map<Unit,List<Unit>> result=new HashMap<Unit,List<Unit>>();
+  for (  Unit unit : body.getUnits()) {
+    if (unit.branches()) {
+      List<Unit> targetUnits=new ArrayList<Unit>();
+      for (      UnitBox ub : unit.getUnitBoxes()) {
+        targetUnits.add(ub.getUnit());
+      }
+      if (unit.fallsThrough()) {
+        targetUnits.add(body.getUnits().getSuccOf(unit));
+      }
+      for (      Unit targetUnit : targetUnits) {
+        List<Unit> sourceUnits=result.get(targetUnit);
+        if (sourceUnits == null) {
+          sourceUnits=new ArrayList<Unit>();
+          result.put(targetUnit,sourceUnits);
+        }
+        sourceUnits.add(unit);
+      }
+    }
+  }
+  return result;
+}
