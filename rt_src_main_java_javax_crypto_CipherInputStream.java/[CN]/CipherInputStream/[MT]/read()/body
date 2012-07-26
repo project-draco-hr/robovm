@@ -1,17 +1,21 @@
 {
   if (finished) {
-    return ((outputBuffer == null) || (index == outputBuffer.length)) ? -1 : outputBuffer[index++] & 0xFF;
+    return (outputIndex == outputLength) ? -1 : outputBuffer[outputIndex++] & 0xFF;
   }
-  if ((outputBuffer != null) && (index < outputBuffer.length)) {
-    return outputBuffer[index++] & 0xFF;
+  if (outputIndex < outputLength) {
+    return outputBuffer[outputIndex++] & 0xFF;
   }
-  index=0;
-  outputBuffer=null;
-  int byteCount;
-  while (outputBuffer == null) {
-    if ((byteCount=in.read(inputBuffer)) == -1) {
+  outputIndex=0;
+  outputLength=0;
+  while (outputLength == 0) {
+    int outputSize=cipher.getOutputSize(inputBuffer.length);
+    if ((outputBuffer == null) || (outputBuffer.length < outputSize)) {
+      this.outputBuffer=new byte[outputSize];
+    }
+    int byteCount=in.read(inputBuffer);
+    if (byteCount == -1) {
       try {
-        outputBuffer=cipher.doFinal();
+        outputLength=cipher.doFinal(outputBuffer,0);
       }
  catch (      Exception e) {
         throw new IOException(e.getMessage());
@@ -19,7 +23,12 @@
       finished=true;
       break;
     }
-    outputBuffer=cipher.update(inputBuffer,0,byteCount);
+    try {
+      outputLength=cipher.update(inputBuffer,0,byteCount,outputBuffer,0);
+    }
+ catch (    ShortBufferException e) {
+      throw new AssertionError(e);
+    }
   }
   return read();
 }

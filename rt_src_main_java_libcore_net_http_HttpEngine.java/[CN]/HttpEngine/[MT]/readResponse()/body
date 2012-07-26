@@ -24,11 +24,14 @@
   responseHeaders.setLocalTimestamps(sentRequestMillis,System.currentTimeMillis());
   if (responseSource == ResponseSource.CONDITIONAL_CACHE) {
     if (cachedResponseHeaders.validate(responseHeaders)) {
-      if (responseCache instanceof HttpResponseCache) {
-        ((HttpResponseCache)responseCache).trackConditionalCacheHit();
-      }
       release(true);
-      setResponse(cachedResponseHeaders.combine(responseHeaders),cachedResponseBody);
+      ResponseHeaders combinedHeaders=cachedResponseHeaders.combine(responseHeaders);
+      setResponse(combinedHeaders,cachedResponseBody);
+      if (responseCache instanceof ExtendedResponseCache) {
+        ExtendedResponseCache httpResponseCache=(ExtendedResponseCache)responseCache;
+        httpResponseCache.trackConditionalCacheHit();
+        httpResponseCache.update(cacheResponse,getHttpConnectionToCache());
+      }
       return;
     }
  else {

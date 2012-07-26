@@ -1,8 +1,24 @@
 {
   if (state == SIGN) {
-    throw new UnsupportedOperationException();
+    if (ctx == 0) {
+      try {
+        ctx=NativeCrypto.EVP_SignInit(evpAlgorithm);
+      }
+ catch (      Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+    NativeCrypto.EVP_SignUpdate(ctx,input,offset,len);
   }
  else {
+    if (ctx == 0) {
+      try {
+        ctx=NativeCrypto.EVP_VerifyInit(evpAlgorithm);
+      }
+ catch (      Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    }
     NativeCrypto.EVP_VerifyUpdate(ctx,input,offset,len);
   }
 }

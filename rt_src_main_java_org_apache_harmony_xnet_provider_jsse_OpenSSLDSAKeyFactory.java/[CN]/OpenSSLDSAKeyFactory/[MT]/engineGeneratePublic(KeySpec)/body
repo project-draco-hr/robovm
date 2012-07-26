@@ -1,0 +1,17 @@
+{
+  if (keySpec instanceof DSAPublicKeySpec) {
+    DSAPublicKeySpec dsaKeySpec=(DSAPublicKeySpec)keySpec;
+    return new OpenSSLDSAPublicKey(dsaKeySpec);
+  }
+ else   if (keySpec instanceof X509EncodedKeySpec) {
+    X509EncodedKeySpec x509KeySpec=(X509EncodedKeySpec)keySpec;
+    try {
+      final OpenSSLKey key=new OpenSSLKey(NativeCrypto.d2i_PUBKEY(x509KeySpec.getEncoded()));
+      return new OpenSSLDSAPublicKey(key);
+    }
+ catch (    Exception e) {
+      throw new InvalidKeySpecException(e);
+    }
+  }
+  throw new InvalidKeySpecException("Must use DSAPublicKeySpec or X509EncodedKeySpec; was " + keySpec.getClass().getName());
+}

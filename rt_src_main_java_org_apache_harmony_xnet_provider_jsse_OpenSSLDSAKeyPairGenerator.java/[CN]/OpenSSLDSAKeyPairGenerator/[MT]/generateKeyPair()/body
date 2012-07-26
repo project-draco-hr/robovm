@@ -1,0 +1,14 @@
+{
+  final byte[] seed;
+  if (random == null) {
+    seed=null;
+  }
+ else {
+    seed=new byte[20];
+    random.nextBytes(seed);
+  }
+  final OpenSSLKey key=new OpenSSLKey(NativeCrypto.DSA_generate_key(primeBits,seed,g,p,q));
+  final OpenSSLDSAPrivateKey privKey=new OpenSSLDSAPrivateKey(key);
+  final OpenSSLDSAPublicKey pubKey=new OpenSSLDSAPublicKey(key);
+  return new KeyPair(pubKey,privKey);
+}

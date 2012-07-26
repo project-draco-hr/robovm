@@ -1,0 +1,17 @@
+{
+  List<Challenge> challenges=HeaderParser.parseChallenges(responseHeaders,challengeHeader);
+  if (challenges.isEmpty()) {
+    throw new IOException("No authentication challenges found");
+  }
+  for (  Challenge challenge : challenges) {
+    PasswordAuthentication auth=Authenticator.requestPasswordAuthentication(getConnectToInetAddress(),getConnectToPort(),url.getProtocol(),challenge.realm,challenge.scheme);
+    if (auth == null) {
+      continue;
+    }
+    String usernameAndPassword=auth.getUserName() + ":" + new String(auth.getPassword());
+    byte[] bytes=usernameAndPassword.getBytes(Charsets.ISO_8859_1);
+    String encoded=Base64.encode(bytes);
+    return challenge.scheme + " " + encoded;
+  }
+  return null;
+}

@@ -17,6 +17,9 @@
   if (entries.contains(ze.name)) {
     throw new ZipException("Entry already exists: " + ze.name);
   }
+  if (entries.size() == 64 * 1024 - 1) {
+    throw new ZipException("Too many entries for the zip file format's 16-bit entry count");
+  }
   nameBytes=ze.name.getBytes(Charsets.UTF_8);
   nameLength=nameBytes.length;
   if (nameLength > 0xffff) {

@@ -1,0 +1,20 @@
+{
+  checkNotClosed();
+  validateKey(key);
+  Entry entry=lruEntries.get(key);
+  if (expectedSequenceNumber != ANY_SEQUENCE_NUMBER && (entry == null || entry.sequenceNumber != expectedSequenceNumber)) {
+    return null;
+  }
+  if (entry == null) {
+    entry=new Entry(key);
+    lruEntries.put(key,entry);
+  }
+ else   if (entry.currentEditor != null) {
+    return null;
+  }
+  Editor editor=new Editor(entry);
+  entry.currentEditor=editor;
+  journalWriter.write(DIRTY + ' ' + key+ '\n');
+  journalWriter.flush();
+  return editor;
+}

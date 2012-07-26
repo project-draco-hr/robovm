@@ -1,0 +1,29 @@
+{
+  List<Challenge> result=new ArrayList<Challenge>();
+  for (int h=0; h < responseHeaders.length(); h++) {
+    if (!challengeHeader.equalsIgnoreCase(responseHeaders.getFieldName(h))) {
+      continue;
+    }
+    String value=responseHeaders.getValue(h);
+    int pos=0;
+    while (pos < value.length()) {
+      int tokenStart=pos;
+      pos=skipUntil(value,pos," ");
+      String scheme=value.substring(tokenStart,pos).trim();
+      pos=skipWhitespace(value,pos);
+      if (!value.regionMatches(pos,"realm=\"",0,"realm=\"".length())) {
+        break;
+      }
+      pos+="realm=\"".length();
+      int realmStart=pos;
+      pos=skipUntil(value,pos,"\"");
+      String realm=value.substring(realmStart,pos);
+      pos++;
+      pos=skipUntil(value,pos,",");
+      pos++;
+      pos=skipWhitespace(value,pos);
+      result.add(new Challenge(scheme,realm));
+    }
+  }
+  return result;
+}

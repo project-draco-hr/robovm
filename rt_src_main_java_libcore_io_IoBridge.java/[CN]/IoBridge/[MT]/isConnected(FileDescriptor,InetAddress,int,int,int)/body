@@ -15,6 +15,9 @@
     throw new ErrnoException("isConnected",connectError);
   }
  catch (  ErrnoException errnoException) {
+    if (!fd.valid()) {
+      throw new SocketException("Socket closed");
+    }
     if (errnoException.errno == EINTR) {
       return false;
     }

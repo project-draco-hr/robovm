@@ -1,5 +1,5 @@
 {
-  final Socket socket=connection.getSocket();
+  Socket socket=connection.getSocket();
   try {
     SocketTagger.get().untag(socket);
   }
@@ -17,6 +17,7 @@ synchronized (connectionPool) {
         connectionPool.put(address,connections);
       }
       if (connections.size() < maxConnections) {
+        connection.setRecycled();
         connections.add(connection);
         return;
       }

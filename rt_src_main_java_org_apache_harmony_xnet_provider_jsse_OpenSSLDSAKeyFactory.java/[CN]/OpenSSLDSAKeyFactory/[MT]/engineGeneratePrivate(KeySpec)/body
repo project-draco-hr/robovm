@@ -1,0 +1,17 @@
+{
+  if (keySpec instanceof DSAPrivateKeySpec) {
+    DSAPrivateKeySpec dsaKeySpec=(DSAPrivateKeySpec)keySpec;
+    return new OpenSSLDSAPrivateKey(dsaKeySpec);
+  }
+ else   if (keySpec instanceof PKCS8EncodedKeySpec) {
+    PKCS8EncodedKeySpec pkcs8KeySpec=(PKCS8EncodedKeySpec)keySpec;
+    try {
+      final OpenSSLKey key=new OpenSSLKey(NativeCrypto.d2i_PKCS8_PRIV_KEY_INFO(pkcs8KeySpec.getEncoded()));
+      return new OpenSSLDSAPrivateKey(key);
+    }
+ catch (    Exception e) {
+      throw new InvalidKeySpecException(e);
+    }
+  }
+  throw new InvalidKeySpecException("Must use DSAPublicKeySpec or PKCS8EncodedKeySpec; was " + keySpec.getClass().getName());
+}

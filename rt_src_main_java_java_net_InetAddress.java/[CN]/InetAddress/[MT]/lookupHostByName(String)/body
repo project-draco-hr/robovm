@@ -22,6 +22,11 @@
     return addresses;
   }
  catch (  GaiException gaiException) {
+    if (gaiException.getCause() instanceof ErrnoException) {
+      if (((ErrnoException)gaiException.getCause()).errno == EACCES) {
+        throw new SecurityException("Permission denied (missing INTERNET permission?)",gaiException);
+      }
+    }
     String detailMessage="Unable to resolve host \"" + host + "\": "+ Libcore.os.gai_strerror(gaiException.error);
     addressCache.putUnknownHost(host,detailMessage);
     throw gaiException.rethrowAsUnknownHostException(detailMessage);

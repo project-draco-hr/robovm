@@ -1,0 +1,18 @@
+{
+  if (id == null) {
+    throw new NullPointerException("id == null");
+  }
+  final int keyRef=NativeCrypto.ENGINE_load_private_key(ctx,id);
+  if (keyRef == 0) {
+    return null;
+  }
+  final int keyType=NativeCrypto.EVP_PKEY_type(keyRef);
+switch (keyType) {
+case NativeCrypto.EVP_PKEY_RSA:
+    return OpenSSLRSAPrivateKey.getInstance(new OpenSSLKey(keyRef,this));
+case NativeCrypto.EVP_PKEY_DSA:
+  return new OpenSSLDSAPrivateKey(new OpenSSLKey(keyRef,this));
+default :
+throw new InvalidKeyException("Unknown key type: " + keyType);
+}
+}

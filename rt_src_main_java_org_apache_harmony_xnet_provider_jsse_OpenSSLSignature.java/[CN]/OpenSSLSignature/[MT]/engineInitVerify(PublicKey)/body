@@ -1,30 +1,34 @@
 {
-  if (publicKey instanceof DSAPublicKey) {
-    try {
-      DSAPublicKey dsaPublicKey=(DSAPublicKey)publicKey;
-      DSAParams dsaParams=dsaPublicKey.getParams();
-      dsa=NativeCrypto.EVP_PKEY_new_DSA(dsaParams.getP().toByteArray(),dsaParams.getQ().toByteArray(),dsaParams.getG().toByteArray(),dsaPublicKey.getY().toByteArray(),null);
+  destroyContextIfExists();
+  if (publicKey instanceof OpenSSLDSAPublicKey) {
+    if (engineType != EngineType.DSA) {
+      throw new InvalidKeyException("Signature not initialized as DSA");
     }
- catch (    Exception e) {
-      throw new InvalidKeyException(e);
+    OpenSSLDSAPublicKey dsaPublicKey=(OpenSSLDSAPublicKey)publicKey;
+    key=dsaPublicKey.getOpenSSLKey();
+  }
+ else   if (publicKey instanceof DSAPublicKey) {
+    if (engineType != EngineType.DSA) {
+      throw new InvalidKeyException("Signature not initialized as DSA");
     }
+    DSAPublicKey dsaPublicKey=(DSAPublicKey)publicKey;
+    key=OpenSSLDSAPublicKey.getInstance(dsaPublicKey);
+  }
+ else   if (publicKey instanceof OpenSSLRSAPublicKey) {
+    if (engineType != EngineType.RSA) {
+      throw new InvalidKeyException("Signature not initialized as RSA");
+    }
+    OpenSSLRSAPublicKey rsaPublicKey=(OpenSSLRSAPublicKey)publicKey;
+    key=rsaPublicKey.getOpenSSLKey();
   }
  else   if (publicKey instanceof RSAPublicKey) {
-    try {
-      RSAPublicKey rsaPublicKey=(RSAPublicKey)publicKey;
-      rsa=NativeCrypto.EVP_PKEY_new_RSA(rsaPublicKey.getModulus().toByteArray(),rsaPublicKey.getPublicExponent().toByteArray(),null,null,null);
+    if (engineType != EngineType.RSA) {
+      throw new InvalidKeyException("Signature not initialized as RSA");
     }
- catch (    Exception e) {
-      throw new InvalidKeyException(e);
-    }
+    RSAPublicKey rsaPublicKey=(RSAPublicKey)publicKey;
+    key=OpenSSLRSAPublicKey.getInstance(rsaPublicKey);
   }
  else {
     throw new InvalidKeyException("Need DSA or RSA public key");
-  }
-  try {
-    ctx=NativeCrypto.EVP_VerifyInit(evpAlgorithm);
-  }
- catch (  Exception ex) {
-    throw new RuntimeException(ex);
   }
 }

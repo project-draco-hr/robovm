@@ -1,0 +1,18 @@
+{
+  hostName=hostName.toLowerCase(Locale.US);
+  boolean hasDns=false;
+  for (  String altName : getSubjectAltNames(certificate,ALT_DNS_NAME)) {
+    hasDns=true;
+    if (verifyHostName(hostName,altName)) {
+      return true;
+    }
+  }
+  if (!hasDns) {
+    X500Principal principal=certificate.getSubjectX500Principal();
+    String cn=new DistinguishedNameParser(principal).find("cn");
+    if (cn != null) {
+      return verifyHostName(hostName,cn);
+    }
+  }
+  return false;
+}

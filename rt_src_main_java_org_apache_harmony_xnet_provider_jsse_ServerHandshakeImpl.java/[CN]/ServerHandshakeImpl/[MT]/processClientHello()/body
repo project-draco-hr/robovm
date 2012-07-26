@@ -8,8 +8,14 @@
     }
     fatalAlert(AlertProtocol.HANDSHAKE_FAILURE,"HANDSHAKE FAILURE. Incorrect client hello message");
   }
+  byte[] server_version=clientHello.client_version;
   if (!ProtocolVersion.isSupported(clientHello.client_version)) {
-    fatalAlert(AlertProtocol.PROTOCOL_VERSION,"PROTOCOL VERSION. Unsupported client version " + clientHello.client_version[0] + clientHello.client_version[1]);
+    if (clientHello.client_version[0] >= 3) {
+      server_version=ProtocolVersion.TLSv1.version;
+    }
+ else {
+      fatalAlert(AlertProtocol.PROTOCOL_VERSION,"PROTOCOL VERSION. Unsupported client version " + clientHello.client_version[0] + clientHello.client_version[1]);
+    }
   }
   isResuming=false;
   FIND:   if (clientHello.session_id.length != 0) {
@@ -67,10 +73,10 @@
       session.setPeer(socketOwner.getInetAddress().getHostName(),socketOwner.getPort());
     }
   }
-  recordProtocol.setVersion(clientHello.client_version);
-  session.protocol=ProtocolVersion.getByVersion(clientHello.client_version);
+  recordProtocol.setVersion(server_version);
+  session.protocol=ProtocolVersion.getByVersion(server_version);
   session.clientRandom=clientHello.random;
-  serverHello=new ServerHello(parameters.getSecureRandom(),clientHello.client_version,session.getId(),cipher_suite,(byte)0);
+  serverHello=new ServerHello(parameters.getSecureRandom(),server_version,session.getId(),cipher_suite,(byte)0);
   session.serverRandom=serverHello.random;
   send(serverHello);
   if (isResuming) {

@@ -1,0 +1,36 @@
+{
+  if (key == null) {
+    throw new InvalidKeyException("key == null");
+  }
+  if (key instanceof DSAPublicKey) {
+    DSAPublicKey dsaKey=(DSAPublicKey)key;
+    BigInteger y=dsaKey.getY();
+    DSAParams params=dsaKey.getParams();
+    BigInteger p=params.getP();
+    BigInteger q=params.getQ();
+    BigInteger g=params.getG();
+    try {
+      return engineGeneratePublic(new DSAPublicKeySpec(y,p,q,g));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else   if (key instanceof DSAPrivateKey) {
+    DSAPrivateKey dsaKey=(DSAPrivateKey)key;
+    BigInteger x=dsaKey.getX();
+    DSAParams params=dsaKey.getParams();
+    BigInteger p=params.getP();
+    BigInteger q=params.getQ();
+    BigInteger g=params.getG();
+    try {
+      return engineGeneratePublic(new DSAPrivateKeySpec(x,p,q,g));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else {
+    throw new InvalidKeyException("Key is not DSAPublicKey or DSAPrivateKey");
+  }
+}

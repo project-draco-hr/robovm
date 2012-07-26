@@ -1,13 +1,15 @@
 {
-  int handle=(rsa != 0) ? rsa : dsa;
-  if (handle == 0) {
+  if (key == null) {
     throw new SignatureException("Need DSA or RSA public key");
   }
   try {
-    int result=NativeCrypto.EVP_VerifyFinal(ctx,sigBytes,0,sigBytes.length,handle);
+    int result=NativeCrypto.EVP_VerifyFinal(ctx,sigBytes,0,sigBytes.length,key.getPkeyContext());
     return result == 1;
   }
  catch (  Exception ex) {
     throw new SignatureException(ex);
+  }
+ finally {
+    destroyContextIfExists();
   }
 }

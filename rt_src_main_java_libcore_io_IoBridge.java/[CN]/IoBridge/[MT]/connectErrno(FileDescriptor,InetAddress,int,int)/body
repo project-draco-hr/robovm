@@ -3,29 +3,26 @@
     Libcore.os.connect(fd,inetAddress,port);
     return true;
   }
-  long finishTimeMs=System.currentTimeMillis() + timeoutMs;
   IoUtils.setBlocking(fd,false);
+  long finishTimeMs=System.currentTimeMillis() + timeoutMs;
   try {
-    try {
-      Libcore.os.connect(fd,inetAddress,port);
-      return true;
-    }
- catch (    ErrnoException errnoException) {
-      if (errnoException.errno != EINPROGRESS) {
-        throw errnoException;
-      }
-    }
-    int remainingTimeoutMs;
-    do {
-      remainingTimeoutMs=(int)(finishTimeMs - System.currentTimeMillis());
-      if (remainingTimeoutMs <= 0) {
-        throw new SocketTimeoutException(connectDetail(inetAddress,port,timeoutMs,null));
-      }
-    }
- while (!IoBridge.isConnected(fd,inetAddress,port,timeoutMs,remainingTimeoutMs));
+    Libcore.os.connect(fd,inetAddress,port);
+    IoUtils.setBlocking(fd,true);
     return true;
   }
-  finally {
-    IoUtils.setBlocking(fd,true);
+ catch (  ErrnoException errnoException) {
+    if (errnoException.errno != EINPROGRESS) {
+      throw errnoException;
+    }
   }
+  int remainingTimeoutMs;
+  do {
+    remainingTimeoutMs=(int)(finishTimeMs - System.currentTimeMillis());
+    if (remainingTimeoutMs <= 0) {
+      throw new SocketTimeoutException(connectDetail(inetAddress,port,timeoutMs,null));
+    }
+  }
+ while (!IoBridge.isConnected(fd,inetAddress,port,timeoutMs,remainingTimeoutMs));
+  IoUtils.setBlocking(fd,true);
+  return true;
 }

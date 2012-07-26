@@ -1,0 +1,16 @@
+{
+  final BigInteger modulus=rsaPrivateKey.getModulus();
+  final BigInteger privateExponent=rsaPrivateKey.getPrivateExponent();
+  if (modulus == null) {
+    throw new InvalidKeyException("modulus == null");
+  }
+ else   if (privateExponent == null) {
+    throw new InvalidKeyException("privateExponent == null");
+  }
+  try {
+    return new OpenSSLKey(NativeCrypto.EVP_PKEY_new_RSA(modulus.toByteArray(),null,privateExponent.toByteArray(),null,null,null,null,null));
+  }
+ catch (  Exception e) {
+    throw new InvalidKeyException(e);
+  }
+}

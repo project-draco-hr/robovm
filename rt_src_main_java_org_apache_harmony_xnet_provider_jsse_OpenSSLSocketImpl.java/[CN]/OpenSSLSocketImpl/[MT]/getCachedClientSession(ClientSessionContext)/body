@@ -1,8 +1,10 @@
 {
-  if (super.getInetAddress() == null || super.getInetAddress().getHostAddress() == null || super.getInetAddress().getHostName() == null) {
+  String hostName=getPeerHostName();
+  int port=getPeerPort();
+  if (hostName == null) {
     return null;
   }
-  OpenSSLSessionImpl session=(OpenSSLSessionImpl)sessionContext.getSession(super.getInetAddress().getHostName(),super.getPort());
+  OpenSSLSessionImpl session=(OpenSSLSessionImpl)sessionContext.getSession(hostName,port);
   if (session == null) {
     return null;
   }
@@ -29,15 +31,17 @@
     return null;
   }
   String compressionMethod=session.getCompressionMethod();
-  boolean compressionMethodFound=false;
-  for (  String enabledCompressionMethod : enabledCompressionMethods) {
-    if (compressionMethod.equals(enabledCompressionMethod)) {
-      compressionMethodFound=true;
-      break;
+  if (!compressionMethod.equals(NativeCrypto.SUPPORTED_COMPRESSION_METHOD_NULL)) {
+    boolean compressionMethodFound=false;
+    for (    String enabledCompressionMethod : enabledCompressionMethods) {
+      if (compressionMethod.equals(enabledCompressionMethod)) {
+        compressionMethodFound=true;
+        break;
+      }
     }
-  }
-  if (!compressionMethodFound) {
-    return null;
+    if (!compressionMethodFound) {
+      return null;
+    }
   }
   return session;
 }

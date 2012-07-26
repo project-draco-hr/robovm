@@ -1,0 +1,22 @@
+{
+  BigInteger modulus=rsaKeySpec.getModulus();
+  BigInteger privateExponent=rsaKeySpec.getPrivateExponent();
+  if (modulus == null) {
+    throw new InvalidKeySpecException("modulus == null");
+  }
+ else   if (privateExponent == null) {
+    throw new InvalidKeySpecException("privateExponent == null");
+  }
+  try {
+    final BigInteger publicExponent=rsaKeySpec.getPublicExponent();
+    final BigInteger primeP=rsaKeySpec.getPrimeP();
+    final BigInteger primeQ=rsaKeySpec.getPrimeQ();
+    final BigInteger primeExponentP=rsaKeySpec.getPrimeExponentP();
+    final BigInteger primeExponentQ=rsaKeySpec.getPrimeExponentQ();
+    final BigInteger crtCoefficient=rsaKeySpec.getCrtCoefficient();
+    return new OpenSSLKey(NativeCrypto.EVP_PKEY_new_RSA(modulus.toByteArray(),publicExponent == null ? null : publicExponent.toByteArray(),privateExponent.toByteArray(),primeP == null ? null : primeP.toByteArray(),primeQ == null ? null : primeQ.toByteArray(),primeExponentP == null ? null : primeExponentP.toByteArray(),primeExponentQ == null ? null : primeExponentQ.toByteArray(),crtCoefficient == null ? null : crtCoefficient.toByteArray()));
+  }
+ catch (  Exception e) {
+    throw new InvalidKeySpecException(e);
+  }
+}

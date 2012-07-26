@@ -86,8 +86,8 @@ clientKeyExchange=new ClientKeyExchange(io_stream,length,serverHello.server_vers
 Cipher c=null;
 try {
 c=Cipher.getInstance("RSA/ECB/PKCS1Padding");
-c.init(Cipher.DECRYPT_MODE,privKey);
-preMasterSecret=c.doFinal(clientKeyExchange.exchange_keys);
+c.init(Cipher.UNWRAP_MODE,privKey);
+preMasterSecret=c.unwrap(clientKeyExchange.exchange_keys,"preMasterSecret",Cipher.SECRET_KEY).getEncoded();
 if (preMasterSecret.length != 48 || preMasterSecret[0] != clientHello.client_version[0] || preMasterSecret[1] != clientHello.client_version[1]) {
 preMasterSecret=new byte[48];
 parameters.getSecureRandom().nextBytes(preMasterSecret);

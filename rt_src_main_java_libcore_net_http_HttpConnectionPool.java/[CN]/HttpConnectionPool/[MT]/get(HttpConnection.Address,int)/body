@@ -1,16 +1,17 @@
 {
 synchronized (connectionPool) {
     List<HttpConnection> connections=connectionPool.get(address);
-    if (connections != null) {
-      while (!connections.isEmpty()) {
-        HttpConnection connection=connections.remove(connections.size() - 1);
-        if (!connection.isStale()) {
-          final Socket socket=connection.getSocket();
-          SocketTagger.get().tag(socket);
-          return connection;
-        }
+    while (connections != null) {
+      HttpConnection connection=connections.remove(connections.size() - 1);
+      if (connections.isEmpty()) {
+        connectionPool.remove(address);
+        connections=null;
       }
-      connectionPool.remove(address);
+      if (connection.isEligibleForRecycling()) {
+        Socket socket=connection.getSocket();
+        SocketTagger.get().tag(socket);
+        return connection;
+      }
     }
   }
   return address.connect(connectTimeout);

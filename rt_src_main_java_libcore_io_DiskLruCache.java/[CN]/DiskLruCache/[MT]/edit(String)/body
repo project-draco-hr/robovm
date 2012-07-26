@@ -1,17 +1,3 @@
 {
-  checkNotClosed();
-  validateKey(key);
-  Entry entry=lruEntries.get(key);
-  if (entry == null) {
-    entry=new Entry(key);
-    lruEntries.put(key,entry);
-  }
- else   if (entry.currentEditor != null) {
-    return null;
-  }
-  Editor editor=new Editor(entry);
-  entry.currentEditor=editor;
-  journalWriter.write(DIRTY + ' ' + key+ '\n');
-  journalWriter.flush();
-  return editor;
+  return edit(key,ANY_SEQUENCE_NUMBER);
 }

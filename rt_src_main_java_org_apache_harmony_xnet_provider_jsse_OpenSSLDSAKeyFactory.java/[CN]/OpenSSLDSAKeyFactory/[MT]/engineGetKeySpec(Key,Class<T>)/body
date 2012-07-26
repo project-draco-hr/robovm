@@ -1,0 +1,45 @@
+{
+  if (key == null) {
+    throw new InvalidKeySpecException("key == null");
+  }
+  if (keySpec == null) {
+    throw new InvalidKeySpecException("keySpec == null");
+  }
+  if (key instanceof DSAPublicKey) {
+    DSAPublicKey dsaKey=(DSAPublicKey)key;
+    if (DSAPublicKeySpec.class.equals(keySpec)) {
+      BigInteger y=dsaKey.getY();
+      DSAParams params=dsaKey.getParams();
+      BigInteger p=params.getP();
+      BigInteger q=params.getQ();
+      BigInteger g=params.getG();
+      return (T)new DSAPublicKeySpec(y,p,q,g);
+    }
+ else     if (PKCS8EncodedKeySpec.class.equals(keySpec)) {
+      return (T)new PKCS8EncodedKeySpec(key.getEncoded());
+    }
+ else {
+      throw new InvalidKeySpecException("Must be DSAPublicKeySpec or PKCS8EncodedKeySpec");
+    }
+  }
+ else   if (key instanceof DSAPrivateKey) {
+    DSAPrivateKey dsaKey=(DSAPrivateKey)key;
+    if (DSAPrivateKeySpec.class.equals(keySpec)) {
+      BigInteger x=dsaKey.getX();
+      DSAParams params=dsaKey.getParams();
+      BigInteger p=params.getP();
+      BigInteger q=params.getQ();
+      BigInteger g=params.getG();
+      return (T)new DSAPrivateKeySpec(x,p,q,g);
+    }
+ else     if (X509EncodedKeySpec.class.equals(keySpec)) {
+      return (T)new X509EncodedKeySpec(dsaKey.getEncoded());
+    }
+ else {
+      throw new InvalidKeySpecException("Must be DSAPrivateKeySpec or X509EncodedKeySpec");
+    }
+  }
+ else {
+    throw new InvalidKeySpecException("Must be DSAPublicKey or DSAPrivateKey");
+  }
+}

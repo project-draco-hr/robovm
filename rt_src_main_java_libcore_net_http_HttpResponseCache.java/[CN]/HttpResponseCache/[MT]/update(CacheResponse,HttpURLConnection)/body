@@ -1,0 +1,19 @@
+{
+  HttpEngine httpEngine=getHttpEngine(httpConnection);
+  URI uri=httpEngine.getUri();
+  ResponseHeaders response=httpEngine.getResponseHeaders();
+  RawHeaders varyHeaders=httpEngine.getRequestHeaders().getHeaders().getAll(response.getVaryFields());
+  Entry entry=new Entry(uri,varyHeaders,httpConnection);
+  DiskLruCache.Snapshot snapshot=(conditionalCacheHit instanceof EntryCacheResponse) ? ((EntryCacheResponse)conditionalCacheHit).snapshot : ((EntrySecureCacheResponse)conditionalCacheHit).snapshot;
+  DiskLruCache.Editor editor=null;
+  try {
+    editor=snapshot.edit();
+    if (editor != null) {
+      entry.writeTo(editor);
+      editor.commit();
+    }
+  }
+ catch (  IOException e) {
+    abortQuietly(editor);
+  }
+}
