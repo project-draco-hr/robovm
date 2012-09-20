@@ -1,0 +1,19 @@
+{
+  soot.Type sootType=method.getReturnType();
+  if (hasPointerAnnotation(method)) {
+    if (!sootType.equals(LongType.v())) {
+      throw new IllegalArgumentException(anno + " annotated method " + method.getName()+ " must return long when annotated with @Pointer");
+    }
+    return I8_PTR;
+  }
+  if (isStruct(sootType)) {
+    if (!isPassByValue(method)) {
+      return new PointerType(getStructType(sootType));
+    }
+    return getStructType(sootType);
+  }
+ else   if (isNativeObject(sootType)) {
+    return I8_PTR;
+  }
+  return getType(sootType);
+}

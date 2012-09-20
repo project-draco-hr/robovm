@@ -1,12 +1,10 @@
 {
-  soot.Type sootRetType=method.getReturnType();
-  if (!sootRetType.equals(VoidType.v()) && !(sootRetType instanceof PrimType) && !isStruct(sootRetType)) {
-    throw new IllegalArgumentException("@Bridge annotated method must return void or a primitive or Struct type");
+  if (!canMarshal(method)) {
+    throw new IllegalArgumentException("No @Marshaler for return type of" + " @Bridge annotated method " + method.getName() + " found");
   }
   for (int i=0; i < method.getParameterCount(); i++) {
-    soot.Type t=method.getParameterType(i);
-    if (!(t instanceof PrimType) && !isStruct(t)) {
-      throw new IllegalArgumentException("@Bridge annotated method must take only primitive or Struct type arguments");
+    if (!canMarshal(method,i)) {
+      throw new IllegalArgumentException("No @Marshaler for parameter " + (i + 1) + " of @Bridge annotated method "+ method.getName()+ " found");
     }
   }
 }

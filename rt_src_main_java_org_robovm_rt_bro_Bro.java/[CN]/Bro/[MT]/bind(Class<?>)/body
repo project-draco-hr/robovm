@@ -1,14 +1,12 @@
 {
-  org.robovm.rt.bro.annotation.Runtime runtime=c.getAnnotation(org.robovm.rt.bro.annotation.Runtime.class);
-  Runtime runtimeImpl=getRuntime(runtime == null ? CRuntime.class : runtime.value());
   Library library=c.getAnnotation(Library.class);
   if (library != null) {
-    runtimeImpl.loadLibrary(library);
+    Runtime.loadLibrary(library);
   }
   for (  Method method : c.getDeclaredMethods()) {
     Bridge bridge=method.getAnnotation(Bridge.class);
     if (bridge != null) {
-      long f=runtimeImpl.resolveBridge(library,bridge,method);
+      long f=Runtime.resolveBridge(library,bridge,method);
       bind(method,f);
     }
   }
