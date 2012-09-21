@@ -1,6 +1,18 @@
 {
+  if (!Modifier.isStatic(getModifiers())) {
+    if (receiver == null) {
+      throw new NullPointerException();
+    }
+    if (!getDeclaringClass().isInstance(receiver)) {
+      throw new IllegalArgumentException("receiver is not an instance " + "of this method's declaring class");
+    }
+  }
   if (args == null) {
     args=EmptyArray.OBJECT;
   }
-  return invoke(method,flag,receiver,args);
+  Class<?>[] pTypes=getParameterTypes(false);
+  if (args.length != pTypes.length) {
+    throw new IllegalArgumentException("wrong number of arguments");
+  }
+  return internalInvoke(method,pTypes,receiver,args);
 }
