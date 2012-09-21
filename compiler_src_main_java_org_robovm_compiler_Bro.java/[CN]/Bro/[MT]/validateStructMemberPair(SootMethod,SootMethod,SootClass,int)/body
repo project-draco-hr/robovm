@@ -1,0 +1,18 @@
+{
+  if (getter != null && setter != null) {
+    if (!setter.getParameterType(0).equals(getter.getReturnType())) {
+      throw new IllegalArgumentException("Different type used " + "for getter and setter of " + "@StructMember(" + offset + ") in class "+ clazz);
+    }
+    soot.Type type=getter.getReturnType();
+    if (hasPointerAnnotation(getter) || hasPointerAnnotation(setter,0)) {
+      if (hasPointerAnnotation(getter) != hasPointerAnnotation(setter,0)) {
+        throw new IllegalArgumentException("Getter and setter of " + "@StructMember(" + offset + ") in class "+ clazz+ " must both be annotated with @Pointer");
+      }
+    }
+ else     if (isStruct(type)) {
+      if (isPassByValue(getter) != isPassByValue(setter,0)) {
+        throw new IllegalArgumentException("Getter and setter of " + "@StructMember(" + offset + ") in class "+ clazz+ " must either both use @ByVal or @ByRef");
+      }
+    }
+  }
+}
