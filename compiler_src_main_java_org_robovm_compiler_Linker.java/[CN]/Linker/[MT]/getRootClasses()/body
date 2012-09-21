@@ -6,15 +6,15 @@
   for (  String rootClassName : ROOT_CLASSES) {
     classes.add(config.getClazzes().load(rootClassName));
   }
-  if (config.getRoots().isEmpty()) {
-    if (config.getMainClass() != null) {
-      Clazz clazz=config.getClazzes().load(config.getMainClass().replace('.','/'));
-      if (clazz == null) {
-        throw new CompilerException("Main class " + config.getMainClass() + " not found");
-      }
-      classes.add(clazz);
+  if (config.getMainClass() != null) {
+    Clazz clazz=config.getClazzes().load(config.getMainClass().replace('.','/'));
+    if (clazz == null) {
+      throw new CompilerException("Main class " + config.getMainClass() + " not found");
     }
- else {
+    classes.add(clazz);
+  }
+  if (config.getRoots().isEmpty()) {
+    if (config.getMainClass() == null) {
       classes.addAll(config.getClazzes().listClasses());
     }
   }
