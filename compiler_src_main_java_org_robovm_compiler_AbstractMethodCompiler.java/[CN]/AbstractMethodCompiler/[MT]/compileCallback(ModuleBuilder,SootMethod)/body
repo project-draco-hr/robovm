@@ -2,29 +2,77 @@
   validateCallbackMethod(method);
   Function callbackFn=FunctionBuilder.callback(method);
   moduleBuilder.addFunction(callbackFn);
-  Value env=call(callbackFn,BC_ATTACH_THREAD_FROM_CALLBACK);
-  pushCallbackFrame(callbackFn,env);
-  ArrayList<Value> args=new ArrayList<Value>();
-  args.add(env);
-  for (  VariableRef ref : callbackFn.getParameterRefs()) {
-    if (ref.getType() == I8_PTR) {
-      Variable tmp=callbackFn.newVariable(I64);
-      callbackFn.add(new Ptrtoint(tmp,ref,I64));
-      ref=tmp.ref();
-    }
-    args.add(ref);
-  }
   String targetName=mangleMethod(method);
   if (method.isSynchronized()) {
     targetName+="_synchronized";
   }
   FunctionRef targetFn=new FunctionRef(targetName,getFunctionType(method));
+  Value env=call(callbackFn,BC_ATTACH_THREAD_FROM_CALLBACK);
   BasicBlockRef bbSuccess=callbackFn.newBasicBlockRef(new Label("success"));
   BasicBlockRef bbFailure=callbackFn.newBasicBlockRef(new Label("failure"));
+  pushCallbackFrame(callbackFn,env);
   trycatchAllEnter(callbackFn,env,bbSuccess,bbFailure);
   callbackFn.newBasicBlock(bbSuccess.getLabel());
+class MarshaledValue {
+    private Value object;
+    private Value handle;
+    private int paramIndex;
+  }
+  List<MarshaledValue> marshaledValues=new ArrayList<MarshaledValue>();
+  ArrayList<Value> args=new ArrayList<Value>();
+  args.add(env);
+  for (int i=0; i < sootMethod.getParameterCount(); i++) {
+    Value arg=callbackFn.getParameterRef(i);
+    soot.Type type=sootMethod.getParameterType(i);
+    if (needsMarshaler(type)) {
+      String marshalerClassName=getMarshalerClassName(method,i,true);
+      Variable handle=callbackFn.newVariable(I64);
+      callbackFn.add(new Ptrtoint(handle,arg,I64));
+      MarshaledValue marshaledValue=new MarshaledValue();
+      marshaledValues.add(marshaledValue);
+      marshaledValue.handle=handle.ref();
+      marshaledValue.paramIndex=i;
+      if (isPtr(type)) {
+        SootClass sootPtrTargetClass=getPtrTargetClass(method,i);
+        Value ptrTargetClass=ldcClass(callbackFn,getInternalName(sootPtrTargetClass),env);
+        int ptrWrapCount=getPtrWrapCount(method,i);
+        Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toPtr","(Ljava/lang/Class;JI)Lorg/robovm/rt/bro/ptr/Ptr;");
+        trampolines.add(invokestatic);
+        arg=call(callbackFn,invokestatic.getFunctionRef(),env,ptrTargetClass,handle.ref(),new IntegerConstant(ptrWrapCount));
+      }
+ else {
+        String targetClassName=getInternalName(type);
+        Value targetClass=ldcClass(callbackFn,targetClassName,env);
+        Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toObject","(Ljava/lang/Class;JZ)Ljava/lang/Object;");
+        trampolines.add(invokestatic);
+        arg=call(callbackFn,invokestatic.getFunctionRef(),env,targetClass,handle.ref(),new IntegerConstant((byte)0));
+      }
+      marshaledValue.object=arg;
+    }
+ else     if (hasPointerAnnotation(method,i)) {
+      Variable resultI64=callbackFn.newVariable(I64);
+      callbackFn.add(new Ptrtoint(resultI64,arg,I64));
+      arg=resultI64.ref();
+    }
+    args.add(arg);
+  }
   Value result=call(callbackFn,targetFn,args);
-  if (callbackFn.getType().getReturnType() == I8_PTR) {
+  for (  MarshaledValue value : marshaledValues) {
+    String marshalerClassName=getMarshalerClassName(method,value.paramIndex,false);
+    Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"updateNative","(Ljava/lang/Object;J)V");
+    trampolines.add(invokestatic);
+    call(callbackFn,invokestatic.getFunctionRef(),env,value.object,value.handle);
+  }
+  if (needsMarshaler(method.getReturnType())) {
+    String marshalerClassName=getMarshalerClassName(method,false);
+    Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toNative","(Ljava/lang/Object;)J");
+    trampolines.add(invokestatic);
+    Value resultI64=call(callbackFn,invokestatic.getFunctionRef(),env,result);
+    Variable resultPtr=callbackFn.newVariable(callbackFn.getType().getReturnType());
+    callbackFn.add(new Inttoptr(resultPtr,resultI64,resultPtr.getType()));
+    result=resultPtr.ref();
+  }
+ else   if (hasPointerAnnotation(method)) {
     Variable resultI8Ptr=callbackFn.newVariable(I8_PTR);
     callbackFn.add(new Inttoptr(resultI8Ptr,result,I8_PTR));
     result=resultI8Ptr.ref();
@@ -36,7 +84,8 @@
   callbackFn.newBasicBlock(bbFailure.getLabel());
   trycatchLeave(callbackFn,env);
   popCallbackFrame(callbackFn,env);
+  Value ex=call(callbackFn,BC_EXCEPTION_CLEAR,env);
   call(callbackFn,BC_DETACH_THREAD_FROM_CALLBACK,env);
-  call(callbackFn,BC_THROW_IF_EXCEPTION_OCCURRED,env);
+  call(callbackFn,BC_THROW,env,ex);
   callbackFn.add(new Unreachable());
 }

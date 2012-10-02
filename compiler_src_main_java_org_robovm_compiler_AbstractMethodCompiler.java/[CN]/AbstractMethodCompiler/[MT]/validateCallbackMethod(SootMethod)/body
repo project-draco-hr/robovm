@@ -1,14 +1,13 @@
 {
   if (!method.isStatic()) {
-    throw new IllegalArgumentException("@Callback annotated method must be static: " + method);
+    throw new IllegalArgumentException("@Callback annotated method " + method.getName() + " must be static");
   }
-  soot.Type sootRetType=method.getReturnType();
-  if (!sootRetType.equals(VoidType.v()) && !(sootRetType instanceof PrimType)) {
-    throw new IllegalArgumentException("@Callback annotated method must return void or primitive type");
+  if (!canMarshal(method)) {
+    throw new IllegalArgumentException("No @Marshaler for return type of" + " @Callback annotated method " + method.getName() + " found");
   }
   for (int i=0; i < method.getParameterCount(); i++) {
-    if (!(method.getParameterType(i) instanceof PrimType)) {
-      throw new IllegalArgumentException("@Callback annotated method must take only primitive type arguments");
+    if (!canMarshal(method,i)) {
+      throw new IllegalArgumentException("No @Marshaler for parameter " + (i + 1) + " of @Callback annotated method "+ method.getName()+ " found");
     }
   }
 }
