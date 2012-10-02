@@ -1,0 +1,18 @@
+{
+  TestStruct s=new TestStruct();
+  assertNull(s.pointPtrPtr());
+  Ptr<Ptr<Point>> ptrOuter=Ptr.newPtrPtr(Point.class);
+  s.pointPtrPtr(ptrOuter);
+  assertEquals(ptrOuter,s.pointPtrPtr());
+  assertNull(s.pointPtrPtr().get());
+  Ptr<Point> ptrInner=Ptr.newPtr(Point.class);
+  ptrOuter.set(ptrInner);
+  assertEquals(ptrInner,s.pointPtrPtr().get());
+  Point p=new Point().x(10).y(20);
+  ptrInner.set(p);
+  assertEquals(p,s.pointPtrPtr().get().get());
+  s.pointPtrPtr().get().set(null);
+  assertNull(ptrInner.get());
+  s.pointPtrPtr().set(null);
+  assertNull(ptrOuter.get());
+}

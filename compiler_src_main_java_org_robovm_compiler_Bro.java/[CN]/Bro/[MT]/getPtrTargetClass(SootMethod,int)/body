@@ -1,0 +1,13 @@
+{
+  SignatureTag signatureTag=(SignatureTag)method.getTag("SignatureTag");
+  if (signatureTag == null) {
+    return SootResolver.v().resolveClass("org.robovm.bro.ptr.VoidPtr",SootClass.SIGNATURES);
+  }
+ else {
+    GenericSignatureParser parser=new GenericSignatureParser(signatureTag.getSignature());
+    String sig=paramIndex != -1 ? parser.getParameterSignature(paramIndex) : parser.getReturnTypeSignature();
+    String name=sig.replaceAll("(?:Lorg/robovm/rt/bro/ptr/Ptr<)+L([^<;]+).*","$1");
+    name=name.replace('/','.');
+    return SootResolver.v().resolveClass(name,SootClass.SIGNATURES);
+  }
+}

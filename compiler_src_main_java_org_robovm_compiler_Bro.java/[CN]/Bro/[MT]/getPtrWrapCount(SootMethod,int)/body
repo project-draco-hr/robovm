@@ -1,0 +1,16 @@
+{
+  SignatureTag signatureTag=(SignatureTag)method.getTag("SignatureTag");
+  if (signatureTag == null) {
+    return 1;
+  }
+ else {
+    GenericSignatureParser parser=new GenericSignatureParser(signatureTag.getSignature());
+    String sig=paramIndex != -1 ? parser.getParameterSignature(paramIndex) : parser.getReturnTypeSignature();
+    int count=0;
+    while (sig.startsWith("Lorg/robovm/rt/bro/ptr/Ptr<")) {
+      count++;
+      sig=sig.substring("Lorg/robovm/rt/bro/ptr/Ptr<".length());
+    }
+    return count;
+  }
+}

@@ -1,0 +1,12 @@
+{
+  AnnotationTag annotation=getMarshalerAnnotation(method);
+  if (annotation == null) {
+    SootClass paramType=((RefType)method.getReturnType()).getSootClass();
+    if (unwrapPtr && isPtr(paramType)) {
+      paramType=getPtrTargetClass(method);
+    }
+    annotation=getMarshalerAnnotation(paramType);
+  }
+  String desc=((AnnotationClassElem)annotation.getElemAt(0)).getDesc();
+  return desc.substring(1,desc.length() - 1);
+}

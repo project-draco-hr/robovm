@@ -26,23 +26,24 @@
         function.add(new Load(tmp,memberPtr.ref()));
         result=tmp.ref();
       }
-      String targetClassName=getInternalName(method.getReturnType());
-      FunctionRef ldcClassFn=null;
-      if (targetClassName.equals(this.className)) {
-        ldcClassFn=FunctionBuilder.ldcInternal(method.getDeclaringClass()).ref();
+      Variable handle=function.newVariable(I64);
+      function.add(new Ptrtoint(handle,result,I64));
+      String marshalerClassName=getMarshalerClassName(method,true);
+      if (isPtr(method.getReturnType())) {
+        SootClass sootPtrTargetClass=getPtrTargetClass(method);
+        Value ptrTargetClass=ldcClass(function,getInternalName(sootPtrTargetClass));
+        int ptrWrapCount=getPtrWrapCount(method);
+        Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toPtr","(Ljava/lang/Class;JI)Lorg/robovm/rt/bro/ptr/Ptr;");
+        trampolines.add(invokestatic);
+        result=call(function,invokestatic.getFunctionRef(),function.getParameterRef(0),ptrTargetClass,handle.ref(),new IntegerConstant(ptrWrapCount));
       }
  else {
-        Trampoline trampoline=new LdcClass(className,targetClassName);
-        trampolines.add(trampoline);
-        ldcClassFn=trampoline.getFunctionRef();
+        String targetClassName=getInternalName(method.getReturnType());
+        Value returnClass=ldcClass(function,targetClassName);
+        Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toObject","(Ljava/lang/Class;JZ)Ljava/lang/Object;");
+        trampolines.add(invokestatic);
+        result=call(function,invokestatic.getFunctionRef(),function.getParameterRef(0),returnClass,handle.ref(),new IntegerConstant((byte)0));
       }
-      Value returnClass=call(function,ldcClassFn,function.getParameterRef(0));
-      String marshalerClassName=getMarshalerClassName(method);
-      Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toObject","(Ljava/lang/Class;JZ)Ljava/lang/Object;");
-      trampolines.add(invokestatic);
-      Variable resultI64=function.newVariable(I64);
-      function.add(new Ptrtoint(resultI64,result,I64));
-      result=call(function,invokestatic.getFunctionRef(),function.getParameterRef(0),returnClass,resultI64.ref(),new IntegerConstant((byte)0));
       function.add(new Ret(result));
     }
  else     if (hasPointerAnnotation(method)) {
@@ -61,16 +62,17 @@
  else {
     Value p=function.getParameterRef(2);
     if (needsMarshaler(method.getParameterType(0))) {
-      if (isPassByValue(method,0)) {
+      boolean copy=!isPtr(method.getReturnType()) && isPassByValue(method,0);
+      if (copy) {
         call(function,CHECK_NULL,function.getParameterRef(0),p);
       }
-      String marshalerClassName=getMarshalerClassName(method,0);
+      String marshalerClassName=getMarshalerClassName(method,0,false);
       Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toNative","(Ljava/lang/Object;)J");
       trampolines.add(invokestatic);
       Value ptrI64=call(function,invokestatic.getFunctionRef(),function.getParameterRef(0),p);
       Variable ptr=function.newVariable(I8_PTR);
       function.add(new Inttoptr(ptr,ptrI64,I8_PTR));
-      if (isPassByValue(method,0)) {
+      if (copy) {
         Variable memberI8Ptr=function.newVariable(I8_PTR);
         function.add(new Bitcast(memberI8Ptr,memberPtr.ref(),I8_PTR));
         call(function,LLVM_MEMCPY,memberI8Ptr.ref(),ptr.ref(),sizeof((StructureType)memberType),new IntegerConstant(1),BooleanConstant.FALSE);

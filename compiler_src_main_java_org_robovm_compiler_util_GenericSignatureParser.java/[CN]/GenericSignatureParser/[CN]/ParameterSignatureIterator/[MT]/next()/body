@@ -1,0 +1,63 @@
+{
+  if (!hasNext())   throw new NoSuchElementException();
+  StringBuilder result=new StringBuilder();
+  boolean done;
+  do {
+    done=true;
+    char ch=signature.charAt(index);
+switch (ch) {
+case 'B':
+case 'C':
+case 'D':
+case 'F':
+case 'I':
+case 'J':
+case 'S':
+case 'Z':
+case '*':
+      result.append(signature.charAt(index));
+    ++index;
+  break;
+case 'L':
+case 'T':
+String tmp="";
+int startsemi=index;
+int leftCount=0;
+int i=startsemi + 1;
+loop: while (true) {
+char c=signature.charAt(i);
+switch (c) {
+case ';':
+if (leftCount == 0) break loop;
+break;
+case '<':
+leftCount++;
+break;
+case '>':
+leftCount--;
+break;
+}
+i++;
+}
+String foo=signature.substring(startsemi,i + 1);
+result.append(foo);
+index=i + 1;
+break;
+case '[':
+case '+':
+case '-':
+result.append(signature.charAt(index));
+++index;
+done=false;
+break;
+case ')':
+case '^':
+throw new NoSuchElementException("Should have already thrown NoSuchElementException");
+case 'V':
+default :
+throw new IllegalStateException("Invalid method signature: '" + signature + "' : "+ signature.substring(index)+ " "+ result);
+}
+}
+ while (!done);
+return result.toString();
+}
