@@ -1,0 +1,20 @@
+{
+  if (handle == 0L) {
+    return null;
+  }
+  T o=getPeerObject(handle);
+  if (o != null) {
+    return o;
+  }
+  ObjCClass fallback=ObjCClass.getByType(cls);
+  ObjCClass objCClass=ObjCClass.getFromObject(handle,fallback);
+  Class<T> c=(Class<T>)objCClass.getType();
+  if (c == ObjCClass.class) {
+    return (T)objCClass;
+  }
+  o=VM.allocateObject(c);
+  o.setHandle(handle);
+  setAssociatedObject(handle,PEER_OBJECT_KEY,o);
+  o.afterMarshaled();
+  return o;
+}

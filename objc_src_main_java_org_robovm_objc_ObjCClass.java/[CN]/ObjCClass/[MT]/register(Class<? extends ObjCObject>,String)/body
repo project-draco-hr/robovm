@@ -1,0 +1,32 @@
+{
+  ObjCClass superclass=getByType((Class<? extends ObjCObject>)type.getSuperclass());
+  long handle=ObjCRuntime.objc_allocateClassPair(superclass.getHandle(),VM.getStringUTFChars(name),0);
+  if (handle == 0L) {
+    throw new ObjCClassNotFoundException("Failed to create custom Objective-C class for Java class: " + type);
+  }
+  for (  Entry<String,Method> entry : getCallbacks(type).entrySet()) {
+    String selName=entry.getKey();
+    Method method=entry.getValue();
+    Selector selector=Selector.register(selName);
+    String encoding=null;
+    TypeEncoding typeEncoding=method.getAnnotation(TypeEncoding.class);
+    if (typeEncoding != null) {
+      encoding=typeEncoding.value();
+    }
+ else {
+      long methodPtr=ObjCRuntime.class_getInstanceMethod(superclass.getHandle(),selector.getHandle());
+      if (methodPtr != 0L) {
+        long encodingPtr=ObjCRuntime.method_getTypeEncoding(methodPtr);
+        if (encodingPtr != 0L) {
+          encoding=VM.newStringUTF(encodingPtr);
+        }
+      }
+    }
+    long impl=VM.getCallbackMethodImpl(method);
+    if (!ObjCRuntime.class_addMethod(handle,selector.getHandle(),impl,encoding != null ? VM.getStringUTFChars(encoding) : 0L)) {
+      throw new ObjCClassNotFoundException("Failed to add method " + selName + " to custom Objective-C class for Java class: "+ type);
+    }
+  }
+  ObjCRuntime.objc_registerClassPair(handle);
+  return new ObjCClass(handle,type,name,true);
+}

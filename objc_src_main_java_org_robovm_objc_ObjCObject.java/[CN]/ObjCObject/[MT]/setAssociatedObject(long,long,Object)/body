@@ -1,0 +1,14 @@
+{
+  if (o == null) {
+    ObjCRuntime.objc_setAssociatedObject(handle,key,0L,0);
+  }
+ else {
+    long address=VM.getObjectAddress(o);
+    long numberPtr=ObjCRuntime.ptr_objc_msgSend(NSNUMBER_CLASS,alloc.getHandle());
+    if (numberPtr == 0L) {
+      throw new OutOfMemoryError();
+    }
+    numberPtr=ObjCRuntime.ptr_objc_msgSend_long(numberPtr,initWithLongLong$.getHandle(),address);
+    ObjCRuntime.objc_setAssociatedObject(handle,PEER_OBJECT_KEY,numberPtr,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+  }
+}

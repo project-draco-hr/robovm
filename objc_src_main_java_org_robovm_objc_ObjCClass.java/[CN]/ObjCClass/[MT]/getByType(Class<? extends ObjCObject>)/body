@@ -1,0 +1,32 @@
+{
+  if (type == null) {
+    throw new NullPointerException("type");
+  }
+synchronized (typeToClass) {
+    ObjCClass c=typeToClass.get(type);
+    if (c == null) {
+      BindClass bindToClass=type.getAnnotation(BindClass.class);
+      String name=null;
+      if (bindToClass != null) {
+        name=bindToClass.value();
+      }
+ else       if (KNOWN_NATIVE_CLASSES_PATTERN.matcher(type.getName()).matches()) {
+        name=type.getSimpleName();
+      }
+ else {
+        name="Java." + type.getName();
+        c=register(type,name);
+      }
+      if (c == null) {
+        long classPtr=ObjCRuntime.objc_getClass(VM.getStringUTFChars(name));
+        if (classPtr == 0L) {
+          throw new ObjCClassNotFoundException(name);
+        }
+        c=new ObjCClass(classPtr,type,name,false);
+      }
+      typeToClass.put(type,c);
+      nameToClass.put(name,c);
+    }
+    return c;
+  }
+}

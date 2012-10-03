@@ -1,0 +1,16 @@
+{
+  if (name == null) {
+    throw new NullPointerException("name");
+  }
+synchronized (selectors) {
+    Selector sel=selectors.get(name);
+    if (sel == null) {
+      sel=ObjCRuntime.sel_registerName(BytePtr.toBytePtrAsciiZ(name));
+      if (sel == null) {
+        throw new IllegalStateException("Objective-C failed to register selector '" + name + "'");
+      }
+      selectors.put(name,sel);
+    }
+    return sel;
+  }
+}
