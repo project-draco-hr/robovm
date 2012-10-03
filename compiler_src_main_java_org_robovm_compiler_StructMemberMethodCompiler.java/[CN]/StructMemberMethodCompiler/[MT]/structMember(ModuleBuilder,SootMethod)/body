@@ -71,14 +71,16 @@
       Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toNative","(Ljava/lang/Object;)J");
       trampolines.add(invokestatic);
       Value ptrI64=call(function,invokestatic.getFunctionRef(),env,p);
-      Variable ptr=function.newVariable(I8_PTR);
-      function.add(new Inttoptr(ptr,ptrI64,I8_PTR));
       if (copy) {
-        Variable memberI8Ptr=function.newVariable(I8_PTR);
-        function.add(new Bitcast(memberI8Ptr,memberPtr.ref(),I8_PTR));
-        call(function,LLVM_MEMCPY,memberI8Ptr.ref(),ptr.ref(),sizeof((StructureType)memberType),new IntegerConstant(1),BooleanConstant.FALSE);
+        Variable ptr=function.newVariable(memberPtr.getType());
+        function.add(new Inttoptr(ptr,ptrI64,ptr.getType()));
+        Variable memberValue=function.newVariable(memberType);
+        function.add(new Load(memberValue,ptr.ref()));
+        function.add(new Store(memberValue.ref(),memberPtr.ref()));
       }
  else {
+        Variable ptr=function.newVariable(I8_PTR);
+        function.add(new Inttoptr(ptr,ptrI64,I8_PTR));
         function.add(new Store(ptr.ref(),memberPtr.ref()));
       }
     }
