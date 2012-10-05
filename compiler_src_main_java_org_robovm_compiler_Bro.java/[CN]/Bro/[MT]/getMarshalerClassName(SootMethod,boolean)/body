@@ -1,12 +1,15 @@
 {
   AnnotationTag annotation=getMarshalerAnnotation(method);
   if (annotation == null) {
-    SootClass paramType=((RefType)method.getReturnType()).getSootClass();
-    if (unwrapPtr && isPtr(paramType)) {
-      paramType=getPtrTargetClass(method);
+    SootClass type=((RefType)method.getReturnType()).getSootClass();
+    if (unwrapPtr && isPtr(type)) {
+      type=getPtrTargetClass(method);
     }
-    annotation=getMarshalerAnnotation(paramType);
+    annotation=getMarshalerAnnotation(method.getDeclaringClass(),method.getReturnType());
+    if (annotation == null) {
+      annotation=getMarshalerAnnotation(type);
+    }
   }
-  String desc=((AnnotationClassElem)annotation.getElemAt(0)).getDesc();
-  return desc.substring(1,desc.length() - 1);
+  String desc=((AnnotationClassElem)getElemByName(annotation,"value")).getDesc();
+  return getInternalNameFromDescriptor(desc);
 }

@@ -5,8 +5,11 @@
     if (unwrapPtr && isPtr(paramType)) {
       paramType=getPtrTargetClass(method,paramIndex);
     }
-    annotation=getMarshalerAnnotation(paramType);
+    annotation=getMarshalerAnnotation(method.getDeclaringClass(),method.getParameterType(paramIndex));
+    if (annotation == null) {
+      annotation=getMarshalerAnnotation(paramType);
+    }
   }
-  String desc=((AnnotationClassElem)annotation.getElemAt(0)).getDesc();
-  return desc.substring(1,desc.length() - 1);
+  String desc=((AnnotationClassElem)getElemByName(annotation,"value")).getDesc();
+  return getInternalNameFromDescriptor(desc);
 }
