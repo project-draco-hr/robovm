@@ -17,33 +17,47 @@
   StructMemberPair pair=getStructMemberPair(sootClass,offset);
   VariableRef env=function.getParameterRef(0);
   if (method == pair.getGetter()) {
-    if (needsMarshaler(method.getReturnType())) {
+    soot.Type type=method.getReturnType();
+    if (needsMarshaler(type)) {
       Value result=null;
-      if (isPassByValue(method)) {
-        result=memberPtr.ref();
-      }
- else {
-        Variable tmp=function.newVariable(memberType);
-        function.add(new Load(tmp,memberPtr.ref()));
-        result=tmp.ref();
-      }
-      Variable handle=function.newVariable(I64);
-      function.add(new Ptrtoint(handle,result,I64));
       String marshalerClassName=getMarshalerClassName(method,true);
-      if (isPtr(method.getReturnType())) {
-        SootClass sootPtrTargetClass=getPtrTargetClass(method);
-        Value ptrTargetClass=ldcClass(function,getInternalName(sootPtrTargetClass),env);
-        int ptrWrapCount=getPtrWrapCount(method);
-        Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toPtr","(Ljava/lang/Class;JI)Lorg/robovm/rt/bro/ptr/Ptr;");
-        trampolines.add(invokestatic);
-        result=call(function,invokestatic.getFunctionRef(),env,ptrTargetClass,handle.ref(),new IntegerConstant(ptrWrapCount));
+      if (!isEnum(type)) {
+        if (isPassByValue(method)) {
+          result=memberPtr.ref();
+        }
+ else {
+          Variable tmp=function.newVariable(memberType);
+          function.add(new Load(tmp,memberPtr.ref()));
+          result=tmp.ref();
+        }
+        Variable handle=function.newVariable(I64);
+        function.add(new Ptrtoint(handle,result,I64));
+        if (isPtr(type)) {
+          SootClass sootPtrTargetClass=getPtrTargetClass(method);
+          Value ptrTargetClass=ldcClass(function,getInternalName(sootPtrTargetClass),env);
+          int ptrWrapCount=getPtrWrapCount(method);
+          Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toPtr","(Ljava/lang/Class;JI)Lorg/robovm/rt/bro/ptr/Ptr;");
+          trampolines.add(invokestatic);
+          result=call(function,invokestatic.getFunctionRef(),env,ptrTargetClass,handle.ref(),new IntegerConstant(ptrWrapCount));
+        }
+ else {
+          String targetClassName=getInternalName(type);
+          Value returnClass=ldcClass(function,targetClassName,env);
+          Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toObject","(Ljava/lang/Class;JZ)Ljava/lang/Object;");
+          trampolines.add(invokestatic);
+          result=call(function,invokestatic.getFunctionRef(),env,returnClass,handle.ref(),new IntegerConstant((byte)0));
+        }
       }
  else {
-        String targetClassName=getInternalName(method.getReturnType());
-        Value returnClass=ldcClass(function,targetClassName,env);
-        Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toObject","(Ljava/lang/Class;JZ)Ljava/lang/Object;");
-        trampolines.add(invokestatic);
-        result=call(function,invokestatic.getFunctionRef(),env,returnClass,handle.ref(),new IntegerConstant((byte)0));
+        String enumClassName=getInternalName(type);
+        Invokestatic invokeValues=new Invokestatic(getInternalName(method.getDeclaringClass()),enumClassName,"values",String.format("()[L%s;",enumClassName));
+        trampolines.add(invokeValues);
+        Value values=call(function,invokeValues.getFunctionRef(),env);
+        Invokestatic invokeToObject=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toObject","([Ljava/lang/Enum;I)Ljava/lang/Enum;");
+        trampolines.add(invokeToObject);
+        Variable tmp=function.newVariable(I32);
+        function.add(new Load(tmp,memberPtr.ref()));
+        result=call(function,invokeToObject.getFunctionRef(),env,values,tmp.ref());
       }
       function.add(new Ret(result));
     }
@@ -62,26 +76,35 @@
   }
  else {
     Value p=function.getParameterRef(2);
-    if (needsMarshaler(method.getParameterType(0))) {
-      boolean copy=!isPtr(method.getReturnType()) && isPassByValue(method,0);
-      if (copy) {
-        call(function,CHECK_NULL,env,p);
-      }
+    soot.Type type=method.getParameterType(0);
+    if (needsMarshaler(type)) {
       String marshalerClassName=getMarshalerClassName(method,0,false);
-      Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toNative","(Ljava/lang/Object;)J");
-      trampolines.add(invokestatic);
-      Value ptrI64=call(function,invokestatic.getFunctionRef(),env,p);
-      if (copy) {
-        Variable ptr=function.newVariable(memberPtr.getType());
-        function.add(new Inttoptr(ptr,ptrI64,ptr.getType()));
-        Variable memberValue=function.newVariable(memberType);
-        function.add(new Load(memberValue,ptr.ref()));
-        function.add(new Store(memberValue.ref(),memberPtr.ref()));
+      if (!isEnum(type)) {
+        boolean copy=isPassByValue(method,0);
+        if (copy) {
+          call(function,CHECK_NULL,env,p);
+        }
+        Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toNative","(Ljava/lang/Object;)J");
+        trampolines.add(invokestatic);
+        Value ptrI64=call(function,invokestatic.getFunctionRef(),env,p);
+        if (copy) {
+          Variable ptr=function.newVariable(memberPtr.getType());
+          function.add(new Inttoptr(ptr,ptrI64,ptr.getType()));
+          Variable memberValue=function.newVariable(memberType);
+          function.add(new Load(memberValue,ptr.ref()));
+          function.add(new Store(memberValue.ref(),memberPtr.ref()));
+        }
+ else {
+          Variable ptr=function.newVariable(I8_PTR);
+          function.add(new Inttoptr(ptr,ptrI64,I8_PTR));
+          function.add(new Store(ptr.ref(),memberPtr.ref()));
+        }
       }
  else {
-        Variable ptr=function.newVariable(I8_PTR);
-        function.add(new Inttoptr(ptr,ptrI64,I8_PTR));
-        function.add(new Store(ptr.ref(),memberPtr.ref()));
+        Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"toNative","(Ljava/lang/Enum;)I");
+        trampolines.add(invokestatic);
+        Value result=call(function,invokestatic.getFunctionRef(),env,p);
+        function.add(new Store(result,memberPtr.ref()));
       }
     }
  else     if (hasPointerAnnotation(method,0)) {
