@@ -1,0 +1,27 @@
+{
+  T[] all=values();
+  Arrays.sort(all,new Comparator<T>(){
+    public int compare(    T lhs,    T rhs){
+      return Long.compare(cardinality(rhs.mask),cardinality(lhs.mask));
+    }
+  }
+);
+  Set<T> values=new TreeSet<T>();
+  long value=this.value;
+  for (  T bits : all) {
+    if ((value & bits.mask) == bits.value) {
+      values.add(bits);
+      value&=~bits.mask;
+      if (value == 0) {
+        break;
+      }
+    }
+  }
+  if (value != 0) {
+    values.add(wrap(value,value));
+  }
+ else   if (values.isEmpty()) {
+    values.add((T)this);
+  }
+  return values;
+}

@@ -1,0 +1,22 @@
+{
+  if (!Bits.class.isAssignableFrom(cls)) {
+    throw new IllegalArgumentException(cls.getName() + " is not a subclass of " + Bits.class);
+  }
+  try {
+    Set<T> values=new TreeSet<T>();
+    for (    Field field : cls.getDeclaredFields()) {
+      int mod=field.getModifiers();
+      if (Modifier.isPublic(mod) && Modifier.isStatic(mod) && Modifier.isFinal(mod)&& field.getType() == cls) {
+        T bits=(T)field.get(null);
+        bits.name=field.getName();
+        if (bits.mask != 0) {
+          values.add(bits);
+        }
+      }
+    }
+    return (T[])values.toArray((T[])Array.newInstance(cls,values.size()));
+  }
+ catch (  IllegalAccessException e) {
+    throw new Error(e);
+  }
+}
