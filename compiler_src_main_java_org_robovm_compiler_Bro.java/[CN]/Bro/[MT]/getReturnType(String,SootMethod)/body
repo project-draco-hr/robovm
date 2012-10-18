@@ -12,11 +12,12 @@
     }
     return getStructType(sootType);
   }
- else   if (isEnum(sootType)) {
-    return I32;
-  }
  else   if (isNativeObject(sootType)) {
     return I8_PTR;
   }
-  return getType(sootType);
+ else   if (sootType instanceof PrimType || sootType == VoidType.v()) {
+    return getType(sootType);
+  }
+  String marshalerClassName=getMarshalerClassName(method,false);
+  return getMarshalType(marshalerClassName,sootType);
 }

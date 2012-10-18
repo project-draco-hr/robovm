@@ -18,17 +18,18 @@
         }
       }
     }
- else     if (isEnum(type)) {
-      types.add(I32);
-    }
  else     if (isNativeObject(type)) {
       types.add(I8_PTR);
     }
  else     if (getter != null && hasPointerAnnotation(getter) || hasPointerAnnotation(setter)) {
       types.add(I8_PTR);
     }
- else {
+ else     if (type instanceof PrimType) {
       types.add(getType(type));
+    }
+ else {
+      String marshalerClassName=getter != null ? getMarshalerClassName(getter,false) : getMarshalerClassName(setter,0,false);
+      types.add(getMarshalType(marshalerClassName,type));
     }
   }
   if (types.isEmpty()) {

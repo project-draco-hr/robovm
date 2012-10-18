@@ -1,0 +1,22 @@
+{
+  SootClass marshalerClass=SootResolver.v().resolveClass(marshalerClassName.replace('/','.'),SootClass.SIGNATURES);
+  boolean isenum=isEnum(type);
+  Type defType=isenum ? I32 : I8_PTR;
+  if (marshalerClass.isPhantom()) {
+    return defType;
+  }
+  try {
+    List<?> paramTypes=Collections.singletonList(RefType.v(isenum ? "java.lang.Enum" : "java.lang.Object"));
+    SootMethod toNative=marshalerClass.getMethod("toNative",paramTypes);
+    soot.Type returnType=toNative.getReturnType();
+    if (returnType instanceof PrimType) {
+      if (!isenum && hasPointerAnnotation(toNative) && returnType == LongType.v()) {
+        return I8_PTR;
+      }
+      return getType(returnType);
+    }
+  }
+ catch (  RuntimeException e) {
+  }
+  return defType;
+}

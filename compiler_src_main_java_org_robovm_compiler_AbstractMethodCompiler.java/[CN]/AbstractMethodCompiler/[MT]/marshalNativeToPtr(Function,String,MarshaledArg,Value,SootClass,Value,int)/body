@@ -1,0 +1,13 @@
+{
+  Value ptrTargetClass=ldcClass(fn,getInternalName(sootPtrTargetClass),env);
+  Invokestatic invokeToPtr=new Invokestatic(getInternalName(sootMethod.getDeclaringClass()),marshalerClassName,"toPtr","(Ljava/lang/Class;JI)Lorg/robovm/rt/bro/ptr/Ptr;");
+  trampolines.add(invokeToPtr);
+  Variable handle=fn.newVariable(I64);
+  fn.add(new Ptrtoint(handle,nativeValue,I64));
+  Value object=call(fn,invokeToPtr.getFunctionRef(),env,ptrTargetClass,handle.ref(),new IntegerConstant(ptrWrapCount));
+  if (marshaledArg != null) {
+    marshaledArg.handle=handle.ref();
+    marshaledArg.object=object;
+  }
+  return object;
+}
