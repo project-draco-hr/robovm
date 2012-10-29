@@ -1,0 +1,16 @@
+{
+  if (type.getAnnotation(NativeClass.class) != null) {
+    throw new IllegalArgumentException("@NativeClass annotated class " + type.getName() + " can not be registered as a custom class");
+  }
+synchronized (typeToClass) {
+    ObjCClass c=typeToClass.get(type);
+    if (c != null) {
+      String name=type.getName();
+      if (name.indexOf('.') == -1) {
+        name="." + name;
+      }
+      c=register(type,name);
+    }
+    return c;
+  }
+}

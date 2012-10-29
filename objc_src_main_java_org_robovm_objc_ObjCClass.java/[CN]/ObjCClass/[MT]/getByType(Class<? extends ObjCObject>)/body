@@ -5,16 +5,17 @@
 synchronized (typeToClass) {
     ObjCClass c=typeToClass.get(type);
     if (c == null) {
-      BindClass bindToClass=type.getAnnotation(BindClass.class);
+      NativeClass nativeClassAnno=type.getAnnotation(NativeClass.class);
       String name=null;
-      if (bindToClass != null) {
-        name=bindToClass.value();
-      }
- else       if (KNOWN_NATIVE_CLASSES_PATTERN.matcher(type.getName()).matches()) {
-        name=type.getSimpleName();
+      if (nativeClassAnno != null) {
+        name=nativeClassAnno.value();
+        name="".equals(name) ? type.getSimpleName() : name;
       }
  else {
-        name="Java." + type.getName();
+        name=type.getName();
+        if (name.indexOf('.') == -1) {
+          name="." + name;
+        }
         c=register(type,name);
       }
       if (c == null) {
