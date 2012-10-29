@@ -3,6 +3,16 @@
     return getMarshalerAnnotationOnInterface(clazz,type);
   }
  else {
-    return getMarshalerAnnotationOnClass(clazz,type);
+    AnnotationTag tag=getMarshalerAnnotationOnClass(clazz,type);
+    if (tag == null) {
+      while (clazz.hasSuperclass()) {
+        tag=getMarshalerAnnotationOnInterface(clazz,type);
+        if (tag != null) {
+          break;
+        }
+        clazz=clazz.getSuperclass();
+      }
+    }
+    return tag;
   }
 }
