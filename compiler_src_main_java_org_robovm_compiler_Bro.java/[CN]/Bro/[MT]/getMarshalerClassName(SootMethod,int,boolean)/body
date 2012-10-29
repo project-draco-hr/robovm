@@ -5,7 +5,13 @@
     if (unwrapPtr && isPtr(paramType)) {
       paramType=getPtrTargetClass(method,paramIndex);
     }
-    annotation=getMarshalerAnnotation(method.getDeclaringClass(),method.getParameterType(paramIndex));
+    annotation=getMarshalerAnnotation(method.getDeclaringClass(),RefType.v(paramType));
+    if (annotation == null) {
+      SootClass outerClass=getOuterClass(method.getDeclaringClass());
+      if (outerClass != null) {
+        annotation=getMarshalerAnnotation(outerClass,RefType.v(paramType));
+      }
+    }
     if (annotation == null) {
       annotation=getMarshalerAnnotation(paramType);
       if (annotation == null && isEnum(paramType)) {
