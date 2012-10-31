@@ -2,16 +2,19 @@
   T[] all=values();
   Arrays.sort(all,new Comparator<T>(){
     public int compare(    T lhs,    T rhs){
-      return Long.compare(cardinality(rhs.mask),cardinality(lhs.mask));
+      Bits<?> lhs_=lhs;
+      Bits<?> rhs_=rhs;
+      return Long.compare(cardinality(rhs_.mask),cardinality(lhs_.mask));
     }
   }
 );
   Set<T> values=new TreeSet<T>();
   long value=this.value;
   for (  T bits : all) {
-    if ((value & bits.mask) == bits.value) {
+    Bits<?> bits_=bits;
+    if ((value & bits_.mask) == bits_.value) {
       values.add(bits);
-      value&=~bits.mask;
+      value&=~bits_.mask;
       if (value == 0) {
         break;
       }
