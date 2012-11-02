@@ -1,27 +1,5 @@
 {
   int flags=0;
-  flags<<=CI_INTERFACE_COUNT_BITS;
-  if (sootClass.getInterfaceCount() < CI_INTERFACE_COUNT_MASK) {
-    flags|=sootClass.getInterfaceCount();
-  }
- else {
-    flags|=CI_INTERFACE_COUNT_MASK;
-  }
-  flags<<=CI_FIELD_COUNT_BITS;
-  if (sootClass.getFieldCount() < CI_FIELD_COUNT_MASK) {
-    flags|=sootClass.getFieldCount();
-  }
- else {
-    flags|=CI_FIELD_COUNT_MASK;
-  }
-  flags<<=CI_METHOD_COUNT_BITS;
-  if (sootClass.getMethodCount() < CI_METHOD_COUNT_MASK) {
-    flags|=sootClass.getMethodCount();
-  }
- else {
-    flags|=CI_METHOD_COUNT_MASK;
-  }
-  flags<<=CI_FLAGS_BITS;
   if (Modifier.isPublic(sootClass.getModifiers())) {
     flags|=CI_PUBLIC;
   }
@@ -46,6 +24,9 @@
   if (attributesEncoder.classHasAttributes()) {
     flags|=CI_ATTRIBUTES;
   }
+  if (hasFinalizer(sootClass)) {
+    flags|=CI_FINALIZABLE;
+  }
   StructureConstantBuilder header=new StructureConstantBuilder();
   header.add(new NullConstant(I8_PTR));
   header.add(new IntegerConstant(flags));
@@ -65,16 +46,12 @@
  else {
     header.add(sizeof(instanceType));
   }
+  header.add(new IntegerConstant((short)countReferences(classFields)));
+  header.add(new IntegerConstant((short)countReferences(instanceFields)));
   PackedStructureConstantBuilder body=new PackedStructureConstantBuilder();
-  if (sootClass.getInterfaceCount() >= CI_INTERFACE_COUNT_MASK) {
-    body.add(new IntegerConstant((short)sootClass.getInterfaceCount()));
-  }
-  if (sootClass.getFieldCount() >= CI_FIELD_COUNT_MASK) {
-    body.add(new IntegerConstant((short)sootClass.getFieldCount()));
-  }
-  if (sootClass.getMethodCount() >= CI_METHOD_COUNT_MASK) {
-    body.add(new IntegerConstant((short)sootClass.getMethodCount()));
-  }
+  body.add(new IntegerConstant((short)sootClass.getInterfaceCount()));
+  body.add(new IntegerConstant((short)sootClass.getFieldCount()));
+  body.add(new IntegerConstant((short)sootClass.getMethodCount()));
   if (!sootClass.isInterface()) {
     body.add(getStringOrNull(sootClass.hasSuperclass() ? getInternalName(sootClass.getSuperclass()) : null));
   }
@@ -84,12 +61,7 @@
   for (  SootClass s : sootClass.getInterfaces()) {
     body.add(getString(getInternalName(s)));
   }
-  int classFieldCounter=0;
-  int instanceFieldCounter=0;
-  List<SootField> fields=new ArrayList<SootField>();
-  fields.addAll(classFields);
-  fields.addAll(instanceFields);
-  for (  SootField f : fields) {
+  for (  SootField f : sootClass.getFields()) {
     flags=0;
     soot.Type t=f.getType();
     if (t instanceof PrimType) {
@@ -155,10 +127,12 @@
       body.add(getString(getDescriptor(f)));
     }
     if (f.isStatic()) {
-      body.add(offsetof(classType,1,classFieldCounter++));
+      int index=classFields.indexOf(f);
+      body.add(offsetof(classType,1,index,1));
     }
  else {
-      body.add(offsetof(instanceType,1,1 + instanceFieldCounter++));
+      int index=instanceFields.indexOf(f);
+      body.add(offsetof(instanceType,1,1 + index,1));
     }
     if (attributesEncoder.fieldHasAttributes(f)) {
       body.add(new ConstantBitcast(attributesEncoder.getFieldAttributes(f).ref(),I8_PTR));

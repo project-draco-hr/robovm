@@ -7,15 +7,33 @@
   }
   Collections.sort(l,new Comparator<SootField>(){
     @Override public int compare(    SootField o1,    SootField o2){
-      int size1=getFieldSize(o1);
-      int size2=getFieldSize(o2);
-      if (size1 > size2) {
-        return -1;
+      soot.Type t1=o1.getType();
+      soot.Type t2=o2.getType();
+      if (t1 instanceof RefLikeType) {
+        if (!(t2 instanceof RefLikeType)) {
+          return -1;
+        }
       }
-      if (size1 < size2) {
-        return 1;
+      if (t2 instanceof RefLikeType) {
+        if (!(t1 instanceof RefLikeType)) {
+          return 1;
+        }
       }
-      return 0;
+      int align1=getFieldAlignment(o1);
+      int align2=getFieldAlignment(o2);
+      int c=new Integer(align2).compareTo(align1);
+      if (c == 0) {
+        int size1=getFieldSize(o1);
+        int size2=getFieldSize(o2);
+        c=new Integer(size2).compareTo(size1);
+        if (c == 0) {
+          c=t1.getClass().getSimpleName().compareTo(t2.getClass().getSimpleName());
+          if (c == 0) {
+            c=o1.getName().compareTo(o2.getName());
+          }
+        }
+      }
+      return c;
     }
   }
 );

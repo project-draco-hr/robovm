@@ -1,15 +1,19 @@
 {
-  if (LongType.v().equals(f.getType()) || DoubleType.v().equals(f.getType())) {
+  soot.Type t=f.getType();
+  if (LongType.v().equals(t) || DoubleType.v().equals(t)) {
     return 8;
   }
-  if (IntType.v().equals(f.getType()) || FloatType.v().equals(f.getType())) {
+  if (IntType.v().equals(t) || FloatType.v().equals(t)) {
     return 4;
   }
-  if (f.getType() instanceof RefLikeType) {
+  if (t instanceof RefLikeType) {
     return 4;
   }
-  if (ShortType.v().equals(f.getType()) || CharType.v().equals(f.getType())) {
+  if (ShortType.v().equals(t) || CharType.v().equals(t)) {
     return 2;
   }
-  return 1;
+  if (ByteType.v().equals(t) || BooleanType.v().equals(t)) {
+    return 1;
+  }
+  throw new IllegalArgumentException("Unknown Type: " + t);
 }

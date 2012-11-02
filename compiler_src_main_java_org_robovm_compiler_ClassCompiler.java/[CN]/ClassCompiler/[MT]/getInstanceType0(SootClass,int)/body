@@ -4,21 +4,21 @@
   int superAlignment=1;
   if (!fields.isEmpty()) {
     SootField field=fields.get(0);
-    superAlignment=getFieldSize(field);
+    superAlignment=getFieldAlignment(field);
   }
   if (clazz.hasSuperclass()) {
     types.add(getInstanceType0(clazz.getSuperclass(),superAlignment));
   }
-  int size=0;
+  int offset=0;
   for (  SootField field : fields) {
-    size+=getFieldSize(field);
-    types.add(getType(field.getType()));
+    int falign=getFieldAlignment(field);
+    int padding=(offset & (falign - 1)) != 0 ? (falign - (offset & (falign - 1))) : 0;
+    types.add(padType(getType(field.getType()),padding));
+    offset+=padding + getFieldSize(field);
   }
-  if (size > 0 && alignment > 1) {
-    int padding=alignment - size % alignment;
-    for (int i=0; i < padding; i++) {
-      types.add(I8);
-    }
+  int padding=(offset & (subClassAlignment - 1)) != 0 ? (subClassAlignment - (offset & (subClassAlignment - 1))) : 0;
+  for (int i=0; i < padding; i++) {
+    types.add(I8);
   }
   return new StructureType(types.toArray(new Type[types.size()]));
 }
