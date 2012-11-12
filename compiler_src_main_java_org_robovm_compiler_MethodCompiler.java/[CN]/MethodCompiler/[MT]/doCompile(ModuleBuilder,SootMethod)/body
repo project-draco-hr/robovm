@@ -1,8 +1,12 @@
 {
   function=FunctionBuilder.method(method);
-  trapsAt=new HashMap<Unit,List<Trap>>();
   moduleBuilder.addFunction(function);
   env=function.getParameterRef(0);
+  if (this.className.equals("java/lang/Object") && "<init>".equals(method.getName())) {
+    compileObjectInit();
+    return;
+  }
+  trapsAt=new HashMap<Unit,List<Trap>>();
   Body body=method.retrieveActiveBody();
   PackManager.v().getPack("jtp").apply(body);
   PackManager.v().getPack("jop").apply(body);
