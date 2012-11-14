@@ -1,13 +1,24 @@
 {
-  MemoryMappedFile mappedFile=null;
-  try {
-    mappedFile=MemoryMappedFile.mmapRO(INDEX_FILE_NAME);
-    readIndex(mappedFile);
-  }
- catch (  Exception ex) {
-    throw new AssertionError(ex);
-  }
+  if (SINGLE_FILE_DB) {
+    MemoryMappedFile mappedFile=null;
+    try {
+      mappedFile=MemoryMappedFile.mmapRO(INDEX_FILE_NAME);
+      readIndex(mappedFile);
+    }
+ catch (    Exception ex) {
+      throw new AssertionError(ex);
+    }
  finally {
-    IoUtils.closeQuietly(mappedFile);
+      IoUtils.closeQuietly(mappedFile);
+    }
   }
+ else {
+    try {
+      readIndexMulti();
+    }
+ catch (    Exception ex) {
+      throw new AssertionError(ex);
+    }
+  }
+  zoneInfos=new ZoneInfo[ids.length];
 }

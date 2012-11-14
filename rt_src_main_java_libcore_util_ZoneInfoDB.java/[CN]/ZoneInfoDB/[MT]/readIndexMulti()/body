@@ -1,0 +1,43 @@
+{
+  TreeSet<String> set=new TreeSet<String>();
+  for (  File f1 : new File(ZONE_DIRECTORY_NAME).listFiles()) {
+    String name1=f1.getName();
+    if ("Factory".equals(name1)) {
+      continue;
+    }
+    if (name1.charAt(0) < 'A' || name1.charAt(0) > 'Z') {
+      continue;
+    }
+    if (f1.isDirectory()) {
+      for (      File f2 : f1.listFiles()) {
+        String name2=f2.getName();
+        if (name2.charAt(0) < 'A' || name2.charAt(0) > 'Z') {
+          continue;
+        }
+        if (f2.isDirectory()) {
+          for (          File f3 : f2.listFiles()) {
+            String name3=f3.getName();
+            if (name3.charAt(0) < 'A' || name3.charAt(0) > 'Z') {
+              continue;
+            }
+            if (!f3.isDirectory()) {
+              set.add(name1 + "/" + name2+ "/"+ name3);
+            }
+          }
+        }
+ else {
+          set.add(name1 + "/" + name2);
+        }
+      }
+    }
+ else {
+      set.add(name1);
+    }
+  }
+  for (  Entry<String,String> alias : deprecatedAliases.entrySet()) {
+    if (set.contains(alias.getValue())) {
+      set.add(alias.getKey());
+    }
+  }
+  ids=set.toArray(new String[set.size()]);
+}

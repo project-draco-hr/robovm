@@ -1,8 +1,22 @@
 {
   List<String> matches=new ArrayList<String>();
-  for (int i=0, end=rawUtcOffsets.length; i < end; i++) {
-    if (rawUtcOffsets[i] == rawOffset) {
-      matches.add(ids[i]);
+  if (SINGLE_FILE_DB) {
+    for (int i=0, end=rawUtcOffsets.length; i < end; i++) {
+      if (rawUtcOffsets[i] == rawOffset) {
+        matches.add(ids[i]);
+      }
+    }
+  }
+ else {
+    for (    String id : ids) {
+      try {
+        TimeZone timeZone=makeTimeZone(id,false);
+        if (timeZone.getRawOffset() == rawOffset) {
+          matches.add(id);
+        }
+      }
+ catch (      IOException e) {
+      }
     }
   }
   return matches.toArray(new String[matches.size()]);

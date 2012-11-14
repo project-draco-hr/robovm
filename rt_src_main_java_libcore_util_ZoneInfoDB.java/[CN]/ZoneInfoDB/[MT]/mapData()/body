@@ -1,8 +1,13 @@
 {
-  try {
-    return MemoryMappedFile.mmapRO(ZONE_FILE_NAME);
+  if (SINGLE_FILE_DB) {
+    try {
+      return MemoryMappedFile.mmapRO(ZONE_FILE_NAME);
+    }
+ catch (    ErrnoException errnoException) {
+      throw new AssertionError(errnoException);
+    }
   }
- catch (  ErrnoException errnoException) {
-    throw new AssertionError(errnoException);
+ else {
+    return null;
   }
 }

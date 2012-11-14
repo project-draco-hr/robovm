@@ -6,7 +6,28 @@ synchronized (LOCK) {
       zoneName=zoneName.trim();
     }
     if (zoneName == null || zoneName.isEmpty()) {
-      zoneName="localtime";
+      try {
+        zoneName=IoUtils.readFileAsString("/etc/timezone").trim();
+      }
+ catch (      IOException e) {
+      }
+    }
+    if (zoneName == null || zoneName.isEmpty()) {
+      File link=new File("/etc/localtime");
+      if (!link.exists()) {
+        link=new File("/private/var/db/timezone/localtime");
+      }
+      try {
+        String path=link.getCanonicalPath();
+        if (path.startsWith(ZONE_DIRECTORY_NAME)) {
+          zoneName=path.substring(ZONE_DIRECTORY_NAME.length());
+        }
+      }
+ catch (      IOException e) {
+      }
+    }
+    if (zoneName == null || zoneName.isEmpty()) {
+      zoneName="GMT";
     }
     return TimeZone.getTimeZone(zoneName);
   }
