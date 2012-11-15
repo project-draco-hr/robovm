@@ -1,0 +1,42 @@
+{
+  TreeSet<Clazz> classes=new TreeSet<Clazz>();
+  for (  String rootClassPattern : ROOT_CLASS_PATTERNS) {
+    classes.addAll(getMatchingClasses(rootClassPattern));
+  }
+  for (  String rootClassName : ROOT_CLASSES) {
+    classes.add(config.getClazzes().load(rootClassName));
+  }
+  if (config.getMainClass() != null) {
+    Clazz clazz=config.getClazzes().load(config.getMainClass().replace('.','/'));
+    if (clazz == null) {
+      throw new CompilerException("Main class " + config.getMainClass() + " not found");
+    }
+    classes.add(clazz);
+  }
+  if (config.getRoots().isEmpty()) {
+    if (config.getMainClass() == null) {
+      classes.addAll(config.getClazzes().listClasses());
+    }
+  }
+ else {
+    for (    String root : config.getRoots()) {
+      if (root.indexOf('*') == -1) {
+        Clazz clazz=config.getClazzes().load(root.replace('.','/'));
+        if (clazz == null) {
+          throw new CompilerException("Root class " + root + " not found");
+        }
+        classes.add(clazz);
+      }
+ else {
+        Collection<Clazz> matches=getMatchingClasses(root);
+        if (matches.isEmpty()) {
+          config.getLogger().warn("Root pattern %s matches no classes",root);
+        }
+ else {
+          classes.addAll(matches);
+        }
+      }
+    }
+  }
+  return classes;
+}

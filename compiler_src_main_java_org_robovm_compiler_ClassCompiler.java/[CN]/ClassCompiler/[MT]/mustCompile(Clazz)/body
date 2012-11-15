@@ -1,0 +1,30 @@
+{
+  File oFile=config.getOFile(clazz);
+  if (!oFile.exists() || oFile.lastModified() < clazz.lastModified()) {
+    return true;
+  }
+  Set<Dependency> dependencies=clazz.getDependencies();
+  for (  Dependency dep : dependencies) {
+    Clazz depClazz=config.getClazzes().load(dep.getClassName());
+    if (depClazz == null) {
+      if (dep.getPath() != null) {
+        return true;
+      }
+    }
+ else {
+      if (dep.getPath() == null) {
+        return true;
+      }
+      if (!dep.getPath().equals(depClazz.getPath().getFile().getAbsolutePath())) {
+        return true;
+      }
+      if (depClazz.isInBootClasspath() != dep.isInBootClasspath()) {
+        return true;
+      }
+      if (depClazz.lastModified() > oFile.lastModified()) {
+        return true;
+      }
+    }
+  }
+  return dependencies.isEmpty();
+}

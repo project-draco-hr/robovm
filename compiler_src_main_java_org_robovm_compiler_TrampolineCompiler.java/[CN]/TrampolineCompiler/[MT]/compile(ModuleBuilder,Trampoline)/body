@@ -1,5 +1,6 @@
 {
   this.mb=mb;
+  this.dependencies=new HashSet<String>();
   if (t instanceof LdcString) {
     Function f=new FunctionBuilder(t).linkage(weak).build();
     mb.addFunction(f);
@@ -148,6 +149,9 @@
   }
  else   if (t instanceof FieldAccessor) {
     SootField field=resolveField(f,(FieldAccessor)t);
+    if (field != null) {
+      dependencies.add(getInternalName(field.getDeclaringClass()));
+    }
     if (field == null || !checkMemberAccessible(f,t,field)) {
       mb.addFunction(f);
       return;
@@ -163,6 +167,9 @@
   }
  else   if (t instanceof Invokeinterface) {
     SootMethod rm=resolveInterfaceMethod(f,(Invokeinterface)t);
+    if (rm != null) {
+      dependencies.add(getInternalName(rm.getDeclaringClass()));
+    }
     if (rm == null || !checkMemberAccessible(f,t,rm)) {
       mb.addFunction(f);
       return;
@@ -171,6 +178,9 @@
   }
  else   if (t instanceof Invoke) {
     SootMethod method=resolveMethod(f,(Invoke)t);
+    if (method != null) {
+      dependencies.add(getInternalName(method.getDeclaringClass()));
+    }
     if (method == null || !checkMemberAccessible(f,t,method)) {
       mb.addFunction(f);
       return;

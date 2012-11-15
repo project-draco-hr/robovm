@@ -87,33 +87,47 @@
   infoFn.add(new Ret(new ConstantBitcast(classInfoStruct.ref(),I8_PTR_PTR)));
   mb.addFunction(infoFn);
   out.write(mb.build().toString().getBytes("UTF-8"));
-  ClazzInfo clazzInfo=clazz.resetClazzInfo();
-  clazzInfo.setModifiers(sootClass.getModifiers());
-  clazzInfo.setName(clazz.getInternalName());
+  clazz.clearDependencies();
+  clazz.addDependency("java/lang/Object");
   if (sootClass.hasSuperclass() && !sootClass.isInterface()) {
-    clazzInfo.setSuperclass(sootClass.getSuperclass().getName().replace('.','/'));
+    clazz.addDependency(getInternalName(sootClass.getSuperclass()));
   }
- else {
-    clazzInfo.setSuperclass(null);
-  }
-  List<String> interfaces=new ArrayList<String>();
   for (  SootClass iface : sootClass.getInterfaces()) {
-    interfaces.add(iface.getName().replace('.','/'));
+    clazz.addDependency(getInternalName(iface));
   }
-  clazzInfo.setInterfaces(interfaces);
-  List<FieldInfo> fieldInfos=new ArrayList<FieldInfo>();
   for (  SootField f : sootClass.getFields()) {
-    fieldInfos.add(new FieldInfo(f.getModifiers(),f.getName(),getDescriptor(f)));
+    addDependencyIfNeeded(clazz,f.getType());
   }
-  clazzInfo.setFields(fieldInfos);
-  List<MethodInfo> methodInfos=new ArrayList<MethodInfo>();
   for (  SootMethod m : sootClass.getMethods()) {
-    methodInfos.add(new MethodInfo(m.getModifiers(),m.getName(),getDescriptor(m)));
+    addDependencyIfNeeded(clazz,m.getReturnType());
+    @SuppressWarnings("unchecked") List<soot.Type> paramTypes=(List<soot.Type>)m.getParameterTypes();
+    for (    soot.Type type : paramTypes) {
+      addDependencyIfNeeded(clazz,type);
+    }
   }
-  clazzInfo.setMethods(methodInfos);
-  clazzInfo.setStruct(isStruct(this.sootClass));
-  clazzInfo.setAttributeDependencies(attributesEncoder.getDependencies());
-  clazzInfo.setTrampolines(trampolines);
-  clazzInfo.setCatches(catches);
-  clazz.commitClazzInfo();
+  clazz.addDependencies(attributesEncoder.getDependencies());
+  clazz.addDependencies(trampolineResolver.getDependencies());
+  clazz.addDependencies(catches);
+  for (  Trampoline t : trampolines) {
+    if (!(t instanceof LdcString)) {
+      String desc=t.getTarget();
+      if (desc.charAt(0) == 'L' || desc.charAt(0) == '[') {
+        addDependencyIfNeeded(clazz,desc);
+      }
+ else {
+        clazz.addDependency(t.getTarget());
+      }
+    }
+    if (t instanceof FieldAccessor) {
+      addDependencyIfNeeded(clazz,((FieldAccessor)t).getFieldDesc());
+    }
+ else     if (t instanceof Invoke) {
+      String methodDesc=((Invoke)t).getMethodDesc();
+      addDependencyIfNeeded(clazz,getReturnTypeDescriptor(methodDesc));
+      for (      String desc : getParameterDescriptors(methodDesc)) {
+        addDependencyIfNeeded(clazz,desc);
+      }
+    }
+  }
+  clazz.saveDependencies();
 }

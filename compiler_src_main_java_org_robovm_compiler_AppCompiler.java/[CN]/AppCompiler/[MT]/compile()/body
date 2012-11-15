@@ -1,10 +1,14 @@
 {
-  Set<String> dirtyStructs=new HashSet<String>();
-  Set<Clazz> compiled=new HashSet<Clazz>();
-  compile(dirtyStructs,compiled);
-  while (!rebuildStructDependents(dirtyStructs,compiled)) {
+  TreeSet<Clazz> compileQueue=getRootClasses();
+  Set<Clazz> linkClasses=new HashSet<Clazz>();
+  while (!compileQueue.isEmpty()) {
+    Clazz clazz=compileQueue.pollFirst();
+    if (!linkClasses.contains(clazz)) {
+      compile(clazz,compileQueue,linkClasses);
+      linkClasses.add(clazz);
+    }
   }
   if (!config.isSkipLinking()) {
-    linker.link();
+    linker.link(linkClasses);
   }
 }
