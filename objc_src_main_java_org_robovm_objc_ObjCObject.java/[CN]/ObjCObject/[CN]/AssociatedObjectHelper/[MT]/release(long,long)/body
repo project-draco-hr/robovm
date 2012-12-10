@@ -1,0 +1,19 @@
+{
+  Object o=VM.castAddressToObject(VM.getLong(self + JAVA_OBJECT_IVAR_OFFSET));
+  Key key=Key.values()[VM.getInt(self + KEY_IVAR_OFFSET)];
+  if (key == Key.Peer && o != null) {
+    VM.unregisterDisappearingLink(self + JAVA_OBJECT_IVAR_OFFSET);
+  }
+ else   if (key == Key.StrongRefs) {
+synchronized (strongRefs) {
+      strongRefs.remove(self);
+    }
+  }
+  if (o != null) {
+    System.out.println("RoboVMAssocObjWrapper.release() called on " + Long.toHexString(self) + " associated with "+ o+ " a "+ o.getClass().getName()+ " for key "+ key);
+  }
+ else {
+    System.out.println("RoboVMAssocObjWrapper.release() called on " + Long.toHexString(self) + " which points to null");
+  }
+  ObjCRuntime.void_objc_msgSendSuper(new Super(self,NS_OBJECT_CLASS).getHandle(),sel);
+}
