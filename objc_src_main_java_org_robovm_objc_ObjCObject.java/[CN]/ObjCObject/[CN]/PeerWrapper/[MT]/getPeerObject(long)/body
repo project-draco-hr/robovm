@@ -1,0 +1,14 @@
+{
+  if (handle == 0L) {
+    return null;
+  }
+  long peerWrapper=ObjCRuntime.objc_getAssociatedObject(handle,PEER_OBJECT_KEY);
+  if (peerWrapper != 0L) {
+    long address=VM.getPointer(peerWrapper + PEER_IVAR_OFFSET);
+    if (address != 0L) {
+      return (T)VM.castAddressToObject(address);
+    }
+    System.out.println("RoboVMPeerWrapper " + Long.toHexString(peerWrapper) + " associated with "+ Long.toHexString(handle)+ " points to null");
+  }
+  return null;
+}
