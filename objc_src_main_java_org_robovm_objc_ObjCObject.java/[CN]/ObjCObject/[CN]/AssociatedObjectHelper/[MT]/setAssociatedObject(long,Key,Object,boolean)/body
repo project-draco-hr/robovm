@@ -1,7 +1,7 @@
 {
   long wrapper=ObjCRuntime.objc_getAssociatedObject(handle,key.hashCode());
   if (wrapper != 0L && weak) {
-    VM.unregisterDisappearingLink(wrapper + JAVA_OBJECT_IVAR_OFFSET);
+    VM.unregisterDisappearingLink(wrapper + VALUE_IVAR_OFFSET);
   }
   if (value == null) {
     ObjCRuntime.objc_setAssociatedObject(handle,key.hashCode(),0L,0);
@@ -13,12 +13,12 @@
     }
     wrapper=ObjCRuntime.ptr_objc_msgSend(wrapper,init.getHandle());
     long address=VM.getObjectAddress(value);
-    VM.setPointer(wrapper + JAVA_OBJECT_IVAR_OFFSET,address);
+    VM.setPointer(wrapper + VALUE_IVAR_OFFSET,address);
     VM.setInt(wrapper + KEY_IVAR_OFFSET,key.ordinal());
     if (weak) {
-      VM.registerDisappearingLink(wrapper + JAVA_OBJECT_IVAR_OFFSET,value);
+      VM.registerDisappearingLink(wrapper + VALUE_IVAR_OFFSET,value);
     }
     ObjCRuntime.objc_setAssociatedObject(handle,key.hashCode(),wrapper,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    System.out.println("RoboVMAssocObjWrapper " + Long.toHexString(wrapper) + " associated with "+ Long.toHexString(handle)+ " a "+ value.getClass().getName()+ " for key "+ key);
+    ObjCRuntime.void_objc_msgSend(wrapper,release.getHandle());
   }
 }

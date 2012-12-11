@@ -1,0 +1,23 @@
+{
+synchronized (ASSOCIATED_OBJECTS) {
+    Map<Object,Object> map=ASSOCIATED_OBJECTS.get(object.getHandle());
+    if (map == null && value == null) {
+      return;
+    }
+    if (map == null) {
+      map=new HashMap<Object,Object>();
+      setAssociatedObject(object.getHandle(),Key.AssociatedObjects,map,false);
+      ASSOCIATED_OBJECTS.put(object.getHandle(),map);
+    }
+    if (value != null) {
+      map.put(key,value);
+    }
+ else {
+      map.remove(key);
+      if (map.isEmpty()) {
+        setAssociatedObject(object.getHandle(),Key.AssociatedObjects,null,false);
+        ASSOCIATED_OBJECTS.remove(object.getHandle());
+      }
+    }
+  }
+}
