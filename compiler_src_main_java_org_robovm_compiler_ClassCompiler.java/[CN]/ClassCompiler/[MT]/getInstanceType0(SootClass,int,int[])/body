@@ -7,9 +7,9 @@
     superAlignment=getFieldAlignment(field);
   }
   if (clazz.hasSuperclass()) {
-    types.add(getInstanceType0(clazz.getSuperclass(),superAlignment));
+    types.add(getInstanceType0(clazz.getSuperclass(),superAlignment,superSize));
   }
-  int offset=0;
+  int offset=superSize[0];
   for (  SootField field : fields) {
     int falign=getFieldAlignment(field);
     int padding=(offset & (falign - 1)) != 0 ? (falign - (offset & (falign - 1))) : 0;
@@ -19,6 +19,8 @@
   int padding=(offset & (subClassAlignment - 1)) != 0 ? (subClassAlignment - (offset & (subClassAlignment - 1))) : 0;
   for (int i=0; i < padding; i++) {
     types.add(I8);
+    offset++;
   }
+  superSize[0]=offset;
   return new StructureType(types.toArray(new Type[types.size()]));
 }
