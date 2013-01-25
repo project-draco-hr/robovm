@@ -8,6 +8,10 @@
   }
   trapsAt=new HashMap<Unit,List<Trap>>();
   Body body=method.retrieveActiveBody();
+  if (method.isStatic() && !body.getUnits().getFirst().getBoxesPointingToThis().isEmpty()) {
+    Unit inserPoint=body.getUnits().getFirst();
+    body.getUnits().getNonPatchingChain().insertBefore(Jimple.v().newNopStmt(),inserPoint);
+  }
   PackManager.v().getPack("jtp").apply(body);
   PackManager.v().getPack("jop").apply(body);
   PackManager.v().getPack("jap").apply(body);
@@ -179,6 +183,8 @@
     }
  else     if (unit instanceof ExitMonitorStmt) {
       exitMonitor((ExitMonitorStmt)unit);
+    }
+ else     if (unit instanceof NopStmt) {
     }
  else {
       throw new IllegalArgumentException("Unknown Unit type: " + unit.getClass());
