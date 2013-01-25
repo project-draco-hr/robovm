@@ -33,5 +33,22 @@
     ccArgs.add("-Wl,-no_implicit_dylibs");
     ccArgs.add("-Wl,-dead_strip");
   }
+  if (!config.getStaticLibs().isEmpty()) {
+    objectFiles=new ArrayList<File>(objectFiles);
+    for (    String p : config.getStaticLibs()) {
+      if (p.endsWith(".o")) {
+        objectFiles.add(new File(p));
+      }
+ else {
+        if (config.getOs().getFamily() == OS.Family.darwin) {
+          libs.add("-force_load");
+          libs.add(new File(p).getAbsolutePath());
+        }
+ else {
+          libs.addAll(Arrays.asList("-Wl,--whole-archive",new File(p).getAbsolutePath(),"-Wl,--no-whole-archive"));
+        }
+      }
+    }
+  }
   doBuild(outFile,ccArgs,objectFiles,libs);
 }
