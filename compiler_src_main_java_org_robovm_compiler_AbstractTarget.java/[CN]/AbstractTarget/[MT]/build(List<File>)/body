@@ -39,7 +39,7 @@
       if (p.endsWith(".o")) {
         objectFiles.add(new File(p));
       }
- else {
+ else       if (p.endsWith(".a")) {
         if (config.getOs().getFamily() == OS.Family.darwin) {
           libs.add("-force_load");
           libs.add(new File(p).getAbsolutePath());
@@ -47,6 +47,9 @@
  else {
           libs.addAll(Arrays.asList("-Wl,--whole-archive",new File(p).getAbsolutePath(),"-Wl,--no-whole-archive"));
         }
+      }
+ else {
+        libs.add("-l" + p);
       }
     }
   }
