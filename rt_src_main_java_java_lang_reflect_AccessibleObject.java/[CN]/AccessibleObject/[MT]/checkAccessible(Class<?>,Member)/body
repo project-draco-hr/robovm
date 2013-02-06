@@ -1,0 +1,28 @@
+{
+  Class<?> callee=member.getDeclaringClass();
+  if (caller == callee) {
+    return true;
+  }
+  if ((callee.getModifiers() & Modifier.PUBLIC) == 0) {
+    if (!isSamePackage(caller,callee)) {
+      return false;
+    }
+  }
+  int access=member.getModifiers();
+  if ((access & Modifier.PUBLIC) > 0) {
+    return true;
+  }
+  if ((access & Modifier.PRIVATE) > 0) {
+    return false;
+  }
+  if ((access & Modifier.PROTECTED) > 0) {
+    Class<?> sc=caller.getSuperclass();
+    while (sc != null) {
+      if (sc == callee) {
+        return true;
+      }
+      sc=caller.getSuperclass();
+    }
+  }
+  return isSamePackage(caller,callee);
+}
