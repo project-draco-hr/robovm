@@ -12,10 +12,12 @@
     throw new IllegalArgumentException("wrong number of arguments");
   }
   if (!flag) {
-    Class<?>[] callers=VM.getStackClasses(0,2);
-    Class<?> caller=callers[0] == Class.class ? callers[1] : callers[0];
-    if (!checkAccessible(caller,this)) {
-      throw new IllegalAccessException(String.format("Attempt to access constructor %s(%s) from class %s",clazz.getName(),toString(parameterTypes),caller.getName()));
+    if (!checkAccessibleFast(this)) {
+      Class<?>[] callers=VM.getStackClasses(0,2);
+      Class<?> caller=callers[0] == Class.class ? callers[1] : callers[0];
+      if (!checkAccessible(caller,this)) {
+        throw new IllegalAccessException(String.format("Attempt to access constructor %s(%s) from class %s",clazz.getName(),toString(parameterTypes),caller.getName()));
+      }
     }
   }
   return (T)internalNewInstance(method,pTypes,args);
