@@ -4,12 +4,11 @@
   }
 synchronized (typeToClass) {
     ObjCClass c=typeToClass.get(type);
-    if (c != null) {
-      String name=type.getName();
-      if (name.indexOf('.') == -1) {
-        name="." + name;
-      }
+    if (c == null) {
+      String name=getCustomClassName(type);
       c=register(type,name);
+      typeToClass.put(type,c);
+      nameToClass.put(name,c);
     }
     return c;
   }
