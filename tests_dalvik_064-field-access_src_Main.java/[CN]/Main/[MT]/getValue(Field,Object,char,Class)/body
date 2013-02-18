@@ -1,0 +1,54 @@
+{
+  Object result=null;
+  try {
+switch (type) {
+case 'Z':
+      result=new Boolean(field.getBoolean(obj));
+    break;
+case 'B':
+  result=new Byte(field.getByte(obj));
+break;
+case 'S':
+result=new Short(field.getShort(obj));
+break;
+case 'C':
+result=new Character(field.getChar(obj));
+break;
+case 'I':
+result=new Integer(field.getInt(obj));
+break;
+case 'J':
+result=new Long(field.getLong(obj));
+break;
+case 'F':
+result=new Float(field.getFloat(obj));
+break;
+case 'D':
+result=new Double(field.getDouble(obj));
+break;
+case 'L':
+result=field.get(obj);
+break;
+default :
+throw new RuntimeException("bad type '" + type + "'");
+}
+if (expectedException != null) {
+Throwable th=new Throwable();
+System.err.println("ERROR: call succeeded, was expecting " + expectedException);
+th.printStackTrace();
+}
+}
+ catch (Exception ex) {
+if (expectedException == null) {
+System.err.println("ERROR: call failed unexpectedly: " + ex.getClass());
+ex.printStackTrace();
+}
+ else {
+if (!expectedException.equals(ex.getClass())) {
+System.err.println("ERROR: incorrect exception: wanted " + expectedException.getName() + ", got "+ ex.getClass());
+ex.printStackTrace();
+}
+}
+}
+return result;
+}

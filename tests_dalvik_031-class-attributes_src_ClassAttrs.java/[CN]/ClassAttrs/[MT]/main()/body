@@ -1,0 +1,40 @@
+{
+  printClassAttrs(ClassAttrs.class);
+  printClassAttrs(OtherClass.class);
+  printClassAttrs(OtherPackageClass.class);
+class InnerNamed {
+    public void showMe(){
+      printClassAttrs(this.getClass());
+    }
+  }
+  InnerNamed inner=new InnerNamed();
+  inner.showMe();
+  ClassAttrs attrs=new ClassAttrs();
+  printClassAttrs((new OtherClass(){
+    int i=5;
+  }
+).getClass());
+  printClassAttrs(MemberClass.class);
+  printClassAttrs(FancyClass.class);
+  try {
+    Constructor cons;
+    cons=MemberClass.class.getConstructor(new Class[]{MemberClass.class});
+    System.out.println("constructor signature: " + getSignatureAttribute(cons));
+    Method meth;
+    meth=MemberClass.class.getMethod("foo",(Class[])null);
+    System.out.println("method signature: " + getSignatureAttribute(meth));
+    Field field;
+    field=MemberClass.class.getField("mWha");
+    System.out.println("field signature: " + getSignatureAttribute(field));
+  }
+ catch (  NoSuchMethodException nsme) {
+    System.err.println("FAILED: " + nsme);
+  }
+catch (  NoSuchFieldException nsfe) {
+    System.err.println("FAILED: " + nsfe);
+  }
+catch (  RuntimeException re) {
+    System.err.println("FAILED: " + re);
+    re.printStackTrace();
+  }
+}

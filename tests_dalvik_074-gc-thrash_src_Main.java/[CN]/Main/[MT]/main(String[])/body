@@ -1,0 +1,28 @@
+{
+  System.out.println("Running (" + TEST_TIME + " seconds) ...");
+  runTests();
+  Method dumpHprofDataMethod=null;
+  String dumpFile=null;
+  if (WRITE_HPROF_DATA) {
+    dumpHprofDataMethod=getDumpHprofDataMethod();
+    if (dumpHprofDataMethod != null) {
+      dumpFile=getDumpFileName();
+      System.out.println("Sending output to " + dumpFile);
+    }
+  }
+  System.gc();
+  System.runFinalization();
+  System.gc();
+  if (WRITE_HPROF_DATA && dumpHprofDataMethod != null) {
+    try {
+      dumpHprofDataMethod.invoke(null,dumpFile);
+    }
+ catch (    IllegalAccessException iae) {
+      System.err.println(iae);
+    }
+catch (    InvocationTargetException ite) {
+      System.err.println(ite);
+    }
+  }
+  System.out.println("Done.");
+}

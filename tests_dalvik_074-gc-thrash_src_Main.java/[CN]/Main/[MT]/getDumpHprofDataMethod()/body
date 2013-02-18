@@ -1,0 +1,19 @@
+{
+  ClassLoader myLoader=Main.class.getClassLoader();
+  Class vmdClass;
+  try {
+    vmdClass=myLoader.loadClass("dalvik.system.VMDebug");
+  }
+ catch (  ClassNotFoundException cnfe) {
+    return null;
+  }
+  Method meth;
+  try {
+    meth=vmdClass.getMethod("dumpHprofData",new Class[]{String.class});
+  }
+ catch (  NoSuchMethodException nsme) {
+    System.err.println("Found VMDebug but not dumpHprofData method");
+    return null;
+  }
+  return meth;
+}

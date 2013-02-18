@@ -1,0 +1,30 @@
+{
+  Field field;
+  try {
+    field=Main.class.getField("dummy");
+  }
+ catch (  NoSuchFieldException nsfe) {
+    throw new RuntimeException(nsfe);
+  }
+  Type listType=field.getGenericType();
+  System.out.println("generic field: " + listType);
+  Method method;
+  try {
+    method=Main.class.getMethod("fancyMethod",new Class[]{ArrayList.class});
+  }
+ catch (  NoSuchMethodException nsme) {
+    throw new RuntimeException(nsme);
+  }
+  Type[] parmTypes=method.getGenericParameterTypes();
+  Type ret=method.getGenericReturnType();
+  System.out.println("generic method " + method.getName() + " params='"+ stringifyTypeArray(parmTypes)+ "' ret='"+ ret+ "'");
+  Constructor ctor;
+  try {
+    ctor=Main.class.getConstructor(new Class[]{ArrayList.class});
+  }
+ catch (  NoSuchMethodException nsme) {
+    throw new RuntimeException(nsme);
+  }
+  parmTypes=ctor.getGenericParameterTypes();
+  System.out.println("generic ctor " + ctor.getName() + " params='"+ stringifyTypeArray(parmTypes)+ "'");
+}

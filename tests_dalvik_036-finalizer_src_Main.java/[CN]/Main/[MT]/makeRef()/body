@@ -1,0 +1,19 @@
+{
+  final WeakReference[] wimp=new WeakReference[1];
+  Thread t=new Thread(){
+    public void run(){
+      FinalizerTest ft=new FinalizerTest("wahoo");
+      wimp[0]=new WeakReference(ft);
+      ft=null;
+    }
+  }
+;
+  t.start();
+  try {
+    t.join();
+  }
+ catch (  InterruptedException ie) {
+    throw new RuntimeException(ie);
+  }
+  return wimp[0];
+}

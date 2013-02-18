@@ -1,0 +1,41 @@
+{
+  Mix proxyMe=new Mix();
+  Object proxy=createProxy(proxyMe);
+  if (!Proxy.isProxyClass(proxy.getClass()))   System.err.println("not a proxy class?");
+  if (Proxy.getInvocationHandler(proxy) == null)   System.err.println("ERROR: Proxy.getInvocationHandler is null");
+  Shapes shapes=(Shapes)proxy;
+  shapes.circle(3);
+  shapes.rectangle(10,20);
+  shapes.blob();
+  Quads quads=(Quads)proxy;
+  quads.rectangle(15,25);
+  quads.trapezoid(6,81.18,4);
+  Colors colors=(Colors)proxy;
+  colors.red(1.0f);
+  colors.blue(777);
+  colors.mauve("sorry");
+  colors.blob();
+  try {
+    shapes.upChuck();
+    System.out.println("Didn't get expected exception");
+  }
+ catch (  IndexOutOfBoundsException ioobe) {
+    System.out.println("Got expected ioobe");
+  }
+  try {
+    shapes.upCheck();
+    System.out.println("Didn't get expected exception");
+  }
+ catch (  InterruptedException ie) {
+    System.out.println("Got expected ie");
+  }
+  System.out.println("");
+  Method[] methods=proxy.getClass().getDeclaredMethods();
+  System.out.println("Proxy methods: " + Arrays.deepToString(methods));
+  Method meth=methods[methods.length - 1];
+  System.out.println("Decl annos: " + Arrays.deepToString(meth.getDeclaredAnnotations()));
+  Annotation[][] paramAnnos=meth.getParameterAnnotations();
+  System.out.println("Param annos (" + paramAnnos.length + ") : "+ Arrays.deepToString(paramAnnos));
+  Field[] fields=proxy.getClass().getDeclaredFields();
+  System.out.println("Proxy fields: " + Arrays.deepToString(fields));
+}

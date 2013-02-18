@@ -1,0 +1,23 @@
+{
+  Object longArray=Array.newInstance(Long.TYPE,2);
+  Array.setInt(longArray,0,123);
+  Array.setLong(longArray,1,0x1122334455667788L);
+  try {
+    Array.getInt(longArray,0);
+    throw new RuntimeException("shouldn't allow read of long as int");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  long[] array=(long[])longArray;
+  if (array[0] != 123 || array[1] != 0x1122334455667788L) {
+    throw new RuntimeException();
+  }
+  float f=Array.getFloat(longArray,0);
+  if (f < 122.9 || f > 123.1) {
+    throw new RuntimeException("long-as-float failed - " + f);
+  }
+  if (Array.getLong(longArray,1) != 0x1122334455667788L) {
+    throw new RuntimeException("long1 failed");
+  }
+  System.out.println("ReflectArrayTest.testSingleLong passed");
+}

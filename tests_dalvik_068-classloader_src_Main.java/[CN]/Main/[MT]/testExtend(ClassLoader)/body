@@ -1,0 +1,38 @@
+{
+  Class doubledExtendClass;
+  Object obj;
+  try {
+    doubledExtendClass=loader.loadClass("DoubledExtend");
+  }
+ catch (  ClassNotFoundException cnfe) {
+    System.err.println("loadClass failed: " + cnfe);
+    return;
+  }
+  try {
+    obj=doubledExtendClass.newInstance();
+  }
+ catch (  InstantiationException ie) {
+    System.err.println("newInstance failed: " + ie);
+    return;
+  }
+catch (  IllegalAccessException iae) {
+    System.err.println("newInstance failed: " + iae);
+    return;
+  }
+catch (  LinkageError le) {
+    System.out.println("Got expected LinkageError on DE");
+    return;
+  }
+  Base baseRef=(Base)obj;
+  DoubledExtend de=baseRef.getExtended();
+  try {
+    String result;
+    result=Base.doStuff(de);
+    System.err.println("ERROR: did not get LinkageError on DE");
+    System.err.println("(result=" + result + ")");
+  }
+ catch (  LinkageError le) {
+    System.out.println("Got expected LinkageError on DE");
+    return;
+  }
+}

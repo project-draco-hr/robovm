@@ -1,0 +1,21 @@
+{
+  final int LINK_SIZE=6 * 4;
+  LinkedList<Object> list=new LinkedList<Object>();
+  int objSize=1 * 1024 * 1024;
+  while (objSize >= LINK_SIZE) {
+    boolean sawEx=false;
+    try {
+      for (int i=0; i < Runtime.getRuntime().maxMemory() / objSize; i++) {
+        list.add((Object)new byte[objSize]);
+      }
+    }
+ catch (    OutOfMemoryError oom) {
+      sawEx=true;
+    }
+    if (!sawEx) {
+      return false;
+    }
+    objSize=(objSize * 4) / 5;
+  }
+  return true;
+}

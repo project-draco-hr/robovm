@@ -1,0 +1,40 @@
+{
+  String testStr="Now is the time";
+  int under=-1;
+  int over=testStr.length();
+  int numThrown=0;
+  int numNotThrown=0;
+  int at0=testStr.charAt(0);
+  int at1=testStr.charAt(1);
+  int at10=testStr.charAt(10);
+  int atLast=testStr.charAt(testStr.length() - 1);
+  int i;
+  System.out.println(testStr + "[0] = \"" + (char)at0+ "\"");
+  System.out.println(testStr + "[1] = \"" + (char)at1+ "\"");
+  System.out.println(testStr + "[10] = \"" + (char)at10+ "\"");
+  System.out.println(testStr + "[last] = \"" + (char)atLast+ "\"");
+  for (i=0; i < 1000; i++) {
+    assert(at0 == testStr.charAt(0));
+    assert(at1 == testStr.charAt(1));
+    assert(at10 == testStr.charAt(10));
+    assert(atLast == testStr.charAt(testStr.length() - 1));
+  }
+  for (i=0; i < 1000; i++) {
+    try {
+      testStr.charAt(under);
+      numNotThrown++;
+    }
+ catch (    StringIndexOutOfBoundsException sioobe) {
+      numThrown++;
+    }
+    try {
+      testStr.charAt(over);
+      numNotThrown++;
+    }
+ catch (    StringIndexOutOfBoundsException sioobe) {
+      numThrown++;
+    }
+  }
+  assert(numNotThrown == 0);
+  System.out.println("Num throws " + numThrown);
+}

@@ -1,0 +1,36 @@
+{
+  Class getDoubledClass;
+  Object obj;
+  try {
+    getDoubledClass=loader.loadClass("GetDoubled");
+  }
+ catch (  ClassNotFoundException cnfe) {
+    System.err.println("loadClass failed: " + cnfe);
+    return;
+  }
+  try {
+    obj=getDoubledClass.newInstance();
+  }
+ catch (  InstantiationException ie) {
+    System.err.println("newInstance failed: " + ie);
+    return;
+  }
+catch (  IllegalAccessException iae) {
+    System.err.println("newInstance failed: " + iae);
+    return;
+  }
+catch (  LinkageError le) {
+    System.out.println("Got LinkageError on GD");
+    return;
+  }
+  IGetDoubled iface=(IGetDoubled)obj;
+  try {
+    DoubledExtendOkay de=iface.getDoubled();
+    String str=de.getStr();
+  }
+ catch (  LinkageError le) {
+    System.out.println("Got LinkageError on GD");
+    return;
+  }
+  System.err.println("Should have failed by now on GetDoubled");
+}

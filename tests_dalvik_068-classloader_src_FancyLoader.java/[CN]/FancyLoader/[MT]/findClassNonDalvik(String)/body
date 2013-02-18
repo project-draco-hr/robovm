@@ -1,0 +1,32 @@
+{
+  String pathName=CLASS_PATH + name + ".class";
+  File path=new File(pathName);
+  RandomAccessFile raf;
+  try {
+    raf=new RandomAccessFile(path,"r");
+  }
+ catch (  FileNotFoundException fnfe) {
+    throw new ClassNotFoundException("Not found: " + pathName);
+  }
+  byte[] fileData;
+  try {
+    fileData=new byte[(int)raf.length()];
+    raf.readFully(fileData);
+  }
+ catch (  IOException ioe) {
+    throw new ClassNotFoundException("Read error: " + pathName);
+  }
+ finally {
+    try {
+      raf.close();
+    }
+ catch (    IOException ioe) {
+    }
+  }
+  try {
+    return defineClass(name,fileData,0,fileData.length);
+  }
+ catch (  Throwable th) {
+    throw new ClassNotFoundException("defineClass failed",th);
+  }
+}

@@ -1,0 +1,32 @@
+{
+  Object dexFile=null;
+  Class dexClass=null;
+  try {
+    try {
+      dexClass=ClassLoader.getSystemClassLoader().loadClass("dalvik.system.DexFile");
+      Constructor ctor=dexClass.getConstructor(new Class[]{String.class});
+      dexFile=ctor.newInstance(DEX_FILE);
+      Method meth=dexClass.getMethod("loadClass",new Class[]{String.class,ClassLoader.class});
+      meth.invoke(dexFile,name,this);
+    }
+  finally {
+      if (dexFile != null) {
+        Method meth=dexClass.getMethod("close",(Class[])null);
+        meth.invoke(dexFile);
+      }
+    }
+  }
+ catch (  NoSuchMethodException nsme) {
+    throw new TestFailed(nsme);
+  }
+catch (  InstantiationException ie) {
+    throw new TestFailed(ie);
+  }
+catch (  IllegalAccessException iae) {
+    throw new TestFailed(iae);
+  }
+catch (  ClassNotFoundException cnfe) {
+    throw new TestFailed(cnfe);
+  }
+  return null;
+}

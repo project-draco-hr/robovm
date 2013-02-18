@@ -1,0 +1,38 @@
+{
+  Annotation[] annos;
+  Annotation[][] parAnnos;
+  annos=clazz.getAnnotations();
+  System.out.println("annotations on TYPE " + clazz + "("+ annos.length+ "):");
+  printAnnotationArray("",annos);
+  System.out.println();
+  for (  Constructor c : clazz.getDeclaredConstructors()) {
+    annos=c.getDeclaredAnnotations();
+    System.out.println("  annotations on CTOR " + c + ":");
+    printAnnotationArray("  ",annos);
+    System.out.println("    constructor parameter annotations:");
+    for (    Annotation[] pannos : c.getParameterAnnotations()) {
+      printAnnotationArray("    ",pannos);
+    }
+  }
+  for (  Method m : clazz.getDeclaredMethods()) {
+    annos=m.getDeclaredAnnotations();
+    System.out.println("  annotations on METH " + m + ":");
+    printAnnotationArray("  ",annos);
+    System.out.println("    method parameter annotations:");
+    for (    Annotation[] pannos : m.getParameterAnnotations()) {
+      printAnnotationArray("    ",pannos);
+    }
+  }
+  for (  Field f : clazz.getDeclaredFields()) {
+    annos=f.getDeclaredAnnotations();
+    System.out.println("  annotations on FIELD " + f + ":");
+    printAnnotationArray("  ",annos);
+    AnnoFancyField aff;
+    aff=(AnnoFancyField)f.getAnnotation(AnnoFancyField.class);
+    if (aff != null) {
+      System.out.println("    aff: " + aff + " / "+ aff.getClass());
+      System.out.println("    --> nombre is '" + aff.nombre() + "'");
+    }
+  }
+  System.out.println();
+}

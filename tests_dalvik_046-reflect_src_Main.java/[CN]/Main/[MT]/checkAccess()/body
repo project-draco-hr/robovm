@@ -1,0 +1,41 @@
+{
+  try {
+    Class target=otherpackage.Other.class;
+    Object instance=new otherpackage.Other();
+    Method meth;
+    meth=target.getMethod("publicMethod",(Class[])null);
+    meth.invoke(instance);
+    try {
+      meth=target.getMethod("packageMethod",(Class[])null);
+      System.err.println("succeeded on package-scope method");
+    }
+ catch (    NoSuchMethodException nsme) {
+    }
+    instance=otherpackage.Other.getInnerClassInstance();
+    target=instance.getClass();
+    meth=target.getMethod("innerMethod",(Class[])null);
+    try {
+      if (!FULL_ACCESS_CHECKS) {
+        throw new IllegalAccessException();
+      }
+      meth.invoke(instance);
+      System.err.println("inner-method invoke unexpectedly worked");
+    }
+ catch (    IllegalAccessException iae) {
+    }
+    Field field=target.getField("innerField");
+    try {
+      int x=field.getInt(instance);
+      if (!FULL_ACCESS_CHECKS) {
+        throw new IllegalAccessException();
+      }
+      System.err.println("field get unexpectedly worked: " + x);
+    }
+ catch (    IllegalAccessException iae) {
+    }
+  }
+ catch (  Exception ex) {
+    System.out.println("----- unexpected exception -----");
+    ex.printStackTrace();
+  }
+}

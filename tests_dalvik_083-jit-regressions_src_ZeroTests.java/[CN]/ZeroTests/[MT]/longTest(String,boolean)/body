@@ -1,0 +1,32 @@
+{
+  for (int i=0; i < 10000; ++i) {
+    try {
+      if (divide) {
+        longDiv(1,1);
+      }
+ else {
+        longMod(1,1);
+      }
+    }
+ catch (    ArithmeticException expected) {
+      throw new AssertionError(name + " threw during warmup");
+    }
+  }
+  int catchCount=0;
+  for (int i=0; i < 10000; ++i) {
+    try {
+      if (divide) {
+        longDiv(1,0);
+      }
+ else {
+        longMod(1,0);
+      }
+      throw new AssertionError(name + " failed to throw: " + i);
+    }
+ catch (    ArithmeticException expected) {
+      ++catchCount;
+    }
+  }
+  if (catchCount != 10000)   throw new AssertionError(name + " failed: " + catchCount);
+  System.out.println(name + " passes");
+}

@@ -1,0 +1,51 @@
+{
+  Class localClass=SamePackage.class;
+  Class otherClass=OtherPackage.class;
+  Field localPubByteField, localProtByteField, localProtObjectField, localPrivFloatField;
+  Field otherPubCharField, otherProtShortField, otherProtObjectField, otherPkgDoubleField;
+  Field subProtLongField;
+  Main localInst=new Main();
+  SamePackage samePkgInst=new SamePackage();
+  OtherPackage otherPkgInst=new OtherPackage();
+  Object plainObj=new Object();
+  try {
+    localPubByteField=localClass.getDeclaredField("pubByteField");
+    localProtByteField=localClass.getDeclaredField("protByteField");
+    localProtObjectField=localClass.getDeclaredField("protObjectField");
+    localPrivFloatField=localClass.getDeclaredField("privFloatField");
+    otherPubCharField=otherClass.getDeclaredField("pubCharField");
+    otherProtShortField=otherClass.getDeclaredField("protShortField");
+    otherProtObjectField=otherClass.getDeclaredField("protObjectField");
+    otherPkgDoubleField=otherClass.getDeclaredField("pkgDoubleField");
+    subProtLongField=getClass().getDeclaredField("protLongField");
+  }
+ catch (  NoSuchFieldException nsfe) {
+    throw new RuntimeException(nsfe);
+  }
+  localInst.getValue(localPubByteField,samePkgInst,'B',null);
+  this.getValue(localProtByteField,samePkgInst,'B',null);
+  this.getValue(localPrivFloatField,samePkgInst,'F',IllegalAccessException.class);
+  this.getValue(otherProtShortField,this,'S',null);
+  this.getValue(otherProtShortField,otherPkgInst,'S',IllegalAccessException.class);
+  this.getValue(otherPkgDoubleField,otherPkgInst,'D',IllegalAccessException.class);
+  localInst.getValue(localPubByteField,null,'B',NullPointerException.class);
+  this.getValue(subProtLongField,null,'J',NullPointerException.class);
+  this.getValue(localPrivFloatField,null,'F',IllegalAccessException.class);
+  localInst.getValue(otherProtShortField,null,'S',IllegalAccessException.class);
+  this.getValue(otherProtShortField,null,'S',IllegalAccessException.class);
+  this.getValue(otherPkgDoubleField,null,'D',IllegalAccessException.class);
+  localInst.getValue(otherProtShortField,null,'Z',IllegalAccessException.class);
+  this.getValue(subProtLongField,this,'J',null);
+  this.getValue(localProtByteField,samePkgInst,'Z',IllegalArgumentException.class);
+  this.getValue(subProtLongField,this,'Z',IllegalArgumentException.class);
+  this.getValue(localPrivFloatField,this,'Z',IllegalAccessException.class);
+  this.getValue(localPrivFloatField,this,'Z',IllegalAccessException.class);
+  localInst.getValue(otherProtShortField,otherPkgInst,'Z',IllegalAccessException.class);
+  this.getValue(otherProtShortField,otherPkgInst,'Z',IllegalAccessException.class);
+  this.getValue(subProtLongField,plainObj,'J',IllegalArgumentException.class);
+  this.getValue(localPrivFloatField,plainObj,'F',IllegalAccessException.class);
+  this.getValue(subProtLongField,plainObj,'Z',IllegalArgumentException.class);
+  localInst.getValue(otherProtShortField,plainObj,'S',IllegalAccessException.class);
+  this.getValue(otherProtShortField,plainObj,'S',IllegalAccessException.class);
+  System.out.println("good");
+}

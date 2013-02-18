@@ -1,0 +1,27 @@
+{
+  int iter=0;
+  boolean once=false;
+  Main.startupDelay();
+  while (!Main.quit) {
+    dive(0,iter);
+    once=true;
+    iter+=MAX_DEPTH;
+  }
+  if (!once) {
+    System.err.println("not even once?");
+    return;
+  }
+  for (int i=0; i < MAX_DEPTH; i++) {
+    if (strong[i] != weak[i].get()) {
+      System.err.println("Deep: " + i + " strong="+ strong[i]+ ", weak="+ weak[i].get());
+    }
+  }
+  for (int i=0; i < MAX_DEPTH; i++)   strong[i]=null;
+  System.gc();
+  for (int i=0; i < MAX_DEPTH; i++) {
+    if (weak[i].get() != null) {
+      System.err.println("Deep: weak still has " + i);
+    }
+  }
+  if (Main.DEBUG)   System.out.println("Deep: iters=" + iter / MAX_DEPTH);
+}

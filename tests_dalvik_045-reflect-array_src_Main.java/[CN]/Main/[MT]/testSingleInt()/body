@@ -1,0 +1,41 @@
+{
+  Object intArray;
+  intArray=Array.newInstance(Integer.TYPE,2);
+  int[] array=(int[])intArray;
+  array[0]=5;
+  Array.setInt(intArray,1,6);
+  if (Array.getInt(intArray,0) != 5)   throw new RuntimeException();
+  if (array[1] != 6)   throw new RuntimeException();
+  try {
+    array[2]=27;
+    throw new RuntimeException("store should have failed");
+  }
+ catch (  ArrayIndexOutOfBoundsException abe) {
+  }
+  try {
+    Array.setInt(intArray,2,27);
+    throw new RuntimeException("store should have failed");
+  }
+ catch (  ArrayIndexOutOfBoundsException abe) {
+  }
+  if (array.length != Array.getLength(intArray) || array.length != 2) {
+    throw new RuntimeException("bad len");
+  }
+  Integer x123=Integer.valueOf(123);
+  Integer x456=Integer.valueOf(456);
+  Array.set(intArray,0,x123);
+  Array.set(intArray,1,x456);
+  if (!Array.get(intArray,0).equals(x123) || !Array.get(intArray,1).equals(x456)) {
+    throw new RuntimeException("bad 123 or 456");
+  }
+  int[][] wrongArray;
+  try {
+    wrongArray=(int[][])intArray;
+    throw new RuntimeException("cast should have failed");
+  }
+ catch (  ClassCastException cce) {
+  }
+  intArray=Array.newInstance(Integer.TYPE,0);
+  if (Array.getLength(intArray) != 0)   throw new RuntimeException();
+  System.out.println("ReflectArrayTest.testSingleInt passed");
+}

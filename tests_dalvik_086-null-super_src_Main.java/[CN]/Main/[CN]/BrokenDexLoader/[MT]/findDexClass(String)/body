@@ -1,0 +1,22 @@
+{
+  try {
+    Class mDexClass=ClassLoader.getSystemClassLoader().loadClass("dalvik.system.DexFile");
+    Constructor ctor=mDexClass.getConstructor(new Class[]{String.class});
+    Object mDexFile=ctor.newInstance(DEX_FILE);
+    Method meth=mDexClass.getMethod("loadClass",new Class[]{String.class,ClassLoader.class});
+    meth.invoke(mDexFile,name,this);
+  }
+ catch (  NoSuchMethodException nsme) {
+    throw new TestFailed(nsme);
+  }
+catch (  InstantiationException ie) {
+    throw new TestFailed(ie);
+  }
+catch (  IllegalAccessException iae) {
+    throw new TestFailed(iae);
+  }
+catch (  ClassNotFoundException cnfe) {
+    throw new TestFailed(cnfe);
+  }
+  return null;
+}
