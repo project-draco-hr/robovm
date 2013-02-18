@@ -1,0 +1,24 @@
+{
+  StringBuilder result=new StringBuilder();
+  result.append('@');
+  result.append(a.annotationType().getName());
+  result.append('(');
+  TreeMap<String,Method> sorted=new TreeMap<String,Method>();
+  for (  Method method : a.annotationType().getDeclaredMethods()) {
+    String name=method.getName();
+    if (method.getParameterTypes().length == 0) {
+      if (!"toString".equals(name) && !"hashCode".equals(name)) {
+        sorted.put(method.getName(),method);
+      }
+    }
+  }
+  Method[] methods=sorted.values().toArray(new Method[0]);
+  for (int i=0; i < methods.length; ++i) {
+    if (i != 0) {
+      result.append(", ");
+    }
+    result.append(annotationMemberToString(a,methods[i]));
+  }
+  result.append(')');
+  return result.toString();
+}
