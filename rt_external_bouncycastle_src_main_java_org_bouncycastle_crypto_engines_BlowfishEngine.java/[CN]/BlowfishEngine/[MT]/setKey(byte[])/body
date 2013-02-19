@@ -1,0 +1,24 @@
+{
+  System.arraycopy(KS0,0,S0,0,SBOX_SK);
+  System.arraycopy(KS1,0,S1,0,SBOX_SK);
+  System.arraycopy(KS2,0,S2,0,SBOX_SK);
+  System.arraycopy(KS3,0,S3,0,SBOX_SK);
+  System.arraycopy(KP,0,P,0,P_SZ);
+  int keyLength=key.length;
+  int keyIndex=0;
+  for (int i=0; i < P_SZ; i++) {
+    int data=0x0000000;
+    for (int j=0; j < 4; j++) {
+      data=(data << 8) | (key[keyIndex++] & 0xff);
+      if (keyIndex >= keyLength) {
+        keyIndex=0;
+      }
+    }
+    P[i]^=data;
+  }
+  processTable(0,0,P);
+  processTable(P[P_SZ - 2],P[P_SZ - 1],S0);
+  processTable(S0[SBOX_SK - 2],S0[SBOX_SK - 1],S1);
+  processTable(S1[SBOX_SK - 2],S1[SBOX_SK - 1],S2);
+  processTable(S2[SBOX_SK - 2],S2[SBOX_SK - 1],S3);
+}

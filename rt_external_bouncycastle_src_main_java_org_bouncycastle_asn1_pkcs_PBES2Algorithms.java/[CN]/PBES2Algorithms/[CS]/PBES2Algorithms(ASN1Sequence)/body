@@ -1,0 +1,15 @@
+{
+  super(obj);
+  Enumeration e=obj.getObjects();
+  objectId=(DERObjectIdentifier)e.nextElement();
+  ASN1Sequence seq=(ASN1Sequence)e.nextElement();
+  e=seq.getObjects();
+  ASN1Sequence funcSeq=(ASN1Sequence)e.nextElement();
+  if (funcSeq.getObjectAt(0).equals(id_PBKDF2)) {
+    func=new KeyDerivationFunc(id_PBKDF2,PBKDF2Params.getInstance(funcSeq.getObjectAt(1)));
+  }
+ else {
+    func=new KeyDerivationFunc(funcSeq);
+  }
+  scheme=new EncryptionScheme((ASN1Sequence)e.nextElement());
+}

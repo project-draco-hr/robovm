@@ -1,0 +1,284 @@
+{
+  if (stream == null) {
+    return;
+  }
+  if (password == null) {
+    throw new NullPointerException("No password supplied for PKCS#12 KeyStore.");
+  }
+  BufferedInputStream bufIn=new BufferedInputStream(stream);
+  bufIn.mark(10);
+  int head=bufIn.read();
+  if (head != 0x30) {
+    throw new IOException("stream does not represent a PKCS12 key store");
+  }
+  bufIn.reset();
+  ASN1InputStream bIn=new ASN1InputStream(bufIn);
+  ASN1Sequence obj=(ASN1Sequence)bIn.readObject();
+  Pfx bag=new Pfx(obj);
+  ContentInfo info=bag.getAuthSafe();
+  Vector chain=new Vector();
+  boolean unmarkedKey=false;
+  boolean wrongPKCS12Zero=false;
+  if (bag.getMacData() != null) {
+    MacData mData=bag.getMacData();
+    DigestInfo dInfo=mData.getMac();
+    AlgorithmIdentifier algId=dInfo.getAlgorithmId();
+    byte[] salt=mData.getSalt();
+    int itCount=mData.getIterationCount().intValue();
+    byte[] data=((ASN1OctetString)info.getContent()).getOctets();
+    try {
+      byte[] res=calculatePbeMac(algId.getObjectId(),salt,itCount,password,false,data);
+      byte[] dig=dInfo.getDigest();
+      if (!Arrays.constantTimeAreEqual(res,dig)) {
+        if (password.length > 0) {
+          throw new IOException("PKCS12 key store mac invalid - wrong password or corrupted file.");
+        }
+        res=calculatePbeMac(algId.getObjectId(),salt,itCount,password,true,data);
+        if (!Arrays.constantTimeAreEqual(res,dig)) {
+          throw new IOException("PKCS12 key store mac invalid - wrong password or corrupted file.");
+        }
+        wrongPKCS12Zero=true;
+      }
+    }
+ catch (    IOException e) {
+      throw e;
+    }
+catch (    Exception e) {
+      throw new IOException("error constructing MAC: " + e.toString());
+    }
+  }
+  keys=new IgnoresCaseHashtable();
+  localIds=new Hashtable();
+  if (info.getContentType().equals(data)) {
+    bIn=new ASN1InputStream(((ASN1OctetString)info.getContent()).getOctets());
+    AuthenticatedSafe authSafe=new AuthenticatedSafe((ASN1Sequence)bIn.readObject());
+    ContentInfo[] c=authSafe.getContentInfo();
+    for (int i=0; i != c.length; i++) {
+      if (c[i].getContentType().equals(data)) {
+        ASN1InputStream dIn=new ASN1InputStream(((ASN1OctetString)c[i].getContent()).getOctets());
+        ASN1Sequence seq=(ASN1Sequence)dIn.readObject();
+        for (int j=0; j != seq.size(); j++) {
+          SafeBag b=new SafeBag((ASN1Sequence)seq.getObjectAt(j));
+          if (b.getBagId().equals(pkcs8ShroudedKeyBag)) {
+            org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo eIn=new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo((ASN1Sequence)b.getBagValue());
+            PrivateKey privKey=unwrapKey(eIn.getEncryptionAlgorithm(),eIn.getEncryptedData(),password,wrongPKCS12Zero);
+            PKCS12BagAttributeCarrier bagAttr=(PKCS12BagAttributeCarrier)privKey;
+            String alias=null;
+            ASN1OctetString localId=null;
+            if (b.getBagAttributes() != null) {
+              Enumeration e=b.getBagAttributes().getObjects();
+              while (e.hasMoreElements()) {
+                ASN1Sequence sq=(ASN1Sequence)e.nextElement();
+                DERObjectIdentifier aOid=(DERObjectIdentifier)sq.getObjectAt(0);
+                ASN1Set attrSet=(ASN1Set)sq.getObjectAt(1);
+                DERObject attr=null;
+                if (attrSet.size() > 0) {
+                  attr=(DERObject)attrSet.getObjectAt(0);
+                  DEREncodable existing=bagAttr.getBagAttribute(aOid);
+                  if (existing != null) {
+                    if (!existing.getDERObject().equals(attr)) {
+                      throw new IOException("attempt to add existing attribute with different value");
+                    }
+                  }
+ else {
+                    bagAttr.setBagAttribute(aOid,attr);
+                  }
+                }
+                if (aOid.equals(pkcs_9_at_friendlyName)) {
+                  alias=((DERBMPString)attr).getString();
+                  keys.put(alias,privKey);
+                }
+ else                 if (aOid.equals(pkcs_9_at_localKeyId)) {
+                  localId=(ASN1OctetString)attr;
+                }
+              }
+            }
+            if (localId != null) {
+              String name=new String(Hex.encode(localId.getOctets()));
+              if (alias == null) {
+                keys.put(name,privKey);
+              }
+ else {
+                localIds.put(alias,name);
+              }
+            }
+ else {
+              unmarkedKey=true;
+              keys.put("unmarked",privKey);
+            }
+          }
+ else           if (b.getBagId().equals(certBag)) {
+            chain.addElement(b);
+          }
+ else {
+            System.out.println("extra in data " + b.getBagId());
+            System.out.println(ASN1Dump.dumpAsString(b));
+          }
+        }
+      }
+ else       if (c[i].getContentType().equals(encryptedData)) {
+        EncryptedData d=new EncryptedData((ASN1Sequence)c[i].getContent());
+        byte[] octets=cryptData(false,d.getEncryptionAlgorithm(),password,wrongPKCS12Zero,d.getContent().getOctets());
+        ASN1Sequence seq=(ASN1Sequence)ASN1Object.fromByteArray(octets);
+        for (int j=0; j != seq.size(); j++) {
+          SafeBag b=new SafeBag((ASN1Sequence)seq.getObjectAt(j));
+          if (b.getBagId().equals(certBag)) {
+            chain.addElement(b);
+          }
+ else           if (b.getBagId().equals(pkcs8ShroudedKeyBag)) {
+            org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo eIn=new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo((ASN1Sequence)b.getBagValue());
+            PrivateKey privKey=unwrapKey(eIn.getEncryptionAlgorithm(),eIn.getEncryptedData(),password,wrongPKCS12Zero);
+            PKCS12BagAttributeCarrier bagAttr=(PKCS12BagAttributeCarrier)privKey;
+            String alias=null;
+            ASN1OctetString localId=null;
+            Enumeration e=b.getBagAttributes().getObjects();
+            while (e.hasMoreElements()) {
+              ASN1Sequence sq=(ASN1Sequence)e.nextElement();
+              DERObjectIdentifier aOid=(DERObjectIdentifier)sq.getObjectAt(0);
+              ASN1Set attrSet=(ASN1Set)sq.getObjectAt(1);
+              DERObject attr=null;
+              if (attrSet.size() > 0) {
+                attr=(DERObject)attrSet.getObjectAt(0);
+                DEREncodable existing=bagAttr.getBagAttribute(aOid);
+                if (existing != null) {
+                  if (!existing.getDERObject().equals(attr)) {
+                    throw new IOException("attempt to add existing attribute with different value");
+                  }
+                }
+ else {
+                  bagAttr.setBagAttribute(aOid,attr);
+                }
+              }
+              if (aOid.equals(pkcs_9_at_friendlyName)) {
+                alias=((DERBMPString)attr).getString();
+                keys.put(alias,privKey);
+              }
+ else               if (aOid.equals(pkcs_9_at_localKeyId)) {
+                localId=(ASN1OctetString)attr;
+              }
+            }
+            String name=new String(Hex.encode(localId.getOctets()));
+            if (alias == null) {
+              keys.put(name,privKey);
+            }
+ else {
+              localIds.put(alias,name);
+            }
+          }
+ else           if (b.getBagId().equals(keyBag)) {
+            org.bouncycastle.asn1.pkcs.PrivateKeyInfo pIn=new org.bouncycastle.asn1.pkcs.PrivateKeyInfo((ASN1Sequence)b.getBagValue());
+            PrivateKey privKey=JDKKeyFactory.createPrivateKeyFromPrivateKeyInfo(pIn);
+            PKCS12BagAttributeCarrier bagAttr=(PKCS12BagAttributeCarrier)privKey;
+            String alias=null;
+            ASN1OctetString localId=null;
+            Enumeration e=b.getBagAttributes().getObjects();
+            while (e.hasMoreElements()) {
+              ASN1Sequence sq=(ASN1Sequence)e.nextElement();
+              DERObjectIdentifier aOid=(DERObjectIdentifier)sq.getObjectAt(0);
+              ASN1Set attrSet=(ASN1Set)sq.getObjectAt(1);
+              DERObject attr=null;
+              if (attrSet.size() > 0) {
+                attr=(DERObject)attrSet.getObjectAt(0);
+                DEREncodable existing=bagAttr.getBagAttribute(aOid);
+                if (existing != null) {
+                  if (!existing.getDERObject().equals(attr)) {
+                    throw new IOException("attempt to add existing attribute with different value");
+                  }
+                }
+ else {
+                  bagAttr.setBagAttribute(aOid,attr);
+                }
+              }
+              if (aOid.equals(pkcs_9_at_friendlyName)) {
+                alias=((DERBMPString)attr).getString();
+                keys.put(alias,privKey);
+              }
+ else               if (aOid.equals(pkcs_9_at_localKeyId)) {
+                localId=(ASN1OctetString)attr;
+              }
+            }
+            String name=new String(Hex.encode(localId.getOctets()));
+            if (alias == null) {
+              keys.put(name,privKey);
+            }
+ else {
+              localIds.put(alias,name);
+            }
+          }
+ else {
+            System.out.println("extra in encryptedData " + b.getBagId());
+            System.out.println(ASN1Dump.dumpAsString(b));
+          }
+        }
+      }
+ else {
+        System.out.println("extra " + c[i].getContentType().getId());
+        System.out.println("extra " + ASN1Dump.dumpAsString(c[i].getContent()));
+      }
+    }
+  }
+  certs=new IgnoresCaseHashtable();
+  chainCerts=new Hashtable();
+  keyCerts=new Hashtable();
+  for (int i=0; i != chain.size(); i++) {
+    SafeBag b=(SafeBag)chain.elementAt(i);
+    CertBag cb=new CertBag((ASN1Sequence)b.getBagValue());
+    if (!cb.getCertId().equals(x509Certificate)) {
+      throw new RuntimeException("Unsupported certificate type: " + cb.getCertId());
+    }
+    Certificate cert;
+    try {
+      ByteArrayInputStream cIn=new ByteArrayInputStream(((ASN1OctetString)cb.getCertValue()).getOctets());
+      cert=certFact.generateCertificate(cIn);
+    }
+ catch (    Exception e) {
+      throw new RuntimeException(e.toString());
+    }
+    ASN1OctetString localId=null;
+    String alias=null;
+    if (b.getBagAttributes() != null) {
+      Enumeration e=b.getBagAttributes().getObjects();
+      while (e.hasMoreElements()) {
+        ASN1Sequence sq=(ASN1Sequence)e.nextElement();
+        DERObjectIdentifier oid=(DERObjectIdentifier)sq.getObjectAt(0);
+        DERObject attr=(DERObject)((ASN1Set)sq.getObjectAt(1)).getObjectAt(0);
+        PKCS12BagAttributeCarrier bagAttr=null;
+        if (cert instanceof PKCS12BagAttributeCarrier) {
+          bagAttr=(PKCS12BagAttributeCarrier)cert;
+          DEREncodable existing=bagAttr.getBagAttribute(oid);
+          if (existing != null) {
+            if (!existing.getDERObject().equals(attr)) {
+              throw new IOException("attempt to add existing attribute with different value");
+            }
+          }
+ else {
+            bagAttr.setBagAttribute(oid,attr);
+          }
+        }
+        if (oid.equals(pkcs_9_at_friendlyName)) {
+          alias=((DERBMPString)attr).getString();
+        }
+ else         if (oid.equals(pkcs_9_at_localKeyId)) {
+          localId=(ASN1OctetString)attr;
+        }
+      }
+    }
+    chainCerts.put(new CertId(cert.getPublicKey()),cert);
+    if (unmarkedKey) {
+      if (keyCerts.isEmpty()) {
+        String name=new String(Hex.encode(createSubjectKeyId(cert.getPublicKey()).getKeyIdentifier()));
+        keyCerts.put(name,cert);
+        keys.put(name,keys.remove("unmarked"));
+      }
+    }
+ else {
+      if (localId != null) {
+        String name=new String(Hex.encode(localId.getOctets()));
+        keyCerts.put(name,cert);
+      }
+      if (alias != null) {
+        certs.put(alias,cert);
+      }
+    }
+  }
+}

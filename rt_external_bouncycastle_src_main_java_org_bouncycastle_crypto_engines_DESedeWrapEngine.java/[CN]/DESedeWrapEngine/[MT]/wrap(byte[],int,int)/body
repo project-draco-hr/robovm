@@ -1,0 +1,30 @@
+{
+  if (!forWrapping) {
+    throw new IllegalStateException("Not initialized for wrapping");
+  }
+  byte keyToBeWrapped[]=new byte[inLen];
+  System.arraycopy(in,inOff,keyToBeWrapped,0,inLen);
+  byte[] CKS=calculateCMSKeyChecksum(keyToBeWrapped);
+  byte[] WKCKS=new byte[keyToBeWrapped.length + CKS.length];
+  System.arraycopy(keyToBeWrapped,0,WKCKS,0,keyToBeWrapped.length);
+  System.arraycopy(CKS,0,WKCKS,keyToBeWrapped.length,CKS.length);
+  int blockSize=engine.getBlockSize();
+  if (WKCKS.length % blockSize != 0) {
+    throw new IllegalStateException("Not multiple of block length");
+  }
+  engine.init(true,paramPlusIV);
+  byte TEMP1[]=new byte[WKCKS.length];
+  for (int currentBytePos=0; currentBytePos != WKCKS.length; currentBytePos+=blockSize) {
+    engine.processBlock(WKCKS,currentBytePos,TEMP1,currentBytePos);
+  }
+  byte[] TEMP2=new byte[this.iv.length + TEMP1.length];
+  System.arraycopy(this.iv,0,TEMP2,0,this.iv.length);
+  System.arraycopy(TEMP1,0,TEMP2,this.iv.length,TEMP1.length);
+  byte[] TEMP3=reverse(TEMP2);
+  ParametersWithIV param2=new ParametersWithIV(this.param,IV2);
+  this.engine.init(true,param2);
+  for (int currentBytePos=0; currentBytePos != TEMP3.length; currentBytePos+=blockSize) {
+    engine.processBlock(TEMP3,currentBytePos,TEMP3,currentBytePos);
+  }
+  return TEMP3;
+}

@@ -1,0 +1,13 @@
+{
+  Enumeration certs=c.getRevokedCertificateEnumeration();
+  X500Principal previousCertificateIssuer=getIssuerX500Principal();
+  while (certs.hasMoreElements()) {
+    TBSCertList.CRLEntry entry=(TBSCertList.CRLEntry)certs.nextElement();
+    X509CRLEntryObject crlEntry=new X509CRLEntryObject(entry,isIndirect,previousCertificateIssuer);
+    if (serialNumber.equals(entry.getUserCertificate().getValue())) {
+      return crlEntry;
+    }
+    previousCertificateIssuer=crlEntry.getCertificateIssuer();
+  }
+  return null;
+}

@@ -1,0 +1,26 @@
+{
+  digest.reset();
+  byte[] key=((KeyParameter)params).getKey();
+  if (key.length > blockLength) {
+    digest.update(key,0,key.length);
+    digest.doFinal(inputPad,0);
+    for (int i=digestSize; i < inputPad.length; i++) {
+      inputPad[i]=0;
+    }
+  }
+ else {
+    System.arraycopy(key,0,inputPad,0,key.length);
+    for (int i=key.length; i < inputPad.length; i++) {
+      inputPad[i]=0;
+    }
+  }
+  outputPad=new byte[inputPad.length];
+  System.arraycopy(inputPad,0,outputPad,0,inputPad.length);
+  for (int i=0; i < inputPad.length; i++) {
+    inputPad[i]^=IPAD;
+  }
+  for (int i=0; i < outputPad.length; i++) {
+    outputPad[i]^=OPAD;
+  }
+  digest.update(inputPad,0,inputPad.length);
+}

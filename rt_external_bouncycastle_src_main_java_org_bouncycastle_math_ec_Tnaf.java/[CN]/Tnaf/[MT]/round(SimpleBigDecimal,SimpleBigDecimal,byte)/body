@@ -1,0 +1,63 @@
+{
+  int scale=lambda0.getScale();
+  if (lambda1.getScale() != scale) {
+    throw new IllegalArgumentException("lambda0 and lambda1 do not " + "have same scale");
+  }
+  if (!((mu == 1) || (mu == -1))) {
+    throw new IllegalArgumentException("mu must be 1 or -1");
+  }
+  BigInteger f0=lambda0.round();
+  BigInteger f1=lambda1.round();
+  SimpleBigDecimal eta0=lambda0.subtract(f0);
+  SimpleBigDecimal eta1=lambda1.subtract(f1);
+  SimpleBigDecimal eta=eta0.add(eta0);
+  if (mu == 1) {
+    eta=eta.add(eta1);
+  }
+ else {
+    eta=eta.subtract(eta1);
+  }
+  SimpleBigDecimal threeEta1=eta1.add(eta1).add(eta1);
+  SimpleBigDecimal fourEta1=threeEta1.add(eta1);
+  SimpleBigDecimal check1;
+  SimpleBigDecimal check2;
+  if (mu == 1) {
+    check1=eta0.subtract(threeEta1);
+    check2=eta0.add(fourEta1);
+  }
+ else {
+    check1=eta0.add(threeEta1);
+    check2=eta0.subtract(fourEta1);
+  }
+  byte h0=0;
+  byte h1=0;
+  if (eta.compareTo(ECConstants.ONE) >= 0) {
+    if (check1.compareTo(MINUS_ONE) < 0) {
+      h1=mu;
+    }
+ else {
+      h0=1;
+    }
+  }
+ else {
+    if (check2.compareTo(ECConstants.TWO) >= 0) {
+      h1=mu;
+    }
+  }
+  if (eta.compareTo(MINUS_ONE) < 0) {
+    if (check1.compareTo(ECConstants.ONE) >= 0) {
+      h1=(byte)-mu;
+    }
+ else {
+      h0=-1;
+    }
+  }
+ else {
+    if (check2.compareTo(MINUS_TWO) < 0) {
+      h1=(byte)-mu;
+    }
+  }
+  BigInteger q0=f0.add(BigInteger.valueOf(h0));
+  BigInteger q1=f1.add(BigInteger.valueOf(h1));
+  return new ZTauElement(q0,q1);
+}

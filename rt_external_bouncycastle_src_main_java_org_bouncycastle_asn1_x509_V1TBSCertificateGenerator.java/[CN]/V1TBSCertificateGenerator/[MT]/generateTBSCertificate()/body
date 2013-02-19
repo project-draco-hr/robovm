@@ -1,0 +1,16 @@
+{
+  if ((serialNumber == null) || (signature == null) || (issuer == null)|| (startDate == null)|| (endDate == null)|| (subject == null)|| (subjectPublicKeyInfo == null)) {
+    throw new IllegalStateException("not all mandatory fields set in V1 TBScertificate generator");
+  }
+  ASN1EncodableVector seq=new ASN1EncodableVector();
+  seq.add(serialNumber);
+  seq.add(signature);
+  seq.add(issuer);
+  ASN1EncodableVector validity=new ASN1EncodableVector();
+  validity.add(startDate);
+  validity.add(endDate);
+  seq.add(new DERSequence(validity));
+  seq.add(subject);
+  seq.add(subjectPublicKeyInfo);
+  return new TBSCertificateStructure(new DERSequence(seq));
+}

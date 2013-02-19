@@ -1,0 +1,22 @@
+{
+  Set deltaSet=new HashSet();
+  X509CRLStoreSelector crlselect=new X509CRLStoreSelector();
+  crlselect.setCertificateChecking(cert);
+  try {
+    crlselect.addIssuerName(crl.getIssuerX500Principal().getEncoded());
+  }
+ catch (  IOException e) {
+    throw new AnnotatedException("Cannot extract issuer from CRL." + e,e);
+  }
+  crlselect.setCompleteCRLEnabled(true);
+  Set completeSet=CRL_UTIL.findCRLs(crlselect,paramsPKIX,currentDate);
+  if (paramsPKIX.isUseDeltasEnabled()) {
+    try {
+      deltaSet.addAll(CertPathValidatorUtilities.getDeltaCRLs(currentDate,paramsPKIX,crl));
+    }
+ catch (    AnnotatedException e) {
+      throw new AnnotatedException("Exception obtaining delta CRLs.",e);
+    }
+  }
+  return new Set[]{completeSet,deltaSet};
+}

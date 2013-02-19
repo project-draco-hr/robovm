@@ -1,0 +1,25 @@
+{
+  Enumeration e=seq.getObjects();
+  version=(DERInteger)e.nextElement();
+  digestAlgorithms=((ASN1Set)e.nextElement());
+  contentInfo=ContentInfo.getInstance(e.nextElement());
+  while (e.hasMoreElements()) {
+    DERObject o=(DERObject)e.nextElement();
+    if (o instanceof DERTaggedObject) {
+      DERTaggedObject tagged=(DERTaggedObject)o;
+switch (tagged.getTagNo()) {
+case 0:
+        certificates=ASN1Set.getInstance(tagged,false);
+      break;
+case 1:
+    crls=ASN1Set.getInstance(tagged,false);
+  break;
+default :
+throw new IllegalArgumentException("unknown tag value " + tagged.getTagNo());
+}
+}
+ else {
+signerInfos=(ASN1Set)o;
+}
+}
+}

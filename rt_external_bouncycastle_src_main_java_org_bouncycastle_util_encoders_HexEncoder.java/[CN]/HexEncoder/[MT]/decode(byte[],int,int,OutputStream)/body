@@ -1,0 +1,25 @@
+{
+  byte b1, b2;
+  int outLen=0;
+  int end=off + length;
+  while (end > off) {
+    if (!ignore((char)data[end - 1])) {
+      break;
+    }
+    end--;
+  }
+  int i=off;
+  while (i < end) {
+    while (i < end && ignore((char)data[i])) {
+      i++;
+    }
+    b1=decodingTable[data[i++]];
+    while (i < end && ignore((char)data[i])) {
+      i++;
+    }
+    b2=decodingTable[data[i++]];
+    out.write((b1 << 4) | b2);
+    outLen++;
+  }
+  return outLen;
+}

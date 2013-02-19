@@ -1,0 +1,43 @@
+{
+  if (currentCrlStream == null) {
+    currentCrlStream=inStream;
+    sCrlData=null;
+    sCrlDataObjectCount=0;
+  }
+ else   if (currentCrlStream != inStream) {
+    currentCrlStream=inStream;
+    sCrlData=null;
+    sCrlDataObjectCount=0;
+  }
+  try {
+    if (sCrlData != null) {
+      if (sCrlDataObjectCount != sCrlData.size()) {
+        return getCRL();
+      }
+ else {
+        sCrlData=null;
+        sCrlDataObjectCount=0;
+        return null;
+      }
+    }
+    int limit=ProviderUtil.getReadLimit(inStream);
+    PushbackInputStream pis=new PushbackInputStream(inStream);
+    int tag=pis.read();
+    if (tag == -1) {
+      return null;
+    }
+    pis.unread(tag);
+    if (tag != 0x30) {
+      return readPEMCRL(pis);
+    }
+ else {
+      return readDERCRL(new ASN1InputStream(pis,limit,true));
+    }
+  }
+ catch (  CRLException e) {
+    throw e;
+  }
+catch (  Exception e) {
+    throw new CRLException(e.toString());
+  }
+}

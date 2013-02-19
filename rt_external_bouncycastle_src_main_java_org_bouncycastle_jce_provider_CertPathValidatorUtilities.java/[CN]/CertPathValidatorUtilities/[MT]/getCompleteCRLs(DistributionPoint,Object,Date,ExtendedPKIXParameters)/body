@@ -1,0 +1,35 @@
+{
+  X509CRLStoreSelector crlselect=new X509CRLStoreSelector();
+  try {
+    Set issuers=new HashSet();
+    if (cert instanceof X509AttributeCertificate) {
+      issuers.add(((X509AttributeCertificate)cert).getIssuer().getPrincipals()[0]);
+    }
+ else {
+      issuers.add(getEncodedIssuerPrincipal(cert));
+    }
+    CertPathValidatorUtilities.getCRLIssuersFromDistributionPoint(dp,issuers,crlselect,paramsPKIX);
+  }
+ catch (  AnnotatedException e) {
+    new AnnotatedException("Could not get issuer information from distribution point.",e);
+  }
+  if (cert instanceof X509Certificate) {
+    crlselect.setCertificateChecking((X509Certificate)cert);
+  }
+ else   if (cert instanceof X509AttributeCertificate) {
+    crlselect.setAttrCertificateChecking((X509AttributeCertificate)cert);
+  }
+  crlselect.setCompleteCRLEnabled(true);
+  Set crls=CRL_UTIL.findCRLs(crlselect,paramsPKIX,currentDate);
+  if (crls.isEmpty()) {
+    if (cert instanceof X509AttributeCertificate) {
+      X509AttributeCertificate aCert=(X509AttributeCertificate)cert;
+      throw new AnnotatedException("No CRLs found for issuer \"" + aCert.getIssuer().getPrincipals()[0] + "\"");
+    }
+ else {
+      X509Certificate xCert=(X509Certificate)cert;
+      throw new AnnotatedException("No CRLs found for issuer \"" + xCert.getIssuerX500Principal() + "\"");
+    }
+  }
+  return crls;
+}

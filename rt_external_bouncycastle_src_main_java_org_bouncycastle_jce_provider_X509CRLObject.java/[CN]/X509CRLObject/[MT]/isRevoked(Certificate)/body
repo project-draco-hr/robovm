@@ -1,0 +1,15 @@
+{
+  if (!cert.getType().equals("X.509")) {
+    throw new RuntimeException("X.509 CRL used with non X.509 Cert");
+  }
+  TBSCertList.CRLEntry[] certs=c.getRevokedCertificates();
+  if (certs != null) {
+    BigInteger serial=((X509Certificate)cert).getSerialNumber();
+    for (int i=0; i < certs.length; i++) {
+      if (certs[i].getUserCertificate().getValue().equals(serial)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}

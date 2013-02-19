@@ -1,0 +1,35 @@
+{
+  int n=k.bitLength();
+  int s=k.getLowestSetBit();
+  BigInteger Uh=ECConstants.ONE;
+  BigInteger Vl=ECConstants.TWO;
+  BigInteger Vh=P;
+  BigInteger Ql=ECConstants.ONE;
+  BigInteger Qh=ECConstants.ONE;
+  for (int j=n - 1; j >= s + 1; --j) {
+    Ql=Ql.multiply(Qh).mod(p);
+    if (k.testBit(j)) {
+      Qh=Ql.multiply(Q).mod(p);
+      Uh=Uh.multiply(Vh).mod(p);
+      Vl=Vh.multiply(Vl).subtract(P.multiply(Ql)).mod(p);
+      Vh=Vh.multiply(Vh).subtract(Qh.shiftLeft(1)).mod(p);
+    }
+ else {
+      Qh=Ql;
+      Uh=Uh.multiply(Vl).subtract(Ql).mod(p);
+      Vh=Vh.multiply(Vl).subtract(P.multiply(Ql)).mod(p);
+      Vl=Vl.multiply(Vl).subtract(Ql.shiftLeft(1)).mod(p);
+    }
+  }
+  Ql=Ql.multiply(Qh).mod(p);
+  Qh=Ql.multiply(Q).mod(p);
+  Uh=Uh.multiply(Vl).subtract(Ql).mod(p);
+  Vl=Vh.multiply(Vl).subtract(P.multiply(Ql)).mod(p);
+  Ql=Ql.multiply(Qh).mod(p);
+  for (int j=1; j <= s; ++j) {
+    Uh=Uh.multiply(Vl).mod(p);
+    Vl=Vl.multiply(Vl).subtract(Ql.shiftLeft(1)).mod(p);
+    Ql=Ql.multiply(Ql).mod(p);
+  }
+  return new BigInteger[]{Uh,Vl};
+}

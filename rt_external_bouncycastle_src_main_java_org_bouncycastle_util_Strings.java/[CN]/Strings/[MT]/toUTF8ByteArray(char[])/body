@@ -1,0 +1,38 @@
+{
+  ByteArrayOutputStream bOut=new ByteArrayOutputStream();
+  char[] c=string;
+  int i=0;
+  while (i < c.length) {
+    char ch=c[i];
+    if (ch < 0x0080) {
+      bOut.write(ch);
+    }
+ else     if (ch < 0x0800) {
+      bOut.write(0xc0 | (ch >> 6));
+      bOut.write(0x80 | (ch & 0x3f));
+    }
+ else     if (ch >= 0xD800 && ch <= 0xDFFF) {
+      if (i + 1 >= c.length) {
+        throw new IllegalStateException("invalid UTF-16 codepoint");
+      }
+      char W1=ch;
+      ch=c[++i];
+      char W2=ch;
+      if (W1 > 0xDBFF) {
+        throw new IllegalStateException("invalid UTF-16 codepoint");
+      }
+      int codePoint=(((W1 & 0x03FF) << 10) | (W2 & 0x03FF)) + 0x10000;
+      bOut.write(0xf0 | (codePoint >> 18));
+      bOut.write(0x80 | ((codePoint >> 12) & 0x3F));
+      bOut.write(0x80 | ((codePoint >> 6) & 0x3F));
+      bOut.write(0x80 | (codePoint & 0x3F));
+    }
+ else {
+      bOut.write(0xe0 | (ch >> 12));
+      bOut.write(0x80 | ((ch >> 6) & 0x3F));
+      bOut.write(0x80 | (ch & 0x3F));
+    }
+    i++;
+  }
+  return bOut.toByteArray();
+}

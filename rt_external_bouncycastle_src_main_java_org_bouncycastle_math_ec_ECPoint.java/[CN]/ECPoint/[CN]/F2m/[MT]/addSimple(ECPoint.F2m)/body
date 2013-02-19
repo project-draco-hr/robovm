@@ -1,0 +1,21 @@
+{
+  ECPoint.F2m other=b;
+  if (this.isInfinity()) {
+    return other;
+  }
+  if (other.isInfinity()) {
+    return this;
+  }
+  ECFieldElement.F2m x2=(ECFieldElement.F2m)other.getX();
+  ECFieldElement.F2m y2=(ECFieldElement.F2m)other.getY();
+  if (this.x.equals(x2)) {
+    if (this.y.equals(y2)) {
+      return (ECPoint.F2m)this.twice();
+    }
+    return (ECPoint.F2m)this.curve.getInfinity();
+  }
+  ECFieldElement.F2m lambda=(ECFieldElement.F2m)(this.y.add(y2)).divide(this.x.add(x2));
+  ECFieldElement.F2m x3=(ECFieldElement.F2m)lambda.square().add(lambda).add(this.x).add(x2).add(this.curve.getA());
+  ECFieldElement.F2m y3=(ECFieldElement.F2m)lambda.multiply(this.x.add(x3)).add(x3).add(this.y);
+  return new ECPoint.F2m(curve,x3,y3,withCompression);
+}

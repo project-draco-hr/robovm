@@ -1,0 +1,27 @@
+{
+  final ASN1Sequence outer=this;
+  return new ASN1SequenceParser(){
+    private final int max=size();
+    private int index;
+    public DEREncodable readObject() throws IOException {
+      if (index == max) {
+        return null;
+      }
+      DEREncodable obj=getObjectAt(index++);
+      if (obj instanceof ASN1Sequence) {
+        return ((ASN1Sequence)obj).parser();
+      }
+      if (obj instanceof ASN1Set) {
+        return ((ASN1Set)obj).parser();
+      }
+      return obj;
+    }
+    public DERObject getLoadedObject(){
+      return outer;
+    }
+    public DERObject getDERObject(){
+      return outer;
+    }
+  }
+;
+}

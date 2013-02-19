@@ -1,0 +1,16 @@
+{
+  if (permitted == null) {
+    return;
+  }
+  if (permitted.isEmpty() && dns.size() == 0) {
+    return;
+  }
+  Iterator it=permitted.iterator();
+  while (it.hasNext()) {
+    ASN1Sequence subtree=(ASN1Sequence)it.next();
+    if (withinDNSubtree(dns,subtree)) {
+      return;
+    }
+  }
+  throw new PKIXNameConstraintValidatorException("Subject distinguished name is not from a permitted subtree");
+}

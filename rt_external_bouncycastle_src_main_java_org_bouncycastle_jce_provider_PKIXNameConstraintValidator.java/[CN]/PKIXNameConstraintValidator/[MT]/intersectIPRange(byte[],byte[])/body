@@ -1,0 +1,21 @@
+{
+  if (ipWithSubmask1.length != ipWithSubmask2.length) {
+    return Collections.EMPTY_SET;
+  }
+  byte[][] temp=extractIPsAndSubnetMasks(ipWithSubmask1,ipWithSubmask2);
+  byte ip1[]=temp[0];
+  byte subnetmask1[]=temp[1];
+  byte ip2[]=temp[2];
+  byte subnetmask2[]=temp[3];
+  byte minMax[][]=minMaxIPs(ip1,subnetmask1,ip2,subnetmask2);
+  byte[] min;
+  byte[] max;
+  max=min(minMax[1],minMax[3]);
+  min=max(minMax[0],minMax[2]);
+  if (compareTo(min,max) == 1) {
+    return Collections.EMPTY_SET;
+  }
+  byte[] ip=or(minMax[0],minMax[2]);
+  byte[] subnetmask=or(subnetmask1,subnetmask2);
+  return Collections.singleton(ipWithSubnetMask(ip,subnetmask));
+}

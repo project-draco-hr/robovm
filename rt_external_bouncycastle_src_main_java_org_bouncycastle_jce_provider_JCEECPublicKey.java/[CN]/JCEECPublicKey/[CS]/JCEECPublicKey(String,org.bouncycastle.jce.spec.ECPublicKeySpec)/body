@@ -1,0 +1,16 @@
+{
+  this.algorithm=algorithm;
+  this.q=spec.getQ();
+  if (spec.getParams() != null) {
+    ECCurve curve=spec.getParams().getCurve();
+    EllipticCurve ellipticCurve=EC5Util.convertCurve(curve,spec.getParams().getSeed());
+    this.ecSpec=EC5Util.convertSpec(ellipticCurve,spec.getParams());
+  }
+ else {
+    if (q.getCurve() == null) {
+      org.bouncycastle.jce.spec.ECParameterSpec s=ProviderUtil.getEcImplicitlyCa();
+      q=s.getCurve().createPoint(q.getX().toBigInteger(),q.getY().toBigInteger(),false);
+    }
+    this.ecSpec=null;
+  }
+}

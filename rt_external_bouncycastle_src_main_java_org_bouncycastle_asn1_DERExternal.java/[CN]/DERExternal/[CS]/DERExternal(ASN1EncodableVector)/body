@@ -1,0 +1,28 @@
+{
+  int offset=0;
+  DERObject enc=getObjFromVector(vector,offset);
+  if (enc instanceof DERObjectIdentifier) {
+    directReference=(DERObjectIdentifier)enc;
+    offset++;
+    enc=getObjFromVector(vector,offset);
+  }
+  if (enc instanceof DERInteger) {
+    indirectReference=(DERInteger)enc;
+    offset++;
+    enc=getObjFromVector(vector,offset);
+  }
+  if (!(enc instanceof DERTaggedObject)) {
+    dataValueDescriptor=(ASN1Object)enc;
+    offset++;
+    enc=getObjFromVector(vector,offset);
+  }
+  if (vector.size() != offset + 1) {
+    throw new IllegalArgumentException("input vector too large");
+  }
+  if (!(enc instanceof DERTaggedObject)) {
+    throw new IllegalArgumentException("No tagged object found in vector. Structure doesn't seem to be of type External");
+  }
+  DERTaggedObject obj=(DERTaggedObject)enc;
+  setEncoding(obj.getTagNo());
+  externalContent=obj.getObject();
+}

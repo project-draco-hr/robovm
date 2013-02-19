@@ -1,0 +1,27 @@
+{
+  BigInteger n=key.getParameters().getN();
+  BigInteger e=calculateE(n,message);
+  BigInteger r=null;
+  BigInteger s=null;
+  do {
+    BigInteger k=null;
+    int nBitLength=n.bitLength();
+    do {
+      do {
+        k=new BigInteger(nBitLength,random);
+      }
+ while (k.equals(ZERO) || k.compareTo(n) >= 0);
+      ECPoint p=key.getParameters().getG().multiply(k);
+      BigInteger x=p.getX().toBigInteger();
+      r=x.mod(n);
+    }
+ while (r.equals(ZERO));
+    BigInteger d=((ECPrivateKeyParameters)key).getD();
+    s=k.modInverse(n).multiply(e.add(d.multiply(r))).mod(n);
+  }
+ while (s.equals(ZERO));
+  BigInteger[] res=new BigInteger[2];
+  res[0]=r;
+  res[1]=s;
+  return res;
+}

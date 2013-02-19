@@ -1,0 +1,218 @@
+{
+  if (password == null) {
+    throw new NullPointerException("No password supplied for PKCS#12 KeyStore.");
+  }
+  ASN1EncodableVector keyS=new ASN1EncodableVector();
+  Enumeration ks=keys.keys();
+  while (ks.hasMoreElements()) {
+    byte[] kSalt=new byte[SALT_SIZE];
+    random.nextBytes(kSalt);
+    String name=(String)ks.nextElement();
+    PrivateKey privKey=(PrivateKey)keys.get(name);
+    PKCS12PBEParams kParams=new PKCS12PBEParams(kSalt,MIN_ITERATIONS);
+    byte[] kBytes=wrapKey(keyAlgorithm.getId(),privKey,kParams,password);
+    AlgorithmIdentifier kAlgId=new AlgorithmIdentifier(keyAlgorithm,kParams.getDERObject());
+    org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo kInfo=new org.bouncycastle.asn1.pkcs.EncryptedPrivateKeyInfo(kAlgId,kBytes);
+    boolean attrSet=false;
+    ASN1EncodableVector kName=new ASN1EncodableVector();
+    if (privKey instanceof PKCS12BagAttributeCarrier) {
+      PKCS12BagAttributeCarrier bagAttrs=(PKCS12BagAttributeCarrier)privKey;
+      DERBMPString nm=(DERBMPString)bagAttrs.getBagAttribute(pkcs_9_at_friendlyName);
+      if (nm == null || !nm.getString().equals(name)) {
+        bagAttrs.setBagAttribute(pkcs_9_at_friendlyName,new DERBMPString(name));
+      }
+      if (bagAttrs.getBagAttribute(pkcs_9_at_localKeyId) == null) {
+        Certificate ct=engineGetCertificate(name);
+        bagAttrs.setBagAttribute(pkcs_9_at_localKeyId,createSubjectKeyId(ct.getPublicKey()));
+      }
+      Enumeration e=bagAttrs.getBagAttributeKeys();
+      while (e.hasMoreElements()) {
+        DERObjectIdentifier oid=(DERObjectIdentifier)e.nextElement();
+        ASN1EncodableVector kSeq=new ASN1EncodableVector();
+        kSeq.add(oid);
+        kSeq.add(new DERSet(bagAttrs.getBagAttribute(oid)));
+        attrSet=true;
+        kName.add(new DERSequence(kSeq));
+      }
+    }
+    if (!attrSet) {
+      ASN1EncodableVector kSeq=new ASN1EncodableVector();
+      Certificate ct=engineGetCertificate(name);
+      kSeq.add(pkcs_9_at_localKeyId);
+      kSeq.add(new DERSet(createSubjectKeyId(ct.getPublicKey())));
+      kName.add(new DERSequence(kSeq));
+      kSeq=new ASN1EncodableVector();
+      kSeq.add(pkcs_9_at_friendlyName);
+      kSeq.add(new DERSet(new DERBMPString(name)));
+      kName.add(new DERSequence(kSeq));
+    }
+    SafeBag kBag=new SafeBag(pkcs8ShroudedKeyBag,kInfo.getDERObject(),new DERSet(kName));
+    keyS.add(kBag);
+  }
+  byte[] keySEncoded=new DERSequence(keyS).getDEREncoded();
+  BERConstructedOctetString keyString=new BERConstructedOctetString(keySEncoded);
+  byte[] cSalt=new byte[SALT_SIZE];
+  random.nextBytes(cSalt);
+  ASN1EncodableVector certSeq=new ASN1EncodableVector();
+  PKCS12PBEParams cParams=new PKCS12PBEParams(cSalt,MIN_ITERATIONS);
+  AlgorithmIdentifier cAlgId=new AlgorithmIdentifier(certAlgorithm,cParams.getDERObject());
+  Hashtable doneCerts=new Hashtable();
+  Enumeration cs=keys.keys();
+  while (cs.hasMoreElements()) {
+    try {
+      String name=(String)cs.nextElement();
+      Certificate cert=engineGetCertificate(name);
+      boolean cAttrSet=false;
+      CertBag cBag=new CertBag(x509Certificate,new DEROctetString(cert.getEncoded()));
+      ASN1EncodableVector fName=new ASN1EncodableVector();
+      if (cert instanceof PKCS12BagAttributeCarrier) {
+        PKCS12BagAttributeCarrier bagAttrs=(PKCS12BagAttributeCarrier)cert;
+        DERBMPString nm=(DERBMPString)bagAttrs.getBagAttribute(pkcs_9_at_friendlyName);
+        if (nm == null || !nm.getString().equals(name)) {
+          bagAttrs.setBagAttribute(pkcs_9_at_friendlyName,new DERBMPString(name));
+        }
+        if (bagAttrs.getBagAttribute(pkcs_9_at_localKeyId) == null) {
+          bagAttrs.setBagAttribute(pkcs_9_at_localKeyId,createSubjectKeyId(cert.getPublicKey()));
+        }
+        Enumeration e=bagAttrs.getBagAttributeKeys();
+        while (e.hasMoreElements()) {
+          DERObjectIdentifier oid=(DERObjectIdentifier)e.nextElement();
+          ASN1EncodableVector fSeq=new ASN1EncodableVector();
+          fSeq.add(oid);
+          fSeq.add(new DERSet(bagAttrs.getBagAttribute(oid)));
+          fName.add(new DERSequence(fSeq));
+          cAttrSet=true;
+        }
+      }
+      if (!cAttrSet) {
+        ASN1EncodableVector fSeq=new ASN1EncodableVector();
+        fSeq.add(pkcs_9_at_localKeyId);
+        fSeq.add(new DERSet(createSubjectKeyId(cert.getPublicKey())));
+        fName.add(new DERSequence(fSeq));
+        fSeq=new ASN1EncodableVector();
+        fSeq.add(pkcs_9_at_friendlyName);
+        fSeq.add(new DERSet(new DERBMPString(name)));
+        fName.add(new DERSequence(fSeq));
+      }
+      SafeBag sBag=new SafeBag(certBag,cBag.getDERObject(),new DERSet(fName));
+      certSeq.add(sBag);
+      doneCerts.put(cert,cert);
+    }
+ catch (    CertificateEncodingException e) {
+      throw new IOException("Error encoding certificate: " + e.toString());
+    }
+  }
+  cs=certs.keys();
+  while (cs.hasMoreElements()) {
+    try {
+      String certId=(String)cs.nextElement();
+      Certificate cert=(Certificate)certs.get(certId);
+      boolean cAttrSet=false;
+      if (keys.get(certId) != null) {
+        continue;
+      }
+      CertBag cBag=new CertBag(x509Certificate,new DEROctetString(cert.getEncoded()));
+      ASN1EncodableVector fName=new ASN1EncodableVector();
+      if (cert instanceof PKCS12BagAttributeCarrier) {
+        PKCS12BagAttributeCarrier bagAttrs=(PKCS12BagAttributeCarrier)cert;
+        DERBMPString nm=(DERBMPString)bagAttrs.getBagAttribute(pkcs_9_at_friendlyName);
+        if (nm == null || !nm.getString().equals(certId)) {
+          bagAttrs.setBagAttribute(pkcs_9_at_friendlyName,new DERBMPString(certId));
+        }
+        Enumeration e=bagAttrs.getBagAttributeKeys();
+        while (e.hasMoreElements()) {
+          DERObjectIdentifier oid=(DERObjectIdentifier)e.nextElement();
+          if (oid.equals(PKCSObjectIdentifiers.pkcs_9_at_localKeyId)) {
+            continue;
+          }
+          ASN1EncodableVector fSeq=new ASN1EncodableVector();
+          fSeq.add(oid);
+          fSeq.add(new DERSet(bagAttrs.getBagAttribute(oid)));
+          fName.add(new DERSequence(fSeq));
+          cAttrSet=true;
+        }
+      }
+      if (!cAttrSet) {
+        ASN1EncodableVector fSeq=new ASN1EncodableVector();
+        fSeq.add(pkcs_9_at_friendlyName);
+        fSeq.add(new DERSet(new DERBMPString(certId)));
+        fName.add(new DERSequence(fSeq));
+      }
+      SafeBag sBag=new SafeBag(certBag,cBag.getDERObject(),new DERSet(fName));
+      certSeq.add(sBag);
+      doneCerts.put(cert,cert);
+    }
+ catch (    CertificateEncodingException e) {
+      throw new IOException("Error encoding certificate: " + e.toString());
+    }
+  }
+  cs=chainCerts.keys();
+  while (cs.hasMoreElements()) {
+    try {
+      CertId certId=(CertId)cs.nextElement();
+      Certificate cert=(Certificate)chainCerts.get(certId);
+      if (doneCerts.get(cert) != null) {
+        continue;
+      }
+      CertBag cBag=new CertBag(x509Certificate,new DEROctetString(cert.getEncoded()));
+      ASN1EncodableVector fName=new ASN1EncodableVector();
+      if (cert instanceof PKCS12BagAttributeCarrier) {
+        PKCS12BagAttributeCarrier bagAttrs=(PKCS12BagAttributeCarrier)cert;
+        Enumeration e=bagAttrs.getBagAttributeKeys();
+        while (e.hasMoreElements()) {
+          DERObjectIdentifier oid=(DERObjectIdentifier)e.nextElement();
+          if (oid.equals(PKCSObjectIdentifiers.pkcs_9_at_localKeyId)) {
+            continue;
+          }
+          ASN1EncodableVector fSeq=new ASN1EncodableVector();
+          fSeq.add(oid);
+          fSeq.add(new DERSet(bagAttrs.getBagAttribute(oid)));
+          fName.add(new DERSequence(fSeq));
+        }
+      }
+      SafeBag sBag=new SafeBag(certBag,cBag.getDERObject(),new DERSet(fName));
+      certSeq.add(sBag);
+    }
+ catch (    CertificateEncodingException e) {
+      throw new IOException("Error encoding certificate: " + e.toString());
+    }
+  }
+  byte[] certSeqEncoded=new DERSequence(certSeq).getDEREncoded();
+  byte[] certBytes=cryptData(true,cAlgId,password,false,certSeqEncoded);
+  EncryptedData cInfo=new EncryptedData(data,cAlgId,new BERConstructedOctetString(certBytes));
+  ContentInfo[] info=new ContentInfo[]{new ContentInfo(data,keyString),new ContentInfo(encryptedData,cInfo.getDERObject())};
+  AuthenticatedSafe auth=new AuthenticatedSafe(info);
+  ByteArrayOutputStream bOut=new ByteArrayOutputStream();
+  DEROutputStream asn1Out;
+  if (useDEREncoding) {
+    asn1Out=new DEROutputStream(bOut);
+  }
+ else {
+    asn1Out=new BEROutputStream(bOut);
+  }
+  asn1Out.writeObject(auth);
+  byte[] pkg=bOut.toByteArray();
+  ContentInfo mainInfo=new ContentInfo(data,new BERConstructedOctetString(pkg));
+  byte[] mSalt=new byte[20];
+  int itCount=MIN_ITERATIONS;
+  random.nextBytes(mSalt);
+  byte[] data=((ASN1OctetString)mainInfo.getContent()).getOctets();
+  MacData mData;
+  try {
+    byte[] res=calculatePbeMac(id_SHA1,mSalt,itCount,password,false,data);
+    AlgorithmIdentifier algId=new AlgorithmIdentifier(id_SHA1,DERNull.INSTANCE);
+    DigestInfo dInfo=new DigestInfo(algId,res);
+    mData=new MacData(dInfo,mSalt,itCount);
+  }
+ catch (  Exception e) {
+    throw new IOException("error constructing MAC: " + e.toString());
+  }
+  Pfx pfx=new Pfx(mainInfo,mData);
+  if (useDEREncoding) {
+    asn1Out=new DEROutputStream(stream);
+  }
+ else {
+    asn1Out=new BEROutputStream(stream);
+  }
+  asn1Out.writeObject(pfx);
+}

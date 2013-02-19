@@ -1,0 +1,14 @@
+{
+switch (tag) {
+case DERTags.SET:
+    return ASN1Set.getInstance(this,isExplicit).parser();
+case DERTags.SEQUENCE:
+  return ASN1Sequence.getInstance(this,isExplicit).parser();
+case DERTags.OCTET_STRING:
+return ASN1OctetString.getInstance(this,isExplicit).parser();
+}
+if (isExplicit) {
+return getObject();
+}
+throw new RuntimeException("implicit tagging not implemented for tag: " + tag);
+}

@@ -1,0 +1,30 @@
+{
+  boolean isConstructed=(tag & CONSTRUCTED) != 0;
+  DefiniteLengthInputStream defIn=new DefiniteLengthInputStream(this,length);
+  if ((tag & APPLICATION) != 0) {
+    return new DERApplicationSpecific(isConstructed,tagNo,defIn.toByteArray());
+  }
+  if ((tag & TAGGED) != 0) {
+    return new ASN1StreamParser(defIn).readTaggedObject(isConstructed,tagNo);
+  }
+  if (isConstructed) {
+switch (tagNo) {
+case OCTET_STRING:
+      return new BERConstructedOctetString(buildDEREncodableVector(defIn).v);
+case SEQUENCE:
+    if (lazyEvaluate) {
+      return new LazyDERSequence(defIn.toByteArray());
+    }
+ else {
+      return DERFactory.createSequence(buildDEREncodableVector(defIn));
+    }
+case SET:
+  return DERFactory.createSet(buildDEREncodableVector(defIn),false);
+case EXTERNAL:
+return new DERExternal(buildDEREncodableVector(defIn));
+default :
+return new DERUnknownTag(true,tagNo,defIn.toByteArray());
+}
+}
+return createPrimitiveDERObject(tagNo,defIn.toByteArray());
+}

@@ -1,0 +1,20 @@
+{
+  try {
+    ASN1InputStream ais=new ASN1InputStream(obj.getContent());
+    Object asnObject=ais.readObject();
+    ASN1Sequence sequence=(ASN1Sequence)asnObject;
+    RSAPublicKeyStructure rsaPubStructure=new RSAPublicKeyStructure(sequence);
+    RSAPublicKeySpec keySpec=new RSAPublicKeySpec(rsaPubStructure.getModulus(),rsaPubStructure.getPublicExponent());
+    KeyFactory keyFact=KeyFactory.getInstance("RSA",provider);
+    return keyFact.generatePublic(keySpec);
+  }
+ catch (  IOException e) {
+    throw e;
+  }
+catch (  NoSuchProviderException e) {
+    throw new IOException("can't find provider " + provider);
+  }
+catch (  Exception e) {
+    throw new PEMException("problem extracting key: " + e.toString(),e);
+  }
+}

@@ -1,0 +1,24 @@
+{
+  Set intersect=new HashSet();
+  for (Iterator it=dns.iterator(); it.hasNext(); ) {
+    ASN1Sequence dn=ASN1Sequence.getInstance(((GeneralSubtree)it.next()).getBase().getName().getDERObject());
+    if (permitted == null) {
+      if (dn != null) {
+        intersect.add(dn);
+      }
+    }
+ else {
+      Iterator _iter=permitted.iterator();
+      while (_iter.hasNext()) {
+        ASN1Sequence subtree=(ASN1Sequence)_iter.next();
+        if (withinDNSubtree(dn,subtree)) {
+          intersect.add(dn);
+        }
+ else         if (withinDNSubtree(subtree,dn)) {
+          intersect.add(subtree);
+        }
+      }
+    }
+  }
+  return intersect;
+}

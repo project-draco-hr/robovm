@@ -1,0 +1,11 @@
+{
+  if (derTagNo >= 0x1f) {
+    throw new IOException("unsupported tag number");
+  }
+  byte[] orig=this.getEncoded();
+  byte[] tmp=replaceTagNumber(derTagNo,orig);
+  if ((orig[0] & DERTags.CONSTRUCTED) != 0) {
+    tmp[0]|=DERTags.CONSTRUCTED;
+  }
+  return new ASN1InputStream(tmp).readObject();
+}

@@ -1,0 +1,35 @@
+{
+  X500NameTokenizer nTok=new X500NameTokenizer(name);
+  X500NameBuilder builder=new X500NameBuilder(x500Style);
+  while (nTok.hasMoreTokens()) {
+    String token=nTok.nextToken();
+    int index=token.indexOf('=');
+    if (index == -1) {
+      throw new IllegalArgumentException("badly formated directory string");
+    }
+    String attr=token.substring(0,index);
+    String value=token.substring(index + 1);
+    ASN1ObjectIdentifier oid=x500Style.attrNameToOID(attr);
+    if (value.indexOf('+') > 0) {
+      X500NameTokenizer vTok=new X500NameTokenizer(value,'+');
+      String v=vTok.nextToken();
+      Vector oids=new Vector();
+      Vector values=new Vector();
+      oids.addElement(oid);
+      values.addElement(v);
+      while (vTok.hasMoreTokens()) {
+        String sv=vTok.nextToken();
+        int ndx=sv.indexOf('=');
+        String nm=sv.substring(0,ndx);
+        String vl=sv.substring(ndx + 1);
+        oids.addElement(x500Style.attrNameToOID(nm));
+        values.addElement(vl);
+      }
+      builder.addMultiValuedRDN(toOIDArray(oids),toValueArray(values));
+    }
+ else {
+      builder.addRDN(oid,value);
+    }
+  }
+  return builder.build().getRDNs();
+}

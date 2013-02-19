@@ -1,0 +1,17 @@
+{
+  Exception lastException=null;
+  for (Iterator it=deltacrls.iterator(); it.hasNext(); ) {
+    X509CRL crl=(X509CRL)it.next();
+    try {
+      crl.verify(key);
+      return crl;
+    }
+ catch (    Exception e) {
+      lastException=e;
+    }
+  }
+  if (lastException != null) {
+    throw new AnnotatedException("Cannot verify delta CRL.",lastException);
+  }
+  return null;
+}

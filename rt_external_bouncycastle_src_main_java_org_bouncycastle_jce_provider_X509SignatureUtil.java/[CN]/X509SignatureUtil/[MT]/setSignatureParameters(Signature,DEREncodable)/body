@@ -1,0 +1,19 @@
+{
+  if (params != null && !derNull.equals(params)) {
+    AlgorithmParameters sigParams=AlgorithmParameters.getInstance(signature.getAlgorithm(),signature.getProvider());
+    try {
+      sigParams.init(params.getDERObject().getDEREncoded());
+    }
+ catch (    IOException e) {
+      throw new SignatureException("IOException decoding parameters: " + e.getMessage());
+    }
+    if (signature.getAlgorithm().endsWith("MGF1")) {
+      try {
+        signature.setParameter(sigParams.getParameterSpec(PSSParameterSpec.class));
+      }
+ catch (      GeneralSecurityException e) {
+        throw new SignatureException("Exception extracting parameters: " + e.getMessage());
+      }
+    }
+  }
+}

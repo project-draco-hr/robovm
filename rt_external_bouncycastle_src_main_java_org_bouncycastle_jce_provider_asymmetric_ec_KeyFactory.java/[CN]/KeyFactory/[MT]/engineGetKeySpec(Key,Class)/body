@@ -1,0 +1,29 @@
+{
+  if (spec.isAssignableFrom(PKCS8EncodedKeySpec.class) && key.getFormat().equals("PKCS#8")) {
+    return new PKCS8EncodedKeySpec(key.getEncoded());
+  }
+ else   if (spec.isAssignableFrom(X509EncodedKeySpec.class) && key.getFormat().equals("X.509")) {
+    return new X509EncodedKeySpec(key.getEncoded());
+  }
+ else   if (spec.isAssignableFrom(java.security.spec.ECPublicKeySpec.class) && key instanceof ECPublicKey) {
+    ECPublicKey k=(ECPublicKey)key;
+    if (k.getParams() != null) {
+      return new java.security.spec.ECPublicKeySpec(k.getW(),k.getParams());
+    }
+ else {
+      ECParameterSpec implicitSpec=ProviderUtil.getEcImplicitlyCa();
+      return new java.security.spec.ECPublicKeySpec(k.getW(),EC5Util.convertSpec(EC5Util.convertCurve(implicitSpec.getCurve(),implicitSpec.getSeed()),implicitSpec));
+    }
+  }
+ else   if (spec.isAssignableFrom(java.security.spec.ECPrivateKeySpec.class) && key instanceof ECPrivateKey) {
+    ECPrivateKey k=(ECPrivateKey)key;
+    if (k.getParams() != null) {
+      return new java.security.spec.ECPrivateKeySpec(k.getS(),k.getParams());
+    }
+ else {
+      ECParameterSpec implicitSpec=ProviderUtil.getEcImplicitlyCa();
+      return new java.security.spec.ECPrivateKeySpec(k.getS(),EC5Util.convertSpec(EC5Util.convertCurve(implicitSpec.getCurve(),implicitSpec.getSeed()),implicitSpec));
+    }
+  }
+  throw new RuntimeException("not implemented yet " + key + " "+ spec);
+}

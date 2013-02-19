@@ -1,0 +1,24 @@
+{
+  int x0=BytesTo32Bits(src,srcIndex) ^ gSubKeys[INPUT_WHITEN];
+  int x1=BytesTo32Bits(src,srcIndex + 4) ^ gSubKeys[INPUT_WHITEN + 1];
+  int x2=BytesTo32Bits(src,srcIndex + 8) ^ gSubKeys[INPUT_WHITEN + 2];
+  int x3=BytesTo32Bits(src,srcIndex + 12) ^ gSubKeys[INPUT_WHITEN + 3];
+  int k=ROUND_SUBKEYS;
+  int t0, t1;
+  for (int r=0; r < ROUNDS; r+=2) {
+    t0=Fe32_0(x0);
+    t1=Fe32_3(x1);
+    x2^=t0 + t1 + gSubKeys[k++];
+    x2=x2 >>> 1 | x2 << 31;
+    x3=(x3 << 1 | x3 >>> 31) ^ (t0 + 2 * t1 + gSubKeys[k++]);
+    t0=Fe32_0(x2);
+    t1=Fe32_3(x3);
+    x0^=t0 + t1 + gSubKeys[k++];
+    x0=x0 >>> 1 | x0 << 31;
+    x1=(x1 << 1 | x1 >>> 31) ^ (t0 + 2 * t1 + gSubKeys[k++]);
+  }
+  Bits32ToBytes(x2 ^ gSubKeys[OUTPUT_WHITEN],dst,dstIndex);
+  Bits32ToBytes(x3 ^ gSubKeys[OUTPUT_WHITEN + 1],dst,dstIndex + 4);
+  Bits32ToBytes(x0 ^ gSubKeys[OUTPUT_WHITEN + 2],dst,dstIndex + 8);
+  Bits32ToBytes(x1 ^ gSubKeys[OUTPUT_WHITEN + 3],dst,dstIndex + 12);
+}

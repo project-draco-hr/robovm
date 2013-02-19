@@ -1,0 +1,52 @@
+{
+  if (!((mu == 1) || (mu == -1))) {
+    throw new IllegalArgumentException("mu must be 1 or -1");
+  }
+  BigInteger norm=norm(mu,lambda);
+  int log2Norm=norm.bitLength();
+  int maxLength=log2Norm > 30 ? log2Norm + 4 + width : 34 + width;
+  byte[] u=new byte[maxLength];
+  BigInteger pow2wMin1=pow2w.shiftRight(1);
+  BigInteger r0=lambda.u;
+  BigInteger r1=lambda.v;
+  int i=0;
+  while (!((r0.equals(ECConstants.ZERO)) && (r1.equals(ECConstants.ZERO)))) {
+    if (r0.testBit(0)) {
+      BigInteger uUnMod=r0.add(r1.multiply(tw)).mod(pow2w);
+      byte uLocal;
+      if (uUnMod.compareTo(pow2wMin1) >= 0) {
+        uLocal=(byte)uUnMod.subtract(pow2w).intValue();
+      }
+ else {
+        uLocal=(byte)uUnMod.intValue();
+      }
+      u[i]=uLocal;
+      boolean s=true;
+      if (uLocal < 0) {
+        s=false;
+        uLocal=(byte)-uLocal;
+      }
+      if (s) {
+        r0=r0.subtract(alpha[uLocal].u);
+        r1=r1.subtract(alpha[uLocal].v);
+      }
+ else {
+        r0=r0.add(alpha[uLocal].u);
+        r1=r1.add(alpha[uLocal].v);
+      }
+    }
+ else {
+      u[i]=0;
+    }
+    BigInteger t=r0;
+    if (mu == 1) {
+      r0=r1.add(r0.shiftRight(1));
+    }
+ else {
+      r0=r1.subtract(r0.shiftRight(1));
+    }
+    r1=t.shiftRight(1).negate();
+    i++;
+  }
+  return u;
+}

@@ -1,0 +1,39 @@
+{
+  super("X.509");
+  try {
+    if (encoding.equalsIgnoreCase("PkiPath")) {
+      ASN1InputStream derInStream=new ASN1InputStream(inStream);
+      DERObject derObject=derInStream.readObject();
+      if (!(derObject instanceof ASN1Sequence)) {
+        throw new CertificateException("input stream does not contain a ASN1 SEQUENCE while reading PkiPath encoded data to load CertPath");
+      }
+      Enumeration e=((ASN1Sequence)derObject).getObjects();
+      certificates=new ArrayList();
+      CertificateFactory certFactory=CertificateFactory.getInstance("X.509",BouncyCastleProvider.PROVIDER_NAME);
+      while (e.hasMoreElements()) {
+        ASN1Encodable element=(ASN1Encodable)e.nextElement();
+        byte[] encoded=element.getEncoded(ASN1Encodable.DER);
+        certificates.add(0,certFactory.generateCertificate(new ByteArrayInputStream(encoded)));
+      }
+    }
+ else     if (encoding.equalsIgnoreCase("PKCS7") || encoding.equalsIgnoreCase("PEM")) {
+      inStream=new BufferedInputStream(inStream);
+      certificates=new ArrayList();
+      CertificateFactory certFactory=CertificateFactory.getInstance("X.509",BouncyCastleProvider.PROVIDER_NAME);
+      Certificate cert;
+      while ((cert=certFactory.generateCertificate(inStream)) != null) {
+        certificates.add(cert);
+      }
+    }
+ else {
+      throw new CertificateException("unsupported encoding: " + encoding);
+    }
+  }
+ catch (  IOException ex) {
+    throw new CertificateException("IOException throw while decoding CertPath:\n" + ex.toString());
+  }
+catch (  NoSuchProviderException ex) {
+    throw new CertificateException("BouncyCastle provider not found while trying to get a CertificateFactory:\n" + ex.toString());
+  }
+  this.certificates=sortCerts(certificates);
+}

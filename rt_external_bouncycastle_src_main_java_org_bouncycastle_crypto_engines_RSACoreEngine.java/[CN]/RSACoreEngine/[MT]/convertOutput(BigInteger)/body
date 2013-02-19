@@ -1,0 +1,23 @@
+{
+  byte[] output=result.toByteArray();
+  if (forEncryption) {
+    if (output[0] == 0 && output.length > getOutputBlockSize()) {
+      byte[] tmp=new byte[output.length - 1];
+      System.arraycopy(output,1,tmp,0,tmp.length);
+      return tmp;
+    }
+    if (output.length < getOutputBlockSize()) {
+      byte[] tmp=new byte[getOutputBlockSize()];
+      System.arraycopy(output,0,tmp,tmp.length - output.length,output.length);
+      return tmp;
+    }
+  }
+ else {
+    if (output[0] == 0) {
+      byte[] tmp=new byte[output.length - 1];
+      System.arraycopy(output,1,tmp,0,tmp.length);
+      return tmp;
+    }
+  }
+  return output;
+}

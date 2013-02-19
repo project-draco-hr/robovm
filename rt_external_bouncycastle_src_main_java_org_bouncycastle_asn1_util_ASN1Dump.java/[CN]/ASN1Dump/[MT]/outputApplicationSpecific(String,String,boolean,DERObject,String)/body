@@ -1,0 +1,18 @@
+{
+  DERApplicationSpecific app=(DERApplicationSpecific)obj;
+  StringBuffer buf=new StringBuffer();
+  if (app.isConstructed()) {
+    try {
+      ASN1Sequence s=ASN1Sequence.getInstance(app.getObject(DERTags.SEQUENCE));
+      buf.append(indent + type + " ApplicationSpecific["+ app.getApplicationTag()+ "]"+ nl);
+      for (Enumeration e=s.getObjects(); e.hasMoreElements(); ) {
+        _dumpAsString(indent + TAB,verbose,(DERObject)e.nextElement(),buf);
+      }
+    }
+ catch (    IOException e) {
+      buf.append(e);
+    }
+    return buf.toString();
+  }
+  return indent + type + " ApplicationSpecific["+ app.getApplicationTag()+ "] ("+ new String(Hex.encode(app.getContents()))+ ")"+ nl;
+}

@@ -1,0 +1,28 @@
+{
+  X962Parameters params=new X962Parameters((DERObject)info.getAlgorithmId().getParameters());
+  if (params.isNamedCurve()) {
+    DERObjectIdentifier oid=(DERObjectIdentifier)params.getParameters();
+    X9ECParameters ecP=ECUtil.getNamedCurveByOid(oid);
+{
+      EllipticCurve ellipticCurve=EC5Util.convertCurve(ecP.getCurve(),ecP.getSeed());
+      ecSpec=new ECNamedCurveSpec(ECUtil.getCurveName(oid),ellipticCurve,new ECPoint(ecP.getG().getX().toBigInteger(),ecP.getG().getY().toBigInteger()),ecP.getN(),ecP.getH());
+    }
+  }
+ else   if (params.isImplicitlyCA()) {
+    ecSpec=null;
+  }
+ else {
+    X9ECParameters ecP=new X9ECParameters((ASN1Sequence)params.getParameters());
+    EllipticCurve ellipticCurve=EC5Util.convertCurve(ecP.getCurve(),ecP.getSeed());
+    this.ecSpec=new ECParameterSpec(ellipticCurve,new ECPoint(ecP.getG().getX().toBigInteger(),ecP.getG().getY().toBigInteger()),ecP.getN(),ecP.getH().intValue());
+  }
+  if (info.getPrivateKey() instanceof DERInteger) {
+    DERInteger derD=(DERInteger)info.getPrivateKey();
+    this.d=derD.getValue();
+  }
+ else {
+    ECPrivateKeyStructure ec=new ECPrivateKeyStructure((ASN1Sequence)info.getPrivateKey());
+    this.d=ec.getKey();
+    this.publicKey=ec.getPublicKey();
+  }
+}

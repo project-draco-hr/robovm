@@ -1,0 +1,38 @@
+{
+  if (obj == null || obj instanceof GeneralName) {
+    return (GeneralName)obj;
+  }
+  if (obj instanceof ASN1TaggedObject) {
+    ASN1TaggedObject tagObj=(ASN1TaggedObject)obj;
+    int tag=tagObj.getTagNo();
+switch (tag) {
+case otherName:
+      return new GeneralName(tag,ASN1Sequence.getInstance(tagObj,false));
+case rfc822Name:
+    return new GeneralName(tag,DERIA5String.getInstance(tagObj,false));
+case dNSName:
+  return new GeneralName(tag,DERIA5String.getInstance(tagObj,false));
+case x400Address:
+throw new IllegalArgumentException("unknown tag: " + tag);
+case directoryName:
+return new GeneralName(tag,X509Name.getInstance(tagObj,true));
+case ediPartyName:
+return new GeneralName(tag,ASN1Sequence.getInstance(tagObj,false));
+case uniformResourceIdentifier:
+return new GeneralName(tag,DERIA5String.getInstance(tagObj,false));
+case iPAddress:
+return new GeneralName(tag,ASN1OctetString.getInstance(tagObj,false));
+case registeredID:
+return new GeneralName(tag,DERObjectIdentifier.getInstance(tagObj,false));
+}
+}
+if (obj instanceof byte[]) {
+try {
+return getInstance(ASN1Object.fromByteArray((byte[])obj));
+}
+ catch (IOException e) {
+throw new IllegalArgumentException("unable to parse encoded general name");
+}
+}
+throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
+}

@@ -1,0 +1,14 @@
+{
+  Object obj=in.readObject();
+  if (obj instanceof Hashtable) {
+    this.pkcs12Attributes=(Hashtable)obj;
+    this.pkcs12Ordering=(Vector)in.readObject();
+  }
+ else {
+    ASN1InputStream aIn=new ASN1InputStream((byte[])obj);
+    DERObjectIdentifier oid;
+    while ((oid=(DERObjectIdentifier)aIn.readObject()) != null) {
+      this.setBagAttribute(oid,aIn.readObject());
+    }
+  }
+}

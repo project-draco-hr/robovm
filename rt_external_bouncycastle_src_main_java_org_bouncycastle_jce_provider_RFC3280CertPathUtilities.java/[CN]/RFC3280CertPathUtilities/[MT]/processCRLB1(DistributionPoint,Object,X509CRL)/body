@@ -1,0 +1,40 @@
+{
+  DERObject idp=CertPathValidatorUtilities.getExtensionValue(crl,ISSUING_DISTRIBUTION_POINT);
+  boolean isIndirect=false;
+  if (idp != null) {
+    if (IssuingDistributionPoint.getInstance(idp).isIndirectCRL()) {
+      isIndirect=true;
+    }
+  }
+  byte[] issuerBytes=CertPathValidatorUtilities.getIssuerPrincipal(crl).getEncoded();
+  boolean matchIssuer=false;
+  if (dp.getCRLIssuer() != null) {
+    GeneralName genNames[]=dp.getCRLIssuer().getNames();
+    for (int j=0; j < genNames.length; j++) {
+      if (genNames[j].getTagNo() == GeneralName.directoryName) {
+        try {
+          if (Arrays.areEqual(genNames[j].getName().getDERObject().getEncoded(),issuerBytes)) {
+            matchIssuer=true;
+          }
+        }
+ catch (        IOException e) {
+          throw new AnnotatedException("CRL issuer information from distribution point cannot be decoded.",e);
+        }
+      }
+    }
+    if (matchIssuer && !isIndirect) {
+      throw new AnnotatedException("Distribution point contains cRLIssuer field but CRL is not indirect.");
+    }
+    if (!matchIssuer) {
+      throw new AnnotatedException("CRL issuer of CRL does not match CRL issuer of distribution point.");
+    }
+  }
+ else {
+    if (CertPathValidatorUtilities.getIssuerPrincipal(crl).equals(CertPathValidatorUtilities.getEncodedIssuerPrincipal(cert))) {
+      matchIssuer=true;
+    }
+  }
+  if (!matchIssuer) {
+    throw new AnnotatedException("Cannot find matching CRL issuer for certificate.");
+  }
+}

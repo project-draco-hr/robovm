@@ -1,0 +1,23 @@
+{
+  if (input != null) {
+    bOut.write(input,inputOffset,inputLen);
+  }
+  if (cipher instanceof RSABlindedEngine) {
+    if (bOut.size() > cipher.getInputBlockSize() + 1) {
+      throw new ArrayIndexOutOfBoundsException("too much data for RSA block");
+    }
+  }
+ else {
+    if (bOut.size() > cipher.getInputBlockSize()) {
+      throw new ArrayIndexOutOfBoundsException("too much data for RSA block");
+    }
+  }
+  try {
+    byte[] bytes=bOut.toByteArray();
+    bOut.reset();
+    return cipher.processBlock(bytes,0,bytes.length);
+  }
+ catch (  InvalidCipherTextException e) {
+    throw new BadPaddingException(e.getMessage());
+  }
+}

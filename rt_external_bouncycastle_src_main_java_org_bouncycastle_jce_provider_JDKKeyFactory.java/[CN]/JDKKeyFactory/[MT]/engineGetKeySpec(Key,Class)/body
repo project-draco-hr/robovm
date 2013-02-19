@@ -1,0 +1,37 @@
+{
+  if (spec.isAssignableFrom(PKCS8EncodedKeySpec.class) && key.getFormat().equals("PKCS#8")) {
+    return new PKCS8EncodedKeySpec(key.getEncoded());
+  }
+ else   if (spec.isAssignableFrom(X509EncodedKeySpec.class) && key.getFormat().equals("X.509")) {
+    return new X509EncodedKeySpec(key.getEncoded());
+  }
+ else   if (spec.isAssignableFrom(RSAPublicKeySpec.class) && key instanceof RSAPublicKey) {
+    RSAPublicKey k=(RSAPublicKey)key;
+    return new RSAPublicKeySpec(k.getModulus(),k.getPublicExponent());
+  }
+ else   if (spec.isAssignableFrom(RSAPrivateKeySpec.class) && key instanceof RSAPrivateKey) {
+    RSAPrivateKey k=(RSAPrivateKey)key;
+    return new RSAPrivateKeySpec(k.getModulus(),k.getPrivateExponent());
+  }
+ else   if (spec.isAssignableFrom(RSAPrivateCrtKeySpec.class) && key instanceof RSAPrivateCrtKey) {
+    RSAPrivateCrtKey k=(RSAPrivateCrtKey)key;
+    return new RSAPrivateCrtKeySpec(k.getModulus(),k.getPublicExponent(),k.getPrivateExponent(),k.getPrimeP(),k.getPrimeQ(),k.getPrimeExponentP(),k.getPrimeExponentQ(),k.getCrtCoefficient());
+  }
+ else   if (spec.isAssignableFrom(DHPrivateKeySpec.class) && key instanceof DHPrivateKey) {
+    DHPrivateKey k=(DHPrivateKey)key;
+    return new DHPrivateKeySpec(k.getX(),k.getParams().getP(),k.getParams().getG());
+  }
+ else   if (spec.isAssignableFrom(DHPublicKeySpec.class) && key instanceof DHPublicKey) {
+    DHPublicKey k=(DHPublicKey)key;
+    return new DHPublicKeySpec(k.getY(),k.getParams().getP(),k.getParams().getG());
+  }
+ else   if (spec.isAssignableFrom(DSAPublicKeySpec.class) && key instanceof DSAPublicKey) {
+    DSAPublicKey k=(DSAPublicKey)key;
+    return new DSAPublicKeySpec(k.getY(),k.getParams().getP(),k.getParams().getQ(),k.getParams().getG());
+  }
+ else   if (spec.isAssignableFrom(DSAPrivateKeySpec.class) && key instanceof DSAPrivateKey) {
+    DSAPrivateKey k=(DSAPrivateKey)key;
+    return new DSAPrivateKeySpec(k.getX(),k.getParams().getP(),k.getParams().getQ(),k.getParams().getG());
+  }
+  throw new RuntimeException("not implemented yet " + key + " "+ spec);
+}

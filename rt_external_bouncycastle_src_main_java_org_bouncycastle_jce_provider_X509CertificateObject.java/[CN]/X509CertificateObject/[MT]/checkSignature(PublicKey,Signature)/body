@@ -1,0 +1,12 @@
+{
+  if (!isAlgIdEqual(c.getSignatureAlgorithm(),c.getTBSCertificate().getSignature())) {
+    throw new CertificateException("signature algorithm in TBS cert not same as outer cert");
+  }
+  DEREncodable params=c.getSignatureAlgorithm().getParameters();
+  X509SignatureUtil.setSignatureParameters(signature,params);
+  signature.initVerify(key);
+  signature.update(this.getTBSCertificate());
+  if (!signature.verify(this.getSignature())) {
+    throw new InvalidKeyException("Public key presented not for certificate signature");
+  }
+}

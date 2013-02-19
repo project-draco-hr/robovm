@@ -1,0 +1,26 @@
+{
+  Set certs=new HashSet();
+  Iterator iter=certStores.iterator();
+  while (iter.hasNext()) {
+    Object obj=iter.next();
+    if (obj instanceof X509Store) {
+      X509Store certStore=(X509Store)obj;
+      try {
+        certs.addAll(certStore.getMatches(certSelect));
+      }
+ catch (      StoreException e) {
+        throw new AnnotatedException("Problem while picking certificates from X.509 store.",e);
+      }
+    }
+ else {
+      CertStore certStore=(CertStore)obj;
+      try {
+        certs.addAll(certStore.getCertificates(certSelect));
+      }
+ catch (      CertStoreException e) {
+        throw new AnnotatedException("Problem while picking certificates from certificate store.",e);
+      }
+    }
+  }
+  return certs;
+}

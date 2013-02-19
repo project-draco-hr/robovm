@@ -1,0 +1,20 @@
+{
+  byte[] buf=new byte[digest.getDigestSize()];
+  byte[] key=new byte[bytesNeeded];
+  int offset=0;
+  for (; ; ) {
+    digest.update(password,0,password.length);
+    digest.update(salt,0,salt.length);
+    digest.doFinal(buf,0);
+    int len=(bytesNeeded > buf.length) ? buf.length : bytesNeeded;
+    System.arraycopy(buf,0,key,offset,len);
+    offset+=len;
+    bytesNeeded-=len;
+    if (bytesNeeded == 0) {
+      break;
+    }
+    digest.reset();
+    digest.update(buf,0,buf.length);
+  }
+  return key;
+}

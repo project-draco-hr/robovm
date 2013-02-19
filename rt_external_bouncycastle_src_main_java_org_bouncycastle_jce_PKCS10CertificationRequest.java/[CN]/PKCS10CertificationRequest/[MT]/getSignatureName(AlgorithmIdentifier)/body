@@ -1,0 +1,10 @@
+{
+  DEREncodable params=sigAlgId.getParameters();
+  if (params != null && !DERNull.INSTANCE.equals(params)) {
+    if (sigAlgId.getObjectId().equals(PKCSObjectIdentifiers.id_RSASSA_PSS)) {
+      RSASSAPSSparams rsaParams=RSASSAPSSparams.getInstance(params);
+      return getDigestAlgName(rsaParams.getHashAlgorithm().getObjectId()) + "withRSAandMGF1";
+    }
+  }
+  return sigAlgId.getObjectId().getId();
+}

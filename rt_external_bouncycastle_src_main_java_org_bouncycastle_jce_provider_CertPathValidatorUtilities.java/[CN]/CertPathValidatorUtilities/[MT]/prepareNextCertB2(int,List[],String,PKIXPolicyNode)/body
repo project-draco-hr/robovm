@@ -1,0 +1,24 @@
+{
+  Iterator nodes_i=policyNodes[i].iterator();
+  while (nodes_i.hasNext()) {
+    PKIXPolicyNode node=(PKIXPolicyNode)nodes_i.next();
+    if (node.getValidPolicy().equals(id_p)) {
+      PKIXPolicyNode p_node=(PKIXPolicyNode)node.getParent();
+      p_node.removeChild(node);
+      nodes_i.remove();
+      for (int k=(i - 1); k >= 0; k--) {
+        List nodes=policyNodes[k];
+        for (int l=0; l < nodes.size(); l++) {
+          PKIXPolicyNode node2=(PKIXPolicyNode)nodes.get(l);
+          if (!node2.hasChildren()) {
+            validPolicyTree=removePolicyNode(validPolicyTree,policyNodes,node2);
+            if (validPolicyTree == null) {
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+  return validPolicyTree;
+}

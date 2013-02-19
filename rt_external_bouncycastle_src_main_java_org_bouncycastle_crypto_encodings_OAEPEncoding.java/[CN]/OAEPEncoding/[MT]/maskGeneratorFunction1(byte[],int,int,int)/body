@@ -1,0 +1,23 @@
+{
+  byte[] mask=new byte[length];
+  byte[] hashBuf=new byte[mgf1Hash.getDigestSize()];
+  byte[] C=new byte[4];
+  int counter=0;
+  hash.reset();
+  do {
+    ItoOSP(counter,C);
+    mgf1Hash.update(Z,zOff,zLen);
+    mgf1Hash.update(C,0,C.length);
+    mgf1Hash.doFinal(hashBuf,0);
+    System.arraycopy(hashBuf,0,mask,counter * hashBuf.length,hashBuf.length);
+  }
+ while (++counter < (length / hashBuf.length));
+  if ((counter * hashBuf.length) < length) {
+    ItoOSP(counter,C);
+    mgf1Hash.update(Z,zOff,zLen);
+    mgf1Hash.update(C,0,C.length);
+    mgf1Hash.doFinal(hashBuf,0);
+    System.arraycopy(hashBuf,0,mask,counter * hashBuf.length,mask.length - (counter * hashBuf.length));
+  }
+  return mask;
+}

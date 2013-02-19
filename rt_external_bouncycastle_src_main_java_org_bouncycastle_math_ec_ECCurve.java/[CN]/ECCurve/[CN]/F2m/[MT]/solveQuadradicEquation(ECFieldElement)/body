@@ -1,0 +1,25 @@
+{
+  ECFieldElement zeroElement=new ECFieldElement.F2m(this.m,this.k1,this.k2,this.k3,ECConstants.ZERO);
+  if (beta.toBigInteger().equals(ECConstants.ZERO)) {
+    return zeroElement;
+  }
+  ECFieldElement z=null;
+  ECFieldElement gamma=zeroElement;
+  Random rand=new Random();
+  do {
+    ECFieldElement t=new ECFieldElement.F2m(this.m,this.k1,this.k2,this.k3,new BigInteger(m,rand));
+    z=zeroElement;
+    ECFieldElement w=beta;
+    for (int i=1; i <= m - 1; i++) {
+      ECFieldElement w2=w.square();
+      z=z.square().add(w2.multiply(t));
+      w=w2.add(beta);
+    }
+    if (!w.toBigInteger().equals(ECConstants.ZERO)) {
+      return null;
+    }
+    gamma=z.square().add(z);
+  }
+ while (gamma.toBigInteger().equals(ECConstants.ZERO));
+  return z;
+}

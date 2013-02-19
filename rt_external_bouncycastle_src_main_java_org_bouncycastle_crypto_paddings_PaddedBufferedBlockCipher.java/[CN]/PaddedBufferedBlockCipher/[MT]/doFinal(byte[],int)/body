@@ -1,0 +1,35 @@
+{
+  int blockSize=cipher.getBlockSize();
+  int resultLen=0;
+  if (forEncryption) {
+    if (bufOff == blockSize) {
+      if ((outOff + 2 * blockSize) > out.length) {
+        reset();
+        throw new DataLengthException("output buffer too short");
+      }
+      resultLen=cipher.processBlock(buf,0,out,outOff);
+      bufOff=0;
+    }
+    padding.addPadding(buf,bufOff);
+    resultLen+=cipher.processBlock(buf,0,out,outOff + resultLen);
+    reset();
+  }
+ else {
+    if (bufOff == blockSize) {
+      resultLen=cipher.processBlock(buf,0,buf,0);
+      bufOff=0;
+    }
+ else {
+      reset();
+      throw new DataLengthException("last block incomplete in decryption");
+    }
+    try {
+      resultLen-=padding.padCount(buf);
+      System.arraycopy(buf,0,out,outOff,resultLen);
+    }
+  finally {
+      reset();
+    }
+  }
+  return resultLen;
+}

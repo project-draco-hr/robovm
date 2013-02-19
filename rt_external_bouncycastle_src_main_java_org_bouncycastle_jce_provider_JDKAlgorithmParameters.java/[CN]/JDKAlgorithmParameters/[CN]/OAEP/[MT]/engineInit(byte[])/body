@@ -1,0 +1,12 @@
+{
+  try {
+    RSAESOAEPparams oaepP=new RSAESOAEPparams((ASN1Sequence)ASN1Object.fromByteArray(params));
+    currentSpec=new OAEPParameterSpec(oaepP.getHashAlgorithm().getObjectId().getId(),oaepP.getMaskGenAlgorithm().getObjectId().getId(),new MGF1ParameterSpec(AlgorithmIdentifier.getInstance(oaepP.getMaskGenAlgorithm().getParameters()).getObjectId().getId()),new PSource.PSpecified(ASN1OctetString.getInstance(oaepP.getPSourceAlgorithm().getParameters()).getOctets()));
+  }
+ catch (  ClassCastException e) {
+    throw new IOException("Not a valid OAEP Parameter encoding.");
+  }
+catch (  ArrayIndexOutOfBoundsException e) {
+    throw new IOException("Not a valid OAEP Parameter encoding.");
+  }
+}

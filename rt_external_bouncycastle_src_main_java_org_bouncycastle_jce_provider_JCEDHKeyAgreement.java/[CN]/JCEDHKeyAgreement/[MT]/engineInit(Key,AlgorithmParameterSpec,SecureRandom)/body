@@ -1,0 +1,19 @@
+{
+  if (!(key instanceof DHPrivateKey)) {
+    throw new InvalidKeyException("DHKeyAgreement requires DHPrivateKey for initialisation");
+  }
+  DHPrivateKey privKey=(DHPrivateKey)key;
+  if (params != null) {
+    if (!(params instanceof DHParameterSpec)) {
+      throw new InvalidAlgorithmParameterException("DHKeyAgreement only accepts DHParameterSpec");
+    }
+    DHParameterSpec p=(DHParameterSpec)params;
+    this.p=p.getP();
+    this.g=p.getG();
+  }
+ else {
+    this.p=privKey.getParams().getP();
+    this.g=privKey.getParams().getG();
+  }
+  this.x=this.result=privKey.getX();
+}

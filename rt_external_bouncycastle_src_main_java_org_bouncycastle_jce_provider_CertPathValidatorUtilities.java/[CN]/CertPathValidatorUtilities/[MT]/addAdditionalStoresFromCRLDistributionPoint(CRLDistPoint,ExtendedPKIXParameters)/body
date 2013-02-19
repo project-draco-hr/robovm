@@ -1,0 +1,25 @@
+{
+  if (crldp != null) {
+    DistributionPoint dps[]=null;
+    try {
+      dps=crldp.getDistributionPoints();
+    }
+ catch (    Exception e) {
+      throw new AnnotatedException("Distribution points could not be read.",e);
+    }
+    for (int i=0; i < dps.length; i++) {
+      DistributionPointName dpn=dps[i].getDistributionPoint();
+      if (dpn != null) {
+        if (dpn.getType() == DistributionPointName.FULL_NAME) {
+          GeneralName[] genNames=GeneralNames.getInstance(dpn.getName()).getNames();
+          for (int j=0; j < genNames.length; j++) {
+            if (genNames[j].getTagNo() == GeneralName.uniformResourceIdentifier) {
+              String location=DERIA5String.getInstance(genNames[j].getName()).getString();
+              CertPathValidatorUtilities.addAdditionalStoreFromLocation(location,pkixParams);
+            }
+          }
+        }
+      }
+    }
+  }
+}

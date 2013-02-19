@@ -1,0 +1,39 @@
+{
+  List certs=certPath.getCertificates();
+  X509Certificate cert=(X509Certificate)certs.get(index);
+  if (!verificationAlreadyPerformed) {
+    try {
+      CertPathValidatorUtilities.verifyX509Certificate(cert,workingPublicKey,paramsPKIX.getSigProvider());
+    }
+ catch (    GeneralSecurityException e) {
+      throw new ExtCertPathValidatorException("Could not validate certificate signature.",e,certPath,index);
+    }
+  }
+  try {
+    cert.checkValidity(CertPathValidatorUtilities.getValidCertDateFromValidityModel(paramsPKIX,certPath,index));
+  }
+ catch (  CertificateExpiredException e) {
+    throw new ExtCertPathValidatorException("Could not validate certificate: " + e.getMessage(),e,certPath,index);
+  }
+catch (  CertificateNotYetValidException e) {
+    throw new ExtCertPathValidatorException("Could not validate certificate: " + e.getMessage(),e,certPath,index);
+  }
+catch (  AnnotatedException e) {
+    throw new ExtCertPathValidatorException("Could not validate time of certificate.",e,certPath,index);
+  }
+  if (paramsPKIX.isRevocationEnabled()) {
+    try {
+      checkCRLs(paramsPKIX,cert,CertPathValidatorUtilities.getValidCertDateFromValidityModel(paramsPKIX,certPath,index),sign,workingPublicKey,certs);
+    }
+ catch (    AnnotatedException e) {
+      Throwable cause=e;
+      if (null != e.getCause()) {
+        cause=e.getCause();
+      }
+      throw new ExtCertPathValidatorException(e.getMessage(),cause,certPath,index);
+    }
+  }
+  if (!CertPathValidatorUtilities.getEncodedIssuerPrincipal(cert).equals(workingIssuerName)) {
+    throw new ExtCertPathValidatorException("IssuerName(" + CertPathValidatorUtilities.getEncodedIssuerPrincipal(cert) + ") does not match SubjectName("+ workingIssuerName+ ") of signing certificate.",null,certPath,index);
+  }
+}

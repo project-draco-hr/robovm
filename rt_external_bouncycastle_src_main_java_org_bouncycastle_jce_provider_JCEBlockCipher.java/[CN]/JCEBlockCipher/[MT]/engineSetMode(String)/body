@@ -1,0 +1,61 @@
+{
+  modeName=Strings.toUpperCase(mode);
+  if (modeName.equals("ECB")) {
+    ivLength=0;
+    cipher=new BufferedGenericBlockCipher(baseEngine);
+  }
+ else   if (modeName.equals("CBC")) {
+    ivLength=baseEngine.getBlockSize();
+    cipher=new BufferedGenericBlockCipher(new CBCBlockCipher(baseEngine));
+  }
+ else   if (modeName.startsWith("OFB")) {
+    ivLength=baseEngine.getBlockSize();
+    if (modeName.length() != 3) {
+      int wordSize=Integer.parseInt(modeName.substring(3));
+      cipher=new BufferedGenericBlockCipher(new OFBBlockCipher(baseEngine,wordSize));
+    }
+ else {
+      cipher=new BufferedGenericBlockCipher(new OFBBlockCipher(baseEngine,8 * baseEngine.getBlockSize()));
+    }
+  }
+ else   if (modeName.startsWith("CFB")) {
+    ivLength=baseEngine.getBlockSize();
+    if (modeName.length() != 3) {
+      int wordSize=Integer.parseInt(modeName.substring(3));
+      cipher=new BufferedGenericBlockCipher(new CFBBlockCipher(baseEngine,wordSize));
+    }
+ else {
+      cipher=new BufferedGenericBlockCipher(new CFBBlockCipher(baseEngine,8 * baseEngine.getBlockSize()));
+    }
+  }
+ else   if (modeName.startsWith("SIC")) {
+    ivLength=baseEngine.getBlockSize();
+    if (ivLength < 16) {
+      throw new IllegalArgumentException("Warning: SIC-Mode can become a twotime-pad if the blocksize of the cipher is too small. Use a cipher with a block size of at least 128 bits (e.g. AES)");
+    }
+    cipher=new BufferedGenericBlockCipher(new BufferedBlockCipher(new SICBlockCipher(baseEngine)));
+  }
+ else   if (modeName.startsWith("CTR")) {
+    ivLength=baseEngine.getBlockSize();
+    cipher=new BufferedGenericBlockCipher(new BufferedBlockCipher(new SICBlockCipher(baseEngine)));
+  }
+ else   if (modeName.startsWith("GOFB")) {
+    ivLength=baseEngine.getBlockSize();
+    cipher=new BufferedGenericBlockCipher(new BufferedBlockCipher(new GOFBBlockCipher(baseEngine)));
+  }
+ else   if (modeName.startsWith("CTS")) {
+    ivLength=baseEngine.getBlockSize();
+    cipher=new BufferedGenericBlockCipher(new CTSBlockCipher(new CBCBlockCipher(baseEngine)));
+  }
+ else   if (modeName.startsWith("CCM")) {
+    ivLength=baseEngine.getBlockSize();
+    cipher=new AEADGenericBlockCipher(new CCMBlockCipher(baseEngine));
+  }
+ else   if (modeName.startsWith("GCM")) {
+    ivLength=baseEngine.getBlockSize();
+    cipher=new AEADGenericBlockCipher(new GCMBlockCipher(baseEngine));
+  }
+ else {
+    throw new NoSuchAlgorithmException("can't support mode " + mode);
+  }
+}

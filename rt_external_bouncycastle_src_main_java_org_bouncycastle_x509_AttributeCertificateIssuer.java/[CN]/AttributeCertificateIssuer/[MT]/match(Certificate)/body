@@ -1,0 +1,23 @@
+{
+  if (!(cert instanceof X509Certificate)) {
+    return false;
+  }
+  X509Certificate x509Cert=(X509Certificate)cert;
+  if (form instanceof V2Form) {
+    V2Form issuer=(V2Form)form;
+    if (issuer.getBaseCertificateID() != null) {
+      return issuer.getBaseCertificateID().getSerial().getValue().equals(x509Cert.getSerialNumber()) && matchesDN(x509Cert.getIssuerX500Principal(),issuer.getBaseCertificateID().getIssuer());
+    }
+    GeneralNames name=issuer.getIssuerName();
+    if (matchesDN(x509Cert.getSubjectX500Principal(),name)) {
+      return true;
+    }
+  }
+ else {
+    GeneralNames name=(GeneralNames)form;
+    if (matchesDN(x509Cert.getSubjectX500Principal(),name)) {
+      return true;
+    }
+  }
+  return false;
+}

@@ -1,0 +1,36 @@
+{
+  String pad=Strings.toUpperCase(padding);
+  if (pad.equals("NOPADDING")) {
+    cipher=new RSABlindedEngine();
+  }
+ else   if (pad.equals("PKCS1PADDING")) {
+    cipher=new PKCS1Encoding(new RSABlindedEngine());
+  }
+ else   if (pad.equals("ISO9796-1PADDING")) {
+    cipher=new ISO9796d1Encoding(new RSABlindedEngine());
+  }
+ else   if (pad.equals("OAEPWITHMD5ANDMGF1PADDING")) {
+    initFromSpec(new OAEPParameterSpec("MD5","MGF1",new MGF1ParameterSpec("MD5"),PSource.PSpecified.DEFAULT));
+  }
+ else   if (pad.equals("OAEPPADDING")) {
+    initFromSpec(OAEPParameterSpec.DEFAULT);
+  }
+ else   if (pad.equals("OAEPWITHSHA1ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-1ANDMGF1PADDING")) {
+    initFromSpec(OAEPParameterSpec.DEFAULT);
+  }
+ else   if (pad.equals("OAEPWITHSHA224ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-224ANDMGF1PADDING")) {
+    initFromSpec(new OAEPParameterSpec("SHA-224","MGF1",new MGF1ParameterSpec("SHA-224"),PSource.PSpecified.DEFAULT));
+  }
+ else   if (pad.equals("OAEPWITHSHA256ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-256ANDMGF1PADDING")) {
+    initFromSpec(new OAEPParameterSpec("SHA-256","MGF1",MGF1ParameterSpec.SHA256,PSource.PSpecified.DEFAULT));
+  }
+ else   if (pad.equals("OAEPWITHSHA384ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-384ANDMGF1PADDING")) {
+    initFromSpec(new OAEPParameterSpec("SHA-384","MGF1",MGF1ParameterSpec.SHA384,PSource.PSpecified.DEFAULT));
+  }
+ else   if (pad.equals("OAEPWITHSHA512ANDMGF1PADDING") || pad.equals("OAEPWITHSHA-512ANDMGF1PADDING")) {
+    initFromSpec(new OAEPParameterSpec("SHA-512","MGF1",MGF1ParameterSpec.SHA512,PSource.PSpecified.DEFAULT));
+  }
+ else {
+    throw new NoSuchPaddingException(padding + " unavailable with RSA.");
+  }
+}

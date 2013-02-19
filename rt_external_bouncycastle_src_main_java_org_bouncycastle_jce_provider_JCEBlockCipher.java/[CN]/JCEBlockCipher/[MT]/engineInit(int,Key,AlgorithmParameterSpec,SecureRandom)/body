@@ -1,0 +1,89 @@
+{
+  CipherParameters param;
+  this.pbeSpec=null;
+  this.pbeAlgorithm=null;
+  this.engineParams=null;
+  if (!(key instanceof SecretKey)) {
+    throw new InvalidKeyException("Key for algorithm " + key.getAlgorithm() + " not suitable for symmetric enryption.");
+  }
+  if (key instanceof JCEPBEKey) {
+    JCEPBEKey k=(JCEPBEKey)key;
+    if (k.getOID() != null) {
+      pbeAlgorithm=k.getOID().getId();
+    }
+ else {
+      pbeAlgorithm=k.getAlgorithm();
+    }
+    if (k.getParam() != null) {
+      param=k.getParam();
+      pbeSpec=new PBEParameterSpec(k.getSalt(),k.getIterationCount());
+    }
+ else     if (params instanceof PBEParameterSpec) {
+      pbeSpec=(PBEParameterSpec)params;
+      param=PBE.Util.makePBEParameters(k,params,cipher.getUnderlyingCipher().getAlgorithmName());
+    }
+ else {
+      throw new InvalidAlgorithmParameterException("PBE requires PBE parameters to be set.");
+    }
+    if (param instanceof ParametersWithIV) {
+      ivParam=(ParametersWithIV)param;
+    }
+  }
+ else   if (params == null) {
+    param=new KeyParameter(key.getEncoded());
+  }
+ else   if (params instanceof IvParameterSpec) {
+    if (ivLength != 0) {
+      IvParameterSpec p=(IvParameterSpec)params;
+      if (p.getIV().length != ivLength && !isAEADModeName(modeName)) {
+        throw new InvalidAlgorithmParameterException("IV must be " + ivLength + " bytes long.");
+      }
+      param=new ParametersWithIV(new KeyParameter(key.getEncoded()),p.getIV());
+      ivParam=(ParametersWithIV)param;
+    }
+ else {
+      if (modeName != null && modeName.equals("ECB")) {
+        throw new InvalidAlgorithmParameterException("ECB mode does not use an IV");
+      }
+      param=new KeyParameter(key.getEncoded());
+    }
+  }
+ else {
+    throw new InvalidAlgorithmParameterException("unknown parameter type.");
+  }
+  if ((ivLength != 0) && !(param instanceof ParametersWithIV)) {
+    SecureRandom ivRandom=random;
+    if (ivRandom == null) {
+      ivRandom=new SecureRandom();
+    }
+    if ((opmode == Cipher.ENCRYPT_MODE) || (opmode == Cipher.WRAP_MODE)) {
+      byte[] iv=new byte[ivLength];
+      ivRandom.nextBytes(iv);
+      param=new ParametersWithIV(param,iv);
+      ivParam=(ParametersWithIV)param;
+    }
+ else     if (cipher.getUnderlyingCipher().getAlgorithmName().indexOf("PGPCFB") < 0) {
+      throw new InvalidAlgorithmParameterException("no IV set when one expected");
+    }
+  }
+  if (random != null && padded) {
+    param=new ParametersWithRandom(param,random);
+  }
+  try {
+switch (opmode) {
+case Cipher.ENCRYPT_MODE:
+case Cipher.WRAP_MODE:
+      cipher.init(true,param);
+    break;
+case Cipher.DECRYPT_MODE:
+case Cipher.UNWRAP_MODE:
+  cipher.init(false,param);
+break;
+default :
+throw new InvalidParameterException("unknown opmode " + opmode + " passed");
+}
+}
+ catch (Exception e) {
+throw new InvalidKeyException(e.getMessage());
+}
+}

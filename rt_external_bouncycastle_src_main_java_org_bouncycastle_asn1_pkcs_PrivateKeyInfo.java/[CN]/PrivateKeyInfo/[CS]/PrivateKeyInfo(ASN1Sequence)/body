@@ -1,0 +1,18 @@
+{
+  Enumeration e=seq.getObjects();
+  BigInteger version=((DERInteger)e.nextElement()).getValue();
+  if (version.intValue() != 0) {
+    throw new IllegalArgumentException("wrong version for private key info");
+  }
+  algId=new AlgorithmIdentifier((ASN1Sequence)e.nextElement());
+  try {
+    ASN1InputStream aIn=new ASN1InputStream(((ASN1OctetString)e.nextElement()).getOctets());
+    privKey=aIn.readObject();
+  }
+ catch (  IOException ex) {
+    throw new IllegalArgumentException("Error recoverying private key from sequence");
+  }
+  if (e.hasMoreElements()) {
+    attributes=ASN1Set.getInstance((ASN1TaggedObject)e.nextElement(),false);
+  }
+}

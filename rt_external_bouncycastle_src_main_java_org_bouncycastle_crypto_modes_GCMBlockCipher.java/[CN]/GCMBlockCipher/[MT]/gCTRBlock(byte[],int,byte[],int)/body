@@ -1,0 +1,26 @@
+{
+  for (int i=15; i >= 12; --i) {
+    byte b=(byte)((counter[i] + 1) & 0xff);
+    counter[i]=b;
+    if (b != 0) {
+      break;
+    }
+  }
+  byte[] tmp=new byte[BLOCK_SIZE];
+  cipher.processBlock(counter,0,tmp,0);
+  byte[] hashBytes;
+  if (forEncryption) {
+    System.arraycopy(ZEROES,bufCount,tmp,bufCount,BLOCK_SIZE - bufCount);
+    hashBytes=tmp;
+  }
+ else {
+    hashBytes=buf;
+  }
+  for (int i=bufCount - 1; i >= 0; --i) {
+    tmp[i]^=buf[i];
+    out[outOff + i]=tmp[i];
+  }
+  xor(S,hashBytes);
+  multiplier.multiplyH(S);
+  totalLength+=bufCount;
+}

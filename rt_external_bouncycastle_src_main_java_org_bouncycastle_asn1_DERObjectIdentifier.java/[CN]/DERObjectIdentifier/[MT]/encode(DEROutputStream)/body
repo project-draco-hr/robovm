@@ -1,0 +1,18 @@
+{
+  OIDTokenizer tok=new OIDTokenizer(identifier);
+  ByteArrayOutputStream bOut=new ByteArrayOutputStream();
+  DEROutputStream dOut=new DEROutputStream(bOut);
+  writeField(bOut,Integer.parseInt(tok.nextToken()) * 40 + Integer.parseInt(tok.nextToken()));
+  while (tok.hasMoreTokens()) {
+    String token=tok.nextToken();
+    if (token.length() < 18) {
+      writeField(bOut,Long.parseLong(token));
+    }
+ else {
+      writeField(bOut,new BigInteger(token));
+    }
+  }
+  dOut.close();
+  byte[] bytes=bOut.toByteArray();
+  out.writeEncoded(OBJECT_IDENTIFIER,bytes);
+}

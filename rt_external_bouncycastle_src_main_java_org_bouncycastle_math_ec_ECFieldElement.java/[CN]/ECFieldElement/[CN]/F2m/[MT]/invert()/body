@@ -1,0 +1,33 @@
+{
+  IntArray uz=(IntArray)this.x.clone();
+  IntArray vz=new IntArray(t);
+  vz.setBit(m);
+  vz.setBit(0);
+  vz.setBit(this.k1);
+  if (this.representation == PPB) {
+    vz.setBit(this.k2);
+    vz.setBit(this.k3);
+  }
+  IntArray g1z=new IntArray(t);
+  g1z.setBit(0);
+  IntArray g2z=new IntArray(t);
+  while (!uz.isZero()) {
+    int j=uz.bitLength() - vz.bitLength();
+    if (j < 0) {
+      final IntArray uzCopy=uz;
+      uz=vz;
+      vz=uzCopy;
+      final IntArray g1zCopy=g1z;
+      g1z=g2z;
+      g2z=g1zCopy;
+      j=-j;
+    }
+    int jInt=j >> 5;
+    int jBit=j & 0x1F;
+    IntArray vzShift=vz.shiftLeft(jBit);
+    uz.addShifted(vzShift,jInt);
+    IntArray g2zShift=g2z.shiftLeft(jBit);
+    g1z.addShifted(g2zShift,jInt);
+  }
+  return new ECFieldElement.F2m(this.m,this.k1,this.k2,this.k3,g2z);
+}

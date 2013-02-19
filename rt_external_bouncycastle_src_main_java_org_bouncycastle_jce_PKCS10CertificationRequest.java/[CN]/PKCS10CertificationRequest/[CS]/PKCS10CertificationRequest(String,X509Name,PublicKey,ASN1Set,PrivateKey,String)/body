@@ -1,0 +1,49 @@
+{
+  String algorithmName=Strings.toUpperCase(signatureAlgorithm);
+  DERObjectIdentifier sigOID=(DERObjectIdentifier)algorithms.get(algorithmName);
+  if (sigOID == null) {
+    try {
+      sigOID=new DERObjectIdentifier(algorithmName);
+    }
+ catch (    Exception e) {
+      throw new IllegalArgumentException("Unknown signature type requested");
+    }
+  }
+  if (subject == null) {
+    throw new IllegalArgumentException("subject must not be null");
+  }
+  if (key == null) {
+    throw new IllegalArgumentException("public key must not be null");
+  }
+  if (noParams.contains(sigOID)) {
+    this.sigAlgId=new AlgorithmIdentifier(sigOID);
+  }
+ else   if (params.containsKey(algorithmName)) {
+    this.sigAlgId=new AlgorithmIdentifier(sigOID,(DEREncodable)params.get(algorithmName));
+  }
+ else {
+    this.sigAlgId=new AlgorithmIdentifier(sigOID,DERNull.INSTANCE);
+  }
+  try {
+    ASN1Sequence seq=(ASN1Sequence)ASN1Object.fromByteArray(key.getEncoded());
+    this.reqInfo=new CertificationRequestInfo(subject,new SubjectPublicKeyInfo(seq),attributes);
+  }
+ catch (  IOException e) {
+    throw new IllegalArgumentException("can't encode public key");
+  }
+  Signature sig;
+  if (provider == null) {
+    sig=Signature.getInstance(signatureAlgorithm);
+  }
+ else {
+    sig=Signature.getInstance(signatureAlgorithm,provider);
+  }
+  sig.initSign(signingKey);
+  try {
+    sig.update(reqInfo.getEncoded(ASN1Encodable.DER));
+  }
+ catch (  Exception e) {
+    throw new IllegalArgumentException("exception encoding TBS cert request - " + e);
+  }
+  this.sigBits=new DERBitString(sig.sign());
+}

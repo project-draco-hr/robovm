@@ -1,0 +1,16 @@
+{
+  List policyNodeVec=policyNodes[index - 1];
+  for (int j=0; j < policyNodeVec.size(); j++) {
+    PKIXPolicyNode node=(PKIXPolicyNode)policyNodeVec.get(j);
+    Set expectedPolicies=node.getExpectedPolicies();
+    if (expectedPolicies.contains(pOid.getId())) {
+      Set childExpectedPolicies=new HashSet();
+      childExpectedPolicies.add(pOid.getId());
+      PKIXPolicyNode child=new PKIXPolicyNode(new ArrayList(),index,childExpectedPolicies,node,pq,pOid.getId(),false);
+      node.addChild(child);
+      policyNodes[index].add(child);
+      return true;
+    }
+  }
+  return false;
+}

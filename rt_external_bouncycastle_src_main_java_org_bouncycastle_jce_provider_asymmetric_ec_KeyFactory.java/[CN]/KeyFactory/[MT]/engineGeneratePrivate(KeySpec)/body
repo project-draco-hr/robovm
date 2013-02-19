@@ -1,0 +1,18 @@
+{
+  if (keySpec instanceof PKCS8EncodedKeySpec) {
+    try {
+      JCEECPrivateKey key=(JCEECPrivateKey)JDKKeyFactory.createPrivateKeyFromDERStream(((PKCS8EncodedKeySpec)keySpec).getEncoded());
+      return new JCEECPrivateKey(algorithm,key);
+    }
+ catch (    Exception e) {
+      throw new InvalidKeySpecException(e.toString());
+    }
+  }
+ else   if (keySpec instanceof ECPrivateKeySpec) {
+    return new JCEECPrivateKey(algorithm,(ECPrivateKeySpec)keySpec);
+  }
+ else   if (keySpec instanceof java.security.spec.ECPrivateKeySpec) {
+    return new JCEECPrivateKey(algorithm,(java.security.spec.ECPrivateKeySpec)keySpec);
+  }
+  throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+}

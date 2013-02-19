@@ -1,0 +1,26 @@
+{
+  if (key == null) {
+    throw new IllegalStateException("RSA engine not initialised");
+  }
+  BigInteger input=core.convertInput(in,inOff,inLen);
+  BigInteger result;
+  if (key instanceof RSAPrivateCrtKeyParameters) {
+    RSAPrivateCrtKeyParameters k=(RSAPrivateCrtKeyParameters)key;
+    BigInteger e=k.getPublicExponent();
+    if (e != null) {
+      BigInteger m=k.getModulus();
+      BigInteger r=BigIntegers.createRandomInRange(ONE,m.subtract(ONE),random);
+      BigInteger blindedInput=r.modPow(e,m).multiply(input).mod(m);
+      BigInteger blindedResult=core.processBlock(blindedInput);
+      BigInteger rInv=r.modInverse(m);
+      result=blindedResult.multiply(rInv).mod(m);
+    }
+ else {
+      result=core.processBlock(input);
+    }
+  }
+ else {
+    result=core.processBlock(input);
+  }
+  return core.convertOutput(result);
+}

@@ -1,0 +1,27 @@
+{
+  if (excluded.isEmpty()) {
+    if (dn == null) {
+      return excluded;
+    }
+    excluded.add(dn);
+    return excluded;
+  }
+ else {
+    Set intersect=new HashSet();
+    Iterator it=excluded.iterator();
+    while (it.hasNext()) {
+      ASN1Sequence subtree=(ASN1Sequence)it.next();
+      if (withinDNSubtree(dn,subtree)) {
+        intersect.add(subtree);
+      }
+ else       if (withinDNSubtree(subtree,dn)) {
+        intersect.add(dn);
+      }
+ else {
+        intersect.add(subtree);
+        intersect.add(dn);
+      }
+    }
+    return intersect;
+  }
+}

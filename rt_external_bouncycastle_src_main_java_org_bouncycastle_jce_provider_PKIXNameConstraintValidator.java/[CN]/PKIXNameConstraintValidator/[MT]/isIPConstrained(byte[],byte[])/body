@@ -1,0 +1,15 @@
+{
+  int ipLength=ip.length;
+  if (ipLength != (constraint.length / 2)) {
+    return false;
+  }
+  byte[] subnetMask=new byte[ipLength];
+  System.arraycopy(constraint,ipLength,subnetMask,0,ipLength);
+  byte[] permittedSubnetAddress=new byte[ipLength];
+  byte[] ipSubnetAddress=new byte[ipLength];
+  for (int i=0; i < ipLength; i++) {
+    permittedSubnetAddress[i]=(byte)(constraint[i] & subnetMask[i]);
+    ipSubnetAddress[i]=(byte)(ip[i] & subnetMask[i]);
+  }
+  return Arrays.areEqual(permittedSubnetAddress,ipSubnetAddress);
+}

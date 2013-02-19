@@ -1,0 +1,20 @@
+{
+  int tagNo=tag & 0x1f;
+  if (tagNo == 0x1f) {
+    tagNo=0;
+    int b=s.read();
+    if ((b & 0x7f) == 0) {
+      throw new IOException("corrupted stream - invalid high tag number found");
+    }
+    while ((b >= 0) && ((b & 0x80) != 0)) {
+      tagNo|=(b & 0x7f);
+      tagNo<<=7;
+      b=s.read();
+    }
+    if (b < 0) {
+      throw new EOFException("EOF found inside tag value.");
+    }
+    tagNo|=(b & 0x7f);
+  }
+  return tagNo;
+}

@@ -1,0 +1,25 @@
+{
+  ASN1Encodable params;
+  SubjectPublicKeyInfo info;
+{
+    if (ecSpec instanceof ECNamedCurveSpec) {
+      DERObjectIdentifier curveOid=ECUtil.getNamedCurveOid(((ECNamedCurveSpec)ecSpec).getName());
+      if (curveOid == null) {
+        curveOid=new DERObjectIdentifier(((ECNamedCurveSpec)ecSpec).getName());
+      }
+      params=new X962Parameters(curveOid);
+    }
+ else     if (ecSpec == null) {
+      params=new X962Parameters(DERNull.INSTANCE);
+    }
+ else {
+      ECCurve curve=EC5Util.convertCurve(ecSpec.getCurve());
+      X9ECParameters ecP=new X9ECParameters(curve,EC5Util.convertPoint(curve,ecSpec.getGenerator(),withCompression),ecSpec.getOrder(),BigInteger.valueOf(ecSpec.getCofactor()),ecSpec.getCurve().getSeed());
+      params=new X962Parameters(ecP);
+    }
+    ECCurve curve=this.engineGetQ().getCurve();
+    ASN1OctetString p=(ASN1OctetString)new X9ECPoint(curve.createPoint(this.getQ().getX().toBigInteger(),this.getQ().getY().toBigInteger(),withCompression)).getDERObject();
+    info=new SubjectPublicKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey,params.getDERObject()),p.getOctets());
+  }
+  return info.getDEREncoded();
+}

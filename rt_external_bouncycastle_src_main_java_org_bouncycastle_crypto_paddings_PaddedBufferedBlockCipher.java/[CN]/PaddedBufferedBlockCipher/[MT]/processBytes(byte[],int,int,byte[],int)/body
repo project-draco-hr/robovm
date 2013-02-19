@@ -1,0 +1,29 @@
+{
+  if (len < 0) {
+    throw new IllegalArgumentException("Can't have a negative input length!");
+  }
+  int blockSize=getBlockSize();
+  int length=getUpdateOutputSize(len);
+  if (length > 0) {
+    if ((outOff + length) > out.length) {
+      throw new DataLengthException("output buffer too short");
+    }
+  }
+  int resultLen=0;
+  int gapLen=buf.length - bufOff;
+  if (len > gapLen) {
+    System.arraycopy(in,inOff,buf,bufOff,gapLen);
+    resultLen+=cipher.processBlock(buf,0,out,outOff);
+    bufOff=0;
+    len-=gapLen;
+    inOff+=gapLen;
+    while (len > buf.length) {
+      resultLen+=cipher.processBlock(in,inOff,out,outOff + resultLen);
+      len-=blockSize;
+      inOff+=blockSize;
+    }
+  }
+  System.arraycopy(in,inOff,buf,bufOff,len);
+  bufOff+=len;
+  return resultLen;
+}

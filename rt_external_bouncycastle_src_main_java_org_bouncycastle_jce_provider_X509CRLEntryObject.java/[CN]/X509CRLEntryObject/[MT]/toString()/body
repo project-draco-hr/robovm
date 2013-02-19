@@ -1,0 +1,43 @@
+{
+  StringBuffer buf=new StringBuffer();
+  String nl=System.getProperty("line.separator");
+  buf.append("      userCertificate: ").append(this.getSerialNumber()).append(nl);
+  buf.append("       revocationDate: ").append(this.getRevocationDate()).append(nl);
+  buf.append("       certificateIssuer: ").append(this.getCertificateIssuer()).append(nl);
+  X509Extensions extensions=c.getExtensions();
+  if (extensions != null) {
+    Enumeration e=extensions.oids();
+    if (e.hasMoreElements()) {
+      buf.append("   crlEntryExtensions:").append(nl);
+      while (e.hasMoreElements()) {
+        DERObjectIdentifier oid=(DERObjectIdentifier)e.nextElement();
+        X509Extension ext=extensions.getExtension(oid);
+        if (ext.getValue() != null) {
+          byte[] octs=ext.getValue().getOctets();
+          ASN1InputStream dIn=new ASN1InputStream(octs);
+          buf.append("                       critical(").append(ext.isCritical()).append(") ");
+          try {
+            if (oid.equals(X509Extensions.ReasonCode)) {
+              buf.append(new CRLReason(DEREnumerated.getInstance(dIn.readObject()))).append(nl);
+            }
+ else             if (oid.equals(X509Extensions.CertificateIssuer)) {
+              buf.append("Certificate issuer: ").append(new GeneralNames((ASN1Sequence)dIn.readObject())).append(nl);
+            }
+ else {
+              buf.append(oid.getId());
+              buf.append(" value = ").append(ASN1Dump.dumpAsString(dIn.readObject())).append(nl);
+            }
+          }
+ catch (          Exception ex) {
+            buf.append(oid.getId());
+            buf.append(" value = ").append("*****").append(nl);
+          }
+        }
+ else {
+          buf.append(nl);
+        }
+      }
+    }
+  }
+  return buf.toString();
+}

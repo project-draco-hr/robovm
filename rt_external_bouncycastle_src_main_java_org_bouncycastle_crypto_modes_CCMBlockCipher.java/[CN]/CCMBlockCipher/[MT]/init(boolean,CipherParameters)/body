@@ -1,0 +1,20 @@
+{
+  this.forEncryption=forEncryption;
+  if (params instanceof AEADParameters) {
+    AEADParameters param=(AEADParameters)params;
+    nonce=param.getNonce();
+    associatedText=param.getAssociatedText();
+    macSize=param.getMacSize() / 8;
+    keyParam=param.getKey();
+  }
+ else   if (params instanceof ParametersWithIV) {
+    ParametersWithIV param=(ParametersWithIV)params;
+    nonce=param.getIV();
+    associatedText=null;
+    macSize=macBlock.length / 2;
+    keyParam=param.getParameters();
+  }
+ else {
+    throw new IllegalArgumentException("invalid parameters passed to CCM");
+  }
+}

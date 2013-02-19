@@ -1,0 +1,24 @@
+{
+  this.tag=tag;
+  if (tag == rfc822Name || tag == dNSName || tag == uniformResourceIdentifier) {
+    this.obj=new DERIA5String(name);
+  }
+ else   if (tag == registeredID) {
+    this.obj=new DERObjectIdentifier(name);
+  }
+ else   if (tag == directoryName) {
+    this.obj=new X509Name(name);
+  }
+ else   if (tag == iPAddress) {
+    byte[] enc=toGeneralNameEncoding(name);
+    if (enc != null) {
+      this.obj=new DEROctetString(enc);
+    }
+ else {
+      throw new IllegalArgumentException("IP Address is invalid");
+    }
+  }
+ else {
+    throw new IllegalArgumentException("can't process String for tag: " + tag);
+  }
+}

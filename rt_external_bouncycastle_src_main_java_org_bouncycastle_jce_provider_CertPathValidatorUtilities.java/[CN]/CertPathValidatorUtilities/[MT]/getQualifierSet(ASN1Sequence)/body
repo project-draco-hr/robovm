@@ -1,0 +1,20 @@
+{
+  Set pq=new HashSet();
+  if (qualifiers == null) {
+    return pq;
+  }
+  ByteArrayOutputStream bOut=new ByteArrayOutputStream();
+  ASN1OutputStream aOut=new ASN1OutputStream(bOut);
+  Enumeration e=qualifiers.getObjects();
+  while (e.hasMoreElements()) {
+    try {
+      aOut.writeObject(e.nextElement());
+      pq.add(new PolicyQualifierInfo(bOut.toByteArray()));
+    }
+ catch (    IOException ex) {
+      throw new ExtCertPathValidatorException("Policy qualifier info cannot be decoded.",ex);
+    }
+    bOut.reset();
+  }
+  return pq;
+}

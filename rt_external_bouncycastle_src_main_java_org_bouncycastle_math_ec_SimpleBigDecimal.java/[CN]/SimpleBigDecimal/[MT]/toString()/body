@@ -1,0 +1,29 @@
+{
+  if (scale == 0) {
+    return bigInt.toString();
+  }
+  BigInteger floorBigInt=floor();
+  BigInteger fract=bigInt.subtract(floorBigInt.shiftLeft(scale));
+  if (bigInt.signum() == -1) {
+    fract=ECConstants.ONE.shiftLeft(scale).subtract(fract);
+  }
+  if ((floorBigInt.signum() == -1) && (!(fract.equals(ECConstants.ZERO)))) {
+    floorBigInt=floorBigInt.add(ECConstants.ONE);
+  }
+  String leftOfPoint=floorBigInt.toString();
+  char[] fractCharArr=new char[scale];
+  String fractStr=fract.toString(2);
+  int fractLen=fractStr.length();
+  int zeroes=scale - fractLen;
+  for (int i=0; i < zeroes; i++) {
+    fractCharArr[i]='0';
+  }
+  for (int j=0; j < fractLen; j++) {
+    fractCharArr[zeroes + j]=fractStr.charAt(j);
+  }
+  String rightOfPoint=new String(fractCharArr);
+  StringBuffer sb=new StringBuffer(leftOfPoint);
+  sb.append(".");
+  sb.append(rightOfPoint);
+  return sb.toString();
+}

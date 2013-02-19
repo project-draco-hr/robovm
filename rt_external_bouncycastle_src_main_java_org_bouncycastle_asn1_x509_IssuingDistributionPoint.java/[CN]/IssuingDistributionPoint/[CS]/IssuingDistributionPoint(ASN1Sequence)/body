@@ -1,0 +1,28 @@
+{
+  this.seq=seq;
+  for (int i=0; i != seq.size(); i++) {
+    ASN1TaggedObject o=ASN1TaggedObject.getInstance(seq.getObjectAt(i));
+switch (o.getTagNo()) {
+case 0:
+      distributionPoint=DistributionPointName.getInstance(o,true);
+    break;
+case 1:
+  onlyContainsUserCerts=DERBoolean.getInstance(o,false).isTrue();
+break;
+case 2:
+onlyContainsCACerts=DERBoolean.getInstance(o,false).isTrue();
+break;
+case 3:
+onlySomeReasons=new ReasonFlags(ReasonFlags.getInstance(o,false));
+break;
+case 4:
+indirectCRL=DERBoolean.getInstance(o,false).isTrue();
+break;
+case 5:
+onlyContainsAttributeCerts=DERBoolean.getInstance(o,false).isTrue();
+break;
+default :
+throw new IllegalArgumentException("unknown tag in IssuingDistributionPoint");
+}
+}
+}

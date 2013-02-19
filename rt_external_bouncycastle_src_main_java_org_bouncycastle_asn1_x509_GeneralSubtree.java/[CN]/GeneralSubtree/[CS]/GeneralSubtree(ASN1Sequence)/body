@@ -1,0 +1,40 @@
+{
+  base=GeneralName.getInstance(seq.getObjectAt(0));
+switch (seq.size()) {
+case 1:
+    break;
+case 2:
+  ASN1TaggedObject o=ASN1TaggedObject.getInstance(seq.getObjectAt(1));
+switch (o.getTagNo()) {
+case 0:
+  minimum=DERInteger.getInstance(o,false);
+break;
+case 1:
+maximum=DERInteger.getInstance(o,false);
+break;
+default :
+throw new IllegalArgumentException("Bad tag number: " + o.getTagNo());
+}
+break;
+case 3:
+{
+{
+ASN1TaggedObject oMin=ASN1TaggedObject.getInstance(seq.getObjectAt(1));
+if (oMin.getTagNo() != 0) {
+throw new IllegalArgumentException("Bad tag number for 'minimum': " + oMin.getTagNo());
+}
+minimum=DERInteger.getInstance(oMin,false);
+}
+{
+ASN1TaggedObject oMax=ASN1TaggedObject.getInstance(seq.getObjectAt(2));
+if (oMax.getTagNo() != 1) {
+throw new IllegalArgumentException("Bad tag number for 'maximum': " + oMax.getTagNo());
+}
+maximum=DERInteger.getInstance(oMax,false);
+}
+break;
+}
+default :
+throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+}
+}

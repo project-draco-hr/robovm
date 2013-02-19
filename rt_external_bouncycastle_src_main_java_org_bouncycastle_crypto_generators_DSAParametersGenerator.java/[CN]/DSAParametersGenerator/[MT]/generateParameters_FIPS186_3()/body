@@ -1,0 +1,42 @@
+{
+  Digest d=new SHA256Digest();
+  int outlen=d.getDigestSize() * 8;
+  int seedlen=N;
+  byte[] seed=new byte[seedlen / 8];
+  int n=(L - 1) / outlen;
+  int b=(L - 1) % outlen;
+  byte[] output=new byte[d.getDigestSize()];
+  for (; ; ) {
+    random.nextBytes(seed);
+    hash(d,seed,output);
+    BigInteger U=new BigInteger(1,output).mod(ONE.shiftLeft(N - 1));
+    BigInteger q=ONE.shiftLeft(N - 1).add(U).add(ONE).subtract(U.mod(TWO));
+    if (!q.isProbablePrime(certainty)) {
+      continue;
+    }
+    byte[] offset=Arrays.clone(seed);
+    int counterLimit=4 * L;
+    for (int counter=0; counter < counterLimit; ++counter) {
+      BigInteger W=ZERO;
+      for (int j=0, exp=0; j <= n; ++j, exp+=outlen) {
+        inc(offset);
+        hash(d,offset,output);
+        BigInteger Vj=new BigInteger(1,output);
+        if (j == n) {
+          Vj=Vj.mod(ONE.shiftLeft(b));
+        }
+        W=W.add(Vj.shiftLeft(exp));
+      }
+      BigInteger X=W.add(ONE.shiftLeft(L - 1));
+      BigInteger c=X.mod(q.shiftLeft(1));
+      BigInteger p=X.subtract(c.subtract(ONE));
+      if (p.bitLength() != L) {
+        continue;
+      }
+      if (p.isProbablePrime(certainty)) {
+        BigInteger g=calculateGenerator_FIPS186_3_Unverifiable(p,q,random);
+        return new DSAParameters(p,q,g,new DSAValidationParameters(seed,counter));
+      }
+    }
+  }
+}

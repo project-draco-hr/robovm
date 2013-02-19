@@ -1,0 +1,31 @@
+{
+  if ((serialNumber == null) || (signature == null) || (issuer == null)|| (startDate == null)|| (endDate == null)|| (subject == null && !altNamePresentAndCritical)|| (subjectPublicKeyInfo == null)) {
+    throw new IllegalStateException("not all mandatory fields set in V3 TBScertificate generator");
+  }
+  ASN1EncodableVector v=new ASN1EncodableVector();
+  v.add(version);
+  v.add(serialNumber);
+  v.add(signature);
+  v.add(issuer);
+  ASN1EncodableVector validity=new ASN1EncodableVector();
+  validity.add(startDate);
+  validity.add(endDate);
+  v.add(new DERSequence(validity));
+  if (subject != null) {
+    v.add(subject);
+  }
+ else {
+    v.add(new DERSequence());
+  }
+  v.add(subjectPublicKeyInfo);
+  if (issuerUniqueID != null) {
+    v.add(new DERTaggedObject(false,1,issuerUniqueID));
+  }
+  if (subjectUniqueID != null) {
+    v.add(new DERTaggedObject(false,2,subjectUniqueID));
+  }
+  if (extensions != null) {
+    v.add(new DERTaggedObject(3,extensions));
+  }
+  return new TBSCertificateStructure(new DERSequence(v));
+}

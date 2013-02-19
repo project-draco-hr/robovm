@@ -1,0 +1,71 @@
+{
+  if (random == null) {
+    random=this.random;
+  }
+  if (params instanceof ECParameterSpec) {
+    ECParameterSpec p=(ECParameterSpec)params;
+    this.ecParams=params;
+    param=new ECKeyGenerationParameters(new ECDomainParameters(p.getCurve(),p.getG(),p.getN()),random);
+    engine.init(param);
+    initialised=true;
+  }
+ else   if (params instanceof java.security.spec.ECParameterSpec) {
+    java.security.spec.ECParameterSpec p=(java.security.spec.ECParameterSpec)params;
+    this.ecParams=params;
+    ECCurve curve=EC5Util.convertCurve(p.getCurve());
+    ECPoint g=EC5Util.convertPoint(curve,p.getGenerator(),false);
+    param=new ECKeyGenerationParameters(new ECDomainParameters(curve,g,p.getOrder(),BigInteger.valueOf(p.getCofactor())),random);
+    engine.init(param);
+    initialised=true;
+  }
+ else   if (params instanceof ECGenParameterSpec) {
+    final String curveName=((ECGenParameterSpec)params).getName();
+{
+      X9ECParameters ecP=X962NamedCurves.getByName(curveName);
+      if (ecP == null) {
+        ecP=SECNamedCurves.getByName(curveName);
+        if (ecP == null) {
+          ecP=NISTNamedCurves.getByName(curveName);
+        }
+        if (ecP == null) {
+          try {
+            DERObjectIdentifier oid=new DERObjectIdentifier(curveName);
+            ecP=X962NamedCurves.getByOID(oid);
+            if (ecP == null) {
+              ecP=SECNamedCurves.getByOID(oid);
+            }
+            if (ecP == null) {
+              ecP=NISTNamedCurves.getByOID(oid);
+            }
+            if (ecP == null) {
+              throw new InvalidAlgorithmParameterException("unknown curve OID: " + curveName);
+            }
+          }
+ catch (          IllegalArgumentException ex) {
+            throw new InvalidAlgorithmParameterException("unknown curve name: " + curveName);
+          }
+        }
+      }
+      this.ecParams=new ECNamedCurveSpec(curveName,ecP.getCurve(),ecP.getG(),ecP.getN(),ecP.getH(),null);
+    }
+    java.security.spec.ECParameterSpec p=(java.security.spec.ECParameterSpec)ecParams;
+    ECCurve curve=EC5Util.convertCurve(p.getCurve());
+    ECPoint g=EC5Util.convertPoint(curve,p.getGenerator(),false);
+    param=new ECKeyGenerationParameters(new ECDomainParameters(curve,g,p.getOrder(),BigInteger.valueOf(p.getCofactor())),random);
+    engine.init(param);
+    initialised=true;
+  }
+ else   if (params == null && ProviderUtil.getEcImplicitlyCa() != null) {
+    ECParameterSpec p=ProviderUtil.getEcImplicitlyCa();
+    this.ecParams=params;
+    param=new ECKeyGenerationParameters(new ECDomainParameters(p.getCurve(),p.getG(),p.getN()),random);
+    engine.init(param);
+    initialised=true;
+  }
+ else   if (params == null && ProviderUtil.getEcImplicitlyCa() == null) {
+    throw new InvalidAlgorithmParameterException("null parameter passed but no implicitCA set");
+  }
+ else {
+    throw new InvalidAlgorithmParameterException("parameter object not a ECParameterSpec");
+  }
+}

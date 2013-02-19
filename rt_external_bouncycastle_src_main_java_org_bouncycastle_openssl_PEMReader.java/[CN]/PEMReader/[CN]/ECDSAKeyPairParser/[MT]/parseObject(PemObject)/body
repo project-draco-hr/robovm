@@ -1,0 +1,19 @@
+{
+  try {
+    ASN1Sequence seq=readKeyPair(obj);
+    ECPrivateKeyStructure pKey=new ECPrivateKeyStructure(seq);
+    AlgorithmIdentifier algId=new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey,pKey.getParameters());
+    PrivateKeyInfo privInfo=new PrivateKeyInfo(algId,pKey.getDERObject());
+    SubjectPublicKeyInfo pubInfo=new SubjectPublicKeyInfo(algId,pKey.getPublicKey().getBytes());
+    PKCS8EncodedKeySpec privSpec=new PKCS8EncodedKeySpec(privInfo.getEncoded());
+    X509EncodedKeySpec pubSpec=new X509EncodedKeySpec(pubInfo.getEncoded());
+    KeyFactory fact=KeyFactory.getInstance("ECDSA",provider);
+    return new KeyPair(fact.generatePublic(pubSpec),fact.generatePrivate(privSpec));
+  }
+ catch (  IOException e) {
+    throw e;
+  }
+catch (  Exception e) {
+    throw new PEMException("problem creating EC private key: " + e.toString(),e);
+  }
+}

@@ -1,0 +1,40 @@
+{
+{
+    X962Parameters params=new X962Parameters((DERObject)info.getAlgorithmId().getParameters());
+    ECCurve curve;
+    EllipticCurve ellipticCurve;
+    if (params.isNamedCurve()) {
+      DERObjectIdentifier oid=(DERObjectIdentifier)params.getParameters();
+      X9ECParameters ecP=ECUtil.getNamedCurveByOid(oid);
+      curve=ecP.getCurve();
+      ellipticCurve=EC5Util.convertCurve(curve,ecP.getSeed());
+      ecSpec=new ECNamedCurveSpec(ECUtil.getCurveName(oid),ellipticCurve,new ECPoint(ecP.getG().getX().toBigInteger(),ecP.getG().getY().toBigInteger()),ecP.getN(),ecP.getH());
+    }
+ else     if (params.isImplicitlyCA()) {
+      ecSpec=null;
+      curve=ProviderUtil.getEcImplicitlyCa().getCurve();
+    }
+ else {
+      X9ECParameters ecP=new X9ECParameters((ASN1Sequence)params.getParameters());
+      curve=ecP.getCurve();
+      ellipticCurve=EC5Util.convertCurve(curve,ecP.getSeed());
+      this.ecSpec=new ECParameterSpec(ellipticCurve,new ECPoint(ecP.getG().getX().toBigInteger(),ecP.getG().getY().toBigInteger()),ecP.getN(),ecP.getH().intValue());
+    }
+    DERBitString bits=info.getPublicKeyData();
+    byte[] data=bits.getBytes();
+    ASN1OctetString key=new DEROctetString(data);
+    if (data[0] == 0x04 && data[1] == data.length - 2 && (data[2] == 0x02 || data[2] == 0x03)) {
+      int qLength=new X9IntegerConverter().getByteLength(curve);
+      if (qLength >= data.length - 3) {
+        try {
+          key=(ASN1OctetString)ASN1Object.fromByteArray(data);
+        }
+ catch (        IOException ex) {
+          throw new IllegalArgumentException("error recovering public key");
+        }
+      }
+    }
+    X9ECPoint derQ=new X9ECPoint(curve,key);
+    this.q=derQ.getPoint();
+  }
+}

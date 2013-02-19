@@ -1,0 +1,19 @@
+{
+  Enumeration e=table.elements();
+  while (e.hasMoreElements()) {
+    StoreEntry entry=(StoreEntry)e.nextElement();
+    if (entry.getObject() instanceof Certificate) {
+      Certificate c=(Certificate)entry.getObject();
+      if (c.equals(cert)) {
+        return entry.getAlias();
+      }
+    }
+ else {
+      Certificate[] chain=entry.getCertificateChain();
+      if (chain != null && chain[0].equals(cert)) {
+        return entry.getAlias();
+      }
+    }
+  }
+  return null;
+}

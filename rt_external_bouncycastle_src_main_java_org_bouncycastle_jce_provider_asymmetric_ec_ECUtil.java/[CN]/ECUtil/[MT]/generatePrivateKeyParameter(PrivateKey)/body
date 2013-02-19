@@ -1,0 +1,11 @@
+{
+  if (key instanceof ECPrivateKey) {
+    ECPrivateKey k=(ECPrivateKey)key;
+    ECParameterSpec s=k.getParameters();
+    if (s == null) {
+      s=ProviderUtil.getEcImplicitlyCa();
+    }
+    return new ECPrivateKeyParameters(k.getD(),new ECDomainParameters(s.getCurve(),s.getG(),s.getN(),s.getH(),s.getSeed()));
+  }
+  throw new InvalidKeyException("can't identify EC private key.");
+}

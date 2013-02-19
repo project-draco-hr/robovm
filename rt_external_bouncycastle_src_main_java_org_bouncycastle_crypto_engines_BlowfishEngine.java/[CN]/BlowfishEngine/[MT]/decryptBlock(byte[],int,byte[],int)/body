@@ -1,0 +1,12 @@
+{
+  int xl=BytesTo32bits(src,srcIndex);
+  int xr=BytesTo32bits(src,srcIndex + 4);
+  xl^=P[ROUNDS + 1];
+  for (int i=ROUNDS; i > 0; i-=2) {
+    xr^=F(xl) ^ P[i];
+    xl^=F(xr) ^ P[i - 1];
+  }
+  xr^=P[0];
+  Bits32ToBytes(xr,dst,dstIndex);
+  Bits32ToBytes(xl,dst,dstIndex + 4);
+}

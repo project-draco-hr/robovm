@@ -1,0 +1,25 @@
+{
+  if (_currentStream == null) {
+    if (!_first) {
+      return -1;
+    }
+    ASN1OctetStringParser s=(ASN1OctetStringParser)_parser.readObject();
+    if (s == null) {
+      return -1;
+    }
+    _first=false;
+    _currentStream=s.getOctetStream();
+  }
+  for (; ; ) {
+    int b=_currentStream.read();
+    if (b >= 0) {
+      return b;
+    }
+    ASN1OctetStringParser s=(ASN1OctetStringParser)_parser.readObject();
+    if (s == null) {
+      _currentStream=null;
+      return -1;
+    }
+    _currentStream=s.getOctetStream();
+  }
+}

@@ -1,0 +1,21 @@
+{
+  if (inLen > (getInputBlockSize() + 1)) {
+    throw new DataLengthException("input too large for RSA cipher.");
+  }
+ else   if (inLen == (getInputBlockSize() + 1) && !forEncryption) {
+    throw new DataLengthException("input too large for RSA cipher.");
+  }
+  byte[] block;
+  if (inOff != 0 || inLen != in.length) {
+    block=new byte[inLen];
+    System.arraycopy(in,inOff,block,0,inLen);
+  }
+ else {
+    block=in;
+  }
+  BigInteger res=new BigInteger(1,block);
+  if (res.compareTo(key.getModulus()) >= 0) {
+    throw new DataLengthException("input too large for RSA cipher.");
+  }
+  return res;
+}

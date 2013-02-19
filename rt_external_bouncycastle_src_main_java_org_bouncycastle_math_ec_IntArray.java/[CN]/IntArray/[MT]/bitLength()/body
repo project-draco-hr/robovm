@@ -1,0 +1,28 @@
+{
+  int intLen=getUsedLength();
+  if (intLen == 0) {
+    return 0;
+  }
+  int last=intLen - 1;
+  int highest=m_ints[last];
+  int bits=(last << 5) + 1;
+  if ((highest & 0xffff0000) != 0) {
+    if ((highest & 0xff000000) != 0) {
+      bits+=24;
+      highest>>>=24;
+    }
+ else {
+      bits+=16;
+      highest>>>=16;
+    }
+  }
+ else   if (highest > 0x000000ff) {
+    bits+=8;
+    highest>>>=8;
+  }
+  while (highest != 1) {
+    ++bits;
+    highest>>>=1;
+  }
+  return bits;
+}

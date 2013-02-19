@@ -1,0 +1,27 @@
+{
+  if (excluded.isEmpty()) {
+    if (dns == null) {
+      return excluded;
+    }
+    excluded.add(dns);
+    return excluded;
+  }
+ else {
+    Set union=new HashSet();
+    Iterator _iter=excluded.iterator();
+    while (_iter.hasNext()) {
+      String _permitted=(String)_iter.next();
+      if (withinDomain(_permitted,dns)) {
+        union.add(dns);
+      }
+ else       if (withinDomain(dns,_permitted)) {
+        union.add(_permitted);
+      }
+ else {
+        union.add(_permitted);
+        union.add(dns);
+      }
+    }
+    return union;
+  }
+}

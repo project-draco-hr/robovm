@@ -1,0 +1,23 @@
+{
+  this.converter=converter;
+  if (ordering != null) {
+    for (int i=0; i != ordering.size(); i++) {
+      this.ordering.addElement(ordering.elementAt(i));
+      this.added.addElement(FALSE);
+    }
+  }
+ else {
+    Enumeration e=attributes.keys();
+    while (e.hasMoreElements()) {
+      this.ordering.addElement(e.nextElement());
+      this.added.addElement(FALSE);
+    }
+  }
+  for (int i=0; i != this.ordering.size(); i++) {
+    DERObjectIdentifier oid=(DERObjectIdentifier)this.ordering.elementAt(i);
+    if (attributes.get(oid) == null) {
+      throw new IllegalArgumentException("No attribute for object id - " + oid.getId() + " - passed to distinguished name");
+    }
+    this.values.addElement(attributes.get(oid));
+  }
+}

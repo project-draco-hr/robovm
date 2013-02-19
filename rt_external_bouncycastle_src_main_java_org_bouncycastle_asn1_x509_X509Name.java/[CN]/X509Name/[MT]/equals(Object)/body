@@ -1,0 +1,58 @@
+{
+  if (obj == this) {
+    return true;
+  }
+  if (!(obj instanceof X509Name || obj instanceof ASN1Sequence)) {
+    return false;
+  }
+  DERObject derO=((DEREncodable)obj).getDERObject();
+  if (this.getDERObject().equals(derO)) {
+    return true;
+  }
+  X509Name other;
+  try {
+    other=X509Name.getInstance(obj);
+  }
+ catch (  IllegalArgumentException e) {
+    return false;
+  }
+  int orderingSize=ordering.size();
+  if (orderingSize != other.ordering.size()) {
+    return false;
+  }
+  boolean[] indexes=new boolean[orderingSize];
+  int start, end, delta;
+  if (ordering.elementAt(0).equals(other.ordering.elementAt(0))) {
+    start=0;
+    end=orderingSize;
+    delta=1;
+  }
+ else {
+    start=orderingSize - 1;
+    end=-1;
+    delta=-1;
+  }
+  for (int i=start; i != end; i+=delta) {
+    boolean found=false;
+    DERObjectIdentifier oid=(DERObjectIdentifier)ordering.elementAt(i);
+    String value=(String)values.elementAt(i);
+    for (int j=0; j < orderingSize; j++) {
+      if (indexes[j]) {
+        continue;
+      }
+      DERObjectIdentifier oOid=(DERObjectIdentifier)other.ordering.elementAt(j);
+      if (oid.equals(oOid)) {
+        String oValue=(String)other.values.elementAt(j);
+        if (equivalentStrings(value,oValue)) {
+          indexes[j]=true;
+          found=true;
+          break;
+        }
+      }
+    }
+    if (!found) {
+      return false;
+    }
+  }
+  return true;
+}

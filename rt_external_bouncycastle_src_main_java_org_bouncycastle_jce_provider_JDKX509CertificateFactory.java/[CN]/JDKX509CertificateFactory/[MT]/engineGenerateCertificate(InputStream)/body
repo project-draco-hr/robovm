@@ -1,0 +1,40 @@
+{
+  if (currentStream == null) {
+    currentStream=in;
+    sData=null;
+    sDataObjectCount=0;
+  }
+ else   if (currentStream != in) {
+    currentStream=in;
+    sData=null;
+    sDataObjectCount=0;
+  }
+  try {
+    if (sData != null) {
+      if (sDataObjectCount != sData.size()) {
+        return getCertificate();
+      }
+ else {
+        sData=null;
+        sDataObjectCount=0;
+        return null;
+      }
+    }
+    int limit=ProviderUtil.getReadLimit(in);
+    PushbackInputStream pis=new PushbackInputStream(in);
+    int tag=pis.read();
+    if (tag == -1) {
+      return null;
+    }
+    pis.unread(tag);
+    if (tag != 0x30) {
+      return readPEMCertificate(pis);
+    }
+ else {
+      return readDERCertificate(new ASN1InputStream(pis,limit));
+    }
+  }
+ catch (  Exception e) {
+    throw new CertificateException(e);
+  }
+}

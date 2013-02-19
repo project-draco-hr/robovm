@@ -1,0 +1,22 @@
+{
+  if (encoding.equalsIgnoreCase("PkiPath")) {
+    ASN1EncodableVector v=new ASN1EncodableVector();
+    ListIterator iter=certificates.listIterator(certificates.size());
+    while (iter.hasPrevious()) {
+      v.add(toASN1Object((X509Certificate)iter.previous()));
+    }
+    return toDEREncoded(new DERSequence(v));
+  }
+ else   if (encoding.equalsIgnoreCase("PKCS7")) {
+    ContentInfo encInfo=new ContentInfo(PKCSObjectIdentifiers.data,null);
+    ASN1EncodableVector v=new ASN1EncodableVector();
+    for (int i=0; i != certificates.size(); i++) {
+      v.add(toASN1Object((X509Certificate)certificates.get(i)));
+    }
+    SignedData sd=new SignedData(new DERInteger(1),new DERSet(),encInfo,new DERSet(v),null,new DERSet());
+    return toDEREncoded(new ContentInfo(PKCSObjectIdentifiers.signedData,sd));
+  }
+ else {
+    throw new CertificateEncodingException("unsupported encoding: " + encoding);
+  }
+}

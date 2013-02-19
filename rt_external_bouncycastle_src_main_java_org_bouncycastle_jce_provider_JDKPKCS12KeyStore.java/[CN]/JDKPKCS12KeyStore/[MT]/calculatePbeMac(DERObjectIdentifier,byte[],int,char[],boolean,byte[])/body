@@ -1,0 +1,11 @@
+{
+  SecretKeyFactory keyFact=SecretKeyFactory.getInstance(oid.getId(),bcProvider);
+  PBEParameterSpec defParams=new PBEParameterSpec(salt,itCount);
+  PBEKeySpec pbeSpec=new PBEKeySpec(password);
+  JCEPBEKey key=(JCEPBEKey)keyFact.generateSecret(pbeSpec);
+  key.setTryWrongPKCS12Zero(wrongPkcs12Zero);
+  Mac mac=Mac.getInstance(oid.getId(),bcProvider);
+  mac.init(key,defParams);
+  mac.update(data);
+  return mac.doFinal();
+}

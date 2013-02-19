@@ -1,0 +1,30 @@
+{
+  byte b1, b2, b3, b4;
+  int outLen=0;
+  int end=off + length;
+  while (end > off) {
+    if (!ignore((char)data[end - 1])) {
+      break;
+    }
+    end--;
+  }
+  int i=off;
+  int finish=end - 4;
+  i=nextI(data,i,finish);
+  while (i < finish) {
+    b1=decodingTable[data[i++]];
+    i=nextI(data,i,finish);
+    b2=decodingTable[data[i++]];
+    i=nextI(data,i,finish);
+    b3=decodingTable[data[i++]];
+    i=nextI(data,i,finish);
+    b4=decodingTable[data[i++]];
+    out.write((b1 << 2) | (b2 >> 4));
+    out.write((b2 << 4) | (b3 >> 2));
+    out.write((b3 << 6) | b4);
+    outLen+=3;
+    i=nextI(data,i,finish);
+  }
+  outLen+=decodeLastBlock(out,(char)data[end - 4],(char)data[end - 3],(char)data[end - 2],(char)data[end - 1]);
+  return outLen;
+}

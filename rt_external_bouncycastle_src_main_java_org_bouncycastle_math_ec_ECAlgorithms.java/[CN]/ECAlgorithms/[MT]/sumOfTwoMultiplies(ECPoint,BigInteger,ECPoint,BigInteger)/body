@@ -1,0 +1,13 @@
+{
+  ECCurve c=P.getCurve();
+  if (!c.equals(Q.getCurve())) {
+    throw new IllegalArgumentException("P and Q must be on same curve");
+  }
+  if (c instanceof ECCurve.F2m) {
+    ECCurve.F2m f2mCurve=(ECCurve.F2m)c;
+    if (f2mCurve.isKoblitz()) {
+      return P.multiply(a).add(Q.multiply(b));
+    }
+  }
+  return implShamirsTrick(P,a,Q,b);
+}

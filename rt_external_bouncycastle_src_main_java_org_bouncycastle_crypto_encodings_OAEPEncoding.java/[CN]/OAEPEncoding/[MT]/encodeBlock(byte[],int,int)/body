@@ -1,0 +1,18 @@
+{
+  byte[] block=new byte[getInputBlockSize() + 1 + 2 * defHash.length];
+  System.arraycopy(in,inOff,block,block.length - inLen,inLen);
+  block[block.length - inLen - 1]=0x01;
+  System.arraycopy(defHash,0,block,defHash.length,defHash.length);
+  byte[] seed=new byte[defHash.length];
+  random.nextBytes(seed);
+  byte[] mask=maskGeneratorFunction1(seed,0,seed.length,block.length - defHash.length);
+  for (int i=defHash.length; i != block.length; i++) {
+    block[i]^=mask[i - defHash.length];
+  }
+  System.arraycopy(seed,0,block,0,defHash.length);
+  mask=maskGeneratorFunction1(block,defHash.length,block.length - defHash.length,defHash.length);
+  for (int i=0; i != defHash.length; i++) {
+    block[i]^=mask[i];
+  }
+  return engine.processBlock(block,0,block.length);
+}

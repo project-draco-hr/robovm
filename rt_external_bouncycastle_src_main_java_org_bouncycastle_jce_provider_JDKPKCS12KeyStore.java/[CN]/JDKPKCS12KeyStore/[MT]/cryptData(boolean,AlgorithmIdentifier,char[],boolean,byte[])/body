@@ -1,0 +1,18 @@
+{
+  String algorithm=algId.getObjectId().getId();
+  PKCS12PBEParams pbeParams=new PKCS12PBEParams((ASN1Sequence)algId.getParameters());
+  PBEKeySpec pbeSpec=new PBEKeySpec(password);
+  try {
+    SecretKeyFactory keyFact=SecretKeyFactory.getInstance(algorithm,bcProvider);
+    PBEParameterSpec defParams=new PBEParameterSpec(pbeParams.getIV(),pbeParams.getIterations().intValue());
+    JCEPBEKey key=(JCEPBEKey)keyFact.generateSecret(pbeSpec);
+    key.setTryWrongPKCS12Zero(wrongPKCS12Zero);
+    Cipher cipher=Cipher.getInstance(algorithm,bcProvider);
+    int mode=forEncryption ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE;
+    cipher.init(mode,key,defParams);
+    return cipher.doFinal(data);
+  }
+ catch (  Exception e) {
+    throw new IOException("exception decrypting data - " + e.toString());
+  }
+}

@@ -1,0 +1,12 @@
+{
+  Set entrySet=new HashSet();
+  Enumeration certs=c.getRevokedCertificateEnumeration();
+  X500Principal previousCertificateIssuer=getIssuerX500Principal();
+  while (certs.hasMoreElements()) {
+    TBSCertList.CRLEntry entry=(TBSCertList.CRLEntry)certs.nextElement();
+    X509CRLEntryObject crlEntry=new X509CRLEntryObject(entry,isIndirect,previousCertificateIssuer);
+    entrySet.add(crlEntry);
+    previousCertificateIssuer=crlEntry.getCertificateIssuer();
+  }
+  return entrySet;
+}

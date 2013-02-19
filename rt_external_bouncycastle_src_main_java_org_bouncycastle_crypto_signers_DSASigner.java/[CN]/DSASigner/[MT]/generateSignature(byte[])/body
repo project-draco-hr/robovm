@@ -1,0 +1,17 @@
+{
+  DSAParameters params=key.getParameters();
+  BigInteger m=calculateE(params.getQ(),message);
+  BigInteger k;
+  int qBitLength=params.getQ().bitLength();
+  do {
+    k=new BigInteger(qBitLength,random);
+  }
+ while (k.compareTo(params.getQ()) >= 0);
+  BigInteger r=params.getG().modPow(k,params.getP()).mod(params.getQ());
+  k=k.modInverse(params.getQ()).multiply(m.add(((DSAPrivateKeyParameters)key).getX().multiply(r)));
+  BigInteger s=k.mod(params.getQ());
+  BigInteger[] res=new BigInteger[2];
+  res[0]=r;
+  res[1]=s;
+  return res;
+}

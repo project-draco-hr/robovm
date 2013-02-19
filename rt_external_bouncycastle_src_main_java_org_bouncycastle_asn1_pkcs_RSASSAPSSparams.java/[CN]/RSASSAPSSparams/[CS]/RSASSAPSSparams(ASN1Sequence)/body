@@ -1,0 +1,25 @@
+{
+  hashAlgorithm=DEFAULT_HASH_ALGORITHM;
+  maskGenAlgorithm=DEFAULT_MASK_GEN_FUNCTION;
+  saltLength=DEFAULT_SALT_LENGTH;
+  trailerField=DEFAULT_TRAILER_FIELD;
+  for (int i=0; i != seq.size(); i++) {
+    ASN1TaggedObject o=(ASN1TaggedObject)seq.getObjectAt(i);
+switch (o.getTagNo()) {
+case 0:
+      hashAlgorithm=AlgorithmIdentifier.getInstance(o,true);
+    break;
+case 1:
+  maskGenAlgorithm=AlgorithmIdentifier.getInstance(o,true);
+break;
+case 2:
+saltLength=DERInteger.getInstance(o,true);
+break;
+case 3:
+trailerField=DERInteger.getInstance(o,true);
+break;
+default :
+throw new IllegalArgumentException("unknown tag");
+}
+}
+}

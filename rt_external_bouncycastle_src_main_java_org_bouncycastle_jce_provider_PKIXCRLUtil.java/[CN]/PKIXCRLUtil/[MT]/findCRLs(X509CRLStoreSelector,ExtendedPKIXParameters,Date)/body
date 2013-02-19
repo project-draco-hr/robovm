@@ -1,0 +1,31 @@
+{
+  Set initialSet=new HashSet();
+  try {
+    initialSet.addAll(findCRLs(crlselect,paramsPKIX.getAdditionalStores()));
+    initialSet.addAll(findCRLs(crlselect,paramsPKIX.getStores()));
+    initialSet.addAll(findCRLs(crlselect,paramsPKIX.getCertStores()));
+  }
+ catch (  AnnotatedException e) {
+    throw new AnnotatedException("Exception obtaining complete CRLs.",e);
+  }
+  Set finalSet=new HashSet();
+  Date validityDate=currentDate;
+  if (paramsPKIX.getDate() != null) {
+    validityDate=paramsPKIX.getDate();
+  }
+  for (Iterator it=initialSet.iterator(); it.hasNext(); ) {
+    X509CRL crl=(X509CRL)it.next();
+    if (crl.getNextUpdate().after(validityDate)) {
+      X509Certificate cert=crlselect.getCertificateChecking();
+      if (cert != null) {
+        if (crl.getThisUpdate().before(cert.getNotAfter())) {
+          finalSet.add(crl);
+        }
+      }
+ else {
+        finalSet.add(crl);
+      }
+    }
+  }
+  return finalSet;
+}

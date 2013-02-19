@@ -1,0 +1,69 @@
+{
+  byte[] encoded;
+  try {
+    if (wrapEngine == null) {
+      encoded=engineDoFinal(wrappedKey,0,wrappedKey.length);
+    }
+ else {
+      encoded=wrapEngine.unwrap(wrappedKey,0,wrappedKey.length);
+    }
+  }
+ catch (  InvalidCipherTextException e) {
+    throw new InvalidKeyException(e.getMessage());
+  }
+catch (  BadPaddingException e) {
+    throw new InvalidKeyException(e.getMessage());
+  }
+catch (  IllegalBlockSizeException e2) {
+    throw new InvalidKeyException(e2.getMessage());
+  }
+  if (wrappedKeyType == Cipher.SECRET_KEY) {
+    return new SecretKeySpec(encoded,wrappedKeyAlgorithm);
+  }
+ else   if (wrappedKeyAlgorithm.equals("") && wrappedKeyType == Cipher.PRIVATE_KEY) {
+    ASN1InputStream bIn=new ASN1InputStream(encoded);
+    PrivateKey privKey;
+    try {
+      ASN1Sequence s=(ASN1Sequence)bIn.readObject();
+      PrivateKeyInfo in=new PrivateKeyInfo(s);
+      DERObjectIdentifier oid=in.getAlgorithmId().getObjectId();
+      if (oid.equals(X9ObjectIdentifiers.id_ecPublicKey)) {
+        privKey=new JCEECPrivateKey(in);
+      }
+ else       if (oid.equals(X9ObjectIdentifiers.id_dsa)) {
+        privKey=new JDKDSAPrivateKey(in);
+      }
+ else       if (oid.equals(PKCSObjectIdentifiers.dhKeyAgreement)) {
+        privKey=new JCEDHPrivateKey(in);
+      }
+ else       if (oid.equals(X9ObjectIdentifiers.dhpublicnumber)) {
+        privKey=new JCEDHPrivateKey(in);
+      }
+ else {
+        privKey=new JCERSAPrivateCrtKey(in);
+      }
+    }
+ catch (    Exception e) {
+      throw new InvalidKeyException("Invalid key encoding.");
+    }
+    return privKey;
+  }
+ else {
+    try {
+      KeyFactory kf=KeyFactory.getInstance(wrappedKeyAlgorithm,BouncyCastleProvider.PROVIDER_NAME);
+      if (wrappedKeyType == Cipher.PUBLIC_KEY) {
+        return kf.generatePublic(new X509EncodedKeySpec(encoded));
+      }
+ else       if (wrappedKeyType == Cipher.PRIVATE_KEY) {
+        return kf.generatePrivate(new PKCS8EncodedKeySpec(encoded));
+      }
+    }
+ catch (    NoSuchProviderException e) {
+      throw new InvalidKeyException("Unknown key type " + e.getMessage());
+    }
+catch (    InvalidKeySpecException e2) {
+      throw new InvalidKeyException("Unknown key type " + e2.getMessage());
+    }
+    throw new InvalidKeyException("Unknown key type " + wrappedKeyType);
+  }
+}

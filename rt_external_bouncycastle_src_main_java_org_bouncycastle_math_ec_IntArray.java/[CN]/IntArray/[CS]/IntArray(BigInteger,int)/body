@@ -1,0 +1,50 @@
+{
+  if (bigInt.signum() == -1) {
+    throw new IllegalArgumentException("Only positive Integers allowed");
+  }
+  if (bigInt.equals(ECConstants.ZERO)) {
+    m_ints=new int[]{0};
+    return;
+  }
+  byte[] barr=bigInt.toByteArray();
+  int barrLen=barr.length;
+  int barrStart=0;
+  if (barr[0] == 0) {
+    barrLen--;
+    barrStart=1;
+  }
+  int intLen=(barrLen + 3) / 4;
+  if (intLen < minIntLen) {
+    m_ints=new int[minIntLen];
+  }
+ else {
+    m_ints=new int[intLen];
+  }
+  int iarrJ=intLen - 1;
+  int rem=barrLen % 4 + barrStart;
+  int temp=0;
+  int barrI=barrStart;
+  if (barrStart < rem) {
+    for (; barrI < rem; barrI++) {
+      temp<<=8;
+      int barrBarrI=barr[barrI];
+      if (barrBarrI < 0) {
+        barrBarrI+=256;
+      }
+      temp|=barrBarrI;
+    }
+    m_ints[iarrJ--]=temp;
+  }
+  for (; iarrJ >= 0; iarrJ--) {
+    temp=0;
+    for (int i=0; i < 4; i++) {
+      temp<<=8;
+      int barrBarrI=barr[barrI++];
+      if (barrBarrI < 0) {
+        barrBarrI+=256;
+      }
+      temp|=barrBarrI;
+    }
+    m_ints[iarrJ]=temp;
+  }
+}

@@ -1,0 +1,17 @@
+{
+  if (keySpec instanceof PBEKeySpec) {
+    PBEKeySpec pbeSpec=(PBEKeySpec)keySpec;
+    CipherParameters param;
+    if (pbeSpec.getSalt() == null) {
+      return new JCEPBEKey(this.algName,this.algOid,scheme,digest,keySize,ivSize,pbeSpec,null);
+    }
+    if (forCipher) {
+      param=Util.makePBEParameters(pbeSpec,scheme,digest,keySize,ivSize);
+    }
+ else {
+      param=Util.makePBEMacParameters(pbeSpec,scheme,digest,keySize);
+    }
+    return new JCEPBEKey(this.algName,this.algOid,scheme,digest,keySize,ivSize,pbeSpec,param);
+  }
+  throw new InvalidKeySpecException("Invalid KeySpec");
+}

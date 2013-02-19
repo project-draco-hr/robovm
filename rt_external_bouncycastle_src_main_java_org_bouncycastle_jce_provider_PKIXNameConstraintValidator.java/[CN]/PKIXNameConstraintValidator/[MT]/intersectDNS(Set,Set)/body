@@ -1,0 +1,24 @@
+{
+  Set intersect=new HashSet();
+  for (Iterator it=dnss.iterator(); it.hasNext(); ) {
+    String dns=extractNameAsString(((GeneralSubtree)it.next()).getBase());
+    if (permitted == null) {
+      if (dns != null) {
+        intersect.add(dns);
+      }
+    }
+ else {
+      Iterator _iter=permitted.iterator();
+      while (_iter.hasNext()) {
+        String _permitted=(String)_iter.next();
+        if (withinDomain(_permitted,dns)) {
+          intersect.add(_permitted);
+        }
+ else         if (withinDomain(dns,_permitted)) {
+          intersect.add(dns);
+        }
+      }
+    }
+  }
+  return intersect;
+}

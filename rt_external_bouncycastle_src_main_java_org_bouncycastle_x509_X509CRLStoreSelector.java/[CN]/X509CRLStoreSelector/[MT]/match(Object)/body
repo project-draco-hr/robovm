@@ -1,0 +1,47 @@
+{
+  if (!(obj instanceof X509CRL)) {
+    return false;
+  }
+  X509CRL crl=(X509CRL)obj;
+  DERInteger dci=null;
+  try {
+    byte[] bytes=crl.getExtensionValue(X509Extensions.DeltaCRLIndicator.getId());
+    if (bytes != null) {
+      dci=DERInteger.getInstance(X509ExtensionUtil.fromExtensionValue(bytes));
+    }
+  }
+ catch (  Exception e) {
+    return false;
+  }
+  if (isDeltaCRLIndicatorEnabled()) {
+    if (dci == null) {
+      return false;
+    }
+  }
+  if (isCompleteCRLEnabled()) {
+    if (dci != null) {
+      return false;
+    }
+  }
+  if (dci != null) {
+    if (maxBaseCRLNumber != null) {
+      if (dci.getPositiveValue().compareTo(maxBaseCRLNumber) == 1) {
+        return false;
+      }
+    }
+  }
+  if (issuingDistributionPointEnabled) {
+    byte[] idp=crl.getExtensionValue(X509Extensions.IssuingDistributionPoint.getId());
+    if (issuingDistributionPoint == null) {
+      if (idp != null) {
+        return false;
+      }
+    }
+ else {
+      if (!Arrays.areEqual(idp,issuingDistributionPoint)) {
+        return false;
+      }
+    }
+  }
+  return super.match((X509CRL)obj);
+}

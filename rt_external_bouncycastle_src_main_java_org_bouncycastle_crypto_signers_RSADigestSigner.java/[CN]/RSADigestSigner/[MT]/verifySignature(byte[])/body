@@ -1,0 +1,43 @@
+{
+  if (forSigning) {
+    throw new IllegalStateException("RSADigestSigner not initialised for verification");
+  }
+  byte[] hash=new byte[digest.getDigestSize()];
+  digest.doFinal(hash,0);
+  byte[] sig;
+  byte[] expected;
+  try {
+    sig=rsaEngine.processBlock(signature,0,signature.length);
+    expected=derEncode(hash);
+  }
+ catch (  Exception e) {
+    return false;
+  }
+  if (sig.length == expected.length) {
+    for (int i=0; i < sig.length; i++) {
+      if (sig[i] != expected[i]) {
+        return false;
+      }
+    }
+  }
+ else   if (sig.length == expected.length - 2) {
+    int sigOffset=sig.length - hash.length - 2;
+    int expectedOffset=expected.length - hash.length - 2;
+    expected[1]-=2;
+    expected[3]-=2;
+    for (int i=0; i < hash.length; i++) {
+      if (sig[sigOffset + i] != expected[expectedOffset + i]) {
+        return false;
+      }
+    }
+    for (int i=0; i < sigOffset; i++) {
+      if (sig[i] != expected[i]) {
+        return false;
+      }
+    }
+  }
+ else {
+    return false;
+  }
+  return true;
+}

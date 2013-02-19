@@ -1,0 +1,19 @@
+{
+  String algorithm=algId.getObjectId().getId();
+  PKCS12PBEParams pbeParams=new PKCS12PBEParams((ASN1Sequence)algId.getParameters());
+  PBEKeySpec pbeSpec=new PBEKeySpec(password);
+  PrivateKey out;
+  try {
+    SecretKeyFactory keyFact=SecretKeyFactory.getInstance(algorithm,bcProvider);
+    PBEParameterSpec defParams=new PBEParameterSpec(pbeParams.getIV(),pbeParams.getIterations().intValue());
+    SecretKey k=keyFact.generateSecret(pbeSpec);
+    ((JCEPBEKey)k).setTryWrongPKCS12Zero(wrongPKCS12Zero);
+    Cipher cipher=Cipher.getInstance(algorithm,bcProvider);
+    cipher.init(Cipher.UNWRAP_MODE,k,defParams);
+    out=(PrivateKey)cipher.unwrap(data,"",Cipher.PRIVATE_KEY);
+  }
+ catch (  Exception e) {
+    throw new IOException("exception unwrapping private key - " + e.toString());
+  }
+  return out;
+}

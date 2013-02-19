@@ -1,0 +1,19 @@
+{
+  DSAParametersGenerator pGen=new DSAParametersGenerator();
+  if (random != null) {
+    pGen.init(strength,20,random);
+  }
+ else {
+    pGen.init(strength,20,new SecureRandom());
+  }
+  DSAParameters p=pGen.generateParameters();
+  AlgorithmParameters params;
+  try {
+    params=AlgorithmParameters.getInstance("DSA",BouncyCastleProvider.PROVIDER_NAME);
+    params.init(new DSAParameterSpec(p.getP(),p.getQ(),p.getG()));
+  }
+ catch (  Exception e) {
+    throw new RuntimeException(e.getMessage());
+  }
+  return params;
+}

@@ -1,0 +1,21 @@
+{
+  if (!isIndirect) {
+    return null;
+  }
+  byte[] ext=getExtensionValue(X509Extensions.CertificateIssuer.getId());
+  if (ext == null) {
+    return previousCertificateIssuer;
+  }
+  try {
+    GeneralName[] names=GeneralNames.getInstance(X509ExtensionUtil.fromExtensionValue(ext)).getNames();
+    for (int i=0; i < names.length; i++) {
+      if (names[i].getTagNo() == GeneralName.directoryName) {
+        return new X500Principal(names[i].getName().getDERObject().getDEREncoded());
+      }
+    }
+    return null;
+  }
+ catch (  IOException e) {
+    return null;
+  }
+}

@@ -1,0 +1,21 @@
+{
+  if (keySpec == null) {
+    throw new InvalidKeySpecException("keySpec parameter is null");
+  }
+  if (key == null) {
+    throw new InvalidKeySpecException("key parameter is null");
+  }
+  if (SecretKeySpec.class.isAssignableFrom(keySpec)) {
+    return new SecretKeySpec(key.getEncoded(),algName);
+  }
+  try {
+    Class[] parameters={byte[].class};
+    Constructor c=keySpec.getConstructor(parameters);
+    Object[] p=new Object[1];
+    p[0]=key.getEncoded();
+    return (KeySpec)c.newInstance(p);
+  }
+ catch (  Exception e) {
+    throw new InvalidKeySpecException(e.toString());
+  }
+}

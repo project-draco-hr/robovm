@@ -1,0 +1,15 @@
+{
+  int resultLen=0;
+  for (int i=0; i != len; i++) {
+    bufBlock[bufOff++]=in[inOff + i];
+    if (bufOff == bufBlock.length) {
+      gCTRBlock(bufBlock,BLOCK_SIZE,out,outOff + resultLen);
+      if (!forEncryption) {
+        System.arraycopy(bufBlock,BLOCK_SIZE,bufBlock,0,macSize);
+      }
+      bufOff=bufBlock.length - BLOCK_SIZE;
+      resultLen+=BLOCK_SIZE;
+    }
+  }
+  return resultLen;
+}

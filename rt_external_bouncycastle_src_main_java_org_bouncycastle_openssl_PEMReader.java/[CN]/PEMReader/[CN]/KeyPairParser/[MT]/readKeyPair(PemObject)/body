@@ -1,0 +1,47 @@
+{
+  boolean isEncrypted=false;
+  String dekInfo=null;
+  List headers=obj.getHeaders();
+  for (Iterator it=headers.iterator(); it.hasNext(); ) {
+    PemHeader hdr=(PemHeader)it.next();
+    if (hdr.getName().equals("Proc-Type") && hdr.getValue().equals("4,ENCRYPTED")) {
+      isEncrypted=true;
+    }
+ else     if (hdr.getName().equals("DEK-Info")) {
+      dekInfo=hdr.getValue();
+    }
+  }
+  byte[] keyBytes=obj.getContent();
+  if (isEncrypted) {
+    if (pFinder == null) {
+      throw new PasswordException("No password finder specified, but a password is required");
+    }
+    char[] password=pFinder.getPassword();
+    if (password == null) {
+      throw new PasswordException("Password is null, but a password is required");
+    }
+    StringTokenizer tknz=new StringTokenizer(dekInfo,",");
+    String dekAlgName=tknz.nextToken();
+    byte[] iv=Hex.decode(tknz.nextToken());
+    keyBytes=PEMUtilities.crypt(false,provider,keyBytes,password,dekAlgName,iv);
+  }
+  try {
+    return (ASN1Sequence)ASN1Object.fromByteArray(keyBytes);
+  }
+ catch (  IOException e) {
+    if (isEncrypted) {
+      throw new PEMException("exception decoding - please check password and data.",e);
+    }
+ else {
+      throw new PEMException(e.getMessage(),e);
+    }
+  }
+catch (  ClassCastException e) {
+    if (isEncrypted) {
+      throw new PEMException("exception decoding - please check password and data.",e);
+    }
+ else {
+      throw new PEMException(e.getMessage(),e);
+    }
+  }
+}

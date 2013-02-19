@@ -1,0 +1,46 @@
+{
+  if (IPAddress.isValidIPv6WithNetmask(ip) || IPAddress.isValidIPv6(ip)) {
+    int slashIndex=ip.indexOf('/');
+    if (slashIndex < 0) {
+      byte[] addr=new byte[16];
+      int[] parsedIp=parseIPv6(ip);
+      copyInts(parsedIp,addr,0);
+      return addr;
+    }
+ else {
+      byte[] addr=new byte[32];
+      int[] parsedIp=parseIPv6(ip.substring(0,slashIndex));
+      copyInts(parsedIp,addr,0);
+      String mask=ip.substring(slashIndex + 1);
+      if (mask.indexOf(':') > 0) {
+        parsedIp=parseIPv6(mask);
+      }
+ else {
+        parsedIp=parseMask(mask);
+      }
+      copyInts(parsedIp,addr,16);
+      return addr;
+    }
+  }
+ else   if (IPAddress.isValidIPv4WithNetmask(ip) || IPAddress.isValidIPv4(ip)) {
+    int slashIndex=ip.indexOf('/');
+    if (slashIndex < 0) {
+      byte[] addr=new byte[4];
+      parseIPv4(ip,addr,0);
+      return addr;
+    }
+ else {
+      byte[] addr=new byte[8];
+      parseIPv4(ip.substring(0,slashIndex),addr,0);
+      String mask=ip.substring(slashIndex + 1);
+      if (mask.indexOf('.') > 0) {
+        parseIPv4(mask,addr,4);
+      }
+ else {
+        parseIPv4Mask(mask,addr,4);
+      }
+      return addr;
+    }
+  }
+  return null;
+}

@@ -1,0 +1,40 @@
+{
+  StringBuffer buf=new StringBuffer();
+  Vector components=new Vector();
+  boolean first=true;
+  StringBuffer ava=null;
+  for (int i=0; i < ordering.size(); i++) {
+    if (((Boolean)added.elementAt(i)).booleanValue()) {
+      ava.append('+');
+      appendValue(ava,oidSymbols,(DERObjectIdentifier)ordering.elementAt(i),(String)values.elementAt(i));
+    }
+ else {
+      ava=new StringBuffer();
+      appendValue(ava,oidSymbols,(DERObjectIdentifier)ordering.elementAt(i),(String)values.elementAt(i));
+      components.addElement(ava);
+    }
+  }
+  if (reverse) {
+    for (int i=components.size() - 1; i >= 0; i--) {
+      if (first) {
+        first=false;
+      }
+ else {
+        buf.append(',');
+      }
+      buf.append(components.elementAt(i).toString());
+    }
+  }
+ else {
+    for (int i=0; i < components.size(); i++) {
+      if (first) {
+        first=false;
+      }
+ else {
+        buf.append(',');
+      }
+      buf.append(components.elementAt(i).toString());
+    }
+  }
+  return buf.toString();
+}

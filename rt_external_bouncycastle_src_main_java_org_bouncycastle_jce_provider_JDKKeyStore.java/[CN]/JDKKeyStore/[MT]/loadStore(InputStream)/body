@@ -1,0 +1,35 @@
+{
+  DataInputStream dIn=new DataInputStream(in);
+  int type=dIn.read();
+  while (type > NULL) {
+    String alias=dIn.readUTF();
+    Date date=new Date(dIn.readLong());
+    int chainLength=dIn.readInt();
+    Certificate[] chain=null;
+    if (chainLength != 0) {
+      chain=new Certificate[chainLength];
+      for (int i=0; i != chainLength; i++) {
+        chain[i]=decodeCertificate(dIn);
+      }
+    }
+switch (type) {
+case CERTIFICATE:
+      Certificate cert=decodeCertificate(dIn);
+    table.put(alias,new StoreEntry(alias,date,CERTIFICATE,cert));
+  break;
+case KEY:
+Key key=decodeKey(dIn);
+table.put(alias,new StoreEntry(alias,date,KEY,key,chain));
+break;
+case SECRET:
+case SEALED:
+byte[] b=new byte[dIn.readInt()];
+dIn.readFully(b);
+table.put(alias,new StoreEntry(alias,date,type,b,chain));
+break;
+default :
+throw new RuntimeException("Unknown object type in store.");
+}
+type=dIn.read();
+}
+}

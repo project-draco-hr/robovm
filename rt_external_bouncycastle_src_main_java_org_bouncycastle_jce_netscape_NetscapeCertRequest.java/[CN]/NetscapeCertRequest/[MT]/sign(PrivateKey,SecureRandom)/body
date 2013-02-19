@@ -1,0 +1,19 @@
+{
+  Signature sig=Signature.getInstance(sigAlg.getObjectId().getId(),"BC");
+  if (rand != null) {
+    sig.initSign(priv_key,rand);
+  }
+ else {
+    sig.initSign(priv_key);
+  }
+  ASN1EncodableVector pkac=new ASN1EncodableVector();
+  pkac.add(getKeySpec());
+  pkac.add(new DERIA5String(challenge));
+  try {
+    sig.update(new DERSequence(pkac).getEncoded(ASN1Encodable.DER));
+  }
+ catch (  IOException ioe) {
+    throw new SignatureException(ioe.getMessage());
+  }
+  sigBits=sig.sign();
+}

@@ -1,0 +1,13 @@
+{
+  if (this.isInfinity()) {
+    return this;
+  }
+  if (this.x.toBigInteger().signum() == 0) {
+    return this.curve.getInfinity();
+  }
+  ECFieldElement.F2m lambda=(ECFieldElement.F2m)this.x.add(this.y.divide(this.x));
+  ECFieldElement.F2m x3=(ECFieldElement.F2m)lambda.square().add(lambda).add(this.curve.getA());
+  ECFieldElement ONE=this.curve.fromBigInteger(ECConstants.ONE);
+  ECFieldElement.F2m y3=(ECFieldElement.F2m)this.x.square().add(x3.multiply(lambda.add(ONE)));
+  return new ECPoint.F2m(this.curve,x3,y3,withCompression);
+}

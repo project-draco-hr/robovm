@@ -1,0 +1,21 @@
+{
+  List certs=certPath.getCertificates();
+  X509Certificate cert=(X509Certificate)certs.get(index);
+  BasicConstraints bc=null;
+  try {
+    bc=BasicConstraints.getInstance(CertPathValidatorUtilities.getExtensionValue(cert,RFC3280CertPathUtilities.BASIC_CONSTRAINTS));
+  }
+ catch (  Exception e) {
+    throw new ExtCertPathValidatorException("Basic constraints extension cannot be decoded.",e,certPath,index);
+  }
+  if (bc != null) {
+    BigInteger _pathLengthConstraint=bc.getPathLenConstraint();
+    if (_pathLengthConstraint != null) {
+      int _plc=_pathLengthConstraint.intValue();
+      if (_plc < maxPathLength) {
+        return _plc;
+      }
+    }
+  }
+  return maxPathLength;
+}

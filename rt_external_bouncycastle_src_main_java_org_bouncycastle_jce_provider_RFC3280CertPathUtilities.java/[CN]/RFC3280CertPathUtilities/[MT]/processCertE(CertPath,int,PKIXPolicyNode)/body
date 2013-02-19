@@ -1,0 +1,15 @@
+{
+  List certs=certPath.getCertificates();
+  X509Certificate cert=(X509Certificate)certs.get(index);
+  ASN1Sequence certPolicies=null;
+  try {
+    certPolicies=DERSequence.getInstance(CertPathValidatorUtilities.getExtensionValue(cert,RFC3280CertPathUtilities.CERTIFICATE_POLICIES));
+  }
+ catch (  AnnotatedException e) {
+    throw new ExtCertPathValidatorException("Could not read certificate policies extension from certificate.",e,certPath,index);
+  }
+  if (certPolicies == null) {
+    validPolicyTree=null;
+  }
+  return validPolicyTree;
+}

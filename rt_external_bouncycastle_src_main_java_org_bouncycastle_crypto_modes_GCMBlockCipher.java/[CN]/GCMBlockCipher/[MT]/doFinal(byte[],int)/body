@@ -1,0 +1,38 @@
+{
+  int extra=bufOff;
+  if (!forEncryption) {
+    if (extra < macSize) {
+      throw new InvalidCipherTextException("data too short");
+    }
+    extra-=macSize;
+  }
+  if (extra > 0) {
+    byte[] tmp=new byte[BLOCK_SIZE];
+    System.arraycopy(bufBlock,0,tmp,0,extra);
+    gCTRBlock(tmp,extra,out,outOff);
+  }
+  byte[] X=new byte[16];
+  packLength((long)A.length * 8,X,0);
+  packLength(totalLength * 8,X,8);
+  xor(S,X);
+  multiplier.multiplyH(S);
+  byte[] tag=new byte[BLOCK_SIZE];
+  cipher.processBlock(J0,0,tag,0);
+  xor(tag,S);
+  int resultLen=extra;
+  this.macBlock=new byte[macSize];
+  System.arraycopy(tag,0,macBlock,0,macSize);
+  if (forEncryption) {
+    System.arraycopy(macBlock,0,out,outOff + bufOff,macSize);
+    resultLen+=macSize;
+  }
+ else {
+    byte[] msgMac=new byte[macSize];
+    System.arraycopy(bufBlock,extra,msgMac,0,macSize);
+    if (!Arrays.constantTimeAreEqual(this.macBlock,msgMac)) {
+      throw new InvalidCipherTextException("mac check in GCM failed");
+    }
+  }
+  reset(false);
+  return resultLen;
+}

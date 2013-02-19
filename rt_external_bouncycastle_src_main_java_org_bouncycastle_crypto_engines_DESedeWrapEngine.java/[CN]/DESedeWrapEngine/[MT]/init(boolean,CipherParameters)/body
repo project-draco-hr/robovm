@@ -1,0 +1,34 @@
+{
+  this.forWrapping=forWrapping;
+  this.engine=new CBCBlockCipher(new DESedeEngine());
+  SecureRandom sr;
+  if (param instanceof ParametersWithRandom) {
+    ParametersWithRandom pr=(ParametersWithRandom)param;
+    param=pr.getParameters();
+    sr=pr.getRandom();
+  }
+ else {
+    sr=new SecureRandom();
+  }
+  if (param instanceof KeyParameter) {
+    this.param=(KeyParameter)param;
+    if (this.forWrapping) {
+      this.iv=new byte[8];
+      sr.nextBytes(iv);
+      this.paramPlusIV=new ParametersWithIV(this.param,this.iv);
+    }
+  }
+ else   if (param instanceof ParametersWithIV) {
+    this.paramPlusIV=(ParametersWithIV)param;
+    this.iv=this.paramPlusIV.getIV();
+    this.param=(KeyParameter)this.paramPlusIV.getParameters();
+    if (this.forWrapping) {
+      if ((this.iv == null) || (this.iv.length != 8)) {
+        throw new IllegalArgumentException("IV is not 8 octets");
+      }
+    }
+ else {
+      throw new IllegalArgumentException("You should not supply an IV for unwrapping");
+    }
+  }
+}

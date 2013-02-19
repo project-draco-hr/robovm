@@ -1,0 +1,34 @@
+{
+  Signature sig;
+  try {
+    if (provider == null) {
+      sig=Signature.getInstance(getSignatureName(sigAlgId));
+    }
+ else {
+      sig=Signature.getInstance(getSignatureName(sigAlgId),provider);
+    }
+  }
+ catch (  NoSuchAlgorithmException e) {
+    if (oids.get(sigAlgId.getObjectId()) != null) {
+      String signatureAlgorithm=(String)oids.get(sigAlgId.getObjectId());
+      if (provider == null) {
+        sig=Signature.getInstance(signatureAlgorithm);
+      }
+ else {
+        sig=Signature.getInstance(signatureAlgorithm,provider);
+      }
+    }
+ else {
+      throw e;
+    }
+  }
+  setSignatureParameters(sig,sigAlgId.getParameters());
+  sig.initVerify(pubKey);
+  try {
+    sig.update(reqInfo.getEncoded(ASN1Encodable.DER));
+  }
+ catch (  Exception e) {
+    throw new SignatureException("exception encoding TBS cert request - " + e);
+  }
+  return sig.verify(sigBits.getBytes());
+}

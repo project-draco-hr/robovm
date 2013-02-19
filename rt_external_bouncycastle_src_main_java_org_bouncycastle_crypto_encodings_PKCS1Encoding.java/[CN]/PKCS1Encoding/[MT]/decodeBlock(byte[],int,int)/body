@@ -1,0 +1,30 @@
+{
+  byte[] block=engine.processBlock(in,inOff,inLen);
+  if (block.length < getOutputBlockSize()) {
+    throw new InvalidCipherTextException("block truncated");
+  }
+  byte type=block[0];
+  if (type != 1 && type != 2) {
+    throw new InvalidCipherTextException("unknown block type");
+  }
+  if (useStrictLength && block.length != engine.getOutputBlockSize()) {
+    throw new InvalidCipherTextException("block incorrect size");
+  }
+  int start;
+  for (start=1; start != block.length; start++) {
+    byte pad=block[start];
+    if (pad == 0) {
+      break;
+    }
+    if (type == 1 && pad != (byte)0xff) {
+      throw new InvalidCipherTextException("block padding incorrect");
+    }
+  }
+  start++;
+  if (start > block.length || start < HEADER_LENGTH) {
+    throw new InvalidCipherTextException("no data in block");
+  }
+  byte[] result=new byte[block.length - start];
+  System.arraycopy(block,start,result,0,result.length);
+  return result;
+}

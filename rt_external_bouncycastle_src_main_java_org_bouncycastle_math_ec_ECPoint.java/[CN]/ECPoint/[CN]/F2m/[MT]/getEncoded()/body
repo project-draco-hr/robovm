@@ -1,0 +1,26 @@
+{
+  if (this.isInfinity()) {
+    return new byte[1];
+  }
+  int byteCount=converter.getByteLength(this.x);
+  byte[] X=converter.integerToBytes(this.getX().toBigInteger(),byteCount);
+  byte[] PO;
+  if (withCompression) {
+    PO=new byte[byteCount + 1];
+    PO[0]=0x02;
+    if (!(this.getX().toBigInteger().equals(ECConstants.ZERO))) {
+      if (this.getY().multiply(this.getX().invert()).toBigInteger().testBit(0)) {
+        PO[0]=0x03;
+      }
+    }
+    System.arraycopy(X,0,PO,1,byteCount);
+  }
+ else {
+    byte[] Y=converter.integerToBytes(this.getY().toBigInteger(),byteCount);
+    PO=new byte[byteCount + byteCount + 1];
+    PO[0]=0x04;
+    System.arraycopy(X,0,PO,1,byteCount);
+    System.arraycopy(Y,0,PO,byteCount + 1,byteCount);
+  }
+  return PO;
+}

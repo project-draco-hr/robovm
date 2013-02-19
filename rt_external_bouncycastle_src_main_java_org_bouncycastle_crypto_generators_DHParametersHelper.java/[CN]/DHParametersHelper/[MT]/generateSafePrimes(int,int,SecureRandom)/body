@@ -1,0 +1,19 @@
+{
+  logger.info("Generating safe primes. This may take a long time.");
+  long start=System.currentTimeMillis();
+  int tries=0;
+  BigInteger p, q;
+  int qLength=size - 1;
+  for (; ; ) {
+    tries++;
+    q=new BigInteger(qLength,2,random);
+    p=q.shiftLeft(1).add(ONE);
+    if (p.isProbablePrime(certainty) && (certainty <= 2 || q.isProbablePrime(certainty))) {
+      break;
+    }
+  }
+  long end=System.currentTimeMillis();
+  long duration=end - start;
+  logger.info("Generated safe primes: " + tries + " tries took "+ duration+ "ms");
+  return new BigInteger[]{p,q};
+}

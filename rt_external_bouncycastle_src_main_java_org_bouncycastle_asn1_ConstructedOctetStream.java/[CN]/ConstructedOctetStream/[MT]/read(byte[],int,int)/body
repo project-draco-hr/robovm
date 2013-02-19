@@ -1,0 +1,31 @@
+{
+  if (_currentStream == null) {
+    if (!_first) {
+      return -1;
+    }
+    ASN1OctetStringParser s=(ASN1OctetStringParser)_parser.readObject();
+    if (s == null) {
+      return -1;
+    }
+    _first=false;
+    _currentStream=s.getOctetStream();
+  }
+  int totalRead=0;
+  for (; ; ) {
+    int numRead=_currentStream.read(b,off + totalRead,len - totalRead);
+    if (numRead >= 0) {
+      totalRead+=numRead;
+      if (totalRead == len) {
+        return totalRead;
+      }
+    }
+ else {
+      ASN1OctetStringParser aos=(ASN1OctetStringParser)_parser.readObject();
+      if (aos == null) {
+        _currentStream=null;
+        return totalRead < 1 ? -1 : totalRead;
+      }
+      _currentStream=aos.getOctetStream();
+    }
+  }
+}

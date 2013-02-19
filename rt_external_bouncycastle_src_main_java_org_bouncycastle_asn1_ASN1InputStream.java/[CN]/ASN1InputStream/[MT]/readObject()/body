@@ -1,0 +1,45 @@
+{
+  int tag=read();
+  if (tag <= 0) {
+    if (tag == 0) {
+      throw new IOException("unexpected end-of-contents marker");
+    }
+    return null;
+  }
+  int tagNo=readTagNumber(this,tag);
+  boolean isConstructed=(tag & CONSTRUCTED) != 0;
+  int length=readLength();
+  if (length < 0) {
+    if (!isConstructed) {
+      throw new IOException("indefinite length primitive encoding encountered");
+    }
+    IndefiniteLengthInputStream indIn=new IndefiniteLengthInputStream(this,limit);
+    ASN1StreamParser sp=new ASN1StreamParser(indIn,limit);
+    if ((tag & APPLICATION) != 0) {
+      return new BERApplicationSpecificParser(tagNo,sp).getLoadedObject();
+    }
+    if ((tag & TAGGED) != 0) {
+      return new BERTaggedObjectParser(true,tagNo,sp).getLoadedObject();
+    }
+switch (tagNo) {
+case OCTET_STRING:
+      return new BEROctetStringParser(sp).getLoadedObject();
+case SEQUENCE:
+    return new BERSequenceParser(sp).getLoadedObject();
+case SET:
+  return new BERSetParser(sp).getLoadedObject();
+case EXTERNAL:
+return new DERExternalParser(sp).getLoadedObject();
+default :
+throw new IOException("unknown BER object encountered");
+}
+}
+ else {
+try {
+return buildObject(tag,tagNo,length);
+}
+ catch (IllegalArgumentException e) {
+throw new ASN1Exception("corrupted stream detected",e);
+}
+}
+}

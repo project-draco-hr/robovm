@@ -1,0 +1,39 @@
+{
+  if (paramsPKIX.getValidityModel() == ExtendedPKIXParameters.CHAIN_VALIDITY_MODEL) {
+    if (index <= 0) {
+      return CertPathValidatorUtilities.getValidDate(paramsPKIX);
+    }
+ else {
+      if (index - 1 == 0) {
+        DERGeneralizedTime dateOfCertgen=null;
+        try {
+          byte[] extBytes=((X509Certificate)certPath.getCertificates().get(index - 1)).getExtensionValue(ISISMTTObjectIdentifiers.id_isismtt_at_dateOfCertGen.getId());
+          if (extBytes != null) {
+            dateOfCertgen=DERGeneralizedTime.getInstance(ASN1Object.fromByteArray(extBytes));
+          }
+        }
+ catch (        IOException e) {
+          throw new AnnotatedException("Date of cert gen extension could not be read.");
+        }
+catch (        IllegalArgumentException e) {
+          throw new AnnotatedException("Date of cert gen extension could not be read.");
+        }
+        if (dateOfCertgen != null) {
+          try {
+            return dateOfCertgen.getDate();
+          }
+ catch (          ParseException e) {
+            throw new AnnotatedException("Date from date of cert gen extension could not be parsed.",e);
+          }
+        }
+        return ((X509Certificate)certPath.getCertificates().get(index - 1)).getNotBefore();
+      }
+ else {
+        return ((X509Certificate)certPath.getCertificates().get(index - 1)).getNotBefore();
+      }
+    }
+  }
+ else {
+    return getValidDate(paramsPKIX);
+  }
+}

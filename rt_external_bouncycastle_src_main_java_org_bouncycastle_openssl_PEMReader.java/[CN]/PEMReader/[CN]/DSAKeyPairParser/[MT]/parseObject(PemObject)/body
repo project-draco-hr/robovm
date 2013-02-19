@@ -1,0 +1,23 @@
+{
+  try {
+    ASN1Sequence seq=readKeyPair(obj);
+    if (seq.size() != 6) {
+      throw new PEMException("malformed sequence in DSA private key");
+    }
+    DERInteger p=(DERInteger)seq.getObjectAt(1);
+    DERInteger q=(DERInteger)seq.getObjectAt(2);
+    DERInteger g=(DERInteger)seq.getObjectAt(3);
+    DERInteger y=(DERInteger)seq.getObjectAt(4);
+    DERInteger x=(DERInteger)seq.getObjectAt(5);
+    DSAPrivateKeySpec privSpec=new DSAPrivateKeySpec(x.getValue(),p.getValue(),q.getValue(),g.getValue());
+    DSAPublicKeySpec pubSpec=new DSAPublicKeySpec(y.getValue(),p.getValue(),q.getValue(),g.getValue());
+    KeyFactory fact=KeyFactory.getInstance("DSA",provider);
+    return new KeyPair(fact.generatePublic(pubSpec),fact.generatePrivate(privSpec));
+  }
+ catch (  IOException e) {
+    throw e;
+  }
+catch (  Exception e) {
+    throw new PEMException("problem creating DSA private key: " + e.toString(),e);
+  }
+}

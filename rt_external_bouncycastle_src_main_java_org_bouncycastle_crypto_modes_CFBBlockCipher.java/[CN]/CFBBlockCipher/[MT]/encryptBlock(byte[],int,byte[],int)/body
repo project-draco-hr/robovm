@@ -1,0 +1,15 @@
+{
+  if ((inOff + blockSize) > in.length) {
+    throw new DataLengthException("input buffer too short");
+  }
+  if ((outOff + blockSize) > out.length) {
+    throw new DataLengthException("output buffer too short");
+  }
+  cipher.processBlock(cfbV,0,cfbOutV,0);
+  for (int i=0; i < blockSize; i++) {
+    out[outOff + i]=(byte)(cfbOutV[i] ^ in[inOff + i]);
+  }
+  System.arraycopy(cfbV,blockSize,cfbV,0,cfbV.length - blockSize);
+  System.arraycopy(out,outOff,cfbV,cfbV.length - blockSize,blockSize);
+  return blockSize;
+}

@@ -1,0 +1,56 @@
+{
+  if (certs.size() < 2) {
+    return certs;
+  }
+  X500Principal issuer=((X509Certificate)certs.get(0)).getIssuerX500Principal();
+  boolean okay=true;
+  for (int i=1; i != certs.size(); i++) {
+    X509Certificate cert=(X509Certificate)certs.get(i);
+    if (issuer.equals(cert.getSubjectX500Principal())) {
+      issuer=((X509Certificate)certs.get(i)).getIssuerX500Principal();
+    }
+ else {
+      okay=false;
+      break;
+    }
+  }
+  if (okay) {
+    return certs;
+  }
+  List retList=new ArrayList(certs.size());
+  List orig=new ArrayList(certs);
+  for (int i=0; i < certs.size(); i++) {
+    X509Certificate cert=(X509Certificate)certs.get(i);
+    boolean found=false;
+    X500Principal subject=cert.getSubjectX500Principal();
+    for (int j=0; j != certs.size(); j++) {
+      X509Certificate c=(X509Certificate)certs.get(j);
+      if (c.getIssuerX500Principal().equals(subject)) {
+        found=true;
+        break;
+      }
+    }
+    if (!found) {
+      retList.add(cert);
+      certs.remove(i);
+    }
+  }
+  if (retList.size() > 1) {
+    return orig;
+  }
+  for (int i=0; i != retList.size(); i++) {
+    issuer=((X509Certificate)retList.get(i)).getIssuerX500Principal();
+    for (int j=0; j < certs.size(); j++) {
+      X509Certificate c=(X509Certificate)certs.get(j);
+      if (issuer.equals(c.getSubjectX500Principal())) {
+        retList.add(c);
+        certs.remove(j);
+        break;
+      }
+    }
+  }
+  if (certs.size() > 0) {
+    return orig;
+  }
+  return retList;
+}

@@ -1,0 +1,24 @@
+{
+  DataOutputStream dOut=new DataOutputStream(stream);
+  byte[] salt=new byte[STORE_SALT_SIZE];
+  int iterationCount=MIN_ITERATIONS + (random.nextInt() & 0x3ff);
+  random.nextBytes(salt);
+  dOut.writeInt(STORE_VERSION);
+  dOut.writeInt(salt.length);
+  dOut.write(salt);
+  dOut.writeInt(iterationCount);
+  HMac hMac=new HMac(new OpenSSLDigest.SHA1());
+  MacOutputStream mOut=new MacOutputStream(dOut,hMac);
+  PBEParametersGenerator pbeGen=new PKCS12ParametersGenerator(new OpenSSLDigest.SHA1());
+  byte[] passKey=PBEParametersGenerator.PKCS12PasswordToBytes(password);
+  pbeGen.init(passKey,salt,iterationCount);
+  hMac.init(pbeGen.generateDerivedMacParameters(hMac.getMacSize()));
+  for (int i=0; i != passKey.length; i++) {
+    passKey[i]=0;
+  }
+  saveStore(mOut);
+  byte[] mac=new byte[hMac.getMacSize()];
+  hMac.doFinal(mac,0);
+  dOut.write(mac);
+  dOut.close();
+}

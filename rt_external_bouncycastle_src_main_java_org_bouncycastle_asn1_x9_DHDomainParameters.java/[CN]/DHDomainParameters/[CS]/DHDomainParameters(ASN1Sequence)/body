@@ -1,0 +1,17 @@
+{
+  if (seq.size() < 3 || seq.size() > 5) {
+    throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+  }
+  Enumeration e=seq.getObjects();
+  this.p=DERInteger.getInstance(e.nextElement());
+  this.g=DERInteger.getInstance(e.nextElement());
+  this.q=DERInteger.getInstance(e.nextElement());
+  DEREncodable next=getNext(e);
+  if (next != null && next instanceof DERInteger) {
+    this.j=DERInteger.getInstance(next);
+    next=getNext(e);
+  }
+  if (next != null) {
+    this.validationParms=DHValidationParms.getInstance(next.getDERObject());
+  }
+}

@@ -1,0 +1,14 @@
+{
+  AlgorithmIdentifier hashAlgorithm=new AlgorithmIdentifier(JCEDigestUtil.getOID(currentSpec.getDigestAlgorithm()),DERNull.INSTANCE);
+  MGF1ParameterSpec mgfSpec=(MGF1ParameterSpec)currentSpec.getMGFParameters();
+  AlgorithmIdentifier maskGenAlgorithm=new AlgorithmIdentifier(PKCSObjectIdentifiers.id_mgf1,new AlgorithmIdentifier(JCEDigestUtil.getOID(mgfSpec.getDigestAlgorithm()),DERNull.INSTANCE));
+  PSource.PSpecified pSource=(PSource.PSpecified)currentSpec.getPSource();
+  AlgorithmIdentifier pSourceAlgorithm=new AlgorithmIdentifier(PKCSObjectIdentifiers.id_pSpecified,new DEROctetString(pSource.getValue()));
+  RSAESOAEPparams oaepP=new RSAESOAEPparams(hashAlgorithm,maskGenAlgorithm,pSourceAlgorithm);
+  try {
+    return oaepP.getEncoded(ASN1Encodable.DER);
+  }
+ catch (  IOException e) {
+    throw new RuntimeException("Error encoding OAEPParameters");
+  }
+}

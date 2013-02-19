@@ -1,0 +1,24 @@
+{
+  String sym=(String)oidSymbols.get(oid);
+  if (sym != null) {
+    buf.append(sym);
+  }
+ else {
+    buf.append(oid.getId());
+  }
+  buf.append('=');
+  int index=buf.length();
+  buf.append(value);
+  int end=buf.length();
+  if (value.length() >= 2 && value.charAt(0) == '\\' && value.charAt(1) == '#') {
+    index+=2;
+  }
+  while (index != end) {
+    if ((buf.charAt(index) == ',') || (buf.charAt(index) == '"') || (buf.charAt(index) == '\\')|| (buf.charAt(index) == '+')|| (buf.charAt(index) == '=')|| (buf.charAt(index) == '<')|| (buf.charAt(index) == '>')|| (buf.charAt(index) == ';')) {
+      buf.insert(index,"\\");
+      index++;
+      end++;
+    }
+    index++;
+  }
+}

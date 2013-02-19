@@ -1,0 +1,23 @@
+{
+  CipherParameters param;
+  if (publicKey instanceof DSAKey) {
+    param=DSAUtil.generatePublicKeyParameter(publicKey);
+  }
+ else {
+    try {
+      byte[] bytes=publicKey.getEncoded();
+      publicKey=JDKKeyFactory.createPublicKeyFromDERStream(bytes);
+      if (publicKey instanceof DSAKey) {
+        param=DSAUtil.generatePublicKeyParameter(publicKey);
+      }
+ else {
+        throw new InvalidKeyException("can't recognise key type in DSA based signer");
+      }
+    }
+ catch (    Exception e) {
+      throw new InvalidKeyException("can't recognise key type in DSA based signer");
+    }
+  }
+  digest.reset();
+  signer.init(false,param);
+}

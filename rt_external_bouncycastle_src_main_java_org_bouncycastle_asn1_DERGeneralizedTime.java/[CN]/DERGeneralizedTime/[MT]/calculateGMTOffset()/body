@@ -1,0 +1,19 @@
+{
+  String sign="+";
+  TimeZone timeZone=TimeZone.getDefault();
+  int offset=timeZone.getRawOffset();
+  if (offset < 0) {
+    sign="-";
+    offset=-offset;
+  }
+  int hours=offset / (60 * 60 * 1000);
+  int minutes=(offset - (hours * 60 * 60* 1000)) / (60 * 1000);
+  try {
+    if (timeZone.useDaylightTime() && timeZone.inDaylightTime(this.getDate())) {
+      hours+=sign.equals("+") ? 1 : -1;
+    }
+  }
+ catch (  ParseException e) {
+  }
+  return "GMT" + sign + convert(hours)+ ":"+ convert(minutes);
+}

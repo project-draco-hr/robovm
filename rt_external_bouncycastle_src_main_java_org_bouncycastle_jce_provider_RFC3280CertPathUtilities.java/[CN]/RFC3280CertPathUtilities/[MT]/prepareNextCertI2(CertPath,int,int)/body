@@ -1,0 +1,31 @@
+{
+  List certs=certPath.getCertificates();
+  X509Certificate cert=(X509Certificate)certs.get(index);
+  ASN1Sequence pc=null;
+  try {
+    pc=DERSequence.getInstance(CertPathValidatorUtilities.getExtensionValue(cert,RFC3280CertPathUtilities.POLICY_CONSTRAINTS));
+  }
+ catch (  Exception e) {
+    throw new ExtCertPathValidatorException("Policy constraints extension cannot be decoded.",e,certPath,index);
+  }
+  int tmpInt;
+  if (pc != null) {
+    Enumeration policyConstraints=pc.getObjects();
+    while (policyConstraints.hasMoreElements()) {
+      try {
+        ASN1TaggedObject constraint=ASN1TaggedObject.getInstance(policyConstraints.nextElement());
+        if (constraint.getTagNo() == 1) {
+          tmpInt=DERInteger.getInstance(constraint,false).getValue().intValue();
+          if (tmpInt < policyMapping) {
+            return tmpInt;
+          }
+          break;
+        }
+      }
+ catch (      IllegalArgumentException e) {
+        throw new ExtCertPathValidatorException("Policy constraints extension contents cannot be decoded.",e,certPath,index);
+      }
+    }
+  }
+  return policyMapping;
+}

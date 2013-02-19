@@ -1,0 +1,121 @@
+{
+  List certs=certPath.getCertificates();
+  X509Certificate cert=(X509Certificate)certs.get(index);
+  int n=certs.size();
+  int i=n - index;
+  ASN1Sequence pm=null;
+  try {
+    pm=DERSequence.getInstance(CertPathValidatorUtilities.getExtensionValue(cert,RFC3280CertPathUtilities.POLICY_MAPPINGS));
+  }
+ catch (  AnnotatedException ex) {
+    throw new ExtCertPathValidatorException("Policy mappings extension could not be decoded.",ex,certPath,index);
+  }
+  PKIXPolicyNode _validPolicyTree=validPolicyTree;
+  if (pm != null) {
+    ASN1Sequence mappings=(ASN1Sequence)pm;
+    Map m_idp=new HashMap();
+    Set s_idp=new HashSet();
+    for (int j=0; j < mappings.size(); j++) {
+      ASN1Sequence mapping=(ASN1Sequence)mappings.getObjectAt(j);
+      String id_p=((DERObjectIdentifier)mapping.getObjectAt(0)).getId();
+      String sd_p=((DERObjectIdentifier)mapping.getObjectAt(1)).getId();
+      Set tmp;
+      if (!m_idp.containsKey(id_p)) {
+        tmp=new HashSet();
+        tmp.add(sd_p);
+        m_idp.put(id_p,tmp);
+        s_idp.add(id_p);
+      }
+ else {
+        tmp=(Set)m_idp.get(id_p);
+        tmp.add(sd_p);
+      }
+    }
+    Iterator it_idp=s_idp.iterator();
+    while (it_idp.hasNext()) {
+      String id_p=(String)it_idp.next();
+      if (policyMapping > 0) {
+        boolean idp_found=false;
+        Iterator nodes_i=policyNodes[i].iterator();
+        while (nodes_i.hasNext()) {
+          PKIXPolicyNode node=(PKIXPolicyNode)nodes_i.next();
+          if (node.getValidPolicy().equals(id_p)) {
+            idp_found=true;
+            node.expectedPolicies=(Set)m_idp.get(id_p);
+            break;
+          }
+        }
+        if (!idp_found) {
+          nodes_i=policyNodes[i].iterator();
+          while (nodes_i.hasNext()) {
+            PKIXPolicyNode node=(PKIXPolicyNode)nodes_i.next();
+            if (RFC3280CertPathUtilities.ANY_POLICY.equals(node.getValidPolicy())) {
+              Set pq=null;
+              ASN1Sequence policies=null;
+              try {
+                policies=(ASN1Sequence)CertPathValidatorUtilities.getExtensionValue(cert,RFC3280CertPathUtilities.CERTIFICATE_POLICIES);
+              }
+ catch (              AnnotatedException e) {
+                throw new ExtCertPathValidatorException("Certificate policies extension could not be decoded.",e,certPath,index);
+              }
+              Enumeration e=policies.getObjects();
+              while (e.hasMoreElements()) {
+                PolicyInformation pinfo=null;
+                try {
+                  pinfo=PolicyInformation.getInstance(e.nextElement());
+                }
+ catch (                Exception ex) {
+                  throw new CertPathValidatorException("Policy information could not be decoded.",ex,certPath,index);
+                }
+                if (RFC3280CertPathUtilities.ANY_POLICY.equals(pinfo.getPolicyIdentifier().getId())) {
+                  try {
+                    pq=CertPathValidatorUtilities.getQualifierSet(pinfo.getPolicyQualifiers());
+                  }
+ catch (                  CertPathValidatorException ex) {
+                    throw new ExtCertPathValidatorException("Policy qualifier info set could not be decoded.",ex,certPath,index);
+                  }
+                  break;
+                }
+              }
+              boolean ci=false;
+              if (cert.getCriticalExtensionOIDs() != null) {
+                ci=cert.getCriticalExtensionOIDs().contains(RFC3280CertPathUtilities.CERTIFICATE_POLICIES);
+              }
+              PKIXPolicyNode p_node=(PKIXPolicyNode)node.getParent();
+              if (RFC3280CertPathUtilities.ANY_POLICY.equals(p_node.getValidPolicy())) {
+                PKIXPolicyNode c_node=new PKIXPolicyNode(new ArrayList(),i,(Set)m_idp.get(id_p),p_node,pq,id_p,ci);
+                p_node.addChild(c_node);
+                policyNodes[i].add(c_node);
+              }
+              break;
+            }
+          }
+        }
+      }
+ else       if (policyMapping <= 0) {
+        Iterator nodes_i=policyNodes[i].iterator();
+        while (nodes_i.hasNext()) {
+          PKIXPolicyNode node=(PKIXPolicyNode)nodes_i.next();
+          if (node.getValidPolicy().equals(id_p)) {
+            PKIXPolicyNode p_node=(PKIXPolicyNode)node.getParent();
+            p_node.removeChild(node);
+            nodes_i.remove();
+            for (int k=(i - 1); k >= 0; k--) {
+              List nodes=policyNodes[k];
+              for (int l=0; l < nodes.size(); l++) {
+                PKIXPolicyNode node2=(PKIXPolicyNode)nodes.get(l);
+                if (!node2.hasChildren()) {
+                  _validPolicyTree=CertPathValidatorUtilities.removePolicyNode(_validPolicyTree,policyNodes,node2);
+                  if (_validPolicyTree == null) {
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return _validPolicyTree;
+}

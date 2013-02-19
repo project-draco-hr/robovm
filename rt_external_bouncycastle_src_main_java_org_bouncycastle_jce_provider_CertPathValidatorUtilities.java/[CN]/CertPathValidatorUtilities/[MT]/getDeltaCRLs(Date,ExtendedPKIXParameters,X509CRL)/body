@@ -1,0 +1,39 @@
+{
+  X509CRLStoreSelector deltaSelect=new X509CRLStoreSelector();
+  try {
+    deltaSelect.addIssuerName(CertPathValidatorUtilities.getIssuerPrincipal(completeCRL).getEncoded());
+  }
+ catch (  IOException e) {
+    new AnnotatedException("Cannot extract issuer from CRL.",e);
+  }
+  BigInteger completeCRLNumber=null;
+  try {
+    DERObject derObject=CertPathValidatorUtilities.getExtensionValue(completeCRL,CRL_NUMBER);
+    if (derObject != null) {
+      completeCRLNumber=CRLNumber.getInstance(derObject).getPositiveValue();
+    }
+  }
+ catch (  Exception e) {
+    throw new AnnotatedException("CRL number extension could not be extracted from CRL.",e);
+  }
+  byte[] idp=null;
+  try {
+    idp=completeCRL.getExtensionValue(ISSUING_DISTRIBUTION_POINT);
+  }
+ catch (  Exception e) {
+    throw new AnnotatedException("Issuing distribution point extension value could not be read.",e);
+  }
+  deltaSelect.setMinCRLNumber(completeCRLNumber == null ? null : completeCRLNumber.add(BigInteger.valueOf(1)));
+  deltaSelect.setIssuingDistributionPoint(idp);
+  deltaSelect.setIssuingDistributionPointEnabled(true);
+  deltaSelect.setMaxBaseCRLNumber(completeCRLNumber);
+  Set temp=CRL_UTIL.findCRLs(deltaSelect,paramsPKIX,currentDate);
+  Set result=new HashSet();
+  for (Iterator it=temp.iterator(); it.hasNext(); ) {
+    X509CRL crl=(X509CRL)it.next();
+    if (isDeltaCRL(crl)) {
+      result.add(crl);
+    }
+  }
+  return result;
+}

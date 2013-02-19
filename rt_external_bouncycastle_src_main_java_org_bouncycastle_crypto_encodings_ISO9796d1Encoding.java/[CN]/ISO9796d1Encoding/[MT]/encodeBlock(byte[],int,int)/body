@@ -1,0 +1,33 @@
+{
+  byte[] block=new byte[(bitSize + 7) / 8];
+  int r=padBits + 1;
+  int z=inLen;
+  int t=(bitSize + 13) / 16;
+  for (int i=0; i < t; i+=z) {
+    if (i > t - z) {
+      System.arraycopy(in,inOff + inLen - (t - i),block,block.length - t,t - i);
+    }
+ else {
+      System.arraycopy(in,inOff,block,block.length - (i + z),z);
+    }
+  }
+  for (int i=block.length - 2 * t; i != block.length; i+=2) {
+    byte val=block[block.length - t + i / 2];
+    block[i]=(byte)((shadows[(val & 0xff) >>> 4] << 4) | shadows[val & 0x0f]);
+    block[i + 1]=val;
+  }
+  block[block.length - 2 * z]^=r;
+  block[block.length - 1]=(byte)((block[block.length - 1] << 4) | 0x06);
+  int maxBit=(8 - (bitSize - 1) % 8);
+  int offSet=0;
+  if (maxBit != 8) {
+    block[0]&=0xff >>> maxBit;
+    block[0]|=0x80 >>> maxBit;
+  }
+ else {
+    block[0]=0x00;
+    block[1]|=0x80;
+    offSet=1;
+  }
+  return engine.processBlock(block,offSet,block.length - offSet);
+}

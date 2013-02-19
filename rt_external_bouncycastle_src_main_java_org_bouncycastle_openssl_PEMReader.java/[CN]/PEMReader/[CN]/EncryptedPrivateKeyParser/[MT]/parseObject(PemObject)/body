@@ -1,0 +1,62 @@
+{
+  try {
+    EncryptedPrivateKeyInfo info=EncryptedPrivateKeyInfo.getInstance(ASN1Object.fromByteArray(obj.getContent()));
+    AlgorithmIdentifier algId=info.getEncryptionAlgorithm();
+    if (pFinder == null) {
+      throw new PEMException("no PasswordFinder specified");
+    }
+    if (PEMUtilities.isPKCS5Scheme2(algId.getAlgorithm())) {
+      PBES2Parameters params=PBES2Parameters.getInstance(algId.getParameters());
+      KeyDerivationFunc func=params.getKeyDerivationFunc();
+      EncryptionScheme scheme=params.getEncryptionScheme();
+      PBKDF2Params defParams=(PBKDF2Params)func.getParameters();
+      int iterationCount=defParams.getIterationCount().intValue();
+      byte[] salt=defParams.getSalt();
+      String algorithm=scheme.getAlgorithm().getId();
+      SecretKey key=PEMUtilities.generateSecretKeyForPKCS5Scheme2(algorithm,pFinder.getPassword(),salt,iterationCount);
+      Cipher cipher=Cipher.getInstance(algorithm,symProvider);
+      AlgorithmParameters algParams=AlgorithmParameters.getInstance(algorithm,symProvider);
+      algParams.init(scheme.getParameters().getDERObject().getEncoded());
+      cipher.init(Cipher.DECRYPT_MODE,key,algParams);
+      PrivateKeyInfo pInfo=PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(cipher.doFinal(info.getEncryptedData())));
+      PKCS8EncodedKeySpec keySpec=new PKCS8EncodedKeySpec(pInfo.getEncoded());
+      KeyFactory keyFact=KeyFactory.getInstance(pInfo.getAlgorithmId().getAlgorithm().getId(),asymProvider);
+      return keyFact.generatePrivate(keySpec);
+    }
+ else     if (PEMUtilities.isPKCS12(algId.getAlgorithm())) {
+      PKCS12PBEParams params=PKCS12PBEParams.getInstance(algId.getParameters());
+      String algorithm=algId.getAlgorithm().getId();
+      PBEKeySpec pbeSpec=new PBEKeySpec(pFinder.getPassword());
+      SecretKeyFactory secKeyFact=SecretKeyFactory.getInstance(algorithm,symProvider);
+      PBEParameterSpec defParams=new PBEParameterSpec(params.getIV(),params.getIterations().intValue());
+      Cipher cipher=Cipher.getInstance(algorithm,symProvider);
+      cipher.init(Cipher.DECRYPT_MODE,secKeyFact.generateSecret(pbeSpec),defParams);
+      PrivateKeyInfo pInfo=PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(cipher.doFinal(info.getEncryptedData())));
+      PKCS8EncodedKeySpec keySpec=new PKCS8EncodedKeySpec(pInfo.getEncoded());
+      KeyFactory keyFact=KeyFactory.getInstance(pInfo.getAlgorithmId().getAlgorithm().getId(),asymProvider);
+      return keyFact.generatePrivate(keySpec);
+    }
+ else     if (PEMUtilities.isPKCS5Scheme1(algId.getAlgorithm())) {
+      PBEParameter params=PBEParameter.getInstance(algId.getParameters());
+      String algorithm=algId.getAlgorithm().getId();
+      PBEKeySpec pbeSpec=new PBEKeySpec(pFinder.getPassword());
+      SecretKeyFactory secKeyFact=SecretKeyFactory.getInstance(algorithm,symProvider);
+      PBEParameterSpec defParams=new PBEParameterSpec(params.getSalt(),params.getIterationCount().intValue());
+      Cipher cipher=Cipher.getInstance(algorithm,symProvider);
+      cipher.init(Cipher.DECRYPT_MODE,secKeyFact.generateSecret(pbeSpec),defParams);
+      PrivateKeyInfo pInfo=PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(cipher.doFinal(info.getEncryptedData())));
+      PKCS8EncodedKeySpec keySpec=new PKCS8EncodedKeySpec(pInfo.getEncoded());
+      KeyFactory keyFact=KeyFactory.getInstance(pInfo.getAlgorithmId().getAlgorithm().getId(),asymProvider);
+      return keyFact.generatePrivate(keySpec);
+    }
+ else {
+      throw new PEMException("Unknown algorithm: " + algId.getAlgorithm());
+    }
+  }
+ catch (  IOException e) {
+    throw e;
+  }
+catch (  Exception e) {
+    throw new PEMException("problem parsing ENCRYPTED PRIVATE KEY: " + e.toString(),e);
+  }
+}

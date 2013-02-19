@@ -1,0 +1,37 @@
+{
+  Enumeration e=table.elements();
+  DataOutputStream dOut=new DataOutputStream(out);
+  while (e.hasMoreElements()) {
+    StoreEntry entry=(StoreEntry)e.nextElement();
+    dOut.write(entry.getType());
+    dOut.writeUTF(entry.getAlias());
+    dOut.writeLong(entry.getDate().getTime());
+    Certificate[] chain=entry.getCertificateChain();
+    if (chain == null) {
+      dOut.writeInt(0);
+    }
+ else {
+      dOut.writeInt(chain.length);
+      for (int i=0; i != chain.length; i++) {
+        encodeCertificate(chain[i],dOut);
+      }
+    }
+switch (entry.getType()) {
+case CERTIFICATE:
+      encodeCertificate((Certificate)entry.getObject(),dOut);
+    break;
+case KEY:
+  encodeKey((Key)entry.getObject(),dOut);
+break;
+case SEALED:
+case SECRET:
+byte[] b=(byte[])entry.getObject();
+dOut.writeInt(b.length);
+dOut.write(b);
+break;
+default :
+throw new RuntimeException("Unknown object type in store.");
+}
+}
+dOut.write(NULL);
+}

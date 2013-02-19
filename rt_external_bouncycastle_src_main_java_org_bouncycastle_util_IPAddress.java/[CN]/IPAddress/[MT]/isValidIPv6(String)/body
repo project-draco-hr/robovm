@@ -1,0 +1,45 @@
+{
+  if (address.length() == 0) {
+    return false;
+  }
+  int octet;
+  int octets=0;
+  String temp=address + ":";
+  boolean doubleColonFound=false;
+  int pos;
+  int start=0;
+  while (start < temp.length() && (pos=temp.indexOf(':',start)) >= start) {
+    if (octets == 8) {
+      return false;
+    }
+    if (start != pos) {
+      String value=temp.substring(start,pos);
+      if (pos == (temp.length() - 1) && value.indexOf('.') > 0) {
+        if (!isValidIPv4(value)) {
+          return false;
+        }
+        octets++;
+      }
+ else {
+        try {
+          octet=Integer.parseInt(temp.substring(start,pos),16);
+        }
+ catch (        NumberFormatException ex) {
+          return false;
+        }
+        if (octet < 0 || octet > 0xffff) {
+          return false;
+        }
+      }
+    }
+ else {
+      if (pos != 1 && pos != temp.length() - 1 && doubleColonFound) {
+        return false;
+      }
+      doubleColonFound=true;
+    }
+    start=pos + 1;
+    octets++;
+  }
+  return octets == 8 || doubleColonFound;
+}

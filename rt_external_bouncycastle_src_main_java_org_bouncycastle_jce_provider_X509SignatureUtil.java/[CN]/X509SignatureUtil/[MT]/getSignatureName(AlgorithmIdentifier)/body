@@ -1,0 +1,10 @@
+{
+  DEREncodable params=sigAlgId.getParameters();
+  if (params != null && !derNull.equals(params)) {
+    if (sigAlgId.getObjectId().equals(X9ObjectIdentifiers.ecdsa_with_SHA2)) {
+      ASN1Sequence ecDsaParams=ASN1Sequence.getInstance(params);
+      return getDigestAlgName((DERObjectIdentifier)ecDsaParams.getObjectAt(0)) + "withECDSA";
+    }
+  }
+  return sigAlgId.getObjectId().getId();
+}

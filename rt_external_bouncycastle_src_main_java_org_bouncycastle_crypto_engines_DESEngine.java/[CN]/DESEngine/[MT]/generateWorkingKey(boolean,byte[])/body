@@ -1,0 +1,53 @@
+{
+  int[] newKey=new int[32];
+  boolean[] pc1m=new boolean[56], pcr=new boolean[56];
+  for (int j=0; j < 56; j++) {
+    int l=pc1[j];
+    pc1m[j]=((key[l >>> 3] & bytebit[l & 07]) != 0);
+  }
+  for (int i=0; i < 16; i++) {
+    int l, m, n;
+    if (encrypting) {
+      m=i << 1;
+    }
+ else {
+      m=(15 - i) << 1;
+    }
+    n=m + 1;
+    newKey[m]=newKey[n]=0;
+    for (int j=0; j < 28; j++) {
+      l=j + totrot[i];
+      if (l < 28) {
+        pcr[j]=pc1m[l];
+      }
+ else {
+        pcr[j]=pc1m[l - 28];
+      }
+    }
+    for (int j=28; j < 56; j++) {
+      l=j + totrot[i];
+      if (l < 56) {
+        pcr[j]=pc1m[l];
+      }
+ else {
+        pcr[j]=pc1m[l - 28];
+      }
+    }
+    for (int j=0; j < 24; j++) {
+      if (pcr[pc2[j]]) {
+        newKey[m]|=bigbyte[j];
+      }
+      if (pcr[pc2[j + 24]]) {
+        newKey[n]|=bigbyte[j];
+      }
+    }
+  }
+  for (int i=0; i != 32; i+=2) {
+    int i1, i2;
+    i1=newKey[i];
+    i2=newKey[i + 1];
+    newKey[i]=((i1 & 0x00fc0000) << 6) | ((i1 & 0x00000fc0) << 10) | ((i2 & 0x00fc0000) >>> 10)| ((i2 & 0x00000fc0) >>> 6);
+    newKey[i + 1]=((i1 & 0x0003f000) << 12) | ((i1 & 0x0000003f) << 16) | ((i2 & 0x0003f000) >>> 4)| (i2 & 0x0000003f);
+  }
+  return newKey;
+}

@@ -1,0 +1,22 @@
+{
+  if (keySpec instanceof PKCS8EncodedKeySpec) {
+    try {
+      return JDKKeyFactory.createPrivateKeyFromDERStream(((PKCS8EncodedKeySpec)keySpec).getEncoded());
+    }
+ catch (    Exception e) {
+      try {
+        return new JCERSAPrivateCrtKey(new RSAPrivateKeyStructure((ASN1Sequence)ASN1Object.fromByteArray(((PKCS8EncodedKeySpec)keySpec).getEncoded())));
+      }
+ catch (      Exception ex) {
+        throw new InvalidKeySpecException(ex.toString());
+      }
+    }
+  }
+ else   if (keySpec instanceof RSAPrivateCrtKeySpec) {
+    return new JCERSAPrivateCrtKey((RSAPrivateCrtKeySpec)keySpec);
+  }
+ else   if (keySpec instanceof RSAPrivateKeySpec) {
+    return new JCERSAPrivateKey((RSAPrivateKeySpec)keySpec);
+  }
+  throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+}

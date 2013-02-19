@@ -1,0 +1,24 @@
+{
+  DERObjectIdentifier algOid=info.getAlgorithmId().getObjectId();
+  if (RSAUtil.isRsaOid(algOid)) {
+    return new JCERSAPublicKey(info);
+  }
+ else   if (algOid.equals(PKCSObjectIdentifiers.dhKeyAgreement)) {
+    return new JCEDHPublicKey(info);
+  }
+ else   if (algOid.equals(X9ObjectIdentifiers.dhpublicnumber)) {
+    return new JCEDHPublicKey(info);
+  }
+ else   if (algOid.equals(X9ObjectIdentifiers.id_dsa)) {
+    return new JDKDSAPublicKey(info);
+  }
+ else   if (algOid.equals(OIWObjectIdentifiers.dsaWithSHA1)) {
+    return new JDKDSAPublicKey(info);
+  }
+ else   if (algOid.equals(X9ObjectIdentifiers.id_ecPublicKey)) {
+    return new JCEECPublicKey(info);
+  }
+ else {
+    throw new RuntimeException("algorithm identifier " + algOid + " in key not recognised");
+  }
+}

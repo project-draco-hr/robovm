@@ -1,0 +1,27 @@
+{
+  if (engineParams == null) {
+    if (pbeSpec != null) {
+      try {
+        engineParams=AlgorithmParameters.getInstance(pbeAlgorithm,BouncyCastleProvider.PROVIDER_NAME);
+        engineParams.init(pbeSpec);
+      }
+ catch (      Exception e) {
+        return null;
+      }
+    }
+ else     if (ivParam != null) {
+      String name=cipher.getUnderlyingCipher().getAlgorithmName();
+      if (name.indexOf('/') >= 0) {
+        name=name.substring(0,name.indexOf('/'));
+      }
+      try {
+        engineParams=AlgorithmParameters.getInstance(name,BouncyCastleProvider.PROVIDER_NAME);
+        engineParams.init(ivParam.getIV());
+      }
+ catch (      Exception e) {
+        throw new RuntimeException(e.toString());
+      }
+    }
+  }
+  return engineParams;
+}

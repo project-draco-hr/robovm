@@ -1,0 +1,35 @@
+{
+  Set set=new HashSet();
+  if (paramsPKIX.isUseDeltasEnabled()) {
+    CRLDistPoint freshestCRL=null;
+    try {
+      freshestCRL=CRLDistPoint.getInstance(CertPathValidatorUtilities.getExtensionValue(cert,FRESHEST_CRL));
+    }
+ catch (    AnnotatedException e) {
+      throw new AnnotatedException("Freshest CRL extension could not be decoded from certificate.",e);
+    }
+    if (freshestCRL == null) {
+      try {
+        freshestCRL=CRLDistPoint.getInstance(CertPathValidatorUtilities.getExtensionValue(crl,FRESHEST_CRL));
+      }
+ catch (      AnnotatedException e) {
+        throw new AnnotatedException("Freshest CRL extension could not be decoded from CRL.",e);
+      }
+    }
+    if (freshestCRL != null) {
+      try {
+        CertPathValidatorUtilities.addAdditionalStoresFromCRLDistributionPoint(freshestCRL,paramsPKIX);
+      }
+ catch (      AnnotatedException e) {
+        throw new AnnotatedException("No new delta CRL locations could be added from Freshest CRL extension.",e);
+      }
+      try {
+        set.addAll(CertPathValidatorUtilities.getDeltaCRLs(currentDate,paramsPKIX,crl));
+      }
+ catch (      AnnotatedException e) {
+        throw new AnnotatedException("Exception obtaining delta CRLs.",e);
+      }
+    }
+  }
+  return set;
+}

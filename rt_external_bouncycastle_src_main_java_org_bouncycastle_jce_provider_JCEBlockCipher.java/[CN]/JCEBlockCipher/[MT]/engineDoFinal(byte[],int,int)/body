@@ -1,0 +1,22 @@
+{
+  int len=0;
+  byte[] tmp=new byte[engineGetOutputSize(inputLen)];
+  if (inputLen != 0) {
+    len=cipher.processBytes(input,inputOffset,inputLen,tmp,0);
+  }
+  try {
+    len+=cipher.doFinal(tmp,len);
+  }
+ catch (  DataLengthException e) {
+    throw new IllegalBlockSizeException(e.getMessage());
+  }
+catch (  InvalidCipherTextException e) {
+    throw new BadPaddingException(e.getMessage());
+  }
+  if (len == tmp.length) {
+    return tmp;
+  }
+  byte[] out=new byte[len];
+  System.arraycopy(tmp,0,out,0,len);
+  return out;
+}

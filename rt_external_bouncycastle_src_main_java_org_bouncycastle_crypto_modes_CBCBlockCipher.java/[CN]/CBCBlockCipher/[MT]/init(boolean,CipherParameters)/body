@@ -1,0 +1,17 @@
+{
+  this.encrypting=encrypting;
+  if (params instanceof ParametersWithIV) {
+    ParametersWithIV ivParam=(ParametersWithIV)params;
+    byte[] iv=ivParam.getIV();
+    if (iv.length != blockSize) {
+      throw new IllegalArgumentException("initialisation vector must be the same length as block size");
+    }
+    System.arraycopy(iv,0,IV,0,iv.length);
+    reset();
+    cipher.init(encrypting,ivParam.getParameters());
+  }
+ else {
+    reset();
+    cipher.init(encrypting,params);
+  }
+}

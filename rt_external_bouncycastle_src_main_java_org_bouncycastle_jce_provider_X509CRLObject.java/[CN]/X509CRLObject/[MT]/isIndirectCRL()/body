@@ -1,0 +1,13 @@
+{
+  byte[] idp=getExtensionValue(X509Extensions.IssuingDistributionPoint.getId());
+  boolean isIndirect=false;
+  try {
+    if (idp != null) {
+      isIndirect=IssuingDistributionPoint.getInstance(X509ExtensionUtil.fromExtensionValue(idp)).isIndirectCRL();
+    }
+  }
+ catch (  Exception e) {
+    throw new ExtCRLException("Exception reading IssuingDistributionPoint",e);
+  }
+  return isIndirect;
+}

@@ -1,0 +1,67 @@
+{
+  Date currentDate=new Date(System.currentTimeMillis());
+  if (validDate.getTime() > currentDate.getTime()) {
+    throw new AnnotatedException("Validation time is in future.");
+  }
+  Set crls=CertPathValidatorUtilities.getCompleteCRLs(dp,cert,currentDate,paramsPKIX);
+  boolean validCrlFound=false;
+  AnnotatedException lastException=null;
+  Iterator crl_iter=crls.iterator();
+  while (crl_iter.hasNext() && certStatus.getCertStatus() == CertStatus.UNREVOKED && !reasonMask.isAllReasons()) {
+    try {
+      X509CRL crl=(X509CRL)crl_iter.next();
+      ReasonsMask interimReasonsMask=RFC3280CertPathUtilities.processCRLD(crl,dp);
+      if (!interimReasonsMask.hasNewReasons(reasonMask)) {
+        continue;
+      }
+      Set keys=RFC3280CertPathUtilities.processCRLF(crl,cert,defaultCRLSignCert,defaultCRLSignKey,paramsPKIX,certPathCerts);
+      PublicKey key=RFC3280CertPathUtilities.processCRLG(crl,keys);
+      X509CRL deltaCRL=null;
+      if (paramsPKIX.isUseDeltasEnabled()) {
+        Set deltaCRLs=CertPathValidatorUtilities.getDeltaCRLs(currentDate,paramsPKIX,crl);
+        deltaCRL=RFC3280CertPathUtilities.processCRLH(deltaCRLs,key);
+      }
+      if (paramsPKIX.getValidityModel() != ExtendedPKIXParameters.CHAIN_VALIDITY_MODEL) {
+        if (cert.getNotAfter().getTime() < crl.getThisUpdate().getTime()) {
+          throw new AnnotatedException("No valid CRL for current time found.");
+        }
+      }
+      RFC3280CertPathUtilities.processCRLB1(dp,cert,crl);
+      RFC3280CertPathUtilities.processCRLB2(dp,cert,crl);
+      RFC3280CertPathUtilities.processCRLC(deltaCRL,crl,paramsPKIX);
+      RFC3280CertPathUtilities.processCRLI(validDate,deltaCRL,cert,certStatus,paramsPKIX);
+      RFC3280CertPathUtilities.processCRLJ(validDate,crl,cert,certStatus);
+      if (certStatus.getCertStatus() == CRLReason.removeFromCRL) {
+        certStatus.setCertStatus(CertStatus.UNREVOKED);
+      }
+      reasonMask.addReasons(interimReasonsMask);
+      Set criticalExtensions=crl.getCriticalExtensionOIDs();
+      if (criticalExtensions != null) {
+        criticalExtensions=new HashSet(criticalExtensions);
+        criticalExtensions.remove(X509Extensions.IssuingDistributionPoint.getId());
+        criticalExtensions.remove(X509Extensions.DeltaCRLIndicator.getId());
+        if (!criticalExtensions.isEmpty()) {
+          throw new AnnotatedException("CRL contains unsupported critical extensions.");
+        }
+      }
+      if (deltaCRL != null) {
+        criticalExtensions=deltaCRL.getCriticalExtensionOIDs();
+        if (criticalExtensions != null) {
+          criticalExtensions=new HashSet(criticalExtensions);
+          criticalExtensions.remove(X509Extensions.IssuingDistributionPoint.getId());
+          criticalExtensions.remove(X509Extensions.DeltaCRLIndicator.getId());
+          if (!criticalExtensions.isEmpty()) {
+            throw new AnnotatedException("Delta CRL contains unsupported critical extension.");
+          }
+        }
+      }
+      validCrlFound=true;
+    }
+ catch (    AnnotatedException e) {
+      lastException=e;
+    }
+  }
+  if (!validCrlFound) {
+    throw lastException;
+  }
+}

@@ -1,0 +1,16 @@
+{
+  IssuingDistributionPoint idp=null;
+  try {
+    idp=IssuingDistributionPoint.getInstance(CertPathValidatorUtilities.getExtensionValue(crl,RFC3280CertPathUtilities.ISSUING_DISTRIBUTION_POINT));
+  }
+ catch (  Exception e) {
+    throw new AnnotatedException("Issuing distribution point extension could not be decoded.",e);
+  }
+  if (idp != null && idp.getOnlySomeReasons() != null && dp.getReasons() != null) {
+    return new ReasonsMask(dp.getReasons().intValue()).intersect(new ReasonsMask(idp.getOnlySomeReasons().intValue()));
+  }
+  if ((idp == null || idp.getOnlySomeReasons() == null) && dp.getReasons() == null) {
+    return ReasonsMask.allReasons;
+  }
+  return (dp.getReasons() == null ? ReasonsMask.allReasons : new ReasonsMask(dp.getReasons().intValue())).intersect(idp == null ? ReasonsMask.allReasons : new ReasonsMask(idp.getOnlySomeReasons().intValue()));
+}

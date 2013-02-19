@@ -1,0 +1,28 @@
+{
+  int usedLen=getUsedLength();
+  if (usedLen == 0) {
+    return ECConstants.ZERO;
+  }
+  int highestInt=m_ints[usedLen - 1];
+  byte[] temp=new byte[4];
+  int barrI=0;
+  boolean trailingZeroBytesDone=false;
+  for (int j=3; j >= 0; j--) {
+    byte thisByte=(byte)(highestInt >>> (8 * j));
+    if (trailingZeroBytesDone || (thisByte != 0)) {
+      trailingZeroBytesDone=true;
+      temp[barrI++]=thisByte;
+    }
+  }
+  int barrLen=4 * (usedLen - 1) + barrI;
+  byte[] barr=new byte[barrLen];
+  for (int j=0; j < barrI; j++) {
+    barr[j]=temp[j];
+  }
+  for (int iarrJ=usedLen - 2; iarrJ >= 0; iarrJ--) {
+    for (int j=3; j >= 0; j--) {
+      barr[barrI++]=(byte)(m_ints[iarrJ] >>> (8 * j));
+    }
+  }
+  return new BigInteger(1,barr);
+}

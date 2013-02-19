@@ -1,0 +1,47 @@
+{
+  if (bufOff + outOff > out.length) {
+    throw new DataLengthException("output buffer to small in doFinal");
+  }
+  int blockSize=cipher.getBlockSize();
+  int len=bufOff - blockSize;
+  byte[] block=new byte[blockSize];
+  if (forEncryption) {
+    cipher.processBlock(buf,0,block,0);
+    if (bufOff < blockSize) {
+      throw new DataLengthException("need at least one block of input for CTS");
+    }
+    for (int i=bufOff; i != buf.length; i++) {
+      buf[i]=block[i - blockSize];
+    }
+    for (int i=blockSize; i != bufOff; i++) {
+      buf[i]^=block[i - blockSize];
+    }
+    if (cipher instanceof CBCBlockCipher) {
+      BlockCipher c=((CBCBlockCipher)cipher).getUnderlyingCipher();
+      c.processBlock(buf,blockSize,out,outOff);
+    }
+ else {
+      cipher.processBlock(buf,blockSize,out,outOff);
+    }
+    System.arraycopy(block,0,out,outOff + blockSize,len);
+  }
+ else {
+    byte[] lastBlock=new byte[blockSize];
+    if (cipher instanceof CBCBlockCipher) {
+      BlockCipher c=((CBCBlockCipher)cipher).getUnderlyingCipher();
+      c.processBlock(buf,0,block,0);
+    }
+ else {
+      cipher.processBlock(buf,0,block,0);
+    }
+    for (int i=blockSize; i != bufOff; i++) {
+      lastBlock[i - blockSize]=(byte)(block[i - blockSize] ^ buf[i]);
+    }
+    System.arraycopy(buf,blockSize,block,0,len);
+    cipher.processBlock(block,0,out,outOff);
+    System.arraycopy(lastBlock,0,out,outOff + blockSize,len);
+  }
+  int offset=bufOff;
+  reset();
+  return offset;
+}

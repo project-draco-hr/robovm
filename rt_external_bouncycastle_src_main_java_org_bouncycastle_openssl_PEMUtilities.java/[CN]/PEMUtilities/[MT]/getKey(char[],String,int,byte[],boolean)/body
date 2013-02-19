@@ -1,0 +1,11 @@
+{
+  OpenSSLPBEParametersGenerator pGen=new OpenSSLPBEParametersGenerator();
+  pGen.init(PBEParametersGenerator.PKCS5PasswordToBytes(password),salt);
+  KeyParameter keyParam;
+  keyParam=(KeyParameter)pGen.generateDerivedParameters(keyLength * 8);
+  byte[] key=keyParam.getKey();
+  if (des2 && key.length >= 24) {
+    System.arraycopy(key,0,key,16,8);
+  }
+  return new javax.crypto.spec.SecretKeySpec(key,algorithm);
+}

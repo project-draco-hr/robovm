@@ -1,0 +1,18 @@
+{
+  int hashCodeValue=0;
+  RDN[] rdns=name.getRDNs();
+  for (int i=0; i != rdns.length; i++) {
+    if (rdns[i].isMultiValued()) {
+      AttributeTypeAndValue[] atv=rdns[i].getTypesAndValues();
+      for (int j=0; j != atv.length; j++) {
+        hashCodeValue^=atv[j].getType().hashCode();
+        hashCodeValue^=calcHashCode(atv[j].getValue());
+      }
+    }
+ else {
+      hashCodeValue^=rdns[i].getFirst().getType().hashCode();
+      hashCodeValue^=calcHashCode(rdns[i].getFirst().getValue());
+    }
+  }
+  return hashCodeValue;
+}

@@ -1,0 +1,32 @@
+{
+  Certificate cert=(Certificate)certs.get(index);
+  PublicKey pubKey=cert.getPublicKey();
+  if (!(pubKey instanceof DSAPublicKey)) {
+    return pubKey;
+  }
+  DSAPublicKey dsaPubKey=(DSAPublicKey)pubKey;
+  if (dsaPubKey.getParams() != null) {
+    return dsaPubKey;
+  }
+  for (int i=index + 1; i < certs.size(); i++) {
+    X509Certificate parentCert=(X509Certificate)certs.get(i);
+    pubKey=parentCert.getPublicKey();
+    if (!(pubKey instanceof DSAPublicKey)) {
+      throw new CertPathValidatorException("DSA parameters cannot be inherited from previous certificate.");
+    }
+    DSAPublicKey prevDSAPubKey=(DSAPublicKey)pubKey;
+    if (prevDSAPubKey.getParams() == null) {
+      continue;
+    }
+    DSAParams dsaParams=prevDSAPubKey.getParams();
+    DSAPublicKeySpec dsaPubKeySpec=new DSAPublicKeySpec(dsaPubKey.getY(),dsaParams.getP(),dsaParams.getQ(),dsaParams.getG());
+    try {
+      KeyFactory keyFactory=KeyFactory.getInstance("DSA",BouncyCastleProvider.PROVIDER_NAME);
+      return keyFactory.generatePublic(dsaPubKeySpec);
+    }
+ catch (    Exception exception) {
+      throw new RuntimeException(exception.getMessage());
+    }
+  }
+  throw new CertPathValidatorException("DSA parameters cannot be inherited from previous certificate.");
+}

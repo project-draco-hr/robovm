@@ -1,0 +1,16 @@
+{
+  X509Extensions extensions=cert.getAcinfo().getExtensions();
+  if (extensions != null) {
+    Set set=new HashSet();
+    Enumeration e=extensions.oids();
+    while (e.hasMoreElements()) {
+      DERObjectIdentifier oid=(DERObjectIdentifier)e.nextElement();
+      X509Extension ext=extensions.getExtension(oid);
+      if (ext.isCritical() == critical) {
+        set.add(oid.getId());
+      }
+    }
+    return set;
+  }
+  return null;
+}

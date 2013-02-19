@@ -1,0 +1,29 @@
+{
+  byte[] wnaf=new byte[k.bitLength() + 1];
+  short pow2wB=(short)(1 << width);
+  BigInteger pow2wBI=BigInteger.valueOf(pow2wB);
+  int i=0;
+  int length=0;
+  while (k.signum() > 0) {
+    if (k.testBit(0)) {
+      BigInteger remainder=k.mod(pow2wBI);
+      if (remainder.testBit(width - 1)) {
+        wnaf[i]=(byte)(remainder.intValue() - pow2wB);
+      }
+ else {
+        wnaf[i]=(byte)remainder.intValue();
+      }
+      k=k.subtract(BigInteger.valueOf(wnaf[i]));
+      length=i;
+    }
+ else {
+      wnaf[i]=0;
+    }
+    k=k.shiftRight(1);
+    i++;
+  }
+  length++;
+  byte[] wnafShort=new byte[length];
+  System.arraycopy(wnaf,0,wnafShort,0,length);
+  return wnafShort;
+}

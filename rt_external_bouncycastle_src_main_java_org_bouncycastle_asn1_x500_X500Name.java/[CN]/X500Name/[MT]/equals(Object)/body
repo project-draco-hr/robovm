@@ -1,0 +1,18 @@
+{
+  if (obj == this) {
+    return true;
+  }
+  if (!(obj instanceof X500Name || obj instanceof ASN1Sequence)) {
+    return false;
+  }
+  DERObject derO=((DEREncodable)obj).getDERObject();
+  if (this.getDERObject().equals(derO)) {
+    return true;
+  }
+  try {
+    return style.areEqual(this,new X500Name(ASN1Sequence.getInstance(((DEREncodable)obj).getDERObject())));
+  }
+ catch (  Exception e) {
+    return false;
+  }
+}

@@ -1,0 +1,22 @@
+{
+  if (seq.size() > 3) {
+    throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+  }
+  int index=0;
+  if (!(seq.getObjectAt(0) instanceof ASN1TaggedObject)) {
+    index++;
+    this.issuerName=GeneralNames.getInstance(seq.getObjectAt(0));
+  }
+  for (int i=index; i != seq.size(); i++) {
+    ASN1TaggedObject o=ASN1TaggedObject.getInstance(seq.getObjectAt(i));
+    if (o.getTagNo() == 0) {
+      baseCertificateID=IssuerSerial.getInstance(o,false);
+    }
+ else     if (o.getTagNo() == 1) {
+      objectDigestInfo=ObjectDigestInfo.getInstance(o,false);
+    }
+ else {
+      throw new IllegalArgumentException("Bad tag number: " + o.getTagNo());
+    }
+  }
+}

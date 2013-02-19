@@ -1,0 +1,37 @@
+{
+  if (forWrapping) {
+    throw new IllegalStateException("Not set for unwrapping");
+  }
+  if (in == null) {
+    throw new InvalidCipherTextException("Null pointer as ciphertext");
+  }
+  final int blockSize=engine.getBlockSize();
+  if (inLen % blockSize != 0) {
+    throw new InvalidCipherTextException("Ciphertext not multiple of " + blockSize);
+  }
+  ParametersWithIV param2=new ParametersWithIV(this.param,IV2);
+  this.engine.init(false,param2);
+  byte TEMP3[]=new byte[inLen];
+  for (int currentBytePos=0; currentBytePos != inLen; currentBytePos+=blockSize) {
+    engine.processBlock(in,inOff + currentBytePos,TEMP3,currentBytePos);
+  }
+  byte[] TEMP2=reverse(TEMP3);
+  this.iv=new byte[8];
+  byte[] TEMP1=new byte[TEMP2.length - 8];
+  System.arraycopy(TEMP2,0,this.iv,0,8);
+  System.arraycopy(TEMP2,8,TEMP1,0,TEMP2.length - 8);
+  this.paramPlusIV=new ParametersWithIV(this.param,this.iv);
+  this.engine.init(false,this.paramPlusIV);
+  byte[] WKCKS=new byte[TEMP1.length];
+  for (int currentBytePos=0; currentBytePos != WKCKS.length; currentBytePos+=blockSize) {
+    engine.processBlock(TEMP1,currentBytePos,WKCKS,currentBytePos);
+  }
+  byte[] result=new byte[WKCKS.length - 8];
+  byte[] CKStoBeVerified=new byte[8];
+  System.arraycopy(WKCKS,0,result,0,WKCKS.length - 8);
+  System.arraycopy(WKCKS,WKCKS.length - 8,CKStoBeVerified,0,8);
+  if (!checkCMSKeyChecksum(result,CKStoBeVerified)) {
+    throw new InvalidCipherTextException("Checksum inside ciphertext is corrupted");
+  }
+  return result;
+}

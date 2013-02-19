@@ -1,0 +1,22 @@
+{
+  if (WorkingKey == null) {
+    throw new IllegalStateException("AES engine not initialised");
+  }
+  if ((inOff + (32 / 2)) > in.length) {
+    throw new DataLengthException("input buffer too short");
+  }
+  if ((outOff + (32 / 2)) > out.length) {
+    throw new DataLengthException("output buffer too short");
+  }
+  if (forEncryption) {
+    unpackBlock(in,inOff);
+    encryptBlock(WorkingKey);
+    packBlock(out,outOff);
+  }
+ else {
+    unpackBlock(in,inOff);
+    decryptBlock(WorkingKey);
+    packBlock(out,outOff);
+  }
+  return BLOCK_SIZE;
+}

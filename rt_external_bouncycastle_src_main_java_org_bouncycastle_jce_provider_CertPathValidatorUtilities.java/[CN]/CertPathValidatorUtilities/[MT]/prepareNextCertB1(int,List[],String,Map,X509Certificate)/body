@@ -1,0 +1,58 @@
+{
+  boolean idp_found=false;
+  Iterator nodes_i=policyNodes[i].iterator();
+  while (nodes_i.hasNext()) {
+    PKIXPolicyNode node=(PKIXPolicyNode)nodes_i.next();
+    if (node.getValidPolicy().equals(id_p)) {
+      idp_found=true;
+      node.expectedPolicies=(Set)m_idp.get(id_p);
+      break;
+    }
+  }
+  if (!idp_found) {
+    nodes_i=policyNodes[i].iterator();
+    while (nodes_i.hasNext()) {
+      PKIXPolicyNode node=(PKIXPolicyNode)nodes_i.next();
+      if (ANY_POLICY.equals(node.getValidPolicy())) {
+        Set pq=null;
+        ASN1Sequence policies=null;
+        try {
+          policies=DERSequence.getInstance(getExtensionValue(cert,CERTIFICATE_POLICIES));
+        }
+ catch (        Exception e) {
+          throw new AnnotatedException("Certificate policies cannot be decoded.",e);
+        }
+        Enumeration e=policies.getObjects();
+        while (e.hasMoreElements()) {
+          PolicyInformation pinfo=null;
+          try {
+            pinfo=PolicyInformation.getInstance(e.nextElement());
+          }
+ catch (          Exception ex) {
+            throw new AnnotatedException("Policy information cannot be decoded.",ex);
+          }
+          if (ANY_POLICY.equals(pinfo.getPolicyIdentifier().getId())) {
+            try {
+              pq=getQualifierSet(pinfo.getPolicyQualifiers());
+            }
+ catch (            CertPathValidatorException ex) {
+              throw new ExtCertPathValidatorException("Policy qualifier info set could not be built.",ex);
+            }
+            break;
+          }
+        }
+        boolean ci=false;
+        if (cert.getCriticalExtensionOIDs() != null) {
+          ci=cert.getCriticalExtensionOIDs().contains(CERTIFICATE_POLICIES);
+        }
+        PKIXPolicyNode p_node=(PKIXPolicyNode)node.getParent();
+        if (ANY_POLICY.equals(p_node.getValidPolicy())) {
+          PKIXPolicyNode c_node=new PKIXPolicyNode(new ArrayList(),i,(Set)m_idp.get(id_p),p_node,pq,id_p,ci);
+          p_node.addChild(c_node);
+          policyNodes[i].add(c_node);
+        }
+        break;
+      }
+    }
+  }
+}

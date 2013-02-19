@@ -1,0 +1,24 @@
+{
+  if (explicit) {
+    if (!obj.isExplicit()) {
+      throw new IllegalArgumentException("object implicit - explicit expected.");
+    }
+    return (ASN1Sequence)obj.getObject();
+  }
+ else {
+    if (obj.isExplicit()) {
+      if (obj instanceof BERTaggedObject) {
+        return new BERSequence(obj.getObject());
+      }
+ else {
+        return new DERSequence(obj.getObject());
+      }
+    }
+ else {
+      if (obj.getObject() instanceof ASN1Sequence) {
+        return (ASN1Sequence)obj.getObject();
+      }
+    }
+  }
+  throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
+}

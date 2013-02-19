@@ -1,0 +1,26 @@
+{
+  ECFieldElement xp=new ECFieldElement.F2m(this.m,this.k1,this.k2,this.k3,new BigInteger(1,xEnc));
+  ECFieldElement yp=null;
+  if (xp.toBigInteger().equals(ECConstants.ZERO)) {
+    yp=(ECFieldElement.F2m)b;
+    for (int i=0; i < m - 1; i++) {
+      yp=yp.square();
+    }
+  }
+ else {
+    ECFieldElement beta=xp.add(a).add(b.multiply(xp.square().invert()));
+    ECFieldElement z=solveQuadradicEquation(beta);
+    if (z == null) {
+      throw new RuntimeException("Invalid point compression");
+    }
+    int zBit=0;
+    if (z.toBigInteger().testBit(0)) {
+      zBit=1;
+    }
+    if (zBit != ypBit) {
+      z=z.add(new ECFieldElement.F2m(this.m,this.k1,this.k2,this.k3,ECConstants.ONE));
+    }
+    yp=xp.multiply(z);
+  }
+  return new ECPoint.F2m(this,xp,yp);
+}

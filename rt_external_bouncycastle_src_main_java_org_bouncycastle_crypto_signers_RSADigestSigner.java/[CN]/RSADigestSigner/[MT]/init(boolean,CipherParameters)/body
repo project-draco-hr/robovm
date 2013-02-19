@@ -1,0 +1,18 @@
+{
+  this.forSigning=forSigning;
+  AsymmetricKeyParameter k;
+  if (parameters instanceof ParametersWithRandom) {
+    k=(AsymmetricKeyParameter)((ParametersWithRandom)parameters).getParameters();
+  }
+ else {
+    k=(AsymmetricKeyParameter)parameters;
+  }
+  if (forSigning && !k.isPrivate()) {
+    throw new IllegalArgumentException("signing requires private key");
+  }
+  if (!forSigning && k.isPrivate()) {
+    throw new IllegalArgumentException("verification requires public key");
+  }
+  reset();
+  rsaEngine.init(forSigning,parameters);
+}

@@ -1,0 +1,28 @@
+{
+  CipherParameters param;
+  if (key == null) {
+    throw new InvalidKeyException("key is null");
+  }
+  if (key instanceof JCEPBEKey) {
+    JCEPBEKey k=(JCEPBEKey)key;
+    if (k.getParam() != null) {
+      param=k.getParam();
+    }
+ else     if (params instanceof PBEParameterSpec) {
+      param=PBE.Util.makePBEMacParameters(k,params);
+    }
+ else {
+      throw new InvalidAlgorithmParameterException("PBE requires PBE parameters to be set.");
+    }
+  }
+ else   if (params instanceof IvParameterSpec) {
+    param=new ParametersWithIV(new KeyParameter(key.getEncoded()),((IvParameterSpec)params).getIV());
+  }
+ else   if (params == null) {
+    param=new KeyParameter(key.getEncoded());
+  }
+ else {
+    throw new InvalidAlgorithmParameterException("unknown parameter type.");
+  }
+  macEngine.init(param);
+}

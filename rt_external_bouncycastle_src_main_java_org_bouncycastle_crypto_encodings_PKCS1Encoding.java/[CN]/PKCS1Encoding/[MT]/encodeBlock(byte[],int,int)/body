@@ -1,0 +1,24 @@
+{
+  if (inLen > getInputBlockSize()) {
+    throw new IllegalArgumentException("input data too large");
+  }
+  byte[] block=new byte[engine.getInputBlockSize()];
+  if (forPrivateKey) {
+    block[0]=0x01;
+    for (int i=1; i != block.length - inLen - 1; i++) {
+      block[i]=(byte)0xFF;
+    }
+  }
+ else {
+    random.nextBytes(block);
+    block[0]=0x02;
+    for (int i=1; i != block.length - inLen - 1; i++) {
+      while (block[i] == 0) {
+        block[i]=(byte)random.nextInt();
+      }
+    }
+  }
+  block[block.length - inLen - 1]=0x00;
+  System.arraycopy(in,inOff,block,block.length - inLen,inLen);
+  return engine.processBlock(block,0,block.length);
+}

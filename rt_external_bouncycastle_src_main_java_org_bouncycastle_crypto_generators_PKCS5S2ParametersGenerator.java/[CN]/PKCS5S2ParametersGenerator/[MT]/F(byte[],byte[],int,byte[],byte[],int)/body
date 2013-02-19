@@ -1,0 +1,22 @@
+{
+  byte[] state=new byte[hMac.getMacSize()];
+  CipherParameters param=new KeyParameter(P);
+  hMac.init(param);
+  if (S != null) {
+    hMac.update(S,0,S.length);
+  }
+  hMac.update(iBuf,0,iBuf.length);
+  hMac.doFinal(state,0);
+  System.arraycopy(state,0,out,outOff,state.length);
+  if (c == 0) {
+    throw new IllegalArgumentException("iteration count must be at least 1.");
+  }
+  for (int count=1; count < c; count++) {
+    hMac.init(param);
+    hMac.update(state,0,state.length);
+    hMac.doFinal(state,0);
+    for (int j=0; j != state.length; j++) {
+      out[outOff + j]^=state[j];
+    }
+  }
+}

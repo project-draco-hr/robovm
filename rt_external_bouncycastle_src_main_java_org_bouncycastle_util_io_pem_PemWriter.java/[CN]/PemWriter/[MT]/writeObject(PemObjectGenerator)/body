@@ -1,0 +1,16 @@
+{
+  PemObject obj=objGen.generate();
+  writePreEncapsulationBoundary(obj.getType());
+  if (!obj.getHeaders().isEmpty()) {
+    for (Iterator it=obj.getHeaders().iterator(); it.hasNext(); ) {
+      PemHeader hdr=(PemHeader)it.next();
+      this.write(hdr.getName());
+      this.write(": ");
+      this.write(hdr.getValue());
+      this.newLine();
+    }
+    this.newLine();
+  }
+  writeEncoded(obj.getContent());
+  writePostEncapsulationBoundary(obj.getType());
+}

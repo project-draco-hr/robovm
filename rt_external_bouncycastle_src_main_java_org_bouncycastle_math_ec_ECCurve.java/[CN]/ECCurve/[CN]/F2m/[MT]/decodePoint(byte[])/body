@@ -1,0 +1,34 @@
+{
+  ECPoint p=null;
+switch (encoded[0]) {
+case 0x00:
+    if (encoded.length > 1) {
+      throw new RuntimeException("Invalid point encoding");
+    }
+  p=getInfinity();
+break;
+case 0x02:
+case 0x03:
+byte[] enc=new byte[encoded.length - 1];
+System.arraycopy(encoded,1,enc,0,enc.length);
+if (encoded[0] == 0x02) {
+p=decompressPoint(enc,0);
+}
+ else {
+p=decompressPoint(enc,1);
+}
+break;
+case 0x04:
+case 0x06:
+case 0x07:
+byte[] xEnc=new byte[(encoded.length - 1) / 2];
+byte[] yEnc=new byte[(encoded.length - 1) / 2];
+System.arraycopy(encoded,1,xEnc,0,xEnc.length);
+System.arraycopy(encoded,xEnc.length + 1,yEnc,0,yEnc.length);
+p=new ECPoint.F2m(this,new ECFieldElement.F2m(this.m,this.k1,this.k2,this.k3,new BigInteger(1,xEnc)),new ECFieldElement.F2m(this.m,this.k1,this.k2,this.k3,new BigInteger(1,yEnc)),false);
+break;
+default :
+throw new RuntimeException("Invalid point encoding 0x" + Integer.toString(encoded[0],16));
+}
+return p;
+}

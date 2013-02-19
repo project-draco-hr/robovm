@@ -1,0 +1,41 @@
+{
+  int x76, x54, x32, x10;
+  x76=((in[inOff + 7] & 0xff) << 8) + (in[inOff + 6] & 0xff);
+  x54=((in[inOff + 5] & 0xff) << 8) + (in[inOff + 4] & 0xff);
+  x32=((in[inOff + 3] & 0xff) << 8) + (in[inOff + 2] & 0xff);
+  x10=((in[inOff + 1] & 0xff) << 8) + (in[inOff + 0] & 0xff);
+  for (int i=0; i <= 16; i+=4) {
+    x10=rotateWordLeft(x10 + (x32 & ~x76) + (x54 & x76)+ workingKey[i],1);
+    x32=rotateWordLeft(x32 + (x54 & ~x10) + (x76 & x10)+ workingKey[i + 1],2);
+    x54=rotateWordLeft(x54 + (x76 & ~x32) + (x10 & x32)+ workingKey[i + 2],3);
+    x76=rotateWordLeft(x76 + (x10 & ~x54) + (x32 & x54)+ workingKey[i + 3],5);
+  }
+  x10+=workingKey[x76 & 63];
+  x32+=workingKey[x10 & 63];
+  x54+=workingKey[x32 & 63];
+  x76+=workingKey[x54 & 63];
+  for (int i=20; i <= 40; i+=4) {
+    x10=rotateWordLeft(x10 + (x32 & ~x76) + (x54 & x76)+ workingKey[i],1);
+    x32=rotateWordLeft(x32 + (x54 & ~x10) + (x76 & x10)+ workingKey[i + 1],2);
+    x54=rotateWordLeft(x54 + (x76 & ~x32) + (x10 & x32)+ workingKey[i + 2],3);
+    x76=rotateWordLeft(x76 + (x10 & ~x54) + (x32 & x54)+ workingKey[i + 3],5);
+  }
+  x10+=workingKey[x76 & 63];
+  x32+=workingKey[x10 & 63];
+  x54+=workingKey[x32 & 63];
+  x76+=workingKey[x54 & 63];
+  for (int i=44; i < 64; i+=4) {
+    x10=rotateWordLeft(x10 + (x32 & ~x76) + (x54 & x76)+ workingKey[i],1);
+    x32=rotateWordLeft(x32 + (x54 & ~x10) + (x76 & x10)+ workingKey[i + 1],2);
+    x54=rotateWordLeft(x54 + (x76 & ~x32) + (x10 & x32)+ workingKey[i + 2],3);
+    x76=rotateWordLeft(x76 + (x10 & ~x54) + (x32 & x54)+ workingKey[i + 3],5);
+  }
+  out[outOff + 0]=(byte)x10;
+  out[outOff + 1]=(byte)(x10 >> 8);
+  out[outOff + 2]=(byte)x32;
+  out[outOff + 3]=(byte)(x32 >> 8);
+  out[outOff + 4]=(byte)x54;
+  out[outOff + 5]=(byte)(x54 >> 8);
+  out[outOff + 6]=(byte)x76;
+  out[outOff + 7]=(byte)(x76 >> 8);
+}

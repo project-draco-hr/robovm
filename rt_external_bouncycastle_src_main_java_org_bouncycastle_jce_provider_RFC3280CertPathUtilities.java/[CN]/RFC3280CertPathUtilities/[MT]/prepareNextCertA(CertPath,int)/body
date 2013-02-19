@@ -1,0 +1,32 @@
+{
+  List certs=certPath.getCertificates();
+  X509Certificate cert=(X509Certificate)certs.get(index);
+  ASN1Sequence pm=null;
+  try {
+    pm=DERSequence.getInstance(CertPathValidatorUtilities.getExtensionValue(cert,RFC3280CertPathUtilities.POLICY_MAPPINGS));
+  }
+ catch (  AnnotatedException ex) {
+    throw new ExtCertPathValidatorException("Policy mappings extension could not be decoded.",ex,certPath,index);
+  }
+  if (pm != null) {
+    ASN1Sequence mappings=pm;
+    for (int j=0; j < mappings.size(); j++) {
+      DERObjectIdentifier issuerDomainPolicy=null;
+      DERObjectIdentifier subjectDomainPolicy=null;
+      try {
+        ASN1Sequence mapping=DERSequence.getInstance(mappings.getObjectAt(j));
+        issuerDomainPolicy=DERObjectIdentifier.getInstance(mapping.getObjectAt(0));
+        subjectDomainPolicy=DERObjectIdentifier.getInstance(mapping.getObjectAt(1));
+      }
+ catch (      Exception e) {
+        throw new ExtCertPathValidatorException("Policy mappings extension contents could not be decoded.",e,certPath,index);
+      }
+      if (RFC3280CertPathUtilities.ANY_POLICY.equals(issuerDomainPolicy.getId())) {
+        throw new CertPathValidatorException("IssuerDomainPolicy is anyPolicy",null,certPath,index);
+      }
+      if (RFC3280CertPathUtilities.ANY_POLICY.equals(subjectDomainPolicy.getId())) {
+        throw new CertPathValidatorException("SubjectDomainPolicy is anyPolicy,",null,certPath,index);
+      }
+    }
+  }
+}

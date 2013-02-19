@@ -1,0 +1,18 @@
+{
+  if (keySpec instanceof X509EncodedKeySpec) {
+    try {
+      JCEECPublicKey key=(JCEECPublicKey)JDKKeyFactory.createPublicKeyFromDERStream(((X509EncodedKeySpec)keySpec).getEncoded());
+      return new JCEECPublicKey(algorithm,key);
+    }
+ catch (    Exception e) {
+      throw new InvalidKeySpecException(e.toString());
+    }
+  }
+ else   if (keySpec instanceof ECPublicKeySpec) {
+    return new JCEECPublicKey(algorithm,(ECPublicKeySpec)keySpec);
+  }
+ else   if (keySpec instanceof java.security.spec.ECPublicKeySpec) {
+    return new JCEECPublicKey(algorithm,(java.security.spec.ECPublicKeySpec)keySpec);
+  }
+  throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+}

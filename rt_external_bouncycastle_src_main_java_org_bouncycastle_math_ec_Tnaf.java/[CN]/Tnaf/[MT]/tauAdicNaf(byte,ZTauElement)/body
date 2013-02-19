@@ -1,0 +1,42 @@
+{
+  if (!((mu == 1) || (mu == -1))) {
+    throw new IllegalArgumentException("mu must be 1 or -1");
+  }
+  BigInteger norm=norm(mu,lambda);
+  int log2Norm=norm.bitLength();
+  int maxLength=log2Norm > 30 ? log2Norm + 4 : 34;
+  byte[] u=new byte[maxLength];
+  int i=0;
+  int length=0;
+  BigInteger r0=lambda.u;
+  BigInteger r1=lambda.v;
+  while (!((r0.equals(ECConstants.ZERO)) && (r1.equals(ECConstants.ZERO)))) {
+    if (r0.testBit(0)) {
+      u[i]=(byte)ECConstants.TWO.subtract((r0.subtract(r1.shiftLeft(1))).mod(ECConstants.FOUR)).intValue();
+      if (u[i] == 1) {
+        r0=r0.clearBit(0);
+      }
+ else {
+        r0=r0.add(ECConstants.ONE);
+      }
+      length=i;
+    }
+ else {
+      u[i]=0;
+    }
+    BigInteger t=r0;
+    BigInteger s=r0.shiftRight(1);
+    if (mu == 1) {
+      r0=r1.add(s);
+    }
+ else {
+      r0=r1.subtract(s);
+    }
+    r1=t.shiftRight(1).negate();
+    i++;
+  }
+  length++;
+  byte[] tnaf=new byte[length];
+  System.arraycopy(u,0,tnaf,0,length);
+  return tnaf;
+}

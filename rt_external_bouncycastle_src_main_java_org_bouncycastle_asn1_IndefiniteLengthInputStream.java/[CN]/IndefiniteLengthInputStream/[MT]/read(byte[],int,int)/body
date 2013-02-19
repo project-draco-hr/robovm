@@ -1,0 +1,20 @@
+{
+  if (_eofOn00 || len < 3) {
+    return super.read(b,off,len);
+  }
+  if (_eofReached) {
+    return -1;
+  }
+  int numRead=_in.read(b,off + 2,len - 2);
+  if (numRead < 0) {
+    throw new EOFException();
+  }
+  b[off]=(byte)_b1;
+  b[off + 1]=(byte)_b2;
+  _b1=_in.read();
+  _b2=_in.read();
+  if (_b2 < 0) {
+    throw new EOFException();
+  }
+  return numRead + 2;
+}

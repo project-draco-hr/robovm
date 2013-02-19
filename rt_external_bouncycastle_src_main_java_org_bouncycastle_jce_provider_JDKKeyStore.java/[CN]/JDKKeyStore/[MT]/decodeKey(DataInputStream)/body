@@ -1,0 +1,35 @@
+{
+  int keyType=dIn.read();
+  String format=dIn.readUTF();
+  String algorithm=dIn.readUTF();
+  byte[] enc=new byte[dIn.readInt()];
+  KeySpec spec;
+  dIn.readFully(enc);
+  if (format.equals("PKCS#8") || format.equals("PKCS8")) {
+    spec=new PKCS8EncodedKeySpec(enc);
+  }
+ else   if (format.equals("X.509") || format.equals("X509")) {
+    spec=new X509EncodedKeySpec(enc);
+  }
+ else   if (format.equals("RAW")) {
+    return new SecretKeySpec(enc,algorithm);
+  }
+ else {
+    throw new IOException("Key format " + format + " not recognised!");
+  }
+  try {
+switch (keyType) {
+case KEY_PRIVATE:
+      return KeyFactory.getInstance(algorithm,BouncyCastleProvider.PROVIDER_NAME).generatePrivate(spec);
+case KEY_PUBLIC:
+    return KeyFactory.getInstance(algorithm,BouncyCastleProvider.PROVIDER_NAME).generatePublic(spec);
+case KEY_SECRET:
+  return SecretKeyFactory.getInstance(algorithm,BouncyCastleProvider.PROVIDER_NAME).generateSecret(spec);
+default :
+throw new IOException("Key type " + keyType + " not recognised!");
+}
+}
+ catch (Exception e) {
+throw new IOException("Exception creating key: " + e.toString());
+}
+}

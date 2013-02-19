@@ -1,0 +1,11 @@
+{
+  if (!c.getSignatureAlgorithm().equals(c.getTBSCertList().getSignature())) {
+    throw new CRLException("Signature algorithm on CertificateList does not match TBSCertList.");
+  }
+  Signature sig=Signature.getInstance(getSigAlgName(),sigProvider);
+  sig.initVerify(key);
+  sig.update(this.getTBSCertList());
+  if (!sig.verify(this.getSignature())) {
+    throw new SignatureException("CRL does not verify with supplied public key.");
+  }
+}

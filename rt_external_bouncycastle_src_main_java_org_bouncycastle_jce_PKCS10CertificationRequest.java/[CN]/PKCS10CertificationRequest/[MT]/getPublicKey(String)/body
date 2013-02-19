@@ -1,0 +1,30 @@
+{
+  SubjectPublicKeyInfo subjectPKInfo=reqInfo.getSubjectPublicKeyInfo();
+  X509EncodedKeySpec xspec=new X509EncodedKeySpec(new DERBitString(subjectPKInfo).getBytes());
+  AlgorithmIdentifier keyAlg=subjectPKInfo.getAlgorithmId();
+  try {
+    try {
+      if (provider == null) {
+        return KeyFactory.getInstance(keyAlg.getObjectId().getId()).generatePublic(xspec);
+      }
+ else {
+        return KeyFactory.getInstance(keyAlg.getObjectId().getId(),provider).generatePublic(xspec);
+      }
+    }
+ catch (    NoSuchAlgorithmException e) {
+      if (keyAlgorithms.get(keyAlg.getObjectId()) != null) {
+        String keyAlgorithm=(String)keyAlgorithms.get(keyAlg.getObjectId());
+        if (provider == null) {
+          return KeyFactory.getInstance(keyAlgorithm).generatePublic(xspec);
+        }
+ else {
+          return KeyFactory.getInstance(keyAlgorithm,provider).generatePublic(xspec);
+        }
+      }
+      throw e;
+    }
+  }
+ catch (  InvalidKeySpecException e) {
+    throw new InvalidKeyException("error decoding public key");
+  }
+}

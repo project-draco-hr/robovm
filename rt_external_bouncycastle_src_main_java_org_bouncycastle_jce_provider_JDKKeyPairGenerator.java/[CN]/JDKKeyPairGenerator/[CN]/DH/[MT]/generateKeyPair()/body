@@ -1,0 +1,20 @@
+{
+  if (!initialised) {
+    Integer paramStrength=Integer.valueOf(strength);
+    if (params.containsKey(paramStrength)) {
+      param=(DHKeyGenerationParameters)params.get(paramStrength);
+    }
+ else {
+      DHParametersGenerator pGen=new DHParametersGenerator();
+      pGen.init(strength,certainty,random);
+      param=new DHKeyGenerationParameters(random,pGen.generateParameters());
+      params.put(paramStrength,param);
+    }
+    engine.init(param);
+    initialised=true;
+  }
+  AsymmetricCipherKeyPair pair=engine.generateKeyPair();
+  DHPublicKeyParameters pub=(DHPublicKeyParameters)pair.getPublic();
+  DHPrivateKeyParameters priv=(DHPrivateKeyParameters)pair.getPrivate();
+  return new KeyPair(new JCEDHPublicKey(pub),new JCEDHPrivateKey(priv));
+}

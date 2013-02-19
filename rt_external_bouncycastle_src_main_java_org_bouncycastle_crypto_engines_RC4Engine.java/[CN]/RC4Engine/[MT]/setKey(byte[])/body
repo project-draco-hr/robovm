@@ -1,0 +1,20 @@
+{
+  workingKey=keyBytes;
+  x=0;
+  y=0;
+  if (engineState == null) {
+    engineState=new byte[STATE_LENGTH];
+  }
+  for (int i=0; i < STATE_LENGTH; i++) {
+    engineState[i]=(byte)i;
+  }
+  int i1=0;
+  int i2=0;
+  for (int i=0; i < STATE_LENGTH; i++) {
+    i2=((keyBytes[i1] & 0xff) + engineState[i] + i2) & 0xff;
+    byte tmp=engineState[i];
+    engineState[i]=engineState[i2];
+    engineState[i2]=tmp;
+    i1=(i1 + 1) % keyBytes.length;
+  }
+}

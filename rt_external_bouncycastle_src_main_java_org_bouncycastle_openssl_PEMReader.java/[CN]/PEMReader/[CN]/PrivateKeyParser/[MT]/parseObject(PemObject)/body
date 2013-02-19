@@ -1,0 +1,11 @@
+{
+  try {
+    PrivateKeyInfo info=PrivateKeyInfo.getInstance(ASN1Object.fromByteArray(obj.getContent()));
+    PKCS8EncodedKeySpec keySpec=new PKCS8EncodedKeySpec(obj.getContent());
+    KeyFactory keyFact=KeyFactory.getInstance(info.getAlgorithmId().getAlgorithm().getId(),provider);
+    return keyFact.generatePrivate(keySpec);
+  }
+ catch (  Exception e) {
+    throw new PEMException("problem parsing PRIVATE KEY: " + e.toString(),e);
+  }
+}

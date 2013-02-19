@@ -1,0 +1,38 @@
+{
+  String paddingName=Strings.toUpperCase(padding);
+  if (paddingName.equals("NOPADDING")) {
+    if (cipher.wrapOnNoPadding()) {
+      cipher=new BufferedGenericBlockCipher(new BufferedBlockCipher(cipher.getUnderlyingCipher()));
+    }
+  }
+ else   if (paddingName.equals("WITHCTS")) {
+    cipher=new BufferedGenericBlockCipher(new CTSBlockCipher(cipher.getUnderlyingCipher()));
+  }
+ else {
+    padded=true;
+    if (isAEADModeName(modeName)) {
+      throw new NoSuchPaddingException("Only NoPadding can be used with AEAD modes.");
+    }
+ else     if (paddingName.equals("PKCS5PADDING") || paddingName.equals("PKCS7PADDING")) {
+      cipher=new BufferedGenericBlockCipher(cipher.getUnderlyingCipher());
+    }
+ else     if (paddingName.equals("ZEROBYTEPADDING")) {
+      cipher=new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(),new ZeroBytePadding());
+    }
+ else     if (paddingName.equals("ISO10126PADDING") || paddingName.equals("ISO10126-2PADDING")) {
+      cipher=new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(),new ISO10126d2Padding());
+    }
+ else     if (paddingName.equals("X9.23PADDING") || paddingName.equals("X923PADDING")) {
+      cipher=new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(),new X923Padding());
+    }
+ else     if (paddingName.equals("ISO7816-4PADDING") || paddingName.equals("ISO9797-1PADDING")) {
+      cipher=new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(),new ISO7816d4Padding());
+    }
+ else     if (paddingName.equals("TBCPADDING")) {
+      cipher=new BufferedGenericBlockCipher(cipher.getUnderlyingCipher(),new TBCPadding());
+    }
+ else {
+      throw new NoSuchPaddingException("Padding " + padding + " unknown.");
+    }
+  }
+}

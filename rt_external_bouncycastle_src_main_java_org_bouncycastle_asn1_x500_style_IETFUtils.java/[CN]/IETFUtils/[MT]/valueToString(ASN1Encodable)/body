@@ -1,0 +1,29 @@
+{
+  StringBuffer vBuf=new StringBuffer();
+  if (value instanceof ASN1String && !(value instanceof DERUniversalString)) {
+    String v=((ASN1String)value).getString();
+    if (v.length() > 0 && v.charAt(0) == '#') {
+      vBuf.append("\\" + v);
+    }
+ else {
+      vBuf.append(v);
+    }
+  }
+ else {
+    vBuf.append("#" + bytesToString(Hex.encode(value.getDERObject().getDEREncoded())));
+  }
+  int end=vBuf.length();
+  int index=0;
+  if (vBuf.length() >= 2 && vBuf.charAt(0) == '\\' && vBuf.charAt(1) == '#') {
+    index+=2;
+  }
+  while (index != end) {
+    if ((vBuf.charAt(index) == ',') || (vBuf.charAt(index) == '"') || (vBuf.charAt(index) == '\\')|| (vBuf.charAt(index) == '+')|| (vBuf.charAt(index) == '=')|| (vBuf.charAt(index) == '<')|| (vBuf.charAt(index) == '>')|| (vBuf.charAt(index) == ';')) {
+      vBuf.insert(index,"\\");
+      index++;
+      end++;
+    }
+    index++;
+  }
+  return vBuf.toString();
+}

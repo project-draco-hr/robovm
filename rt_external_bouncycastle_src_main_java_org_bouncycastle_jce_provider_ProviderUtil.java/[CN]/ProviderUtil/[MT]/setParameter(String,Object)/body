@@ -1,0 +1,32 @@
+{
+  SecurityManager securityManager=System.getSecurityManager();
+  if (parameterName.equals(ConfigurableProvider.THREAD_LOCAL_EC_IMPLICITLY_CA)) {
+    ECParameterSpec curveSpec;
+    if (securityManager != null) {
+      securityManager.checkPermission(BC_EC_LOCAL_PERMISSION);
+    }
+    if (parameter instanceof ECParameterSpec || parameter == null) {
+      curveSpec=(ECParameterSpec)parameter;
+    }
+ else {
+      curveSpec=EC5Util.convertSpec((java.security.spec.ECParameterSpec)parameter,false);
+    }
+    if (curveSpec == null) {
+      threadSpec.remove();
+    }
+ else {
+      threadSpec.set(curveSpec);
+    }
+  }
+ else   if (parameterName.equals(ConfigurableProvider.EC_IMPLICITLY_CA)) {
+    if (securityManager != null) {
+      securityManager.checkPermission(BC_EC_PERMISSION);
+    }
+    if (parameter instanceof ECParameterSpec || parameter == null) {
+      ecImplicitCaParams=(ECParameterSpec)parameter;
+    }
+ else {
+      ecImplicitCaParams=EC5Util.convertSpec((java.security.spec.ECParameterSpec)parameter,false);
+    }
+  }
+}

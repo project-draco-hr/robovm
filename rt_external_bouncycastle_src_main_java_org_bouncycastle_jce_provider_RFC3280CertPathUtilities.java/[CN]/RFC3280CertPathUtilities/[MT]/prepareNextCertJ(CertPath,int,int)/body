@@ -1,0 +1,18 @@
+{
+  List certs=certPath.getCertificates();
+  X509Certificate cert=(X509Certificate)certs.get(index);
+  DERInteger iap=null;
+  try {
+    iap=DERInteger.getInstance(CertPathValidatorUtilities.getExtensionValue(cert,RFC3280CertPathUtilities.INHIBIT_ANY_POLICY));
+  }
+ catch (  Exception e) {
+    throw new ExtCertPathValidatorException("Inhibit any-policy extension cannot be decoded.",e,certPath,index);
+  }
+  if (iap != null) {
+    int _inhibitAnyPolicy=iap.getValue().intValue();
+    if (_inhibitAnyPolicy < inhibitAnyPolicy) {
+      return _inhibitAnyPolicy;
+    }
+  }
+  return inhibitAnyPolicy;
+}

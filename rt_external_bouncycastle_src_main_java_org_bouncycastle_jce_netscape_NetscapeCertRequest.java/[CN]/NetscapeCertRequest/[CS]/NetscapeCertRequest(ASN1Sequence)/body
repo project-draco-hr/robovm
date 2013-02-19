@@ -1,0 +1,22 @@
+{
+  try {
+    if (spkac.size() != 3) {
+      throw new IllegalArgumentException("invalid SPKAC (size):" + spkac.size());
+    }
+    sigAlg=new AlgorithmIdentifier((ASN1Sequence)spkac.getObjectAt(1));
+    sigBits=((DERBitString)spkac.getObjectAt(2)).getBytes();
+    ASN1Sequence pkac=(ASN1Sequence)spkac.getObjectAt(0);
+    if (pkac.size() != 2) {
+      throw new IllegalArgumentException("invalid PKAC (len): " + pkac.size());
+    }
+    challenge=((DERIA5String)pkac.getObjectAt(1)).getString();
+    content=new DERBitString(pkac);
+    SubjectPublicKeyInfo pubkeyinfo=new SubjectPublicKeyInfo((ASN1Sequence)pkac.getObjectAt(0));
+    X509EncodedKeySpec xspec=new X509EncodedKeySpec(new DERBitString(pubkeyinfo).getBytes());
+    keyAlg=pubkeyinfo.getAlgorithmId();
+    pubkey=KeyFactory.getInstance(keyAlg.getObjectId().getId(),"BC").generatePublic(xspec);
+  }
+ catch (  Exception e) {
+    throw new IllegalArgumentException(e.toString());
+  }
+}

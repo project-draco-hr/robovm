@@ -1,0 +1,36 @@
+{
+  StringTokenizer sTok=new StringTokenizer(ip,":",true);
+  int index=0;
+  int[] val=new int[8];
+  if (ip.charAt(0) == ':' && ip.charAt(1) == ':') {
+    sTok.nextToken();
+  }
+  int doubleColon=-1;
+  while (sTok.hasMoreTokens()) {
+    String e=sTok.nextToken();
+    if (e.equals(":")) {
+      doubleColon=index;
+      val[index++]=0;
+    }
+ else {
+      if (e.indexOf('.') < 0) {
+        val[index++]=Integer.parseInt(e,16);
+        if (sTok.hasMoreTokens()) {
+          sTok.nextToken();
+        }
+      }
+ else {
+        StringTokenizer eTok=new StringTokenizer(e,".");
+        val[index++]=(Integer.parseInt(eTok.nextToken()) << 8) | Integer.parseInt(eTok.nextToken());
+        val[index++]=(Integer.parseInt(eTok.nextToken()) << 8) | Integer.parseInt(eTok.nextToken());
+      }
+    }
+  }
+  if (index != val.length) {
+    System.arraycopy(val,doubleColon,val,val.length - (index - doubleColon),index - doubleColon);
+    for (int i=doubleColon; i != val.length - (index - doubleColon); i++) {
+      val[i]=0;
+    }
+  }
+  return val;
+}

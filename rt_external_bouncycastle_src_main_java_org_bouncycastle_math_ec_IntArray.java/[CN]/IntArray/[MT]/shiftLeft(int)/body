@@ -1,0 +1,20 @@
+{
+  int usedLen=getUsedLength();
+  if (usedLen == 0) {
+    return this;
+  }
+  if (n == 0) {
+    return this;
+  }
+  if (n > 31) {
+    throw new IllegalArgumentException("shiftLeft() for max 31 bits " + ", " + n + "bit shift is not possible");
+  }
+  int[] newInts=new int[usedLen + 1];
+  int nm32=32 - n;
+  newInts[0]=m_ints[0] << n;
+  for (int i=1; i < usedLen; i++) {
+    newInts[i]=(m_ints[i] << n) | (m_ints[i - 1] >>> nm32);
+  }
+  newInts[usedLen]=m_ints[usedLen - 1] >>> nm32;
+  return new IntArray(newInts);
+}

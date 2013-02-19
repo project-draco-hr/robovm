@@ -1,0 +1,29 @@
+{
+  this.info=info;
+  DERInteger derY;
+  try {
+    derY=(DERInteger)info.getPublicKey();
+  }
+ catch (  IOException e) {
+    throw new IllegalArgumentException("invalid info structure in DH public key");
+  }
+  this.y=derY.getValue();
+  ASN1Sequence seq=ASN1Sequence.getInstance(info.getAlgorithmId().getParameters());
+  DERObjectIdentifier id=info.getAlgorithmId().getObjectId();
+  if (id.equals(PKCSObjectIdentifiers.dhKeyAgreement) || isPKCSParam(seq)) {
+    DHParameter params=new DHParameter(seq);
+    if (params.getL() != null) {
+      this.dhSpec=new DHParameterSpec(params.getP(),params.getG(),params.getL().intValue());
+    }
+ else {
+      this.dhSpec=new DHParameterSpec(params.getP(),params.getG());
+    }
+  }
+ else   if (id.equals(X9ObjectIdentifiers.dhpublicnumber)) {
+    DHDomainParameters params=DHDomainParameters.getInstance(seq);
+    this.dhSpec=new DHParameterSpec(params.getP().getValue(),params.getG().getValue());
+  }
+ else {
+    throw new IllegalArgumentException("unknown algorithm type: " + id);
+  }
+}

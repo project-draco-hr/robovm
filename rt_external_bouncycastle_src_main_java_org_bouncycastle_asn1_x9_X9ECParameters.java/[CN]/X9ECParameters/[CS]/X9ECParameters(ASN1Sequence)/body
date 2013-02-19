@@ -1,0 +1,13 @@
+{
+  if (!(seq.getObjectAt(0) instanceof DERInteger) || !((DERInteger)seq.getObjectAt(0)).getValue().equals(ONE)) {
+    throw new IllegalArgumentException("bad version in X9ECParameters");
+  }
+  X9Curve x9c=new X9Curve(new X9FieldID((ASN1Sequence)seq.getObjectAt(1)),(ASN1Sequence)seq.getObjectAt(2));
+  this.curve=x9c.getCurve();
+  this.g=new X9ECPoint(curve,(ASN1OctetString)seq.getObjectAt(3)).getPoint();
+  this.n=((DERInteger)seq.getObjectAt(4)).getValue();
+  this.seed=x9c.getSeed();
+  if (seq.size() == 6) {
+    this.h=((DERInteger)seq.getObjectAt(5)).getValue();
+  }
+}

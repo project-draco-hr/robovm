@@ -1,0 +1,35 @@
+{
+  if (forWrapping) {
+    throw new IllegalStateException("not set for unwrapping");
+  }
+  int n=inLen / 8;
+  if ((n * 8) != inLen) {
+    throw new InvalidCipherTextException("unwrap data must be a multiple of 8 bytes");
+  }
+  byte[] block=new byte[inLen - iv.length];
+  byte[] a=new byte[iv.length];
+  byte[] buf=new byte[8 + iv.length];
+  System.arraycopy(in,0,a,0,iv.length);
+  System.arraycopy(in,iv.length,block,0,inLen - iv.length);
+  engine.init(false,param);
+  n=n - 1;
+  for (int j=5; j >= 0; j--) {
+    for (int i=n; i >= 1; i--) {
+      System.arraycopy(a,0,buf,0,iv.length);
+      System.arraycopy(block,8 * (i - 1),buf,iv.length,8);
+      int t=n * j + i;
+      for (int k=1; t != 0; k++) {
+        byte v=(byte)t;
+        buf[iv.length - k]^=v;
+        t>>>=8;
+      }
+      engine.processBlock(buf,0,buf,0);
+      System.arraycopy(buf,0,a,0,8);
+      System.arraycopy(buf,8,block,8 * (i - 1),8);
+    }
+  }
+  if (!Arrays.constantTimeAreEqual(a,iv)) {
+    throw new InvalidCipherTextException("checksum failed");
+  }
+  return block;
+}

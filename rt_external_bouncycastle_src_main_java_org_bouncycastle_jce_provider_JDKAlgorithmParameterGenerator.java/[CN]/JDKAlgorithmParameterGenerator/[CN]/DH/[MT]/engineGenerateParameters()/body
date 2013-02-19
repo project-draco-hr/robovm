@@ -1,0 +1,19 @@
+{
+  DHParametersGenerator pGen=new DHParametersGenerator();
+  if (random != null) {
+    pGen.init(strength,20,random);
+  }
+ else {
+    pGen.init(strength,20,new SecureRandom());
+  }
+  DHParameters p=pGen.generateParameters();
+  AlgorithmParameters params;
+  try {
+    params=AlgorithmParameters.getInstance("DH",BouncyCastleProvider.PROVIDER_NAME);
+    params.init(new DHParameterSpec(p.getP(),p.getG(),l));
+  }
+ catch (  Exception e) {
+    throw new RuntimeException(e.getMessage());
+  }
+  return params;
+}

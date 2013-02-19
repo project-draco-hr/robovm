@@ -1,0 +1,9 @@
+{
+  MGF1ParameterSpec mgfParams=(MGF1ParameterSpec)pSpec.getMGFParameters();
+  Digest digest=JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
+  if (digest == null) {
+    throw new NoSuchPaddingException("no match on OAEP constructor for digest algorithm: " + mgfParams.getDigestAlgorithm());
+  }
+  cipher=new OAEPEncoding(new RSABlindedEngine(),digest,((PSource.PSpecified)pSpec.getPSource()).getValue());
+  paramSpec=pSpec;
+}

@@ -1,0 +1,19 @@
+{
+  Set intersect=new HashSet();
+  for (Iterator it=ips.iterator(); it.hasNext(); ) {
+    byte[] ip=ASN1OctetString.getInstance(((GeneralSubtree)it.next()).getBase().getName()).getOctets();
+    if (permitted == null) {
+      if (ip != null) {
+        intersect.add(ip);
+      }
+    }
+ else {
+      Iterator it2=permitted.iterator();
+      while (it2.hasNext()) {
+        byte[] _permitted=(byte[])it2.next();
+        intersect.addAll(intersectIPRange(_permitted,ip));
+      }
+    }
+  }
+  return intersect;
+}

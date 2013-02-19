@@ -1,0 +1,40 @@
+{
+  byte[] data=engine.processBlock(in,inOff,inLen);
+  byte[] block;
+  if (data.length < engine.getOutputBlockSize()) {
+    block=new byte[engine.getOutputBlockSize()];
+    System.arraycopy(data,0,block,block.length - data.length,data.length);
+  }
+ else {
+    block=data;
+  }
+  if (block.length < (2 * defHash.length) + 1) {
+    throw new InvalidCipherTextException("data too short");
+  }
+  byte[] mask=maskGeneratorFunction1(block,defHash.length,block.length - defHash.length,defHash.length);
+  for (int i=0; i != defHash.length; i++) {
+    block[i]^=mask[i];
+  }
+  mask=maskGeneratorFunction1(block,0,defHash.length,block.length - defHash.length);
+  for (int i=defHash.length; i != block.length; i++) {
+    block[i]^=mask[i - defHash.length];
+  }
+  for (int i=0; i != defHash.length; i++) {
+    if (defHash[i] != block[defHash.length + i]) {
+      throw new InvalidCipherTextException("data hash wrong");
+    }
+  }
+  int start;
+  for (start=2 * defHash.length; start != block.length; start++) {
+    if (block[start] != 0) {
+      break;
+    }
+  }
+  if (start >= (block.length - 1) || block[start] != 1) {
+    throw new InvalidCipherTextException("data start wrong " + start);
+  }
+  start++;
+  byte[] output=new byte[block.length - start];
+  System.arraycopy(block,start,output,0,output.length);
+  return output;
+}

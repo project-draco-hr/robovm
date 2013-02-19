@@ -1,0 +1,33 @@
+{
+  List issuers=new ArrayList();
+  if (dp.getCRLIssuer() != null) {
+    GeneralName genNames[]=dp.getCRLIssuer().getNames();
+    for (int j=0; j < genNames.length; j++) {
+      if (genNames[j].getTagNo() == GeneralName.directoryName) {
+        try {
+          issuers.add(new X500Principal(genNames[j].getName().getDERObject().getEncoded()));
+        }
+ catch (        IOException e) {
+          throw new AnnotatedException("CRL issuer information from distribution point cannot be decoded.",e);
+        }
+      }
+    }
+  }
+ else {
+    if (dp.getDistributionPoint() == null) {
+      throw new AnnotatedException("CRL issuer is omitted from distribution point but no distributionPoint field present.");
+    }
+    for (Iterator it=issuerPrincipals.iterator(); it.hasNext(); ) {
+      issuers.add((X500Principal)it.next());
+    }
+  }
+  Iterator it=issuers.iterator();
+  while (it.hasNext()) {
+    try {
+      selector.addIssuerName(((X500Principal)it.next()).getEncoded());
+    }
+ catch (    IOException ex) {
+      throw new AnnotatedException("Cannot decode CRL issuer information.",ex);
+    }
+  }
+}

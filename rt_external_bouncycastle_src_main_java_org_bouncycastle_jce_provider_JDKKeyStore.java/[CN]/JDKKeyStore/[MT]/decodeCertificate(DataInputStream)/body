@@ -1,0 +1,16 @@
+{
+  String type=dIn.readUTF();
+  byte[] cEnc=new byte[dIn.readInt()];
+  dIn.readFully(cEnc);
+  try {
+    CertificateFactory cFact=CertificateFactory.getInstance(type,BouncyCastleProvider.PROVIDER_NAME);
+    ByteArrayInputStream bIn=new ByteArrayInputStream(cEnc);
+    return cFact.generateCertificate(bIn);
+  }
+ catch (  NoSuchProviderException ex) {
+    throw new IOException(ex.toString());
+  }
+catch (  CertificateException ex) {
+    throw new IOException(ex.toString());
+  }
+}

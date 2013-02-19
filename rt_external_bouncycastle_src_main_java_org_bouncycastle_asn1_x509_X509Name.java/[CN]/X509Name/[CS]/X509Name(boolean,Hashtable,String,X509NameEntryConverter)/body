@@ -1,0 +1,58 @@
+{
+  this.converter=converter;
+  X509NameTokenizer nTok=new X509NameTokenizer(dirName);
+  while (nTok.hasMoreTokens()) {
+    String token=nTok.nextToken();
+    int index=token.indexOf('=');
+    if (index == -1) {
+      throw new IllegalArgumentException("badly formatted directory string");
+    }
+    String name=token.substring(0,index);
+    String value=token.substring(index + 1);
+    DERObjectIdentifier oid=decodeOID(name,lookUp);
+    if (value.indexOf('+') > 0) {
+      X509NameTokenizer vTok=new X509NameTokenizer(value,'+');
+      String v=vTok.nextToken();
+      this.ordering.addElement(oid);
+      this.values.addElement(v);
+      this.added.addElement(FALSE);
+      while (vTok.hasMoreTokens()) {
+        String sv=vTok.nextToken();
+        int ndx=sv.indexOf('=');
+        String nm=sv.substring(0,ndx);
+        String vl=sv.substring(ndx + 1);
+        this.ordering.addElement(decodeOID(nm,lookUp));
+        this.values.addElement(vl);
+        this.added.addElement(TRUE);
+      }
+    }
+ else {
+      this.ordering.addElement(oid);
+      this.values.addElement(value);
+      this.added.addElement(FALSE);
+    }
+  }
+  if (reverse) {
+    Vector o=new Vector();
+    Vector v=new Vector();
+    Vector a=new Vector();
+    int count=1;
+    for (int i=0; i < this.ordering.size(); i++) {
+      if (((Boolean)this.added.elementAt(i)).booleanValue()) {
+        o.insertElementAt(this.ordering.elementAt(i),count);
+        v.insertElementAt(this.values.elementAt(i),count);
+        a.insertElementAt(this.added.elementAt(i),count);
+        count++;
+      }
+ else {
+        o.insertElementAt(this.ordering.elementAt(i),0);
+        v.insertElementAt(this.values.elementAt(i),0);
+        a.insertElementAt(this.added.elementAt(i),0);
+        count=1;
+      }
+    }
+    this.ordering=o;
+    this.values=v;
+    this.added=a;
+  }
+}

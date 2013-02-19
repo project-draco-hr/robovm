@@ -1,0 +1,18 @@
+{
+  if (this.isInfinity()) {
+    return b;
+  }
+  if (b.isInfinity()) {
+    return this;
+  }
+  if (this.x.equals(b.x)) {
+    if (this.y.equals(b.y)) {
+      return this.twice();
+    }
+    return this.curve.getInfinity();
+  }
+  ECFieldElement gamma=b.y.subtract(this.y).divide(b.x.subtract(this.x));
+  ECFieldElement x3=gamma.square().subtract(this.x).subtract(b.x);
+  ECFieldElement y3=gamma.multiply(this.x.subtract(x3)).subtract(this.y);
+  return new ECPoint.Fp(curve,x3,y3);
+}

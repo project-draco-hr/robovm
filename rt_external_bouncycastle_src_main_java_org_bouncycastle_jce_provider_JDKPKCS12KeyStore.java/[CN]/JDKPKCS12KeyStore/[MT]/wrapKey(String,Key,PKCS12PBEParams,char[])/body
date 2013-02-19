@@ -1,0 +1,15 @@
+{
+  PBEKeySpec pbeSpec=new PBEKeySpec(password);
+  byte[] out;
+  try {
+    SecretKeyFactory keyFact=SecretKeyFactory.getInstance(algorithm,bcProvider);
+    PBEParameterSpec defParams=new PBEParameterSpec(pbeParams.getIV(),pbeParams.getIterations().intValue());
+    Cipher cipher=Cipher.getInstance(algorithm,bcProvider);
+    cipher.init(Cipher.WRAP_MODE,keyFact.generateSecret(pbeSpec),defParams);
+    out=cipher.wrap(key);
+  }
+ catch (  Exception e) {
+    throw new IOException("exception encrypting data - " + e.toString());
+  }
+  return out;
+}

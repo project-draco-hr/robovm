@@ -1,0 +1,29 @@
+{
+  if (explicit) {
+    if (!obj.isExplicit()) {
+      throw new IllegalArgumentException("object implicit - explicit expected.");
+    }
+    return (ASN1Set)obj.getObject();
+  }
+ else {
+    if (obj.isExplicit()) {
+      ASN1Set set=new DERSet(obj.getObject());
+      return set;
+    }
+ else {
+      if (obj.getObject() instanceof ASN1Set) {
+        return (ASN1Set)obj.getObject();
+      }
+      ASN1EncodableVector v=new ASN1EncodableVector();
+      if (obj.getObject() instanceof ASN1Sequence) {
+        ASN1Sequence s=(ASN1Sequence)obj.getObject();
+        Enumeration e=s.getObjects();
+        while (e.hasMoreElements()) {
+          v.add((DEREncodable)e.nextElement());
+        }
+        return new DERSet(v,false);
+      }
+    }
+  }
+  throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
+}

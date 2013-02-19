@@ -1,0 +1,23 @@
+{
+  if (workingKey1 == null) {
+    throw new IllegalStateException("DESede engine not initialised");
+  }
+  if ((inOff + BLOCK_SIZE) > in.length) {
+    throw new DataLengthException("input buffer too short");
+  }
+  if ((outOff + BLOCK_SIZE) > out.length) {
+    throw new DataLengthException("output buffer too short");
+  }
+  byte[] temp=new byte[BLOCK_SIZE];
+  if (forEncryption) {
+    desFunc(workingKey1,in,inOff,temp,0);
+    desFunc(workingKey2,temp,0,temp,0);
+    desFunc(workingKey3,temp,0,out,outOff);
+  }
+ else {
+    desFunc(workingKey3,in,inOff,temp,0);
+    desFunc(workingKey2,temp,0,temp,0);
+    desFunc(workingKey1,temp,0,out,outOff);
+  }
+  return BLOCK_SIZE;
+}

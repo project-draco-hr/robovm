@@ -1,0 +1,12 @@
+{
+  DERBitString id=cert.getAcinfo().getIssuerUniqueID();
+  if (id != null) {
+    byte[] bytes=id.getBytes();
+    boolean[] boolId=new boolean[bytes.length * 8 - id.getPadBits()];
+    for (int i=0; i != boolId.length; i++) {
+      boolId[i]=(bytes[i / 8] & (0x80 >>> (i % 8))) != 0;
+    }
+    return boolId;
+  }
+  return null;
+}

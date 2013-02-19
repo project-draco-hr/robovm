@@ -1,0 +1,16 @@
+{
+  TBSCertificateStructure tbsCert=generateTbsCert();
+  byte[] signature;
+  try {
+    signature=X509Util.calculateSignature(sigOID,signatureAlgorithm,provider,key,random,tbsCert);
+  }
+ catch (  IOException e) {
+    throw new ExtCertificateEncodingException("exception encoding TBS cert",e);
+  }
+  try {
+    return generateJcaObject(tbsCert,signature);
+  }
+ catch (  CertificateParsingException e) {
+    throw new ExtCertificateEncodingException("exception producing certificate object",e);
+  }
+}

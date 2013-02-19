@@ -1,0 +1,48 @@
+{
+  byte[] seed=new byte[20];
+  byte[] part1=new byte[20];
+  byte[] part2=new byte[20];
+  byte[] u=new byte[20];
+  SHA1Digest sha1=new SHA1Digest();
+  int n=(L - 1) / 160;
+  byte[] w=new byte[L / 8];
+  for (; ; ) {
+    random.nextBytes(seed);
+    hash(sha1,seed,part1);
+    System.arraycopy(seed,0,part2,0,seed.length);
+    inc(part2);
+    hash(sha1,part2,part2);
+    for (int i=0; i != u.length; i++) {
+      u[i]=(byte)(part1[i] ^ part2[i]);
+    }
+    u[0]|=(byte)0x80;
+    u[19]|=(byte)0x01;
+    BigInteger q=new BigInteger(1,u);
+    if (!q.isProbablePrime(certainty)) {
+      continue;
+    }
+    byte[] offset=Arrays.clone(seed);
+    inc(offset);
+    for (int counter=0; counter < 4096; ++counter) {
+      for (int k=0; k < n; k++) {
+        inc(offset);
+        hash(sha1,offset,part1);
+        System.arraycopy(part1,0,w,w.length - (k + 1) * part1.length,part1.length);
+      }
+      inc(offset);
+      hash(sha1,offset,part1);
+      System.arraycopy(part1,part1.length - ((w.length - (n) * part1.length)),w,0,w.length - n * part1.length);
+      w[0]|=(byte)0x80;
+      BigInteger x=new BigInteger(1,w);
+      BigInteger c=x.mod(q.shiftLeft(1));
+      BigInteger p=x.subtract(c.subtract(ONE));
+      if (p.bitLength() != L) {
+        continue;
+      }
+      if (p.isProbablePrime(certainty)) {
+        BigInteger g=calculateGenerator_FIPS186_2(p,q,random);
+        return new DSAParameters(p,q,g,new DSAValidationParameters(seed,counter));
+      }
+    }
+  }
+}

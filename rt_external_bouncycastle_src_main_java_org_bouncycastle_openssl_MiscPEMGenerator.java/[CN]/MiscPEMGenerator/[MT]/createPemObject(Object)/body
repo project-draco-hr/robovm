@@ -1,0 +1,79 @@
+{
+  String type;
+  byte[] encoding;
+  if (o instanceof PemObject) {
+    return (PemObject)o;
+  }
+  if (o instanceof PemObjectGenerator) {
+    return ((PemObjectGenerator)o).generate();
+  }
+  if (o instanceof X509Certificate) {
+    type="CERTIFICATE";
+    try {
+      encoding=((X509Certificate)o).getEncoded();
+    }
+ catch (    CertificateEncodingException e) {
+      throw new PemGenerationException("Cannot encode object: " + e.toString());
+    }
+  }
+ else   if (o instanceof X509CRL) {
+    type="X509 CRL";
+    try {
+      encoding=((X509CRL)o).getEncoded();
+    }
+ catch (    CRLException e) {
+      throw new PemGenerationException("Cannot encode object: " + e.toString());
+    }
+  }
+ else   if (o instanceof KeyPair) {
+    return createPemObject(((KeyPair)o).getPrivate());
+  }
+ else   if (o instanceof PrivateKey) {
+    PrivateKeyInfo info=new PrivateKeyInfo((ASN1Sequence)ASN1Object.fromByteArray(((Key)o).getEncoded()));
+    if (o instanceof RSAPrivateKey) {
+      type="RSA PRIVATE KEY";
+      encoding=info.getPrivateKey().getEncoded();
+    }
+ else     if (o instanceof DSAPrivateKey) {
+      type="DSA PRIVATE KEY";
+      DSAParameter p=DSAParameter.getInstance(info.getAlgorithmId().getParameters());
+      ASN1EncodableVector v=new ASN1EncodableVector();
+      v.add(new DERInteger(0));
+      v.add(new DERInteger(p.getP()));
+      v.add(new DERInteger(p.getQ()));
+      v.add(new DERInteger(p.getG()));
+      BigInteger x=((DSAPrivateKey)o).getX();
+      BigInteger y=p.getG().modPow(x,p.getP());
+      v.add(new DERInteger(y));
+      v.add(new DERInteger(x));
+      encoding=new DERSequence(v).getEncoded();
+    }
+ else     if (((PrivateKey)o).getAlgorithm().equals("ECDSA")) {
+      type="EC PRIVATE KEY";
+      encoding=info.getPrivateKey().getEncoded();
+    }
+ else {
+      throw new IOException("Cannot identify private key");
+    }
+  }
+ else   if (o instanceof PublicKey) {
+    type="PUBLIC KEY";
+    encoding=((PublicKey)o).getEncoded();
+  }
+ else   if (o instanceof X509AttributeCertificate) {
+    type="ATTRIBUTE CERTIFICATE";
+    encoding=((X509V2AttributeCertificate)o).getEncoded();
+  }
+ else   if (o instanceof PKCS10CertificationRequest) {
+    type="CERTIFICATE REQUEST";
+    encoding=((PKCS10CertificationRequest)o).getEncoded();
+  }
+ else   if (o instanceof ContentInfo) {
+    type="PKCS7";
+    encoding=((ContentInfo)o).getEncoded();
+  }
+ else {
+    throw new PemGenerationException("unknown object passed - can't encode.");
+  }
+  return new PemObject(type,encoding);
+}

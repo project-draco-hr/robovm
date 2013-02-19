@@ -1,0 +1,30 @@
+{
+  this.c=c;
+  try {
+    byte[] bytes=this.getExtensionBytes("2.5.29.19");
+    if (bytes != null) {
+      basicConstraints=BasicConstraints.getInstance(ASN1Object.fromByteArray(bytes));
+    }
+  }
+ catch (  Exception e) {
+    throw new CertificateParsingException("cannot construct BasicConstraints: " + e);
+  }
+  try {
+    byte[] bytes=this.getExtensionBytes("2.5.29.15");
+    if (bytes != null) {
+      DERBitString bits=DERBitString.getInstance(ASN1Object.fromByteArray(bytes));
+      bytes=bits.getBytes();
+      int length=(bytes.length * 8) - bits.getPadBits();
+      keyUsage=new boolean[(length < 9) ? 9 : length];
+      for (int i=0; i != length; i++) {
+        keyUsage[i]=(bytes[i / 8] & (0x80 >>> (i % 8))) != 0;
+      }
+    }
+ else {
+      keyUsage=null;
+    }
+  }
+ catch (  Exception e) {
+    throw new CertificateParsingException("cannot construct KeyUsage: " + e);
+  }
+}

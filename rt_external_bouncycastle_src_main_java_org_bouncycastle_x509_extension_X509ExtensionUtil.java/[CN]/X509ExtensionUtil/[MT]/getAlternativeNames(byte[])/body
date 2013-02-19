@@ -1,0 +1,42 @@
+{
+  if (extVal == null) {
+    return Collections.EMPTY_LIST;
+  }
+  try {
+    Collection temp=new ArrayList();
+    Enumeration it=DERSequence.getInstance(fromExtensionValue(extVal)).getObjects();
+    while (it.hasMoreElements()) {
+      GeneralName genName=GeneralName.getInstance(it.nextElement());
+      List list=new ArrayList();
+      list.add(Integer.valueOf(genName.getTagNo()));
+switch (genName.getTagNo()) {
+case GeneralName.ediPartyName:
+case GeneralName.x400Address:
+case GeneralName.otherName:
+        list.add(genName.getName().getDERObject());
+      break;
+case GeneralName.directoryName:
+    list.add(X509Name.getInstance(genName.getName()).toString());
+  break;
+case GeneralName.dNSName:
+case GeneralName.rfc822Name:
+case GeneralName.uniformResourceIdentifier:
+list.add(((ASN1String)genName.getName()).getString());
+break;
+case GeneralName.registeredID:
+list.add(DERObjectIdentifier.getInstance(genName.getName()).getId());
+break;
+case GeneralName.iPAddress:
+list.add(DEROctetString.getInstance(genName.getName()).getOctets());
+break;
+default :
+throw new IOException("Bad tag number: " + genName.getTagNo());
+}
+temp.add(list);
+}
+return Collections.unmodifiableCollection(temp);
+}
+ catch (Exception e) {
+throw new CertificateParsingException(e.getMessage());
+}
+}

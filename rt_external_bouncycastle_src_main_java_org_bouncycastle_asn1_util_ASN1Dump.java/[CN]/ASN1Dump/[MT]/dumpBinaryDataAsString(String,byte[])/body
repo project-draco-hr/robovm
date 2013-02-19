@@ -1,0 +1,26 @@
+{
+  String nl=System.getProperty("line.separator");
+  StringBuffer buf=new StringBuffer();
+  indent+=TAB;
+  buf.append(nl);
+  for (int i=0; i < bytes.length; i+=SAMPLE_SIZE) {
+    if (bytes.length - i > SAMPLE_SIZE) {
+      buf.append(indent);
+      buf.append(new String(Hex.encode(bytes,i,SAMPLE_SIZE)));
+      buf.append(TAB);
+      buf.append(calculateAscString(bytes,i,SAMPLE_SIZE));
+      buf.append(nl);
+    }
+ else {
+      buf.append(indent);
+      buf.append(new String(Hex.encode(bytes,i,bytes.length - i)));
+      for (int j=bytes.length - i; j != SAMPLE_SIZE; j++) {
+        buf.append("  ");
+      }
+      buf.append(TAB);
+      buf.append(calculateAscString(bytes,i,bytes.length - i));
+      buf.append(nl);
+    }
+  }
+  return buf.toString();
+}

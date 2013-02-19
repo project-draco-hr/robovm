@@ -1,0 +1,17 @@
+{
+  List certs=certPath.getCertificates();
+  X509Certificate cert=(X509Certificate)certs.get(index);
+  Iterator tmpIter;
+  tmpIter=pathCheckers.iterator();
+  while (tmpIter.hasNext()) {
+    try {
+      ((PKIXCertPathChecker)tmpIter.next()).check(cert,criticalExtensions);
+    }
+ catch (    CertPathValidatorException e) {
+      throw new ExtCertPathValidatorException("Additional certificate path checker failed.",e,certPath,index);
+    }
+  }
+  if (!criticalExtensions.isEmpty()) {
+    throw new ExtCertPathValidatorException("Certificate has unsupported critical extension",null,certPath,index);
+  }
+}

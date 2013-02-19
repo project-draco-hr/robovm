@@ -1,0 +1,13 @@
+{
+  int size=(2 * (obj.getType().length() + 10 + nlLength)) + 6 + 4;
+  if (!obj.getHeaders().isEmpty()) {
+    for (Iterator it=obj.getHeaders().iterator(); it.hasNext(); ) {
+      PemHeader hdr=(PemHeader)it.next();
+      size+=hdr.getName().length() + ": ".length() + hdr.getValue().length()+ nlLength;
+    }
+    size+=nlLength;
+  }
+  int dataLen=((obj.getContent().length + 2) / 3) * 4;
+  size+=dataLen + (((dataLen + LINE_LENGTH - 1) / LINE_LENGTH) * nlLength);
+  return size;
+}

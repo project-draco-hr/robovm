@@ -1,0 +1,61 @@
+{
+  if (deltaCRL == null) {
+    return;
+  }
+  IssuingDistributionPoint completeidp=null;
+  try {
+    completeidp=IssuingDistributionPoint.getInstance(CertPathValidatorUtilities.getExtensionValue(completeCRL,RFC3280CertPathUtilities.ISSUING_DISTRIBUTION_POINT));
+  }
+ catch (  Exception e) {
+    throw new AnnotatedException("Issuing distribution point extension could not be decoded.",e);
+  }
+  if (pkixParams.isUseDeltasEnabled()) {
+    if (!deltaCRL.getIssuerX500Principal().equals(completeCRL.getIssuerX500Principal())) {
+      throw new AnnotatedException("Complete CRL issuer does not match delta CRL issuer.");
+    }
+    IssuingDistributionPoint deltaidp=null;
+    try {
+      deltaidp=IssuingDistributionPoint.getInstance(CertPathValidatorUtilities.getExtensionValue(deltaCRL,ISSUING_DISTRIBUTION_POINT));
+    }
+ catch (    Exception e) {
+      throw new AnnotatedException("Issuing distribution point extension from delta CRL could not be decoded.",e);
+    }
+    boolean match=false;
+    if (completeidp == null) {
+      if (deltaidp == null) {
+        match=true;
+      }
+    }
+ else {
+      if (completeidp.equals(deltaidp)) {
+        match=true;
+      }
+    }
+    if (!match) {
+      throw new AnnotatedException("Issuing distribution point extension from delta CRL and complete CRL does not match.");
+    }
+    DERObject completeKeyIdentifier=null;
+    try {
+      completeKeyIdentifier=CertPathValidatorUtilities.getExtensionValue(completeCRL,AUTHORITY_KEY_IDENTIFIER);
+    }
+ catch (    AnnotatedException e) {
+      throw new AnnotatedException("Authority key identifier extension could not be extracted from complete CRL.",e);
+    }
+    DERObject deltaKeyIdentifier=null;
+    try {
+      deltaKeyIdentifier=CertPathValidatorUtilities.getExtensionValue(deltaCRL,AUTHORITY_KEY_IDENTIFIER);
+    }
+ catch (    AnnotatedException e) {
+      throw new AnnotatedException("Authority key identifier extension could not be extracted from delta CRL.",e);
+    }
+    if (completeKeyIdentifier == null) {
+      throw new AnnotatedException("CRL authority key identifier is null.");
+    }
+    if (deltaKeyIdentifier == null) {
+      throw new AnnotatedException("Delta CRL authority key identifier is null.");
+    }
+    if (!completeKeyIdentifier.equals(deltaKeyIdentifier)) {
+      throw new AnnotatedException("Delta CRL authority key identifier does not match complete CRL authority key identifier.");
+    }
+  }
+}

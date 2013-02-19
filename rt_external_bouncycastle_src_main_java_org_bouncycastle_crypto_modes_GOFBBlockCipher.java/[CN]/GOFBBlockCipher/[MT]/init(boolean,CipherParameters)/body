@@ -1,0 +1,24 @@
+{
+  firstStep=true;
+  N3=0;
+  N4=0;
+  if (params instanceof ParametersWithIV) {
+    ParametersWithIV ivParam=(ParametersWithIV)params;
+    byte[] iv=ivParam.getIV();
+    if (iv.length < IV.length) {
+      System.arraycopy(iv,0,IV,IV.length - iv.length,iv.length);
+      for (int i=0; i < IV.length - iv.length; i++) {
+        IV[i]=0;
+      }
+    }
+ else {
+      System.arraycopy(iv,0,IV,0,IV.length);
+    }
+    reset();
+    cipher.init(true,ivParam.getParameters());
+  }
+ else {
+    reset();
+    cipher.init(true,params);
+  }
+}

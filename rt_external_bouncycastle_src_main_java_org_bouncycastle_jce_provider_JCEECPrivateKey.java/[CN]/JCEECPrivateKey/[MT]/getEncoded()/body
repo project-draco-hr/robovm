@@ -1,0 +1,30 @@
+{
+  X962Parameters params;
+  if (ecSpec instanceof ECNamedCurveSpec) {
+    DERObjectIdentifier curveOid=ECUtil.getNamedCurveOid(((ECNamedCurveSpec)ecSpec).getName());
+    if (curveOid == null) {
+      curveOid=new DERObjectIdentifier(((ECNamedCurveSpec)ecSpec).getName());
+    }
+    params=new X962Parameters(curveOid);
+  }
+ else   if (ecSpec == null) {
+    params=new X962Parameters(DERNull.INSTANCE);
+  }
+ else {
+    ECCurve curve=EC5Util.convertCurve(ecSpec.getCurve());
+    X9ECParameters ecP=new X9ECParameters(curve,EC5Util.convertPoint(curve,ecSpec.getGenerator(),withCompression),ecSpec.getOrder(),BigInteger.valueOf(ecSpec.getCofactor()),ecSpec.getCurve().getSeed());
+    params=new X962Parameters(ecP);
+  }
+  PrivateKeyInfo info;
+  ECPrivateKeyStructure keyStructure;
+  if (publicKey != null) {
+    keyStructure=new ECPrivateKeyStructure(this.getS(),publicKey,params);
+  }
+ else {
+    keyStructure=new ECPrivateKeyStructure(this.getS(),params);
+  }
+{
+    info=new PrivateKeyInfo(new AlgorithmIdentifier(X9ObjectIdentifiers.id_ecPublicKey,params.getDERObject()),keyStructure.getDERObject());
+  }
+  return info.getDEREncoded();
+}

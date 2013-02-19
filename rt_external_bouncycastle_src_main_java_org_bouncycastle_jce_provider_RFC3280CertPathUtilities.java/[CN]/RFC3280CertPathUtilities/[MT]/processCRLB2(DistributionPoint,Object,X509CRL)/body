@@ -1,0 +1,110 @@
+{
+  IssuingDistributionPoint idp=null;
+  try {
+    idp=IssuingDistributionPoint.getInstance(CertPathValidatorUtilities.getExtensionValue(crl,RFC3280CertPathUtilities.ISSUING_DISTRIBUTION_POINT));
+  }
+ catch (  Exception e) {
+    throw new AnnotatedException("Issuing distribution point extension could not be decoded.",e);
+  }
+  if (idp != null) {
+    if (idp.getDistributionPoint() != null) {
+      DistributionPointName dpName=IssuingDistributionPoint.getInstance(idp).getDistributionPoint();
+      List names=new ArrayList();
+      if (dpName.getType() == DistributionPointName.FULL_NAME) {
+        GeneralName[] genNames=GeneralNames.getInstance(dpName.getName()).getNames();
+        for (int j=0; j < genNames.length; j++) {
+          names.add(genNames[j]);
+        }
+      }
+      if (dpName.getType() == DistributionPointName.NAME_RELATIVE_TO_CRL_ISSUER) {
+        ASN1EncodableVector vec=new ASN1EncodableVector();
+        try {
+          Enumeration e=ASN1Sequence.getInstance(ASN1Sequence.fromByteArray(CertPathValidatorUtilities.getIssuerPrincipal(crl).getEncoded())).getObjects();
+          while (e.hasMoreElements()) {
+            vec.add((DEREncodable)e.nextElement());
+          }
+        }
+ catch (        IOException e) {
+          throw new AnnotatedException("Could not read CRL issuer.",e);
+        }
+        vec.add(dpName.getName());
+        names.add(new GeneralName(X509Name.getInstance(new DERSequence(vec))));
+      }
+      boolean matches=false;
+      if (dp.getDistributionPoint() != null) {
+        dpName=dp.getDistributionPoint();
+        GeneralName[] genNames=null;
+        if (dpName.getType() == DistributionPointName.FULL_NAME) {
+          genNames=GeneralNames.getInstance(dpName.getName()).getNames();
+        }
+        if (dpName.getType() == DistributionPointName.NAME_RELATIVE_TO_CRL_ISSUER) {
+          if (dp.getCRLIssuer() != null) {
+            genNames=dp.getCRLIssuer().getNames();
+          }
+ else {
+            genNames=new GeneralName[1];
+            try {
+              genNames[0]=new GeneralName(new X509Name((ASN1Sequence)ASN1Sequence.fromByteArray(CertPathValidatorUtilities.getEncodedIssuerPrincipal(cert).getEncoded())));
+            }
+ catch (            IOException e) {
+              throw new AnnotatedException("Could not read certificate issuer.",e);
+            }
+          }
+          for (int j=0; j < genNames.length; j++) {
+            Enumeration e=ASN1Sequence.getInstance(genNames[j].getName().getDERObject()).getObjects();
+            ASN1EncodableVector vec=new ASN1EncodableVector();
+            while (e.hasMoreElements()) {
+              vec.add((DEREncodable)e.nextElement());
+            }
+            vec.add(dpName.getName());
+            genNames[j]=new GeneralName(new X509Name(new DERSequence(vec)));
+          }
+        }
+        if (genNames != null) {
+          for (int j=0; j < genNames.length; j++) {
+            if (names.contains(genNames[j])) {
+              matches=true;
+              break;
+            }
+          }
+        }
+        if (!matches) {
+          throw new AnnotatedException("No match for certificate CRL issuing distribution point name to cRLIssuer CRL distribution point.");
+        }
+      }
+ else {
+        if (dp.getCRLIssuer() == null) {
+          throw new AnnotatedException("Either the cRLIssuer or the distributionPoint field must " + "be contained in DistributionPoint.");
+        }
+        GeneralName[] genNames=dp.getCRLIssuer().getNames();
+        for (int j=0; j < genNames.length; j++) {
+          if (names.contains(genNames[j])) {
+            matches=true;
+            break;
+          }
+        }
+        if (!matches) {
+          throw new AnnotatedException("No match for certificate CRL issuing distribution point name to cRLIssuer CRL distribution point.");
+        }
+      }
+    }
+    BasicConstraints bc=null;
+    try {
+      bc=BasicConstraints.getInstance(CertPathValidatorUtilities.getExtensionValue((X509Extension)cert,BASIC_CONSTRAINTS));
+    }
+ catch (    Exception e) {
+      throw new AnnotatedException("Basic constraints extension could not be decoded.",e);
+    }
+    if (cert instanceof X509Certificate) {
+      if (idp.onlyContainsUserCerts() && (bc != null && bc.isCA())) {
+        throw new AnnotatedException("CA Cert CRL only contains user certificates.");
+      }
+      if (idp.onlyContainsCACerts() && (bc == null || !bc.isCA())) {
+        throw new AnnotatedException("End CRL only contains CA certificates.");
+      }
+    }
+    if (idp.onlyContainsAttributeCerts()) {
+      throw new AnnotatedException("onlyContainsAttributeCerts boolean is asserted.");
+    }
+  }
+}

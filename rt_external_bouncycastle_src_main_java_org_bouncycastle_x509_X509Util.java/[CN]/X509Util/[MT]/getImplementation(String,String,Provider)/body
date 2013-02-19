@@ -1,0 +1,28 @@
+{
+  algorithm=Strings.toUpperCase(algorithm);
+  String alias;
+  while ((alias=prov.getProperty("Alg.Alias." + baseName + "."+ algorithm)) != null) {
+    algorithm=alias;
+  }
+  String className=prov.getProperty(baseName + "." + algorithm);
+  if (className != null) {
+    try {
+      Class cls;
+      ClassLoader clsLoader=prov.getClass().getClassLoader();
+      if (clsLoader != null) {
+        cls=clsLoader.loadClass(className);
+      }
+ else {
+        cls=Class.forName(className);
+      }
+      return new Implementation(cls.newInstance(),prov);
+    }
+ catch (    ClassNotFoundException e) {
+      throw new IllegalStateException("algorithm " + algorithm + " in provider "+ prov.getName()+ " but no class \""+ className+ "\" found!");
+    }
+catch (    Exception e) {
+      throw new IllegalStateException("algorithm " + algorithm + " in provider "+ prov.getName()+ " but class \""+ className+ "\" inaccessible!");
+    }
+  }
+  throw new NoSuchAlgorithmException("cannot find implementation " + algorithm + " for provider "+ prov.getName());
+}

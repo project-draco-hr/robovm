@@ -1,0 +1,73 @@
+{
+  if (tbvPath.contains(tbvCert)) {
+    return null;
+  }
+  if (pkixParams.getExcludedCerts().contains(tbvCert)) {
+    return null;
+  }
+  if (pkixParams.getMaxPathLength() != -1) {
+    if (tbvPath.size() - 1 > pkixParams.getMaxPathLength()) {
+      return null;
+    }
+  }
+  tbvPath.add(tbvCert);
+  CertificateFactory cFact;
+  CertPathValidator validator;
+  CertPathBuilderResult builderResult=null;
+  try {
+    cFact=CertificateFactory.getInstance("X.509",BouncyCastleProvider.PROVIDER_NAME);
+    validator=CertPathValidator.getInstance("PKIX",BouncyCastleProvider.PROVIDER_NAME);
+  }
+ catch (  Exception e) {
+    throw new RuntimeException("Exception creating support classes.");
+  }
+  try {
+    if (CertPathValidatorUtilities.findTrustAnchor(tbvCert,pkixParams.getTrustAnchors(),pkixParams.getSigProvider()) != null) {
+      CertPath certPath=null;
+      PKIXCertPathValidatorResult result=null;
+      try {
+        certPath=cFact.generateCertPath(tbvPath);
+      }
+ catch (      Exception e) {
+        throw new AnnotatedException("Certification path could not be constructed from certificate list.",e);
+      }
+      try {
+        result=(PKIXCertPathValidatorResult)validator.validate(certPath,pkixParams);
+      }
+ catch (      Exception e) {
+        throw new AnnotatedException("Certification path could not be validated.",e);
+      }
+      return new PKIXCertPathBuilderResult(certPath,result.getTrustAnchor(),result.getPolicyTree(),result.getPublicKey());
+    }
+ else {
+      try {
+        CertPathValidatorUtilities.addAdditionalStoresFromAltNames(tbvCert,pkixParams);
+      }
+ catch (      CertificateParsingException e) {
+        throw new AnnotatedException("No additiontal X.509 stores can be added from certificate locations.",e);
+      }
+      Collection issuers=new HashSet();
+      try {
+        issuers.addAll(CertPathValidatorUtilities.findIssuerCerts(tbvCert,pkixParams));
+      }
+ catch (      AnnotatedException e) {
+        throw new AnnotatedException("Cannot find issuer certificate for certificate in certification path.",e);
+      }
+      if (issuers.isEmpty()) {
+        throw new AnnotatedException("No issuer certificate for certificate in certification path found.");
+      }
+      Iterator it=issuers.iterator();
+      while (it.hasNext() && builderResult == null) {
+        X509Certificate issuer=(X509Certificate)it.next();
+        builderResult=build(issuer,pkixParams,tbvPath);
+      }
+    }
+  }
+ catch (  AnnotatedException e) {
+    certPathException=e;
+  }
+  if (builderResult == null) {
+    tbvPath.remove(tbvCert);
+  }
+  return builderResult;
+}

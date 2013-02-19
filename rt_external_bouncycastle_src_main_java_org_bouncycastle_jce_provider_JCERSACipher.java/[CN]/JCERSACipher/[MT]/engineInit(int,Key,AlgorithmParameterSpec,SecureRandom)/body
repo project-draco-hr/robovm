@@ -1,0 +1,63 @@
+{
+  CipherParameters param;
+  if (params == null || params instanceof OAEPParameterSpec) {
+    if (key instanceof RSAPublicKey) {
+      if (privateKeyOnly) {
+        throw new InvalidKeyException("mode 1 requires RSAPrivateKey");
+      }
+      param=RSAUtil.generatePublicKeyParameter((RSAPublicKey)key);
+    }
+ else     if (key instanceof RSAPrivateKey) {
+      if (publicKeyOnly) {
+        throw new InvalidKeyException("mode 2 requires RSAPublicKey");
+      }
+      param=RSAUtil.generatePrivateKeyParameter((RSAPrivateKey)key);
+    }
+ else {
+      throw new InvalidKeyException("unknown key type passed to RSA");
+    }
+    if (params != null) {
+      OAEPParameterSpec spec=(OAEPParameterSpec)params;
+      paramSpec=params;
+      if (!spec.getMGFAlgorithm().equalsIgnoreCase("MGF1") && !spec.getMGFAlgorithm().equals(PKCSObjectIdentifiers.id_mgf1.getId())) {
+        throw new InvalidAlgorithmParameterException("unknown mask generation function specified");
+      }
+      if (!(spec.getMGFParameters() instanceof MGF1ParameterSpec)) {
+        throw new InvalidAlgorithmParameterException("unkown MGF parameters");
+      }
+      Digest digest=JCEDigestUtil.getDigest(spec.getDigestAlgorithm());
+      if (digest == null) {
+        throw new InvalidAlgorithmParameterException("no match on digest algorithm: " + spec.getDigestAlgorithm());
+      }
+      MGF1ParameterSpec mgfParams=(MGF1ParameterSpec)spec.getMGFParameters();
+      Digest mgfDigest=JCEDigestUtil.getDigest(mgfParams.getDigestAlgorithm());
+      if (mgfDigest == null) {
+        throw new InvalidAlgorithmParameterException("no match on MGF digest algorithm: " + mgfParams.getDigestAlgorithm());
+      }
+      cipher=new OAEPEncoding(new RSABlindedEngine(),digest,mgfDigest,((PSource.PSpecified)spec.getPSource()).getValue());
+    }
+  }
+ else {
+    throw new IllegalArgumentException("unknown parameter type.");
+  }
+  if (!(cipher instanceof RSABlindedEngine)) {
+    if (random != null) {
+      param=new ParametersWithRandom(param,random);
+    }
+ else {
+      param=new ParametersWithRandom(param,new SecureRandom());
+    }
+  }
+switch (opmode) {
+case Cipher.ENCRYPT_MODE:
+case Cipher.WRAP_MODE:
+    cipher.init(true,param);
+  break;
+case Cipher.DECRYPT_MODE:
+case Cipher.UNWRAP_MODE:
+cipher.init(false,param);
+break;
+default :
+throw new InvalidParameterException("unknown opmode " + opmode + " passed to RSA");
+}
+}

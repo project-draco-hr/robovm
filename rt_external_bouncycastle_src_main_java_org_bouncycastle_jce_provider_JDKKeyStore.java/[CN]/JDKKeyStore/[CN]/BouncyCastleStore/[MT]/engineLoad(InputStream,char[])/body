@@ -1,0 +1,42 @@
+{
+  table.clear();
+  if (stream == null) {
+    return;
+  }
+  DataInputStream dIn=new DataInputStream(stream);
+  int version=dIn.readInt();
+  if (version != STORE_VERSION) {
+    if (version != 0) {
+      throw new IOException("Wrong version of key store.");
+    }
+  }
+  byte[] salt=new byte[dIn.readInt()];
+  if (salt.length != STORE_SALT_SIZE) {
+    throw new IOException("Key store corrupted.");
+  }
+  dIn.readFully(salt);
+  int iterationCount=dIn.readInt();
+  if ((iterationCount < 0) || (iterationCount > 4 * MIN_ITERATIONS)) {
+    throw new IOException("Key store corrupted.");
+  }
+  String cipherAlg;
+  if (version == 0) {
+    cipherAlg="Old" + STORE_CIPHER;
+  }
+ else {
+    cipherAlg=STORE_CIPHER;
+  }
+  Cipher cipher=this.makePBECipher(cipherAlg,Cipher.DECRYPT_MODE,password,salt,iterationCount);
+  CipherInputStream cIn=new CipherInputStream(dIn,cipher);
+  Digest dig=new OpenSSLDigest.SHA1();
+  DigestInputStream dgIn=new DigestInputStream(cIn,dig);
+  this.loadStore(dgIn);
+  byte[] hash=new byte[dig.getDigestSize()];
+  dig.doFinal(hash,0);
+  byte[] oldHash=new byte[dig.getDigestSize()];
+  Streams.readFully(cIn,oldHash);
+  if (!Arrays.constantTimeAreEqual(hash,oldHash)) {
+    table.clear();
+    throw new IOException("KeyStore integrity check failed.");
+  }
+}

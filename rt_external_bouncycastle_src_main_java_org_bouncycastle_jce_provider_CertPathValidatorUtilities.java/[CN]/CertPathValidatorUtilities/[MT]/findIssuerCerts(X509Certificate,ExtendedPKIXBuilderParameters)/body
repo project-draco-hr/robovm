@@ -1,0 +1,27 @@
+{
+  X509CertStoreSelector certSelect=new X509CertStoreSelector();
+  Set certs=new HashSet();
+  try {
+    certSelect.setSubject(cert.getIssuerX500Principal().getEncoded());
+  }
+ catch (  IOException ex) {
+    throw new AnnotatedException("Subject criteria for certificate selector to find issuer certificate could not be set.",ex);
+  }
+  Iterator iter;
+  try {
+    List matches=new ArrayList();
+    matches.addAll(CertPathValidatorUtilities.findCertificates(certSelect,pkixParams.getCertStores()));
+    matches.addAll(CertPathValidatorUtilities.findCertificates(certSelect,pkixParams.getStores()));
+    matches.addAll(CertPathValidatorUtilities.findCertificates(certSelect,pkixParams.getAdditionalStores()));
+    iter=matches.iterator();
+  }
+ catch (  AnnotatedException e) {
+    throw new AnnotatedException("Issuer certificate cannot be searched.",e);
+  }
+  X509Certificate issuer=null;
+  while (iter.hasNext()) {
+    issuer=(X509Certificate)iter.next();
+    certs.add(issuer);
+  }
+  return certs;
+}

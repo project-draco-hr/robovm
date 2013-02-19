@@ -1,0 +1,61 @@
+{
+  List certs=certPath.getCertificates();
+  X509Certificate cert=(X509Certificate)certs.get(index);
+  int n=certs.size();
+  int i=n - index;
+  if (!(CertPathValidatorUtilities.isSelfIssued(cert) && (i < n))) {
+    X500Principal principal=CertPathValidatorUtilities.getSubjectPrincipal(cert);
+    ASN1InputStream aIn=new ASN1InputStream(principal.getEncoded());
+    ASN1Sequence dns;
+    try {
+      dns=DERSequence.getInstance(aIn.readObject());
+    }
+ catch (    Exception e) {
+      throw new CertPathValidatorException("Exception extracting subject name when checking subtrees.",e,certPath,index);
+    }
+    try {
+      nameConstraintValidator.checkPermittedDN(dns);
+      nameConstraintValidator.checkExcludedDN(dns);
+    }
+ catch (    PKIXNameConstraintValidatorException e) {
+      throw new CertPathValidatorException("Subtree check for certificate subject failed.",e,certPath,index);
+    }
+    GeneralNames altName=null;
+    try {
+      altName=GeneralNames.getInstance(CertPathValidatorUtilities.getExtensionValue(cert,RFC3280CertPathUtilities.SUBJECT_ALTERNATIVE_NAME));
+    }
+ catch (    Exception e) {
+      throw new CertPathValidatorException("Subject alternative name extension could not be decoded.",e,certPath,index);
+    }
+    Vector emails=new X509Name(dns).getValues(X509Name.EmailAddress);
+    for (Enumeration e=emails.elements(); e.hasMoreElements(); ) {
+      String email=(String)e.nextElement();
+      GeneralName emailAsGeneralName=new GeneralName(GeneralName.rfc822Name,email);
+      try {
+        nameConstraintValidator.checkPermitted(emailAsGeneralName);
+        nameConstraintValidator.checkExcluded(emailAsGeneralName);
+      }
+ catch (      PKIXNameConstraintValidatorException ex) {
+        throw new CertPathValidatorException("Subtree check for certificate subject alternative email failed.",ex,certPath,index);
+      }
+    }
+    if (altName != null) {
+      GeneralName[] genNames=null;
+      try {
+        genNames=altName.getNames();
+      }
+ catch (      Exception e) {
+        throw new CertPathValidatorException("Subject alternative name contents could not be decoded.",e,certPath,index);
+      }
+      for (int j=0; j < genNames.length; j++) {
+        try {
+          nameConstraintValidator.checkPermitted(genNames[j]);
+          nameConstraintValidator.checkExcluded(genNames[j]);
+        }
+ catch (        PKIXNameConstraintValidatorException e) {
+          throw new CertPathValidatorException("Subtree check for certificate subject alternative name failed.",e,certPath,index);
+        }
+      }
+    }
+  }
+}

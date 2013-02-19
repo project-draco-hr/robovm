@@ -1,0 +1,64 @@
+{
+  if (alias == null) {
+    throw new IllegalArgumentException("null alias passed to getCertificateChain.");
+  }
+  if (!engineIsKeyEntry(alias)) {
+    return null;
+  }
+  Certificate c=engineGetCertificate(alias);
+  if (c != null) {
+    Vector cs=new Vector();
+    while (c != null) {
+      X509Certificate x509c=(X509Certificate)c;
+      Certificate nextC=null;
+      byte[] bytes=x509c.getExtensionValue(X509Extensions.AuthorityKeyIdentifier.getId());
+      if (bytes != null) {
+        try {
+          ASN1InputStream aIn=new ASN1InputStream(bytes);
+          byte[] authBytes=((ASN1OctetString)aIn.readObject()).getOctets();
+          aIn=new ASN1InputStream(authBytes);
+          AuthorityKeyIdentifier id=new AuthorityKeyIdentifier((ASN1Sequence)aIn.readObject());
+          if (id.getKeyIdentifier() != null) {
+            nextC=(Certificate)chainCerts.get(new CertId(id.getKeyIdentifier()));
+          }
+        }
+ catch (        IOException e) {
+          throw new RuntimeException(e.toString());
+        }
+      }
+      if (nextC == null) {
+        Principal i=x509c.getIssuerDN();
+        Principal s=x509c.getSubjectDN();
+        if (!i.equals(s)) {
+          Enumeration e=chainCerts.keys();
+          while (e.hasMoreElements()) {
+            X509Certificate crt=(X509Certificate)chainCerts.get(e.nextElement());
+            Principal sub=crt.getSubjectDN();
+            if (sub.equals(i)) {
+              try {
+                x509c.verify(crt.getPublicKey());
+                nextC=crt;
+                break;
+              }
+ catch (              Exception ex) {
+              }
+            }
+          }
+        }
+      }
+      cs.addElement(c);
+      if (nextC != c) {
+        c=nextC;
+      }
+ else {
+        c=null;
+      }
+    }
+    Certificate[] certChain=new Certificate[cs.size()];
+    for (int i=0; i != certChain.length; i++) {
+      certChain[i]=(Certificate)cs.elementAt(i);
+    }
+    return certChain;
+  }
+  return null;
+}

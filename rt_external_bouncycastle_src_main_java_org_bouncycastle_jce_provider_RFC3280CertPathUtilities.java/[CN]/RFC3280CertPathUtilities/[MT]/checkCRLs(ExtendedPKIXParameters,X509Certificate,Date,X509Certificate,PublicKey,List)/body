@@ -1,0 +1,75 @@
+{
+  AnnotatedException lastException=null;
+  CRLDistPoint crldp=null;
+  try {
+    crldp=CRLDistPoint.getInstance(CertPathValidatorUtilities.getExtensionValue(cert,RFC3280CertPathUtilities.CRL_DISTRIBUTION_POINTS));
+  }
+ catch (  Exception e) {
+    throw new AnnotatedException("CRL distribution point extension could not be read.",e);
+  }
+  try {
+    CertPathValidatorUtilities.addAdditionalStoresFromCRLDistributionPoint(crldp,paramsPKIX);
+  }
+ catch (  AnnotatedException e) {
+    throw new AnnotatedException("No additional CRL locations could be decoded from CRL distribution point extension.",e);
+  }
+  CertStatus certStatus=new CertStatus();
+  ReasonsMask reasonsMask=new ReasonsMask();
+  boolean validCrlFound=false;
+  if (crldp != null) {
+    DistributionPoint dps[]=null;
+    try {
+      dps=crldp.getDistributionPoints();
+    }
+ catch (    Exception e) {
+      throw new AnnotatedException("Distribution points could not be read.",e);
+    }
+    if (dps != null) {
+      for (int i=0; i < dps.length && certStatus.getCertStatus() == CertStatus.UNREVOKED && !reasonsMask.isAllReasons(); i++) {
+        ExtendedPKIXParameters paramsPKIXClone=(ExtendedPKIXParameters)paramsPKIX.clone();
+        try {
+          checkCRL(dps[i],paramsPKIXClone,cert,validDate,sign,workingPublicKey,certStatus,reasonsMask,certPathCerts);
+          validCrlFound=true;
+        }
+ catch (        AnnotatedException e) {
+          lastException=e;
+        }
+      }
+    }
+  }
+  if (certStatus.getCertStatus() == CertStatus.UNREVOKED && !reasonsMask.isAllReasons()) {
+    try {
+      DERObject issuer=null;
+      try {
+        issuer=new ASN1InputStream(CertPathValidatorUtilities.getEncodedIssuerPrincipal(cert).getEncoded()).readObject();
+      }
+ catch (      Exception e) {
+        throw new AnnotatedException("Issuer from certificate for CRL could not be reencoded.",e);
+      }
+      DistributionPoint dp=new DistributionPoint(new DistributionPointName(0,new GeneralNames(new GeneralName(GeneralName.directoryName,issuer))),null,null);
+      ExtendedPKIXParameters paramsPKIXClone=(ExtendedPKIXParameters)paramsPKIX.clone();
+      checkCRL(dp,paramsPKIXClone,cert,validDate,sign,workingPublicKey,certStatus,reasonsMask,certPathCerts);
+      validCrlFound=true;
+    }
+ catch (    AnnotatedException e) {
+      lastException=e;
+    }
+  }
+  if (!validCrlFound) {
+    if (lastException instanceof AnnotatedException) {
+      throw lastException;
+    }
+    throw new AnnotatedException("No valid CRL found.",lastException);
+  }
+  if (certStatus.getCertStatus() != CertStatus.UNREVOKED) {
+    String message="Certificate revocation after " + certStatus.getRevocationDate();
+    message+=", reason: " + crlReasons[certStatus.getCertStatus()];
+    throw new AnnotatedException(message);
+  }
+  if (!reasonsMask.isAllReasons() && certStatus.getCertStatus() == CertStatus.UNREVOKED) {
+    certStatus.setCertStatus(CertStatus.UNDETERMINED);
+  }
+  if (certStatus.getCertStatus() == CertStatus.UNDETERMINED) {
+    throw new AnnotatedException("Certificate status could not be determined.");
+  }
+}

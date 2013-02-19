@@ -1,0 +1,22 @@
+{
+  if (value.length() != 0 && value.charAt(0) == '#') {
+    try {
+      return IETFUtils.valueFromHexString(value,1);
+    }
+ catch (    IOException e) {
+      throw new RuntimeException("can't recode value for oid " + oid.getId());
+    }
+  }
+ else {
+    if (value.length() != 0 && value.charAt(0) == '\\') {
+      value=value.substring(1);
+    }
+    if (oid.equals(dc)) {
+      return new DERIA5String(value);
+    }
+ else     if (oid.equals(c) || oid.equals(serialNumber) || oid.equals(dnQualifier)|| oid.equals(telephoneNumber)) {
+      return new DERPrintableString(value);
+    }
+  }
+  return new DERUTF8String(value);
+}

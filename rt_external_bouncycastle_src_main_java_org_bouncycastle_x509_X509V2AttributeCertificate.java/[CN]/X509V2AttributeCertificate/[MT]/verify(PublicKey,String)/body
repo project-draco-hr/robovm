@@ -1,0 +1,17 @@
+{
+  Signature signature=null;
+  if (!cert.getSignatureAlgorithm().equals(cert.getAcinfo().getSignature())) {
+    throw new CertificateException("Signature algorithm in certificate info not same as outer certificate");
+  }
+  signature=Signature.getInstance(cert.getSignatureAlgorithm().getObjectId().getId(),provider);
+  signature.initVerify(key);
+  try {
+    signature.update(cert.getAcinfo().getEncoded());
+  }
+ catch (  IOException e) {
+    throw new SignatureException("Exception encoding certificate info object");
+  }
+  if (!signature.verify(this.getSignature())) {
+    throw new InvalidKeyException("Public key presented not for certificate signature");
+  }
+}

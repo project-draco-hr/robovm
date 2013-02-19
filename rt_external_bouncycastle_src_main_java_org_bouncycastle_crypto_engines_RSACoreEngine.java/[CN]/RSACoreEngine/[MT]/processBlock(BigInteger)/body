@@ -1,0 +1,22 @@
+{
+  if (key instanceof RSAPrivateCrtKeyParameters) {
+    RSAPrivateCrtKeyParameters crtKey=(RSAPrivateCrtKeyParameters)key;
+    BigInteger p=crtKey.getP();
+    BigInteger q=crtKey.getQ();
+    BigInteger dP=crtKey.getDP();
+    BigInteger dQ=crtKey.getDQ();
+    BigInteger qInv=crtKey.getQInv();
+    BigInteger mP, mQ, h, m;
+    mP=(input.remainder(p)).modPow(dP,p);
+    mQ=(input.remainder(q)).modPow(dQ,q);
+    h=mP.subtract(mQ);
+    h=h.multiply(qInv);
+    h=h.mod(p);
+    m=h.multiply(q);
+    m=m.add(mQ);
+    return m;
+  }
+ else {
+    return input.modPow(key.getExponent(),key.getModulus());
+  }
+}
