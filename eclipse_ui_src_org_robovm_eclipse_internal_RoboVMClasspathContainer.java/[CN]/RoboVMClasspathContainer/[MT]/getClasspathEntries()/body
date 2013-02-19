@@ -1,11 +1,12 @@
 {
-  File f=RoboVMPlugin.getRoboVMHome().getRtPath();
+  Config.Home home=RoboVMPlugin.getRoboVMHome();
+  File f=home.getRtPath();
   IPath sourceAttachment=null;
-  if (f.isFile()) {
+  if (!home.isDev()) {
     sourceAttachment=new Path(new File(f.getParentFile(),"robovm-rt-sources.jar").getAbsolutePath());
   }
  else {
-    sourceAttachment=new Path(new File(f.getParentFile().getParent(),"src/main/java").getAbsolutePath());
+    sourceAttachment=new Path(f.getAbsolutePath().replaceAll("\\.jar$","-sources.jar"));
   }
   return new IClasspathEntry[]{JavaCore.newLibraryEntry(new Path(f.getAbsolutePath()),sourceAttachment,new Path(""),new IAccessRule[]{},new IClasspathAttribute[]{},false)};
 }
