@@ -1,15 +1,23 @@
 {
   arraycopyCheckBounds(src.length,srcPos,dst.length,dstPos,length);
   if (length > 0) {
-    if (src != dst || srcPos > dstPos || srcPos + length <= dstPos) {
-      for (int i=0; i < length; ++i) {
-        dst[dstPos + i]=src[srcPos + i];
+    int i=0;
+    try {
+      if (src != dst || srcPos > dstPos || srcPos + length <= dstPos) {
+        for (i=0; i < length; ++i) {
+          dst[dstPos + i]=src[srcPos + i];
+        }
+      }
+ else {
+        for (i=length - 1; i >= 0; --i) {
+          dst[dstPos + i]=src[srcPos + i];
+        }
       }
     }
- else {
-      for (int i=length - 1; i >= 0; --i) {
-        dst[dstPos + i]=src[srcPos + i];
-      }
+ catch (    ArrayStoreException e) {
+      Class<?> srcElemClass=src[i + srcPos].getClass();
+      String srcElemTypeName=srcElemClass.isArray() ? srcElemClass.getCanonicalName() : srcElemClass.getName();
+      throw new ArrayStoreException(String.format("source[%d] of type %s cannot be stored in destination array of type %s",i + srcPos,srcElemTypeName,dst.getClass().getCanonicalName()));
     }
   }
 }
