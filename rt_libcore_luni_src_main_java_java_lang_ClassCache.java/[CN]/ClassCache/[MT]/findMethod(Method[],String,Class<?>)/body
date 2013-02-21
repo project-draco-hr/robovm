@@ -1,8 +1,32 @@
 {
+  Method firstMatch=null;
+  List<Method> allMatches=null;
   for (  Method m : candidates) {
     if (name.equals(m.getName()) && R.matchParameterTypes(m,parameterTypes)) {
-      return m;
+      if (firstMatch == null) {
+        firstMatch=m;
+      }
+ else {
+        if (allMatches == null) {
+          allMatches=new ArrayList<Method>();
+          allMatches.add(firstMatch);
+        }
+        allMatches.add(m);
+      }
     }
   }
-  throw new NoSuchMethodException(clazz.getName() + "." + name+ '('+ parameterTypesToString(parameterTypes)+ ')');
+  if (firstMatch == null) {
+    throw new NoSuchMethodException(clazz.getName() + "." + name+ '('+ parameterTypesToString(parameterTypes)+ ')');
+  }
+  if (allMatches == null) {
+    return firstMatch;
+  }
+  Method result=null;
+  for (  Method m : allMatches) {
+    if (!m.isSynthetic()) {
+      return m;
+    }
+    result=m;
+  }
+  return result;
 }
