@@ -1,0 +1,28 @@
+{
+  if (intrans) {
+    throw new SQLException("incomplete transaction");
+  }
+  if (ro != readonly) {
+    DatabaseX dbx=null;
+    try {
+      dbx=open(ro);
+      db.close();
+      db=dbx;
+      dbx=null;
+      readonly=ro;
+    }
+ catch (    SQLException e) {
+      throw e;
+    }
+catch (    SQLite.Exception ee) {
+      if (dbx != null) {
+        try {
+          dbx.close();
+        }
+ catch (        SQLite.Exception eee) {
+        }
+      }
+      throw new SQLException(ee.toString());
+    }
+  }
+}

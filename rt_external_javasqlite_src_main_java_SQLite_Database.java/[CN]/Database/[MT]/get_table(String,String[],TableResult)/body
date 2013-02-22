@@ -1,0 +1,29 @@
+{
+  tbl.clear();
+  if (!is3()) {
+    try {
+      exec(sql,tbl,args);
+    }
+ catch (    SQLite.Exception e) {
+      if (tbl.maxrows <= 0 || !tbl.atmaxrows) {
+        throw e;
+      }
+    }
+  }
+ else {
+synchronized (this) {
+      Vm vm=compile(sql,args);
+      if (tbl.maxrows > 0) {
+        while (tbl.nrows < tbl.maxrows && vm.step(tbl)) {
+          set_last_error(vm.error_code);
+        }
+      }
+ else {
+        while (vm.step(tbl)) {
+          set_last_error(vm.error_code);
+        }
+      }
+      vm.finalize();
+    }
+  }
+}

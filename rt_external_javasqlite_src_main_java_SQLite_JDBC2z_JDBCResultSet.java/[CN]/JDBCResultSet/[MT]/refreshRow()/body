@@ -1,0 +1,43 @@
+{
+  isUpdatable();
+  if (oninsrow) {
+    throw new SQLException("cursor on insert row");
+  }
+  if (updatable < UPD_INSUPDDEL) {
+    throw new SQLException("no primary key on table defined");
+  }
+  JDBCResultSetMetaData m=(JDBCResultSetMetaData)getMetaData();
+  String rd[]=(String[])tr.rows.elementAt(row);
+  StringBuffer sb=new StringBuffer();
+  sb.append("SELECT ");
+  for (int i=0; i < tr.ncolumns; i++) {
+    sb.append(SQLite.Shell.sql_quote_dbl(m.getColumnName(i + 1)));
+    if (i < tr.ncolumns - 1) {
+      sb.append(",");
+    }
+  }
+  sb.append(" FROM ");
+  sb.append(SQLite.Shell.sql_quote_dbl(uptable));
+  sb.append(" WHERE ");
+  String args[]=new String[pkcols.length];
+  for (int i=0; i < pkcols.length; i++) {
+    sb.append(SQLite.Shell.sql_quote_dbl(pkcols[i]));
+    sb.append(" = " + (nullrepl ? "'%q'" : "%Q"));
+    if (i < pkcols.length - 1) {
+      sb.append(" AND ");
+    }
+    args[i]=rd[pkcoli[i]];
+  }
+  SQLite.TableResult trnew=null;
+  try {
+    trnew=this.s.conn.db.get_table(sb.toString(),args);
+  }
+ catch (  SQLite.Exception e) {
+    throw new SQLException(e.getMessage());
+  }
+  if (trnew.nrows != 1) {
+    throw new SQLException("wrong size of result set");
+  }
+  rowbuf=null;
+  tr.rows.setElementAt(trnew.rows.elementAt(0),row);
+}

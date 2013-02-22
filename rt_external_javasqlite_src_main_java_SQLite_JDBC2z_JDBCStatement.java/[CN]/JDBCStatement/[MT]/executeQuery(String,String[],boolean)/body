@@ -1,0 +1,71 @@
+{
+  SQLite.TableResult tr=null;
+  if (rs != null) {
+    rs.close();
+    rs=null;
+  }
+  updcnt=-1;
+  if (conn == null || conn.db == null) {
+    throw new SQLException("stale connection");
+  }
+  int busy=0;
+  boolean starttrans=!conn.autocommit && !conn.intrans;
+  while (true) {
+    try {
+      if (starttrans) {
+        conn.db.exec("BEGIN TRANSACTION",null);
+        conn.intrans=true;
+      }
+      if (args == null) {
+        if (updonly) {
+          conn.db.exec(sql,null);
+        }
+ else {
+          tr=conn.db.get_table(sql,maxrows);
+        }
+      }
+ else {
+        if (updonly) {
+          conn.db.exec(sql,null,args);
+        }
+ else {
+          tr=conn.db.get_table(sql,maxrows,args);
+        }
+      }
+      updcnt=(int)conn.db.changes();
+    }
+ catch (    SQLite.Exception e) {
+      if (conn.db.is3() && conn.db.last_error() == SQLite.Constants.SQLITE_BUSY && conn.busy3(conn.db,++busy)) {
+        try {
+          if (starttrans && conn.intrans) {
+            conn.db.exec("ROLLBACK",null);
+            conn.intrans=false;
+          }
+        }
+ catch (        SQLite.Exception ee) {
+        }
+        try {
+          int ms=20 + busy * 10;
+          if (ms > 1000) {
+            ms=1000;
+          }
+synchronized (this) {
+            this.wait(ms);
+          }
+        }
+ catch (        java.lang.Exception eee) {
+        }
+        continue;
+      }
+      throw new SQLException(e.toString());
+    }
+    break;
+  }
+  if (!updonly && tr == null) {
+    throw new SQLException("no result set produced");
+  }
+  if (!updonly && tr != null) {
+    rs=new JDBCResultSet(new TableResultX(tr),this);
+  }
+  return rs;
+}

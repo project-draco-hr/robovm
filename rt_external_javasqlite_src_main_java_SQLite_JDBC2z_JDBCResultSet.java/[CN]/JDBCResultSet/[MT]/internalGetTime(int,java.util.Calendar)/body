@@ -1,0 +1,29 @@
+{
+  if (tr == null || columnIndex < 1 || columnIndex > tr.ncolumns) {
+    throw new SQLException("column " + columnIndex + " not found");
+  }
+  String rd[]=(String[])tr.rows.elementAt(row);
+  lastg=rd[columnIndex - 1];
+  try {
+    if (s.conn.useJulian) {
+      try {
+        return new java.sql.Time(SQLite.Database.long_from_julian(lastg));
+      }
+ catch (      java.lang.Exception ee) {
+        return java.sql.Time.valueOf(lastg);
+      }
+    }
+ else {
+      try {
+        return java.sql.Time.valueOf(lastg);
+      }
+ catch (      java.lang.Exception ee) {
+        return new java.sql.Time(SQLite.Database.long_from_julian(lastg));
+      }
+    }
+  }
+ catch (  java.lang.Exception e) {
+    lastg=null;
+  }
+  return null;
+}

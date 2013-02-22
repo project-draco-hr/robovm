@@ -1,0 +1,46 @@
+{
+  if (args.length != 3) {
+    return true;
+  }
+  s.pw.println(args[2] + ";");
+  if (args[1].compareTo("table") == 0) {
+    Shell s2=(Shell)s.clone();
+    s2.mode=Shell.MODE_Insert;
+    s2.set_table_name(args[0]);
+    String qargs[]=new String[1];
+    qargs[0]=args[0];
+    try {
+      if (s2.db.is3()) {
+        TableResult t=null;
+        t=s2.db.get_table("PRAGMA table_info('%q')",qargs);
+        String query;
+        if (t != null) {
+          StringBuffer sb=new StringBuffer();
+          String sep="";
+          sb.append("SELECT ");
+          for (int i=0; i < t.nrows; i++) {
+            String col=((String[])t.rows.elementAt(i))[1];
+            sb.append(sep + "quote(" + Shell.sql_quote_dbl(col)+ ")");
+            sep=",";
+          }
+          sb.append(" from '%q'");
+          query=sb.toString();
+          s2.mode=Shell.MODE_Insert2;
+        }
+ else {
+          query="SELECT * from '%q'";
+        }
+        s2.db.exec(query,s2,qargs);
+      }
+ else {
+        s2.db.exec("SELECT * from '%q'",s2,qargs);
+      }
+    }
+ catch (    Exception e) {
+      s.err.println("SQL Error: " + e);
+      s.err.flush();
+      return true;
+    }
+  }
+  return false;
+}

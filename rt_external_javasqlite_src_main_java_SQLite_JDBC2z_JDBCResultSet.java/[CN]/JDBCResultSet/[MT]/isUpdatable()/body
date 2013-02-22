@@ -1,0 +1,46 @@
+{
+  if (updatable == UPD_UNKNOWN) {
+    try {
+      JDBCResultSetMetaData m=(JDBCResultSetMetaData)getMetaData();
+      java.util.HashSet<String> h=new java.util.HashSet<String>();
+      String lastt=null;
+      for (int i=1; i <= tr.ncolumns; i++) {
+        lastt=m.getTableName(i);
+        h.add(lastt);
+      }
+      if (h.size() > 1 || lastt == null) {
+        updatable=UPD_NO;
+        throw new SQLException("view or join");
+      }
+      updatable=UPD_INS;
+      uptable=lastt;
+      JDBCResultSet pk=(JDBCResultSet)s.conn.getMetaData().getPrimaryKeys(null,null,uptable);
+      if (pk.tr.nrows > 0) {
+        boolean colnotfound=false;
+        pkcols=new String[pk.tr.nrows];
+        pkcoli=new int[pk.tr.nrows];
+        for (int i=0; i < pk.tr.nrows; i++) {
+          String rd[]=(String[])pk.tr.rows.elementAt(i);
+          pkcols[i]=rd[3];
+          try {
+            pkcoli[i]=findColumn(pkcols[i]) - 1;
+          }
+ catch (          SQLException ee) {
+            colnotfound=true;
+          }
+        }
+        if (!colnotfound) {
+          updatable=UPD_INSUPDDEL;
+        }
+      }
+      pk.close();
+    }
+ catch (    SQLException e) {
+      updatable=UPD_NO;
+    }
+  }
+  if (updatable < UPD_INS) {
+    throw new SQLException("result set not updatable");
+  }
+  return true;
+}

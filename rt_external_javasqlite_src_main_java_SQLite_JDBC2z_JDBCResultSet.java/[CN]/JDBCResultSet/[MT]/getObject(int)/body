@@ -1,0 +1,36 @@
+{
+  if (tr == null || columnIndex < 1 || columnIndex > tr.ncolumns) {
+    throw new SQLException("column " + columnIndex + " not found");
+  }
+  String rd[]=(String[])tr.rows.elementAt(row);
+  lastg=rd[columnIndex - 1];
+  Object ret=lastg;
+  if (tr instanceof TableResultX) {
+switch (((TableResultX)tr).sql_type[columnIndex - 1]) {
+case Types.SMALLINT:
+      ret=internalGetShort(columnIndex);
+    break;
+case Types.INTEGER:
+  ret=internalGetInt(columnIndex);
+break;
+case Types.DOUBLE:
+ret=internalGetDouble(columnIndex);
+break;
+case Types.FLOAT:
+ret=internalGetFloat(columnIndex);
+break;
+case Types.BIGINT:
+ret=internalGetLong(columnIndex);
+break;
+case Types.BINARY:
+case Types.VARBINARY:
+case Types.LONGVARBINARY:
+ret=getBytes(columnIndex);
+break;
+case Types.NULL:
+ret=null;
+break;
+}
+}
+return ret;
+}

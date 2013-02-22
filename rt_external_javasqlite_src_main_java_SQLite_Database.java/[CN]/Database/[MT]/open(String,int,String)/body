@@ -1,0 +1,22 @@
+{
+  if ((mode & 0200) != 0) {
+    mode=SQLite.Constants.SQLITE_OPEN_READWRITE | SQLite.Constants.SQLITE_OPEN_CREATE;
+  }
+ else   if ((mode & 0400) != 0) {
+    mode=SQLite.Constants.SQLITE_OPEN_READONLY;
+  }
+synchronized (this) {
+    try {
+      _open4(filename,mode,vfs,false);
+    }
+ catch (    SQLite.Exception se) {
+      throw se;
+    }
+catch (    java.lang.OutOfMemoryError me) {
+      throw me;
+    }
+catch (    Throwable t) {
+      _open(filename,mode);
+    }
+  }
+}

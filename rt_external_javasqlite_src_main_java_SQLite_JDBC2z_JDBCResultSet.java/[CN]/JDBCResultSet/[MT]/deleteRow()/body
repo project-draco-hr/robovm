@@ -1,0 +1,30 @@
+{
+  isUpdatable();
+  if (oninsrow) {
+    throw new SQLException("cursor on insert row");
+  }
+  if (updatable < UPD_INSUPDDEL) {
+    throw new SQLException("no primary key on table defined");
+  }
+  fillRowbuf();
+  StringBuffer sb=new StringBuffer();
+  sb.append("DELETE FROM ");
+  sb.append(SQLite.Shell.sql_quote_dbl(uptable));
+  sb.append(" WHERE ");
+  String args[]=new String[pkcols.length];
+  for (int i=0; i < pkcols.length; i++) {
+    sb.append(SQLite.Shell.sql_quote_dbl(pkcols[i]));
+    sb.append(" = " + (nullrepl ? "'%q'" : "%Q"));
+    if (i < pkcols.length - 1) {
+      sb.append(" AND ");
+    }
+    args[i]=rowbuf[pkcoli[i]];
+  }
+  try {
+    this.s.conn.db.exec(sb.toString(),null,args);
+  }
+ catch (  SQLite.Exception e) {
+    throw new SQLException(e.getMessage());
+  }
+  rowbuf=null;
+}

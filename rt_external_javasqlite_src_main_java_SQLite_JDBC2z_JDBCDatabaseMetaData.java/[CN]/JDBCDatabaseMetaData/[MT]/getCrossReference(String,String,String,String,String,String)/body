@@ -1,0 +1,35 @@
+{
+  JDBCResultSet rs0=null;
+  if (foreignTable != null && foreignTable.charAt(0) != '%') {
+    JDBCStatement s0=new JDBCStatement(conn);
+    try {
+      try {
+        conn.db.exec("SELECT 1 FROM sqlite_master LIMIT 1",null);
+      }
+ catch (      SQLite.Exception se) {
+        throw new SQLException("schema reload failed");
+      }
+      rs0=(JDBCResultSet)(s0.executeQuery("PRAGMA foreign_key_list(" + SQLite.Shell.sql_quote(foreignTable) + ")"));
+    }
+ catch (    SQLException e) {
+      throw e;
+    }
+ finally {
+      s0.close();
+    }
+  }
+  String cols[]={"PKTABLE_CAT","PKTABLE_SCHEM","PKTABLE_NAME","PKCOLUMN_NAME","FKTABLE_CAT","FKTABLE_SCHEM","FKTABLE_NAME","FKCOLUMN_NAME","KEY_SEQ","UPDATE_RULE","DELETE_RULE","FK_NAME","PK_NAME","DEFERRABILITY"};
+  int types[]={Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,Types.SMALLINT,Types.SMALLINT,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT};
+  TableResultX tr=new TableResultX();
+  tr.columns(cols);
+  tr.sql_types(types);
+  JDBCResultSet rs=new JDBCResultSet(tr,null);
+  if (rs0 != null && rs0.tr != null && rs0.tr.nrows > 0) {
+    String pktable=null;
+    if (primaryTable != null && primaryTable.charAt(0) != '%') {
+      pktable=primaryTable;
+    }
+    internalImportedKeys(foreignTable,pktable,rs0,tr);
+  }
+  return rs;
+}

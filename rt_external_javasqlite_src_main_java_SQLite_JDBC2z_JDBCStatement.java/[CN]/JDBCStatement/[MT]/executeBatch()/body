@@ -1,0 +1,23 @@
+{
+  if (batch == null) {
+    return new int[0];
+  }
+  int[] ret=new int[batch.size()];
+  for (int i=0; i < ret.length; i++) {
+    ret[i]=EXECUTE_FAILED;
+  }
+  int errs=0;
+  for (int i=0; i < ret.length; i++) {
+    try {
+      execute((String)batch.get(i));
+      ret[i]=updcnt;
+    }
+ catch (    SQLException e) {
+      ++errs;
+    }
+  }
+  if (errs > 0) {
+    throw new BatchUpdateException("batch failed",ret);
+  }
+  return ret;
+}

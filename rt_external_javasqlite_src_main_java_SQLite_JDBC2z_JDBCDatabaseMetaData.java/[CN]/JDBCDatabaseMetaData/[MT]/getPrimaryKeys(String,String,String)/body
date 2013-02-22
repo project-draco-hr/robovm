@@ -1,0 +1,114 @@
+{
+  JDBCStatement s0=new JDBCStatement(conn);
+  JDBCResultSet rs0=null;
+  try {
+    try {
+      conn.db.exec("SELECT 1 FROM sqlite_master LIMIT 1",null);
+    }
+ catch (    SQLite.Exception se) {
+      throw new SQLException("schema reload failed");
+    }
+    rs0=(JDBCResultSet)(s0.executeQuery("PRAGMA index_list(" + SQLite.Shell.sql_quote(table) + ")"));
+  }
+ catch (  SQLException e) {
+    throw e;
+  }
+ finally {
+    s0.close();
+  }
+  String cols[]={"TABLE_CAT","TABLE_SCHEM","TABLE_NAME","COLUMN_NAME","KEY_SEQ","PK_NAME"};
+  int types[]={Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,Types.VARCHAR};
+  TableResultX tr=new TableResultX();
+  tr.columns(cols);
+  tr.sql_types(types);
+  JDBCResultSet rs=new JDBCResultSet((SQLite.TableResult)tr,null);
+  if (rs0 != null && rs0.tr != null && rs0.tr.nrows > 0) {
+    Hashtable<String,Integer> h0=new Hashtable<String,Integer>();
+    for (int i=0; i < rs0.tr.ncolumns; i++) {
+      h0.put(rs0.tr.column[i],Integer.valueOf(i));
+    }
+    for (int i=0; i < rs0.tr.nrows; i++) {
+      String r0[]=(String[])(rs0.tr.rows.elementAt(i));
+      int col=((Integer)h0.get("unique")).intValue();
+      String uniq=r0[col];
+      col=((Integer)h0.get("name")).intValue();
+      String iname=r0[col];
+      if (uniq.charAt(0) == '0') {
+        continue;
+      }
+      JDBCStatement s1=new JDBCStatement(conn);
+      JDBCResultSet rs1=null;
+      try {
+        rs1=(JDBCResultSet)(s1.executeQuery("PRAGMA index_info(" + SQLite.Shell.sql_quote(iname) + ")"));
+      }
+ catch (      SQLException e) {
+      }
+ finally {
+        s1.close();
+      }
+      if (rs1 == null || rs1.tr == null || rs1.tr.nrows <= 0) {
+        continue;
+      }
+      Hashtable<String,Integer> h1=new Hashtable<String,Integer>();
+      for (int k=0; k < rs1.tr.ncolumns; k++) {
+        h1.put(rs1.tr.column[k],Integer.valueOf(k));
+      }
+      for (int k=0; k < rs1.tr.nrows; k++) {
+        String r1[]=(String[])(rs1.tr.rows.elementAt(k));
+        String row[]=new String[cols.length];
+        row[0]="";
+        row[1]="";
+        row[2]=table;
+        col=((Integer)h1.get("name")).intValue();
+        row[3]=r1[col];
+        col=((Integer)h1.get("seqno")).intValue();
+        row[4]=Integer.toString(Integer.parseInt(r1[col]) + 1);
+        row[5]=iname;
+        tr.newrow(row);
+      }
+    }
+  }
+  if (tr.nrows > 0) {
+    return rs;
+  }
+  JDBCStatement s1=new JDBCStatement(conn);
+  try {
+    rs0=(JDBCResultSet)(s1.executeQuery("PRAGMA table_info(" + SQLite.Shell.sql_quote(table) + ")"));
+  }
+ catch (  SQLException e) {
+    throw e;
+  }
+ finally {
+    s1.close();
+  }
+  if (rs0 != null && rs0.tr != null && rs0.tr.nrows > 0) {
+    Hashtable<String,Integer> h0=new Hashtable<String,Integer>();
+    for (int i=0; i < rs0.tr.ncolumns; i++) {
+      h0.put(rs0.tr.column[i],Integer.valueOf(i));
+    }
+    for (int i=0; i < rs0.tr.nrows; i++) {
+      String r0[]=(String[])(rs0.tr.rows.elementAt(i));
+      int col=((Integer)h0.get("type")).intValue();
+      String type=r0[col];
+      if (!type.equalsIgnoreCase("integer")) {
+        continue;
+      }
+      col=((Integer)h0.get("pk")).intValue();
+      String pk=r0[col];
+      if (pk.charAt(0) == '0') {
+        continue;
+      }
+      String row[]=new String[cols.length];
+      row[0]="";
+      row[1]="";
+      row[2]=table;
+      col=((Integer)h0.get("name")).intValue();
+      row[3]=r0[col];
+      col=((Integer)h0.get("cid")).intValue();
+      row[4]=Integer.toString(Integer.parseInt(r0[col]) + 1);
+      row[5]="";
+      tr.newrow(row);
+    }
+  }
+  return rs;
+}

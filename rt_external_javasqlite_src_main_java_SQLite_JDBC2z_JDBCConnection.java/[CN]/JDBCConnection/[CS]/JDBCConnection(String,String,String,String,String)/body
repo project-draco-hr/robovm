@@ -1,0 +1,37 @@
+{
+  if (url.startsWith("sqlite:/")) {
+    dbfile=url.substring(8);
+  }
+ else   if (url.startsWith("jdbc:sqlite:/")) {
+    dbfile=url.substring(13);
+  }
+ else {
+    throw new SQLException("unsupported url");
+  }
+  this.url=url;
+  this.enc=enc;
+  this.vfs=vfs;
+  try {
+    db=open(readonly);
+    try {
+      if (pwd != null && pwd.length() > 0) {
+        db.key(pwd);
+      }
+    }
+ catch (    SQLite.Exception se) {
+      throw new SQLException("error while setting key");
+    }
+    db.busy_handler(this);
+  }
+ catch (  SQLException e) {
+    if (db != null) {
+      try {
+        db.close();
+      }
+ catch (      SQLite.Exception ee) {
+      }
+    }
+    throw e;
+  }
+  useJulian=drep != null && (drep.startsWith("j") || drep.startsWith("J"));
+}

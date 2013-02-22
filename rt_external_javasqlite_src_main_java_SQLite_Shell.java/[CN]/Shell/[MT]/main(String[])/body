@@ -1,0 +1,81 @@
+{
+  String key=null;
+  Shell s=new Shell(System.out,System.err);
+  s.mode=Shell.MODE_List;
+  s.sep="|";
+  s.showHeader=false;
+  s.db=new Database();
+  String dbname=null, sql=null;
+  for (int i=0; i < args.length; i++) {
+    if (args[i].compareTo("-html") == 0) {
+      s.mode=Shell.MODE_Html;
+    }
+ else     if (args[i].compareTo("-list") == 0) {
+      s.mode=Shell.MODE_List;
+    }
+ else     if (args[i].compareTo("-line") == 0) {
+      s.mode=Shell.MODE_Line;
+    }
+ else     if (i < args.length - 1 && args[i].compareTo("-separator") == 0) {
+      ++i;
+      s.sep=args[i];
+    }
+ else     if (args[i].compareTo("-header") == 0) {
+      s.showHeader=true;
+    }
+ else     if (args[i].compareTo("-noheader") == 0) {
+      s.showHeader=false;
+    }
+ else     if (args[i].compareTo("-echo") == 0) {
+      s.echo=true;
+    }
+ else     if (args[i].compareTo("-key") == 0) {
+      ++i;
+      key=args[i];
+    }
+ else     if (dbname == null) {
+      dbname=args[i];
+    }
+ else     if (sql == null) {
+      sql=args[i];
+    }
+ else {
+      System.err.println("Arguments: ?OPTIONS? FILENAME ?SQL?");
+      System.exit(1);
+    }
+  }
+  if (dbname == null) {
+    System.err.println("No database file given");
+    System.exit(1);
+  }
+  try {
+    s.db.open(dbname,0);
+  }
+ catch (  Exception e) {
+    System.err.println("Unable to open database: " + e);
+    System.exit(1);
+  }
+  if (key != null) {
+    try {
+      s.db.key(key);
+    }
+ catch (    Exception e) {
+      System.err.println("Unable to set key: " + e);
+      System.exit(1);
+    }
+  }
+  if (sql != null) {
+    s.do_cmd(sql);
+    s.pw.flush();
+  }
+ else {
+    BufferedReader is=new BufferedReader(new InputStreamReader(System.in));
+    s.do_input(is);
+    s.pw.flush();
+  }
+  try {
+    s.db.close();
+  }
+ catch (  Exception ee) {
+  }
+}

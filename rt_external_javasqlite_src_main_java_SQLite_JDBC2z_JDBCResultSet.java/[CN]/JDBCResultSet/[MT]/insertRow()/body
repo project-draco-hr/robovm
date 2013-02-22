@@ -1,0 +1,35 @@
+{
+  isUpdatable();
+  if (!oninsrow || rowbuf == null) {
+    throw new SQLException("no insert data provided");
+  }
+  JDBCResultSetMetaData m=(JDBCResultSetMetaData)getMetaData();
+  StringBuffer sb=new StringBuffer();
+  sb.append("INSERT INTO ");
+  sb.append(SQLite.Shell.sql_quote_dbl(uptable));
+  sb.append("(");
+  for (int i=0; i < tr.ncolumns; i++) {
+    sb.append(SQLite.Shell.sql_quote_dbl(m.getColumnName(i + 1)));
+    if (i < tr.ncolumns - 1) {
+      sb.append(",");
+    }
+  }
+  sb.append(") VALUES(");
+  for (int i=0; i < tr.ncolumns; i++) {
+    sb.append(nullrepl ? "'%q'" : "%Q");
+    if (i < tr.ncolumns - 1) {
+      sb.append(",");
+    }
+  }
+  sb.append(")");
+  try {
+    this.s.conn.db.exec(sb.toString(),null,rowbuf);
+  }
+ catch (  SQLite.Exception e) {
+    throw new SQLException(e.getMessage());
+  }
+  tr.newrow(rowbuf);
+  rowbuf=null;
+  oninsrow=false;
+  last();
+}

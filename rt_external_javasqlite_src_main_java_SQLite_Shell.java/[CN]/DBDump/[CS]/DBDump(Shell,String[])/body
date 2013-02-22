@@ -1,0 +1,27 @@
+{
+  this.s=s;
+  s.pw.println("BEGIN TRANSACTION;");
+  if (tables == null || tables.length == 0) {
+    try {
+      s.db.exec("SELECT name, type, sql FROM sqlite_master " + "WHERE type!='meta' AND sql NOT NULL " + "ORDER BY substr(type,2,1), name",this);
+    }
+ catch (    Exception e) {
+      s.err.println("SQL Error: " + e);
+      s.err.flush();
+    }
+  }
+ else {
+    String arg[]=new String[1];
+    for (int i=0; i < tables.length; i++) {
+      arg[0]=tables[i];
+      try {
+        s.db.exec("SELECT name, type, sql FROM sqlite_master " + "WHERE tbl_name LIKE '%q' AND type!='meta' " + " AND sql NOT NULL "+ " ORDER BY substr(type,2,1), name",this,arg);
+      }
+ catch (      Exception e) {
+        s.err.println("SQL Error: " + e);
+        s.err.flush();
+      }
+    }
+  }
+  s.pw.println("COMMIT;");
+}

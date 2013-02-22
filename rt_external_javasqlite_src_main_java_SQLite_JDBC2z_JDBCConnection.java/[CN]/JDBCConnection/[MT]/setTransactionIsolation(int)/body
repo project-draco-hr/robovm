@@ -1,0 +1,22 @@
+{
+  if (db.is3() && SQLite.JDBCDriver.sharedCache) {
+    String flag=null;
+    if (level == TRANSACTION_READ_UNCOMMITTED && trmode != TRANSACTION_READ_UNCOMMITTED) {
+      flag="on";
+    }
+ else     if (level == TRANSACTION_SERIALIZABLE && trmode != TRANSACTION_SERIALIZABLE) {
+      flag="off";
+    }
+    if (flag != null) {
+      try {
+        db.exec("PRAGMA read_uncommitted = " + flag + ";",null);
+        trmode=level;
+      }
+ catch (      java.lang.Exception e) {
+      }
+    }
+  }
+  if (level != trmode) {
+    throw new SQLException("not supported");
+  }
+}

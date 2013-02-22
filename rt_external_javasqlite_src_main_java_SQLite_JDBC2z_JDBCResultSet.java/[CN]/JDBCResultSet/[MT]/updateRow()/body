@@ -1,0 +1,45 @@
+{
+  isUpdatable();
+  if (rowbuf == null) {
+    throw new SQLException("no update data provided");
+  }
+  if (oninsrow) {
+    throw new SQLException("cursor on insert row");
+  }
+  if (updatable < UPD_INSUPDDEL) {
+    throw new SQLException("no primary key on table defined");
+  }
+  String rd[]=(String[])tr.rows.elementAt(row);
+  JDBCResultSetMetaData m=(JDBCResultSetMetaData)getMetaData();
+  String args[]=new String[tr.ncolumns + pkcols.length];
+  StringBuffer sb=new StringBuffer();
+  sb.append("UPDATE ");
+  sb.append(SQLite.Shell.sql_quote_dbl(uptable));
+  sb.append(" SET ");
+  int i;
+  for (i=0; i < tr.ncolumns; i++) {
+    sb.append(SQLite.Shell.sql_quote_dbl(m.getColumnName(i + 1)));
+    sb.append(" = " + (nullrepl ? "'%q'" : "%Q"));
+    if (i < tr.ncolumns - 1) {
+      sb.append(",");
+    }
+    args[i]=rowbuf[i];
+  }
+  sb.append(" WHERE ");
+  for (int k=0; k < pkcols.length; k++, i++) {
+    sb.append(SQLite.Shell.sql_quote_dbl(pkcols[k]));
+    sb.append(" = " + (nullrepl ? "'%q'" : "%Q"));
+    if (k < pkcols.length - 1) {
+      sb.append(" AND ");
+    }
+    args[i]=rd[pkcoli[k]];
+  }
+  try {
+    this.s.conn.db.exec(sb.toString(),null,args);
+  }
+ catch (  SQLite.Exception e) {
+    throw new SQLException(e.getMessage());
+  }
+  System.arraycopy(rowbuf,0,rd,0,rowbuf.length);
+  rowbuf=null;
+}

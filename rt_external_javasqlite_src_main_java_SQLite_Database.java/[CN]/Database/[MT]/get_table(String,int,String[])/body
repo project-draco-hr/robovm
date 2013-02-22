@@ -1,0 +1,31 @@
+{
+  TableResult ret=new TableResult(maxrows);
+  if (!is3()) {
+    try {
+      exec(sql,ret,args);
+    }
+ catch (    SQLite.Exception e) {
+      if (maxrows <= 0 || !ret.atmaxrows) {
+        throw e;
+      }
+    }
+  }
+ else {
+synchronized (this) {
+      Vm vm=compile(sql,args);
+      set_last_error(vm.error_code);
+      if (ret.maxrows > 0) {
+        while (ret.nrows < ret.maxrows && vm.step(ret)) {
+          set_last_error(vm.error_code);
+        }
+      }
+ else {
+        while (vm.step(ret)) {
+          set_last_error(vm.error_code);
+        }
+      }
+      vm.finalize();
+    }
+  }
+  return ret;
+}

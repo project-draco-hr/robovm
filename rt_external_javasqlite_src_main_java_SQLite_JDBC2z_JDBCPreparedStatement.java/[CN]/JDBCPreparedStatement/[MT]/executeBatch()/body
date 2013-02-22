@@ -1,0 +1,28 @@
+{
+  if (batch == null) {
+    return new int[0];
+  }
+  int[] ret=new int[batch.size() / args.length];
+  for (int i=0; i < ret.length; i++) {
+    ret[i]=EXECUTE_FAILED;
+  }
+  int errs=0;
+  int index=0;
+  for (int i=0; i < ret.length; i++) {
+    for (int k=0; k < args.length; k++) {
+      BatchArg b=(BatchArg)batch.get(index++);
+      args[k]=b.arg;
+      blobs[k]=b.blob;
+    }
+    try {
+      ret[i]=executeUpdate();
+    }
+ catch (    SQLException e) {
+      ++errs;
+    }
+  }
+  if (errs > 0) {
+    throw new BatchUpdateException("batch failed",ret);
+  }
+  return ret;
+}

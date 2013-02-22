@@ -1,0 +1,42 @@
+{
+  String line, sql=null;
+  String prompt="SQLITE> ";
+  while ((line=read_line(is,prompt)) != null) {
+    if (echo) {
+      pw.println(line);
+    }
+    if (line.length() > 0 && line.charAt(0) == '.') {
+      do_meta(line);
+    }
+ else {
+      if (sql == null) {
+        sql=line;
+      }
+ else {
+        sql=sql + " " + line;
+      }
+      if (Database.complete(sql)) {
+        try {
+          db.exec(sql,this);
+        }
+ catch (        Exception e) {
+          if (!echo) {
+            err.println(sql);
+          }
+          err.println("SQL Error: " + e);
+          err.flush();
+        }
+        sql=null;
+        prompt="SQLITE> ";
+      }
+ else {
+        prompt="SQLITE? ";
+      }
+    }
+    pw.flush();
+  }
+  if (sql != null) {
+    err.println("Incomplete SQL: " + sql);
+    err.flush();
+  }
+}

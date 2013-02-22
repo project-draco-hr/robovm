@@ -1,0 +1,38 @@
+{
+  JDBCStatement s=new JDBCStatement(conn);
+  StringBuffer sb=new StringBuffer();
+  sb.append("SELECT '' AS 'TABLE_CAT', " + "'' AS 'TABLE_SCHEM', " + "tbl_name AS 'TABLE_NAME', "+ "upper(type) AS 'TABLE_TYPE', "+ "'' AS REMARKS FROM sqlite_master "+ "WHERE tbl_name like ");
+  if (tableNamePattern != null) {
+    sb.append(SQLite.Shell.sql_quote(tableNamePattern));
+  }
+ else {
+    sb.append("'%'");
+  }
+  sb.append(" AND ");
+  if (types == null || types.length == 0) {
+    sb.append("(type = 'table' or type = 'view')");
+  }
+ else {
+    sb.append("(");
+    String sep="";
+    for (int i=0; i < types.length; i++) {
+      sb.append(sep);
+      sb.append("type = ");
+      sb.append(SQLite.Shell.sql_quote(types[i].toLowerCase()));
+      sep=" or ";
+    }
+    sb.append(")");
+  }
+  ResultSet rs=null;
+  try {
+    rs=s.executeQuery(sb.toString());
+    s.close();
+  }
+ catch (  SQLException e) {
+    throw e;
+  }
+ finally {
+    s.close();
+  }
+  return rs;
+}

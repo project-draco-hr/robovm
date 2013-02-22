@@ -1,0 +1,77 @@
+{
+  if (conn.db == null) {
+    throw new SQLException("connection closed.");
+  }
+  JDBCStatement s=new JDBCStatement(conn);
+  JDBCResultSet rs0=null;
+  try {
+    try {
+      conn.db.exec("SELECT 1 FROM sqlite_master LIMIT 1",null);
+    }
+ catch (    SQLite.Exception se) {
+      throw new SQLException("schema reload failed");
+    }
+    rs0=(JDBCResultSet)(s.executeQuery("PRAGMA table_info(" + SQLite.Shell.sql_quote(tableNamePattern) + ")"));
+    s.close();
+  }
+ catch (  SQLException e) {
+    throw e;
+  }
+ finally {
+    s.close();
+  }
+  if (rs0.tr.nrows < 1) {
+    throw new SQLException("no such table: " + tableNamePattern);
+  }
+  String cols[]={"TABLE_CAT","TABLE_SCHEM","TABLE_NAME","COLUMN_NAME","DATA_TYPE","TYPE_NAME","COLUMN_SIZE","BUFFER_LENGTH","DECIMAL_DIGITS","NUM_PREC_RADIX","NULLABLE","REMARKS","COLUMN_DEF","SQL_DATA_TYPE","SQL_DATETIME_SUB","CHAR_OCTET_LENGTH","ORDINAL_POSITION","IS_NULLABLE"};
+  int types[]={Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,Types.VARCHAR,Types.INTEGER,Types.INTEGER,Types.INTEGER,Types.INTEGER,Types.INTEGER,Types.VARCHAR,Types.VARCHAR,Types.INTEGER,Types.INTEGER,Types.INTEGER,Types.INTEGER,Types.VARCHAR};
+  TableResultX tr=new TableResultX();
+  tr.columns(cols);
+  tr.sql_types(types);
+  JDBCResultSet rs=new JDBCResultSet((SQLite.TableResult)tr,null);
+  if (rs0 != null && rs0.tr != null && rs0.tr.nrows > 0) {
+    Hashtable<String,Integer> h=new Hashtable<String,Integer>();
+    for (int i=0; i < rs0.tr.ncolumns; i++) {
+      h.put(rs0.tr.column[i],Integer.valueOf(i));
+    }
+    if (columnNamePattern != null && columnNamePattern.charAt(0) == '%') {
+      columnNamePattern=null;
+    }
+    for (int i=0; i < rs0.tr.nrows; i++) {
+      String r0[]=(String[])(rs0.tr.rows.elementAt(i));
+      int col=((Integer)h.get("name")).intValue();
+      if (columnNamePattern != null) {
+        if (r0[col].compareTo(columnNamePattern) != 0) {
+          continue;
+        }
+      }
+      String row[]=new String[cols.length];
+      row[0]="";
+      row[1]="";
+      row[2]=tableNamePattern;
+      row[3]=r0[col];
+      col=((Integer)h.get("type")).intValue();
+      String typeStr=r0[col];
+      int type=mapSqlType(typeStr);
+      row[4]="" + type;
+      row[5]=mapTypeName(type);
+      row[6]="" + getD(typeStr,type);
+      row[7]="" + getM(typeStr,type);
+      row[8]="10";
+      row[9]="0";
+      row[11]=null;
+      col=((Integer)h.get("dflt_value")).intValue();
+      row[12]=r0[col];
+      row[13]="0";
+      row[14]="0";
+      row[15]="65536";
+      col=((Integer)h.get("cid")).intValue();
+      row[16]=Integer.toString(Integer.parseInt(r0[col]) + 1);
+      col=((Integer)h.get("notnull")).intValue();
+      row[17]=(r0[col].charAt(0) == '0') ? "YES" : "NO";
+      row[10]=(r0[col].charAt(0) == '0') ? "" + columnNullable : "" + columnNoNulls;
+      tr.newrow(row);
+    }
+  }
+  return rs;
+}

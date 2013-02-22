@@ -1,0 +1,124 @@
+{
+  int i;
+  String tname;
+switch (mode) {
+case Shell.MODE_Line:
+    if (args.length == 0) {
+      break;
+    }
+  if (count++ > 0) {
+    pw.println("");
+  }
+for (i=0; i < args.length; i++) {
+  pw.println(cols[i] + " = " + args[i] == null ? "NULL" : args[i]);
+}
+break;
+case Shell.MODE_Column:
+String csep="";
+if (count++ == 0) {
+colwidth=new int[args.length];
+for (i=0; i < args.length; i++) {
+int w, n;
+w=cols[i].length();
+if (w < 10) {
+w=10;
+}
+colwidth[i]=w;
+if (showHeader) {
+pw.print(csep + cols[i]);
+csep=" ";
+}
+}
+if (showHeader) {
+pw.println("");
+}
+}
+if (args.length == 0) {
+break;
+}
+csep="";
+for (i=0; i < args.length; i++) {
+pw.print(csep + (args[i] == null ? "NULL" : args[i]));
+csep=" ";
+}
+pw.println("");
+break;
+case Shell.MODE_Semi:
+case Shell.MODE_List:
+if (count++ == 0 && showHeader) {
+for (i=0; i < args.length; i++) {
+pw.print(cols[i] + (i == args.length - 1 ? "\n" : sep));
+}
+}
+if (args.length == 0) {
+break;
+}
+for (i=0; i < args.length; i++) {
+pw.print(args[i] == null ? "NULL" : args[i]);
+if (mode == Shell.MODE_Semi) {
+pw.print(";");
+}
+ else if (i < args.length - 1) {
+pw.print(sep);
+}
+}
+pw.println("");
+break;
+case MODE_Html:
+if (count++ == 0 && showHeader) {
+pw.print("<TR>");
+for (i=0; i < args.length; i++) {
+pw.print("<TH>" + html_quote(cols[i]) + "</TH>");
+}
+pw.println("</TR>");
+}
+if (args.length == 0) {
+break;
+}
+pw.print("<TR>");
+for (i=0; i < args.length; i++) {
+pw.print("<TD>" + html_quote(args[i]) + "</TD>");
+}
+pw.println("</TR>");
+break;
+case MODE_Insert:
+if (args.length == 0) {
+break;
+}
+tname=tableName;
+if (destTable != null) {
+tname=destTable;
+}
+pw.print("INSERT INTO " + tname + " VALUES(");
+for (i=0; i < args.length; i++) {
+String tsep=i > 0 ? "," : "";
+if (args[i] == null) {
+pw.print(tsep + "NULL");
+}
+ else if (is_numeric(args[i])) {
+pw.print(tsep + args[i]);
+}
+ else {
+pw.print(tsep + sql_quote(args[i]));
+}
+}
+pw.println(");");
+break;
+case MODE_Insert2:
+if (args.length == 0) {
+break;
+}
+tname=tableName;
+if (destTable != null) {
+tname=destTable;
+}
+pw.print("INSERT INTO " + tname + " VALUES(");
+for (i=0; i < args.length; i++) {
+String tsep=i > 0 ? "," : "";
+pw.print(tsep + args[i]);
+}
+pw.println(");");
+break;
+}
+return false;
+}

@@ -1,0 +1,15 @@
+{
+  if (db == null) {
+    throw new SQLException("stale connection");
+  }
+  if (!intrans) {
+    return;
+  }
+  try {
+    db.exec("ROLLBACK",null);
+    intrans=false;
+  }
+ catch (  SQLite.Exception e) {
+    throw new SQLException(e.toString());
+  }
+}

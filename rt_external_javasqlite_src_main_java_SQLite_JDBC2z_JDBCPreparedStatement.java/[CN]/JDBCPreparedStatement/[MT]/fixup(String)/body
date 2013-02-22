@@ -1,0 +1,58 @@
+{
+  StringBuffer sb=new StringBuffer();
+  boolean inq=false;
+  int nparm=0;
+  for (int i=0; i < sql.length(); i++) {
+    char c=sql.charAt(i);
+    if (c == '\'') {
+      if (inq) {
+        char nextChar=0;
+        if (i + 1 < sql.length()) {
+          nextChar=sql.charAt(i + 1);
+        }
+        if (nextChar == '\'') {
+          sb.append(c);
+          sb.append(nextChar);
+          i++;
+        }
+ else {
+          inq=false;
+          sb.append(c);
+        }
+      }
+ else {
+        inq=true;
+        sb.append(c);
+      }
+    }
+ else     if (c == '?') {
+      if (inq) {
+        sb.append(c);
+      }
+ else {
+        ++nparm;
+        sb.append(nullrepl ? "'%q'" : "%Q");
+      }
+    }
+ else     if (c == ';') {
+      if (!inq) {
+        break;
+      }
+      sb.append(c);
+    }
+ else     if (c == '%') {
+      sb.append("%%");
+    }
+ else {
+      sb.append(c);
+    }
+  }
+  args=new String[nparm];
+  blobs=new boolean[nparm];
+  try {
+    clearParameters();
+  }
+ catch (  SQLException e) {
+  }
+  return sb.toString();
+}

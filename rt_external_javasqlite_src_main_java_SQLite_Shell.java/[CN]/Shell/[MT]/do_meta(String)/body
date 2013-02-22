@@ -1,0 +1,158 @@
+{
+  StringTokenizer st=new StringTokenizer(line.toLowerCase());
+  int n=st.countTokens();
+  if (n <= 0) {
+    return;
+  }
+  String cmd=st.nextToken();
+  String args[]=new String[n - 1];
+  int i=0;
+  while (st.hasMoreTokens()) {
+    args[i]=st.nextToken();
+    ++i;
+  }
+  if (cmd.compareTo(".dump") == 0) {
+    new DBDump(this,args);
+    return;
+  }
+  if (cmd.compareTo(".echo") == 0) {
+    if (args.length > 0 && (args[0].startsWith("y") || args[0].startsWith("on"))) {
+      echo=true;
+    }
+    return;
+  }
+  if (cmd.compareTo(".exit") == 0) {
+    try {
+      db.close();
+    }
+ catch (    Exception e) {
+    }
+    System.exit(0);
+  }
+  if (cmd.compareTo(".header") == 0) {
+    if (args.length > 0 && (args[0].startsWith("y") || args[0].startsWith("on"))) {
+      showHeader=true;
+    }
+    return;
+  }
+  if (cmd.compareTo(".help") == 0) {
+    pw.println(".dump ?TABLE? ...  Dump database in text fmt");
+    pw.println(".echo ON|OFF       Command echo on or off");
+    pw.println(".enc ?NAME?        Change encoding");
+    pw.println(".exit              Exit program");
+    pw.println(".header ON|OFF     Display headers on or off");
+    pw.println(".help              This message");
+    pw.println(".mode MODE         Set output mode to\n" + "                   line, column, insert\n" + "                   list, or html");
+    pw.println(".mode insert TABLE Generate SQL insert stmts");
+    pw.println(".schema ?PATTERN?  List table schema");
+    pw.println(".separator STRING  Set separator string");
+    pw.println(".tables ?PATTERN?  List table names");
+    return;
+  }
+  if (cmd.compareTo(".mode") == 0) {
+    if (args.length > 0) {
+      if (args[0].compareTo("line") == 0) {
+        mode=Shell.MODE_Line;
+      }
+ else       if (args[0].compareTo("column") == 0) {
+        mode=Shell.MODE_Column;
+      }
+ else       if (args[0].compareTo("list") == 0) {
+        mode=Shell.MODE_List;
+      }
+ else       if (args[0].compareTo("html") == 0) {
+        mode=Shell.MODE_Html;
+      }
+ else       if (args[0].compareTo("insert") == 0) {
+        mode=Shell.MODE_Insert;
+        if (args.length > 1) {
+          destTable=args[1];
+        }
+      }
+    }
+    return;
+  }
+  if (cmd.compareTo(".separator") == 0) {
+    if (args.length > 0) {
+      sep=args[0];
+    }
+    return;
+  }
+  if (cmd.compareTo(".tables") == 0) {
+    TableResult t=null;
+    if (args.length > 0) {
+      try {
+        String qarg[]=new String[1];
+        qarg[0]=args[0];
+        t=db.get_table("SELECT name FROM sqlite_master " + "WHERE type='table' AND " + "name LIKE '%%%q%%' "+ "ORDER BY name",qarg);
+      }
+ catch (      Exception e) {
+        err.println("SQL Error: " + e);
+        err.flush();
+      }
+    }
+ else {
+      try {
+        t=db.get_table("SELECT name FROM sqlite_master " + "WHERE type='table' ORDER BY name");
+      }
+ catch (      Exception e) {
+        err.println("SQL Error: " + e);
+        err.flush();
+      }
+    }
+    if (t != null) {
+      for (i=0; i < t.nrows; i++) {
+        String tab=((String[])t.rows.elementAt(i))[0];
+        if (tab != null) {
+          pw.println(tab);
+        }
+      }
+    }
+    return;
+  }
+  if (cmd.compareTo(".schema") == 0) {
+    if (args.length > 0) {
+      try {
+        String qarg[]=new String[1];
+        qarg[0]=args[0];
+        db.exec("SELECT sql FROM sqlite_master " + "WHERE type!='meta' AND " + "name LIKE '%%%q%%' AND "+ "sql NOTNULL "+ "ORDER BY type DESC, name",this,qarg);
+      }
+ catch (      Exception e) {
+        err.println("SQL Error: " + e);
+        err.flush();
+      }
+    }
+ else {
+      try {
+        db.exec("SELECT sql FROM sqlite_master " + "WHERE type!='meta' AND " + "sql NOTNULL "+ "ORDER BY tbl_name, type DESC, name",this);
+      }
+ catch (      Exception e) {
+        err.println("SQL Error: " + e);
+        err.flush();
+      }
+    }
+    return;
+  }
+  if (cmd.compareTo(".enc") == 0) {
+    try {
+      db.set_encoding(args.length > 0 ? args[0] : null);
+    }
+ catch (    Exception e) {
+      err.println("" + e);
+      err.flush();
+    }
+    return;
+  }
+  if (cmd.compareTo(".rekey") == 0) {
+    try {
+      db.rekey(args.length > 0 ? args[0] : null);
+    }
+ catch (    Exception e) {
+      err.println("" + e);
+      err.flush();
+    }
+    return;
+  }
+  err.println("Unknown command '" + cmd + "'");
+  err.flush();
+}

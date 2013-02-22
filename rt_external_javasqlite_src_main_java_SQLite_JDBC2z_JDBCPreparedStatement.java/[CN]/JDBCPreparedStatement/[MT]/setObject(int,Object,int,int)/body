@@ -1,0 +1,23 @@
+{
+  if (parameterIndex < 1 || parameterIndex > args.length) {
+    throw new SQLException("bad parameter index");
+  }
+  if (x == null) {
+    args[parameterIndex - 1]=nullrepl ? "" : null;
+  }
+ else {
+    if (x instanceof byte[]) {
+      byte[] bx=(byte[])x;
+      if (conn.db.is3()) {
+        args[parameterIndex - 1]=SQLite.StringEncoder.encodeX(bx);
+        blobs[parameterIndex - 1]=true;
+        return;
+      }
+      args[parameterIndex - 1]=SQLite.StringEncoder.encode(bx);
+    }
+ else {
+      args[parameterIndex - 1]=x.toString();
+    }
+  }
+  blobs[parameterIndex - 1]=false;
+}
