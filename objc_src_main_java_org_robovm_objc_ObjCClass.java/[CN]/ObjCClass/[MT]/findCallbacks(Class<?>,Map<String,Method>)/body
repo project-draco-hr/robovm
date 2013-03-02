@@ -3,7 +3,11 @@
   if (!type.isInterface()) {
     classes.add(type);
   }
-  classes.addAll(Arrays.asList(type.getDeclaredClasses()));
+  try {
+    classes.add(Class.forName(type.getName() + "$Callbacks",true,type.getClassLoader()));
+  }
+ catch (  ClassNotFoundException ignored) {
+  }
   for (  Class<?> c : classes) {
     for (    Method m : c.getDeclaredMethods()) {
       if (m.getAnnotation(Callback.class) != null) {
