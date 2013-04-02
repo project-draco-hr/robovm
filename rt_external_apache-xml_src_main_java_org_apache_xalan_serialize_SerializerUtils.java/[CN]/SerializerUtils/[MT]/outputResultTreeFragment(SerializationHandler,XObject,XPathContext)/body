@@ -1,0 +1,11 @@
+{
+  int doc=obj.rtf();
+  DTM dtm=support.getDTM(doc);
+  if (null != dtm) {
+    for (int n=dtm.getFirstChild(doc); DTM.NULL != n; n=dtm.getNextSibling(n)) {
+      handler.flushPending();
+      if (dtm.getNodeType(n) == DTM.ELEMENT_NODE && dtm.getNamespaceURI(n) == null)       handler.startPrefixMapping("","");
+      dtm.dispatchToEvents(n,handler);
+    }
+  }
+}

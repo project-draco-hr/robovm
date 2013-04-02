@@ -1,0 +1,38 @@
+{
+  if (null == refChild) {
+    appendChild(newChild);
+    return newChild;
+  }
+  if (newChild == refChild) {
+    return newChild;
+  }
+  Node node=m_firstChild;
+  Node prev=null;
+  boolean foundit=false;
+  while (null != node) {
+    if (newChild == node) {
+      if (null != prev)       ((ElemTemplateElement)prev).m_nextSibling=(ElemTemplateElement)node.getNextSibling();
+ else       m_firstChild=(ElemTemplateElement)node.getNextSibling();
+      node=node.getNextSibling();
+      continue;
+    }
+    if (refChild == node) {
+      if (null != prev) {
+        ((ElemTemplateElement)prev).m_nextSibling=(ElemTemplateElement)newChild;
+      }
+ else {
+        m_firstChild=(ElemTemplateElement)newChild;
+      }
+      ((ElemTemplateElement)newChild).m_nextSibling=(ElemTemplateElement)refChild;
+      ((ElemTemplateElement)newChild).setParentElem(this);
+      prev=newChild;
+      node=node.getNextSibling();
+      foundit=true;
+      continue;
+    }
+    prev=node;
+    node=node.getNextSibling();
+  }
+  if (!foundit)   throw new DOMException(DOMException.NOT_FOUND_ERR,"refChild was not found in insertBefore method!");
+ else   return newChild;
+}

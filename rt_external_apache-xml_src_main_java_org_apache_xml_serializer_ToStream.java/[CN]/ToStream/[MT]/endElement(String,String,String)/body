@@ -1,0 +1,34 @@
+{
+  if (m_inEntityRef)   return;
+  m_prefixMap.popNamespaces(m_elemContext.m_currentElemDepth,null);
+  try {
+    final java.io.Writer writer=m_writer;
+    if (m_elemContext.m_startTagOpen) {
+      if (m_tracer != null)       super.fireStartElem(m_elemContext.m_elementName);
+      int nAttrs=m_attributes.getLength();
+      if (nAttrs > 0) {
+        processAttributes(m_writer,nAttrs);
+        m_attributes.clear();
+      }
+      if (m_spaceBeforeClose)       writer.write(" />");
+ else       writer.write("/>");
+    }
+ else {
+      if (m_cdataTagOpen)       closeCDATA();
+      if (shouldIndent())       indent(m_elemContext.m_currentElemDepth - 1);
+      writer.write('<');
+      writer.write('/');
+      writer.write(name);
+      writer.write('>');
+    }
+  }
+ catch (  IOException e) {
+    throw new SAXException(e);
+  }
+  if (!m_elemContext.m_startTagOpen && m_doIndent) {
+    m_ispreserve=m_preserves.isEmpty() ? false : m_preserves.pop();
+  }
+  m_isprevtext=false;
+  if (m_tracer != null)   super.fireEndElem(name);
+  m_elemContext=m_elemContext.m_prev;
+}

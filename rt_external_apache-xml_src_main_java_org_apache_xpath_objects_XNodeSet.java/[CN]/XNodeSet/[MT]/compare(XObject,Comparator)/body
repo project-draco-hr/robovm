@@ -1,0 +1,84 @@
+{
+  boolean result=false;
+  int type=obj2.getType();
+  if (XObject.CLASS_NODESET == type) {
+    DTMIterator list1=iterRaw();
+    DTMIterator list2=((XNodeSet)obj2).iterRaw();
+    int node1;
+    java.util.Vector node2Strings=null;
+    while (DTM.NULL != (node1=list1.nextNode())) {
+      XMLString s1=getStringFromNode(node1);
+      if (null == node2Strings) {
+        int node2;
+        while (DTM.NULL != (node2=list2.nextNode())) {
+          XMLString s2=getStringFromNode(node2);
+          if (comparator.compareStrings(s1,s2)) {
+            result=true;
+            break;
+          }
+          if (null == node2Strings)           node2Strings=new java.util.Vector();
+          node2Strings.addElement(s2);
+        }
+      }
+ else {
+        int n=node2Strings.size();
+        for (int i=0; i < n; i++) {
+          if (comparator.compareStrings(s1,(XMLString)node2Strings.elementAt(i))) {
+            result=true;
+            break;
+          }
+        }
+      }
+    }
+    list1.reset();
+    list2.reset();
+  }
+ else   if (XObject.CLASS_BOOLEAN == type) {
+    double num1=bool() ? 1.0 : 0.0;
+    double num2=obj2.num();
+    result=comparator.compareNumbers(num1,num2);
+  }
+ else   if (XObject.CLASS_NUMBER == type) {
+    DTMIterator list1=iterRaw();
+    double num2=obj2.num();
+    int node;
+    while (DTM.NULL != (node=list1.nextNode())) {
+      double num1=getNumberFromNode(node);
+      if (comparator.compareNumbers(num1,num2)) {
+        result=true;
+        break;
+      }
+    }
+    list1.reset();
+  }
+ else   if (XObject.CLASS_RTREEFRAG == type) {
+    XMLString s2=obj2.xstr();
+    DTMIterator list1=iterRaw();
+    int node;
+    while (DTM.NULL != (node=list1.nextNode())) {
+      XMLString s1=getStringFromNode(node);
+      if (comparator.compareStrings(s1,s2)) {
+        result=true;
+        break;
+      }
+    }
+    list1.reset();
+  }
+ else   if (XObject.CLASS_STRING == type) {
+    XMLString s2=obj2.xstr();
+    DTMIterator list1=iterRaw();
+    int node;
+    while (DTM.NULL != (node=list1.nextNode())) {
+      XMLString s1=getStringFromNode(node);
+      if (comparator.compareStrings(s1,s2)) {
+        result=true;
+        break;
+      }
+    }
+    list1.reset();
+  }
+ else {
+    result=comparator.compareNumbers(this.num(),obj2.num());
+  }
+  return result;
+}

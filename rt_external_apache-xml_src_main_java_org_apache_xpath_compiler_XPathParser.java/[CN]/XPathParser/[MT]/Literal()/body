@@ -1,0 +1,17 @@
+{
+  int last=m_token.length() - 1;
+  char c0=m_tokenChar;
+  char cX=m_token.charAt(last);
+  if (((c0 == '\"') && (cX == '\"')) || ((c0 == '\'') && (cX == '\''))) {
+    int tokenQueuePos=m_queueMark - 1;
+    m_ops.m_tokenQueue.setElementAt(null,tokenQueuePos);
+    Object obj=new XString(m_token.substring(1,last));
+    m_ops.m_tokenQueue.setElementAt(obj,tokenQueuePos);
+    m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),tokenQueuePos);
+    m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+    nextToken();
+  }
+ else {
+    error(XPATHErrorResources.ER_PATTERN_LITERAL_NEEDS_BE_QUOTED,new Object[]{m_token});
+  }
+}

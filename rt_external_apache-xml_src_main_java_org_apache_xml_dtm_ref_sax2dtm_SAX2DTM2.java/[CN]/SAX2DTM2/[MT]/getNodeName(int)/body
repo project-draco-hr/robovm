@@ -1,0 +1,31 @@
+{
+  int nodeID=makeNodeIdentity(nodeHandle);
+  int eType=_exptype2(nodeID);
+  final ExtendedType extType=m_extendedTypes[eType];
+  if (extType.getNamespace().length() == 0) {
+    int type=extType.getNodeType();
+    String localName=extType.getLocalName();
+    if (type == DTM.NAMESPACE_NODE) {
+      if (localName.length() == 0)       return "xmlns";
+ else       return "xmlns:" + localName;
+    }
+ else     if (type == DTM.PROCESSING_INSTRUCTION_NODE) {
+      int dataIndex=_dataOrQName(nodeID);
+      dataIndex=m_data.elementAt(-dataIndex);
+      return m_valuesOrPrefixes.indexToString(dataIndex);
+    }
+ else     if (localName.length() == 0) {
+      return getFixedNames(type);
+    }
+ else     return localName;
+  }
+ else {
+    int qnameIndex=m_dataOrQName.elementAt(nodeID);
+    if (qnameIndex == 0)     return extType.getLocalName();
+    if (qnameIndex < 0) {
+      qnameIndex=-qnameIndex;
+      qnameIndex=m_data.elementAt(qnameIndex);
+    }
+    return m_valuesOrPrefixes.indexToString(qnameIndex);
+  }
+}

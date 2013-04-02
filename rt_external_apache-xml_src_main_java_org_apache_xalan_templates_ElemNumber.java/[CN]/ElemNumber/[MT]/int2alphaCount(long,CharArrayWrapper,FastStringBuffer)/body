@@ -1,0 +1,23 @@
+{
+  int radix=aTable.getLength();
+  char[] table=new char[radix];
+  int i;
+  for (i=0; i < radix - 1; i++) {
+    table[i + 1]=aTable.getChar(i);
+  }
+  table[0]=aTable.getChar(i);
+  char buf[]=new char[100];
+  int charPos;
+  charPos=buf.length - 1;
+  int lookupIndex=1;
+  long correction=0;
+  do {
+    correction=((lookupIndex == 0) || (correction != 0 && lookupIndex == radix - 1)) ? (radix - 1) : 0;
+    lookupIndex=(int)(val + correction) % radix;
+    val=(val / radix);
+    if (lookupIndex == 0 && val == 0)     break;
+    buf[charPos--]=table[lookupIndex];
+  }
+ while (val > 0);
+  stringBuf.append(buf,charPos + 1,(buf.length - charPos - 1));
+}

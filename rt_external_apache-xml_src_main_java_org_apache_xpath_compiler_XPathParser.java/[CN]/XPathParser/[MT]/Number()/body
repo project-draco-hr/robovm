@@ -1,0 +1,17 @@
+{
+  if (null != m_token) {
+    double num;
+    try {
+      if ((m_token.indexOf('e') > -1) || (m_token.indexOf('E') > -1))       throw new NumberFormatException();
+      num=Double.valueOf(m_token).doubleValue();
+    }
+ catch (    NumberFormatException nfe) {
+      num=0.0;
+      error(XPATHErrorResources.ER_COULDNOT_BE_FORMATTED_TO_NUMBER,new Object[]{m_token});
+    }
+    m_ops.m_tokenQueue.setElementAt(new XNumber(num),m_queueMark - 1);
+    m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),m_queueMark - 1);
+    m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+    nextToken();
+  }
+}

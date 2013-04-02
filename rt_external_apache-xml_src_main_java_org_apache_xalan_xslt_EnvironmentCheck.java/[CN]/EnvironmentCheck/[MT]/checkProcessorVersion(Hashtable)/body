@@ -1,0 +1,44 @@
+{
+  if (null == h)   h=new Hashtable();
+  try {
+    final String XALAN1_VERSION_CLASS="org.apache.xalan.xslt.XSLProcessorVersion";
+    Class clazz=ObjectFactory.findProviderClass(XALAN1_VERSION_CLASS,ObjectFactory.findClassLoader(),true);
+    StringBuffer buf=new StringBuffer();
+    Field f=clazz.getField("PRODUCT");
+    buf.append(f.get(null));
+    buf.append(';');
+    f=clazz.getField("LANGUAGE");
+    buf.append(f.get(null));
+    buf.append(';');
+    f=clazz.getField("S_VERSION");
+    buf.append(f.get(null));
+    buf.append(';');
+    h.put(VERSION + "xalan1",buf.toString());
+  }
+ catch (  Exception e1) {
+    h.put(VERSION + "xalan1",CLASS_NOTPRESENT);
+  }
+  try {
+    final String XALAN2_VERSION_CLASS="org.apache.xalan.processor.XSLProcessorVersion";
+    Class clazz=ObjectFactory.findProviderClass(XALAN2_VERSION_CLASS,ObjectFactory.findClassLoader(),true);
+    StringBuffer buf=new StringBuffer();
+    Field f=clazz.getField("S_VERSION");
+    buf.append(f.get(null));
+    h.put(VERSION + "xalan2x",buf.toString());
+  }
+ catch (  Exception e2) {
+    h.put(VERSION + "xalan2x",CLASS_NOTPRESENT);
+  }
+  try {
+    final String XALAN2_2_VERSION_CLASS="org.apache.xalan.Version";
+    final String XALAN2_2_VERSION_METHOD="getVersion";
+    final Class noArgs[]=new Class[0];
+    Class clazz=ObjectFactory.findProviderClass(XALAN2_2_VERSION_CLASS,ObjectFactory.findClassLoader(),true);
+    Method method=clazz.getMethod(XALAN2_2_VERSION_METHOD,noArgs);
+    Object returnValue=method.invoke(null,new Object[0]);
+    h.put(VERSION + "xalan2_2",(String)returnValue);
+  }
+ catch (  Exception e2) {
+    h.put(VERSION + "xalan2_2",CLASS_NOTPRESENT);
+  }
+}

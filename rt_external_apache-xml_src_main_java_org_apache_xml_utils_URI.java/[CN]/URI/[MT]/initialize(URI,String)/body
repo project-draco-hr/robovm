@@ -1,0 +1,110 @@
+{
+  if (p_base == null && (p_uriSpec == null || p_uriSpec.trim().length() == 0)) {
+    throw new MalformedURIException(XMLMessages.createXMLMessage(XMLErrorResources.ER_CANNOT_INIT_URI_EMPTY_PARMS,null));
+  }
+  if (p_uriSpec == null || p_uriSpec.trim().length() == 0) {
+    initialize(p_base);
+    return;
+  }
+  String uriSpec=p_uriSpec.trim();
+  int uriSpecLen=uriSpec.length();
+  int index=0;
+  int colonIndex=uriSpec.indexOf(':');
+  if (colonIndex < 0) {
+    if (p_base == null) {
+      throw new MalformedURIException(XMLMessages.createXMLMessage(XMLErrorResources.ER_NO_SCHEME_IN_URI,new Object[]{uriSpec}));
+    }
+  }
+ else {
+    initializeScheme(uriSpec);
+    uriSpec=uriSpec.substring(colonIndex + 1);
+    if (m_scheme != null && p_base != null) {
+      if (uriSpec.startsWith("/") || !m_scheme.equals(p_base.m_scheme) || !p_base.getSchemeSpecificPart().startsWith("/")) {
+        p_base=null;
+      }
+    }
+    uriSpecLen=uriSpec.length();
+  }
+  if (uriSpec.startsWith("//")) {
+    index+=2;
+    int startPos=index;
+    char testChar='\0';
+    while (index < uriSpecLen) {
+      testChar=uriSpec.charAt(index);
+      if (testChar == '/' || testChar == '?' || testChar == '#') {
+        break;
+      }
+      index++;
+    }
+    if (index > startPos) {
+      initializeAuthority(uriSpec.substring(startPos,index));
+    }
+ else {
+      m_host="";
+    }
+  }
+  initializePath(uriSpec.substring(index));
+  if (p_base != null) {
+    if (m_path.length() == 0 && m_scheme == null && m_host == null) {
+      m_scheme=p_base.getScheme();
+      m_userinfo=p_base.getUserinfo();
+      m_host=p_base.getHost();
+      m_port=p_base.getPort();
+      m_path=p_base.getPath();
+      if (m_queryString == null) {
+        m_queryString=p_base.getQueryString();
+      }
+      return;
+    }
+    if (m_scheme == null) {
+      m_scheme=p_base.getScheme();
+    }
+    if (m_host == null) {
+      m_userinfo=p_base.getUserinfo();
+      m_host=p_base.getHost();
+      m_port=p_base.getPort();
+    }
+ else {
+      return;
+    }
+    if (m_path.length() > 0 && m_path.startsWith("/")) {
+      return;
+    }
+    String path=new String();
+    String basePath=p_base.getPath();
+    if (basePath != null) {
+      int lastSlash=basePath.lastIndexOf('/');
+      if (lastSlash != -1) {
+        path=basePath.substring(0,lastSlash + 1);
+      }
+    }
+    path=path.concat(m_path);
+    index=-1;
+    while ((index=path.indexOf("/./")) != -1) {
+      path=path.substring(0,index + 1).concat(path.substring(index + 3));
+    }
+    if (path.endsWith("/.")) {
+      path=path.substring(0,path.length() - 1);
+    }
+    index=-1;
+    int segIndex=-1;
+    String tempString=null;
+    while ((index=path.indexOf("/../")) > 0) {
+      tempString=path.substring(0,path.indexOf("/../"));
+      segIndex=tempString.lastIndexOf('/');
+      if (segIndex != -1) {
+        if (!tempString.substring(segIndex++).equals("..")) {
+          path=path.substring(0,segIndex).concat(path.substring(index + 4));
+        }
+      }
+    }
+    if (path.endsWith("/..")) {
+      tempString=path.substring(0,path.length() - 3);
+      segIndex=tempString.lastIndexOf('/');
+      if (segIndex != -1) {
+        path=path.substring(0,segIndex + 1);
+      }
+    }
+    m_path=path;
+  }
+}

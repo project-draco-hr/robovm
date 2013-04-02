@@ -1,0 +1,26 @@
+{
+  if (!isReverseAxes())   return super.getProximityPosition(predicateIndex);
+  if (predicateIndex < 0)   return -1;
+  if (m_proximityPositions[predicateIndex] <= 0) {
+    XPathContext xctxt=getXPathContext();
+    try {
+      OneStepIterator clone=(OneStepIterator)this.clone();
+      int root=getRoot();
+      xctxt.pushCurrentNode(root);
+      clone.setRoot(root,xctxt);
+      clone.m_predCount=predicateIndex;
+      int count=1;
+      int next;
+      while (DTM.NULL != (next=clone.nextNode())) {
+        count++;
+      }
+      m_proximityPositions[predicateIndex]+=count;
+    }
+ catch (    CloneNotSupportedException cnse) {
+    }
+ finally {
+      xctxt.popCurrentNode();
+    }
+  }
+  return m_proximityPositions[predicateIndex];
+}

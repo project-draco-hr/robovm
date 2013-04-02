@@ -1,0 +1,58 @@
+{
+  int identity=makeNodeIdentity(nodeHandle);
+  if (identity == DTM.NULL)   return;
+  int type=_type2(identity);
+  if (type == DTM.ELEMENT_NODE || type == DTM.DOCUMENT_NODE) {
+    int startNode=identity;
+    identity=_firstch2(identity);
+    if (DTM.NULL != identity) {
+      int offset=-1;
+      int length=0;
+      do {
+        type=_exptype2(identity);
+        if (type == DTM.TEXT_NODE || type == DTM.CDATA_SECTION_NODE) {
+          int dataIndex=m_dataOrQName.elementAt(identity);
+          if (dataIndex >= 0) {
+            if (-1 == offset) {
+              offset=dataIndex >>> TEXT_LENGTH_BITS;
+            }
+            length+=dataIndex & TEXT_LENGTH_MAX;
+          }
+ else {
+            if (-1 == offset) {
+              offset=m_data.elementAt(-dataIndex);
+            }
+            length+=m_data.elementAt(-dataIndex + 1);
+          }
+        }
+        identity++;
+      }
+ while (_parent2(identity) >= startNode);
+      if (length > 0) {
+        if (normalize)         m_chars.sendNormalizedSAXcharacters(ch,offset,length);
+ else         m_chars.sendSAXcharacters(ch,offset,length);
+      }
+    }
+  }
+ else   if (DTM.TEXT_NODE == type || DTM.CDATA_SECTION_NODE == type) {
+    int dataIndex=m_dataOrQName.elementAt(identity);
+    if (dataIndex >= 0) {
+      if (normalize)       m_chars.sendNormalizedSAXcharacters(ch,dataIndex >>> TEXT_LENGTH_BITS,dataIndex & TEXT_LENGTH_MAX);
+ else       m_chars.sendSAXcharacters(ch,dataIndex >>> TEXT_LENGTH_BITS,dataIndex & TEXT_LENGTH_MAX);
+    }
+ else {
+      if (normalize)       m_chars.sendNormalizedSAXcharacters(ch,m_data.elementAt(-dataIndex),m_data.elementAt(-dataIndex + 1));
+ else       m_chars.sendSAXcharacters(ch,m_data.elementAt(-dataIndex),m_data.elementAt(-dataIndex + 1));
+    }
+  }
+ else {
+    int dataIndex=m_dataOrQName.elementAt(identity);
+    if (dataIndex < 0) {
+      dataIndex=-dataIndex;
+      dataIndex=m_data.elementAt(dataIndex + 1);
+    }
+    String str=(String)m_values.elementAt(dataIndex);
+    if (normalize)     FastStringBuffer.sendNormalizedSAXcharacters(str.toCharArray(),0,str.length(),ch);
+ else     ch.characters(str.toCharArray(),0,str.length());
+  }
+}

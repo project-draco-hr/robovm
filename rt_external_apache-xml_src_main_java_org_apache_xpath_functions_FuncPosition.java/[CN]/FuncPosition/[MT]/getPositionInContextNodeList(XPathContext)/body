@@ -1,0 +1,26 @@
+{
+  SubContextList iter=m_isTopLevel ? null : xctxt.getSubContextList();
+  if (null != iter) {
+    int prox=iter.getProximityPosition(xctxt);
+    return prox;
+  }
+  DTMIterator cnl=xctxt.getContextNodeList();
+  if (null != cnl) {
+    int n=cnl.getCurrentNode();
+    if (n == DTM.NULL) {
+      if (cnl.getCurrentPos() == 0)       return 0;
+      try {
+        cnl=cnl.cloneWithReset();
+      }
+ catch (      CloneNotSupportedException cnse) {
+        throw new org.apache.xml.utils.WrappedRuntimeException(cnse);
+      }
+      int currentNode=xctxt.getContextNode();
+      while (DTM.NULL != (n=cnl.nextNode())) {
+        if (n == currentNode)         break;
+      }
+    }
+    return cnl.getCurrentPos();
+  }
+  return -1;
+}

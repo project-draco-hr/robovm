@@ -1,0 +1,46 @@
+{
+  if (nodeArg == null) {
+    return null;
+  }
+  Serializer serializer=fXMLSerializer;
+  serializer.reset();
+  if (nodeArg != fVisitedNode) {
+    String xmlVersion=getXMLVersion(nodeArg);
+    serializer.getOutputFormat().setProperty("version",xmlVersion);
+    fDOMConfigProperties.setProperty(DOMConstants.S_XERCES_PROPERTIES_NS + DOMConstants.S_XML_VERSION,xmlVersion);
+    fDOMConfigProperties.setProperty(DOMConstants.S_XSL_OUTPUT_ENCODING,"UTF-16");
+    if ((nodeArg.getNodeType() != Node.DOCUMENT_NODE || nodeArg.getNodeType() != Node.ELEMENT_NODE || nodeArg.getNodeType() != Node.ENTITY_NODE) && ((fFeatures & XMLDECL) != 0)) {
+      fDOMConfigProperties.setProperty(DOMConstants.S_XSL_OUTPUT_OMIT_XML_DECL,DOMConstants.DOM3_DEFAULT_FALSE);
+    }
+    fVisitedNode=nodeArg;
+  }
+  fXMLSerializer.setOutputFormat(fDOMConfigProperties);
+  StringWriter output=new StringWriter();
+  try {
+    serializer.setWriter(output);
+    if (fDOMSerializer == null) {
+      fDOMSerializer=(DOM3Serializer)serializer.asDOM3Serializer();
+    }
+    if (fDOMErrorHandler != null) {
+      fDOMSerializer.setErrorHandler(fDOMErrorHandler);
+    }
+    if (fSerializerFilter != null) {
+      fDOMSerializer.setNodeFilter(fSerializerFilter);
+    }
+    fDOMSerializer.setNewLine(fEndOfLine.toCharArray());
+    fDOMSerializer.serializeDOM3(nodeArg);
+  }
+ catch (  LSException lse) {
+    throw lse;
+  }
+catch (  RuntimeException e) {
+    throw (LSException)createLSException(LSException.SERIALIZE_ERR,e).fillInStackTrace();
+  }
+catch (  Exception e) {
+    if (fDOMErrorHandler != null) {
+      fDOMErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_FATAL_ERROR,e.getMessage(),null,e));
+    }
+    throw (LSException)createLSException(LSException.SERIALIZE_ERR,e).fillInStackTrace();
+  }
+  return output.toString();
+}

@@ -1,0 +1,28 @@
+{
+  Node child, next;
+  for (child=node.getFirstChild(); child != null; child=next) {
+    next=child.getNextSibling();
+    if (child.getNodeType() == Node.ELEMENT_NODE) {
+      String prefix=child.getPrefix();
+      if (prefix != null && fNSBinder.getURI(prefix) == null) {
+        String msg=Utils.messages.createMessage(MsgKey.ER_ELEM_UNBOUND_PREFIX_IN_ENTREF,new Object[]{node.getNodeName(),child.getNodeName(),prefix});
+        if (fErrorHandler != null) {
+          fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_FATAL_ERROR,msg,MsgKey.ER_ELEM_UNBOUND_PREFIX_IN_ENTREF,null,null,null));
+        }
+      }
+      NamedNodeMap attrs=child.getAttributes();
+      for (int i=0; i < attrs.getLength(); i++) {
+        String attrPrefix=attrs.item(i).getPrefix();
+        if (attrPrefix != null && fNSBinder.getURI(attrPrefix) == null) {
+          String msg=Utils.messages.createMessage(MsgKey.ER_ATTR_UNBOUND_PREFIX_IN_ENTREF,new Object[]{node.getNodeName(),child.getNodeName(),attrs.item(i)});
+          if (fErrorHandler != null) {
+            fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_FATAL_ERROR,msg,MsgKey.ER_ATTR_UNBOUND_PREFIX_IN_ENTREF,null,null,null));
+          }
+        }
+      }
+    }
+    if (child.hasChildNodes()) {
+      checkUnboundPrefixInEntRef(child);
+    }
+  }
+}

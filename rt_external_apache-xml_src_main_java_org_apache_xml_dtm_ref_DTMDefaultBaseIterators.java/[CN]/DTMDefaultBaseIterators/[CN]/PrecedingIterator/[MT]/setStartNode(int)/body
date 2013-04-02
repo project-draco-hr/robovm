@@ -1,0 +1,24 @@
+{
+  if (node == DTMDefaultBase.ROOTNODE)   node=getDocument();
+  if (_isRestartable) {
+    node=makeNodeIdentity(node);
+    int parent, index;
+    if (_type(node) == DTM.ATTRIBUTE_NODE)     node=_parent(node);
+    _startNode=node;
+    _stack[index=0]=node;
+    parent=node;
+    while ((parent=_parent(parent)) != NULL) {
+      if (++index == _stack.length) {
+        final int[] stack=new int[index + 4];
+        System.arraycopy(_stack,0,stack,0,index);
+        _stack=stack;
+      }
+      _stack[index]=parent;
+    }
+    if (index > 0)     --index;
+    _currentNode=_stack[index];
+    _oldsp=_sp=index;
+    return resetPosition();
+  }
+  return this;
+}

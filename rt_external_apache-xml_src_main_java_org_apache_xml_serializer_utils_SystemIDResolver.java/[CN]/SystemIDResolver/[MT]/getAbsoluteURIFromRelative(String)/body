@@ -1,0 +1,19 @@
+{
+  if (localPath == null || localPath.length() == 0)   return "";
+  String absolutePath=localPath;
+  if (!isAbsolutePath(localPath)) {
+    try {
+      absolutePath=getAbsolutePathFromRelativePath(localPath);
+    }
+ catch (    SecurityException se) {
+      return "file:" + localPath;
+    }
+  }
+  String urlString;
+  if (null != absolutePath) {
+    if (absolutePath.startsWith(File.separator))     urlString="file://" + absolutePath;
+ else     urlString="file:///" + absolutePath;
+  }
+ else   urlString="file:" + localPath;
+  return replaceChars(urlString);
+}

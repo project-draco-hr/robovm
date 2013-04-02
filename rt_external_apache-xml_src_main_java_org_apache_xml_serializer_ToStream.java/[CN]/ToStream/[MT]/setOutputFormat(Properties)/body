@@ -1,0 +1,24 @@
+{
+  boolean shouldFlush=m_shouldFlush;
+  if (format != null) {
+    Enumeration propNames;
+    propNames=format.propertyNames();
+    while (propNames.hasMoreElements()) {
+      String key=(String)propNames.nextElement();
+      String value=format.getProperty(key);
+      String explicitValue=(String)format.get(key);
+      if (explicitValue == null && value != null) {
+        this.setOutputPropertyDefault(key,value);
+      }
+      if (explicitValue != null) {
+        this.setOutputProperty(key,explicitValue);
+      }
+    }
+  }
+  String entitiesFileName=(String)format.get(OutputPropertiesFactory.S_KEY_ENTITIES);
+  if (null != entitiesFileName) {
+    String method=(String)format.get(OutputKeys.METHOD);
+    m_charInfo=CharInfo.getCharInfo(entitiesFileName,method);
+  }
+  m_shouldFlush=shouldFlush;
+}

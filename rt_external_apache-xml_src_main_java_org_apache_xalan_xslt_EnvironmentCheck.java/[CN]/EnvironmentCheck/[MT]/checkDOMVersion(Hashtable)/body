@@ -1,0 +1,36 @@
+{
+  if (null == h)   h=new Hashtable();
+  final String DOM_LEVEL2_CLASS="org.w3c.dom.Document";
+  final String DOM_LEVEL2_METHOD="createElementNS";
+  final String DOM_LEVEL2WD_CLASS="org.w3c.dom.Node";
+  final String DOM_LEVEL2WD_METHOD="supported";
+  final String DOM_LEVEL2FD_CLASS="org.w3c.dom.Node";
+  final String DOM_LEVEL2FD_METHOD="isSupported";
+  final Class twoStringArgs[]={java.lang.String.class,java.lang.String.class};
+  try {
+    Class clazz=ObjectFactory.findProviderClass(DOM_LEVEL2_CLASS,ObjectFactory.findClassLoader(),true);
+    Method method=clazz.getMethod(DOM_LEVEL2_METHOD,twoStringArgs);
+    h.put(VERSION + "DOM","2.0");
+    try {
+      clazz=ObjectFactory.findProviderClass(DOM_LEVEL2WD_CLASS,ObjectFactory.findClassLoader(),true);
+      method=clazz.getMethod(DOM_LEVEL2WD_METHOD,twoStringArgs);
+      h.put(ERROR + VERSION + "DOM.draftlevel","2.0wd");
+      h.put(ERROR,ERROR_FOUND);
+    }
+ catch (    Exception e2) {
+      try {
+        clazz=ObjectFactory.findProviderClass(DOM_LEVEL2FD_CLASS,ObjectFactory.findClassLoader(),true);
+        method=clazz.getMethod(DOM_LEVEL2FD_METHOD,twoStringArgs);
+        h.put(VERSION + "DOM.draftlevel","2.0fd");
+      }
+ catch (      Exception e3) {
+        h.put(ERROR + VERSION + "DOM.draftlevel","2.0unknown");
+        h.put(ERROR,ERROR_FOUND);
+      }
+    }
+  }
+ catch (  Exception e) {
+    h.put(ERROR + VERSION + "DOM","ERROR attempting to load DOM level 2 class: " + e.toString());
+    h.put(ERROR,ERROR_FOUND);
+  }
+}

@@ -1,0 +1,21 @@
+{
+  char[] chunk;
+  if (m_firstFree < m_chunkSize)   chunk=m_array[m_lastChunk];
+ else {
+    int i=m_array.length;
+    if (m_lastChunk + 1 == i) {
+      char[][] newarray=new char[i + 16][];
+      System.arraycopy(m_array,0,newarray,0,i);
+      m_array=newarray;
+    }
+    chunk=m_array[++m_lastChunk];
+    if (chunk == null) {
+      if (m_lastChunk == 1 << m_rebundleBits && m_chunkBits < m_maxChunkBits) {
+        m_innerFSB=new FastStringBuffer(this);
+      }
+      chunk=m_array[m_lastChunk]=new char[m_chunkSize];
+    }
+    m_firstFree=0;
+  }
+  chunk[m_firstFree++]=value;
+}

@@ -1,0 +1,33 @@
+{
+  int op=compiler.getOp(opPos);
+  int innerExprOpPos=opPos + 2;
+switch (op) {
+case OpCodes.OP_ARGUMENT:
+    if (isProximateInnerExpr(compiler,innerExprOpPos))     return true;
+  break;
+case OpCodes.OP_VARIABLE:
+case OpCodes.OP_NUMBERLIT:
+case OpCodes.OP_LITERAL:
+case OpCodes.OP_LOCATIONPATH:
+break;
+case OpCodes.OP_FUNCTION:
+boolean isProx=functionProximateOrContainsProximate(compiler,opPos);
+if (isProx) return true;
+break;
+case OpCodes.OP_GT:
+case OpCodes.OP_GTE:
+case OpCodes.OP_LT:
+case OpCodes.OP_LTE:
+case OpCodes.OP_EQUALS:
+int leftPos=OpMap.getFirstChildPos(op);
+int rightPos=compiler.getNextOpPos(leftPos);
+isProx=isProximateInnerExpr(compiler,leftPos);
+if (isProx) return true;
+isProx=isProximateInnerExpr(compiler,rightPos);
+if (isProx) return true;
+break;
+default :
+return true;
+}
+return false;
+}

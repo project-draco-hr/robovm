@@ -1,0 +1,17 @@
+{
+  m_importNumber=getStylesheetRoot().getImportNumber(this);
+  StylesheetRoot root=getStylesheetRoot();
+  int globalImportCount=root.getGlobalImportCount();
+  m_importCountComposed=(globalImportCount - m_importNumber) - 1;
+  int count=getImportCount();
+  if (count > 0) {
+    m_endImportCountComposed+=count;
+    while (count > 0)     m_endImportCountComposed+=this.getImport(--count).getEndImportCountComposed();
+  }
+  count=getIncludeCountComposed();
+  while (count > 0) {
+    int imports=getIncludeComposed(--count).getImportCount();
+    m_endImportCountComposed+=imports;
+    while (imports > 0)     m_endImportCountComposed+=getIncludeComposed(count).getImport(--imports).getEndImportCountComposed();
+  }
+}

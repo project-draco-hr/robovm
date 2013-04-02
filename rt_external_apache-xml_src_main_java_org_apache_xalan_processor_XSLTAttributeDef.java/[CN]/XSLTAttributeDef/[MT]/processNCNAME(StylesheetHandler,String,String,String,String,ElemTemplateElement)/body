@@ -1,0 +1,23 @@
+{
+  if (getSupportsAVT()) {
+    AVT avt=null;
+    try {
+      avt=new AVT(handler,uri,name,rawName,value,owner);
+      if ((avt.isSimple()) && (!XML11Char.isXML11ValidNCName(value))) {
+        handleError(handler,XSLTErrorResources.INVALID_NCNAME,new Object[]{name,value},null);
+        return null;
+      }
+      return avt;
+    }
+ catch (    TransformerException te) {
+      throw new org.xml.sax.SAXException(te);
+    }
+  }
+ else {
+    if (!XML11Char.isXML11ValidNCName(value)) {
+      handleError(handler,XSLTErrorResources.INVALID_NCNAME,new Object[]{name,value},null);
+      return null;
+    }
+    return value;
+  }
+}

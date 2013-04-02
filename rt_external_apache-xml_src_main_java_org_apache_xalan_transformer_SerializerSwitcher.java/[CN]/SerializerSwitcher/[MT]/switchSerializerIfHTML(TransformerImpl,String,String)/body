@@ -1,0 +1,27 @@
+{
+  if (null == transformer)   return;
+  if (((null == ns) || (ns.length() == 0)) && localName.equalsIgnoreCase("html")) {
+    if (null != transformer.getOutputPropertyNoDefault(OutputKeys.METHOD))     return;
+    Properties prevProperties=transformer.getOutputFormat().getProperties();
+    OutputProperties htmlOutputProperties=new OutputProperties(Method.HTML);
+    htmlOutputProperties.copyFrom(prevProperties,true);
+    Properties htmlProperties=htmlOutputProperties.getProperties();
+    try {
+      Serializer oldSerializer=null;
+      if (null != oldSerializer) {
+        Serializer serializer=SerializerFactory.getSerializer(htmlProperties);
+        Writer writer=oldSerializer.getWriter();
+        if (null != writer)         serializer.setWriter(writer);
+ else {
+          OutputStream os=oldSerializer.getOutputStream();
+          if (null != os)           serializer.setOutputStream(os);
+        }
+        ContentHandler ch=serializer.asContentHandler();
+        transformer.setContentHandler(ch);
+      }
+    }
+ catch (    java.io.IOException e) {
+      throw new TransformerException(e);
+    }
+  }
+}

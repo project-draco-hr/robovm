@@ -1,0 +1,26 @@
+{
+  int steptype=compiler.getOp(opPos);
+  if (steptype == OpCodes.OP_LOCATIONPATH) {
+    loadLocationPaths(compiler,compiler.getNextOpPos(opPos),count + 1);
+    m_exprs[count]=createDTMIterator(compiler,opPos);
+    m_exprs[count].exprSetParent(this);
+  }
+ else {
+switch (steptype) {
+case OpCodes.OP_VARIABLE:
+case OpCodes.OP_EXTFUNCTION:
+case OpCodes.OP_FUNCTION:
+case OpCodes.OP_GROUP:
+      loadLocationPaths(compiler,compiler.getNextOpPos(opPos),count + 1);
+    WalkingIterator iter=new WalkingIterator(compiler.getNamespaceContext());
+  iter.exprSetParent(this);
+if (compiler.getLocationPathDepth() <= 0) iter.setIsTopLevel(true);
+iter.m_firstWalker=new org.apache.xpath.axes.FilterExprWalker(iter);
+iter.m_firstWalker.init(compiler,opPos,steptype);
+m_exprs[count]=iter;
+break;
+default :
+m_exprs=new LocPathIterator[count];
+}
+}
+}

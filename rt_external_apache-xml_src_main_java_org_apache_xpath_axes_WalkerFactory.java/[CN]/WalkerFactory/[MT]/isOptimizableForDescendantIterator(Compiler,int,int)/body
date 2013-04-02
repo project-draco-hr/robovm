@@ -1,0 +1,62 @@
+{
+  int stepType;
+  int stepCount=0;
+  boolean foundDorDS=false;
+  boolean foundSelf=false;
+  boolean foundDS=false;
+  int nodeTestType=OpCodes.NODETYPE_NODE;
+  while (OpCodes.ENDOP != (stepType=compiler.getOp(stepOpCodePos))) {
+    if (nodeTestType != OpCodes.NODETYPE_NODE && nodeTestType != OpCodes.NODETYPE_ROOT)     return false;
+    stepCount++;
+    if (stepCount > 3)     return false;
+    boolean mightBeProximate=mightBeProximate(compiler,stepOpCodePos,stepType);
+    if (mightBeProximate)     return false;
+switch (stepType) {
+case OpCodes.FROM_FOLLOWING:
+case OpCodes.FROM_FOLLOWING_SIBLINGS:
+case OpCodes.FROM_PRECEDING:
+case OpCodes.FROM_PRECEDING_SIBLINGS:
+case OpCodes.FROM_PARENT:
+case OpCodes.OP_VARIABLE:
+case OpCodes.OP_EXTFUNCTION:
+case OpCodes.OP_FUNCTION:
+case OpCodes.OP_GROUP:
+case OpCodes.FROM_NAMESPACE:
+case OpCodes.FROM_ANCESTORS:
+case OpCodes.FROM_ANCESTORS_OR_SELF:
+case OpCodes.FROM_ATTRIBUTES:
+case OpCodes.MATCH_ATTRIBUTE:
+case OpCodes.MATCH_ANY_ANCESTOR:
+case OpCodes.MATCH_IMMEDIATE_ANCESTOR:
+      return false;
+case OpCodes.FROM_ROOT:
+    if (1 != stepCount)     return false;
+  break;
+case OpCodes.FROM_CHILDREN:
+if (!foundDS && !(foundDorDS && foundSelf)) return false;
+break;
+case OpCodes.FROM_DESCENDANTS_OR_SELF:
+foundDS=true;
+case OpCodes.FROM_DESCENDANTS:
+if (3 == stepCount) return false;
+foundDorDS=true;
+break;
+case OpCodes.FROM_SELF:
+if (1 != stepCount) return false;
+foundSelf=true;
+break;
+default :
+throw new RuntimeException(XSLMessages.createXPATHMessage(XPATHErrorResources.ER_NULL_ERROR_HANDLER,new Object[]{Integer.toString(stepType)}));
+}
+nodeTestType=compiler.getStepTestType(stepOpCodePos);
+int nextStepOpCodePos=compiler.getNextStepPos(stepOpCodePos);
+if (nextStepOpCodePos < 0) break;
+if (OpCodes.ENDOP != compiler.getOp(nextStepOpCodePos)) {
+if (compiler.countPredicates(stepOpCodePos) > 0) {
+return false;
+}
+}
+stepOpCodePos=nextStepOpCodePos;
+}
+return true;
+}

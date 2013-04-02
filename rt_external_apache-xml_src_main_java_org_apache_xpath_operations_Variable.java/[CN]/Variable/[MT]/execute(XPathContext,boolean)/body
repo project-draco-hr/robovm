@@ -1,0 +1,16 @@
+{
+  org.apache.xml.utils.PrefixResolver xprefixResolver=xctxt.getNamespaceContext();
+  XObject result;
+  if (m_fixUpWasCalled) {
+    if (m_isGlobal)     result=xctxt.getVarStack().getGlobalVariable(xctxt,m_index,destructiveOK);
+ else     result=xctxt.getVarStack().getLocalVariable(xctxt,m_index,destructiveOK);
+  }
+ else {
+    result=xctxt.getVarStack().getVariableOrParam(xctxt,m_qname);
+  }
+  if (null == result) {
+    warn(xctxt,XPATHErrorResources.WG_ILLEGAL_VARIABLE_REFERENCE,new Object[]{m_qname.getLocalPart()});
+    result=new XNodeSet(xctxt.getDTMManager());
+  }
+  return result;
+}

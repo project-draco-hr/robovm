@@ -1,0 +1,37 @@
+{
+  XPath countMatchPattern=getCountMatchPattern(xctxt,pos);
+  DTM dtm=xctxt.getDTM(pos);
+  if (Constants.NUMBERLEVEL_ANY == m_level) {
+    XPath fromMatchPattern=m_fromMatchPattern;
+    while (DTM.NULL != pos) {
+      int next=dtm.getPreviousSibling(pos);
+      if (DTM.NULL == next) {
+        next=dtm.getParent(pos);
+        if ((DTM.NULL != next) && ((((null != fromMatchPattern) && (fromMatchPattern.getMatchScore(xctxt,next) != XPath.MATCH_SCORE_NONE))) || (dtm.getNodeType(next) == DTM.DOCUMENT_NODE))) {
+          pos=DTM.NULL;
+          break;
+        }
+      }
+ else {
+        int child=next;
+        while (DTM.NULL != child) {
+          child=dtm.getLastChild(next);
+          if (DTM.NULL != child)           next=child;
+        }
+      }
+      pos=next;
+      if ((DTM.NULL != pos) && ((null == countMatchPattern) || (countMatchPattern.getMatchScore(xctxt,pos) != XPath.MATCH_SCORE_NONE))) {
+        break;
+      }
+    }
+  }
+ else {
+    while (DTM.NULL != pos) {
+      pos=dtm.getPreviousSibling(pos);
+      if ((DTM.NULL != pos) && ((null == countMatchPattern) || (countMatchPattern.getMatchScore(xctxt,pos) != XPath.MATCH_SCORE_NONE))) {
+        break;
+      }
+    }
+  }
+  return pos;
+}

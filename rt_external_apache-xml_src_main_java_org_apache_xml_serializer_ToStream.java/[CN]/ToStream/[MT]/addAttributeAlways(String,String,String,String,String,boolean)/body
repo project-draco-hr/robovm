@@ -1,0 +1,44 @@
+{
+  boolean was_added;
+  int index;
+  if (uri == null || localName == null || uri.length() == 0)   index=m_attributes.getIndex(rawName);
+ else {
+    index=m_attributes.getIndex(uri,localName);
+  }
+  if (index >= 0) {
+    String old_value=null;
+    if (m_tracer != null) {
+      old_value=m_attributes.getValue(index);
+      if (value.equals(old_value))       old_value=null;
+    }
+    m_attributes.setValue(index,value);
+    was_added=false;
+    if (old_value != null)     firePseudoAttributes();
+  }
+ else {
+    if (xslAttribute) {
+      final int colonIndex=rawName.indexOf(':');
+      if (colonIndex > 0) {
+        String prefix=rawName.substring(0,colonIndex);
+        NamespaceMappings.MappingRecord existing_mapping=m_prefixMap.getMappingFromPrefix(prefix);
+        if (existing_mapping != null && existing_mapping.m_declarationDepth == m_elemContext.m_currentElemDepth && !existing_mapping.m_uri.equals(uri)) {
+          prefix=m_prefixMap.lookupPrefix(uri);
+          if (prefix == null) {
+            prefix=m_prefixMap.generateNextPrefix();
+          }
+          rawName=prefix + ':' + localName;
+        }
+      }
+      try {
+        String prefixUsed=ensureAttributesNamespaceIsDeclared(uri,localName,rawName);
+      }
+ catch (      SAXException e) {
+        e.printStackTrace();
+      }
+    }
+    m_attributes.addAttribute(uri,localName,rawName,type,value);
+    was_added=true;
+    if (m_tracer != null)     firePseudoAttributes();
+  }
+  return was_added;
+}

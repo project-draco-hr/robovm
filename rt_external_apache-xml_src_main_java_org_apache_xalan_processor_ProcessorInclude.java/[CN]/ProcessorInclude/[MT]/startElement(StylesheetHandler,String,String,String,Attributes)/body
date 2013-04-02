@@ -1,0 +1,27 @@
+{
+  setPropertiesFromAttributes(handler,rawName,attributes,this);
+  try {
+    Source sourceFromURIResolver=getSourceFromUriResolver(handler);
+    String hrefUrl=getBaseURIOfIncludedStylesheet(handler,sourceFromURIResolver);
+    if (handler.importStackContains(hrefUrl)) {
+      throw new org.xml.sax.SAXException(XSLMessages.createMessage(getStylesheetInclErr(),new Object[]{hrefUrl}));
+    }
+    handler.pushImportURL(hrefUrl);
+    handler.pushImportSource(sourceFromURIResolver);
+    int savedStylesheetType=handler.getStylesheetType();
+    handler.setStylesheetType(this.getStylesheetType());
+    handler.pushNewNamespaceSupport();
+    try {
+      parse(handler,uri,localName,rawName,attributes);
+    }
+  finally {
+      handler.setStylesheetType(savedStylesheetType);
+      handler.popImportURL();
+      handler.popImportSource();
+      handler.popNamespaceSupport();
+    }
+  }
+ catch (  TransformerException te) {
+    handler.error(te.getMessage(),te);
+  }
+}

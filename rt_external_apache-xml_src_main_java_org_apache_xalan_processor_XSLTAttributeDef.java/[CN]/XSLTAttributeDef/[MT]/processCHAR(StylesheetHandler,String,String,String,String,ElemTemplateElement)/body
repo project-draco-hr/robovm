@@ -1,0 +1,22 @@
+{
+  if (getSupportsAVT()) {
+    try {
+      AVT avt=new AVT(handler,uri,name,rawName,value,owner);
+      if ((avt.isSimple()) && (value.length() != 1)) {
+        handleError(handler,XSLTErrorResources.INVALID_TCHAR,new Object[]{name,value},null);
+        return null;
+      }
+      return avt;
+    }
+ catch (    TransformerException te) {
+      throw new org.xml.sax.SAXException(te);
+    }
+  }
+ else {
+    if (value.length() != 1) {
+      handleError(handler,XSLTErrorResources.INVALID_TCHAR,new Object[]{name,value},null);
+      return null;
+    }
+    return new Character(value.charAt(0));
+  }
+}

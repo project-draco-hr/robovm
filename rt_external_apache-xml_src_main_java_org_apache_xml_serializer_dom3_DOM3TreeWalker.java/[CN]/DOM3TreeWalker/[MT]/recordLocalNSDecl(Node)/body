@@ -1,0 +1,35 @@
+{
+  NamedNodeMap atts=((Element)node).getAttributes();
+  int length=atts.getLength();
+  for (int i=0; i < length; i++) {
+    Node attr=atts.item(i);
+    String localName=attr.getLocalName();
+    String attrPrefix=attr.getPrefix();
+    String attrValue=attr.getNodeValue();
+    String attrNS=attr.getNamespaceURI();
+    localName=localName == null || XMLNS_PREFIX.equals(localName) ? "" : localName;
+    attrPrefix=attrPrefix == null ? "" : attrPrefix;
+    attrValue=attrValue == null ? "" : attrValue;
+    attrNS=attrNS == null ? "" : attrNS;
+    if (XMLNS_URI.equals(attrNS)) {
+      if (XMLNS_URI.equals(attrValue)) {
+        String msg=Utils.messages.createMessage(MsgKey.ER_NS_PREFIX_CANNOT_BE_BOUND,new Object[]{attrPrefix,XMLNS_URI});
+        if (fErrorHandler != null) {
+          fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_ERROR,msg,MsgKey.ER_NS_PREFIX_CANNOT_BE_BOUND,null,null,null));
+        }
+      }
+ else {
+        if (XMLNS_PREFIX.equals(attrPrefix)) {
+          if (attrValue.length() != 0) {
+            fNSBinder.declarePrefix(localName,attrValue);
+          }
+ else {
+          }
+        }
+ else {
+          fNSBinder.declarePrefix("",attrValue);
+        }
+      }
+    }
+  }
+}

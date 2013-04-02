@@ -1,0 +1,42 @@
+{
+  Vector recomposableElements=new Vector();
+  if (null == m_globalImportList) {
+    Vector importList=new Vector();
+    addImports(this,true,importList);
+    m_globalImportList=new StylesheetComposed[importList.size()];
+    for (int i=0, j=importList.size() - 1; i < importList.size(); i++) {
+      m_globalImportList[j]=(StylesheetComposed)importList.elementAt(i);
+      m_globalImportList[j].recomposeIncludes(m_globalImportList[j]);
+      m_globalImportList[j--].recomposeImports();
+    }
+  }
+  int n=getGlobalImportCount();
+  for (int i=0; i < n; i++) {
+    StylesheetComposed imported=getGlobalImport(i);
+    imported.recompose(recomposableElements);
+  }
+  QuickSort2(recomposableElements,0,recomposableElements.size() - 1);
+  m_outputProperties=new OutputProperties(org.apache.xml.serializer.Method.UNKNOWN);
+  m_attrSets=new HashMap();
+  m_decimalFormatSymbols=new Hashtable();
+  m_keyDecls=new Vector();
+  m_namespaceAliasComposed=new Hashtable();
+  m_templateList=new TemplateList();
+  m_variables=new Vector();
+  for (int i=recomposableElements.size() - 1; i >= 0; i--)   ((ElemTemplateElement)recomposableElements.elementAt(i)).recompose(this);
+  initComposeState();
+  m_templateList.compose(this);
+  m_outputProperties.compose(this);
+  m_outputProperties.endCompose(this);
+  n=getGlobalImportCount();
+  for (int i=0; i < n; i++) {
+    StylesheetComposed imported=this.getGlobalImport(i);
+    int includedCount=imported.getIncludeCountComposed();
+    for (int j=-1; j < includedCount; j++) {
+      Stylesheet included=imported.getIncludeComposed(j);
+      composeTemplates(included);
+    }
+  }
+  if (m_extNsMgr != null)   m_extNsMgr.registerUnregisteredNamespaces();
+  clearComposeState();
+}

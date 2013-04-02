@@ -1,0 +1,26 @@
+{
+  int pos=getProximityPosition();
+  AxesWalker walker;
+  try {
+    walker=(AxesWalker)clone();
+  }
+ catch (  CloneNotSupportedException cnse) {
+    return -1;
+  }
+  walker.setPredicateCount(m_predicateIndex);
+  walker.setNextWalker(null);
+  walker.setPrevWalker(null);
+  WalkingIterator lpi=wi();
+  AxesWalker savedWalker=lpi.getLastUsedWalker();
+  try {
+    lpi.setLastUsedWalker(walker);
+    int next;
+    while (DTM.NULL != (next=walker.nextNode())) {
+      pos++;
+    }
+  }
+  finally {
+    lpi.setLastUsedWalker(savedWalker);
+  }
+  return pos;
+}

@@ -1,0 +1,20 @@
+{
+  int stepType=getOp(opPos);
+  if ((stepType >= OpCodes.AXES_START_TYPES) && (stepType <= OpCodes.AXES_END_TYPES)) {
+    return getNextOpPos(opPos);
+  }
+ else   if ((stepType >= OpCodes.FIRST_NODESET_OP) && (stepType <= OpCodes.LAST_NODESET_OP)) {
+    int newOpPos=getNextOpPos(opPos);
+    while (OpCodes.OP_PREDICATE == getOp(newOpPos)) {
+      newOpPos=getNextOpPos(newOpPos);
+    }
+    stepType=getOp(newOpPos);
+    if (!((stepType >= OpCodes.AXES_START_TYPES) && (stepType <= OpCodes.AXES_END_TYPES))) {
+      return OpCodes.ENDOP;
+    }
+    return newOpPos;
+  }
+ else {
+    throw new RuntimeException(XSLMessages.createXPATHMessage(XPATHErrorResources.ER_UNKNOWN_STEP,new Object[]{String.valueOf(stepType)}));
+  }
+}

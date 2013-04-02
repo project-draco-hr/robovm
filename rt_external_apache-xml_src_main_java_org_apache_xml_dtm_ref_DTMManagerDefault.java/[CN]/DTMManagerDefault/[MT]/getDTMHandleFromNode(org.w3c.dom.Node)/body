@@ -1,0 +1,28 @@
+{
+  if (null == node)   throw new IllegalArgumentException(XMLMessages.createXMLMessage(XMLErrorResources.ER_NODE_NON_NULL,null));
+  if (node instanceof org.apache.xml.dtm.ref.DTMNodeProxy)   return ((org.apache.xml.dtm.ref.DTMNodeProxy)node).getDTMNodeNumber();
+ else {
+    int max=m_dtms.length;
+    for (int i=0; i < max; i++) {
+      DTM thisDTM=m_dtms[i];
+      if ((null != thisDTM) && thisDTM instanceof DOM2DTM) {
+        int handle=((DOM2DTM)thisDTM).getHandleOfNode(node);
+        if (handle != DTM.NULL)         return handle;
+      }
+    }
+    Node root=node;
+    Node p=(root.getNodeType() == Node.ATTRIBUTE_NODE) ? ((org.w3c.dom.Attr)root).getOwnerElement() : root.getParentNode();
+    for (; p != null; p=p.getParentNode()) {
+      root=p;
+    }
+    DOM2DTM dtm=(DOM2DTM)getDTM(new javax.xml.transform.dom.DOMSource(root),false,null,true,true);
+    int handle;
+    if (node instanceof org.apache.xml.dtm.ref.dom2dtm.DOM2DTMdefaultNamespaceDeclarationNode) {
+      handle=dtm.getHandleOfNode(((org.w3c.dom.Attr)node).getOwnerElement());
+      handle=dtm.getAttributeNode(handle,node.getNamespaceURI(),node.getLocalName());
+    }
+ else     handle=((DOM2DTM)dtm).getHandleOfNode(node);
+    if (DTM.NULL == handle)     throw new RuntimeException(XMLMessages.createXMLMessage(XMLErrorResources.ER_COULD_NOT_RESOLVE_NODE,null));
+    return handle;
+  }
+}

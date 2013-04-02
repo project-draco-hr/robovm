@@ -1,0 +1,36 @@
+{
+  if (fXMLReader == null)   return;
+  if (DEBUG)   System.out.println("IncrementalSAXSource_Filter parse thread launched");
+  Object arg=Boolean.FALSE;
+  try {
+    fXMLReader.parse(fXMLReaderInputSource);
+  }
+ catch (  IOException ex) {
+    arg=ex;
+  }
+catch (  StopException ex) {
+    if (DEBUG)     System.out.println("Active IncrementalSAXSource_Filter normal stop exception");
+  }
+catch (  SAXException ex) {
+    Exception inner=ex.getException();
+    if (inner instanceof StopException) {
+      if (DEBUG)       System.out.println("Active IncrementalSAXSource_Filter normal stop exception");
+    }
+ else {
+      if (DEBUG) {
+        System.out.println("Active IncrementalSAXSource_Filter UNEXPECTED SAX exception: " + inner);
+        inner.printStackTrace();
+      }
+      arg=ex;
+    }
+  }
+  fXMLReader=null;
+  try {
+    fNoMoreEvents=true;
+    fCoroutineManager.co_exit_to(arg,fSourceCoroutineID,fControllerCoroutineID);
+  }
+ catch (  java.lang.NoSuchMethodException e) {
+    e.printStackTrace(System.err);
+    fCoroutineManager.co_exit(fSourceCoroutineID);
+  }
+}

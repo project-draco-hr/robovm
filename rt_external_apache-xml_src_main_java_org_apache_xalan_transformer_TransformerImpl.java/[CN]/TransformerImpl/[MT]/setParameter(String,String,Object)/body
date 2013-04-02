@@ -1,0 +1,14 @@
+{
+  VariableStack varstack=getXPathContext().getVarStack();
+  QName qname=new QName(namespace,name);
+  XObject xobject=XObject.create(value,getXPathContext());
+  StylesheetRoot sroot=m_stylesheetRoot;
+  Vector vars=sroot.getVariablesAndParamsComposed();
+  int i=vars.size();
+  while (--i >= 0) {
+    ElemVariable variable=(ElemVariable)vars.elementAt(i);
+    if (variable.getXSLToken() == Constants.ELEMNAME_PARAMVARIABLE && variable.getName().equals(qname)) {
+      varstack.setGlobalVariable(i,xobject);
+    }
+  }
+}

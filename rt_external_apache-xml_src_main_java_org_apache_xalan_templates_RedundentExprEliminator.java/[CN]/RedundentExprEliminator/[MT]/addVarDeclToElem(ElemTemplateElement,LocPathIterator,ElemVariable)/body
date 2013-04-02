@@ -1,0 +1,26 @@
+{
+  ElemTemplateElement ete=psuedoVarRecipient.getFirstChildElem();
+  lpi.callVisitors(null,m_varNameCollector);
+  if (m_varNameCollector.getVarCount() > 0) {
+    ElemTemplateElement baseElem=getElemFromExpression(lpi);
+    ElemVariable varElem=getPrevVariableElem(baseElem);
+    while (null != varElem) {
+      if (m_varNameCollector.doesOccur(varElem.getName())) {
+        psuedoVarRecipient=varElem.getParentElem();
+        ete=varElem.getNextSiblingElem();
+        break;
+      }
+      varElem=getPrevVariableElem(varElem);
+    }
+  }
+  if ((null != ete) && (Constants.ELEMNAME_PARAMVARIABLE == ete.getXSLToken())) {
+    if (isParam(lpi))     return null;
+    while (null != ete) {
+      ete=ete.getNextSiblingElem();
+      if ((null != ete) && Constants.ELEMNAME_PARAMVARIABLE != ete.getXSLToken())       break;
+    }
+  }
+  psuedoVarRecipient.insertBefore(psuedoVar,ete);
+  m_varNameCollector.reset();
+  return psuedoVar;
+}

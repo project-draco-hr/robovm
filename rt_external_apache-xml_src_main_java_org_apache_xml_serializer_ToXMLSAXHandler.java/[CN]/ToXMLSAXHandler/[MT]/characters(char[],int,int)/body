@@ -1,0 +1,16 @@
+{
+  if (m_needToCallStartDocument) {
+    startDocumentInternal();
+    m_needToCallStartDocument=false;
+  }
+  if (m_elemContext.m_startTagOpen) {
+    closeStartTag();
+    m_elemContext.m_startTagOpen=false;
+  }
+  if (m_elemContext.m_isCdataSection && !m_cdataTagOpen && m_lexHandler != null) {
+    m_lexHandler.startCDATA();
+    m_cdataTagOpen=true;
+  }
+  m_saxHandler.characters(ch,off,len);
+  if (m_tracer != null)   fireCharEvent(ch,off,len);
+}

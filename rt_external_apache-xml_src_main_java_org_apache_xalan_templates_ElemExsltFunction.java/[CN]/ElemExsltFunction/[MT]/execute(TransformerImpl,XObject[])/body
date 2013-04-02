@@ -1,0 +1,27 @@
+{
+  XPathContext xctxt=transformer.getXPathContext();
+  VariableStack vars=xctxt.getVarStack();
+  int thisFrame=vars.getStackFrame();
+  int nextFrame=vars.link(m_frameSize);
+  if (m_inArgsSize < args.length) {
+    throw new TransformerException("function called with too many args");
+  }
+  if (m_inArgsSize > 0) {
+    vars.clearLocalSlots(0,m_inArgsSize);
+    if (args.length > 0) {
+      vars.setStackFrame(thisFrame);
+      NodeList children=this.getChildNodes();
+      for (int i=0; i < args.length; i++) {
+        Node child=children.item(i);
+        if (children.item(i) instanceof ElemParam) {
+          ElemParam param=(ElemParam)children.item(i);
+          vars.setLocalVariable(param.getIndex(),args[i],nextFrame);
+        }
+      }
+      vars.setStackFrame(nextFrame);
+    }
+  }
+  vars.setStackFrame(nextFrame);
+  transformer.executeChildTemplates(this,true);
+  vars.unlink(thisFrame);
+}

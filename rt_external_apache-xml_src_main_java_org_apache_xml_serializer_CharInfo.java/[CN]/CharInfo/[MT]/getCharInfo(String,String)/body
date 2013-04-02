@@ -1,0 +1,31 @@
+{
+  CharInfo charInfo=(CharInfo)m_getCharInfoCache.get(entitiesFileName);
+  if (charInfo != null) {
+    return mutableCopyOf(charInfo);
+  }
+  try {
+    charInfo=getCharInfoBasedOnPrivilege(entitiesFileName,method,true);
+    m_getCharInfoCache.put(entitiesFileName,charInfo);
+    return mutableCopyOf(charInfo);
+  }
+ catch (  Exception e) {
+  }
+  try {
+    return getCharInfoBasedOnPrivilege(entitiesFileName,method,false);
+  }
+ catch (  Exception e) {
+  }
+  String absoluteEntitiesFileName;
+  if (entitiesFileName.indexOf(':') < 0) {
+    absoluteEntitiesFileName=SystemIDResolver.getAbsoluteURIFromRelative(entitiesFileName);
+  }
+ else {
+    try {
+      absoluteEntitiesFileName=SystemIDResolver.getAbsoluteURI(entitiesFileName,null);
+    }
+ catch (    TransformerException te) {
+      throw new WrappedRuntimeException(te);
+    }
+  }
+  return getCharInfoBasedOnPrivilege(entitiesFileName,method,false);
+}

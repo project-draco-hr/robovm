@@ -1,0 +1,25 @@
+{
+  if (!m_foundFirstElement && null != m_serializer) {
+    m_foundFirstElement=true;
+    Serializer newSerializer;
+    try {
+      newSerializer=SerializerSwitcher.switchSerializerIfHTML(uri,localName,m_outputFormat.getProperties(),m_serializer);
+    }
+ catch (    TransformerException te) {
+      throw new SAXException(te);
+    }
+    if (newSerializer != m_serializer) {
+      try {
+        m_resultContentHandler=newSerializer.asContentHandler();
+      }
+ catch (      IOException ioe) {
+        throw new SAXException(ioe);
+      }
+      if (m_resultContentHandler instanceof DTDHandler)       m_resultDTDHandler=(DTDHandler)m_resultContentHandler;
+      if (m_resultContentHandler instanceof LexicalHandler)       m_resultLexicalHandler=(LexicalHandler)m_resultContentHandler;
+      m_serializer=newSerializer;
+    }
+  }
+  flushStartDoc();
+  m_resultContentHandler.startElement(uri,localName,qName,attributes);
+}

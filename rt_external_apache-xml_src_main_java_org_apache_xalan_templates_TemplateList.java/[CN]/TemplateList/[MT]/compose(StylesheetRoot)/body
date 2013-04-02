@@ -1,0 +1,25 @@
+{
+  if (DEBUG) {
+    System.out.println("Before wildcard insert...");
+    dumpAssociationTables();
+  }
+  if (null != m_wildCardPatterns) {
+    Enumeration associations=m_patternTable.elements();
+    while (associations.hasMoreElements()) {
+      TemplateSubPatternAssociation head=(TemplateSubPatternAssociation)associations.nextElement();
+      TemplateSubPatternAssociation wild=m_wildCardPatterns;
+      while (null != wild) {
+        try {
+          head=insertAssociationIntoList(head,(TemplateSubPatternAssociation)wild.clone(),true);
+        }
+ catch (        CloneNotSupportedException cnse) {
+        }
+        wild=wild.getNext();
+      }
+    }
+  }
+  if (DEBUG) {
+    System.out.println("After wildcard insert...");
+    dumpAssociationTables();
+  }
+}

@@ -1,0 +1,22 @@
+{
+  while (true) {
+    if (m_nodeStack.isEmpty())     return;
+    MappingRecord map=(MappingRecord)(m_nodeStack.peek());
+    int depth=map.m_declarationDepth;
+    if (elemDepth < 1 || map.m_declarationDepth < elemDepth)     break;
+    MappingRecord nm1=(MappingRecord)m_nodeStack.pop();
+    String prefix=map.m_prefix;
+    Stack prefixStack=getPrefixStack(prefix);
+    MappingRecord nm2=(MappingRecord)prefixStack.peek();
+    if (nm1 == nm2) {
+      prefixStack.pop();
+      if (saxHandler != null) {
+        try {
+          saxHandler.endPrefixMapping(prefix);
+        }
+ catch (        SAXException e) {
+        }
+      }
+    }
+  }
+}

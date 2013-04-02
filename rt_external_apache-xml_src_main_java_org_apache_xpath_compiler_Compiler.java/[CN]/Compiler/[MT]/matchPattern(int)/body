@@ -1,0 +1,23 @@
+{
+  locPathDepth++;
+  try {
+    int nextOpPos=opPos;
+    int i;
+    for (i=0; getOp(nextOpPos) == OpCodes.OP_LOCATIONPATHPATTERN; i++) {
+      nextOpPos=getNextOpPos(nextOpPos);
+    }
+    if (i == 1)     return compile(opPos);
+    UnionPattern up=new UnionPattern();
+    StepPattern[] patterns=new StepPattern[i];
+    for (i=0; getOp(opPos) == OpCodes.OP_LOCATIONPATHPATTERN; i++) {
+      nextOpPos=getNextOpPos(opPos);
+      patterns[i]=(StepPattern)compile(opPos);
+      opPos=nextOpPos;
+    }
+    up.setPatterns(patterns);
+    return up;
+  }
+  finally {
+    locPathDepth--;
+  }
+}

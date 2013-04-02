@@ -1,0 +1,29 @@
+{
+  if (null == namespace)   namespace="";
+  if (null == localName)   localName="";
+  int hash=type + namespace.hashCode() + localName.hashCode();
+  hashET.redefine(type,namespace,localName,hash);
+  int index=hash % m_capacity;
+  if (index < 0)   index=-index;
+  for (HashEntry e=m_table[index]; e != null; e=e.next) {
+    if (e.hash == hash && e.key.equals(hashET))     return e.value;
+  }
+  if (searchOnly) {
+    return DTM.NULL;
+  }
+  if (m_nextType > m_threshold) {
+    rehash();
+    index=hash % m_capacity;
+    if (index < 0)     index=-index;
+  }
+  ExtendedType newET=new ExtendedType(type,namespace,localName,hash);
+  if (m_extendedTypes.length == m_nextType) {
+    ExtendedType[] newArray=new ExtendedType[m_extendedTypes.length * 2];
+    System.arraycopy(m_extendedTypes,0,newArray,0,m_extendedTypes.length);
+    m_extendedTypes=newArray;
+  }
+  m_extendedTypes[m_nextType]=newET;
+  HashEntry entry=new HashEntry(newET,m_nextType,hash,m_table[index]);
+  m_table[index]=entry;
+  return m_nextType++;
+}

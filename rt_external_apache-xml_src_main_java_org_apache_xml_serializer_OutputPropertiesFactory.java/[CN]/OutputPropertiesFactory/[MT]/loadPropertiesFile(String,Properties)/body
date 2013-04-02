@@ -1,0 +1,69 @@
+{
+  Properties props=new Properties(defaults);
+  InputStream is=null;
+  BufferedInputStream bis=null;
+  try {
+    if (ACCESS_CONTROLLER_CLASS != null) {
+      is=(InputStream)AccessController.doPrivileged(new PrivilegedAction(){
+        public Object run(){
+          return OutputPropertiesFactory.class.getResourceAsStream(resourceName);
+        }
+      }
+);
+    }
+ else {
+      is=OutputPropertiesFactory.class.getResourceAsStream(resourceName);
+    }
+    bis=new BufferedInputStream(is);
+    props.load(bis);
+  }
+ catch (  IOException ioe) {
+    if (defaults == null) {
+      throw ioe;
+    }
+ else {
+      throw new WrappedRuntimeException(Utils.messages.createMessage(MsgKey.ER_COULD_NOT_LOAD_RESOURCE,new Object[]{resourceName}),ioe);
+    }
+  }
+catch (  SecurityException se) {
+    if (defaults == null) {
+      throw se;
+    }
+ else {
+      throw new WrappedRuntimeException(Utils.messages.createMessage(MsgKey.ER_COULD_NOT_LOAD_RESOURCE,new Object[]{resourceName}),se);
+    }
+  }
+ finally {
+    if (bis != null) {
+      bis.close();
+    }
+    if (is != null) {
+      is.close();
+    }
+  }
+  Enumeration keys=((Properties)props.clone()).keys();
+  while (keys.hasMoreElements()) {
+    String key=(String)keys.nextElement();
+    String value=null;
+    try {
+      value=System.getProperty(key);
+    }
+ catch (    SecurityException se) {
+    }
+    if (value == null)     value=(String)props.get(key);
+    String newKey=fixupPropertyString(key,true);
+    String newValue=null;
+    try {
+      newValue=System.getProperty(newKey);
+    }
+ catch (    SecurityException se) {
+    }
+    if (newValue == null)     newValue=fixupPropertyString(value,false);
+ else     newValue=fixupPropertyString(newValue,false);
+    if (key != newKey || value != newValue) {
+      props.remove(key);
+      props.put(newKey,newValue);
+    }
+  }
+  return props;
+}

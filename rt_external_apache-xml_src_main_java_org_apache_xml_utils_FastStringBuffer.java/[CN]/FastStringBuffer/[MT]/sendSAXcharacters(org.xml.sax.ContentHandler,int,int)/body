@@ -1,0 +1,20 @@
+{
+  int startChunk=start >>> m_chunkBits;
+  int startColumn=start & m_chunkMask;
+  if (startColumn + length < m_chunkMask && m_innerFSB == null) {
+    ch.characters(m_array[startChunk],startColumn,length);
+    return;
+  }
+  int stop=start + length;
+  int stopChunk=stop >>> m_chunkBits;
+  int stopColumn=stop & m_chunkMask;
+  for (int i=startChunk; i < stopChunk; ++i) {
+    if (i == 0 && m_innerFSB != null)     m_innerFSB.sendSAXcharacters(ch,startColumn,m_chunkSize - startColumn);
+ else     ch.characters(m_array[i],startColumn,m_chunkSize - startColumn);
+    startColumn=0;
+  }
+  if (stopChunk == 0 && m_innerFSB != null)   m_innerFSB.sendSAXcharacters(ch,startColumn,stopColumn - startColumn);
+ else   if (stopColumn > startColumn) {
+    ch.characters(m_array[stopChunk],startColumn,stopColumn - startColumn);
+  }
+}

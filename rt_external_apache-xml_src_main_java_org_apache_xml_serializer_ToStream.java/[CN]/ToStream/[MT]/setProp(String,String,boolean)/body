@@ -1,0 +1,121 @@
+{
+  if (val != null) {
+    char first=getFirstCharLocName(name);
+switch (first) {
+case 'c':
+      if (OutputKeys.CDATA_SECTION_ELEMENTS.equals(name)) {
+        String cdataSectionNames=val;
+        addCdataSectionElements(cdataSectionNames);
+      }
+    break;
+case 'd':
+  if (OutputKeys.DOCTYPE_SYSTEM.equals(name)) {
+    this.m_doctypeSystem=val;
+  }
+ else   if (OutputKeys.DOCTYPE_PUBLIC.equals(name)) {
+    this.m_doctypePublic=val;
+    if (val.startsWith("-//W3C//DTD XHTML"))     m_spaceBeforeClose=true;
+  }
+break;
+case 'e':
+String newEncoding=val;
+if (OutputKeys.ENCODING.equals(name)) {
+String possible_encoding=Encodings.getMimeEncoding(val);
+if (possible_encoding != null) {
+super.setProp("mime-name",possible_encoding,defaultVal);
+}
+final String oldExplicitEncoding=getOutputPropertyNonDefault(OutputKeys.ENCODING);
+final String oldDefaultEncoding=getOutputPropertyDefault(OutputKeys.ENCODING);
+if ((defaultVal && (oldDefaultEncoding == null || !oldDefaultEncoding.equalsIgnoreCase(newEncoding))) || (!defaultVal && (oldExplicitEncoding == null || !oldExplicitEncoding.equalsIgnoreCase(newEncoding)))) {
+EncodingInfo encodingInfo=Encodings.getEncodingInfo(newEncoding);
+if (newEncoding != null && encodingInfo.name == null) {
+  final String msg=Utils.messages.createMessage(MsgKey.ER_ENCODING_NOT_SUPPORTED,new Object[]{newEncoding});
+  final String msg2="Warning: encoding \"" + newEncoding + "\" not supported, using "+ Encodings.DEFAULT_MIME_ENCODING;
+  try {
+    final Transformer tran=super.getTransformer();
+    if (tran != null) {
+      final ErrorListener errHandler=tran.getErrorListener();
+      if (null != errHandler && m_sourceLocator != null) {
+        errHandler.warning(new TransformerException(msg,m_sourceLocator));
+        errHandler.warning(new TransformerException(msg2,m_sourceLocator));
+      }
+ else {
+        System.out.println(msg);
+        System.out.println(msg2);
+      }
+    }
+ else {
+      System.out.println(msg);
+      System.out.println(msg2);
+    }
+  }
+ catch (  Exception e) {
+  }
+  newEncoding=Encodings.DEFAULT_MIME_ENCODING;
+  val=Encodings.DEFAULT_MIME_ENCODING;
+  encodingInfo=Encodings.getEncodingInfo(newEncoding);
+}
+if (defaultVal == false || oldExplicitEncoding == null) {
+  m_encodingInfo=encodingInfo;
+  if (newEncoding != null)   m_isUTF8=newEncoding.equals(Encodings.DEFAULT_MIME_ENCODING);
+  OutputStream os=getOutputStream();
+  if (os != null) {
+    Writer w=getWriter();
+    String oldEncoding=getOutputProperty(OutputKeys.ENCODING);
+    if ((w == null || !m_writer_set_by_user) && !newEncoding.equalsIgnoreCase(oldEncoding)) {
+      super.setProp(name,val,defaultVal);
+      setOutputStreamInternal(os,false);
+    }
+  }
+}
+}
+}
+break;
+case 'i':
+if (OutputPropertiesFactory.S_KEY_INDENT_AMOUNT.equals(name)) {
+setIndentAmount(Integer.parseInt(val));
+}
+ else if (OutputKeys.INDENT.equals(name)) {
+boolean b="yes".equals(val) ? true : false;
+m_doIndent=b;
+}
+break;
+case 'l':
+if (OutputPropertiesFactory.S_KEY_LINE_SEPARATOR.equals(name)) {
+m_lineSep=val.toCharArray();
+m_lineSepLen=m_lineSep.length;
+}
+break;
+case 'm':
+if (OutputKeys.MEDIA_TYPE.equals(name)) {
+m_mediatype=val;
+}
+break;
+case 'o':
+if (OutputKeys.OMIT_XML_DECLARATION.equals(name)) {
+boolean b="yes".equals(val) ? true : false;
+this.m_shouldNotWriteXMLHeader=b;
+}
+break;
+case 's':
+if (OutputKeys.STANDALONE.equals(name)) {
+if (defaultVal) {
+setStandaloneInternal(val);
+}
+ else {
+m_standaloneWasSpecified=true;
+setStandaloneInternal(val);
+}
+}
+break;
+case 'v':
+if (OutputKeys.VERSION.equals(name)) {
+m_version=val;
+}
+break;
+default :
+break;
+}
+super.setProp(name,val,defaultVal);
+}
+}

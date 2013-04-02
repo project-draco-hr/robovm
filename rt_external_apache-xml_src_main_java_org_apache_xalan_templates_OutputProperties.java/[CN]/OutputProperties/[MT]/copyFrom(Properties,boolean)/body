@@ -1,0 +1,18 @@
+{
+  Enumeration keys=src.keys();
+  while (keys.hasMoreElements()) {
+    String key=(String)keys.nextElement();
+    if (!isLegalPropertyKey(key))     throw new IllegalArgumentException(XSLMessages.createMessage(XSLTErrorResources.ER_OUTPUT_PROPERTY_NOT_RECOGNIZED,new Object[]{key}));
+    Object oldValue=m_properties.get(key);
+    if (null == oldValue) {
+      String val=(String)src.get(key);
+      if (shouldResetDefaults && key.equals(OutputKeys.METHOD)) {
+        setMethodDefaults(val);
+      }
+      m_properties.put(key,val);
+    }
+ else     if (key.equals(OutputKeys.CDATA_SECTION_ELEMENTS)) {
+      m_properties.put(key,(String)oldValue + " " + (String)src.get(key));
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  if (null == h)   h=new Hashtable();
+  final String SAX_VERSION1_CLASS="org.xml.sax.Parser";
+  final String SAX_VERSION1_METHOD="parse";
+  final String SAX_VERSION2_CLASS="org.xml.sax.XMLReader";
+  final String SAX_VERSION2_METHOD="parse";
+  final String SAX_VERSION2BETA_CLASSNF="org.xml.sax.helpers.AttributesImpl";
+  final String SAX_VERSION2BETA_METHODNF="setAttributes";
+  final Class oneStringArg[]={java.lang.String.class};
+  final Class attributesArg[]={org.xml.sax.Attributes.class};
+  try {
+    Class clazz=ObjectFactory.findProviderClass(SAX_VERSION2BETA_CLASSNF,ObjectFactory.findClassLoader(),true);
+    Method method=clazz.getMethod(SAX_VERSION2BETA_METHODNF,attributesArg);
+    h.put(VERSION + "SAX","2.0");
+  }
+ catch (  Exception e) {
+    h.put(ERROR + VERSION + "SAX","ERROR attempting to load SAX version 2 class: " + e.toString());
+    h.put(ERROR,ERROR_FOUND);
+    try {
+      Class clazz=ObjectFactory.findProviderClass(SAX_VERSION2_CLASS,ObjectFactory.findClassLoader(),true);
+      Method method=clazz.getMethod(SAX_VERSION2_METHOD,oneStringArg);
+      h.put(VERSION + "SAX-backlevel","2.0beta2-or-earlier");
+    }
+ catch (    Exception e2) {
+      h.put(ERROR + VERSION + "SAX","ERROR attempting to load SAX version 2 class: " + e.toString());
+      h.put(ERROR,ERROR_FOUND);
+      try {
+        Class clazz=ObjectFactory.findProviderClass(SAX_VERSION1_CLASS,ObjectFactory.findClassLoader(),true);
+        Method method=clazz.getMethod(SAX_VERSION1_METHOD,oneStringArg);
+        h.put(VERSION + "SAX-backlevel","1.0");
+      }
+ catch (      Exception e3) {
+        h.put(ERROR + VERSION + "SAX-backlevel","ERROR attempting to load SAX version 1 class: " + e3.toString());
+      }
+    }
+  }
+}

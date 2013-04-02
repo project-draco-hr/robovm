@@ -1,0 +1,49 @@
+{
+  if (null == getParent()) {
+    XMLReader reader=null;
+    try {
+      javax.xml.parsers.SAXParserFactory factory=javax.xml.parsers.SAXParserFactory.newInstance();
+      factory.setNamespaceAware(true);
+      if (m_transformer.getStylesheet().isSecureProcessing()) {
+        try {
+          factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,true);
+        }
+ catch (        org.xml.sax.SAXException se) {
+        }
+      }
+      javax.xml.parsers.SAXParser jaxpParser=factory.newSAXParser();
+      reader=jaxpParser.getXMLReader();
+    }
+ catch (    javax.xml.parsers.ParserConfigurationException ex) {
+      throw new org.xml.sax.SAXException(ex);
+    }
+catch (    javax.xml.parsers.FactoryConfigurationError ex1) {
+      throw new org.xml.sax.SAXException(ex1.toString());
+    }
+catch (    NoSuchMethodError ex2) {
+    }
+catch (    AbstractMethodError ame) {
+    }
+    XMLReader parent;
+    if (reader == null)     parent=XMLReaderFactory.createXMLReader();
+ else     parent=reader;
+    try {
+      parent.setFeature("http://xml.org/sax/features/namespace-prefixes",true);
+    }
+ catch (    org.xml.sax.SAXException se) {
+    }
+    setParent(parent);
+  }
+ else {
+    setupParse();
+  }
+  if (null == m_transformer.getContentHandler()) {
+    throw new org.xml.sax.SAXException(XSLMessages.createMessage(XSLTErrorResources.ER_CANNOT_CALL_PARSE,null));
+  }
+  getParent().parse(input);
+  Exception e=m_transformer.getExceptionThrown();
+  if (null != e) {
+    if (e instanceof org.xml.sax.SAXException)     throw (org.xml.sax.SAXException)e;
+ else     throw new org.xml.sax.SAXException(e);
+  }
+}

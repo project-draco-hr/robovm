@@ -1,0 +1,81 @@
+{
+  int stepType;
+  int stepCount=0;
+  int analysisResult=0x00000000;
+  while (OpCodes.ENDOP != (stepType=compiler.getOp(stepOpCodePos))) {
+    stepCount++;
+    boolean predAnalysis=analyzePredicate(compiler,stepOpCodePos,stepType);
+    if (predAnalysis)     analysisResult|=BIT_PREDICATE;
+switch (stepType) {
+case OpCodes.OP_VARIABLE:
+case OpCodes.OP_EXTFUNCTION:
+case OpCodes.OP_FUNCTION:
+case OpCodes.OP_GROUP:
+      analysisResult|=BIT_FILTER;
+    break;
+case OpCodes.FROM_ROOT:
+  analysisResult|=BIT_ROOT;
+break;
+case OpCodes.FROM_ANCESTORS:
+analysisResult|=BIT_ANCESTOR;
+break;
+case OpCodes.FROM_ANCESTORS_OR_SELF:
+analysisResult|=BIT_ANCESTOR_OR_SELF;
+break;
+case OpCodes.FROM_ATTRIBUTES:
+analysisResult|=BIT_ATTRIBUTE;
+break;
+case OpCodes.FROM_NAMESPACE:
+analysisResult|=BIT_NAMESPACE;
+break;
+case OpCodes.FROM_CHILDREN:
+analysisResult|=BIT_CHILD;
+break;
+case OpCodes.FROM_DESCENDANTS:
+analysisResult|=BIT_DESCENDANT;
+break;
+case OpCodes.FROM_DESCENDANTS_OR_SELF:
+if (2 == stepCount && BIT_ROOT == analysisResult) {
+analysisResult|=BIT_ANY_DESCENDANT_FROM_ROOT;
+}
+analysisResult|=BIT_DESCENDANT_OR_SELF;
+break;
+case OpCodes.FROM_FOLLOWING:
+analysisResult|=BIT_FOLLOWING;
+break;
+case OpCodes.FROM_FOLLOWING_SIBLINGS:
+analysisResult|=BIT_FOLLOWING_SIBLING;
+break;
+case OpCodes.FROM_PRECEDING:
+analysisResult|=BIT_PRECEDING;
+break;
+case OpCodes.FROM_PRECEDING_SIBLINGS:
+analysisResult|=BIT_PRECEDING_SIBLING;
+break;
+case OpCodes.FROM_PARENT:
+analysisResult|=BIT_PARENT;
+break;
+case OpCodes.FROM_SELF:
+analysisResult|=BIT_SELF;
+break;
+case OpCodes.MATCH_ATTRIBUTE:
+analysisResult|=(BIT_MATCH_PATTERN | BIT_ATTRIBUTE);
+break;
+case OpCodes.MATCH_ANY_ANCESTOR:
+analysisResult|=(BIT_MATCH_PATTERN | BIT_ANCESTOR);
+break;
+case OpCodes.MATCH_IMMEDIATE_ANCESTOR:
+analysisResult|=(BIT_MATCH_PATTERN | BIT_PARENT);
+break;
+default :
+throw new RuntimeException(XSLMessages.createXPATHMessage(XPATHErrorResources.ER_NULL_ERROR_HANDLER,new Object[]{Integer.toString(stepType)}));
+}
+if (OpCodes.NODETYPE_NODE == compiler.getOp(stepOpCodePos + 3)) {
+analysisResult|=BIT_NODETEST_ANY;
+}
+stepOpCodePos=compiler.getNextStepPos(stepOpCodePos);
+if (stepOpCodePos < 0) break;
+}
+analysisResult|=(stepCount & BITS_COUNT);
+return analysisResult;
+}

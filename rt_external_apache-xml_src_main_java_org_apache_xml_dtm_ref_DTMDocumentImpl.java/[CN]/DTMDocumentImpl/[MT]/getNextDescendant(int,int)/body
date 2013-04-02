@@ -1,0 +1,29 @@
+{
+  subtreeRootHandle&=NODEHANDLE_MASK;
+  nodeHandle&=NODEHANDLE_MASK;
+  if (nodeHandle == 0)   return NULL;
+  while (!m_isError) {
+    if (done && (nodeHandle > nodes.slotsUsed()))     break;
+    if (nodeHandle > subtreeRootHandle) {
+      nodes.readSlot(nodeHandle + 1,gotslot);
+      if (gotslot[2] != 0) {
+        short type=(short)(gotslot[0] & 0xFFFF);
+        if (type == ATTRIBUTE_NODE) {
+          nodeHandle+=2;
+        }
+ else {
+          int nextParentPos=gotslot[1];
+          if (nextParentPos >= subtreeRootHandle)           return (m_docHandle | (nodeHandle + 1));
+ else           break;
+        }
+      }
+ else       if (!done) {
+      }
+ else       break;
+    }
+ else {
+      nodeHandle++;
+    }
+  }
+  return NULL;
+}

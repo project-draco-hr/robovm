@@ -1,0 +1,25 @@
+{
+  XSLTAttributeDef defaultDef=null;
+  XSLTAttributeDef[] attrDefs=getAttributes();
+  int nAttrDefs=attrDefs.length;
+  for (int k=0; k < nAttrDefs; k++) {
+    XSLTAttributeDef attrDef=attrDefs[k];
+    String uriDef=attrDef.getNamespace();
+    String nameDef=attrDef.getName();
+    if (nameDef.equals("*") && (equalsMayBeNullOrZeroLen(uri,uriDef) || (uriDef != null && uriDef.equals("*") && uri != null && uri.length() > 0))) {
+      return attrDef;
+    }
+ else     if (nameDef.equals("*") && (uriDef == null)) {
+      defaultDef=attrDef;
+    }
+ else     if (equalsMayBeNullOrZeroLen(uri,uriDef) && localName.equals(nameDef)) {
+      return attrDef;
+    }
+  }
+  if (null == defaultDef) {
+    if (uri.length() > 0 && !equalsMayBeNullOrZeroLen(uri,Constants.S_XSLNAMESPACEURL)) {
+      return XSLTAttributeDef.m_foreignAttr;
+    }
+  }
+  return defaultDef;
+}

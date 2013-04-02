@@ -1,0 +1,17 @@
+{
+  if (at < m_blocksize)   m_map0[at]=value;
+ else {
+    int index=at >>> m_SHIFT;
+    int offset=at & m_MASK;
+    if (index >= m_map.length) {
+      int newsize=index + m_numblocks;
+      int[][] newMap=new int[newsize][];
+      System.arraycopy(m_map,0,newMap,0,m_map.length);
+      m_map=newMap;
+    }
+    int[] block=m_map[index];
+    if (null == block)     block=m_map[index]=new int[m_blocksize];
+    block[offset]=value;
+  }
+  if (at >= m_firstFree)   m_firstFree=at + 1;
+}

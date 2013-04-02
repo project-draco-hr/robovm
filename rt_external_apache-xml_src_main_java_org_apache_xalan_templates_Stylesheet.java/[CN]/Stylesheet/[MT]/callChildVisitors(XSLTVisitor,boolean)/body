@@ -1,0 +1,69 @@
+{
+  int s=getImportCount();
+  for (int j=0; j < s; j++) {
+    getImport(j).callVisitors(visitor);
+  }
+  s=getIncludeCount();
+  for (int j=0; j < s; j++) {
+    getInclude(j).callVisitors(visitor);
+  }
+  s=getOutputCount();
+  for (int j=0; j < s; j++) {
+    visitor.visitTopLevelInstruction(getOutput(j));
+  }
+  s=getAttributeSetCount();
+  for (int j=0; j < s; j++) {
+    ElemAttributeSet attrSet=getAttributeSet(j);
+    if (visitor.visitTopLevelInstruction(attrSet)) {
+      attrSet.callChildVisitors(visitor);
+    }
+  }
+  s=getDecimalFormatCount();
+  for (int j=0; j < s; j++) {
+    visitor.visitTopLevelInstruction(getDecimalFormat(j));
+  }
+  s=getKeyCount();
+  for (int j=0; j < s; j++) {
+    visitor.visitTopLevelInstruction(getKey(j));
+  }
+  s=getNamespaceAliasCount();
+  for (int j=0; j < s; j++) {
+    visitor.visitTopLevelInstruction(getNamespaceAlias(j));
+  }
+  s=getTemplateCount();
+  for (int j=0; j < s; j++) {
+    try {
+      ElemTemplate template=getTemplate(j);
+      if (visitor.visitTopLevelInstruction(template)) {
+        template.callChildVisitors(visitor);
+      }
+    }
+ catch (    TransformerException te) {
+      throw new org.apache.xml.utils.WrappedRuntimeException(te);
+    }
+  }
+  s=getVariableOrParamCount();
+  for (int j=0; j < s; j++) {
+    ElemVariable var=getVariableOrParam(j);
+    if (visitor.visitTopLevelVariableOrParamDecl(var)) {
+      var.callChildVisitors(visitor);
+    }
+  }
+  s=getStripSpaceCount();
+  for (int j=0; j < s; j++) {
+    visitor.visitTopLevelInstruction(getStripSpace(j));
+  }
+  s=getPreserveSpaceCount();
+  for (int j=0; j < s; j++) {
+    visitor.visitTopLevelInstruction(getPreserveSpace(j));
+  }
+  if (null != m_NonXslTopLevel) {
+    java.util.Enumeration elements=m_NonXslTopLevel.elements();
+    while (elements.hasMoreElements()) {
+      ElemTemplateElement elem=(ElemTemplateElement)elements.nextElement();
+      if (visitor.visitTopLevelInstruction(elem)) {
+        elem.callChildVisitors(visitor);
+      }
+    }
+  }
+}

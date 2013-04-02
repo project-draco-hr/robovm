@@ -1,0 +1,22 @@
+{
+  boolean found=false;
+  for (ElemTemplateElement childElem=getFirstChildElem(); childElem != null; childElem=childElem.getNextSiblingElem()) {
+    int type=childElem.getXSLToken();
+    if (Constants.ELEMNAME_WHEN == type) {
+      found=true;
+      ElemWhen when=(ElemWhen)childElem;
+      XPathContext xctxt=transformer.getXPathContext();
+      int sourceNode=xctxt.getCurrentNode();
+      if (when.getTest().bool(xctxt,sourceNode,when)) {
+        transformer.executeChildTemplates(when,true);
+        return;
+      }
+    }
+ else     if (Constants.ELEMNAME_OTHERWISE == type) {
+      found=true;
+      transformer.executeChildTemplates(childElem,true);
+      return;
+    }
+  }
+  if (!found)   transformer.getMsgMgr().error(this,XSLTErrorResources.ER_CHOOSE_REQUIRES_WHEN);
+}

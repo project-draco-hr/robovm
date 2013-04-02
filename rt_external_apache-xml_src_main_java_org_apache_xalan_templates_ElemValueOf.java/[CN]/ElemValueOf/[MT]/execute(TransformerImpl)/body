@@ -1,0 +1,27 @@
+{
+  XPathContext xctxt=transformer.getXPathContext();
+  SerializationHandler rth=transformer.getResultTreeHandler();
+  try {
+    xctxt.pushNamespaceContext(this);
+    int current=xctxt.getCurrentNode();
+    xctxt.pushCurrentNodeAndExpression(current,current);
+    if (m_disableOutputEscaping)     rth.processingInstruction(javax.xml.transform.Result.PI_DISABLE_OUTPUT_ESCAPING,"");
+    try {
+      Expression expr=m_selectExpression.getExpression();
+      expr.executeCharsToContentHandler(xctxt,rth);
+    }
+  finally {
+      if (m_disableOutputEscaping)       rth.processingInstruction(javax.xml.transform.Result.PI_ENABLE_OUTPUT_ESCAPING,"");
+      xctxt.popNamespaceContext();
+      xctxt.popCurrentNodeAndExpression();
+    }
+  }
+ catch (  SAXException se) {
+    throw new TransformerException(se);
+  }
+catch (  RuntimeException re) {
+    TransformerException te=new TransformerException(re);
+    te.setLocator(this);
+    throw te;
+  }
+}

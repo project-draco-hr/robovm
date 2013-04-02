@@ -1,0 +1,19 @@
+{
+  nodeHandle&=NODEHANDLE_MASK;
+  nodes.readSlot(nodeHandle,gotslot);
+  short type=(short)(gotslot[0] & 0xFFFF);
+  if ((type == ELEMENT_NODE) || (type == DOCUMENT_NODE) || (type == ENTITY_REFERENCE_NODE)) {
+    int kid=nodeHandle + 1;
+    nodes.readSlot(kid,gotslot);
+    while (ATTRIBUTE_NODE == (gotslot[0] & 0xFFFF)) {
+      kid=gotslot[2];
+      if (kid == NULL)       return NULL;
+      nodes.readSlot(kid,gotslot);
+    }
+    if (gotslot[1] == nodeHandle) {
+      int firstChild=kid | m_docHandle;
+      return firstChild;
+    }
+  }
+  return NULL;
+}

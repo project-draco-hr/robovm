@@ -1,0 +1,29 @@
+{
+  if (bStart) {
+    fElementDepth++;
+    if ((fFeatures & WELLFORMED) != 0) {
+      isElementWellFormed(node);
+    }
+    if (!applyFilter(node,NodeFilter.SHOW_ELEMENT)) {
+      return;
+    }
+    if ((fFeatures & NAMESPACES) != 0) {
+      fNSBinder.pushContext();
+      fLocalNSBinder.reset();
+      recordLocalNSDecl(node);
+      fixupElementNS(node);
+    }
+    fSerializer.startElement(node.getNamespaceURI(),node.getLocalName(),node.getNodeName());
+    serializeAttList(node);
+  }
+ else {
+    fElementDepth--;
+    if (!applyFilter(node,NodeFilter.SHOW_ELEMENT)) {
+      return;
+    }
+    this.fSerializer.endElement(node.getNamespaceURI(),node.getLocalName(),node.getNodeName());
+    if ((fFeatures & NAMESPACES) != 0) {
+      fNSBinder.popContext();
+    }
+  }
+}

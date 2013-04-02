@@ -1,0 +1,13 @@
+{
+  nodeHandle&=NODEHANDLE_MASK;
+  if (nodeHandle == 0)   return NULL;
+  short type=(short)(nodes.readEntry(nodeHandle,0) & 0xFFFF);
+  if ((type == ELEMENT_NODE) || (type == ATTRIBUTE_NODE) || (type == ENTITY_REFERENCE_NODE)) {
+    int nextSib=nodes.readEntry(nodeHandle,2);
+    if (nextSib == NULL)     return NULL;
+    if (nextSib != 0)     return (m_docHandle | nextSib);
+  }
+  int thisParent=nodes.readEntry(nodeHandle,1);
+  if (nodes.readEntry(++nodeHandle,1) == thisParent)   return (m_docHandle | nodeHandle);
+  return NULL;
+}

@@ -1,0 +1,25 @@
+{
+  if (m_elemContext.m_startTagOpen) {
+    boolean was_added=addAttributeAlways(uri,localName,rawName,type,value,xslAttribute);
+    if (was_added && !xslAttribute && !rawName.startsWith("xmlns")) {
+      String prefixUsed=ensureAttributesNamespaceIsDeclared(uri,localName,rawName);
+      if (prefixUsed != null && rawName != null && !rawName.startsWith(prefixUsed)) {
+        rawName=prefixUsed + ":" + localName;
+      }
+    }
+    addAttributeAlways(uri,localName,rawName,type,value,xslAttribute);
+  }
+ else {
+    String msg=Utils.messages.createMessage(MsgKey.ER_ILLEGAL_ATTRIBUTE_POSITION,new Object[]{localName});
+    try {
+      Transformer tran=super.getTransformer();
+      ErrorListener errHandler=tran.getErrorListener();
+      if (null != errHandler && m_sourceLocator != null)       errHandler.warning(new TransformerException(msg,m_sourceLocator));
+ else       System.out.println(msg);
+    }
+ catch (    TransformerException e) {
+      SAXException se=new SAXException(e);
+      throw se;
+    }
+  }
+}

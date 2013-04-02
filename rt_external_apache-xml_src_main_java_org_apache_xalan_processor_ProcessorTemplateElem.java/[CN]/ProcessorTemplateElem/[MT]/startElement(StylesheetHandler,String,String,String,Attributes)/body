@@ -1,0 +1,25 @@
+{
+  super.startElement(handler,uri,localName,rawName,attributes);
+  try {
+    XSLTElementDef def=getElemDef();
+    Class classObject=def.getClassObject();
+    ElemTemplateElement elem=null;
+    try {
+      elem=(ElemTemplateElement)classObject.newInstance();
+      elem.setDOMBackPointer(handler.getOriginatingNode());
+      elem.setLocaterInfo(handler.getLocator());
+      elem.setPrefixes(handler.getNamespaceSupport());
+    }
+ catch (    InstantiationException ie) {
+      handler.error(XSLTErrorResources.ER_FAILED_CREATING_ELEMTMPL,null,ie);
+    }
+catch (    IllegalAccessException iae) {
+      handler.error(XSLTErrorResources.ER_FAILED_CREATING_ELEMTMPL,null,iae);
+    }
+    setPropertiesFromAttributes(handler,rawName,attributes,elem);
+    appendAndPush(handler,elem);
+  }
+ catch (  TransformerException te) {
+    throw new org.xml.sax.SAXException(te);
+  }
+}

@@ -1,0 +1,22 @@
+{
+  Object result=null;
+  String ns=extFunction.getNamespace();
+  if (null != ns) {
+    ExtensionHandler extNS=(ExtensionHandler)m_extensionFunctionNamespaces.get(ns);
+    if (null != extNS) {
+      try {
+        result=extNS.callFunction(extFunction,argVec,exprContext);
+      }
+ catch (      javax.xml.transform.TransformerException e) {
+        throw e;
+      }
+catch (      Exception e) {
+        throw new javax.xml.transform.TransformerException(e);
+      }
+    }
+ else {
+      throw new XPathProcessorException(XSLMessages.createMessage(XSLTErrorResources.ER_EXTENSION_FUNC_UNKNOWN,new Object[]{ns,extFunction.getFunctionName()}));
+    }
+  }
+  return result;
+}

@@ -1,0 +1,40 @@
+{
+  String namespace=null;
+  String prefix=null;
+  int indexOfNSSep=qname.indexOf(':');
+  if (indexOfNSSep > 0) {
+    prefix=qname.substring(0,indexOfNSSep);
+    if (prefix.equals("xml")) {
+      namespace=S_XMLNAMESPACEURI;
+    }
+ else     if (prefix.equals("xmlns")) {
+      return;
+    }
+ else {
+      int depth=namespaces.size();
+      for (int i=depth - 1; i >= 0; i--) {
+        NameSpace ns=(NameSpace)namespaces.elementAt(i);
+        while (null != ns) {
+          if ((null != ns.m_prefix) && prefix.equals(ns.m_prefix)) {
+            namespace=ns.m_uri;
+            i=-1;
+            break;
+          }
+          ns=ns.m_next;
+        }
+      }
+    }
+    if (null == namespace) {
+      throw new RuntimeException(XMLMessages.createXMLMessage(XMLErrorResources.ER_PREFIX_MUST_RESOLVE,new Object[]{prefix}));
+    }
+  }
+  _localName=(indexOfNSSep < 0) ? qname : qname.substring(indexOfNSSep + 1);
+  if (validate) {
+    if ((_localName == null) || (!XML11Char.isXML11ValidNCName(_localName))) {
+      throw new IllegalArgumentException(XMLMessages.createXMLMessage(XMLErrorResources.ER_ARG_LOCALNAME_INVALID,null));
+    }
+  }
+  _namespaceURI=namespace;
+  _prefix=prefix;
+  m_hashCode=toString().hashCode();
+}

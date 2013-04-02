@@ -1,0 +1,22 @@
+{
+  if (null == m_incrementalSAXSource)   return false;
+  if (m_endDocumentOccured) {
+    clearCoRoutine();
+    return false;
+  }
+  Object gotMore=m_incrementalSAXSource.deliverMoreNodes(true);
+  if (!(gotMore instanceof Boolean)) {
+    if (gotMore instanceof RuntimeException) {
+      throw (RuntimeException)gotMore;
+    }
+ else     if (gotMore instanceof Exception) {
+      throw new WrappedRuntimeException((Exception)gotMore);
+    }
+    clearCoRoutine();
+    return false;
+  }
+  if (gotMore != Boolean.TRUE) {
+    clearCoRoutine();
+  }
+  return true;
+}

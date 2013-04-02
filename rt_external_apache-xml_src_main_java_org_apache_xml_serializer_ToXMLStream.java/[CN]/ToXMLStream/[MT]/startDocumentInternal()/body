@@ -1,0 +1,38 @@
+{
+  if (m_needToCallStartDocument) {
+    super.startDocumentInternal();
+    m_needToCallStartDocument=false;
+    if (m_inEntityRef)     return;
+    m_needToOutputDocTypeDecl=true;
+    m_startNewLine=false;
+    final String version=getXMLVersion();
+    if (getOmitXMLDeclaration() == false) {
+      String encoding=Encodings.getMimeEncoding(getEncoding());
+      String standalone;
+      if (m_standaloneWasSpecified) {
+        standalone=" standalone=\"" + getStandalone() + "\"";
+      }
+ else {
+        standalone="";
+      }
+      try {
+        final java.io.Writer writer=m_writer;
+        writer.write("<?xml version=\"");
+        writer.write(version);
+        writer.write("\" encoding=\"");
+        writer.write(encoding);
+        writer.write('\"');
+        writer.write(standalone);
+        writer.write("?>");
+        if (m_doIndent) {
+          if (m_standaloneWasSpecified || getDoctypePublic() != null || getDoctypeSystem() != null) {
+            writer.write(m_lineSep,0,m_lineSepLen);
+          }
+        }
+      }
+ catch (      IOException e) {
+        throw new SAXException(e);
+      }
+    }
+  }
+}

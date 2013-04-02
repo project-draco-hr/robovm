@@ -1,0 +1,18 @@
+{
+  if (s == null)   return NULL;
+  int hashslot=s.hashCode() % HASHPRIME;
+  if (hashslot < 0)   hashslot=-hashslot;
+  int hashlast=m_hashStart[hashslot];
+  int hashcandidate=hashlast;
+  while (hashcandidate != NULL) {
+    if (m_intToString.elementAt(hashcandidate).equals(s))     return hashcandidate;
+    hashlast=hashcandidate;
+    hashcandidate=m_hashChain.elementAt(hashcandidate);
+  }
+  int newIndex=m_intToString.size();
+  m_intToString.addElement(s);
+  m_hashChain.addElement(NULL);
+  if (hashlast == NULL)   m_hashStart[hashslot]=newIndex;
+ else   m_hashChain.setElementAt(newIndex,hashlast);
+  return newIndex;
+}

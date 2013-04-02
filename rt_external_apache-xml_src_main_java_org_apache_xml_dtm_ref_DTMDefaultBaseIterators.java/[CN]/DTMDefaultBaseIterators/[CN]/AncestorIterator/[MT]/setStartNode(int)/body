@@ -1,0 +1,21 @@
+{
+  if (node == DTMDefaultBase.ROOTNODE)   node=getDocument();
+  m_realStartNode=node;
+  if (_isRestartable) {
+    int nodeID=makeNodeIdentity(node);
+    if (!_includeSelf && node != DTM.NULL) {
+      nodeID=_parent(nodeID);
+      node=makeNodeHandle(nodeID);
+    }
+    _startNode=node;
+    while (nodeID != END) {
+      m_ancestors.addElement(node);
+      nodeID=_parent(nodeID);
+      node=makeNodeHandle(nodeID);
+    }
+    m_ancestorsPos=m_ancestors.size() - 1;
+    _currentNode=(m_ancestorsPos >= 0) ? m_ancestors.elementAt(m_ancestorsPos) : DTM.NULL;
+    return resetPosition();
+  }
+  return this;
+}

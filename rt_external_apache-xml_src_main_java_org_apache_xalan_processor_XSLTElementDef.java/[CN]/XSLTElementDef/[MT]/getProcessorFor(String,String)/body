@@ -1,0 +1,35 @@
+{
+  XSLTElementProcessor elemDef=null;
+  if (null == m_elements)   return null;
+  int n=m_elements.length;
+  int order=-1;
+  boolean multiAllowed=true;
+  for (int i=0; i < n; i++) {
+    XSLTElementDef def=m_elements[i];
+    if (def.m_name.equals("*")) {
+      if (!equalsMayBeNullOrZeroLen(uri,Constants.S_XSLNAMESPACEURL)) {
+        elemDef=def.m_elementProcessor;
+        order=def.getOrder();
+        multiAllowed=def.getMultiAllowed();
+      }
+    }
+ else     if (def.QNameEquals(uri,localName)) {
+      if (def.getRequired())       this.setRequiredFound(def.getName(),true);
+      order=def.getOrder();
+      multiAllowed=def.getMultiAllowed();
+      elemDef=def.m_elementProcessor;
+      break;
+    }
+  }
+  if (elemDef != null && this.isOrdered()) {
+    int lastOrder=getLastOrder();
+    if (order > lastOrder)     setLastOrder(order);
+ else     if (order == lastOrder && !multiAllowed) {
+      return null;
+    }
+ else     if (order < lastOrder && order > 0) {
+      return null;
+    }
+  }
+  return elemDef;
+}

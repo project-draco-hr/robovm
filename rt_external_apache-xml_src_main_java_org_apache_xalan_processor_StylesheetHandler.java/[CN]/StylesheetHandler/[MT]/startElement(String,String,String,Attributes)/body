@@ -1,0 +1,25 @@
+{
+  NamespaceSupport nssupport=this.getNamespaceSupport();
+  nssupport.pushContext();
+  int n=m_prefixMappings.size();
+  for (int i=0; i < n; i++) {
+    String prefix=(String)m_prefixMappings.elementAt(i++);
+    String nsURI=(String)m_prefixMappings.elementAt(i);
+    nssupport.declarePrefix(prefix,nsURI);
+  }
+  m_prefixMappings.removeAllElements();
+  m_elementID++;
+  checkForFragmentID(attributes);
+  if (!m_shouldProcess)   return;
+  flushCharacters();
+  pushSpaceHandling(attributes);
+  XSLTElementProcessor elemProcessor=getProcessorFor(uri,localName,rawName);
+  if (null != elemProcessor) {
+    this.pushProcessor(elemProcessor);
+    elemProcessor.startElement(this,uri,localName,rawName,attributes);
+  }
+ else {
+    m_shouldProcess=false;
+    popSpaceHandling();
+  }
+}

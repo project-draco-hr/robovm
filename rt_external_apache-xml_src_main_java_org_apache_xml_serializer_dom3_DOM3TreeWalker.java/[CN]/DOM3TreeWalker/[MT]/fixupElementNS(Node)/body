@@ -1,0 +1,39 @@
+{
+  String namespaceURI=((Element)node).getNamespaceURI();
+  String prefix=((Element)node).getPrefix();
+  String localName=((Element)node).getLocalName();
+  if (namespaceURI != null) {
+    prefix=prefix == null ? "" : prefix;
+    String inScopeNamespaceURI=fNSBinder.getURI(prefix);
+    if ((inScopeNamespaceURI != null && inScopeNamespaceURI.equals(namespaceURI))) {
+    }
+ else {
+      if ((fFeatures & NAMESPACEDECLS) != 0) {
+        if ("".equals(prefix) || "".equals(namespaceURI)) {
+          ((Element)node).setAttributeNS(XMLNS_URI,XMLNS_PREFIX,namespaceURI);
+        }
+ else {
+          ((Element)node).setAttributeNS(XMLNS_URI,XMLNS_PREFIX + ":" + prefix,namespaceURI);
+        }
+      }
+      fLocalNSBinder.declarePrefix(prefix,namespaceURI);
+      fNSBinder.declarePrefix(prefix,namespaceURI);
+    }
+  }
+ else {
+    if (localName == null || "".equals(localName)) {
+      String msg=Utils.messages.createMessage(MsgKey.ER_NULL_LOCAL_ELEMENT_NAME,new Object[]{node.getNodeName()});
+      if (fErrorHandler != null) {
+        fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_ERROR,msg,MsgKey.ER_NULL_LOCAL_ELEMENT_NAME,null,null,null));
+      }
+    }
+ else {
+      namespaceURI=fNSBinder.getURI("");
+      if (namespaceURI != null && namespaceURI.length() > 0) {
+        ((Element)node).setAttributeNS(XMLNS_URI,XMLNS_PREFIX,"");
+        fLocalNSBinder.declarePrefix("","");
+        fNSBinder.declarePrefix("","");
+      }
+    }
+  }
+}

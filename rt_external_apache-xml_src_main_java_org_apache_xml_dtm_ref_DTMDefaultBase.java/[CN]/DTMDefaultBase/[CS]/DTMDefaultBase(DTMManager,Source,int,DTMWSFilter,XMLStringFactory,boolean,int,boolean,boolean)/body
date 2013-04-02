@@ -1,0 +1,33 @@
+{
+  int numblocks;
+  if (blocksize <= 64) {
+    numblocks=DEFAULT_NUMBLOCKS_SMALL;
+    m_dtmIdent=new SuballocatedIntVector(4,1);
+  }
+ else {
+    numblocks=DEFAULT_NUMBLOCKS;
+    m_dtmIdent=new SuballocatedIntVector(32);
+  }
+  m_exptype=new SuballocatedIntVector(blocksize,numblocks);
+  m_firstch=new SuballocatedIntVector(blocksize,numblocks);
+  m_nextsib=new SuballocatedIntVector(blocksize,numblocks);
+  m_parent=new SuballocatedIntVector(blocksize,numblocks);
+  if (usePrevsib)   m_prevsib=new SuballocatedIntVector(blocksize,numblocks);
+  m_mgr=mgr;
+  if (mgr instanceof DTMManagerDefault)   m_mgrDefault=(DTMManagerDefault)mgr;
+  m_documentBaseURI=(null != source) ? source.getSystemId() : null;
+  m_dtmIdent.setElementAt(dtmIdentity,0);
+  m_wsfilter=whiteSpaceFilter;
+  m_xstrf=xstringfactory;
+  m_indexing=doIndexing;
+  if (doIndexing) {
+    m_expandedNameTable=new ExpandedNameTable();
+  }
+ else {
+    m_expandedNameTable=m_mgrDefault.getExpandedNameTable(this);
+  }
+  if (null != whiteSpaceFilter) {
+    m_shouldStripWhitespaceStack=new BoolStack();
+    pushShouldStripWhitespace(false);
+  }
+}

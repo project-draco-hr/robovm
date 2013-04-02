@@ -1,0 +1,18 @@
+{
+  String lastMessage=super.getMessage();
+  Throwable exception=m_exception;
+  while (null != exception) {
+    String nextMessage=exception.getMessage();
+    if (null != nextMessage)     lastMessage=nextMessage;
+    if (exception instanceof TransformerException) {
+      TransformerException se=(TransformerException)exception;
+      Throwable prev=exception;
+      exception=se.getException();
+      if (prev == exception)       break;
+    }
+ else {
+      exception=null;
+    }
+  }
+  return (null != lastMessage) ? lastMessage : "";
+}

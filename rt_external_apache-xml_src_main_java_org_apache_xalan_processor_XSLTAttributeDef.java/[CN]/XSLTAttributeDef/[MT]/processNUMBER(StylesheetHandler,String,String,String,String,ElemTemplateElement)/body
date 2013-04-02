@@ -1,0 +1,29 @@
+{
+  if (getSupportsAVT()) {
+    Double val;
+    AVT avt=null;
+    try {
+      avt=new AVT(handler,uri,name,rawName,value,owner);
+      if (avt.isSimple()) {
+        val=Double.valueOf(value);
+      }
+    }
+ catch (    TransformerException te) {
+      throw new org.xml.sax.SAXException(te);
+    }
+catch (    NumberFormatException nfe) {
+      handleError(handler,XSLTErrorResources.INVALID_NUMBER,new Object[]{name,value},nfe);
+      return null;
+    }
+    return avt;
+  }
+ else {
+    try {
+      return Double.valueOf(value);
+    }
+ catch (    NumberFormatException nfe) {
+      handleError(handler,XSLTErrorResources.INVALID_NUMBER,new Object[]{name,value},nfe);
+      return null;
+    }
+  }
+}

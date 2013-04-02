@@ -1,0 +1,45 @@
+{
+  int nodeIndex=m_nodes.size();
+  if (m_dtmIdent.size() == (nodeIndex >>> DTMManager.IDENT_DTM_NODE_BITS)) {
+    try {
+      if (m_mgr == null)       throw new ClassCastException();
+      DTMManagerDefault mgrD=(DTMManagerDefault)m_mgr;
+      int id=mgrD.getFirstFreeDTMID();
+      mgrD.addDTM(this,id,nodeIndex);
+      m_dtmIdent.addElement(id << DTMManager.IDENT_DTM_NODE_BITS);
+    }
+ catch (    ClassCastException e) {
+      error(XMLMessages.createXMLMessage(XMLErrorResources.ER_NO_DTMIDS_AVAIL,null));
+    }
+  }
+  m_size++;
+  int type;
+  if (NULL == forceNodeType)   type=node.getNodeType();
+ else   type=forceNodeType;
+  if (Node.ATTRIBUTE_NODE == type) {
+    String name=node.getNodeName();
+    if (name.startsWith("xmlns:") || name.equals("xmlns")) {
+      type=DTM.NAMESPACE_NODE;
+    }
+  }
+  m_nodes.addElement(node);
+  m_firstch.setElementAt(NOTPROCESSED,nodeIndex);
+  m_nextsib.setElementAt(NOTPROCESSED,nodeIndex);
+  m_prevsib.setElementAt(previousSibling,nodeIndex);
+  m_parent.setElementAt(parentIndex,nodeIndex);
+  if (DTM.NULL != parentIndex && type != DTM.ATTRIBUTE_NODE && type != DTM.NAMESPACE_NODE) {
+    if (NOTPROCESSED == m_firstch.elementAt(parentIndex))     m_firstch.setElementAt(nodeIndex,parentIndex);
+  }
+  String nsURI=node.getNamespaceURI();
+  String localName=(type == Node.PROCESSING_INSTRUCTION_NODE) ? node.getNodeName() : node.getLocalName();
+  if (((type == Node.ELEMENT_NODE) || (type == Node.ATTRIBUTE_NODE)) && null == localName)   localName=node.getNodeName();
+  ExpandedNameTable exnt=m_expandedNameTable;
+  if (node.getLocalName() == null && (type == Node.ELEMENT_NODE || type == Node.ATTRIBUTE_NODE)) {
+  }
+  int expandedNameID=(null != localName) ? exnt.getExpandedTypeID(nsURI,localName,type) : exnt.getExpandedTypeID(type);
+  m_exptype.setElementAt(expandedNameID,nodeIndex);
+  indexNode(expandedNameID,nodeIndex);
+  if (DTM.NULL != previousSibling)   m_nextsib.setElementAt(nodeIndex,previousSibling);
+  if (type == DTM.NAMESPACE_NODE)   declareNamespaceInContext(parentIndex,nodeIndex);
+  return nodeIndex;
+}

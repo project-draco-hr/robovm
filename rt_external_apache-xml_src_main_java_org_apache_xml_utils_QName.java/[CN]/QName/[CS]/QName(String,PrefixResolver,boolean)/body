@@ -1,0 +1,31 @@
+{
+  String prefix=null;
+  _namespaceURI=null;
+  int indexOfNSSep=qname.indexOf(':');
+  if (indexOfNSSep > 0) {
+    prefix=qname.substring(0,indexOfNSSep);
+    if (prefix.equals("xml")) {
+      _namespaceURI=S_XMLNAMESPACEURI;
+    }
+ else {
+      _namespaceURI=resolver.getNamespaceForPrefix(prefix);
+    }
+    if (null == _namespaceURI) {
+      throw new RuntimeException(XMLMessages.createXMLMessage(XMLErrorResources.ER_PREFIX_MUST_RESOLVE,new Object[]{prefix}));
+    }
+    _localName=qname.substring(indexOfNSSep + 1);
+  }
+ else   if (indexOfNSSep == 0) {
+    throw new RuntimeException(XMLMessages.createXMLMessage(XMLErrorResources.ER_NAME_CANT_START_WITH_COLON,null));
+  }
+ else {
+    _localName=qname;
+  }
+  if (validate) {
+    if ((_localName == null) || (!XML11Char.isXML11ValidNCName(_localName))) {
+      throw new IllegalArgumentException(XMLMessages.createXMLMessage(XMLErrorResources.ER_ARG_LOCALNAME_INVALID,null));
+    }
+  }
+  m_hashCode=toString().hashCode();
+  _prefix=prefix;
+}

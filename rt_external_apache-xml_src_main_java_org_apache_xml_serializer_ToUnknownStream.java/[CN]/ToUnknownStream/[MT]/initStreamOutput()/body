@@ -1,0 +1,25 @@
+{
+  boolean firstElementIsHTML=isFirstElemHTML();
+  if (firstElementIsHTML) {
+    SerializationHandler oldHandler=m_handler;
+    Properties htmlProperties=OutputPropertiesFactory.getDefaultMethodProperties(Method.HTML);
+    Serializer serializer=SerializerFactory.getSerializer(htmlProperties);
+    m_handler=(SerializationHandler)serializer;
+    Writer writer=oldHandler.getWriter();
+    if (null != writer)     m_handler.setWriter(writer);
+ else {
+      OutputStream os=oldHandler.getOutputStream();
+      if (null != os)       m_handler.setOutputStream(os);
+    }
+    m_handler.setVersion(oldHandler.getVersion());
+    m_handler.setDoctypeSystem(oldHandler.getDoctypeSystem());
+    m_handler.setDoctypePublic(oldHandler.getDoctypePublic());
+    m_handler.setMediaType(oldHandler.getMediaType());
+    m_handler.setTransformer(oldHandler.getTransformer());
+  }
+  if (m_needToCallStartDocument) {
+    m_handler.startDocument();
+    m_needToCallStartDocument=false;
+  }
+  m_wrapped_handler_not_initialized=false;
+}

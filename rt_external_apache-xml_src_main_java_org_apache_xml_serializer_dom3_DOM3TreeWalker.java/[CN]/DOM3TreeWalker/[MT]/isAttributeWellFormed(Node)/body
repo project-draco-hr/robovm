@@ -1,0 +1,38 @@
+{
+  boolean isNameWF=false;
+  if ((fFeatures & NAMESPACES) != 0) {
+    isNameWF=isValidQName(node.getPrefix(),node.getLocalName(),fIsXMLVersion11);
+  }
+ else {
+    isNameWF=isXMLName(node.getNodeName(),fIsXMLVersion11);
+  }
+  if (!isNameWF) {
+    String msg=Utils.messages.createMessage(MsgKey.ER_WF_INVALID_CHARACTER_IN_NODE_NAME,new Object[]{"Attr",node.getNodeName()});
+    if (fErrorHandler != null) {
+      fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_FATAL_ERROR,msg,MsgKey.ER_WF_INVALID_CHARACTER_IN_NODE_NAME,null,null,null));
+    }
+  }
+  String value=node.getNodeValue();
+  if (value.indexOf('<') >= 0) {
+    String msg=Utils.messages.createMessage(MsgKey.ER_WF_LT_IN_ATTVAL,new Object[]{((Attr)node).getOwnerElement().getNodeName(),node.getNodeName()});
+    if (fErrorHandler != null) {
+      fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_FATAL_ERROR,msg,MsgKey.ER_WF_LT_IN_ATTVAL,null,null,null));
+    }
+  }
+  NodeList children=node.getChildNodes();
+  for (int i=0; i < children.getLength(); i++) {
+    Node child=children.item(i);
+    if (child == null) {
+      continue;
+    }
+switch (child.getNodeType()) {
+case Node.TEXT_NODE:
+      isTextWellFormed((Text)child);
+    break;
+case Node.ENTITY_REFERENCE_NODE:
+  isEntityReferneceWellFormed((EntityReference)child);
+break;
+default :
+}
+}
+}

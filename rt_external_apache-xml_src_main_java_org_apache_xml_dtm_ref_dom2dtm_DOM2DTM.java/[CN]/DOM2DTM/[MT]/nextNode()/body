@@ -1,0 +1,104 @@
+{
+  if (m_nodesAreProcessed)   return false;
+  Node pos=m_pos;
+  Node next=null;
+  int nexttype=NULL;
+  do {
+    if (pos.hasChildNodes()) {
+      next=pos.getFirstChild();
+      if (next != null && DOCUMENT_TYPE_NODE == next.getNodeType())       next=next.getNextSibling();
+      if (ENTITY_REFERENCE_NODE != pos.getNodeType()) {
+        m_last_parent=m_last_kid;
+        m_last_kid=NULL;
+        if (null != m_wsfilter) {
+          short wsv=m_wsfilter.getShouldStripSpace(makeNodeHandle(m_last_parent),this);
+          boolean shouldStrip=(DTMWSFilter.INHERIT == wsv) ? getShouldStripWhitespace() : (DTMWSFilter.STRIP == wsv);
+          pushShouldStripWhitespace(shouldStrip);
+        }
+      }
+    }
+ else {
+      if (m_last_kid != NULL) {
+        if (m_firstch.elementAt(m_last_kid) == NOTPROCESSED)         m_firstch.setElementAt(NULL,m_last_kid);
+      }
+      while (m_last_parent != NULL) {
+        next=pos.getNextSibling();
+        if (next != null && DOCUMENT_TYPE_NODE == next.getNodeType())         next=next.getNextSibling();
+        if (next != null)         break;
+        pos=pos.getParentNode();
+        if (pos == null) {
+          if (JJK_DEBUG) {
+            System.out.println("***** DOM2DTM Pop Control Flow problem");
+            for (; ; )             ;
+          }
+        }
+        if (pos != null && ENTITY_REFERENCE_NODE == pos.getNodeType()) {
+          if (JJK_DEBUG)           System.out.println("***** DOM2DTM popping EntRef");
+        }
+ else {
+          popShouldStripWhitespace();
+          if (m_last_kid == NULL)           m_firstch.setElementAt(NULL,m_last_parent);
+ else           m_nextsib.setElementAt(NULL,m_last_kid);
+          m_last_parent=m_parent.elementAt(m_last_kid=m_last_parent);
+        }
+      }
+      if (m_last_parent == NULL)       next=null;
+    }
+    if (next != null)     nexttype=next.getNodeType();
+    if (ENTITY_REFERENCE_NODE == nexttype)     pos=next;
+  }
+ while (ENTITY_REFERENCE_NODE == nexttype);
+  if (next == null) {
+    m_nextsib.setElementAt(NULL,0);
+    m_nodesAreProcessed=true;
+    m_pos=null;
+    if (JJK_DEBUG) {
+      System.out.println("***** DOM2DTM Crosscheck:");
+      for (int i=0; i < m_nodes.size(); ++i)       System.out.println(i + ":\t" + m_firstch.elementAt(i)+ "\t"+ m_nextsib.elementAt(i));
+    }
+    return false;
+  }
+  boolean suppressNode=false;
+  Node lastTextNode=null;
+  nexttype=next.getNodeType();
+  if (TEXT_NODE == nexttype || CDATA_SECTION_NODE == nexttype) {
+    suppressNode=((null != m_wsfilter) && getShouldStripWhitespace());
+    Node n=next;
+    while (n != null) {
+      lastTextNode=n;
+      if (TEXT_NODE == n.getNodeType())       nexttype=TEXT_NODE;
+      suppressNode&=XMLCharacterRecognizer.isWhiteSpace(n.getNodeValue());
+      n=logicalNextDOMTextNode(n);
+    }
+  }
+ else   if (PROCESSING_INSTRUCTION_NODE == nexttype) {
+    suppressNode=(pos.getNodeName().toLowerCase().equals("xml"));
+  }
+  if (!suppressNode) {
+    int nextindex=addNode(next,m_last_parent,m_last_kid,nexttype);
+    m_last_kid=nextindex;
+    if (ELEMENT_NODE == nexttype) {
+      int attrIndex=NULL;
+      NamedNodeMap attrs=next.getAttributes();
+      int attrsize=(attrs == null) ? 0 : attrs.getLength();
+      if (attrsize > 0) {
+        for (int i=0; i < attrsize; ++i) {
+          attrIndex=addNode(attrs.item(i),nextindex,attrIndex,NULL);
+          m_firstch.setElementAt(DTM.NULL,attrIndex);
+          if (!m_processedFirstElement && "xmlns:xml".equals(attrs.item(i).getNodeName()))           m_processedFirstElement=true;
+        }
+      }
+      if (!m_processedFirstElement) {
+        attrIndex=addNode(new DOM2DTMdefaultNamespaceDeclarationNode((Element)next,"xml",NAMESPACE_DECL_NS,makeNodeHandle(((attrIndex == NULL) ? nextindex : attrIndex) + 1)),nextindex,attrIndex,NULL);
+        m_firstch.setElementAt(DTM.NULL,attrIndex);
+        m_processedFirstElement=true;
+      }
+      if (attrIndex != NULL)       m_nextsib.setElementAt(DTM.NULL,attrIndex);
+    }
+  }
+  if (TEXT_NODE == nexttype || CDATA_SECTION_NODE == nexttype) {
+    next=lastTextNode;
+  }
+  m_pos=next;
+  return true;
+}

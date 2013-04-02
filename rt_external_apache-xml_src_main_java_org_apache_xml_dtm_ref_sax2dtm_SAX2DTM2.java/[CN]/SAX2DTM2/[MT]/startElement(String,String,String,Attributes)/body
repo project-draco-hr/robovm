@@ -1,0 +1,65 @@
+{
+  charactersFlush();
+  int exName=m_expandedNameTable.getExpandedTypeID(uri,localName,DTM.ELEMENT_NODE);
+  int prefixIndex=(qName.length() != localName.length()) ? m_valuesOrPrefixes.stringToIndex(qName) : 0;
+  int elemNode=addNode(DTM.ELEMENT_NODE,exName,m_parents.peek(),m_previous,prefixIndex,true);
+  if (m_indexing)   indexNode(exName,elemNode);
+  m_parents.push(elemNode);
+  int startDecls=m_contextIndexes.peek();
+  int nDecls=m_prefixMappings.size();
+  String prefix;
+  if (!m_pastFirstElement) {
+    prefix="xml";
+    String declURL="http://www.w3.org/XML/1998/namespace";
+    exName=m_expandedNameTable.getExpandedTypeID(null,prefix,DTM.NAMESPACE_NODE);
+    m_values.addElement(declURL);
+    int val=m_valueIndex++;
+    addNode(DTM.NAMESPACE_NODE,exName,elemNode,DTM.NULL,val,false);
+    m_pastFirstElement=true;
+  }
+  for (int i=startDecls; i < nDecls; i+=2) {
+    prefix=(String)m_prefixMappings.elementAt(i);
+    if (prefix == null)     continue;
+    String declURL=(String)m_prefixMappings.elementAt(i + 1);
+    exName=m_expandedNameTable.getExpandedTypeID(null,prefix,DTM.NAMESPACE_NODE);
+    m_values.addElement(declURL);
+    int val=m_valueIndex++;
+    addNode(DTM.NAMESPACE_NODE,exName,elemNode,DTM.NULL,val,false);
+  }
+  int n=attributes.getLength();
+  for (int i=0; i < n; i++) {
+    String attrUri=attributes.getURI(i);
+    String attrQName=attributes.getQName(i);
+    String valString=attributes.getValue(i);
+    int nodeType;
+    String attrLocalName=attributes.getLocalName(i);
+    if ((null != attrQName) && (attrQName.equals("xmlns") || attrQName.startsWith("xmlns:"))) {
+      prefix=getPrefix(attrQName,attrUri);
+      if (declAlreadyDeclared(prefix))       continue;
+      nodeType=DTM.NAMESPACE_NODE;
+    }
+ else {
+      nodeType=DTM.ATTRIBUTE_NODE;
+      if (m_buildIdIndex && attributes.getType(i).equalsIgnoreCase("ID"))       setIDAttribute(valString,elemNode);
+    }
+    if (null == valString)     valString="";
+    m_values.addElement(valString);
+    int val=m_valueIndex++;
+    if (attrLocalName.length() != attrQName.length()) {
+      prefixIndex=m_valuesOrPrefixes.stringToIndex(attrQName);
+      int dataIndex=m_data.size();
+      m_data.addElement(prefixIndex);
+      m_data.addElement(val);
+      val=-dataIndex;
+    }
+    exName=m_expandedNameTable.getExpandedTypeID(attrUri,attrLocalName,nodeType);
+    addNode(nodeType,exName,elemNode,DTM.NULL,val,false);
+  }
+  if (null != m_wsfilter) {
+    short wsv=m_wsfilter.getShouldStripSpace(makeNodeHandle(elemNode),this);
+    boolean shouldStrip=(DTMWSFilter.INHERIT == wsv) ? getShouldStripWhitespace() : (DTMWSFilter.STRIP == wsv);
+    pushShouldStripWhitespace(shouldStrip);
+  }
+  m_previous=DTM.NULL;
+  m_contextIndexes.push(m_prefixMappings.size());
+}

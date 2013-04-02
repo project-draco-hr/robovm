@@ -1,0 +1,21 @@
+{
+  m_outputProperties=new OutputProperties();
+  m_outputProperties.setDOMBackPointer(handler.getOriginatingNode());
+  m_outputProperties.setLocaterInfo(handler.getLocator());
+  m_outputProperties.setUid(handler.nextUid());
+  setPropertiesFromAttributes(handler,rawName,attributes,this);
+  String entitiesFileName=(String)m_outputProperties.getProperties().get(OutputPropertiesFactory.S_KEY_ENTITIES);
+  if (null != entitiesFileName) {
+    try {
+      String absURL=SystemIDResolver.getAbsoluteURI(entitiesFileName,handler.getBaseIdentifier());
+      m_outputProperties.getProperties().put(OutputPropertiesFactory.S_KEY_ENTITIES,absURL);
+    }
+ catch (    TransformerException te) {
+      handler.error(te.getMessage(),te);
+    }
+  }
+  handler.getStylesheet().setOutput(m_outputProperties);
+  ElemTemplateElement parent=handler.getElemTemplateElement();
+  parent.appendChild(m_outputProperties);
+  m_outputProperties=null;
+}

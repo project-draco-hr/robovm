@@ -1,0 +1,45 @@
+{
+  int identity=makeNodeIdentity(nodeHandle);
+  int type;
+  if (identity == DTM.NULL)   type=DTM.NULL;
+ else   type=_type(identity);
+  if (isTextType(type)) {
+    int dataIndex=_dataOrQName(identity);
+    int offset=m_data.elementAt(dataIndex);
+    int length=m_data.elementAt(dataIndex + 1);
+    return m_xstrf.newstr(m_chars,offset,length);
+  }
+ else {
+    int firstChild=_firstch(identity);
+    if (DTM.NULL != firstChild) {
+      int offset=-1;
+      int length=0;
+      int startNode=identity;
+      identity=firstChild;
+      do {
+        type=_type(identity);
+        if (isTextType(type)) {
+          int dataIndex=_dataOrQName(identity);
+          if (-1 == offset) {
+            offset=m_data.elementAt(dataIndex);
+          }
+          length+=m_data.elementAt(dataIndex + 1);
+        }
+        identity=getNextNodeIdentity(identity);
+      }
+ while (DTM.NULL != identity && (_parent(identity) >= startNode));
+      if (length > 0) {
+        return m_xstrf.newstr(m_chars,offset,length);
+      }
+    }
+ else     if (type != DTM.ELEMENT_NODE) {
+      int dataIndex=_dataOrQName(identity);
+      if (dataIndex < 0) {
+        dataIndex=-dataIndex;
+        dataIndex=m_data.elementAt(dataIndex + 1);
+      }
+      return m_xstrf.newstr(m_valuesOrPrefixes.indexToString(dataIndex));
+    }
+  }
+  return m_xstrf.emptystr();
+}

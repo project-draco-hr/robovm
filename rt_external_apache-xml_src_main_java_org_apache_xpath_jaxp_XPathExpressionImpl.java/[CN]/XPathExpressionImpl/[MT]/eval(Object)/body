@@ -1,0 +1,18 @@
+{
+  org.apache.xpath.XPathContext xpathSupport=null;
+  if (functionResolver != null) {
+    JAXPExtensionsProvider jep=new JAXPExtensionsProvider(functionResolver,featureSecureProcessing);
+    xpathSupport=new org.apache.xpath.XPathContext(jep,false);
+  }
+ else {
+    xpathSupport=new org.apache.xpath.XPathContext(false);
+  }
+  xpathSupport.setVarStack(new JAXPVariableStack(variableResolver));
+  XObject xobj=null;
+  Node contextNode=(Node)contextItem;
+  if (contextNode == null) {
+    contextNode=getDummyDocument();
+  }
+  xobj=xpath.execute(xpathSupport,contextNode,prefixResolver);
+  return xobj;
+}

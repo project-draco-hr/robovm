@@ -1,0 +1,42 @@
+{
+  Object objToReturn=null;
+  if (getSupportsAVT()) {
+    try {
+      AVT avt=new AVT(handler,uri,name,rawName,value,owner);
+      if (!avt.isSimple())       return avt;
+ else       objToReturn=avt;
+    }
+ catch (    TransformerException te) {
+      throw new org.xml.sax.SAXException(te);
+    }
+  }
+  int key=this.getEnum(value);
+  if (key != StringToIntTable.INVALID_KEY) {
+    if (objToReturn == null)     objToReturn=new Integer(key);
+  }
+ else {
+    try {
+      QName qname=new QName(value,handler,true);
+      if (objToReturn == null)       objToReturn=qname;
+      if (qname.getPrefix() == null) {
+        StringBuffer enumNamesList=getListOfEnums();
+        enumNamesList.append(" <qname-but-not-ncname>");
+        handleError(handler,XSLTErrorResources.INVALID_ENUM,new Object[]{name,value,enumNamesList.toString()},null);
+        return null;
+      }
+    }
+ catch (    IllegalArgumentException ie) {
+      StringBuffer enumNamesList=getListOfEnums();
+      enumNamesList.append(" <qname-but-not-ncname>");
+      handleError(handler,XSLTErrorResources.INVALID_ENUM,new Object[]{name,value,enumNamesList.toString()},ie);
+      return null;
+    }
+catch (    RuntimeException re) {
+      StringBuffer enumNamesList=getListOfEnums();
+      enumNamesList.append(" <qname-but-not-ncname>");
+      handleError(handler,XSLTErrorResources.INVALID_ENUM,new Object[]{name,value,enumNamesList.toString()},re);
+      return null;
+    }
+  }
+  return objToReturn;
+}

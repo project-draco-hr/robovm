@@ -1,0 +1,42 @@
+{
+  processAccumulatedText();
+  String prefix=null;
+  int colon=qName.indexOf(':');
+  if (colon > 0)   prefix=qName.substring(0,colon);
+  System.out.println("Prefix=" + prefix + " index="+ m_prefixNames.stringToIndex(prefix));
+  appendStartElement(m_nsNames.stringToIndex(namespaceURI),m_localNames.stringToIndex(localName),m_prefixNames.stringToIndex(prefix));
+  int nAtts=(atts == null) ? 0 : atts.getLength();
+  for (int i=nAtts - 1; i >= 0; --i) {
+    qName=atts.getQName(i);
+    if (qName.startsWith("xmlns:") || "xmlns".equals(qName)) {
+      prefix=null;
+      colon=qName.indexOf(':');
+      if (colon > 0) {
+        prefix=qName.substring(0,colon);
+      }
+ else {
+        prefix=null;
+      }
+      appendNSDeclaration(m_prefixNames.stringToIndex(prefix),m_nsNames.stringToIndex(atts.getValue(i)),atts.getType(i).equalsIgnoreCase("ID"));
+    }
+  }
+  for (int i=nAtts - 1; i >= 0; --i) {
+    qName=atts.getQName(i);
+    if (!(qName.startsWith("xmlns:") || "xmlns".equals(qName))) {
+      prefix=null;
+      colon=qName.indexOf(':');
+      if (colon > 0) {
+        prefix=qName.substring(0,colon);
+        localName=qName.substring(colon + 1);
+      }
+ else {
+        prefix="";
+        localName=qName;
+      }
+      m_char.append(atts.getValue(i));
+      int contentEnd=m_char.length();
+      if (!("xmlns".equals(prefix) || "xmlns".equals(qName)))       appendAttribute(m_nsNames.stringToIndex(atts.getURI(i)),m_localNames.stringToIndex(localName),m_prefixNames.stringToIndex(prefix),atts.getType(i).equalsIgnoreCase("ID"),m_char_current_start,contentEnd - m_char_current_start);
+      m_char_current_start=contentEnd;
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  if (!isXMLName(node.getNodeName(),fIsXMLVersion11)) {
+    String msg=Utils.messages.createMessage(MsgKey.ER_WF_INVALID_CHARACTER_IN_NODE_NAME,new Object[]{"EntityReference",node.getNodeName()});
+    if (fErrorHandler != null) {
+      fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_FATAL_ERROR,msg,MsgKey.ER_WF_INVALID_CHARACTER_IN_NODE_NAME,null,null,null));
+    }
+  }
+  Node parent=node.getParentNode();
+  DocumentType docType=node.getOwnerDocument().getDoctype();
+  if (docType != null) {
+    NamedNodeMap entities=docType.getEntities();
+    for (int i=0; i < entities.getLength(); i++) {
+      Entity ent=(Entity)entities.item(i);
+      String nodeName=node.getNodeName() == null ? "" : node.getNodeName();
+      String nodeNamespaceURI=node.getNamespaceURI() == null ? "" : node.getNamespaceURI();
+      String entName=ent.getNodeName() == null ? "" : ent.getNodeName();
+      String entNamespaceURI=ent.getNamespaceURI() == null ? "" : ent.getNamespaceURI();
+      if (parent.getNodeType() == Node.ELEMENT_NODE) {
+        if (entNamespaceURI.equals(nodeNamespaceURI) && entName.equals(nodeName)) {
+          if (ent.getNotationName() != null) {
+            String msg=Utils.messages.createMessage(MsgKey.ER_WF_REF_TO_UNPARSED_ENT,new Object[]{node.getNodeName()});
+            if (fErrorHandler != null) {
+              fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_FATAL_ERROR,msg,MsgKey.ER_WF_REF_TO_UNPARSED_ENT,null,null,null));
+            }
+          }
+        }
+      }
+      if (parent.getNodeType() == Node.ATTRIBUTE_NODE) {
+        if (entNamespaceURI.equals(nodeNamespaceURI) && entName.equals(nodeName)) {
+          if (ent.getPublicId() != null || ent.getSystemId() != null || ent.getNotationName() != null) {
+            String msg=Utils.messages.createMessage(MsgKey.ER_WF_REF_TO_EXTERNAL_ENT,new Object[]{node.getNodeName()});
+            if (fErrorHandler != null) {
+              fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_FATAL_ERROR,msg,MsgKey.ER_WF_REF_TO_EXTERNAL_ENT,null,null,null));
+            }
+          }
+        }
+      }
+    }
+  }
+}

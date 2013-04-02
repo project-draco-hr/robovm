@@ -1,0 +1,50 @@
+{
+  boolean mightBeProximate=false;
+  int argLen;
+switch (stepType) {
+case OpCodes.OP_VARIABLE:
+case OpCodes.OP_EXTFUNCTION:
+case OpCodes.OP_FUNCTION:
+case OpCodes.OP_GROUP:
+    argLen=compiler.getArgLength(opPos);
+  break;
+default :
+argLen=compiler.getArgLengthOfStep(opPos);
+}
+int predPos=compiler.getFirstPredicateOpPos(opPos);
+int count=0;
+while (OpCodes.OP_PREDICATE == compiler.getOp(predPos)) {
+count++;
+int innerExprOpPos=predPos + 2;
+int predOp=compiler.getOp(innerExprOpPos);
+switch (predOp) {
+case OpCodes.OP_VARIABLE:
+return true;
+case OpCodes.OP_LOCATIONPATH:
+break;
+case OpCodes.OP_NUMBER:
+case OpCodes.OP_NUMBERLIT:
+return true;
+case OpCodes.OP_FUNCTION:
+boolean isProx=functionProximateOrContainsProximate(compiler,innerExprOpPos);
+if (isProx) return true;
+break;
+case OpCodes.OP_GT:
+case OpCodes.OP_GTE:
+case OpCodes.OP_LT:
+case OpCodes.OP_LTE:
+case OpCodes.OP_EQUALS:
+int leftPos=OpMap.getFirstChildPos(innerExprOpPos);
+int rightPos=compiler.getNextOpPos(leftPos);
+isProx=isProximateInnerExpr(compiler,leftPos);
+if (isProx) return true;
+isProx=isProximateInnerExpr(compiler,rightPos);
+if (isProx) return true;
+break;
+default :
+return true;
+}
+predPos=compiler.getNextOpPos(predPos);
+}
+return mightBeProximate;
+}

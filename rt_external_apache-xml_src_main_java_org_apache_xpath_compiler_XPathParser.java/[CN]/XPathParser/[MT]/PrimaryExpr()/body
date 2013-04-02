@@ -1,0 +1,38 @@
+{
+  boolean matchFound;
+  int opPos=m_ops.getOp(OpMap.MAPINDEX_LENGTH);
+  if ((m_tokenChar == '\'') || (m_tokenChar == '"')) {
+    appendOp(2,OpCodes.OP_LITERAL);
+    Literal();
+    m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) - opPos);
+    matchFound=true;
+  }
+ else   if (m_tokenChar == '$') {
+    nextToken();
+    appendOp(2,OpCodes.OP_VARIABLE);
+    QName();
+    m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) - opPos);
+    matchFound=true;
+  }
+ else   if (m_tokenChar == '(') {
+    nextToken();
+    appendOp(2,OpCodes.OP_GROUP);
+    Expr();
+    consumeExpected(')');
+    m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) - opPos);
+    matchFound=true;
+  }
+ else   if ((null != m_token) && ((('.' == m_tokenChar) && (m_token.length() > 1) && Character.isDigit(m_token.charAt(1))) || Character.isDigit(m_tokenChar))) {
+    appendOp(2,OpCodes.OP_NUMBERLIT);
+    Number();
+    m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) - opPos);
+    matchFound=true;
+  }
+ else   if (lookahead('(',1) || (lookahead(':',1) && lookahead('(',3))) {
+    matchFound=FunctionCall();
+  }
+ else {
+    matchFound=false;
+  }
+  return matchFound;
+}

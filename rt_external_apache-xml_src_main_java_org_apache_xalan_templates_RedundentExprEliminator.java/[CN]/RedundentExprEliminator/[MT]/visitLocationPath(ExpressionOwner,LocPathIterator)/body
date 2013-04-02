@@ -1,0 +1,23 @@
+{
+  if (path instanceof SelfIteratorNoPredicate) {
+    return true;
+  }
+ else   if (path instanceof WalkingIterator) {
+    WalkingIterator wi=(WalkingIterator)path;
+    AxesWalker aw=wi.getFirstWalker();
+    if ((aw instanceof FilterExprWalker) && (null == aw.getNextWalker())) {
+      FilterExprWalker few=(FilterExprWalker)aw;
+      Expression exp=few.getInnerExpression();
+      if (exp instanceof Variable)       return true;
+    }
+  }
+  if (isAbsolute(path) && (null != m_absPaths)) {
+    if (DEBUG)     validateNewAddition(m_absPaths,owner,path);
+    m_absPaths.addElement(owner);
+  }
+ else   if (m_isSameContext && (null != m_paths)) {
+    if (DEBUG)     validateNewAddition(m_paths,owner,path);
+    m_paths.addElement(owner);
+  }
+  return true;
+}

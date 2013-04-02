@@ -1,0 +1,18 @@
+{
+  SAXSourceLocator locator=getLocator();
+  ErrorListener handler=m_stylesheetProcessor.getErrorListener();
+  TransformerException pe;
+  if (!(e instanceof TransformerException)) {
+    pe=(null == e) ? new TransformerException(msg,locator) : new TransformerException(msg,locator,e);
+  }
+ else   pe=(TransformerException)e;
+  if (null != handler) {
+    try {
+      handler.error(pe);
+    }
+ catch (    TransformerException te) {
+      throw new org.xml.sax.SAXException(te);
+    }
+  }
+ else   throw new org.xml.sax.SAXException(pe);
+}

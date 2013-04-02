@@ -1,0 +1,23 @@
+{
+  if (null != m_errorHandler) {
+    try {
+      m_errorHandler.fatalError(e);
+    }
+ catch (    SAXParseException se) {
+    }
+  }
+  javax.xml.transform.ErrorListener errorListener=m_transformer.getErrorListener();
+  if (errorListener instanceof ErrorHandler) {
+    ((ErrorHandler)errorListener).fatalError(e);
+    if (null != m_errorHandler)     m_errorHandler.fatalError(e);
+  }
+ else {
+    try {
+      errorListener.fatalError(new javax.xml.transform.TransformerException(e));
+      if (null != m_errorHandler)       m_errorHandler.fatalError(e);
+    }
+ catch (    javax.xml.transform.TransformerException te) {
+      throw e;
+    }
+  }
+}

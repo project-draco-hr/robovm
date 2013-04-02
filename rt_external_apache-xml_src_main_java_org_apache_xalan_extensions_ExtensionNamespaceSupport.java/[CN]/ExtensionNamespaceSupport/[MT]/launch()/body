@@ -1,0 +1,23 @@
+{
+  ExtensionHandler handler=null;
+  try {
+    Class cl=ExtensionHandler.getClassForName(m_handlerClass);
+    Constructor con=null;
+    if (m_sig != null)     con=cl.getConstructor(m_sig);
+ else {
+      Constructor[] cons=cl.getConstructors();
+      for (int i=0; i < cons.length; i++) {
+        if (cons[i].getParameterTypes().length == m_args.length) {
+          con=cons[i];
+          break;
+        }
+      }
+    }
+    if (con != null)     handler=(ExtensionHandler)con.newInstance(m_args);
+ else     throw new TransformerException("ExtensionHandler constructor not found");
+  }
+ catch (  Exception e) {
+    throw new TransformerException(e);
+  }
+  return handler;
+}

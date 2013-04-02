@@ -1,0 +1,64 @@
+{
+  String baseID;
+  InputSource isource=null;
+  Node node=null;
+  XMLReader reader=null;
+  if (source instanceof DOMSource) {
+    DOMSource dsource=(DOMSource)source;
+    node=dsource.getNode();
+    baseID=dsource.getSystemId();
+  }
+ else {
+    isource=SAXSource.sourceToInputSource(source);
+    baseID=isource.getSystemId();
+  }
+  StylesheetPIHandler handler=new StylesheetPIHandler(baseID,media,title,charset);
+  if (m_uriResolver != null) {
+    handler.setURIResolver(m_uriResolver);
+  }
+  try {
+    if (null != node) {
+      TreeWalker walker=new TreeWalker(handler,new org.apache.xml.utils.DOM2Helper(),baseID);
+      walker.traverse(node);
+    }
+ else {
+      try {
+        javax.xml.parsers.SAXParserFactory factory=javax.xml.parsers.SAXParserFactory.newInstance();
+        factory.setNamespaceAware(true);
+        if (m_isSecureProcessing) {
+          try {
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,true);
+          }
+ catch (          org.xml.sax.SAXException e) {
+          }
+        }
+        javax.xml.parsers.SAXParser jaxpParser=factory.newSAXParser();
+        reader=jaxpParser.getXMLReader();
+      }
+ catch (      javax.xml.parsers.ParserConfigurationException ex) {
+        throw new org.xml.sax.SAXException(ex);
+      }
+catch (      javax.xml.parsers.FactoryConfigurationError ex1) {
+        throw new org.xml.sax.SAXException(ex1.toString());
+      }
+catch (      NoSuchMethodError ex2) {
+      }
+catch (      AbstractMethodError ame) {
+      }
+      if (null == reader) {
+        reader=XMLReaderFactory.createXMLReader();
+      }
+      reader.setContentHandler(handler);
+      reader.parse(isource);
+    }
+  }
+ catch (  StopParseException spe) {
+  }
+catch (  org.xml.sax.SAXException se) {
+    throw new TransformerConfigurationException("getAssociatedStylesheets failed",se);
+  }
+catch (  IOException ioe) {
+    throw new TransformerConfigurationException("getAssociatedStylesheets failed",ioe);
+  }
+  return handler.getAssociatedStylesheet();
+}

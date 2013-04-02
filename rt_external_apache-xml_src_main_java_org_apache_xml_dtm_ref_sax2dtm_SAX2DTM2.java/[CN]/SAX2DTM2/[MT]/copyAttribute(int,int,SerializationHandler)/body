@@ -1,0 +1,24 @@
+{
+  final ExtendedType extType=m_extendedTypes[exptype];
+  final String uri=extType.getNamespace();
+  final String localName=extType.getLocalName();
+  String prefix=null;
+  String qname=null;
+  int dataIndex=_dataOrQName(nodeID);
+  int valueIndex=dataIndex;
+  if (dataIndex <= 0) {
+    int prefixIndex=m_data.elementAt(-dataIndex);
+    valueIndex=m_data.elementAt(-dataIndex + 1);
+    qname=m_valuesOrPrefixes.indexToString(prefixIndex);
+    int colonIndex=qname.indexOf(':');
+    if (colonIndex > 0) {
+      prefix=qname.substring(0,colonIndex);
+    }
+  }
+  if (uri.length() != 0) {
+    handler.namespaceAfterStartElement(prefix,uri);
+  }
+  String nodeName=(prefix != null) ? qname : localName;
+  String nodeValue=(String)m_values.elementAt(valueIndex);
+  handler.addAttribute(nodeName,nodeValue);
+}

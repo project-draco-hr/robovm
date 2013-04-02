@@ -1,0 +1,15 @@
+{
+  int type=getNodeType(nodeHandle);
+  Node node=getNode(nodeHandle);
+  if (TEXT_NODE == type || CDATA_SECTION_NODE == type) {
+    FastStringBuffer buf=StringBufferPool.get();
+    while (node != null) {
+      buf.append(node.getNodeValue());
+      node=logicalNextDOMTextNode(node);
+    }
+    boolean b=buf.isWhitespace(0,buf.length());
+    StringBufferPool.free(buf);
+    return b;
+  }
+  return false;
+}

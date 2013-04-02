@@ -1,0 +1,39 @@
+{
+  super(compiler,opPos,analysis,false);
+  int firstStepPos=OpMap.getFirstChildPos(opPos);
+  m_pattern=WalkerFactory.loadSteps(this,compiler,firstStepPos,0);
+  boolean fromRoot=false;
+  boolean walkBack=false;
+  boolean walkDescendants=false;
+  boolean walkAttributes=false;
+  if (0 != (analysis & (WalkerFactory.BIT_ROOT | WalkerFactory.BIT_ANY_DESCENDANT_FROM_ROOT)))   fromRoot=true;
+  if (0 != (analysis & (WalkerFactory.BIT_ANCESTOR | WalkerFactory.BIT_ANCESTOR_OR_SELF | WalkerFactory.BIT_PRECEDING| WalkerFactory.BIT_PRECEDING_SIBLING| WalkerFactory.BIT_FOLLOWING| WalkerFactory.BIT_FOLLOWING_SIBLING| WalkerFactory.BIT_PARENT| WalkerFactory.BIT_FILTER)))   walkBack=true;
+  if (0 != (analysis & (WalkerFactory.BIT_DESCENDANT_OR_SELF | WalkerFactory.BIT_DESCENDANT | WalkerFactory.BIT_CHILD)))   walkDescendants=true;
+  if (0 != (analysis & (WalkerFactory.BIT_ATTRIBUTE | WalkerFactory.BIT_NAMESPACE)))   walkAttributes=true;
+  if (false || DEBUG) {
+    System.out.print("analysis: " + Integer.toBinaryString(analysis));
+    System.out.println(", " + WalkerFactory.getAnalysisString(analysis));
+  }
+  if (fromRoot || walkBack) {
+    if (walkAttributes) {
+      m_superAxis=Axis.ALL;
+    }
+ else {
+      m_superAxis=Axis.DESCENDANTSFROMROOT;
+    }
+  }
+ else   if (walkDescendants) {
+    if (walkAttributes) {
+      m_superAxis=Axis.ALLFROMNODE;
+    }
+ else {
+      m_superAxis=Axis.DESCENDANTORSELF;
+    }
+  }
+ else {
+    m_superAxis=Axis.ALL;
+  }
+  if (false || DEBUG) {
+    System.out.println("axis: " + Axis.getNames(m_superAxis));
+  }
+}

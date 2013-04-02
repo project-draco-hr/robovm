@@ -1,0 +1,30 @@
+{
+  int type=elem.getXSLToken();
+switch (type) {
+case Constants.ELEMNAME_CALLTEMPLATE:
+case Constants.ELEMNAME_TEMPLATE:
+case Constants.ELEMNAME_FOREACH:
+{
+      if (type == Constants.ELEMNAME_FOREACH) {
+        ElemForEach efe=(ElemForEach)elem;
+        Expression select=efe.getSelect();
+        select.callVisitors(efe,this);
+      }
+      Vector savedPaths=m_paths;
+      m_paths=new Vector();
+      elem.callChildVisitors(this,false);
+      eleminateRedundentLocals(elem);
+      m_paths=savedPaths;
+      return false;
+    }
+case Constants.ELEMNAME_NUMBER:
+case Constants.ELEMNAME_SORT:
+  boolean savedIsSame=m_isSameContext;
+m_isSameContext=false;
+elem.callChildVisitors(this);
+m_isSameContext=savedIsSame;
+return false;
+default :
+return true;
+}
+}

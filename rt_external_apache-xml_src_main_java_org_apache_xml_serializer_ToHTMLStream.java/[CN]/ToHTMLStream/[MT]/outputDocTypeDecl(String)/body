@@ -1,0 +1,30 @@
+{
+  if (true == m_needToOutputDocTypeDecl) {
+    String doctypeSystem=getDoctypeSystem();
+    String doctypePublic=getDoctypePublic();
+    if ((null != doctypeSystem) || (null != doctypePublic)) {
+      final java.io.Writer writer=m_writer;
+      try {
+        writer.write("<!DOCTYPE ");
+        writer.write(name);
+        if (null != doctypePublic) {
+          writer.write(" PUBLIC \"");
+          writer.write(doctypePublic);
+          writer.write('"');
+        }
+        if (null != doctypeSystem) {
+          if (null == doctypePublic)           writer.write(" SYSTEM \"");
+ else           writer.write(" \"");
+          writer.write(doctypeSystem);
+          writer.write('"');
+        }
+        writer.write('>');
+        outputLineSep();
+      }
+ catch (      IOException e) {
+        throw new SAXException(e);
+      }
+    }
+  }
+  m_needToOutputDocTypeDecl=false;
+}

@@ -1,0 +1,32 @@
+{
+  Node currentNode=m_currentNode;
+  if (null != currentNode) {
+    if (currentNode == m_root && m_nextSibling != null)     currentNode.insertBefore(newNode,m_nextSibling);
+ else     currentNode.appendChild(newNode);
+  }
+ else   if (null != m_docFrag) {
+    if (m_nextSibling != null)     m_docFrag.insertBefore(newNode,m_nextSibling);
+ else     m_docFrag.appendChild(newNode);
+  }
+ else {
+    boolean ok=true;
+    short type=newNode.getNodeType();
+    if (type == Node.TEXT_NODE) {
+      String data=newNode.getNodeValue();
+      if ((null != data) && (data.trim().length() > 0)) {
+        throw new org.xml.sax.SAXException(XMLMessages.createXMLMessage(XMLErrorResources.ER_CANT_OUTPUT_TEXT_BEFORE_DOC,null));
+      }
+      ok=false;
+    }
+ else     if (type == Node.ELEMENT_NODE) {
+      if (m_doc.getDocumentElement() != null) {
+        ok=false;
+        throw new org.xml.sax.SAXException(XMLMessages.createXMLMessage(XMLErrorResources.ER_CANT_HAVE_MORE_THAN_ONE_ROOT,null));
+      }
+    }
+    if (ok) {
+      if (m_nextSibling != null)       m_doc.insertBefore(newNode,m_nextSibling);
+ else       m_doc.appendChild(newNode);
+    }
+  }
+}

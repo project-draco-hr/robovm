@@ -1,0 +1,13 @@
+{
+  XPathContext xctxt=m_xcontext;
+  VariableStack vs=xctxt.getVarStack();
+  StylesheetRoot sr=getStylesheet();
+  Vector vars=sr.getVariablesAndParamsComposed();
+  int i=vars.size();
+  vs.link(i);
+  while (--i >= 0) {
+    ElemVariable v=(ElemVariable)vars.elementAt(i);
+    XObject xobj=new XUnresolvedVariable(v,contextNode,this,vs.getStackFrame(),0,true);
+    if (null == vs.elementAt(i))     vs.setGlobalVariable(i,xobj);
+  }
+}

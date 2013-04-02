@@ -1,0 +1,54 @@
+{
+  int index=0;
+  int start=0;
+  int end=p_uriSpec.length();
+  char testChar='\0';
+  String userinfo=null;
+  if (p_uriSpec.indexOf('@',start) != -1) {
+    while (index < end) {
+      testChar=p_uriSpec.charAt(index);
+      if (testChar == '@') {
+        break;
+      }
+      index++;
+    }
+    userinfo=p_uriSpec.substring(start,index);
+    index++;
+  }
+  String host=null;
+  start=index;
+  while (index < end) {
+    testChar=p_uriSpec.charAt(index);
+    if (testChar == ':') {
+      break;
+    }
+    index++;
+  }
+  host=p_uriSpec.substring(start,index);
+  int port=-1;
+  if (host.length() > 0) {
+    if (testChar == ':') {
+      index++;
+      start=index;
+      while (index < end) {
+        index++;
+      }
+      String portStr=p_uriSpec.substring(start,index);
+      if (portStr.length() > 0) {
+        for (int i=0; i < portStr.length(); i++) {
+          if (!isDigit(portStr.charAt(i))) {
+            throw new MalformedURIException(portStr + " is invalid. Port should only contain digits!");
+          }
+        }
+        try {
+          port=Integer.parseInt(portStr);
+        }
+ catch (        NumberFormatException nfe) {
+        }
+      }
+    }
+  }
+  setHost(host);
+  setPort(port);
+  setUserinfo(userinfo);
+}

@@ -1,0 +1,23 @@
+{
+  String value=attrs.getValue("xml:space");
+  if (null == value) {
+    m_spacePreserveStack.push(m_spacePreserveStack.peekOrFalse());
+  }
+ else   if (value.equals("preserve")) {
+    m_spacePreserveStack.push(true);
+  }
+ else   if (value.equals("default")) {
+    m_spacePreserveStack.push(false);
+  }
+ else {
+    SAXSourceLocator locator=getLocator();
+    ErrorListener handler=m_stylesheetProcessor.getErrorListener();
+    try {
+      handler.error(new TransformerException(XSLMessages.createMessage(XSLTErrorResources.ER_ILLEGAL_XMLSPACE_VALUE,null),locator));
+    }
+ catch (    TransformerException te) {
+      throw new org.xml.sax.SAXParseException(te.getMessage(),locator,te);
+    }
+    m_spacePreserveStack.push(m_spacePreserveStack.peek());
+  }
+}

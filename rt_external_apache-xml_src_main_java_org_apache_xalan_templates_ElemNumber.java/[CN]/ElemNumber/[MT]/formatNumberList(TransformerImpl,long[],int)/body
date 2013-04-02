@@ -1,0 +1,60 @@
+{
+  String numStr;
+  FastStringBuffer formattedNumber=StringBufferPool.get();
+  try {
+    int nNumbers=list.length, numberWidth=1;
+    char numberType='1';
+    String formatToken, lastSepString=null, formatTokenString=null;
+    String lastSep=".";
+    boolean isFirstToken=true;
+    String formatValue=(null != m_format_avt) ? m_format_avt.evaluate(transformer.getXPathContext(),contextNode,this) : null;
+    if (null == formatValue)     formatValue="1";
+    NumberFormatStringTokenizer formatTokenizer=new NumberFormatStringTokenizer(formatValue);
+    for (int i=0; i < nNumbers; i++) {
+      if (formatTokenizer.hasMoreTokens()) {
+        formatToken=formatTokenizer.nextToken();
+        if (Character.isLetterOrDigit(formatToken.charAt(formatToken.length() - 1))) {
+          numberWidth=formatToken.length();
+          numberType=formatToken.charAt(numberWidth - 1);
+        }
+ else         if (formatTokenizer.isLetterOrDigitAhead()) {
+          formatTokenString=formatToken;
+          while (formatTokenizer.nextIsSep()) {
+            formatToken=formatTokenizer.nextToken();
+            formatTokenString+=formatToken;
+          }
+          if (!isFirstToken)           lastSep=formatTokenString;
+          formatToken=formatTokenizer.nextToken();
+          numberWidth=formatToken.length();
+          numberType=formatToken.charAt(numberWidth - 1);
+        }
+ else {
+          lastSepString=formatToken;
+          while (formatTokenizer.hasMoreTokens()) {
+            formatToken=formatTokenizer.nextToken();
+            lastSepString+=formatToken;
+          }
+        }
+      }
+      if (null != formatTokenString && isFirstToken) {
+        formattedNumber.append(formatTokenString);
+      }
+ else       if (null != lastSep && !isFirstToken)       formattedNumber.append(lastSep);
+      getFormattedNumber(transformer,contextNode,numberType,numberWidth,list[i],formattedNumber);
+      isFirstToken=false;
+    }
+    while (formatTokenizer.isLetterOrDigitAhead()) {
+      formatTokenizer.nextToken();
+    }
+    if (lastSepString != null)     formattedNumber.append(lastSepString);
+    while (formatTokenizer.hasMoreTokens()) {
+      formatToken=formatTokenizer.nextToken();
+      formattedNumber.append(formatToken);
+    }
+    numStr=formattedNumber.toString();
+  }
+  finally {
+    StringBufferPool.free(formattedNumber);
+  }
+  return numStr;
+}

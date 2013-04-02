@@ -1,0 +1,120 @@
+{
+  NamedNodeMap atts=node.getAttributes();
+  int nAttrs=atts.getLength();
+  for (int i=0; i < nAttrs; i++) {
+    Node attr=atts.item(i);
+    String localName=attr.getLocalName();
+    String attrName=attr.getNodeName();
+    String attrPrefix=attr.getPrefix() == null ? "" : attr.getPrefix();
+    String attrValue=attr.getNodeValue();
+    String type=null;
+    if (fIsLevel3DOM) {
+      type=((Attr)attr).getSchemaTypeInfo().getTypeName();
+    }
+    type=type == null ? "CDATA" : type;
+    String attrNS=attr.getNamespaceURI();
+    if (attrNS != null && attrNS.length() == 0) {
+      attrNS=null;
+      attrName=attr.getLocalName();
+    }
+    boolean isSpecified=((Attr)attr).getSpecified();
+    boolean addAttr=true;
+    boolean applyFilter=false;
+    boolean xmlnsAttr=attrName.equals("xmlns") || attrName.startsWith("xmlns:");
+    if ((fFeatures & WELLFORMED) != 0) {
+      isAttributeWellFormed(attr);
+    }
+    if ((fFeatures & NAMESPACES) != 0 && !xmlnsAttr) {
+      if (attrNS != null) {
+        attrPrefix=attrPrefix == null ? "" : attrPrefix;
+        String declAttrPrefix=fNSBinder.getPrefix(attrNS);
+        String declAttrNS=fNSBinder.getURI(attrPrefix);
+        if ("".equals(attrPrefix) || "".equals(declAttrPrefix) || !attrPrefix.equals(declAttrPrefix)) {
+          if (declAttrPrefix != null && !"".equals(declAttrPrefix)) {
+            attrPrefix=declAttrPrefix;
+            if (declAttrPrefix.length() > 0) {
+              attrName=declAttrPrefix + ":" + localName;
+            }
+ else {
+              attrName=localName;
+            }
+          }
+ else {
+            if (attrPrefix != null && !"".equals(attrPrefix) && declAttrNS == null) {
+              if ((fFeatures & NAMESPACEDECLS) != 0) {
+                fSerializer.addAttribute(XMLNS_URI,attrPrefix,XMLNS_PREFIX + ":" + attrPrefix,"CDATA",attrNS);
+                fNSBinder.declarePrefix(attrPrefix,attrNS);
+                fLocalNSBinder.declarePrefix(attrPrefix,attrNS);
+              }
+            }
+ else {
+              int counter=1;
+              attrPrefix="NS" + counter++;
+              while (fLocalNSBinder.getURI(attrPrefix) != null) {
+                attrPrefix="NS" + counter++;
+              }
+              attrName=attrPrefix + ":" + localName;
+              if ((fFeatures & NAMESPACEDECLS) != 0) {
+                fSerializer.addAttribute(XMLNS_URI,attrPrefix,XMLNS_PREFIX + ":" + attrPrefix,"CDATA",attrNS);
+                fNSBinder.declarePrefix(attrPrefix,attrNS);
+                fLocalNSBinder.declarePrefix(attrPrefix,attrNS);
+              }
+            }
+          }
+        }
+      }
+ else {
+        if (localName == null) {
+          String msg=Utils.messages.createMessage(MsgKey.ER_NULL_LOCAL_ELEMENT_NAME,new Object[]{attrName});
+          if (fErrorHandler != null) {
+            fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_ERROR,msg,MsgKey.ER_NULL_LOCAL_ELEMENT_NAME,null,null,null));
+          }
+        }
+ else {
+        }
+      }
+    }
+    if ((((fFeatures & DISCARDDEFAULT) != 0) && isSpecified) || ((fFeatures & DISCARDDEFAULT) == 0)) {
+      applyFilter=true;
+    }
+ else {
+      addAttr=false;
+    }
+    if (applyFilter) {
+      if (fFilter != null && (fFilter.getWhatToShow() & NodeFilter.SHOW_ATTRIBUTE) != 0) {
+        if (!xmlnsAttr) {
+          short code=fFilter.acceptNode(attr);
+switch (code) {
+case NodeFilter.FILTER_REJECT:
+case NodeFilter.FILTER_SKIP:
+            addAttr=false;
+          break;
+default :
+      }
+    }
+  }
+}
+if (addAttr && xmlnsAttr) {
+  if ((fFeatures & NAMESPACEDECLS) != 0) {
+    if (localName != null && !"".equals(localName)) {
+      fSerializer.addAttribute(attrNS,localName,attrName,type,attrValue);
+    }
+  }
+}
+ else if (addAttr && !xmlnsAttr) {
+  if (((fFeatures & NAMESPACEDECLS) != 0) && (attrNS != null)) {
+    fSerializer.addAttribute(attrNS,localName,attrName,type,attrValue);
+  }
+ else {
+    fSerializer.addAttribute("",localName,attrName,type,attrValue);
+  }
+}
+if (xmlnsAttr && ((fFeatures & NAMESPACEDECLS) != 0)) {
+  int index;
+  String prefix=(index=attrName.indexOf(":")) < 0 ? "" : attrName.substring(index + 1);
+  if (!"".equals(prefix)) {
+    fSerializer.namespaceAfterStartElement(prefix,attrValue);
+  }
+}
+}
+}

@@ -1,0 +1,40 @@
+{
+  SerializationHandler rhandler=transformer.getSerializationHandler();
+  XPathContext xctxt=transformer.getXPathContext();
+  int sourceNode=xctxt.getCurrentNode();
+  String nodeName=m_name_avt == null ? null : m_name_avt.evaluate(xctxt,sourceNode,this);
+  String prefix=null;
+  String nodeNamespace="";
+  if ((nodeName != null) && (!m_name_avt.isSimple()) && (!XML11Char.isXML11ValidQName(nodeName))) {
+    transformer.getMsgMgr().warn(this,XSLTErrorResources.WG_ILLEGAL_ATTRIBUTE_VALUE,new Object[]{Constants.ATTRNAME_NAME,nodeName});
+    nodeName=null;
+  }
+ else   if (nodeName != null) {
+    prefix=QName.getPrefixPart(nodeName);
+    if (null != m_namespace_avt) {
+      nodeNamespace=m_namespace_avt.evaluate(xctxt,sourceNode,this);
+      if (null == nodeNamespace || (prefix != null && prefix.length() > 0 && nodeNamespace.length() == 0))       transformer.getMsgMgr().error(this,XSLTErrorResources.ER_NULL_URI_NAMESPACE);
+ else {
+        prefix=resolvePrefix(rhandler,prefix,nodeNamespace);
+        if (null == prefix)         prefix="";
+        if (prefix.length() > 0)         nodeName=(prefix + ":" + QName.getLocalPart(nodeName));
+ else         nodeName=QName.getLocalPart(nodeName);
+      }
+    }
+ else {
+      try {
+        nodeNamespace=getNamespaceForPrefix(prefix);
+        if ((null == nodeNamespace) && (prefix.length() == 0))         nodeNamespace="";
+ else         if (null == nodeNamespace) {
+          transformer.getMsgMgr().warn(this,XSLTErrorResources.WG_COULD_NOT_RESOLVE_PREFIX,new Object[]{prefix});
+          nodeName=null;
+        }
+      }
+ catch (      Exception ex) {
+        transformer.getMsgMgr().warn(this,XSLTErrorResources.WG_COULD_NOT_RESOLVE_PREFIX,new Object[]{prefix});
+        nodeName=null;
+      }
+    }
+  }
+  constructNode(nodeName,prefix,nodeNamespace,transformer);
+}

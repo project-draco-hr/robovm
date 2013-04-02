@@ -1,0 +1,30 @@
+{
+  Variable var=new Variable();
+  var.setQName(uniquePseudoVarName);
+  var.setIsGlobal(isGlobal);
+  if (isGlobal) {
+    ElemTemplateElement elem=getElemFromExpression(wi);
+    StylesheetRoot root=elem.getStylesheetRoot();
+    Vector vars=root.getVariablesAndParamsComposed();
+    var.setIndex(vars.size() - 1);
+  }
+  AxesWalker walker=wi.getFirstWalker();
+  for (int i=0; i < numSteps; i++) {
+    assertion(null != walker,"Walker should not be null!");
+    walker=walker.getNextWalker();
+  }
+  if (null != walker) {
+    FilterExprWalker few=new FilterExprWalker(wi);
+    few.setInnerExpression(var);
+    few.exprSetParent(wi);
+    few.setNextWalker(walker);
+    walker.setPrevWalker(few);
+    wi.setFirstWalker(few);
+    return wi;
+  }
+ else {
+    FilterExprIteratorSimple feis=new FilterExprIteratorSimple(var);
+    feis.exprSetParent(wi.exprGetParent());
+    return feis;
+  }
+}

@@ -1,0 +1,30 @@
+{
+  if (expression == null) {
+    String fmsg=XSLMessages.createXPATHMessage(XPATHErrorResources.ER_ARG_CANNOT_BE_NULL,new Object[]{"XPath expression"});
+    throw new NullPointerException(fmsg);
+  }
+  if (returnType == null) {
+    String fmsg=XSLMessages.createXPATHMessage(XPATHErrorResources.ER_ARG_CANNOT_BE_NULL,new Object[]{"returnType"});
+    throw new NullPointerException(fmsg);
+  }
+  if (!isSupported(returnType)) {
+    String fmsg=XSLMessages.createXPATHMessage(XPATHErrorResources.ER_UNSUPPORTED_RETURN_TYPE,new Object[]{returnType.toString()});
+    throw new IllegalArgumentException(fmsg);
+  }
+  try {
+    XObject resultObject=eval(expression,item);
+    return getResultAsType(resultObject,returnType);
+  }
+ catch (  java.lang.NullPointerException npe) {
+    throw new XPathExpressionException(npe);
+  }
+catch (  javax.xml.transform.TransformerException te) {
+    Throwable nestedException=te.getException();
+    if (nestedException instanceof javax.xml.xpath.XPathFunctionException) {
+      throw (javax.xml.xpath.XPathFunctionException)nestedException;
+    }
+ else {
+      throw new XPathExpressionException(te);
+    }
+  }
+}

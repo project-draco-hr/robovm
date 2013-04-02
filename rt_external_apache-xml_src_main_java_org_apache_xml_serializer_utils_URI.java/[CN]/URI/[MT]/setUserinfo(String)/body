@@ -1,0 +1,26 @@
+{
+  if (p_userinfo == null) {
+    m_userinfo=null;
+  }
+ else {
+    if (m_host == null) {
+      throw new MalformedURIException("Userinfo cannot be set when host is null!");
+    }
+    int index=0;
+    int end=p_userinfo.length();
+    char testChar='\0';
+    while (index < end) {
+      testChar=p_userinfo.charAt(index);
+      if (testChar == '%') {
+        if (index + 2 >= end || !isHex(p_userinfo.charAt(index + 1)) || !isHex(p_userinfo.charAt(index + 2))) {
+          throw new MalformedURIException("Userinfo contains invalid escape sequence!");
+        }
+      }
+ else       if (!isUnreservedCharacter(testChar) && USERINFO_CHARACTERS.indexOf(testChar) == -1) {
+        throw new MalformedURIException("Userinfo contains invalid character:" + testChar);
+      }
+      index++;
+    }
+  }
+  m_userinfo=p_userinfo;
+}

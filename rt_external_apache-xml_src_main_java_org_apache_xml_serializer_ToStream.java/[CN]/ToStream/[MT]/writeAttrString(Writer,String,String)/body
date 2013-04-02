@@ -1,0 +1,53 @@
+{
+  final int len=string.length();
+  if (len > m_attrBuff.length) {
+    m_attrBuff=new char[len * 2 + 1];
+  }
+  string.getChars(0,len,m_attrBuff,0);
+  final char[] stringChars=m_attrBuff;
+  for (int i=0; i < len; i++) {
+    char ch=stringChars[i];
+    if (m_charInfo.shouldMapAttrChar(ch)) {
+      accumDefaultEscape(writer,ch,i,stringChars,len,false,true);
+    }
+ else {
+      if (0x0 <= ch && ch <= 0x1F) {
+switch (ch) {
+case CharInfo.S_HORIZONAL_TAB:
+          writer.write("&#9;");
+        break;
+case CharInfo.S_LINEFEED:
+      writer.write("&#10;");
+    break;
+case CharInfo.S_CARRIAGERETURN:
+  writer.write("&#13;");
+break;
+default :
+writer.write("&#");
+writer.write(Integer.toString(ch));
+writer.write(';');
+break;
+}
+}
+ else if (ch < 0x7F) {
+writer.write(ch);
+}
+ else if (ch <= 0x9F) {
+writer.write("&#");
+writer.write(Integer.toString(ch));
+writer.write(';');
+}
+ else if (ch == CharInfo.S_LINE_SEPARATOR) {
+writer.write("&#8232;");
+}
+ else if (m_encodingInfo.isInEncoding(ch)) {
+writer.write(ch);
+}
+ else {
+writer.write("&#");
+writer.write(Integer.toString(ch));
+writer.write(';');
+}
+}
+}
+}

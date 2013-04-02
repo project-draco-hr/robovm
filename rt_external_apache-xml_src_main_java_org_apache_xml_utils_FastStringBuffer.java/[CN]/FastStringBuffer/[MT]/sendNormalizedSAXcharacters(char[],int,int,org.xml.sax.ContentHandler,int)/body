@@ -1,0 +1,32 @@
+{
+  boolean processingLeadingWhitespace=((edgeTreatmentFlags & SUPPRESS_LEADING_WS) != 0);
+  boolean seenWhitespace=((edgeTreatmentFlags & CARRY_WS) != 0);
+  int currPos=start;
+  int limit=start + length;
+  if (processingLeadingWhitespace) {
+    for (; currPos < limit && XMLCharacterRecognizer.isWhiteSpace(ch[currPos]); currPos++) {
+    }
+    if (currPos == limit) {
+      return edgeTreatmentFlags;
+    }
+  }
+  while (currPos < limit) {
+    int startNonWhitespace=currPos;
+    for (; currPos < limit && !XMLCharacterRecognizer.isWhiteSpace(ch[currPos]); currPos++) {
+    }
+    if (startNonWhitespace != currPos) {
+      if (seenWhitespace) {
+        handler.characters(SINGLE_SPACE,0,1);
+        seenWhitespace=false;
+      }
+      handler.characters(ch,startNonWhitespace,currPos - startNonWhitespace);
+    }
+    int startWhitespace=currPos;
+    for (; currPos < limit && XMLCharacterRecognizer.isWhiteSpace(ch[currPos]); currPos++) {
+    }
+    if (startWhitespace != currPos) {
+      seenWhitespace=true;
+    }
+  }
+  return (seenWhitespace ? CARRY_WS : 0) | (edgeTreatmentFlags & SUPPRESS_TRAILING_WS);
+}

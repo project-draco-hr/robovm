@@ -1,0 +1,62 @@
+{
+  if (p_uriSpec == null) {
+    throw new MalformedURIException("Cannot initialize path from null string!");
+  }
+  int index=0;
+  int start=0;
+  int end=p_uriSpec.length();
+  char testChar='\0';
+  while (index < end) {
+    testChar=p_uriSpec.charAt(index);
+    if (testChar == '?' || testChar == '#') {
+      break;
+    }
+    if (testChar == '%') {
+      if (index + 2 >= end || !isHex(p_uriSpec.charAt(index + 1)) || !isHex(p_uriSpec.charAt(index + 2))) {
+        throw new MalformedURIException(XMLMessages.createXMLMessage(XMLErrorResources.ER_PATH_CONTAINS_INVALID_ESCAPE_SEQUENCE,null));
+      }
+    }
+ else     if (!isReservedCharacter(testChar) && !isUnreservedCharacter(testChar)) {
+      if ('\\' != testChar)       throw new MalformedURIException(XMLMessages.createXMLMessage(XMLErrorResources.ER_PATH_INVALID_CHAR,new Object[]{String.valueOf(testChar)}));
+    }
+    index++;
+  }
+  m_path=p_uriSpec.substring(start,index);
+  if (testChar == '?') {
+    index++;
+    start=index;
+    while (index < end) {
+      testChar=p_uriSpec.charAt(index);
+      if (testChar == '#') {
+        break;
+      }
+      if (testChar == '%') {
+        if (index + 2 >= end || !isHex(p_uriSpec.charAt(index + 1)) || !isHex(p_uriSpec.charAt(index + 2))) {
+          throw new MalformedURIException("Query string contains invalid escape sequence!");
+        }
+      }
+ else       if (!isReservedCharacter(testChar) && !isUnreservedCharacter(testChar)) {
+        throw new MalformedURIException("Query string contains invalid character:" + testChar);
+      }
+      index++;
+    }
+    m_queryString=p_uriSpec.substring(start,index);
+  }
+  if (testChar == '#') {
+    index++;
+    start=index;
+    while (index < end) {
+      testChar=p_uriSpec.charAt(index);
+      if (testChar == '%') {
+        if (index + 2 >= end || !isHex(p_uriSpec.charAt(index + 1)) || !isHex(p_uriSpec.charAt(index + 2))) {
+          throw new MalformedURIException("Fragment contains invalid escape sequence!");
+        }
+      }
+ else       if (!isReservedCharacter(testChar) && !isUnreservedCharacter(testChar)) {
+        throw new MalformedURIException("Fragment contains invalid character:" + testChar);
+      }
+      index++;
+    }
+    m_fragment=p_uriSpec.substring(start,index);
+  }
+}

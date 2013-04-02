@@ -1,0 +1,31 @@
+{
+  super.compose(sroot);
+  int length=getParamElemCount();
+  for (int i=0; i < length; i++) {
+    ElemWithParam ewp=getParamElem(i);
+    ewp.compose(sroot);
+  }
+  if ((null != m_templateName) && (null == m_template)) {
+    m_template=this.getStylesheetRoot().getTemplateComposed(m_templateName);
+    if (null == m_template) {
+      String themsg=XSLMessages.createMessage(XSLTErrorResources.ER_ELEMTEMPLATEELEM_ERR,new Object[]{m_templateName});
+      throw new TransformerException(themsg,this);
+    }
+    length=getParamElemCount();
+    for (int i=0; i < length; i++) {
+      ElemWithParam ewp=getParamElem(i);
+      ewp.m_index=-1;
+      int etePos=0;
+      for (ElemTemplateElement ete=m_template.getFirstChildElem(); null != ete; ete=ete.getNextSiblingElem()) {
+        if (ete.getXSLToken() == Constants.ELEMNAME_PARAMVARIABLE) {
+          ElemParam ep=(ElemParam)ete;
+          if (ep.getName().equals(ewp.getName())) {
+            ewp.m_index=etePos;
+          }
+        }
+ else         break;
+        etePos++;
+      }
+    }
+  }
+}

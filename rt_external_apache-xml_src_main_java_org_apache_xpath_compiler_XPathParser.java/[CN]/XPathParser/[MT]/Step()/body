@@ -1,0 +1,43 @@
+{
+  int opPos=m_ops.getOp(OpMap.MAPINDEX_LENGTH);
+  boolean doubleSlash=tokenIs('/');
+  if (doubleSlash) {
+    nextToken();
+    appendOp(2,OpCodes.FROM_DESCENDANTS_OR_SELF);
+    m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+    m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),OpCodes.NODETYPE_NODE);
+    m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+    m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH + 1,m_ops.getOp(OpMap.MAPINDEX_LENGTH) - opPos);
+    m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) - opPos);
+    opPos=m_ops.getOp(OpMap.MAPINDEX_LENGTH);
+  }
+  if (tokenIs(".")) {
+    nextToken();
+    if (tokenIs('[')) {
+      error(XPATHErrorResources.ER_PREDICATE_ILLEGAL_SYNTAX,null);
+    }
+    appendOp(4,OpCodes.FROM_SELF);
+    m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH) - 2,4);
+    m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH) - 1,OpCodes.NODETYPE_NODE);
+  }
+ else   if (tokenIs("..")) {
+    nextToken();
+    appendOp(4,OpCodes.FROM_PARENT);
+    m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH) - 2,4);
+    m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH) - 1,OpCodes.NODETYPE_NODE);
+  }
+ else   if (tokenIs('*') || tokenIs('@') || tokenIs('_')|| (m_token != null && Character.isLetter(m_token.charAt(0)))) {
+    Basis();
+    while (tokenIs('[')) {
+      Predicate();
+    }
+    m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) - opPos);
+  }
+ else {
+    if (doubleSlash) {
+      error(XPATHErrorResources.ER_EXPECTED_LOC_STEP,null);
+    }
+    return false;
+  }
+  return true;
+}

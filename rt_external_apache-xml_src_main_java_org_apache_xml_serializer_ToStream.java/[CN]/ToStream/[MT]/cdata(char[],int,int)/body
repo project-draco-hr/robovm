@@ -1,0 +1,27 @@
+{
+  try {
+    final int old_start=start;
+    if (m_elemContext.m_startTagOpen) {
+      closeStartTag();
+      m_elemContext.m_startTagOpen=false;
+    }
+    m_ispreserve=true;
+    if (shouldIndent())     indent();
+    boolean writeCDataBrackets=(((length >= 1) && escapingNotNeeded(ch[start])));
+    if (writeCDataBrackets && !m_cdataTagOpen) {
+      m_writer.write(CDATA_DELIMITER_OPEN);
+      m_cdataTagOpen=true;
+    }
+    if (isEscapingDisabled()) {
+      charactersRaw(ch,start,length);
+    }
+ else     writeNormalizedChars(ch,start,length,true,m_lineSepUse);
+    if (writeCDataBrackets) {
+      if (ch[start + length - 1] == ']')       closeCDATA();
+    }
+    if (m_tracer != null)     super.fireCDATAEvent(ch,old_start,length);
+  }
+ catch (  IOException ioe) {
+    throw new org.xml.sax.SAXException(Utils.messages.createMessage(MsgKey.ER_OIERROR,null),ioe);
+  }
+}

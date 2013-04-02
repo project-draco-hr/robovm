@@ -1,0 +1,29 @@
+{
+  int codePoint=0;
+  if (i + 1 >= end) {
+    throw new IOException(Utils.messages.createMessage(MsgKey.ER_INVALID_UTF16_SURROGATE,new Object[]{Integer.toHexString((int)c)}));
+  }
+  final char high=c;
+  final char low=ch[i + 1];
+  if (!Encodings.isLowUTF16Surrogate(low)) {
+    throw new IOException(Utils.messages.createMessage(MsgKey.ER_INVALID_UTF16_SURROGATE,new Object[]{Integer.toHexString((int)c) + " " + Integer.toHexString(low)}));
+  }
+  final java.io.Writer writer=m_writer;
+  if (m_encodingInfo.isInEncoding(c,low)) {
+    writer.write(ch,i,2);
+  }
+ else {
+    final String encoding=getEncoding();
+    if (encoding != null) {
+      codePoint=Encodings.toCodePoint(high,low);
+      writer.write('&');
+      writer.write('#');
+      writer.write(Integer.toString(codePoint));
+      writer.write(';');
+    }
+ else {
+      writer.write(ch,i,2);
+    }
+  }
+  return codePoint;
+}

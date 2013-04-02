@@ -1,0 +1,23 @@
+{
+  SourceLocator locator=null;
+  Throwable cause=exception;
+  do {
+    if (cause instanceof SAXParseException) {
+      locator=new SAXSourceLocator((SAXParseException)cause);
+    }
+ else     if (cause instanceof TransformerException) {
+      SourceLocator causeLocator=((TransformerException)cause).getLocator();
+      if (null != causeLocator)       locator=causeLocator;
+    }
+    if (cause instanceof TransformerException)     cause=((TransformerException)cause).getCause();
+ else     if (cause instanceof WrappedRuntimeException)     cause=((WrappedRuntimeException)cause).getException();
+ else     if (cause instanceof SAXException)     cause=((SAXException)cause).getException();
+ else     cause=null;
+  }
+ while (null != cause);
+  if (null != locator) {
+    String id=(null != locator.getPublicId()) ? locator.getPublicId() : (null != locator.getSystemId()) ? locator.getSystemId() : XMLMessages.createXMLMessage(XMLErrorResources.ER_SYSTEMID_UNKNOWN,null);
+    pw.print(id + "; " + XMLMessages.createXMLMessage("line",null)+ locator.getLineNumber()+ "; "+ XMLMessages.createXMLMessage("column",null)+ locator.getColumnNumber()+ "; ");
+  }
+ else   pw.print("(" + XMLMessages.createXMLMessage(XMLErrorResources.ER_LOCATION_UNKNOWN,null) + ")");
+}

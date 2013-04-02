@@ -1,0 +1,23 @@
+{
+  if (m_textPendingStart >= 0) {
+    int length=m_chars.size() - m_textPendingStart;
+    boolean doStrip=false;
+    if (getShouldStripWhitespace()) {
+      doStrip=m_chars.isWhitespace(m_textPendingStart,length);
+    }
+    if (doStrip) {
+      m_chars.setLength(m_textPendingStart);
+    }
+ else {
+      if (length > 0) {
+        int exName=m_expandedNameTable.getExpandedTypeID(DTM.TEXT_NODE);
+        int dataIndex=m_data.size();
+        m_previous=addNode(m_coalescedTextType,exName,m_parents.peek(),m_previous,dataIndex,false);
+        m_data.addElement(m_textPendingStart);
+        m_data.addElement(length);
+      }
+    }
+    m_textPendingStart=-1;
+    m_textType=m_coalescedTextType=DTM.TEXT_NODE;
+  }
+}

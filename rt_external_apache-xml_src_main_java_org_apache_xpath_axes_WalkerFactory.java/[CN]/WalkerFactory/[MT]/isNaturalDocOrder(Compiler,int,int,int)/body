@@ -1,0 +1,51 @@
+{
+  if (canCrissCross(analysis))   return false;
+  if (isSet(analysis,BIT_NAMESPACE))   return false;
+  if (isSet(analysis,BIT_FOLLOWING | BIT_FOLLOWING_SIBLING) && isSet(analysis,BIT_PRECEDING | BIT_PRECEDING_SIBLING))   return false;
+  int stepType;
+  int stepCount=0;
+  boolean foundWildAttribute=false;
+  int potentialDuplicateMakingStepCount=0;
+  while (OpCodes.ENDOP != (stepType=compiler.getOp(stepOpCodePos))) {
+    stepCount++;
+switch (stepType) {
+case OpCodes.FROM_ATTRIBUTES:
+case OpCodes.MATCH_ATTRIBUTE:
+      if (foundWildAttribute)       return false;
+    String localName=compiler.getStepLocalName(stepOpCodePos);
+  if (localName.equals("*")) {
+    foundWildAttribute=true;
+  }
+break;
+case OpCodes.FROM_FOLLOWING:
+case OpCodes.FROM_FOLLOWING_SIBLINGS:
+case OpCodes.FROM_PRECEDING:
+case OpCodes.FROM_PRECEDING_SIBLINGS:
+case OpCodes.FROM_PARENT:
+case OpCodes.OP_VARIABLE:
+case OpCodes.OP_EXTFUNCTION:
+case OpCodes.OP_FUNCTION:
+case OpCodes.OP_GROUP:
+case OpCodes.FROM_NAMESPACE:
+case OpCodes.FROM_ANCESTORS:
+case OpCodes.FROM_ANCESTORS_OR_SELF:
+case OpCodes.MATCH_ANY_ANCESTOR:
+case OpCodes.MATCH_IMMEDIATE_ANCESTOR:
+case OpCodes.FROM_DESCENDANTS_OR_SELF:
+case OpCodes.FROM_DESCENDANTS:
+if (potentialDuplicateMakingStepCount > 0) return false;
+potentialDuplicateMakingStepCount++;
+case OpCodes.FROM_ROOT:
+case OpCodes.FROM_CHILDREN:
+case OpCodes.FROM_SELF:
+if (foundWildAttribute) return false;
+break;
+default :
+throw new RuntimeException(XSLMessages.createXPATHMessage(XPATHErrorResources.ER_NULL_ERROR_HANDLER,new Object[]{Integer.toString(stepType)}));
+}
+int nextStepOpCodePos=compiler.getNextStepPos(stepOpCodePos);
+if (nextStepOpCodePos < 0) break;
+stepOpCodePos=nextStepOpCodePos;
+}
+return true;
+}

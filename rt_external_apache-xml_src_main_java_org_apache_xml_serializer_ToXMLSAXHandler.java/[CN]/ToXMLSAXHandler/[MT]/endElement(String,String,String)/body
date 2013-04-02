@@ -1,0 +1,15 @@
+{
+  flushPending();
+  if (namespaceURI == null) {
+    if (m_elemContext.m_elementURI != null)     namespaceURI=m_elemContext.m_elementURI;
+ else     namespaceURI=getNamespaceURI(qName,true);
+  }
+  if (localName == null) {
+    if (m_elemContext.m_elementLocalName != null)     localName=m_elemContext.m_elementLocalName;
+ else     localName=getLocalName(qName);
+  }
+  m_saxHandler.endElement(namespaceURI,localName,qName);
+  if (m_tracer != null)   super.fireEndElem(qName);
+  m_prefixMap.popNamespaces(m_elemContext.m_currentElemDepth,m_saxHandler);
+  m_elemContext=m_elemContext.m_prev;
+}

@@ -1,0 +1,53 @@
+{
+  if (lookahead('(',1)) {
+    Object nodeTestOp=Keywords.getNodeType(m_token);
+    if (null == nodeTestOp) {
+      error(XPATHErrorResources.ER_UNKNOWN_NODETYPE,new Object[]{m_token});
+    }
+ else {
+      nextToken();
+      int nt=((Integer)nodeTestOp).intValue();
+      m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),nt);
+      m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+      consumeExpected('(');
+      if (OpCodes.NODETYPE_PI == nt) {
+        if (!tokenIs(')')) {
+          Literal();
+        }
+      }
+      consumeExpected(')');
+    }
+  }
+ else {
+    m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),OpCodes.NODENAME);
+    m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+    if (lookahead(':',1)) {
+      if (tokenIs('*')) {
+        m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),OpCodes.ELEMWILDCARD);
+      }
+ else {
+        m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),m_queueMark - 1);
+        if (!Character.isLetter(m_tokenChar) && !tokenIs('_')) {
+          error(XPATHErrorResources.ER_EXPECTED_NODE_TEST,null);
+        }
+      }
+      nextToken();
+      consumeExpected(':');
+    }
+ else {
+      m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),OpCodes.EMPTY);
+    }
+    m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+    if (tokenIs('*')) {
+      m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),OpCodes.ELEMWILDCARD);
+    }
+ else {
+      m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),m_queueMark - 1);
+      if (!Character.isLetter(m_tokenChar) && !tokenIs('_')) {
+        error(XPATHErrorResources.ER_EXPECTED_NODE_TEST,null);
+      }
+    }
+    m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+    nextToken();
+  }
+}

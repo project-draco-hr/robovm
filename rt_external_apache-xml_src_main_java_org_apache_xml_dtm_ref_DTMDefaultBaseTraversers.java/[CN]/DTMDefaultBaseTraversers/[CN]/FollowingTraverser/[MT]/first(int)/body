@@ -1,0 +1,16 @@
+{
+  context=makeNodeIdentity(context);
+  int first;
+  int type=_type(context);
+  if ((DTM.ATTRIBUTE_NODE == type) || (DTM.NAMESPACE_NODE == type)) {
+    context=_parent(context);
+    first=_firstch(context);
+    if (NULL != first)     return makeNodeHandle(first);
+  }
+  do {
+    first=_nextsib(context);
+    if (NULL == first)     context=_parent(context);
+  }
+ while (NULL == first && NULL != context);
+  return makeNodeHandle(first);
+}

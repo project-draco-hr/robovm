@@ -1,0 +1,36 @@
+{
+  XPath matchXPath=template.getMatch();
+  if (null == template.getName() && null == matchXPath) {
+    template.error(XSLTErrorResources.ER_NEED_NAME_OR_MATCH_ATTRIB,new Object[]{"xsl:template"});
+  }
+  if (null != template.getName()) {
+    ElemTemplate existingTemplate=(ElemTemplate)m_namedTemplates.get(template.getName());
+    if (null == existingTemplate) {
+      m_namedTemplates.put(template.getName(),template);
+    }
+ else {
+      int existingPrecedence=existingTemplate.getStylesheetComposed().getImportCountComposed();
+      int newPrecedence=template.getStylesheetComposed().getImportCountComposed();
+      if (newPrecedence > existingPrecedence) {
+        m_namedTemplates.put(template.getName(),template);
+      }
+ else       if (newPrecedence == existingPrecedence)       template.error(XSLTErrorResources.ER_DUPLICATE_NAMED_TEMPLATE,new Object[]{template.getName()});
+    }
+  }
+  if (null != matchXPath) {
+    Expression matchExpr=matchXPath.getExpression();
+    if (matchExpr instanceof StepPattern) {
+      insertPatternInTable((StepPattern)matchExpr,template);
+    }
+ else     if (matchExpr instanceof UnionPattern) {
+      UnionPattern upat=(UnionPattern)matchExpr;
+      StepPattern[] pats=upat.getPatterns();
+      int n=pats.length;
+      for (int i=0; i < n; i++) {
+        insertPatternInTable(pats[i],template);
+      }
+    }
+ else {
+    }
+  }
+}

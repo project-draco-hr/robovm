@@ -1,0 +1,59 @@
+{
+  double priority=getPriorityOrScore(item);
+  double workPriority;
+  int importLevel=item.getImportLevel();
+  int docOrder=item.getDocOrderPos();
+  TemplateSubPatternAssociation insertPoint=head;
+  TemplateSubPatternAssociation next;
+  boolean insertBefore;
+  while (true) {
+    next=insertPoint.getNext();
+    if (null == next)     break;
+ else {
+      workPriority=getPriorityOrScore(next);
+      if (importLevel > next.getImportLevel())       break;
+ else       if (importLevel < next.getImportLevel())       insertPoint=next;
+ else       if (priority > workPriority)       break;
+ else       if (priority < workPriority)       insertPoint=next;
+ else       if (docOrder >= next.getDocOrderPos())       break;
+ else       insertPoint=next;
+    }
+  }
+  if ((null == next) || (insertPoint == head)) {
+    workPriority=getPriorityOrScore(insertPoint);
+    if (importLevel > insertPoint.getImportLevel())     insertBefore=true;
+ else     if (importLevel < insertPoint.getImportLevel())     insertBefore=false;
+ else     if (priority > workPriority)     insertBefore=true;
+ else     if (priority < workPriority)     insertBefore=false;
+ else     if (docOrder >= insertPoint.getDocOrderPos())     insertBefore=true;
+ else     insertBefore=false;
+  }
+ else   insertBefore=false;
+  if (isWildCardInsert) {
+    if (insertBefore) {
+      item.setNext(insertPoint);
+      String key=insertPoint.getTargetString();
+      item.setTargetString(key);
+      putHead(key,item);
+      return item;
+    }
+ else {
+      item.setNext(next);
+      insertPoint.setNext(item);
+      return head;
+    }
+  }
+ else {
+    if (insertBefore) {
+      item.setNext(insertPoint);
+      if (insertPoint.isWild() || item.isWild())       m_wildCardPatterns=item;
+ else       putHead(item.getTargetString(),item);
+      return item;
+    }
+ else {
+      item.setNext(next);
+      insertPoint.setNext(item);
+      return head;
+    }
+  }
+}

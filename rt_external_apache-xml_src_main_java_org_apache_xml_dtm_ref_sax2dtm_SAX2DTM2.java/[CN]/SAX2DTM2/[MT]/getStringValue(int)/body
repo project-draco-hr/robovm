@@ -1,0 +1,59 @@
+{
+  int identity=makeNodeIdentity(nodeHandle);
+  if (identity == DTM.NULL)   return EMPTY_XML_STR;
+  int type=_type2(identity);
+  if (type == DTM.ELEMENT_NODE || type == DTM.DOCUMENT_NODE) {
+    int startNode=identity;
+    identity=_firstch2(identity);
+    if (DTM.NULL != identity) {
+      int offset=-1;
+      int length=0;
+      do {
+        type=_exptype2(identity);
+        if (type == DTM.TEXT_NODE || type == DTM.CDATA_SECTION_NODE) {
+          int dataIndex=m_dataOrQName.elementAt(identity);
+          if (dataIndex >= 0) {
+            if (-1 == offset) {
+              offset=dataIndex >>> TEXT_LENGTH_BITS;
+            }
+            length+=dataIndex & TEXT_LENGTH_MAX;
+          }
+ else {
+            if (-1 == offset) {
+              offset=m_data.elementAt(-dataIndex);
+            }
+            length+=m_data.elementAt(-dataIndex + 1);
+          }
+        }
+        identity++;
+      }
+ while (_parent2(identity) >= startNode);
+      if (length > 0) {
+        if (m_xstrf != null)         return m_xstrf.newstr(m_chars,offset,length);
+ else         return new XMLStringDefault(m_chars.getString(offset,length));
+      }
+ else       return EMPTY_XML_STR;
+    }
+ else     return EMPTY_XML_STR;
+  }
+ else   if (DTM.TEXT_NODE == type || DTM.CDATA_SECTION_NODE == type) {
+    int dataIndex=m_dataOrQName.elementAt(identity);
+    if (dataIndex >= 0) {
+      if (m_xstrf != null)       return m_xstrf.newstr(m_chars,dataIndex >>> TEXT_LENGTH_BITS,dataIndex & TEXT_LENGTH_MAX);
+ else       return new XMLStringDefault(m_chars.getString(dataIndex >>> TEXT_LENGTH_BITS,dataIndex & TEXT_LENGTH_MAX));
+    }
+ else {
+      if (m_xstrf != null)       return m_xstrf.newstr(m_chars,m_data.elementAt(-dataIndex),m_data.elementAt(-dataIndex + 1));
+ else       return new XMLStringDefault(m_chars.getString(m_data.elementAt(-dataIndex),m_data.elementAt(-dataIndex + 1)));
+    }
+  }
+ else {
+    int dataIndex=m_dataOrQName.elementAt(identity);
+    if (dataIndex < 0) {
+      dataIndex=-dataIndex;
+      dataIndex=m_data.elementAt(dataIndex + 1);
+    }
+    if (m_xstrf != null)     return m_xstrf.newstr((String)m_values.elementAt(dataIndex));
+ else     return new XMLStringDefault((String)m_values.elementAt(dataIndex));
+  }
+}

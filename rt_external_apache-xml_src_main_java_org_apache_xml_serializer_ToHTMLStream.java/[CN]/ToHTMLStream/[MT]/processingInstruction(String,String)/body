@@ -1,0 +1,37 @@
+{
+  flushPending();
+  if (target.equals(Result.PI_DISABLE_OUTPUT_ESCAPING)) {
+    startNonEscaping();
+  }
+ else   if (target.equals(Result.PI_ENABLE_OUTPUT_ESCAPING)) {
+    endNonEscaping();
+  }
+ else {
+    try {
+      if (m_elemContext.m_startTagOpen) {
+        closeStartTag();
+        m_elemContext.m_startTagOpen=false;
+      }
+ else       if (m_cdataTagOpen) {
+        closeCDATA();
+      }
+ else       if (m_needToCallStartDocument) {
+        startDocumentInternal();
+      }
+      if (true == m_needToOutputDocTypeDecl)       outputDocTypeDecl("html");
+      if (shouldIndent())       indent();
+      final java.io.Writer writer=m_writer;
+      writer.write("<?");
+      writer.write(target);
+      if (data.length() > 0 && !Character.isSpaceChar(data.charAt(0)))       writer.write(' ');
+      writer.write(data);
+      writer.write('>');
+      if (m_elemContext.m_currentElemDepth <= 0)       outputLineSep();
+      m_startNewLine=true;
+    }
+ catch (    IOException e) {
+      throw new SAXException(e);
+    }
+  }
+  if (m_tracer != null)   super.fireEscapingEvent(target,data);
+}

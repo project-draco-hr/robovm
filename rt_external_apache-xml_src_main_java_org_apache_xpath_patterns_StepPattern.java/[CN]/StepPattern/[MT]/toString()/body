@@ -1,0 +1,58 @@
+{
+  StringBuffer buf=new StringBuffer();
+  for (StepPattern pat=this; pat != null; pat=pat.m_relativePathPattern) {
+    if (pat != this)     buf.append("/");
+    buf.append(Axis.getNames(pat.m_axis));
+    buf.append("::");
+    if (0x000005000 == pat.m_whatToShow) {
+      buf.append("doc()");
+    }
+ else     if (DTMFilter.SHOW_BYFUNCTION == pat.m_whatToShow) {
+      buf.append("function()");
+    }
+ else     if (DTMFilter.SHOW_ALL == pat.m_whatToShow) {
+      buf.append("node()");
+    }
+ else     if (DTMFilter.SHOW_TEXT == pat.m_whatToShow) {
+      buf.append("text()");
+    }
+ else     if (DTMFilter.SHOW_PROCESSING_INSTRUCTION == pat.m_whatToShow) {
+      buf.append("processing-instruction(");
+      if (null != pat.m_name) {
+        buf.append(pat.m_name);
+      }
+      buf.append(")");
+    }
+ else     if (DTMFilter.SHOW_COMMENT == pat.m_whatToShow) {
+      buf.append("comment()");
+    }
+ else     if (null != pat.m_name) {
+      if (DTMFilter.SHOW_ATTRIBUTE == pat.m_whatToShow) {
+        buf.append("@");
+      }
+      if (null != pat.m_namespace) {
+        buf.append("{");
+        buf.append(pat.m_namespace);
+        buf.append("}");
+      }
+      buf.append(pat.m_name);
+    }
+ else     if (DTMFilter.SHOW_ATTRIBUTE == pat.m_whatToShow) {
+      buf.append("@");
+    }
+ else     if ((DTMFilter.SHOW_DOCUMENT | DTMFilter.SHOW_DOCUMENT_FRAGMENT) == pat.m_whatToShow) {
+      buf.append("doc-root()");
+    }
+ else {
+      buf.append("?" + Integer.toHexString(pat.m_whatToShow));
+    }
+    if (null != pat.m_predicates) {
+      for (int i=0; i < pat.m_predicates.length; i++) {
+        buf.append("[");
+        buf.append(pat.m_predicates[i]);
+        buf.append("]");
+      }
+    }
+  }
+  return buf.toString();
+}

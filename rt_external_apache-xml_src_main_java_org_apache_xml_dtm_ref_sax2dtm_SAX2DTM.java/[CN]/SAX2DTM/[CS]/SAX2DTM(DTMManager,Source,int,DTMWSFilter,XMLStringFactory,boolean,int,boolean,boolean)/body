@@ -1,0 +1,24 @@
+{
+  super(mgr,source,dtmIdentity,whiteSpaceFilter,xstringfactory,doIndexing,blocksize,usePrevsib,newNameTable);
+  if (blocksize <= 64) {
+    m_data=new SuballocatedIntVector(blocksize,DEFAULT_NUMBLOCKS_SMALL);
+    m_dataOrQName=new SuballocatedIntVector(blocksize,DEFAULT_NUMBLOCKS_SMALL);
+    m_valuesOrPrefixes=new DTMStringPool(16);
+    m_chars=new FastStringBuffer(7,10);
+    m_contextIndexes=new IntStack(4);
+    m_parents=new IntStack(4);
+  }
+ else {
+    m_data=new SuballocatedIntVector(blocksize,DEFAULT_NUMBLOCKS);
+    m_dataOrQName=new SuballocatedIntVector(blocksize,DEFAULT_NUMBLOCKS);
+    m_valuesOrPrefixes=new DTMStringPool();
+    m_chars=new FastStringBuffer(10,13);
+    m_contextIndexes=new IntStack();
+    m_parents=new IntStack();
+  }
+  m_data.addElement(0);
+  m_useSourceLocationProperty=mgr.getSource_location();
+  m_sourceSystemId=(m_useSourceLocationProperty) ? new StringVector() : null;
+  m_sourceLine=(m_useSourceLocationProperty) ? new IntVector() : null;
+  m_sourceColumn=(m_useSourceLocationProperty) ? new IntVector() : null;
+}

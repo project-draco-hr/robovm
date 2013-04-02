@@ -1,0 +1,38 @@
+{
+  ElemTemplateElement firstChild=elem.getFirstChildElem();
+  if (null == firstChild)   return "";
+  if (elem.hasTextLitOnly() && m_optimizer) {
+    return ((ElemTextLiteral)firstChild).getNodeValue();
+  }
+  SerializationHandler savedRTreeHandler=this.m_serializationHandler;
+  StringWriter sw=(StringWriter)m_stringWriterObjectPool.getInstance();
+  m_serializationHandler=(ToTextStream)m_textResultHandlerObjectPool.getInstance();
+  if (null == m_serializationHandler) {
+    Serializer serializer=org.apache.xml.serializer.SerializerFactory.getSerializer(m_textformat.getProperties());
+    m_serializationHandler=(SerializationHandler)serializer;
+  }
+  m_serializationHandler.setTransformer(this);
+  m_serializationHandler.setWriter(sw);
+  String result;
+  try {
+    executeChildTemplates(elem,true);
+    this.m_serializationHandler.endDocument();
+    result=sw.toString();
+  }
+ catch (  org.xml.sax.SAXException se) {
+    throw new TransformerException(se);
+  }
+ finally {
+    sw.getBuffer().setLength(0);
+    try {
+      sw.close();
+    }
+ catch (    Exception ioe) {
+    }
+    m_stringWriterObjectPool.freeInstance(sw);
+    m_serializationHandler.reset();
+    m_textResultHandlerObjectPool.freeInstance(m_serializationHandler);
+    m_serializationHandler=savedRTreeHandler;
+  }
+  return result;
+}

@@ -1,0 +1,52 @@
+{
+  int firstStepPos=OpMap.getFirstChildPos(opPos);
+  int analysis=analyze(compiler,firstStepPos,0);
+  boolean isOneStep=isOneStep(analysis);
+  DTMIterator iter;
+  if (isOneStep && walksSelfOnly(analysis) && isWild(analysis)&& !hasPredicate(analysis)) {
+    if (DEBUG_ITERATOR_CREATION)     diagnoseIterator("SelfIteratorNoPredicate",analysis,compiler);
+    iter=new SelfIteratorNoPredicate(compiler,opPos,analysis);
+  }
+ else   if (walksChildrenOnly(analysis) && isOneStep) {
+    if (isWild(analysis) && !hasPredicate(analysis)) {
+      if (DEBUG_ITERATOR_CREATION)       diagnoseIterator("ChildIterator",analysis,compiler);
+      iter=new ChildIterator(compiler,opPos,analysis);
+    }
+ else {
+      if (DEBUG_ITERATOR_CREATION)       diagnoseIterator("ChildTestIterator",analysis,compiler);
+      iter=new ChildTestIterator(compiler,opPos,analysis);
+    }
+  }
+ else   if (isOneStep && walksAttributes(analysis)) {
+    if (DEBUG_ITERATOR_CREATION)     diagnoseIterator("AttributeIterator",analysis,compiler);
+    iter=new AttributeIterator(compiler,opPos,analysis);
+  }
+ else   if (isOneStep && !walksFilteredList(analysis)) {
+    if (!walksNamespaces(analysis) && (walksInDocOrder(analysis) || isSet(analysis,BIT_PARENT))) {
+      if (false || DEBUG_ITERATOR_CREATION)       diagnoseIterator("OneStepIteratorForward",analysis,compiler);
+      iter=new OneStepIteratorForward(compiler,opPos,analysis);
+    }
+ else {
+      if (false || DEBUG_ITERATOR_CREATION)       diagnoseIterator("OneStepIterator",analysis,compiler);
+      iter=new OneStepIterator(compiler,opPos,analysis);
+    }
+  }
+ else   if (isOptimizableForDescendantIterator(compiler,firstStepPos,0)) {
+    if (DEBUG_ITERATOR_CREATION)     diagnoseIterator("DescendantIterator",analysis,compiler);
+    iter=new DescendantIterator(compiler,opPos,analysis);
+  }
+ else {
+    if (isNaturalDocOrder(compiler,firstStepPos,0,analysis)) {
+      if (false || DEBUG_ITERATOR_CREATION) {
+        diagnoseIterator("WalkingIterator",analysis,compiler);
+      }
+      iter=new WalkingIterator(compiler,opPos,analysis,true);
+    }
+ else {
+      if (DEBUG_ITERATOR_CREATION)       diagnoseIterator("WalkingIteratorSorted",analysis,compiler);
+      iter=new WalkingIteratorSorted(compiler,opPos,analysis,true);
+    }
+  }
+  if (iter instanceof LocPathIterator)   ((LocPathIterator)iter).setIsTopLevel(isTopLevel);
+  return iter;
+}

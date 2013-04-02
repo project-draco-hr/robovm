@@ -1,0 +1,23 @@
+{
+  Vector listVector=new Vector();
+  Node retNode=dtm.getNode(node);
+  if (retNode != null) {
+    boolean isNamespaceURIWildCard="*".equals(namespaceURI);
+    boolean isLocalNameWildCard="*".equals(localName);
+    if (DTM.ELEMENT_NODE == retNode.getNodeType()) {
+      NodeList nodeList=retNode.getChildNodes();
+      for (int i=0; i < nodeList.getLength(); i++) {
+        traverseChildren(listVector,nodeList.item(i),namespaceURI,localName,isNamespaceURIWildCard,isLocalNameWildCard);
+      }
+    }
+ else     if (DTM.DOCUMENT_NODE == retNode.getNodeType()) {
+      traverseChildren(listVector,dtm.getNode(node),namespaceURI,localName,isNamespaceURIWildCard,isLocalNameWildCard);
+    }
+  }
+  int size=listVector.size();
+  NodeSet nodeSet=new NodeSet(size);
+  for (int i=0; i < size; i++) {
+    nodeSet.addNode((Node)listVector.elementAt(i));
+  }
+  return (NodeList)nodeSet;
+}

@@ -1,0 +1,66 @@
+{
+  if (DEBUG_PATTERN_CREATION) {
+    System.out.println("================");
+    System.out.println("loadSteps for: " + compiler.getPatternString());
+  }
+  int stepType;
+  StepPattern step=null;
+  StepPattern firstStep=null, prevStep=null;
+  int analysis=analyze(compiler,stepOpCodePos,stepIndex);
+  while (OpCodes.ENDOP != (stepType=compiler.getOp(stepOpCodePos))) {
+    step=createDefaultStepPattern(compiler,stepOpCodePos,mpi,analysis,firstStep,prevStep);
+    if (null == firstStep) {
+      firstStep=step;
+    }
+ else {
+      step.setRelativePathPattern(prevStep);
+    }
+    prevStep=step;
+    stepOpCodePos=compiler.getNextStepPos(stepOpCodePos);
+    if (stepOpCodePos < 0)     break;
+  }
+  int axis=Axis.SELF;
+  int paxis=Axis.SELF;
+  StepPattern tail=step;
+  for (StepPattern pat=step; null != pat; pat=pat.getRelativePathPattern()) {
+    int nextAxis=pat.getAxis();
+    pat.setAxis(axis);
+    int whatToShow=pat.getWhatToShow();
+    if (whatToShow == DTMFilter.SHOW_ATTRIBUTE || whatToShow == DTMFilter.SHOW_NAMESPACE) {
+      int newAxis=(whatToShow == DTMFilter.SHOW_ATTRIBUTE) ? Axis.ATTRIBUTE : Axis.NAMESPACE;
+      if (isDownwardAxisOfMany(axis)) {
+        StepPattern attrPat=new StepPattern(whatToShow,pat.getNamespace(),pat.getLocalName(),newAxis,0);
+        XNumber score=pat.getStaticScore();
+        pat.setNamespace(null);
+        pat.setLocalName(NodeTest.WILD);
+        attrPat.setPredicates(pat.getPredicates());
+        pat.setPredicates(null);
+        pat.setWhatToShow(DTMFilter.SHOW_ELEMENT);
+        StepPattern rel=pat.getRelativePathPattern();
+        pat.setRelativePathPattern(attrPat);
+        attrPat.setRelativePathPattern(rel);
+        attrPat.setStaticScore(score);
+        if (Axis.PRECEDING == pat.getAxis())         pat.setAxis(Axis.PRECEDINGANDANCESTOR);
+ else         if (Axis.DESCENDANT == pat.getAxis())         pat.setAxis(Axis.DESCENDANTORSELF);
+        pat=attrPat;
+      }
+ else       if (Axis.CHILD == pat.getAxis()) {
+        pat.setAxis(Axis.ATTRIBUTE);
+      }
+    }
+    axis=nextAxis;
+    tail=pat;
+  }
+  if (axis < Axis.ALL) {
+    StepPattern selfPattern=new ContextMatchStepPattern(axis,paxis);
+    XNumber score=tail.getStaticScore();
+    tail.setRelativePathPattern(selfPattern);
+    tail.setStaticScore(score);
+    selfPattern.setStaticScore(score);
+  }
+  if (DEBUG_PATTERN_CREATION) {
+    System.out.println("Done loading steps: " + step.toString());
+    System.out.println("");
+  }
+  return step;
+}

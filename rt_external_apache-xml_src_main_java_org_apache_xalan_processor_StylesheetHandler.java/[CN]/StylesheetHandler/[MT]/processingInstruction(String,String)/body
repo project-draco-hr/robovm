@@ -1,0 +1,20 @@
+{
+  if (!m_shouldProcess)   return;
+  String prefix="", ns="", localName=target;
+  int colon=target.indexOf(':');
+  if (colon >= 0) {
+    ns=getNamespaceForPrefix(prefix=target.substring(0,colon));
+    localName=target.substring(colon + 1);
+  }
+  try {
+    if ("xalan-doc-cache-off".equals(target) || "xalan:doc-cache-off".equals(target) || ("doc-cache-off".equals(localName) && ns.equals("org.apache.xalan.xslt.extensions.Redirect"))) {
+      if (!(m_elems.peek() instanceof ElemForEach))       throw new TransformerException("xalan:doc-cache-off not allowed here!",getLocator());
+      ElemForEach elem=(ElemForEach)m_elems.peek();
+      elem.m_doc_cache_off=true;
+    }
+  }
+ catch (  Exception e) {
+  }
+  flushCharacters();
+  getCurrentProcessor().processingInstruction(this,target,data);
+}

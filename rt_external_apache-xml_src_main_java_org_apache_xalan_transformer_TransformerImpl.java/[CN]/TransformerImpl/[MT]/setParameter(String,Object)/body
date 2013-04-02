@@ -1,0 +1,21 @@
+{
+  if (value == null) {
+    throw new IllegalArgumentException(XSLMessages.createMessage(XSLTErrorResources.ER_INVALID_SET_PARAM_VALUE,new Object[]{name}));
+  }
+  StringTokenizer tokenizer=new StringTokenizer(name,"{}",false);
+  try {
+    String s1=tokenizer.nextToken();
+    String s2=tokenizer.hasMoreTokens() ? tokenizer.nextToken() : null;
+    if (null == m_userParams)     m_userParams=new Vector();
+    if (null == s2) {
+      replaceOrPushUserParam(new QName(s1),XObject.create(value,getXPathContext()));
+      setParameter(s1,null,value);
+    }
+ else {
+      replaceOrPushUserParam(new QName(s1,s2),XObject.create(value,getXPathContext()));
+      setParameter(s2,s1,value);
+    }
+  }
+ catch (  java.util.NoSuchElementException nsee) {
+  }
+}

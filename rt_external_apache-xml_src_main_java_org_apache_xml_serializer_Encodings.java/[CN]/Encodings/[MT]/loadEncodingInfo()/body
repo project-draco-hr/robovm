@@ -1,0 +1,55 @@
+{
+  try {
+    final InputStream is;
+    SecuritySupport ss=SecuritySupport.getInstance();
+    is=ss.getResourceAsStream(ObjectFactory.findClassLoader(),ENCODINGS_FILE);
+    Properties props=new Properties();
+    if (is != null) {
+      props.load(is);
+      is.close();
+    }
+ else {
+    }
+    int totalEntries=props.size();
+    List encodingInfo_list=new ArrayList();
+    Enumeration keys=props.keys();
+    for (int i=0; i < totalEntries; ++i) {
+      String javaName=(String)keys.nextElement();
+      String val=props.getProperty(javaName);
+      int len=lengthOfMimeNames(val);
+      String mimeName;
+      char highChar;
+      if (len == 0) {
+        mimeName=javaName;
+        highChar='\u0000';
+      }
+ else {
+        try {
+          final String highVal=val.substring(len).trim();
+          highChar=(char)Integer.decode(highVal).intValue();
+        }
+ catch (        NumberFormatException e) {
+          highChar=0;
+        }
+        String mimeNames=val.substring(0,len);
+        StringTokenizer st=new StringTokenizer(mimeNames,",");
+        for (boolean first=true; st.hasMoreTokens(); first=false) {
+          mimeName=st.nextToken();
+          EncodingInfo ei=new EncodingInfo(mimeName,javaName,highChar);
+          encodingInfo_list.add(ei);
+          _encodingTableKeyMime.put(mimeName.toUpperCase(),ei);
+          if (first)           _encodingTableKeyJava.put(javaName.toUpperCase(),ei);
+        }
+      }
+    }
+    EncodingInfo[] ret_ei=new EncodingInfo[encodingInfo_list.size()];
+    encodingInfo_list.toArray(ret_ei);
+    return ret_ei;
+  }
+ catch (  java.net.MalformedURLException mue) {
+    throw new org.apache.xml.serializer.utils.WrappedRuntimeException(mue);
+  }
+catch (  java.io.IOException ioe) {
+    throw new org.apache.xml.serializer.utils.WrappedRuntimeException(ioe);
+  }
+}

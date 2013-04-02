@@ -1,0 +1,16 @@
+{
+  MultistepExprHolder first=null;
+  int n=paths.size();
+  for (int i=0; i < n; i++) {
+    ExpressionOwner eo=(ExpressionOwner)paths.elementAt(i);
+    if (null == eo)     continue;
+    LocPathIterator lpi=(LocPathIterator)eo.getExpression();
+    int numPaths=countSteps(lpi);
+    if (numPaths > 1) {
+      if (null == first)       first=new MultistepExprHolder(eo,numPaths,null);
+ else       first=first.addInSortedOrder(eo,numPaths);
+    }
+  }
+  if ((null == first) || (first.getLength() <= 1))   return null;
+ else   return first;
+}

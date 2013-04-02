@@ -1,0 +1,22 @@
+{
+  int nodeID=makeNodeIdentity(nodeHandle);
+  int eType=_exptype2(nodeID);
+  if (eType == DTM.PROCESSING_INSTRUCTION_NODE) {
+    int dataIndex=_dataOrQName(nodeID);
+    dataIndex=m_data.elementAt(-dataIndex);
+    return m_valuesOrPrefixes.indexToString(dataIndex);
+  }
+  final ExtendedType extType=m_extendedTypes[eType];
+  if (extType.getNamespace().length() == 0) {
+    return extType.getLocalName();
+  }
+ else {
+    int qnameIndex=m_dataOrQName.elementAt(nodeID);
+    if (qnameIndex == 0)     return extType.getLocalName();
+    if (qnameIndex < 0) {
+      qnameIndex=-qnameIndex;
+      qnameIndex=m_data.elementAt(qnameIndex);
+    }
+    return m_valuesOrPrefixes.indexToString(qnameIndex);
+  }
+}

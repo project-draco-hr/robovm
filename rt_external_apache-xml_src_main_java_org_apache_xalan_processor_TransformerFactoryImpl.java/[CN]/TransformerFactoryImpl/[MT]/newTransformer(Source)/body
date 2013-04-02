@@ -1,0 +1,24 @@
+{
+  try {
+    Templates tmpl=newTemplates(source);
+    if (tmpl == null)     return null;
+    Transformer transformer=tmpl.newTransformer();
+    transformer.setURIResolver(m_uriResolver);
+    return transformer;
+  }
+ catch (  TransformerConfigurationException ex) {
+    if (m_errorListener != null) {
+      try {
+        m_errorListener.fatalError(ex);
+        return null;
+      }
+ catch (      TransformerConfigurationException ex1) {
+        throw ex1;
+      }
+catch (      TransformerException ex1) {
+        throw new TransformerConfigurationException(ex1);
+      }
+    }
+    throw ex;
+  }
+}

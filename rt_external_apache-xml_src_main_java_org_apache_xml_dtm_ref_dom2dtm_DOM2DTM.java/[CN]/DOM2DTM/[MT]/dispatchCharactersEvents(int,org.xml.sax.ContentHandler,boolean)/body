@@ -1,0 +1,17 @@
+{
+  if (normalize) {
+    XMLString str=getStringValue(nodeHandle);
+    str=str.fixWhiteSpace(true,true,false);
+    str.dispatchCharactersEvents(ch);
+  }
+ else {
+    int type=getNodeType(nodeHandle);
+    Node node=getNode(nodeHandle);
+    dispatchNodeData(node,ch,0);
+    if (TEXT_NODE == type || CDATA_SECTION_NODE == type) {
+      while (null != (node=logicalNextDOMTextNode(node))) {
+        dispatchNodeData(node,ch,0);
+      }
+    }
+  }
+}

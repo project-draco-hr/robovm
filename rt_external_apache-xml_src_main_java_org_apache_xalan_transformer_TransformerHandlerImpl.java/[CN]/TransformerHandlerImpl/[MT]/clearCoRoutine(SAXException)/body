@@ -1,0 +1,23 @@
+{
+  if (null != ex)   m_transformer.setExceptionThrown(ex);
+  if (m_dtm instanceof SAX2DTM) {
+    if (DEBUG)     System.err.println("In clearCoRoutine...");
+    try {
+      SAX2DTM sax2dtm=((SAX2DTM)m_dtm);
+      if (null != m_contentHandler && m_contentHandler instanceof IncrementalSAXSource_Filter) {
+        IncrementalSAXSource_Filter sp=(IncrementalSAXSource_Filter)m_contentHandler;
+        sp.deliverMoreNodes(false);
+      }
+      sax2dtm.clearCoRoutine(true);
+      m_contentHandler=null;
+      m_dtdHandler=null;
+      m_entityResolver=null;
+      m_errorHandler=null;
+      m_lexicalHandler=null;
+    }
+ catch (    Throwable throwable) {
+      throwable.printStackTrace();
+    }
+    if (DEBUG)     System.err.println("...exiting clearCoRoutine");
+  }
+}

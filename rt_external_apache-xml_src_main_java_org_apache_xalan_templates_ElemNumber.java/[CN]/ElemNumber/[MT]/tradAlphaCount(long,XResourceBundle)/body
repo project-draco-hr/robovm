@@ -1,0 +1,95 @@
+{
+  if (val > Long.MAX_VALUE) {
+    this.error(XSLTErrorResources.ER_NUMBER_TOO_BIG);
+    return XSLTErrorResources.ERROR_STRING;
+  }
+  char[] table=null;
+  int lookupIndex=1;
+  char buf[]=new char[100];
+  int charPos;
+  charPos=0;
+  IntArrayWrapper groups=(IntArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_NUMBERGROUPS);
+  StringArrayWrapper tables=(StringArrayWrapper)(thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_NUM_TABLES));
+  String numbering=thisBundle.getString(org.apache.xml.utils.res.XResourceBundle.LANG_NUMBERING);
+  if (numbering.equals(org.apache.xml.utils.res.XResourceBundle.LANG_MULT_ADD)) {
+    String mult_order=thisBundle.getString(org.apache.xml.utils.res.XResourceBundle.MULT_ORDER);
+    LongArrayWrapper multiplier=(LongArrayWrapper)(thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_MULTIPLIER));
+    CharArrayWrapper zeroChar=(CharArrayWrapper)thisBundle.getObject("zero");
+    int i=0;
+    while (i < multiplier.getLength() && val < multiplier.getLong(i)) {
+      i++;
+    }
+    do {
+      if (i >= multiplier.getLength())       break;
+      if (val < multiplier.getLong(i)) {
+        if (zeroChar.getLength() == 0) {
+          i++;
+        }
+ else {
+          if (buf[charPos - 1] != zeroChar.getChar(0))           buf[charPos++]=zeroChar.getChar(0);
+          i++;
+        }
+      }
+ else       if (val >= multiplier.getLong(i)) {
+        long mult=val / multiplier.getLong(i);
+        val=val % multiplier.getLong(i);
+        int k=0;
+        while (k < groups.getLength()) {
+          lookupIndex=1;
+          if (mult / groups.getInt(k) <= 0)           k++;
+ else {
+            CharArrayWrapper THEletters=(CharArrayWrapper)thisBundle.getObject(tables.getString(k));
+            table=new char[THEletters.getLength() + 1];
+            int j;
+            for (j=0; j < THEletters.getLength(); j++) {
+              table[j + 1]=THEletters.getChar(j);
+            }
+            table[0]=THEletters.getChar(j - 1);
+            lookupIndex=(int)mult / groups.getInt(k);
+            if (lookupIndex == 0 && mult == 0)             break;
+            char multiplierChar=((CharArrayWrapper)(thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_MULTIPLIER_CHAR))).getChar(i);
+            if (lookupIndex < table.length) {
+              if (mult_order.equals(org.apache.xml.utils.res.XResourceBundle.MULT_PRECEDES)) {
+                buf[charPos++]=multiplierChar;
+                buf[charPos++]=table[lookupIndex];
+              }
+ else {
+                if (lookupIndex == 1 && i == multiplier.getLength() - 1) {
+                }
+ else                 buf[charPos++]=table[lookupIndex];
+                buf[charPos++]=multiplierChar;
+              }
+              break;
+            }
+ else             return XSLTErrorResources.ERROR_STRING;
+          }
+        }
+        i++;
+      }
+    }
+ while (i < multiplier.getLength());
+  }
+  int count=0;
+  String tableName;
+  while (count < groups.getLength()) {
+    if (val / groups.getInt(count) <= 0)     count++;
+ else {
+      CharArrayWrapper theletters=(CharArrayWrapper)thisBundle.getObject(tables.getString(count));
+      table=new char[theletters.getLength() + 1];
+      int j;
+      for (j=0; j < theletters.getLength(); j++) {
+        table[j + 1]=theletters.getChar(j);
+      }
+      table[0]=theletters.getChar(j - 1);
+      lookupIndex=(int)val / groups.getInt(count);
+      val=val % groups.getInt(count);
+      if (lookupIndex == 0 && val == 0)       break;
+      if (lookupIndex < table.length) {
+        buf[charPos++]=table[lookupIndex];
+      }
+ else       return XSLTErrorResources.ERROR_STRING;
+      count++;
+    }
+  }
+  return new String(buf,0,charPos);
+}

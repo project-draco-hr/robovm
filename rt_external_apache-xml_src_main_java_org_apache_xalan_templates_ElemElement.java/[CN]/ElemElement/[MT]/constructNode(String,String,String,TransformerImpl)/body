@@ -1,0 +1,27 @@
+{
+  boolean shouldAddAttrs;
+  try {
+    SerializationHandler rhandler=transformer.getResultTreeHandler();
+    if (null == nodeName) {
+      shouldAddAttrs=false;
+    }
+ else {
+      if (null != prefix) {
+        rhandler.startPrefixMapping(prefix,nodeNamespace,true);
+      }
+      rhandler.startElement(nodeNamespace,QName.getLocalPart(nodeName),nodeName);
+      super.execute(transformer);
+      shouldAddAttrs=true;
+    }
+    transformer.executeChildTemplates(this,shouldAddAttrs);
+    if (null != nodeName) {
+      rhandler.endElement(nodeNamespace,QName.getLocalPart(nodeName),nodeName);
+      if (null != prefix) {
+        rhandler.endPrefixMapping(prefix);
+      }
+    }
+  }
+ catch (  SAXException se) {
+    throw new TransformerException(se);
+  }
+}

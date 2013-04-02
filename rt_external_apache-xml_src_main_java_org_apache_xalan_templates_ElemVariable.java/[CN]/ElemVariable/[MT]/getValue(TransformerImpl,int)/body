@@ -1,0 +1,28 @@
+{
+  XObject var;
+  XPathContext xctxt=transformer.getXPathContext();
+  xctxt.pushCurrentNode(sourceNode);
+  try {
+    if (null != m_selectPattern) {
+      var=m_selectPattern.execute(xctxt,sourceNode,this);
+      var.allowDetachToRelease(false);
+    }
+ else     if (null == getFirstChildElem()) {
+      var=XString.EMPTYSTRING;
+    }
+ else {
+      int df;
+      try {
+        if (m_parentNode instanceof Stylesheet)         df=transformer.transformToGlobalRTF(this);
+ else         df=transformer.transformToRTF(this);
+      }
+  finally {
+      }
+      var=new XRTreeFrag(df,xctxt,this);
+    }
+  }
+  finally {
+    xctxt.popCurrentNode();
+  }
+  return var;
+}

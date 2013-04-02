@@ -1,0 +1,18 @@
+{
+  if (!m_activeIDs.get(toCoroutine))   throw new java.lang.NoSuchMethodException(XMLMessages.createXMLMessage(XMLErrorResources.ER_COROUTINE_NOT_AVAIL,new Object[]{Integer.toString(toCoroutine)}));
+  m_yield=arg_object;
+  m_nextCoroutine=toCoroutine;
+  notify();
+  while (m_nextCoroutine != thisCoroutine || m_nextCoroutine == ANYBODY || m_nextCoroutine == NOBODY) {
+    try {
+      wait();
+    }
+ catch (    java.lang.InterruptedException e) {
+    }
+  }
+  if (m_nextCoroutine == NOBODY) {
+    co_exit(thisCoroutine);
+    throw new java.lang.NoSuchMethodException(XMLMessages.createXMLMessage(XMLErrorResources.ER_COROUTINE_CO_EXIT,null));
+  }
+  return m_yield;
+}

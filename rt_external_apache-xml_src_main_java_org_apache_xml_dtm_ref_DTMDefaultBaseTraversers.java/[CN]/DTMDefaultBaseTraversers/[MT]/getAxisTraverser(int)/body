@@ -1,0 +1,80 @@
+{
+  DTMAxisTraverser traverser;
+  if (null == m_traversers) {
+    m_traversers=new DTMAxisTraverser[Axis.getNamesLength()];
+    traverser=null;
+  }
+ else {
+    traverser=m_traversers[axis];
+    if (traverser != null)     return traverser;
+  }
+switch (axis) {
+case Axis.ANCESTOR:
+    traverser=new AncestorTraverser();
+  break;
+case Axis.ANCESTORORSELF:
+traverser=new AncestorOrSelfTraverser();
+break;
+case Axis.ATTRIBUTE:
+traverser=new AttributeTraverser();
+break;
+case Axis.CHILD:
+traverser=new ChildTraverser();
+break;
+case Axis.DESCENDANT:
+traverser=new DescendantTraverser();
+break;
+case Axis.DESCENDANTORSELF:
+traverser=new DescendantOrSelfTraverser();
+break;
+case Axis.FOLLOWING:
+traverser=new FollowingTraverser();
+break;
+case Axis.FOLLOWINGSIBLING:
+traverser=new FollowingSiblingTraverser();
+break;
+case Axis.NAMESPACE:
+traverser=new NamespaceTraverser();
+break;
+case Axis.NAMESPACEDECLS:
+traverser=new NamespaceDeclsTraverser();
+break;
+case Axis.PARENT:
+traverser=new ParentTraverser();
+break;
+case Axis.PRECEDING:
+traverser=new PrecedingTraverser();
+break;
+case Axis.PRECEDINGSIBLING:
+traverser=new PrecedingSiblingTraverser();
+break;
+case Axis.SELF:
+traverser=new SelfTraverser();
+break;
+case Axis.ALL:
+traverser=new AllFromRootTraverser();
+break;
+case Axis.ALLFROMNODE:
+traverser=new AllFromNodeTraverser();
+break;
+case Axis.PRECEDINGANDANCESTOR:
+traverser=new PrecedingAndAncestorTraverser();
+break;
+case Axis.DESCENDANTSFROMROOT:
+traverser=new DescendantFromRootTraverser();
+break;
+case Axis.DESCENDANTSORSELFFROMROOT:
+traverser=new DescendantOrSelfFromRootTraverser();
+break;
+case Axis.ROOT:
+traverser=new RootTraverser();
+break;
+case Axis.FILTEREDLIST:
+return null;
+default :
+throw new DTMException(XMLMessages.createXMLMessage(XMLErrorResources.ER_UNKNOWN_AXIS_TYPE,new Object[]{Integer.toString(axis)}));
+}
+if (null == traverser) throw new DTMException(XMLMessages.createXMLMessage(XMLErrorResources.ER_AXIS_TRAVERSER_NOT_SUPPORTED,new Object[]{Axis.getNames(axis)}));
+m_traversers[axis]=traverser;
+return traverser;
+}

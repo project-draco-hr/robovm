@@ -1,0 +1,23 @@
+{
+  if (getLength() == 0)   return null;
+  String uri=null;
+  String localName=name;
+  int index=name.indexOf(":");
+  if (-1 != index) {
+    uri=name.substring(0,index);
+    localName=name.substring(index + 1);
+  }
+  Node retNode=null;
+  Iterator eum=m_avts.iterator();
+  while (eum.hasNext()) {
+    AVT avt=(AVT)eum.next();
+    if (localName.equals(avt.getName())) {
+      String nsURI=avt.getURI();
+      if ((uri == null && nsURI == null) || (uri != null && uri.equals(nsURI))) {
+        retNode=new Attribute(avt,ElemLiteralResult.this);
+        break;
+      }
+    }
+  }
+  return retNode;
+}

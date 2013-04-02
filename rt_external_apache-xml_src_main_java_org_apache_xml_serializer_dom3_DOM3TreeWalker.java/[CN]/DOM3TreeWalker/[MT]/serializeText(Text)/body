@@ -1,0 +1,32 @@
+{
+  if (fNextIsRaw) {
+    fNextIsRaw=false;
+    fSerializer.processingInstruction(javax.xml.transform.Result.PI_DISABLE_OUTPUT_ESCAPING,"");
+    dispatachChars(node);
+    fSerializer.processingInstruction(javax.xml.transform.Result.PI_ENABLE_OUTPUT_ESCAPING,"");
+  }
+ else {
+    boolean bDispatch=false;
+    if ((fFeatures & WELLFORMED) != 0) {
+      isTextWellFormed(node);
+    }
+    boolean isElementContentWhitespace=false;
+    if (fIsLevel3DOM) {
+      isElementContentWhitespace=node.isElementContentWhitespace();
+    }
+    if (isElementContentWhitespace) {
+      if ((fFeatures & ELEM_CONTENT_WHITESPACE) != 0) {
+        bDispatch=true;
+      }
+    }
+ else {
+      bDispatch=true;
+    }
+    if (!applyFilter(node,NodeFilter.SHOW_TEXT)) {
+      return;
+    }
+    if (bDispatch) {
+      dispatachChars(node);
+    }
+  }
+}

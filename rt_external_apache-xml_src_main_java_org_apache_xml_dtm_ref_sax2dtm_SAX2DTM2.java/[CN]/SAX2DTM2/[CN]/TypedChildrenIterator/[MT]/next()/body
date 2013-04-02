@@ -1,0 +1,26 @@
+{
+  int node=_currentNode;
+  if (node == DTM.NULL)   return DTM.NULL;
+  final int nodeType=_nodeType;
+  if (nodeType != DTM.ELEMENT_NODE) {
+    while (node != DTM.NULL && _exptype2(node) != nodeType) {
+      node=_nextsib2(node);
+    }
+  }
+ else {
+    int eType;
+    while (node != DTM.NULL) {
+      eType=_exptype2(node);
+      if (eType >= DTM.NTYPES)       break;
+ else       node=_nextsib2(node);
+    }
+  }
+  if (node == DTM.NULL) {
+    _currentNode=DTM.NULL;
+    return DTM.NULL;
+  }
+ else {
+    _currentNode=_nextsib2(node);
+    return returnNode(makeNodeHandle(node));
+  }
+}

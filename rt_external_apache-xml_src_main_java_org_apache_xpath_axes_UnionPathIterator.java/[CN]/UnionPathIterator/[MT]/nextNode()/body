@@ -1,0 +1,35 @@
+{
+  if (m_foundLast)   return DTM.NULL;
+  int earliestNode=DTM.NULL;
+  if (null != m_iterators) {
+    int n=m_iterators.length;
+    int iteratorUsed=-1;
+    for (int i=0; i < n; i++) {
+      int node=m_iterators[i].getCurrentNode();
+      if (DTM.NULL == node)       continue;
+ else       if (DTM.NULL == earliestNode) {
+        iteratorUsed=i;
+        earliestNode=node;
+      }
+ else {
+        if (node == earliestNode) {
+          m_iterators[i].nextNode();
+        }
+ else {
+          DTM dtm=getDTM(node);
+          if (dtm.isNodeAfter(node,earliestNode)) {
+            iteratorUsed=i;
+            earliestNode=node;
+          }
+        }
+      }
+    }
+    if (DTM.NULL != earliestNode) {
+      m_iterators[iteratorUsed].nextNode();
+      incrementCurrentPos();
+    }
+ else     m_foundLast=true;
+  }
+  m_lastFetched=earliestNode;
+  return earliestNode;
+}

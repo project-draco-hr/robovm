@@ -1,0 +1,16 @@
+{
+  if (null == m_selectPattern && sroot.getOptimizer()) {
+    XPath newSelect=rewriteChildToExpression(this);
+    if (null != newSelect)     m_selectPattern=newSelect;
+  }
+  StylesheetRoot.ComposeState cstate=sroot.getComposeState();
+  java.util.Vector vnames=cstate.getVariableNames();
+  if (null != m_selectPattern)   m_selectPattern.fixupVariables(vnames,cstate.getGlobalsSize());
+  if (!(m_parentNode instanceof Stylesheet) && m_qname != null) {
+    m_index=cstate.addVariableName(m_qname) - cstate.getGlobalsSize();
+  }
+ else   if (m_parentNode instanceof Stylesheet) {
+    cstate.resetStackFrameSize();
+  }
+  super.compose(sroot);
+}

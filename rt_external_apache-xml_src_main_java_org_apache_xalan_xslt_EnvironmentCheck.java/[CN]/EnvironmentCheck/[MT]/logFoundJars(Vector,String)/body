@@ -1,0 +1,24 @@
+{
+  if ((null == v) || (v.size() < 1))   return false;
+  boolean errors=false;
+  logMsg("#---- BEGIN Listing XML-related jars in: " + desc + " ----");
+  for (int i=0; i < v.size(); i++) {
+    Hashtable subhash=(Hashtable)v.elementAt(i);
+    for (Enumeration keys=subhash.keys(); keys.hasMoreElements(); ) {
+      Object key=keys.nextElement();
+      String keyStr=(String)key;
+      try {
+        if (keyStr.startsWith(ERROR)) {
+          errors=true;
+        }
+        logMsg(keyStr + "=" + subhash.get(keyStr));
+      }
+ catch (      Exception e) {
+        errors=true;
+        logMsg("Reading-" + key + "= threw: "+ e.toString());
+      }
+    }
+  }
+  logMsg("#----- END Listing XML-related jars in: " + desc + " -----");
+  return errors;
+}

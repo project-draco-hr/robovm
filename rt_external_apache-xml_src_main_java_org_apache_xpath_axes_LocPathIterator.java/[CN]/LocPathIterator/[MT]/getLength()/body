@@ -1,0 +1,23 @@
+{
+  boolean isPredicateTest=(this == m_execContext.getSubContextList());
+  int predCount=getPredicateCount();
+  if (-1 != m_length && isPredicateTest && m_predicateIndex < 1)   return m_length;
+  if (m_foundLast)   return m_pos;
+  int pos=(m_predicateIndex >= 0) ? getProximityPosition() : m_pos;
+  LocPathIterator clone;
+  try {
+    clone=(LocPathIterator)clone();
+  }
+ catch (  CloneNotSupportedException cnse) {
+    return -1;
+  }
+  if (predCount > 0 && isPredicateTest) {
+    clone.m_predCount=m_predicateIndex;
+  }
+  int next;
+  while (DTM.NULL != (next=clone.nextNode())) {
+    pos++;
+  }
+  if (isPredicateTest && m_predicateIndex < 1)   m_length=pos;
+  return pos;
+}

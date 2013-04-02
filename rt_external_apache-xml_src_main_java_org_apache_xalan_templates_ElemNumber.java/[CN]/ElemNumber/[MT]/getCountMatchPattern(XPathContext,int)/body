@@ -1,0 +1,37 @@
+{
+  XPath countMatchPattern=m_countMatchPattern;
+  DTM dtm=support.getDTM(contextNode);
+  if (null == countMatchPattern) {
+switch (dtm.getNodeType(contextNode)) {
+case DTM.ELEMENT_NODE:
+      MyPrefixResolver resolver;
+    if (dtm.getNamespaceURI(contextNode) == null) {
+      resolver=new MyPrefixResolver(dtm.getNode(contextNode),dtm,contextNode,false);
+    }
+ else {
+      resolver=new MyPrefixResolver(dtm.getNode(contextNode),dtm,contextNode,true);
+    }
+  countMatchPattern=new XPath(dtm.getNodeName(contextNode),this,resolver,XPath.MATCH,support.getErrorListener());
+break;
+case DTM.ATTRIBUTE_NODE:
+countMatchPattern=new XPath("@" + dtm.getNodeName(contextNode),this,this,XPath.MATCH,support.getErrorListener());
+break;
+case DTM.CDATA_SECTION_NODE:
+case DTM.TEXT_NODE:
+countMatchPattern=new XPath("text()",this,this,XPath.MATCH,support.getErrorListener());
+break;
+case DTM.COMMENT_NODE:
+countMatchPattern=new XPath("comment()",this,this,XPath.MATCH,support.getErrorListener());
+break;
+case DTM.DOCUMENT_NODE:
+countMatchPattern=new XPath("/",this,this,XPath.MATCH,support.getErrorListener());
+break;
+case DTM.PROCESSING_INSTRUCTION_NODE:
+countMatchPattern=new XPath("pi(" + dtm.getNodeName(contextNode) + ")",this,this,XPath.MATCH,support.getErrorListener());
+break;
+default :
+countMatchPattern=null;
+}
+}
+return countMatchPattern;
+}

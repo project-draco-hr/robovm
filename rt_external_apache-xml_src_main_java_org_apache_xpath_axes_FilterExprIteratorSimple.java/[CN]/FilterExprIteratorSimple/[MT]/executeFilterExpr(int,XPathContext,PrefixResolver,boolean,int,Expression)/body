@@ -1,0 +1,25 @@
+{
+  PrefixResolver savedResolver=xctxt.getNamespaceContext();
+  XNodeSet result=null;
+  try {
+    xctxt.pushCurrentNode(context);
+    xctxt.setNamespaceContext(prefixResolver);
+    if (isTopLevel) {
+      VariableStack vars=xctxt.getVarStack();
+      int savedStart=vars.getStackFrame();
+      vars.setStackFrame(stackFrame);
+      result=(org.apache.xpath.objects.XNodeSet)expr.execute(xctxt);
+      result.setShouldCacheNodes(true);
+      vars.setStackFrame(savedStart);
+    }
+ else     result=(org.apache.xpath.objects.XNodeSet)expr.execute(xctxt);
+  }
+ catch (  javax.xml.transform.TransformerException se) {
+    throw new org.apache.xml.utils.WrappedRuntimeException(se);
+  }
+ finally {
+    xctxt.popCurrentNode();
+    xctxt.setNamespaceContext(savedResolver);
+  }
+  return result;
+}

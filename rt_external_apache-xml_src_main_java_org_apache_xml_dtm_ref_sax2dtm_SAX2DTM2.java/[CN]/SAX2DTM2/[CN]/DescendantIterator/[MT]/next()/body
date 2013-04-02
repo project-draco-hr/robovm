@@ -1,0 +1,34 @@
+{
+  final int startNode=_startNode;
+  if (startNode == NULL) {
+    return NULL;
+  }
+  if (_includeSelf && (_currentNode + 1) == startNode)   return returnNode(makeNodeHandle(++_currentNode));
+  int node=_currentNode;
+  int type;
+  if (startNode == ROOTNODE) {
+    int eType;
+    do {
+      node++;
+      eType=_exptype2(node);
+      if (NULL == eType) {
+        _currentNode=NULL;
+        return END;
+      }
+    }
+ while (eType == TEXT_NODE || (type=m_extendedTypes[eType].getNodeType()) == ATTRIBUTE_NODE || type == NAMESPACE_NODE);
+  }
+ else {
+    do {
+      node++;
+      type=_type2(node);
+      if (NULL == type || !isDescendant(node)) {
+        _currentNode=NULL;
+        return END;
+      }
+    }
+ while (ATTRIBUTE_NODE == type || TEXT_NODE == type || NAMESPACE_NODE == type);
+  }
+  _currentNode=node;
+  return returnNode(makeNodeHandle(node));
+}

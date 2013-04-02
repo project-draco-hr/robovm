@@ -1,0 +1,47 @@
+{
+  String fileName=null;
+  Properties defaultProperties=null;
+  try {
+synchronized (m_synch_object) {
+      if (null == m_xml_properties) {
+        fileName=PROP_FILE_XML;
+        m_xml_properties=loadPropertiesFile(fileName,null);
+      }
+    }
+    if (method.equals(Method.XML)) {
+      defaultProperties=m_xml_properties;
+    }
+ else     if (method.equals(Method.HTML)) {
+      if (null == m_html_properties) {
+        fileName=PROP_FILE_HTML;
+        m_html_properties=loadPropertiesFile(fileName,m_xml_properties);
+      }
+      defaultProperties=m_html_properties;
+    }
+ else     if (method.equals(Method.TEXT)) {
+      if (null == m_text_properties) {
+        fileName=PROP_FILE_TEXT;
+        m_text_properties=loadPropertiesFile(fileName,m_xml_properties);
+        if (null == m_text_properties.getProperty(OutputKeys.ENCODING)) {
+          String mimeEncoding=Encodings.getMimeEncoding(null);
+          m_text_properties.put(OutputKeys.ENCODING,mimeEncoding);
+        }
+      }
+      defaultProperties=m_text_properties;
+    }
+ else     if (method.equals(Method.UNKNOWN)) {
+      if (null == m_unknown_properties) {
+        fileName=PROP_FILE_UNKNOWN;
+        m_unknown_properties=loadPropertiesFile(fileName,m_xml_properties);
+      }
+      defaultProperties=m_unknown_properties;
+    }
+ else {
+      defaultProperties=m_xml_properties;
+    }
+  }
+ catch (  IOException ioe) {
+    throw new WrappedRuntimeException(Utils.messages.createMessage(MsgKey.ER_COULD_NOT_LOAD_METHOD_PROPERTY,new Object[]{fileName,method}),ioe);
+  }
+  return new Properties(defaultProperties);
+}

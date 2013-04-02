@@ -1,0 +1,134 @@
+{
+  if (length == 0 || (m_inEntityRef && !m_expandDTDEntities))   return;
+  m_docIsEmpty=false;
+  if (m_elemContext.m_startTagOpen) {
+    closeStartTag();
+    m_elemContext.m_startTagOpen=false;
+  }
+ else   if (m_needToCallStartDocument) {
+    startDocumentInternal();
+  }
+  if (m_cdataStartCalled || m_elemContext.m_isCdataSection) {
+    cdata(chars,start,length);
+    return;
+  }
+  if (m_cdataTagOpen)   closeCDATA();
+  if (m_disableOutputEscapingStates.peekOrFalse() || (!m_escaping)) {
+    charactersRaw(chars,start,length);
+    if (m_tracer != null)     super.fireCharEvent(chars,start,length);
+    return;
+  }
+  if (m_elemContext.m_startTagOpen) {
+    closeStartTag();
+    m_elemContext.m_startTagOpen=false;
+  }
+  try {
+    int i;
+    int startClean;
+    final int end=start + length;
+    int lastDirtyCharProcessed=start - 1;
+    final Writer writer=m_writer;
+    boolean isAllWhitespace=true;
+    i=start;
+    while (i < end && isAllWhitespace) {
+      char ch1=chars[i];
+      if (m_charInfo.shouldMapTextChar(ch1)) {
+        writeOutCleanChars(chars,i,lastDirtyCharProcessed);
+        String outputStringForChar=m_charInfo.getOutputStringForChar(ch1);
+        writer.write(outputStringForChar);
+        isAllWhitespace=false;
+        lastDirtyCharProcessed=i;
+        i++;
+      }
+ else {
+switch (ch1) {
+case CharInfo.S_SPACE:
+          i++;
+        break;
+case CharInfo.S_LINEFEED:
+      lastDirtyCharProcessed=processLineFeed(chars,i,lastDirtyCharProcessed,writer);
+    i++;
+  break;
+case CharInfo.S_CARRIAGERETURN:
+writeOutCleanChars(chars,i,lastDirtyCharProcessed);
+writer.write("&#13;");
+lastDirtyCharProcessed=i;
+i++;
+break;
+case CharInfo.S_HORIZONAL_TAB:
+i++;
+break;
+default :
+isAllWhitespace=false;
+break;
+}
+}
+}
+if (i < end || !isAllWhitespace) m_ispreserve=true;
+for (; i < end; i++) {
+char ch=chars[i];
+if (m_charInfo.shouldMapTextChar(ch)) {
+writeOutCleanChars(chars,i,lastDirtyCharProcessed);
+String outputStringForChar=m_charInfo.getOutputStringForChar(ch);
+writer.write(outputStringForChar);
+lastDirtyCharProcessed=i;
+}
+ else {
+if (ch <= 0x1F) {
+switch (ch) {
+case CharInfo.S_HORIZONAL_TAB:
+break;
+case CharInfo.S_LINEFEED:
+lastDirtyCharProcessed=processLineFeed(chars,i,lastDirtyCharProcessed,writer);
+break;
+case CharInfo.S_CARRIAGERETURN:
+writeOutCleanChars(chars,i,lastDirtyCharProcessed);
+writer.write("&#13;");
+lastDirtyCharProcessed=i;
+break;
+default :
+writeOutCleanChars(chars,i,lastDirtyCharProcessed);
+writer.write("&#");
+writer.write(Integer.toString(ch));
+writer.write(';');
+lastDirtyCharProcessed=i;
+break;
+}
+}
+ else if (ch < 0x7F) {
+}
+ else if (ch <= 0x9F) {
+writeOutCleanChars(chars,i,lastDirtyCharProcessed);
+writer.write("&#");
+writer.write(Integer.toString(ch));
+writer.write(';');
+lastDirtyCharProcessed=i;
+}
+ else if (ch == CharInfo.S_LINE_SEPARATOR) {
+writeOutCleanChars(chars,i,lastDirtyCharProcessed);
+writer.write("&#8232;");
+lastDirtyCharProcessed=i;
+}
+ else if (m_encodingInfo.isInEncoding(ch)) {
+}
+ else {
+writeOutCleanChars(chars,i,lastDirtyCharProcessed);
+writer.write("&#");
+writer.write(Integer.toString(ch));
+writer.write(';');
+lastDirtyCharProcessed=i;
+}
+}
+}
+startClean=lastDirtyCharProcessed + 1;
+if (i > startClean) {
+int lengthClean=i - startClean;
+m_writer.write(chars,startClean,lengthClean);
+}
+m_isprevtext=true;
+}
+ catch (IOException e) {
+throw new SAXException(e);
+}
+if (m_tracer != null) super.fireCharEvent(chars,start,length);
+}

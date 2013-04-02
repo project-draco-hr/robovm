@@ -1,0 +1,37 @@
+{
+  if (value == null)   return;
+  int strlen=value.length();
+  if (0 == strlen)   return;
+  int copyfrom=0;
+  char[] chunk=m_array[m_lastChunk];
+  int available=m_chunkSize - m_firstFree;
+  while (strlen > 0) {
+    if (available > strlen)     available=strlen;
+    int sourcechunk=(copyfrom + value.m_chunkSize - 1) >>> value.m_chunkBits;
+    int sourcecolumn=copyfrom & value.m_chunkMask;
+    int runlength=value.m_chunkSize - sourcecolumn;
+    if (runlength > available)     runlength=available;
+    System.arraycopy(value.m_array[sourcechunk],sourcecolumn,m_array[m_lastChunk],m_firstFree,runlength);
+    if (runlength != available)     System.arraycopy(value.m_array[sourcechunk + 1],0,m_array[m_lastChunk],m_firstFree + runlength,available - runlength);
+    strlen-=available;
+    copyfrom+=available;
+    if (strlen > 0) {
+      int i=m_array.length;
+      if (m_lastChunk + 1 == i) {
+        char[][] newarray=new char[i + 16][];
+        System.arraycopy(m_array,0,newarray,0,i);
+        m_array=newarray;
+      }
+      chunk=m_array[++m_lastChunk];
+      if (chunk == null) {
+        if (m_lastChunk == 1 << m_rebundleBits && m_chunkBits < m_maxChunkBits) {
+          m_innerFSB=new FastStringBuffer(this);
+        }
+        chunk=m_array[m_lastChunk]=new char[m_chunkSize];
+      }
+      available=m_chunkSize;
+      m_firstFree=0;
+    }
+  }
+  m_firstFree+=available;
+}

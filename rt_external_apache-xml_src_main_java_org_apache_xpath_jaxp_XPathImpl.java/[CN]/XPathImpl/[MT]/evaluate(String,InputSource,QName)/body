@@ -1,0 +1,38 @@
+{
+  if (source == null) {
+    String fmsg=XSLMessages.createXPATHMessage(XPATHErrorResources.ER_ARG_CANNOT_BE_NULL,new Object[]{"source"});
+    throw new NullPointerException(fmsg);
+  }
+  if (expression == null) {
+    String fmsg=XSLMessages.createXPATHMessage(XPATHErrorResources.ER_ARG_CANNOT_BE_NULL,new Object[]{"XPath expression"});
+    throw new NullPointerException(fmsg);
+  }
+  if (returnType == null) {
+    String fmsg=XSLMessages.createXPATHMessage(XPATHErrorResources.ER_ARG_CANNOT_BE_NULL,new Object[]{"returnType"});
+    throw new NullPointerException(fmsg);
+  }
+  if (!isSupported(returnType)) {
+    String fmsg=XSLMessages.createXPATHMessage(XPATHErrorResources.ER_UNSUPPORTED_RETURN_TYPE,new Object[]{returnType.toString()});
+    throw new IllegalArgumentException(fmsg);
+  }
+  try {
+    Document document=getParser().parse(source);
+    XObject resultObject=eval(expression,document);
+    return getResultAsType(resultObject,returnType);
+  }
+ catch (  SAXException e) {
+    throw new XPathExpressionException(e);
+  }
+catch (  IOException e) {
+    throw new XPathExpressionException(e);
+  }
+catch (  javax.xml.transform.TransformerException te) {
+    Throwable nestedException=te.getException();
+    if (nestedException instanceof javax.xml.xpath.XPathFunctionException) {
+      throw (javax.xml.xpath.XPathFunctionException)nestedException;
+    }
+ else {
+      throw new XPathExpressionException(te);
+    }
+  }
+}

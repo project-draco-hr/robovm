@@ -1,0 +1,21 @@
+{
+  if (m_firstElementName != null) {
+    if (m_wrapped_handler_not_initialized) {
+      initStreamOutput();
+      m_wrapped_handler_not_initialized=false;
+    }
+    m_handler.startElement(m_firstElementURI,null,m_firstElementName,m_attributes);
+    m_attributes=null;
+    if (m_namespacePrefix != null) {
+      final int n=m_namespacePrefix.size();
+      for (int i=0; i < n; i++) {
+        final String prefix=(String)m_namespacePrefix.elementAt(i);
+        final String uri=(String)m_namespaceURI.elementAt(i);
+        m_handler.startPrefixMapping(prefix,uri,false);
+      }
+      m_namespacePrefix=null;
+      m_namespaceURI=null;
+    }
+    m_firstTagNotEmitted=false;
+  }
+}

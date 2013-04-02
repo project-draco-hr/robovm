@@ -1,0 +1,20 @@
+{
+  int endFunc=opPos + compiler.getOp(opPos + 1) - 1;
+  opPos=OpMap.getFirstChildPos(opPos);
+  int funcID=compiler.getOp(opPos);
+switch (funcID) {
+case FunctionTable.FUNC_LAST:
+case FunctionTable.FUNC_POSITION:
+    return true;
+default :
+  opPos++;
+int i=0;
+for (int p=opPos; p < endFunc; p=compiler.getNextOpPos(p), i++) {
+int innerExprOpPos=p + 2;
+int argOp=compiler.getOp(innerExprOpPos);
+boolean prox=isProximateInnerExpr(compiler,innerExprOpPos);
+if (prox) return true;
+}
+}
+return false;
+}

@@ -1,0 +1,30 @@
+{
+  XPathContext xctxt=m_xcontext;
+  ContentHandler rtfHandler=dtmFrag.getContentHandler();
+  int resultFragment;
+  SerializationHandler savedRTreeHandler=this.m_serializationHandler;
+  ToSAXHandler h=new ToXMLSAXHandler();
+  h.setContentHandler(rtfHandler);
+  h.setTransformer(this);
+  m_serializationHandler=h;
+  SerializationHandler rth=m_serializationHandler;
+  try {
+    rth.startDocument();
+    rth.flushPending();
+    try {
+      executeChildTemplates(templateParent,true);
+      rth.flushPending();
+      resultFragment=dtmFrag.getDocument();
+    }
+  finally {
+      rth.endDocument();
+    }
+  }
+ catch (  org.xml.sax.SAXException se) {
+    throw new TransformerException(se);
+  }
+ finally {
+    this.m_serializationHandler=savedRTreeHandler;
+  }
+  return resultFragment;
+}

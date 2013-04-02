@@ -1,0 +1,19 @@
+{
+  if (fNoMoreEvents)   return;
+  try {
+    Object arg=Boolean.FALSE;
+    if (moreRemains) {
+      arg=fCoroutineManager.co_resume(Boolean.TRUE,fSourceCoroutineID,fControllerCoroutineID);
+    }
+    if (arg == Boolean.FALSE) {
+      fNoMoreEvents=true;
+      if (fXMLReader != null)       throw new StopException();
+      fCoroutineManager.co_exit_to(Boolean.FALSE,fSourceCoroutineID,fControllerCoroutineID);
+    }
+  }
+ catch (  NoSuchMethodException e) {
+    fNoMoreEvents=true;
+    fCoroutineManager.co_exit(fSourceCoroutineID);
+    throw new SAXException(e);
+  }
+}

@@ -1,0 +1,25 @@
+{
+  try {
+    if (type == DTM.ELEMENT_NODE) {
+      for (int namespace=dtm.getFirstNamespaceNode(src,true); DTM.NULL != namespace; namespace=dtm.getNextNamespaceNode(src,namespace,true)) {
+        String prefix=dtm.getNodeNameX(namespace);
+        String desturi=handler.getNamespaceURIFromPrefix(prefix);
+        String srcURI=dtm.getNodeValue(namespace);
+        if (!srcURI.equalsIgnoreCase(desturi)) {
+          handler.startPrefixMapping(prefix,srcURI,false);
+        }
+      }
+    }
+ else     if (type == DTM.NAMESPACE_NODE) {
+      String prefix=dtm.getNodeNameX(src);
+      String desturi=handler.getNamespaceURIFromPrefix(prefix);
+      String srcURI=dtm.getNodeValue(src);
+      if (!srcURI.equalsIgnoreCase(desturi)) {
+        handler.startPrefixMapping(prefix,srcURI,false);
+      }
+    }
+  }
+ catch (  org.xml.sax.SAXException se) {
+    throw new TransformerException(se);
+  }
+}

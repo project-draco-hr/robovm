@@ -1,0 +1,82 @@
+{
+  AxesWalker ai=null;
+  int stepType=compiler.getOp(opPos);
+  boolean simpleInit=false;
+  int totalNumberWalkers=(analysis & BITS_COUNT);
+  boolean prevIsOneStepDown=true;
+switch (stepType) {
+case OpCodes.OP_VARIABLE:
+case OpCodes.OP_EXTFUNCTION:
+case OpCodes.OP_FUNCTION:
+case OpCodes.OP_GROUP:
+    prevIsOneStepDown=false;
+  if (DEBUG_WALKER_CREATION)   System.out.println("new walker:  FilterExprWalker: " + analysis + ", "+ compiler.toString());
+ai=new FilterExprWalker(lpi);
+simpleInit=true;
+break;
+case OpCodes.FROM_ROOT:
+ai=new AxesWalker(lpi,Axis.ROOT);
+break;
+case OpCodes.FROM_ANCESTORS:
+prevIsOneStepDown=false;
+ai=new ReverseAxesWalker(lpi,Axis.ANCESTOR);
+break;
+case OpCodes.FROM_ANCESTORS_OR_SELF:
+prevIsOneStepDown=false;
+ai=new ReverseAxesWalker(lpi,Axis.ANCESTORORSELF);
+break;
+case OpCodes.FROM_ATTRIBUTES:
+ai=new AxesWalker(lpi,Axis.ATTRIBUTE);
+break;
+case OpCodes.FROM_NAMESPACE:
+ai=new AxesWalker(lpi,Axis.NAMESPACE);
+break;
+case OpCodes.FROM_CHILDREN:
+ai=new AxesWalker(lpi,Axis.CHILD);
+break;
+case OpCodes.FROM_DESCENDANTS:
+prevIsOneStepDown=false;
+ai=new AxesWalker(lpi,Axis.DESCENDANT);
+break;
+case OpCodes.FROM_DESCENDANTS_OR_SELF:
+prevIsOneStepDown=false;
+ai=new AxesWalker(lpi,Axis.DESCENDANTORSELF);
+break;
+case OpCodes.FROM_FOLLOWING:
+prevIsOneStepDown=false;
+ai=new AxesWalker(lpi,Axis.FOLLOWING);
+break;
+case OpCodes.FROM_FOLLOWING_SIBLINGS:
+prevIsOneStepDown=false;
+ai=new AxesWalker(lpi,Axis.FOLLOWINGSIBLING);
+break;
+case OpCodes.FROM_PRECEDING:
+prevIsOneStepDown=false;
+ai=new ReverseAxesWalker(lpi,Axis.PRECEDING);
+break;
+case OpCodes.FROM_PRECEDING_SIBLINGS:
+prevIsOneStepDown=false;
+ai=new ReverseAxesWalker(lpi,Axis.PRECEDINGSIBLING);
+break;
+case OpCodes.FROM_PARENT:
+prevIsOneStepDown=false;
+ai=new ReverseAxesWalker(lpi,Axis.PARENT);
+break;
+case OpCodes.FROM_SELF:
+ai=new AxesWalker(lpi,Axis.SELF);
+break;
+default :
+throw new RuntimeException(XSLMessages.createXPATHMessage(XPATHErrorResources.ER_NULL_ERROR_HANDLER,new Object[]{Integer.toString(stepType)}));
+}
+if (simpleInit) {
+ai.initNodeTest(DTMFilter.SHOW_ALL);
+}
+ else {
+int whatToShow=compiler.getWhatToShow(opPos);
+if ((0 == (whatToShow & (DTMFilter.SHOW_ATTRIBUTE | DTMFilter.SHOW_NAMESPACE | DTMFilter.SHOW_ELEMENT| DTMFilter.SHOW_PROCESSING_INSTRUCTION))) || (whatToShow == DTMFilter.SHOW_ALL)) ai.initNodeTest(whatToShow);
+ else {
+ai.initNodeTest(whatToShow,compiler.getStepNS(opPos),compiler.getStepLocalName(opPos));
+}
+}
+return ai;
+}

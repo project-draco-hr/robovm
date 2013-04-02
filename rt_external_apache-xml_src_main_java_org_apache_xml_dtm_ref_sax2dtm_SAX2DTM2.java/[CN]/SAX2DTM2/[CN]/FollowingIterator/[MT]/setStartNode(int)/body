@@ -1,0 +1,25 @@
+{
+  if (node == DTMDefaultBase.ROOTNODE)   node=getDocument();
+  if (_isRestartable) {
+    _startNode=node;
+    node=makeNodeIdentity(node);
+    int first;
+    int type=_type2(node);
+    if ((DTM.ATTRIBUTE_NODE == type) || (DTM.NAMESPACE_NODE == type)) {
+      node=_parent2(node);
+      first=_firstch2(node);
+      if (NULL != first) {
+        _currentNode=makeNodeHandle(first);
+        return resetPosition();
+      }
+    }
+    do {
+      first=_nextsib2(node);
+      if (NULL == first)       node=_parent2(node);
+    }
+ while (NULL == first && NULL != node);
+    _currentNode=makeNodeHandle(first);
+    return resetPosition();
+  }
+  return this;
+}

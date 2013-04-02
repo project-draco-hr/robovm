@@ -1,0 +1,22 @@
+{
+  int first;
+  int type=getNodeType(context);
+  if ((DTM.ATTRIBUTE_NODE == type) || (DTM.NAMESPACE_NODE == type)) {
+    context=getParent(context);
+    first=getFirstChild(context);
+    if (NULL != first) {
+      if (getExpandedTypeID(first) == expandedTypeID)       return first;
+ else       return next(context,first,expandedTypeID);
+    }
+  }
+  do {
+    first=getNextSibling(context);
+    if (NULL == first)     context=getParent(context);
+ else {
+      if (getExpandedTypeID(first) == expandedTypeID)       return first;
+ else       return next(context,first,expandedTypeID);
+    }
+  }
+ while (NULL == first && NULL != context);
+  return first;
+}

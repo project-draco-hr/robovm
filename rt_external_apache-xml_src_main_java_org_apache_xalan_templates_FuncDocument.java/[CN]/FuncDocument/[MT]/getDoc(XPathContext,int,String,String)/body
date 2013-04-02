@@ -1,0 +1,75 @@
+{
+  SourceTreeManager treeMgr=xctxt.getSourceTreeManager();
+  Source source;
+  int newDoc;
+  try {
+    source=treeMgr.resolveURI(base,uri,xctxt.getSAXLocator());
+    newDoc=treeMgr.getNode(source);
+  }
+ catch (  IOException ioe) {
+    throw new TransformerException(ioe.getMessage(),(SourceLocator)xctxt.getSAXLocator(),ioe);
+  }
+catch (  TransformerException te) {
+    throw new TransformerException(te);
+  }
+  if (DTM.NULL != newDoc)   return newDoc;
+  if (uri.length() == 0) {
+    uri=xctxt.getNamespaceContext().getBaseIdentifier();
+    try {
+      source=treeMgr.resolveURI(base,uri,xctxt.getSAXLocator());
+    }
+ catch (    IOException ioe) {
+      throw new TransformerException(ioe.getMessage(),(SourceLocator)xctxt.getSAXLocator(),ioe);
+    }
+  }
+  String diagnosticsString=null;
+  try {
+    if ((null != uri) && (uri.length() > 0)) {
+      newDoc=treeMgr.getSourceTree(source,xctxt.getSAXLocator(),xctxt);
+    }
+ else     warn(xctxt,XSLTErrorResources.WG_CANNOT_MAKE_URL_FROM,new Object[]{((base == null) ? "" : base) + uri});
+  }
+ catch (  Throwable throwable) {
+    newDoc=DTM.NULL;
+    while (throwable instanceof org.apache.xml.utils.WrappedRuntimeException) {
+      throwable=((org.apache.xml.utils.WrappedRuntimeException)throwable).getException();
+    }
+    if ((throwable instanceof NullPointerException) || (throwable instanceof ClassCastException)) {
+      throw new org.apache.xml.utils.WrappedRuntimeException((Exception)throwable);
+    }
+    StringWriter sw=new StringWriter();
+    PrintWriter diagnosticsWriter=new PrintWriter(sw);
+    if (throwable instanceof TransformerException) {
+      TransformerException spe=(TransformerException)throwable;
+{
+        Throwable e=spe;
+        while (null != e) {
+          if (null != e.getMessage()) {
+            diagnosticsWriter.println(" (" + e.getClass().getName() + "): "+ e.getMessage());
+          }
+          if (e instanceof TransformerException) {
+            TransformerException spe2=(TransformerException)e;
+            SourceLocator locator=spe2.getLocator();
+            if ((null != locator) && (null != locator.getSystemId()))             diagnosticsWriter.println("   ID: " + locator.getSystemId() + " Line #"+ locator.getLineNumber()+ " Column #"+ locator.getColumnNumber());
+            e=spe2.getException();
+            if (e instanceof org.apache.xml.utils.WrappedRuntimeException)             e=((org.apache.xml.utils.WrappedRuntimeException)e).getException();
+          }
+ else           e=null;
+        }
+      }
+    }
+ else {
+      diagnosticsWriter.println(" (" + throwable.getClass().getName() + "): "+ throwable.getMessage());
+    }
+    diagnosticsString=throwable.getMessage();
+  }
+  if (DTM.NULL == newDoc) {
+    if (null != diagnosticsString) {
+      warn(xctxt,XSLTErrorResources.WG_CANNOT_LOAD_REQUESTED_DOC,new Object[]{diagnosticsString});
+    }
+ else     warn(xctxt,XSLTErrorResources.WG_CANNOT_LOAD_REQUESTED_DOC,new Object[]{uri == null ? ((base == null) ? "" : base) + uri : uri.toString()});
+  }
+ else {
+  }
+  return newDoc;
+}

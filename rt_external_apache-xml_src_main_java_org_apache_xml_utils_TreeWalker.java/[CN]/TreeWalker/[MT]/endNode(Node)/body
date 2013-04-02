@@ -1,0 +1,34 @@
+{
+switch (node.getNodeType()) {
+case Node.DOCUMENT_NODE:
+    break;
+case Node.ELEMENT_NODE:
+  String ns=m_dh.getNamespaceOfNode(node);
+if (null == ns) ns="";
+this.m_contentHandler.endElement(ns,m_dh.getLocalNameOfNode(node),node.getNodeName());
+NamedNodeMap atts=((Element)node).getAttributes();
+int nAttrs=atts.getLength();
+for (int i=0; i < nAttrs; i++) {
+Node attr=atts.item(i);
+String attrName=attr.getNodeName();
+if (attrName.equals("xmlns") || attrName.startsWith("xmlns:")) {
+int index;
+String prefix=(index=attrName.indexOf(":")) < 0 ? "" : attrName.substring(index + 1);
+this.m_contentHandler.endPrefixMapping(prefix);
+}
+}
+break;
+case Node.CDATA_SECTION_NODE:
+break;
+case Node.ENTITY_REFERENCE_NODE:
+{
+EntityReference eref=(EntityReference)node;
+if (m_contentHandler instanceof LexicalHandler) {
+LexicalHandler lh=((LexicalHandler)this.m_contentHandler);
+lh.endEntity(eref.getNodeName());
+}
+}
+break;
+default :
+}
+}

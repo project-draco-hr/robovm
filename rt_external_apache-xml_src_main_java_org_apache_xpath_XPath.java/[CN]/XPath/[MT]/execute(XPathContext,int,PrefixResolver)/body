@@ -1,0 +1,36 @@
+{
+  xctxt.pushNamespaceContext(namespaceContext);
+  xctxt.pushCurrentNodeAndExpression(contextNode,contextNode);
+  XObject xobj=null;
+  try {
+    xobj=m_mainExp.execute(xctxt);
+  }
+ catch (  TransformerException te) {
+    te.setLocator(this.getLocator());
+    ErrorListener el=xctxt.getErrorListener();
+    if (null != el) {
+      el.error(te);
+    }
+ else     throw te;
+  }
+catch (  Exception e) {
+    while (e instanceof org.apache.xml.utils.WrappedRuntimeException) {
+      e=((org.apache.xml.utils.WrappedRuntimeException)e).getException();
+    }
+    String msg=e.getMessage();
+    if (msg == null || msg.length() == 0) {
+      msg=XSLMessages.createXPATHMessage(XPATHErrorResources.ER_XPATH_ERROR,null);
+    }
+    TransformerException te=new TransformerException(msg,getLocator(),e);
+    ErrorListener el=xctxt.getErrorListener();
+    if (null != el) {
+      el.fatalError(te);
+    }
+ else     throw te;
+  }
+ finally {
+    xctxt.popNamespaceContext();
+    xctxt.popCurrentNodeAndExpression();
+  }
+  return xobj;
+}

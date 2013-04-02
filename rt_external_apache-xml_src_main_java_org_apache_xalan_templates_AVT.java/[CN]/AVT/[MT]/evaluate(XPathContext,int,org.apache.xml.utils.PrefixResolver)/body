@@ -1,0 +1,29 @@
+{
+  if (null != m_simpleString) {
+    return m_simpleString;
+  }
+ else   if (null != m_parts) {
+    final FastStringBuffer buf=getBuffer();
+    String out=null;
+    int n=m_parts.size();
+    try {
+      for (int i=0; i < n; i++) {
+        AVTPart part=(AVTPart)m_parts.elementAt(i);
+        part.evaluate(xctxt,buf,context,nsNode);
+      }
+      out=buf.toString();
+    }
+  finally {
+      if (USE_OBJECT_POOL) {
+        StringBufferPool.free(buf);
+      }
+ else {
+        buf.setLength(0);
+      }
+    }
+    return out;
+  }
+ else {
+    return "";
+  }
+}

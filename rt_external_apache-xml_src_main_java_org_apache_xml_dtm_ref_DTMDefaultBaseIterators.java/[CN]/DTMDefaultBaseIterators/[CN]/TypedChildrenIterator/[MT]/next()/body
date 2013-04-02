@@ -1,0 +1,32 @@
+{
+  int eType;
+  int node=_currentNode;
+  int nodeType=_nodeType;
+  if (nodeType >= DTM.NTYPES) {
+    while (node != DTM.NULL && _exptype(node) != nodeType) {
+      node=_nextsib(node);
+    }
+  }
+ else {
+    while (node != DTM.NULL) {
+      eType=_exptype(node);
+      if (eType < DTM.NTYPES) {
+        if (eType == nodeType) {
+          break;
+        }
+      }
+ else       if (m_expandedNameTable.getType(eType) == nodeType) {
+        break;
+      }
+      node=_nextsib(node);
+    }
+  }
+  if (node == DTM.NULL) {
+    _currentNode=DTM.NULL;
+    return DTM.NULL;
+  }
+ else {
+    _currentNode=_nextsib(node);
+    return returnNode(makeNodeHandle(node));
+  }
+}

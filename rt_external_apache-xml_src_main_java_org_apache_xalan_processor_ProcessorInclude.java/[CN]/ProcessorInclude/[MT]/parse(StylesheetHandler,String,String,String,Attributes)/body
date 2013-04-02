@@ -1,0 +1,77 @@
+{
+  TransformerFactoryImpl processor=handler.getStylesheetProcessor();
+  URIResolver uriresolver=processor.getURIResolver();
+  try {
+    Source source=null;
+    if (null != uriresolver) {
+      source=handler.peekSourceFromURIResolver();
+      if (null != source && source instanceof DOMSource) {
+        Node node=((DOMSource)source).getNode();
+        String systemId=handler.peekImportURL();
+        if (systemId != null)         handler.pushBaseIndentifier(systemId);
+        TreeWalker walker=new TreeWalker(handler,new org.apache.xml.utils.DOM2Helper(),systemId);
+        try {
+          walker.traverse(node);
+        }
+ catch (        org.xml.sax.SAXException se) {
+          throw new TransformerException(se);
+        }
+        if (systemId != null)         handler.popBaseIndentifier();
+        return;
+      }
+    }
+    if (null == source) {
+      String absURL=SystemIDResolver.getAbsoluteURI(getHref(),handler.getBaseIdentifier());
+      source=new StreamSource(absURL);
+    }
+    source=processSource(handler,source);
+    XMLReader reader=null;
+    if (source instanceof SAXSource) {
+      SAXSource saxSource=(SAXSource)source;
+      reader=saxSource.getXMLReader();
+    }
+    InputSource inputSource=SAXSource.sourceToInputSource(source);
+    if (null == reader) {
+      try {
+        javax.xml.parsers.SAXParserFactory factory=javax.xml.parsers.SAXParserFactory.newInstance();
+        factory.setNamespaceAware(true);
+        if (handler.getStylesheetProcessor().isSecureProcessing()) {
+          try {
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,true);
+          }
+ catch (          org.xml.sax.SAXException se) {
+          }
+        }
+        javax.xml.parsers.SAXParser jaxpParser=factory.newSAXParser();
+        reader=jaxpParser.getXMLReader();
+      }
+ catch (      javax.xml.parsers.ParserConfigurationException ex) {
+        throw new org.xml.sax.SAXException(ex);
+      }
+catch (      javax.xml.parsers.FactoryConfigurationError ex1) {
+        throw new org.xml.sax.SAXException(ex1.toString());
+      }
+catch (      NoSuchMethodError ex2) {
+      }
+catch (      AbstractMethodError ame) {
+      }
+    }
+    if (null == reader)     reader=XMLReaderFactory.createXMLReader();
+    if (null != reader) {
+      reader.setContentHandler(handler);
+      handler.pushBaseIndentifier(inputSource.getSystemId());
+      try {
+        reader.parse(inputSource);
+      }
+  finally {
+        handler.popBaseIndentifier();
+      }
+    }
+  }
+ catch (  IOException ioe) {
+    handler.error(XSLTErrorResources.ER_IOEXCEPTION,new Object[]{getHref()},ioe);
+  }
+catch (  TransformerException te) {
+    handler.error(te.getMessage(),te);
+  }
+}

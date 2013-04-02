@@ -1,0 +1,18 @@
+{
+  if (origPath != null && origPath.length() != 0 && origPath.indexOf('%') != -1) {
+    StringTokenizer tokenizer=new StringTokenizer(origPath,"%");
+    StringBuffer result=new StringBuffer(origPath.length());
+    int size=tokenizer.countTokens();
+    result.append(tokenizer.nextToken());
+    for (int i=1; i < size; ++i) {
+      String token=tokenizer.nextToken();
+      if (token.length() >= 2 && isHexDigit(token.charAt(0)) && isHexDigit(token.charAt(1))) {
+        result.append((char)Integer.valueOf(token.substring(0,2),16).intValue());
+        token=token.substring(2);
+      }
+      result.append(token);
+    }
+    return result.toString();
+  }
+  return origPath;
+}

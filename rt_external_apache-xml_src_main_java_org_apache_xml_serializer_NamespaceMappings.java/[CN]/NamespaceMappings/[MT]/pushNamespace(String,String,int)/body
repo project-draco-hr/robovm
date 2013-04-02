@@ -1,0 +1,19 @@
+{
+  if (prefix.startsWith(XML_PREFIX)) {
+    return false;
+  }
+  Stack stack;
+  if ((stack=(Stack)m_namespaces.get(prefix)) == null) {
+    m_namespaces.put(prefix,stack=new Stack());
+  }
+  if (!stack.empty()) {
+    MappingRecord mr=(MappingRecord)stack.peek();
+    if (uri.equals(mr.m_uri) || elemDepth == mr.m_declarationDepth) {
+      return false;
+    }
+  }
+  MappingRecord map=new MappingRecord(prefix,uri,elemDepth);
+  stack.push(map);
+  m_nodeStack.push(map);
+  return true;
+}

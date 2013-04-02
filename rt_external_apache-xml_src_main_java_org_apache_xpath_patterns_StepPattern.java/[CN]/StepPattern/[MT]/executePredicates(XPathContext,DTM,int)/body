@@ -1,0 +1,44 @@
+{
+  boolean result=true;
+  boolean positionAlreadySeen=false;
+  int n=getPredicateCount();
+  try {
+    xctxt.pushSubContextList(this);
+    for (int i=0; i < n; i++) {
+      xctxt.pushPredicatePos(i);
+      try {
+        XObject pred=m_predicates[i].execute(xctxt);
+        try {
+          if (XObject.CLASS_NUMBER == pred.getType()) {
+            int pos=(int)pred.num();
+            if (positionAlreadySeen) {
+              result=(pos == 1);
+              break;
+            }
+ else {
+              positionAlreadySeen=true;
+              if (!checkProximityPosition(xctxt,i,dtm,currentNode,pos)) {
+                result=false;
+                break;
+              }
+            }
+          }
+ else           if (!pred.boolWithSideEffects()) {
+            result=false;
+            break;
+          }
+        }
+  finally {
+          pred.detach();
+        }
+      }
+  finally {
+        xctxt.popPredicatePos();
+      }
+    }
+  }
+  finally {
+    xctxt.popSubContextList();
+  }
+  return result;
+}

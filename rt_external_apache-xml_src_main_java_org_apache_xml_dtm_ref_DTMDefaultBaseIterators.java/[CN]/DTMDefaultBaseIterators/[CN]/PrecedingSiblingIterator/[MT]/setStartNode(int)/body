@@ -1,0 +1,22 @@
+{
+  if (node == DTMDefaultBase.ROOTNODE)   node=getDocument();
+  if (_isRestartable) {
+    _startNode=node;
+    node=_startNodeID=makeNodeIdentity(node);
+    if (node == NULL) {
+      _currentNode=node;
+      return resetPosition();
+    }
+    int type=m_expandedNameTable.getType(_exptype(node));
+    if (ExpandedNameTable.ATTRIBUTE == type || ExpandedNameTable.NAMESPACE == type) {
+      _currentNode=node;
+    }
+ else {
+      _currentNode=_parent(node);
+      if (NULL != _currentNode)       _currentNode=_firstch(_currentNode);
+ else       _currentNode=node;
+    }
+    return resetPosition();
+  }
+  return this;
+}

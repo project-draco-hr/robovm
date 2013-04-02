@@ -1,0 +1,16 @@
+{
+  MultistepExprHolder list=createMultistepExprList(paths);
+  if (null != list) {
+    if (DIAGNOSE_MULTISTEPLIST)     list.diagnose();
+    boolean isGlobal=(paths == m_absPaths);
+    int longestStepsCount=list.m_stepCount;
+    for (int i=longestStepsCount - 1; i >= 1; i--) {
+      MultistepExprHolder next=list;
+      while (null != next) {
+        if (next.m_stepCount < i)         break;
+        list=matchAndEliminatePartialPaths(next,list,isGlobal,i,psuedoVarRecipient);
+        next=next.m_next;
+      }
+    }
+  }
+}

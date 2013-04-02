@@ -1,0 +1,19 @@
+{
+  super.init(compiler,opPos,stepType);
+switch (stepType) {
+case OpCodes.OP_FUNCTION:
+case OpCodes.OP_EXTFUNCTION:
+    m_mustHardReset=true;
+case OpCodes.OP_GROUP:
+case OpCodes.OP_VARIABLE:
+  m_expr=compiler.compile(opPos);
+m_expr.exprSetParent(this);
+if (m_expr instanceof org.apache.xpath.operations.Variable) {
+m_canDetachNodeset=false;
+}
+break;
+default :
+m_expr=compiler.compile(opPos + 2);
+m_expr.exprSetParent(this);
+}
+}

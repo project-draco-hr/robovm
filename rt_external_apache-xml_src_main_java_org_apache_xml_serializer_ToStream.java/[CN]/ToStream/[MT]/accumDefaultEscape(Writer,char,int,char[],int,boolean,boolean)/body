@@ -1,0 +1,38 @@
+{
+  int pos=accumDefaultEntity(writer,ch,i,chars,len,fromTextNode,escLF);
+  if (i == pos) {
+    if (Encodings.isHighUTF16Surrogate(ch)) {
+      char next;
+      int codePoint=0;
+      if (i + 1 >= len) {
+        throw new IOException(Utils.messages.createMessage(MsgKey.ER_INVALID_UTF16_SURROGATE,new Object[]{Integer.toHexString(ch)}));
+      }
+ else {
+        next=chars[++i];
+        if (!(Encodings.isLowUTF16Surrogate(next)))         throw new IOException(Utils.messages.createMessage(MsgKey.ER_INVALID_UTF16_SURROGATE,new Object[]{Integer.toHexString(ch) + " " + Integer.toHexString(next)}));
+        codePoint=Encodings.toCodePoint(ch,next);
+      }
+      writer.write("&#");
+      writer.write(Integer.toString(codePoint));
+      writer.write(';');
+      pos+=2;
+    }
+ else {
+      if (isCharacterInC0orC1Range(ch) || isNELorLSEPCharacter(ch)) {
+        writer.write("&#");
+        writer.write(Integer.toString(ch));
+        writer.write(';');
+      }
+ else       if ((!escapingNotNeeded(ch) || ((fromTextNode && m_charInfo.shouldMapTextChar(ch)) || (!fromTextNode && m_charInfo.shouldMapAttrChar(ch)))) && m_elemContext.m_currentElemDepth > 0) {
+        writer.write("&#");
+        writer.write(Integer.toString(ch));
+        writer.write(';');
+      }
+ else {
+        writer.write(ch);
+      }
+      pos++;
+    }
+  }
+  return pos;
+}

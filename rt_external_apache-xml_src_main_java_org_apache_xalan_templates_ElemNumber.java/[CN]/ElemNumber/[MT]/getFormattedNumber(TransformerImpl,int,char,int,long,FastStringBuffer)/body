@@ -1,0 +1,122 @@
+{
+  String letterVal=(m_lettervalue_avt != null) ? m_lettervalue_avt.evaluate(transformer.getXPathContext(),contextNode,this) : null;
+  CharArrayWrapper alphaCountTable=null;
+  XResourceBundle thisBundle=null;
+switch (numberType) {
+case 'A':
+    if (null == m_alphaCountTable) {
+      thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,getLocale(transformer,contextNode));
+      m_alphaCountTable=(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET);
+    }
+  int2alphaCount(listElement,m_alphaCountTable,formattedNumber);
+break;
+case 'a':
+if (null == m_alphaCountTable) {
+thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,getLocale(transformer,contextNode));
+m_alphaCountTable=(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET);
+}
+FastStringBuffer stringBuf=StringBufferPool.get();
+try {
+int2alphaCount(listElement,m_alphaCountTable,stringBuf);
+formattedNumber.append(stringBuf.toString().toLowerCase(getLocale(transformer,contextNode)));
+}
+  finally {
+StringBufferPool.free(stringBuf);
+}
+break;
+case 'I':
+formattedNumber.append(long2roman(listElement,true));
+break;
+case 'i':
+formattedNumber.append(long2roman(listElement,true).toLowerCase(getLocale(transformer,contextNode)));
+break;
+case 0x3042:
+{
+thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,new Locale("ja","JP","HA"));
+if (letterVal != null && letterVal.equals(Constants.ATTRVAL_TRADITIONAL)) formattedNumber.append(tradAlphaCount(listElement,thisBundle));
+ else formattedNumber.append(int2singlealphaCount(listElement,(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET)));
+break;
+}
+case 0x3044:
+{
+thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,new Locale("ja","JP","HI"));
+if ((letterVal != null) && letterVal.equals(Constants.ATTRVAL_TRADITIONAL)) formattedNumber.append(tradAlphaCount(listElement,thisBundle));
+ else formattedNumber.append(int2singlealphaCount(listElement,(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET)));
+break;
+}
+case 0x30A2:
+{
+thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,new Locale("ja","JP","A"));
+if (letterVal != null && letterVal.equals(Constants.ATTRVAL_TRADITIONAL)) formattedNumber.append(tradAlphaCount(listElement,thisBundle));
+ else formattedNumber.append(int2singlealphaCount(listElement,(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET)));
+break;
+}
+case 0x30A4:
+{
+thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,new Locale("ja","JP","I"));
+if (letterVal != null && letterVal.equals(Constants.ATTRVAL_TRADITIONAL)) formattedNumber.append(tradAlphaCount(listElement,thisBundle));
+ else formattedNumber.append(int2singlealphaCount(listElement,(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET)));
+break;
+}
+case 0x4E00:
+{
+thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,new Locale("zh","CN"));
+if (letterVal != null && letterVal.equals(Constants.ATTRVAL_TRADITIONAL)) {
+formattedNumber.append(tradAlphaCount(listElement,thisBundle));
+}
+ else int2alphaCount(listElement,(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET),formattedNumber);
+break;
+}
+case 0x58F9:
+{
+thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,new Locale("zh","TW"));
+if (letterVal != null && letterVal.equals(Constants.ATTRVAL_TRADITIONAL)) formattedNumber.append(tradAlphaCount(listElement,thisBundle));
+ else int2alphaCount(listElement,(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET),formattedNumber);
+break;
+}
+case 0x0E51:
+{
+thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,new Locale("th",""));
+if (letterVal != null && letterVal.equals(Constants.ATTRVAL_TRADITIONAL)) formattedNumber.append(tradAlphaCount(listElement,thisBundle));
+ else int2alphaCount(listElement,(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET),formattedNumber);
+break;
+}
+case 0x05D0:
+{
+thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,new Locale("he",""));
+if (letterVal != null && letterVal.equals(Constants.ATTRVAL_TRADITIONAL)) formattedNumber.append(tradAlphaCount(listElement,thisBundle));
+ else int2alphaCount(listElement,(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET),formattedNumber);
+break;
+}
+case 0x10D0:
+{
+thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,new Locale("ka",""));
+if (letterVal != null && letterVal.equals(Constants.ATTRVAL_TRADITIONAL)) formattedNumber.append(tradAlphaCount(listElement,thisBundle));
+ else int2alphaCount(listElement,(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET),formattedNumber);
+break;
+}
+case 0x03B1:
+{
+thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,new Locale("el",""));
+if (letterVal != null && letterVal.equals(Constants.ATTRVAL_TRADITIONAL)) formattedNumber.append(tradAlphaCount(listElement,thisBundle));
+ else int2alphaCount(listElement,(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET),formattedNumber);
+break;
+}
+case 0x0430:
+{
+thisBundle=(XResourceBundle)XResourceBundle.loadResourceBundle(org.apache.xml.utils.res.XResourceBundle.LANG_BUNDLE_NAME,new Locale("cy",""));
+if (letterVal != null && letterVal.equals(Constants.ATTRVAL_TRADITIONAL)) formattedNumber.append(tradAlphaCount(listElement,thisBundle));
+ else int2alphaCount(listElement,(CharArrayWrapper)thisBundle.getObject(org.apache.xml.utils.res.XResourceBundle.LANG_ALPHABET),formattedNumber);
+break;
+}
+default :
+DecimalFormat formatter=getNumberFormatter(transformer,contextNode);
+String padString=formatter == null ? String.valueOf(0) : formatter.format(0);
+String numString=formatter == null ? String.valueOf(listElement) : formatter.format(listElement);
+int nPadding=numberWidth - numString.length();
+for (int k=0; k < nPadding; k++) {
+formattedNumber.append(padString);
+}
+formattedNumber.append(numString);
+}
+}

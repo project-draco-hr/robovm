@@ -1,0 +1,46 @@
+{
+  int opPos=m_ops.getOp(OpMap.MAPINDEX_LENGTH);
+  if (lookahead(':',1)) {
+    appendOp(4,OpCodes.OP_EXTFUNCTION);
+    m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH + 1,m_queueMark - 1);
+    nextToken();
+    consumeExpected(':');
+    m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH + 2,m_queueMark - 1);
+    nextToken();
+  }
+ else {
+    int funcTok=getFunctionToken(m_token);
+    if (-1 == funcTok) {
+      error(XPATHErrorResources.ER_COULDNOT_FIND_FUNCTION,new Object[]{m_token});
+    }
+switch (funcTok) {
+case OpCodes.NODETYPE_PI:
+case OpCodes.NODETYPE_COMMENT:
+case OpCodes.NODETYPE_TEXT:
+case OpCodes.NODETYPE_NODE:
+      return false;
+default :
+    appendOp(3,OpCodes.OP_FUNCTION);
+  m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH + 1,funcTok);
+}
+nextToken();
+}
+consumeExpected('(');
+while (!tokenIs(')') && m_token != null) {
+if (tokenIs(',')) {
+error(XPATHErrorResources.ER_FOUND_COMMA_BUT_NO_PRECEDING_ARG,null);
+}
+Argument();
+if (!tokenIs(')')) {
+consumeExpected(',');
+if (tokenIs(')')) {
+  error(XPATHErrorResources.ER_FOUND_COMMA_BUT_NO_FOLLOWING_ARG,null);
+}
+}
+}
+consumeExpected(')');
+m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),OpCodes.ENDOP);
+m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) - opPos);
+return true;
+}

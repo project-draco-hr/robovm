@@ -1,0 +1,104 @@
+{
+  final int end=string.length();
+  if (end > m_attrBuff.length) {
+    m_attrBuff=new char[end * 2 + 1];
+  }
+  string.getChars(0,end,m_attrBuff,0);
+  final char[] chars=m_attrBuff;
+  int cleanStart=0;
+  int cleanLength=0;
+  char ch=0;
+  for (int i=0; i < end; i++) {
+    ch=chars[i];
+    if ((ch < 32) || (ch > 126)) {
+      if (cleanLength > 0) {
+        writer.write(chars,cleanStart,cleanLength);
+        cleanLength=0;
+      }
+      if (doURLEscaping) {
+        if (ch <= 0x7F) {
+          writer.write('%');
+          writer.write(makeHHString(ch));
+        }
+ else         if (ch <= 0x7FF) {
+          int high=(ch >> 6) | 0xC0;
+          int low=(ch & 0x3F) | 0x80;
+          writer.write('%');
+          writer.write(makeHHString(high));
+          writer.write('%');
+          writer.write(makeHHString(low));
+        }
+ else         if (Encodings.isHighUTF16Surrogate(ch)) {
+          int highSurrogate=((int)ch) & 0x03FF;
+          int wwww=((highSurrogate & 0x03C0) >> 6);
+          int uuuuu=wwww + 1;
+          int zzzz=(highSurrogate & 0x003C) >> 2;
+          int yyyyyy=((highSurrogate & 0x0003) << 4) & 0x30;
+          ch=chars[++i];
+          int lowSurrogate=((int)ch) & 0x03FF;
+          yyyyyy=yyyyyy | ((lowSurrogate & 0x03C0) >> 6);
+          int xxxxxx=(lowSurrogate & 0x003F);
+          int byte1=0xF0 | (uuuuu >> 2);
+          int byte2=0x80 | (((uuuuu & 0x03) << 4) & 0x30) | zzzz;
+          int byte3=0x80 | yyyyyy;
+          int byte4=0x80 | xxxxxx;
+          writer.write('%');
+          writer.write(makeHHString(byte1));
+          writer.write('%');
+          writer.write(makeHHString(byte2));
+          writer.write('%');
+          writer.write(makeHHString(byte3));
+          writer.write('%');
+          writer.write(makeHHString(byte4));
+        }
+ else {
+          int high=(ch >> 12) | 0xE0;
+          int middle=((ch & 0x0FC0) >> 6) | 0x80;
+          int low=(ch & 0x3F) | 0x80;
+          writer.write('%');
+          writer.write(makeHHString(high));
+          writer.write('%');
+          writer.write(makeHHString(middle));
+          writer.write('%');
+          writer.write(makeHHString(low));
+        }
+      }
+ else       if (escapingNotNeeded(ch)) {
+        writer.write(ch);
+      }
+ else {
+        writer.write("&#");
+        writer.write(Integer.toString(ch));
+        writer.write(';');
+      }
+      cleanStart=i + 1;
+    }
+ else     if (ch == '"') {
+      if (cleanLength > 0) {
+        writer.write(chars,cleanStart,cleanLength);
+        cleanLength=0;
+      }
+      if (doURLEscaping)       writer.write("%22");
+ else       writer.write("&quot;");
+      cleanStart=i + 1;
+    }
+ else     if (ch == '&') {
+      if (cleanLength > 0) {
+        writer.write(chars,cleanStart,cleanLength);
+        cleanLength=0;
+      }
+      writer.write("&amp;");
+      cleanStart=i + 1;
+    }
+ else {
+      cleanLength++;
+    }
+  }
+  if (cleanLength > 1) {
+    if (cleanStart == 0)     writer.write(string);
+ else     writer.write(chars,cleanStart,cleanLength);
+  }
+ else   if (cleanLength == 1) {
+    writer.write(ch);
+  }
+}

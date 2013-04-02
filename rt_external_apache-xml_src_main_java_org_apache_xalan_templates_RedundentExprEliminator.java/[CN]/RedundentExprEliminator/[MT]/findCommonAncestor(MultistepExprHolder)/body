@@ -1,0 +1,48 @@
+{
+  int numExprs=head.getLength();
+  ElemTemplateElement[] elems=new ElemTemplateElement[numExprs];
+  int[] ancestorCounts=new int[numExprs];
+  MultistepExprHolder next=head;
+  int shortestAncestorCount=10000;
+  for (int i=0; i < numExprs; i++) {
+    ElemTemplateElement elem=getElemFromExpression(next.m_exprOwner.getExpression());
+    elems[i]=elem;
+    int numAncestors=countAncestors(elem);
+    ancestorCounts[i]=numAncestors;
+    if (numAncestors < shortestAncestorCount) {
+      shortestAncestorCount=numAncestors;
+    }
+    next=next.m_next;
+  }
+  for (int i=0; i < numExprs; i++) {
+    if (ancestorCounts[i] > shortestAncestorCount) {
+      int numStepCorrection=ancestorCounts[i] - shortestAncestorCount;
+      for (int j=0; j < numStepCorrection; j++) {
+        elems[i]=elems[i].getParentElem();
+      }
+    }
+  }
+  ElemTemplateElement first=null;
+  while (shortestAncestorCount-- >= 0) {
+    boolean areEqual=true;
+    first=elems[0];
+    for (int i=1; i < numExprs; i++) {
+      if (first != elems[i]) {
+        areEqual=false;
+        break;
+      }
+    }
+    if (areEqual && isNotSameAsOwner(head,first) && first.canAcceptVariables()) {
+      if (DIAGNOSE_MULTISTEPLIST) {
+        System.err.print(first.getClass().getName());
+        System.err.println(" at   " + first.getSystemId() + " Line "+ first.getLineNumber());
+      }
+      return first;
+    }
+    for (int i=0; i < numExprs; i++) {
+      elems[i]=elems[i].getParentElem();
+    }
+  }
+  assertion(false,"Could not find common ancestor!!!");
+  return null;
+}

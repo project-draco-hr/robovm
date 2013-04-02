@@ -1,0 +1,38 @@
+{
+  final String encoding=getEncoding();
+  final java.io.Writer writer=m_writer;
+  final int end=start + length;
+  final char S_LINEFEED=CharInfo.S_LINEFEED;
+  for (int i=start; i < end; i++) {
+    final char c=ch[i];
+    if (S_LINEFEED == c && useLineSep) {
+      writer.write(m_lineSep,0,m_lineSepLen);
+    }
+ else     if (m_encodingInfo.isInEncoding(c)) {
+      writer.write(c);
+    }
+ else     if (Encodings.isHighUTF16Surrogate(c)) {
+      final int codePoint=writeUTF16Surrogate(c,ch,i,end);
+      if (codePoint != 0) {
+        final String integralValue=Integer.toString(codePoint);
+        final String msg=Utils.messages.createMessage(MsgKey.ER_ILLEGAL_CHARACTER,new Object[]{integralValue,encoding});
+        System.err.println(msg);
+      }
+      i++;
+    }
+ else {
+      if (encoding != null) {
+        writer.write('&');
+        writer.write('#');
+        writer.write(Integer.toString(c));
+        writer.write(';');
+        final String integralValue=Integer.toString(c);
+        final String msg=Utils.messages.createMessage(MsgKey.ER_ILLEGAL_CHARACTER,new Object[]{integralValue,encoding});
+        System.err.println(msg);
+      }
+ else {
+        writer.write(c);
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  if (id >= IDENT_MAX_DTMS) {
+    throw new DTMException(XMLMessages.createXMLMessage(XMLErrorResources.ER_NO_DTMIDS_AVAIL,null));
+  }
+  int oldlen=m_dtms.length;
+  if (oldlen <= id) {
+    int newlen=Math.min((id + 256),IDENT_MAX_DTMS);
+    DTM new_m_dtms[]=new DTM[newlen];
+    System.arraycopy(m_dtms,0,new_m_dtms,0,oldlen);
+    m_dtms=new_m_dtms;
+    int new_m_dtm_offsets[]=new int[newlen];
+    System.arraycopy(m_dtm_offsets,0,new_m_dtm_offsets,0,oldlen);
+    m_dtm_offsets=new_m_dtm_offsets;
+  }
+  m_dtms[id]=dtm;
+  m_dtm_offsets[id]=offset;
+  dtm.documentRegistration();
+}

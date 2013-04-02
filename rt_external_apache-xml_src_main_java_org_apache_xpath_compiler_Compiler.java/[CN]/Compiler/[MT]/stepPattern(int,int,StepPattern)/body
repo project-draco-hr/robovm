@@ -1,0 +1,57 @@
+{
+  int startOpPos=opPos;
+  int stepType=getOp(opPos);
+  if (OpCodes.ENDOP == stepType) {
+    return null;
+  }
+  boolean addMagicSelf=true;
+  int endStep=getNextOpPos(opPos);
+  StepPattern pattern;
+  int argLen;
+switch (stepType) {
+case OpCodes.OP_FUNCTION:
+    if (DEBUG)     System.out.println("MATCH_FUNCTION: " + m_currentPattern);
+  addMagicSelf=false;
+argLen=getOp(opPos + OpMap.MAPINDEX_LENGTH);
+pattern=new FunctionPattern(compileFunction(opPos),Axis.PARENT,Axis.CHILD);
+break;
+case OpCodes.FROM_ROOT:
+if (DEBUG) System.out.println("FROM_ROOT, " + m_currentPattern);
+addMagicSelf=false;
+argLen=getArgLengthOfStep(opPos);
+opPos=getFirstChildPosOfStep(opPos);
+pattern=new StepPattern(DTMFilter.SHOW_DOCUMENT | DTMFilter.SHOW_DOCUMENT_FRAGMENT,Axis.PARENT,Axis.CHILD);
+break;
+case OpCodes.MATCH_ATTRIBUTE:
+if (DEBUG) System.out.println("MATCH_ATTRIBUTE: " + getStepLocalName(startOpPos) + ", "+ m_currentPattern);
+argLen=getArgLengthOfStep(opPos);
+opPos=getFirstChildPosOfStep(opPos);
+pattern=new StepPattern(DTMFilter.SHOW_ATTRIBUTE,getStepNS(startOpPos),getStepLocalName(startOpPos),Axis.PARENT,Axis.ATTRIBUTE);
+break;
+case OpCodes.MATCH_ANY_ANCESTOR:
+if (DEBUG) System.out.println("MATCH_ANY_ANCESTOR: " + getStepLocalName(startOpPos) + ", "+ m_currentPattern);
+argLen=getArgLengthOfStep(opPos);
+opPos=getFirstChildPosOfStep(opPos);
+int what=getWhatToShow(startOpPos);
+if (0x00000500 == what) addMagicSelf=false;
+pattern=new StepPattern(getWhatToShow(startOpPos),getStepNS(startOpPos),getStepLocalName(startOpPos),Axis.ANCESTOR,Axis.CHILD);
+break;
+case OpCodes.MATCH_IMMEDIATE_ANCESTOR:
+if (DEBUG) System.out.println("MATCH_IMMEDIATE_ANCESTOR: " + getStepLocalName(startOpPos) + ", "+ m_currentPattern);
+argLen=getArgLengthOfStep(opPos);
+opPos=getFirstChildPosOfStep(opPos);
+pattern=new StepPattern(getWhatToShow(startOpPos),getStepNS(startOpPos),getStepLocalName(startOpPos),Axis.PARENT,Axis.CHILD);
+break;
+default :
+error(XPATHErrorResources.ER_UNKNOWN_MATCH_OPERATION,null);
+return null;
+}
+pattern.setPredicates(getCompiledPredicates(opPos + argLen));
+if (null == ancestorPattern) {
+}
+ else {
+pattern.setRelativePathPattern(ancestorPattern);
+}
+StepPattern relativePathPattern=stepPattern(endStep,stepCount + 1,pattern);
+return (null != relativePathPattern) ? relativePathPattern : pattern;
+}

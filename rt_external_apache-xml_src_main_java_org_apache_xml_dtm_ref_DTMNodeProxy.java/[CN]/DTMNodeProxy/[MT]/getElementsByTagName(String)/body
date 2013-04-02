@@ -1,0 +1,22 @@
+{
+  Vector listVector=new Vector();
+  Node retNode=dtm.getNode(node);
+  if (retNode != null) {
+    boolean isTagNameWildCard="*".equals(tagname);
+    if (DTM.ELEMENT_NODE == retNode.getNodeType()) {
+      NodeList nodeList=retNode.getChildNodes();
+      for (int i=0; i < nodeList.getLength(); i++) {
+        traverseChildren(listVector,nodeList.item(i),tagname,isTagNameWildCard);
+      }
+    }
+ else     if (DTM.DOCUMENT_NODE == retNode.getNodeType()) {
+      traverseChildren(listVector,dtm.getNode(node),tagname,isTagNameWildCard);
+    }
+  }
+  int size=listVector.size();
+  NodeSet nodeSet=new NodeSet(size);
+  for (int i=0; i < size; i++) {
+    nodeSet.addNode((Node)listVector.elementAt(i));
+  }
+  return (NodeList)nodeSet;
+}

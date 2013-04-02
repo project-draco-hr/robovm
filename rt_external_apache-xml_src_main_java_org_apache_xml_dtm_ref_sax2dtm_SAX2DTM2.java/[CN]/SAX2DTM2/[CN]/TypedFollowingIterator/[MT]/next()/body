@@ -1,0 +1,35 @@
+{
+  int current;
+  int node;
+  int type;
+  final int nodeType=_nodeType;
+  int currentNodeID=makeNodeIdentity(_currentNode);
+  if (nodeType >= DTM.NTYPES) {
+    do {
+      node=currentNodeID;
+      current=node;
+      do {
+        current++;
+        type=_type2(current);
+      }
+ while (type != NULL && (ATTRIBUTE_NODE == type || NAMESPACE_NODE == type));
+      currentNodeID=(type != NULL) ? current : NULL;
+    }
+ while (node != DTM.NULL && _exptype2(node) != nodeType);
+  }
+ else {
+    do {
+      node=currentNodeID;
+      current=node;
+      do {
+        current++;
+        type=_type2(current);
+      }
+ while (type != NULL && (ATTRIBUTE_NODE == type || NAMESPACE_NODE == type));
+      currentNodeID=(type != NULL) ? current : NULL;
+    }
+ while (node != DTM.NULL && (_exptype2(node) != nodeType && _type2(node) != nodeType));
+  }
+  _currentNode=makeNodeHandle(currentNodeID);
+  return (node == DTM.NULL ? DTM.NULL : returnNode(makeNodeHandle(node)));
+}

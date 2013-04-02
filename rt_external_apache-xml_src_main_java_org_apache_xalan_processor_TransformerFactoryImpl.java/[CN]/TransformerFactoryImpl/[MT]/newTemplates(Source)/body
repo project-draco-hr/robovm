@@ -1,0 +1,85 @@
+{
+  String baseID=source.getSystemId();
+  if (null != baseID) {
+    baseID=SystemIDResolver.getAbsoluteURI(baseID);
+  }
+  if (source instanceof DOMSource) {
+    DOMSource dsource=(DOMSource)source;
+    Node node=dsource.getNode();
+    if (null != node)     return processFromNode(node,baseID);
+ else {
+      String messageStr=XSLMessages.createMessage(XSLTErrorResources.ER_ILLEGAL_DOMSOURCE_INPUT,null);
+      throw new IllegalArgumentException(messageStr);
+    }
+  }
+  TemplatesHandler builder=newTemplatesHandler();
+  builder.setSystemId(baseID);
+  try {
+    InputSource isource=SAXSource.sourceToInputSource(source);
+    isource.setSystemId(baseID);
+    XMLReader reader=null;
+    if (source instanceof SAXSource)     reader=((SAXSource)source).getXMLReader();
+    if (null == reader) {
+      try {
+        javax.xml.parsers.SAXParserFactory factory=javax.xml.parsers.SAXParserFactory.newInstance();
+        factory.setNamespaceAware(true);
+        if (m_isSecureProcessing) {
+          try {
+            factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,true);
+          }
+ catch (          org.xml.sax.SAXException se) {
+          }
+        }
+        javax.xml.parsers.SAXParser jaxpParser=factory.newSAXParser();
+        reader=jaxpParser.getXMLReader();
+      }
+ catch (      javax.xml.parsers.ParserConfigurationException ex) {
+        throw new org.xml.sax.SAXException(ex);
+      }
+catch (      javax.xml.parsers.FactoryConfigurationError ex1) {
+        throw new org.xml.sax.SAXException(ex1.toString());
+      }
+catch (      NoSuchMethodError ex2) {
+      }
+catch (      AbstractMethodError ame) {
+      }
+    }
+    if (null == reader)     reader=XMLReaderFactory.createXMLReader();
+    reader.setContentHandler(builder);
+    reader.parse(isource);
+  }
+ catch (  org.xml.sax.SAXException se) {
+    if (m_errorListener != null) {
+      try {
+        m_errorListener.fatalError(new TransformerException(se));
+      }
+ catch (      TransformerConfigurationException ex1) {
+        throw ex1;
+      }
+catch (      TransformerException ex1) {
+        throw new TransformerConfigurationException(ex1);
+      }
+    }
+ else {
+      throw new TransformerConfigurationException(se.getMessage(),se);
+    }
+  }
+catch (  Exception e) {
+    if (m_errorListener != null) {
+      try {
+        m_errorListener.fatalError(new TransformerException(e));
+        return null;
+      }
+ catch (      TransformerConfigurationException ex1) {
+        throw ex1;
+      }
+catch (      TransformerException ex1) {
+        throw new TransformerConfigurationException(ex1);
+      }
+    }
+ else {
+      throw new TransformerConfigurationException(e.getMessage(),e);
+    }
+  }
+  return builder.getTemplates();
+}

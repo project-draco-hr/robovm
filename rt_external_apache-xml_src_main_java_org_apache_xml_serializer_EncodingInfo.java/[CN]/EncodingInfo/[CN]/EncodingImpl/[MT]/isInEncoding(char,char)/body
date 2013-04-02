@@ -1,0 +1,22 @@
+{
+  final boolean ret;
+  int codePoint=Encodings.toCodePoint(high,low);
+  if (codePoint < m_explFirst) {
+    if (m_before == null)     m_before=new EncodingImpl(m_encoding,m_first,m_explFirst - 1,codePoint);
+    ret=m_before.isInEncoding(high,low);
+  }
+ else   if (m_explLast < codePoint) {
+    if (m_after == null)     m_after=new EncodingImpl(m_encoding,m_explLast + 1,m_last,codePoint);
+    ret=m_after.isInEncoding(high,low);
+  }
+ else {
+    final int idx=codePoint - m_explFirst;
+    if (m_alreadyKnown[idx])     ret=m_isInEncoding[idx];
+ else {
+      ret=inEncoding(high,low,m_encoding);
+      m_alreadyKnown[idx]=true;
+      m_isInEncoding[idx]=ret;
+    }
+  }
+  return ret;
+}

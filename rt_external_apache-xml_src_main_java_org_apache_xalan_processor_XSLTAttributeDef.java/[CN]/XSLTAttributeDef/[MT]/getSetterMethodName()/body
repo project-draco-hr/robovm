@@ -1,0 +1,31 @@
+{
+  if (null == m_setterString) {
+    if (m_foreignAttr == this) {
+      return S_FOREIGNATTR_SETTER;
+    }
+ else     if (m_name.equals("*")) {
+      m_setterString="addLiteralResultAttribute";
+      return m_setterString;
+    }
+    StringBuffer outBuf=new StringBuffer();
+    outBuf.append("set");
+    if ((m_namespace != null) && m_namespace.equals(Constants.S_XMLNAMESPACEURI)) {
+      outBuf.append("Xml");
+    }
+    int n=m_name.length();
+    for (int i=0; i < n; i++) {
+      char c=m_name.charAt(i);
+      if ('-' == c) {
+        i++;
+        c=m_name.charAt(i);
+        c=Character.toUpperCase(c);
+      }
+ else       if (0 == i) {
+        c=Character.toUpperCase(c);
+      }
+      outBuf.append(c);
+    }
+    m_setterString=outBuf.toString();
+  }
+  return m_setterString;
+}

@@ -1,0 +1,25 @@
+{
+  AVT avt=null;
+  try {
+    avt=new AVT(handler,uri,name,rawName,value,owner);
+    if (avt.isSimple()) {
+      int indexOfNSSep=value.indexOf(':');
+      if (indexOfNSSep >= 0) {
+        String prefix=value.substring(0,indexOfNSSep);
+        if (!XML11Char.isXML11ValidNCName(prefix)) {
+          handleError(handler,XSLTErrorResources.INVALID_QNAME,new Object[]{name,value},null);
+          return null;
+        }
+      }
+      String localName=(indexOfNSSep < 0) ? value : value.substring(indexOfNSSep + 1);
+      if ((localName == null) || (localName.length() == 0) || (!XML11Char.isXML11ValidNCName(localName))) {
+        handleError(handler,XSLTErrorResources.INVALID_QNAME,new Object[]{name,value},null);
+        return null;
+      }
+    }
+  }
+ catch (  TransformerException te) {
+    throw new org.xml.sax.SAXException(te);
+  }
+  return avt;
+}

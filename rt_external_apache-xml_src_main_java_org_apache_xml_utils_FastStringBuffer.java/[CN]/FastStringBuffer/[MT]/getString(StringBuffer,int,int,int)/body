@@ -1,0 +1,13 @@
+{
+  int stop=(startChunk << m_chunkBits) + startColumn + length;
+  int stopChunk=stop >>> m_chunkBits;
+  int stopColumn=stop & m_chunkMask;
+  for (int i=startChunk; i < stopChunk; ++i) {
+    if (i == 0 && m_innerFSB != null)     m_innerFSB.getString(sb,startColumn,m_chunkSize - startColumn);
+ else     sb.append(m_array[i],startColumn,m_chunkSize - startColumn);
+    startColumn=0;
+  }
+  if (stopChunk == 0 && m_innerFSB != null)   m_innerFSB.getString(sb,startColumn,stopColumn - startColumn);
+ else   if (stopColumn > startColumn)   sb.append(m_array[stopChunk],startColumn,stopColumn - startColumn);
+  return sb;
+}

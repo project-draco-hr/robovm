@@ -1,0 +1,47 @@
+{
+  if (attrRawName.equals("xmlns") || attrRawName.startsWith("xmlns:"))   return true;
+  String setterString=getSetterMethodName();
+  if (null != setterString) {
+    try {
+      Method meth;
+      Object[] args;
+      if (setterString.equals(S_FOREIGNATTR_SETTER)) {
+        if (attrUri == null)         attrUri="";
+        Class sclass=attrUri.getClass();
+        Class[] argTypes=new Class[]{sclass,sclass,sclass,sclass};
+        meth=elem.getClass().getMethod(setterString,argTypes);
+        args=new Object[]{attrUri,attrLocalName,attrRawName,attrValue};
+      }
+ else {
+        Object value=processValue(handler,attrUri,attrLocalName,attrRawName,attrValue,elem);
+        if (null == value)         return false;
+        Class[] argTypes=new Class[]{getPrimativeClass(value)};
+        try {
+          meth=elem.getClass().getMethod(setterString,argTypes);
+        }
+ catch (        NoSuchMethodException nsme) {
+          Class cl=((Object)value).getClass();
+          argTypes[0]=cl;
+          meth=elem.getClass().getMethod(setterString,argTypes);
+        }
+        args=new Object[]{value};
+      }
+      meth.invoke(elem,args);
+    }
+ catch (    NoSuchMethodException nsme) {
+      if (!setterString.equals(S_FOREIGNATTR_SETTER)) {
+        handler.error(XSLTErrorResources.ER_FAILED_CALLING_METHOD,new Object[]{setterString},nsme);
+        return false;
+      }
+    }
+catch (    IllegalAccessException iae) {
+      handler.error(XSLTErrorResources.ER_FAILED_CALLING_METHOD,new Object[]{setterString},iae);
+      return false;
+    }
+catch (    InvocationTargetException nsme) {
+      handleError(handler,XSLTErrorResources.WG_ILLEGAL_ATTRIBUTE_VALUE,new Object[]{Constants.ATTRNAME_NAME,getName()},nsme);
+      return false;
+    }
+  }
+  return true;
+}

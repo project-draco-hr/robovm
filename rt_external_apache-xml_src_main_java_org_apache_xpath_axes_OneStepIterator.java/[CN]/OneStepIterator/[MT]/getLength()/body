@@ -1,0 +1,26 @@
+{
+  if (!isReverseAxes())   return super.getLength();
+  boolean isPredicateTest=(this == m_execContext.getSubContextList());
+  int predCount=getPredicateCount();
+  if (-1 != m_length && isPredicateTest && m_predicateIndex < 1)   return m_length;
+  int count=0;
+  XPathContext xctxt=getXPathContext();
+  try {
+    OneStepIterator clone=(OneStepIterator)this.cloneWithReset();
+    int root=getRoot();
+    xctxt.pushCurrentNode(root);
+    clone.setRoot(root,xctxt);
+    clone.m_predCount=m_predicateIndex;
+    int next;
+    while (DTM.NULL != (next=clone.nextNode())) {
+      count++;
+    }
+  }
+ catch (  CloneNotSupportedException cnse) {
+  }
+ finally {
+    xctxt.popCurrentNode();
+  }
+  if (isPredicateTest && m_predicateIndex < 1)   m_length=count;
+  return count;
+}

@@ -1,0 +1,54 @@
+{
+  if (p_address == null) {
+    return false;
+  }
+  String address=p_address.trim();
+  int addrLength=address.length();
+  if (addrLength == 0 || addrLength > 255) {
+    return false;
+  }
+  if (address.startsWith(".") || address.startsWith("-")) {
+    return false;
+  }
+  int index=address.lastIndexOf('.');
+  if (address.endsWith(".")) {
+    index=address.substring(0,index).lastIndexOf('.');
+  }
+  if (index + 1 < addrLength && isDigit(p_address.charAt(index + 1))) {
+    char testChar;
+    int numDots=0;
+    for (int i=0; i < addrLength; i++) {
+      testChar=address.charAt(i);
+      if (testChar == '.') {
+        if (!isDigit(address.charAt(i - 1)) || (i + 1 < addrLength && !isDigit(address.charAt(i + 1)))) {
+          return false;
+        }
+        numDots++;
+      }
+ else       if (!isDigit(testChar)) {
+        return false;
+      }
+    }
+    if (numDots != 3) {
+      return false;
+    }
+  }
+ else {
+    char testChar;
+    for (int i=0; i < addrLength; i++) {
+      testChar=address.charAt(i);
+      if (testChar == '.') {
+        if (!isAlphanum(address.charAt(i - 1))) {
+          return false;
+        }
+        if (i + 1 < addrLength && !isAlphanum(address.charAt(i + 1))) {
+          return false;
+        }
+      }
+ else       if (!isAlphanum(testChar) && testChar != '-') {
+        return false;
+      }
+    }
+  }
+  return true;
+}

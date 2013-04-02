@@ -1,0 +1,39 @@
+{
+  SuballocatedIntVector nsList=null;
+  if (m_namespaceDeclSets == null) {
+    m_namespaceDeclSetElements=new SuballocatedIntVector(32);
+    m_namespaceDeclSetElements.addElement(elementNodeIndex);
+    m_namespaceDeclSets=new Vector();
+    nsList=new SuballocatedIntVector(32);
+    m_namespaceDeclSets.addElement(nsList);
+  }
+ else {
+    int last=m_namespaceDeclSetElements.size() - 1;
+    if (last >= 0 && elementNodeIndex == m_namespaceDeclSetElements.elementAt(last)) {
+      nsList=(SuballocatedIntVector)m_namespaceDeclSets.elementAt(last);
+    }
+  }
+  if (nsList == null) {
+    m_namespaceDeclSetElements.addElement(elementNodeIndex);
+    SuballocatedIntVector inherited=findNamespaceContext(_parent(elementNodeIndex));
+    if (inherited != null) {
+      int isize=inherited.size();
+      nsList=new SuballocatedIntVector(Math.max(Math.min(isize + 16,2048),32));
+      for (int i=0; i < isize; ++i) {
+        nsList.addElement(inherited.elementAt(i));
+      }
+    }
+ else {
+      nsList=new SuballocatedIntVector(32);
+    }
+    m_namespaceDeclSets.addElement(nsList);
+  }
+  int newEType=_exptype(namespaceNodeIndex);
+  for (int i=nsList.size() - 1; i >= 0; --i) {
+    if (newEType == getExpandedTypeID(nsList.elementAt(i))) {
+      nsList.setElementAt(makeNodeHandle(namespaceNodeIndex),i);
+      return;
+    }
+  }
+  nsList.addElement(makeNodeHandle(namespaceNodeIndex));
+}

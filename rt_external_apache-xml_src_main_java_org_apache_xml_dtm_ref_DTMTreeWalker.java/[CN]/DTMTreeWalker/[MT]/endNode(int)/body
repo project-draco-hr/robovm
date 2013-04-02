@@ -1,0 +1,27 @@
+{
+switch (m_dtm.getNodeType(node)) {
+case DTM.DOCUMENT_NODE:
+    this.m_contentHandler.endDocument();
+  break;
+case DTM.ELEMENT_NODE:
+String ns=m_dtm.getNamespaceURI(node);
+if (null == ns) ns="";
+this.m_contentHandler.endElement(ns,m_dtm.getLocalName(node),m_dtm.getNodeName(node));
+for (int nsn=m_dtm.getFirstNamespaceNode(node,true); DTM.NULL != nsn; nsn=m_dtm.getNextNamespaceNode(node,nsn,true)) {
+String prefix=m_dtm.getNodeNameX(nsn);
+this.m_contentHandler.endPrefixMapping(prefix);
+}
+break;
+case DTM.CDATA_SECTION_NODE:
+break;
+case DTM.ENTITY_REFERENCE_NODE:
+{
+if (m_contentHandler instanceof LexicalHandler) {
+LexicalHandler lh=((LexicalHandler)this.m_contentHandler);
+lh.endEntity(m_dtm.getNodeName(node));
+}
+}
+break;
+default :
+}
+}

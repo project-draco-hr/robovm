@@ -1,0 +1,23 @@
+{
+  SerializationHandler xoh=this.getSerializationHandler();
+  SerializationHandler savedHandler=xoh;
+  try {
+    xoh.flushPending();
+    LexicalHandler lex=null;
+    if (handler instanceof LexicalHandler) {
+      lex=(LexicalHandler)handler;
+    }
+    m_serializationHandler=new ToXMLSAXHandler(handler,lex,savedHandler.getEncoding());
+    m_serializationHandler.setTransformer(this);
+    executeChildTemplates(elem,true);
+  }
+ catch (  TransformerException e) {
+    throw e;
+  }
+catch (  SAXException se) {
+    throw new TransformerException(se);
+  }
+ finally {
+    m_serializationHandler=savedHandler;
+  }
+}

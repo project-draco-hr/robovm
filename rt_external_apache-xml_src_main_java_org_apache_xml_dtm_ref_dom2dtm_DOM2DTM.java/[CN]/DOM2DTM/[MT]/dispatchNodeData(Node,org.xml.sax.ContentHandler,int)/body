@@ -1,0 +1,29 @@
+{
+switch (node.getNodeType()) {
+case Node.DOCUMENT_FRAGMENT_NODE:
+case Node.DOCUMENT_NODE:
+case Node.ELEMENT_NODE:
+{
+      for (Node child=node.getFirstChild(); null != child; child=child.getNextSibling()) {
+        dispatchNodeData(child,ch,depth + 1);
+      }
+    }
+  break;
+case Node.PROCESSING_INSTRUCTION_NODE:
+case Node.COMMENT_NODE:
+if (0 != depth) break;
+case Node.TEXT_NODE:
+case Node.CDATA_SECTION_NODE:
+case Node.ATTRIBUTE_NODE:
+String str=node.getNodeValue();
+if (ch instanceof CharacterNodeHandler) {
+((CharacterNodeHandler)ch).characters(node);
+}
+ else {
+ch.characters(str.toCharArray(),0,str.length());
+}
+break;
+default :
+break;
+}
+}

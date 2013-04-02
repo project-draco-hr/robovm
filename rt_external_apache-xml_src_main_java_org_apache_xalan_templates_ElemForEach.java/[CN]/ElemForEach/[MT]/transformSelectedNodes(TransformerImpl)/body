@@ -1,0 +1,46 @@
+{
+  final XPathContext xctxt=transformer.getXPathContext();
+  final int sourceNode=xctxt.getCurrentNode();
+  DTMIterator sourceNodes=m_selectExpression.asIterator(xctxt,sourceNode);
+  try {
+    final Vector keys=(m_sortElems == null) ? null : transformer.processSortKeys(this,sourceNode);
+    if (null != keys)     sourceNodes=sortNodes(xctxt,keys,sourceNodes);
+    xctxt.pushCurrentNode(DTM.NULL);
+    IntStack currentNodes=xctxt.getCurrentNodeStack();
+    xctxt.pushCurrentExpressionNode(DTM.NULL);
+    IntStack currentExpressionNodes=xctxt.getCurrentExpressionNodeStack();
+    xctxt.pushSAXLocatorNull();
+    xctxt.pushContextNodeList(sourceNodes);
+    transformer.pushElemTemplateElement(null);
+    DTM dtm=xctxt.getDTM(sourceNode);
+    int docID=sourceNode & DTMManager.IDENT_DTM_DEFAULT;
+    int child;
+    while (DTM.NULL != (child=sourceNodes.nextNode())) {
+      currentNodes.setTop(child);
+      currentExpressionNodes.setTop(child);
+      if ((child & DTMManager.IDENT_DTM_DEFAULT) != docID) {
+        dtm=xctxt.getDTM(child);
+        docID=child & DTMManager.IDENT_DTM_DEFAULT;
+      }
+      final int nodeType=dtm.getNodeType(child);
+      for (ElemTemplateElement t=this.m_firstChild; t != null; t=t.m_nextSibling) {
+        xctxt.setSAXLocator(t);
+        transformer.setCurrentElement(t);
+        t.execute(transformer);
+      }
+      if (m_doc_cache_off) {
+        if (DEBUG)         System.out.println("JJK***** CACHE RELEASE *****\n" + "\tdtm=" + dtm.getDocumentBaseURI());
+        xctxt.getSourceTreeManager().removeDocumentFromCache(dtm.getDocument());
+        xctxt.release(dtm,false);
+      }
+    }
+  }
+  finally {
+    xctxt.popSAXLocator();
+    xctxt.popContextNodeList();
+    transformer.popElemTemplateElement();
+    xctxt.popCurrentExpressionNode();
+    xctxt.popCurrentNode();
+    sourceNodes.detach();
+  }
+}

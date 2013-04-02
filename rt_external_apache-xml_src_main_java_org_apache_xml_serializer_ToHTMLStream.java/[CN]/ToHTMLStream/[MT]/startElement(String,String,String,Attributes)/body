@@ -1,0 +1,72 @@
+{
+  ElemContext elemContext=m_elemContext;
+  if (elemContext.m_startTagOpen) {
+    closeStartTag();
+    elemContext.m_startTagOpen=false;
+  }
+ else   if (m_cdataTagOpen) {
+    closeCDATA();
+    m_cdataTagOpen=false;
+  }
+ else   if (m_needToCallStartDocument) {
+    startDocumentInternal();
+    m_needToCallStartDocument=false;
+  }
+  if (m_needToOutputDocTypeDecl) {
+    String n=name;
+    if (n == null || n.length() == 0) {
+      n=localName;
+    }
+    outputDocTypeDecl(n);
+  }
+  if (null != namespaceURI && namespaceURI.length() > 0) {
+    super.startElement(namespaceURI,localName,name,atts);
+    return;
+  }
+  try {
+    ElemDesc elemDesc=getElemDesc2(name);
+    int elemFlags=elemDesc.getFlags();
+    if (m_doIndent) {
+      boolean isBlockElement=(elemFlags & ElemDesc.BLOCK) != 0;
+      if (m_ispreserve)       m_ispreserve=false;
+ else       if ((null != elemContext.m_elementName) && (!m_inBlockElem || isBlockElement)) {
+        m_startNewLine=true;
+        indent();
+      }
+      m_inBlockElem=!isBlockElement;
+    }
+    if (atts != null)     addAttributes(atts);
+    m_isprevtext=false;
+    final java.io.Writer writer=m_writer;
+    writer.write('<');
+    writer.write(name);
+    if (m_tracer != null)     firePseudoAttributes();
+    if ((elemFlags & ElemDesc.EMPTY) != 0) {
+      m_elemContext=elemContext.push();
+      m_elemContext.m_elementName=name;
+      m_elemContext.m_elementDesc=elemDesc;
+      return;
+    }
+ else {
+      elemContext=elemContext.push(namespaceURI,localName,name);
+      m_elemContext=elemContext;
+      elemContext.m_elementDesc=elemDesc;
+      elemContext.m_isRaw=(elemFlags & ElemDesc.RAW) != 0;
+    }
+    if ((elemFlags & ElemDesc.HEADELEM) != 0) {
+      closeStartTag();
+      elemContext.m_startTagOpen=false;
+      if (!m_omitMetaTag) {
+        if (m_doIndent)         indent();
+        writer.write("<META http-equiv=\"Content-Type\" content=\"text/html; charset=");
+        String encoding=getEncoding();
+        String encode=Encodings.getMimeEncoding(encoding);
+        writer.write(encode);
+        writer.write("\">");
+      }
+    }
+  }
+ catch (  IOException e) {
+    throw new SAXException(e);
+  }
+}

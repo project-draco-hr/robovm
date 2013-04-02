@@ -1,0 +1,23 @@
+{
+  Locale locale=(Locale)getLocale(transformer,contextNode).clone();
+  DecimalFormat formatter=null;
+  String digitGroupSepValue=(null != m_groupingSeparator_avt) ? m_groupingSeparator_avt.evaluate(transformer.getXPathContext(),contextNode,this) : null;
+  if ((digitGroupSepValue != null) && (!m_groupingSeparator_avt.isSimple()) && (digitGroupSepValue.length() != 1)) {
+    transformer.getMsgMgr().warn(this,XSLTErrorResources.WG_ILLEGAL_ATTRIBUTE_VALUE,new Object[]{Constants.ATTRNAME_NAME,m_groupingSeparator_avt.getName()});
+  }
+  String nDigitsPerGroupValue=(null != m_groupingSize_avt) ? m_groupingSize_avt.evaluate(transformer.getXPathContext(),contextNode,this) : null;
+  if ((null != digitGroupSepValue) && (null != nDigitsPerGroupValue) && (digitGroupSepValue.length() > 0)) {
+    try {
+      formatter=(DecimalFormat)NumberFormat.getNumberInstance(locale);
+      formatter.setGroupingSize(Integer.valueOf(nDigitsPerGroupValue).intValue());
+      DecimalFormatSymbols symbols=formatter.getDecimalFormatSymbols();
+      symbols.setGroupingSeparator(digitGroupSepValue.charAt(0));
+      formatter.setDecimalFormatSymbols(symbols);
+      formatter.setGroupingUsed(true);
+    }
+ catch (    NumberFormatException ex) {
+      formatter.setGroupingUsed(false);
+    }
+  }
+  return formatter;
+}

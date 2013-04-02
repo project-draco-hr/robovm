@@ -1,0 +1,19 @@
+{
+  WalkingIterator newIter=new WalkingIterator(wi.getPrefixResolver());
+  try {
+    AxesWalker walker=(AxesWalker)wi.getFirstWalker().clone();
+    newIter.setFirstWalker(walker);
+    walker.setLocPathIterator(newIter);
+    for (int i=1; i < numSteps; i++) {
+      AxesWalker next=(AxesWalker)walker.getNextWalker().clone();
+      walker.setNextWalker(next);
+      next.setLocPathIterator(newIter);
+      walker=next;
+    }
+    walker.setNextWalker(null);
+  }
+ catch (  CloneNotSupportedException cnse) {
+    throw new WrappedRuntimeException(cnse);
+  }
+  return newIter;
+}

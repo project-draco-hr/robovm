@@ -1,0 +1,17 @@
+{
+  NodeSetDTM ancestors=new NodeSetDTM(xctxt.getDTMManager());
+  XPath countMatchPattern=getCountMatchPattern(xctxt,node);
+  DTM dtm=xctxt.getDTM(node);
+  while (DTM.NULL != node) {
+    if ((null != m_fromMatchPattern) && (m_fromMatchPattern.getMatchScore(xctxt,node) != XPath.MATCH_SCORE_NONE)) {
+      if (!stopAtFirstFound)       break;
+    }
+    if (null == countMatchPattern)     System.out.println("Programmers error! countMatchPattern should never be null!");
+    if (countMatchPattern.getMatchScore(xctxt,node) != XPath.MATCH_SCORE_NONE) {
+      ancestors.addElement(node);
+      if (stopAtFirstFound)       break;
+    }
+    node=dtm.getParent(node);
+  }
+  return ancestors;
+}

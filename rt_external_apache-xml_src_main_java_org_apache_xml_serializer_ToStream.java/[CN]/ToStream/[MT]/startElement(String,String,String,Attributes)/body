@@ -1,0 +1,37 @@
+{
+  if (m_inEntityRef)   return;
+  if (m_needToCallStartDocument) {
+    startDocumentInternal();
+    m_needToCallStartDocument=false;
+    m_docIsEmpty=false;
+  }
+ else   if (m_cdataTagOpen)   closeCDATA();
+  try {
+    if (m_needToOutputDocTypeDecl) {
+      if (null != getDoctypeSystem()) {
+        outputDocTypeDecl(name,true);
+      }
+      m_needToOutputDocTypeDecl=false;
+    }
+    if (m_elemContext.m_startTagOpen) {
+      closeStartTag();
+      m_elemContext.m_startTagOpen=false;
+    }
+    if (namespaceURI != null)     ensurePrefixIsDeclared(namespaceURI,name);
+    m_ispreserve=false;
+    if (shouldIndent() && m_startNewLine) {
+      indent();
+    }
+    m_startNewLine=true;
+    final java.io.Writer writer=m_writer;
+    writer.write('<');
+    writer.write(name);
+  }
+ catch (  IOException e) {
+    throw new SAXException(e);
+  }
+  if (atts != null)   addAttributes(atts);
+  m_elemContext=m_elemContext.push(namespaceURI,localName,name);
+  m_isprevtext=false;
+  if (m_tracer != null)   firePseudoAttributes();
+}

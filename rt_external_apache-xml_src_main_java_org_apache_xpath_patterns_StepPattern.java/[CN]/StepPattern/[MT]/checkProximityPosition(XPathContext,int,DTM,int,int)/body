@@ -1,0 +1,49 @@
+{
+  try {
+    DTMAxisTraverser traverser=dtm.getAxisTraverser(Axis.PRECEDINGSIBLING);
+    for (int child=traverser.first(context); DTM.NULL != child; child=traverser.next(context,child)) {
+      try {
+        xctxt.pushCurrentNode(child);
+        if (NodeTest.SCORE_NONE != super.execute(xctxt,child)) {
+          boolean pass=true;
+          try {
+            xctxt.pushSubContextList(this);
+            for (int i=0; i < predPos; i++) {
+              xctxt.pushPredicatePos(i);
+              try {
+                XObject pred=m_predicates[i].execute(xctxt);
+                try {
+                  if (XObject.CLASS_NUMBER == pred.getType()) {
+                    throw new Error("Why: Should never have been called");
+                  }
+ else                   if (!pred.boolWithSideEffects()) {
+                    pass=false;
+                    break;
+                  }
+                }
+  finally {
+                  pred.detach();
+                }
+              }
+  finally {
+                xctxt.popPredicatePos();
+              }
+            }
+          }
+  finally {
+            xctxt.popSubContextList();
+          }
+          if (pass)           pos--;
+          if (pos < 1)           return false;
+        }
+      }
+  finally {
+        xctxt.popCurrentNode();
+      }
+    }
+  }
+ catch (  javax.xml.transform.TransformerException se) {
+    throw new java.lang.RuntimeException(se.getMessage());
+  }
+  return (pos == 1);
+}

@@ -1,0 +1,43 @@
+{
+  if (JJK_NEWCODE) {
+    int id=makeNodeIdentity(nodeHandle);
+    if (NULL == id)     return null;
+    Node newnode=(Node)m_nodes.elementAt(id);
+    String newname=newnode.getLocalName();
+    if (null == newname) {
+      String qname=newnode.getNodeName();
+      if ('#' == qname.charAt(0)) {
+        newname="";
+      }
+ else {
+        int index=qname.indexOf(':');
+        newname=(index < 0) ? qname : qname.substring(index + 1);
+      }
+    }
+    return newname;
+  }
+ else {
+    String name;
+    short type=getNodeType(nodeHandle);
+switch (type) {
+case DTM.ATTRIBUTE_NODE:
+case DTM.ELEMENT_NODE:
+case DTM.ENTITY_REFERENCE_NODE:
+case DTM.NAMESPACE_NODE:
+case DTM.PROCESSING_INSTRUCTION_NODE:
+{
+        Node node=getNode(nodeHandle);
+        name=node.getLocalName();
+        if (null == name) {
+          String qname=node.getNodeName();
+          int index=qname.indexOf(':');
+          name=(index < 0) ? qname : qname.substring(index + 1);
+        }
+      }
+    break;
+default :
+  name="";
+}
+return name;
+}
+}

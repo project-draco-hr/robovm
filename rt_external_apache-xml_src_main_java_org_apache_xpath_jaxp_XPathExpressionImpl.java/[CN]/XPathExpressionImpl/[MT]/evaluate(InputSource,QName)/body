@@ -1,0 +1,23 @@
+{
+  if ((source == null) || (returnType == null)) {
+    String fmsg=XSLMessages.createXPATHMessage(XPATHErrorResources.ER_SOURCE_RETURN_TYPE_CANNOT_BE_NULL,null);
+    throw new NullPointerException(fmsg);
+  }
+  if (!isSupported(returnType)) {
+    String fmsg=XSLMessages.createXPATHMessage(XPATHErrorResources.ER_UNSUPPORTED_RETURN_TYPE,new Object[]{returnType.toString()});
+    throw new IllegalArgumentException(fmsg);
+  }
+  try {
+    if (dbf == null) {
+      dbf=DocumentBuilderFactory.newInstance();
+      dbf.setNamespaceAware(true);
+      dbf.setValidating(false);
+    }
+    db=dbf.newDocumentBuilder();
+    Document document=db.parse(source);
+    return eval(document,returnType);
+  }
+ catch (  Exception e) {
+    throw new XPathExpressionException(e);
+  }
+}

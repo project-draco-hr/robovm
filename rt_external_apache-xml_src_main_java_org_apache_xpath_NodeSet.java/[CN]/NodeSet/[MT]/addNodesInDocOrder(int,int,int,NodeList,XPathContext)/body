@@ -1,0 +1,28 @@
+{
+  if (!m_mutable)   throw new RuntimeException(XSLMessages.createXPATHMessage(XPATHErrorResources.ER_NODESET_NOT_MUTABLE,null));
+  boolean foundit=false;
+  int i;
+  Node node=nodelist.item(testIndex);
+  for (i=end; i >= start; i--) {
+    Node child=(Node)elementAt(i);
+    if (child == node) {
+      i=-2;
+      break;
+    }
+    if (!DOM2Helper.isNodeAfter(node,child)) {
+      insertElementAt(node,i + 1);
+      testIndex--;
+      if (testIndex > 0) {
+        boolean foundPrev=addNodesInDocOrder(0,i,testIndex,nodelist,support);
+        if (!foundPrev) {
+          addNodesInDocOrder(i,size() - 1,testIndex,nodelist,support);
+        }
+      }
+      break;
+    }
+  }
+  if (i == -1) {
+    insertElementAt(node,0);
+  }
+  return foundit;
+}

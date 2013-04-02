@@ -1,0 +1,29 @@
+{
+  ElemTemplate retValue=null;
+  ElemTemplate ct;
+  while (true) {
+    if (inPatterns) {
+      if (null != curPattern)       curPattern=curPattern.getNext();
+      if (null != curPattern)       retValue=curPattern.getTemplate();
+ else {
+        if (hashIterator.hasMoreElements()) {
+          curPattern=(TemplateSubPatternAssociation)hashIterator.nextElement();
+          retValue=curPattern.getTemplate();
+        }
+ else {
+          inPatterns=false;
+          hashIterator=m_namedTemplates.elements();
+        }
+      }
+    }
+    if (!inPatterns) {
+      if (hashIterator.hasMoreElements())       retValue=(ElemTemplate)hashIterator.nextElement();
+ else       return null;
+    }
+    ct=(ElemTemplate)m_compilerCache.get(new Integer(retValue.getUid()));
+    if (null == ct) {
+      m_compilerCache.put(new Integer(retValue.getUid()),retValue);
+      return retValue;
+    }
+  }
+}

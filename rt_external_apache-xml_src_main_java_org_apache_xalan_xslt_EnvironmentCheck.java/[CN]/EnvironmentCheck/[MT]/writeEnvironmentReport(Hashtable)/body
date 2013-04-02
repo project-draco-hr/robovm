@@ -1,0 +1,29 @@
+{
+  if (null == h) {
+    logMsg("# ERROR: writeEnvironmentReport called with null Hashtable");
+    return false;
+  }
+  boolean errors=false;
+  logMsg("#---- BEGIN writeEnvironmentReport($Revision: 468646 $): Useful stuff found: ----");
+  for (Enumeration keys=h.keys(); keys.hasMoreElements(); ) {
+    Object key=keys.nextElement();
+    String keyStr=(String)key;
+    try {
+      if (keyStr.startsWith(FOUNDCLASSES)) {
+        Vector v=(Vector)h.get(keyStr);
+        errors|=logFoundJars(v,keyStr);
+      }
+ else {
+        if (keyStr.startsWith(ERROR)) {
+          errors=true;
+        }
+        logMsg(keyStr + "=" + h.get(keyStr));
+      }
+    }
+ catch (    Exception e) {
+      logMsg("Reading-" + key + "= threw: "+ e.toString());
+    }
+  }
+  logMsg("#----- END writeEnvironmentReport: Useful properties found: -----");
+  return errors;
+}

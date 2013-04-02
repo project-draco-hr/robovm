@@ -1,0 +1,18 @@
+{
+  int oldCapacity=m_capacity;
+  HashEntry[] oldTable=m_table;
+  int newCapacity=2 * oldCapacity + 1;
+  m_capacity=newCapacity;
+  m_threshold=(int)(newCapacity * m_loadFactor);
+  m_table=new HashEntry[newCapacity];
+  for (int i=oldCapacity - 1; i >= 0; i--) {
+    for (HashEntry old=oldTable[i]; old != null; ) {
+      HashEntry e=old;
+      old=old.next;
+      int newIndex=e.hash % newCapacity;
+      if (newIndex < 0)       newIndex=-newIndex;
+      e.next=m_table[newIndex];
+      m_table[newIndex]=e;
+    }
+  }
+}

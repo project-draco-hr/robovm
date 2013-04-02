@@ -1,0 +1,56 @@
+{
+  if (data == null || (data.length() == 0)) {
+    return;
+  }
+  char[] dataarray=data.toCharArray();
+  int datalength=dataarray.length;
+  if (fIsXMLVersion11) {
+    int i=0;
+    while (i < datalength) {
+      char c=dataarray[i++];
+      if (XML11Char.isXML11Invalid(c)) {
+        if (XMLChar.isHighSurrogate(c) && i < datalength) {
+          char c2=dataarray[i++];
+          if (XMLChar.isLowSurrogate(c2) && XMLChar.isSupplemental(XMLChar.supplemental(c,c2))) {
+            continue;
+          }
+        }
+        String msg=Utils.messages.createMessage(MsgKey.ER_WF_INVALID_CHARACTER_IN_COMMENT,new Object[]{new Character(c)});
+        if (fErrorHandler != null) {
+          fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_FATAL_ERROR,msg,MsgKey.ER_WF_INVALID_CHARACTER,null,null,null));
+        }
+      }
+ else       if (c == '-' && i < datalength && dataarray[i] == '-') {
+        String msg=Utils.messages.createMessage(MsgKey.ER_WF_DASH_IN_COMMENT,null);
+        if (fErrorHandler != null) {
+          fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_FATAL_ERROR,msg,MsgKey.ER_WF_INVALID_CHARACTER,null,null,null));
+        }
+      }
+    }
+  }
+ else {
+    int i=0;
+    while (i < datalength) {
+      char c=dataarray[i++];
+      if (XMLChar.isInvalid(c)) {
+        if (XMLChar.isHighSurrogate(c) && i < datalength) {
+          char c2=dataarray[i++];
+          if (XMLChar.isLowSurrogate(c2) && XMLChar.isSupplemental(XMLChar.supplemental(c,c2))) {
+            continue;
+          }
+        }
+        String msg=Utils.messages.createMessage(MsgKey.ER_WF_INVALID_CHARACTER_IN_COMMENT,new Object[]{new Character(c)});
+        if (fErrorHandler != null) {
+          fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_FATAL_ERROR,msg,MsgKey.ER_WF_INVALID_CHARACTER,null,null,null));
+        }
+      }
+ else       if (c == '-' && i < datalength && dataarray[i] == '-') {
+        String msg=Utils.messages.createMessage(MsgKey.ER_WF_DASH_IN_COMMENT,null);
+        if (fErrorHandler != null) {
+          fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_FATAL_ERROR,msg,MsgKey.ER_WF_INVALID_CHARACTER,null,null,null));
+        }
+      }
+    }
+  }
+  return;
+}

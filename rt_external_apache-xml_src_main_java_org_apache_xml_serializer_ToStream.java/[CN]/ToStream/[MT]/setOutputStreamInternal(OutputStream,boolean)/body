@@ -1,0 +1,35 @@
+{
+  m_outputStream=output;
+  String encoding=getOutputProperty(OutputKeys.ENCODING);
+  if (Encodings.DEFAULT_MIME_ENCODING.equalsIgnoreCase(encoding)) {
+    setWriterInternal(new WriterToUTF8Buffered(output),false);
+  }
+ else   if ("WINDOWS-1250".equals(encoding) || "US-ASCII".equals(encoding) || "ASCII".equals(encoding)) {
+    setWriterInternal(new WriterToASCI(output),false);
+  }
+ else   if (encoding != null) {
+    Writer osw=null;
+    try {
+      osw=Encodings.getWriter(output,encoding);
+    }
+ catch (    UnsupportedEncodingException uee) {
+      osw=null;
+    }
+    if (osw == null) {
+      System.out.println("Warning: encoding \"" + encoding + "\" not supported"+ ", using "+ Encodings.DEFAULT_MIME_ENCODING);
+      encoding=Encodings.DEFAULT_MIME_ENCODING;
+      setEncoding(encoding);
+      try {
+        osw=Encodings.getWriter(output,encoding);
+      }
+ catch (      UnsupportedEncodingException e) {
+        e.printStackTrace();
+      }
+    }
+    setWriterInternal(osw,false);
+  }
+ else {
+    Writer osw=new OutputStreamWriter(output);
+    setWriterInternal(osw,false);
+  }
+}

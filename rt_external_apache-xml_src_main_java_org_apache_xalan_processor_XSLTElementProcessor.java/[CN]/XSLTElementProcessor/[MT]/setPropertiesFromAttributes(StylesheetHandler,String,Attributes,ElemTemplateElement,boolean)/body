@@ -1,0 +1,45 @@
+{
+  XSLTElementDef def=getElemDef();
+  AttributesImpl undefines=null;
+  boolean isCompatibleMode=((null != handler.getStylesheet() && handler.getStylesheet().getCompatibleMode()) || !throwError);
+  if (isCompatibleMode)   undefines=new AttributesImpl();
+  List processedDefs=new ArrayList();
+  List errorDefs=new ArrayList();
+  int nAttrs=attributes.getLength();
+  for (int i=0; i < nAttrs; i++) {
+    String attrUri=attributes.getURI(i);
+    if ((null != attrUri) && (attrUri.length() == 0) && (attributes.getQName(i).startsWith("xmlns:") || attributes.getQName(i).equals("xmlns"))) {
+      attrUri=org.apache.xalan.templates.Constants.S_XMLNAMESPACEURI;
+    }
+    String attrLocalName=attributes.getLocalName(i);
+    XSLTAttributeDef attrDef=def.getAttributeDef(attrUri,attrLocalName);
+    if (null == attrDef) {
+      if (!isCompatibleMode) {
+        handler.error(XSLTErrorResources.ER_ATTR_NOT_ALLOWED,new Object[]{attributes.getQName(i),rawName},null);
+      }
+ else {
+        undefines.addAttribute(attrUri,attrLocalName,attributes.getQName(i),attributes.getType(i),attributes.getValue(i));
+      }
+    }
+ else {
+      boolean success=attrDef.setAttrValue(handler,attrUri,attrLocalName,attributes.getQName(i),attributes.getValue(i),target);
+      if (success)       processedDefs.add(attrDef);
+ else       errorDefs.add(attrDef);
+    }
+  }
+  XSLTAttributeDef[] attrDefs=def.getAttributes();
+  int nAttrDefs=attrDefs.length;
+  for (int i=0; i < nAttrDefs; i++) {
+    XSLTAttributeDef attrDef=attrDefs[i];
+    String defVal=attrDef.getDefault();
+    if (null != defVal) {
+      if (!processedDefs.contains(attrDef)) {
+        attrDef.setDefAttrValue(handler,target);
+      }
+    }
+    if (attrDef.getRequired()) {
+      if ((!processedDefs.contains(attrDef)) && (!errorDefs.contains(attrDef)))       handler.error(XSLMessages.createMessage(XSLTErrorResources.ER_REQUIRES_ATTRIB,new Object[]{rawName,attrDef.getName()}),null);
+    }
+  }
+  return undefines;
+}

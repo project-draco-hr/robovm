@@ -1,0 +1,13 @@
+{
+  int nsIndex=m_nsNames.stringToIndex(namespaceURI), nameIndex=m_localNames.stringToIndex(name);
+  nodeHandle&=NODEHANDLE_MASK;
+  nodes.readSlot(nodeHandle,gotslot);
+  short type=(short)(gotslot[0] & 0xFFFF);
+  if (type == ELEMENT_NODE)   nodeHandle++;
+  while (type == ATTRIBUTE_NODE) {
+    if ((nsIndex == (gotslot[0] << 16)) && (gotslot[3] == nameIndex))     return nodeHandle | m_docHandle;
+    nodeHandle=gotslot[2];
+    nodes.readSlot(nodeHandle,gotslot);
+  }
+  return NULL;
+}

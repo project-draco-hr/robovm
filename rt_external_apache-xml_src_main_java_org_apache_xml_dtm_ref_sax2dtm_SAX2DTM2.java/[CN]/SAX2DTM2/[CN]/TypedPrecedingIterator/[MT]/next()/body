@@ -1,0 +1,53 @@
+{
+  int node=_currentNode;
+  final int nodeType=_nodeType;
+  if (nodeType >= DTM.NTYPES) {
+    while (true) {
+      node++;
+      if (_sp < 0) {
+        node=NULL;
+        break;
+      }
+ else       if (node >= _stack[_sp]) {
+        if (--_sp < 0) {
+          node=NULL;
+          break;
+        }
+      }
+ else       if (_exptype2(node) == nodeType) {
+        break;
+      }
+    }
+  }
+ else {
+    int expType;
+    while (true) {
+      node++;
+      if (_sp < 0) {
+        node=NULL;
+        break;
+      }
+ else       if (node >= _stack[_sp]) {
+        if (--_sp < 0) {
+          node=NULL;
+          break;
+        }
+      }
+ else {
+        expType=_exptype2(node);
+        if (expType < DTM.NTYPES) {
+          if (expType == nodeType) {
+            break;
+          }
+        }
+ else {
+          if (m_extendedTypes[expType].getNodeType() == nodeType) {
+            break;
+          }
+        }
+      }
+    }
+  }
+  _currentNode=node;
+  return (node == NULL) ? NULL : returnNode(makeNodeHandle(node));
+}

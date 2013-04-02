@@ -1,0 +1,20 @@
+{
+  if (DEBUG) {
+    System.out.println("Releasing " + (shouldHardDelete ? "HARD" : "soft") + " dtm="+ dtm.getDocumentBaseURI());
+  }
+  if (dtm instanceof SAX2DTM) {
+    ((SAX2DTM)dtm).clearCoRoutine();
+  }
+  if (dtm instanceof DTMDefaultBase) {
+    org.apache.xml.utils.SuballocatedIntVector ids=((DTMDefaultBase)dtm).getDTMIDs();
+    for (int i=ids.size() - 1; i >= 0; --i)     m_dtms[ids.elementAt(i) >>> DTMManager.IDENT_DTM_NODE_BITS]=null;
+  }
+ else {
+    int i=getDTMIdentity(dtm);
+    if (i >= 0) {
+      m_dtms[i >>> DTMManager.IDENT_DTM_NODE_BITS]=null;
+    }
+  }
+  dtm.documentRelease();
+  return true;
+}

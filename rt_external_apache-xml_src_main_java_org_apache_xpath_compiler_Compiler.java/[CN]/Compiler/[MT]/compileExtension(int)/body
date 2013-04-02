@@ -1,0 +1,22 @@
+{
+  int endExtFunc=opPos + getOp(opPos + 1) - 1;
+  opPos=getFirstChildPos(opPos);
+  java.lang.String ns=(java.lang.String)getTokenQueue().elementAt(getOp(opPos));
+  opPos++;
+  java.lang.String funcName=(java.lang.String)getTokenQueue().elementAt(getOp(opPos));
+  opPos++;
+  Function extension=new FuncExtFunction(ns,funcName,String.valueOf(getNextMethodId()));
+  try {
+    int i=0;
+    while (opPos < endExtFunc) {
+      int nextOpPos=getNextOpPos(opPos);
+      extension.setArg(this.compile(opPos),i);
+      opPos=nextOpPos;
+      i++;
+    }
+  }
+ catch (  WrongNumberArgsException wnae) {
+    ;
+  }
+  return extension;
+}

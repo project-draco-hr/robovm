@@ -1,0 +1,27 @@
+{
+  if (predicateIndex < 0)   return -1;
+  int count=m_proximityPositions[predicateIndex];
+  if (count <= 0) {
+    AxesWalker savedWalker=wi().getLastUsedWalker();
+    try {
+      ReverseAxesWalker clone=(ReverseAxesWalker)this.clone();
+      clone.setRoot(this.getRoot());
+      clone.setPredicateCount(predicateIndex);
+      clone.setPrevWalker(null);
+      clone.setNextWalker(null);
+      wi().setLastUsedWalker(clone);
+      count++;
+      int next;
+      while (DTM.NULL != (next=clone.nextNode())) {
+        count++;
+      }
+      m_proximityPositions[predicateIndex]=count;
+    }
+ catch (    CloneNotSupportedException cnse) {
+    }
+ finally {
+      wi().setLastUsedWalker(savedWalker);
+    }
+  }
+  return count;
+}

@@ -1,0 +1,22 @@
+{
+  if (null == h)   h=new Hashtable();
+  final Class noArgs[]=new Class[0];
+  Class clazz=null;
+  try {
+    final String JAXP1_CLASS="javax.xml.parsers.DocumentBuilder";
+    final String JAXP11_METHOD="getDOMImplementation";
+    clazz=ObjectFactory.findProviderClass(JAXP1_CLASS,ObjectFactory.findClassLoader(),true);
+    Method method=clazz.getMethod(JAXP11_METHOD,noArgs);
+    h.put(VERSION + "JAXP","1.1 or higher");
+  }
+ catch (  Exception e) {
+    if (null != clazz) {
+      h.put(ERROR + VERSION + "JAXP","1.0.1");
+      h.put(ERROR,ERROR_FOUND);
+    }
+ else {
+      h.put(ERROR + VERSION + "JAXP",CLASS_NOTPRESENT);
+      h.put(ERROR,ERROR_FOUND);
+    }
+  }
+}

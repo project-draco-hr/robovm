@@ -1,0 +1,25 @@
+{
+  DTM dtm=xctxt.getDTM(context);
+  while (DTM.NULL != context) {
+    if (null != fromMatchPattern) {
+      if (fromMatchPattern.getMatchScore(xctxt,context) != XPath.MATCH_SCORE_NONE) {
+        context=DTM.NULL;
+        break;
+      }
+    }
+    if (null != countMatchPattern) {
+      if (countMatchPattern.getMatchScore(xctxt,context) != XPath.MATCH_SCORE_NONE) {
+        break;
+      }
+    }
+    int prevSibling=dtm.getPreviousSibling(context);
+    if (DTM.NULL == prevSibling) {
+      context=dtm.getParent(context);
+    }
+ else {
+      context=dtm.getLastChild(prevSibling);
+      if (context == DTM.NULL)       context=prevSibling;
+    }
+  }
+  return context;
+}

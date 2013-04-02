@@ -1,0 +1,20 @@
+{
+  org.apache.xpath.XPath xpath=new org.apache.xpath.XPath(expression,null,prefixResolver,org.apache.xpath.XPath.SELECT);
+  org.apache.xpath.XPathContext xpathSupport=null;
+  if (functionResolver != null) {
+    JAXPExtensionsProvider jep=new JAXPExtensionsProvider(functionResolver,featureSecureProcessing);
+    xpathSupport=new org.apache.xpath.XPathContext(jep,false);
+  }
+ else {
+    xpathSupport=new org.apache.xpath.XPathContext(false);
+  }
+  XObject xobj=null;
+  xpathSupport.setVarStack(new JAXPVariableStack(variableResolver));
+  if (contextItem instanceof Node) {
+    xobj=xpath.execute(xpathSupport,(Node)contextItem,prefixResolver);
+  }
+ else {
+    xobj=xpath.execute(xpathSupport,DTM.NULL,prefixResolver);
+  }
+  return xobj;
+}

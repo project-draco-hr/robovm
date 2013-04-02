@@ -1,0 +1,18 @@
+{
+  SourceLocator locator=null;
+  Throwable cause=exception;
+  do {
+    if (cause instanceof SAXParseException) {
+      locator=new SAXSourceLocator((SAXParseException)cause);
+    }
+ else     if (cause instanceof TransformerException) {
+      SourceLocator causeLocator=((TransformerException)cause).getLocator();
+      if (null != causeLocator)       locator=causeLocator;
+    }
+    if (cause instanceof TransformerException)     cause=((TransformerException)cause).getCause();
+ else     if (cause instanceof SAXException)     cause=((SAXException)cause).getException();
+ else     cause=null;
+  }
+ while (null != cause);
+  exception.setLocator(locator);
+}

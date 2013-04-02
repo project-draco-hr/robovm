@@ -1,0 +1,49 @@
+{
+  SerializationHandler rhandler=transformer.getSerializationHandler();
+  try {
+    rhandler.startPrefixMapping(getPrefix(),getNamespace());
+    executeNSDecls(transformer);
+    rhandler.startElement(getNamespace(),getLocalName(),getRawName());
+  }
+ catch (  SAXException se) {
+    throw new TransformerException(se);
+  }
+  TransformerException tException=null;
+  try {
+    super.execute(transformer);
+    if (null != m_avts) {
+      int nAttrs=m_avts.size();
+      for (int i=(nAttrs - 1); i >= 0; i--) {
+        AVT avt=(AVT)m_avts.get(i);
+        XPathContext xctxt=transformer.getXPathContext();
+        int sourceNode=xctxt.getCurrentNode();
+        String stringedValue=avt.evaluate(xctxt,sourceNode,this);
+        if (null != stringedValue) {
+          rhandler.addAttribute(avt.getURI(),avt.getName(),avt.getRawName(),"CDATA",stringedValue,false);
+        }
+      }
+    }
+    transformer.executeChildTemplates(this,true);
+  }
+ catch (  TransformerException te) {
+    tException=te;
+  }
+catch (  SAXException se) {
+    tException=new TransformerException(se);
+  }
+  try {
+    rhandler.endElement(getNamespace(),getLocalName(),getRawName());
+  }
+ catch (  SAXException se) {
+    if (tException != null)     throw tException;
+ else     throw new TransformerException(se);
+  }
+  if (tException != null)   throw tException;
+  unexecuteNSDecls(transformer);
+  try {
+    rhandler.endPrefixMapping(getPrefix());
+  }
+ catch (  SAXException se) {
+    throw new TransformerException(se);
+  }
+}

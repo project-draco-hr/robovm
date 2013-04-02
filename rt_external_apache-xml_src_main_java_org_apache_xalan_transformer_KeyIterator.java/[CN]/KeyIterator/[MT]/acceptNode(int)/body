@@ -1,0 +1,23 @@
+{
+  boolean foundKey=false;
+  KeyIterator ki=(KeyIterator)m_lpi;
+  org.apache.xpath.XPathContext xctxt=ki.getXPathContext();
+  Vector keys=ki.getKeyDeclarations();
+  QName name=ki.getName();
+  try {
+    int nDeclarations=keys.size();
+    for (int i=0; i < nDeclarations; i++) {
+      KeyDeclaration kd=(KeyDeclaration)keys.elementAt(i);
+      if (!kd.getName().equals(name))       continue;
+      foundKey=true;
+      XPath matchExpr=kd.getMatch();
+      double score=matchExpr.getMatchScore(xctxt,testNode);
+      if (score == kd.getMatch().MATCH_SCORE_NONE)       continue;
+      return DTMIterator.FILTER_ACCEPT;
+    }
+  }
+ catch (  TransformerException se) {
+  }
+  if (!foundKey)   throw new RuntimeException(XSLMessages.createMessage(XSLTErrorResources.ER_NO_XSLKEY_DECLARATION,new Object[]{name.getLocalName()}));
+  return DTMIterator.FILTER_REJECT;
+}

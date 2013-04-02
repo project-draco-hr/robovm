@@ -1,0 +1,20 @@
+{
+  AVT avt=null;
+  if (getSupportsAVT()) {
+    try {
+      avt=new AVT(handler,uri,name,rawName,value,owner);
+      if (!avt.isSimple())       return avt;
+    }
+ catch (    TransformerException te) {
+      throw new org.xml.sax.SAXException(te);
+    }
+  }
+  int retVal=this.getEnum(value);
+  if (retVal == StringToIntTable.INVALID_KEY) {
+    StringBuffer enumNamesList=getListOfEnums();
+    handleError(handler,XSLTErrorResources.INVALID_ENUM,new Object[]{name,value,enumNamesList.toString()},null);
+    return null;
+  }
+  if (getSupportsAVT())   return avt;
+ else   return new Integer(retVal);
+}

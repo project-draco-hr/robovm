@@ -1,0 +1,17 @@
+{
+  if (isOutsideDocElem() && org.apache.xml.utils.XMLCharacterRecognizer.isWhiteSpace(ch,start,length))   return;
+  if (m_inCData) {
+    cdata(ch,start,length);
+    return;
+  }
+  String s=new String(ch,start,length);
+  Node childNode;
+  childNode=m_currentNode != null ? m_currentNode.getLastChild() : null;
+  if (childNode != null && childNode.getNodeType() == Node.TEXT_NODE) {
+    ((Text)childNode).appendData(s);
+  }
+ else {
+    Text text=m_doc.createTextNode(s);
+    append(text);
+  }
+}

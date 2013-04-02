@@ -1,0 +1,52 @@
+{
+  if (null == testee.m_exprOwner)   return head;
+  WalkingIterator iter1=(WalkingIterator)testee.m_exprOwner.getExpression();
+  if (partialIsVariable(testee,lengthToTest))   return head;
+  MultistepExprHolder matchedPaths=null;
+  MultistepExprHolder matchedPathsTail=null;
+  MultistepExprHolder meh=head;
+  while (null != meh) {
+    if ((meh != testee) && (null != meh.m_exprOwner)) {
+      WalkingIterator iter2=(WalkingIterator)meh.m_exprOwner.getExpression();
+      if (stepsEqual(iter1,iter2,lengthToTest)) {
+        if (null == matchedPaths) {
+          try {
+            matchedPaths=(MultistepExprHolder)testee.clone();
+            testee.m_exprOwner=null;
+          }
+ catch (          CloneNotSupportedException cnse) {
+          }
+          matchedPathsTail=matchedPaths;
+          matchedPathsTail.m_next=null;
+        }
+        try {
+          matchedPathsTail.m_next=(MultistepExprHolder)meh.clone();
+          meh.m_exprOwner=null;
+        }
+ catch (        CloneNotSupportedException cnse) {
+        }
+        matchedPathsTail=matchedPathsTail.m_next;
+        matchedPathsTail.m_next=null;
+      }
+    }
+    meh=meh.m_next;
+  }
+  int matchCount=0;
+  if (null != matchedPaths) {
+    ElemTemplateElement root=isGlobal ? varScope : findCommonAncestor(matchedPaths);
+    WalkingIterator sharedIter=(WalkingIterator)matchedPaths.m_exprOwner.getExpression();
+    WalkingIterator newIter=createIteratorFromSteps(sharedIter,lengthToTest);
+    ElemVariable var=createPseudoVarDecl(root,newIter,isGlobal);
+    if (DIAGNOSE_MULTISTEPLIST)     System.err.println("Created var: " + var.getName() + (isGlobal ? "(Global)" : ""));
+    while (null != matchedPaths) {
+      ExpressionOwner owner=matchedPaths.m_exprOwner;
+      WalkingIterator iter=(WalkingIterator)owner.getExpression();
+      if (DIAGNOSE_MULTISTEPLIST)       diagnoseLineNumber(iter);
+      LocPathIterator newIter2=changePartToRef(var.getName(),iter,lengthToTest,isGlobal);
+      owner.setExpression(newIter2);
+      matchedPaths=matchedPaths.m_next;
+    }
+  }
+  if (DIAGNOSE_MULTISTEPLIST)   diagnoseMultistepList(matchCount,lengthToTest,isGlobal);
+  return head;
+}

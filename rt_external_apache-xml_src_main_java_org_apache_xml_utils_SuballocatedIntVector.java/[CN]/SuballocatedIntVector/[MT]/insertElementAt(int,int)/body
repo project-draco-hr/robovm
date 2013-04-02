@@ -1,0 +1,40 @@
+{
+  if (at == m_firstFree)   addElement(value);
+ else   if (at > m_firstFree) {
+    int index=at >>> m_SHIFT;
+    if (index >= m_map.length) {
+      int newsize=index + m_numblocks;
+      int[][] newMap=new int[newsize][];
+      System.arraycopy(m_map,0,newMap,0,m_map.length);
+      m_map=newMap;
+    }
+    int[] block=m_map[index];
+    if (null == block)     block=m_map[index]=new int[m_blocksize];
+    int offset=at & m_MASK;
+    block[offset]=value;
+    m_firstFree=offset + 1;
+  }
+ else {
+    int index=at >>> m_SHIFT;
+    int maxindex=m_firstFree >>> m_SHIFT;
+    ++m_firstFree;
+    int offset=at & m_MASK;
+    int push;
+    while (index <= maxindex) {
+      int copylen=m_blocksize - offset - 1;
+      int[] block=m_map[index];
+      if (null == block) {
+        push=0;
+        block=m_map[index]=new int[m_blocksize];
+      }
+ else {
+        push=block[m_blocksize - 1];
+        System.arraycopy(block,offset,block,offset + 1,copylen);
+      }
+      block[offset]=value;
+      value=push;
+      offset=0;
+      ++index;
+    }
+  }
+}

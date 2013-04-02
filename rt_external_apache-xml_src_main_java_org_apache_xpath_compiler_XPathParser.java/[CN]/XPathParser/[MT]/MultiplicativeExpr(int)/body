@@ -1,0 +1,40 @@
+{
+  int opPos=m_ops.getOp(OpMap.MAPINDEX_LENGTH);
+  if (-1 == addPos)   addPos=opPos;
+  UnaryExpr();
+  if (null != m_token) {
+    if (tokenIs('*')) {
+      nextToken();
+      insertOp(addPos,2,OpCodes.OP_MULT);
+      int opPlusLeftHandLen=m_ops.getOp(OpMap.MAPINDEX_LENGTH) - addPos;
+      addPos=MultiplicativeExpr(addPos);
+      m_ops.setOp(addPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(addPos + opPlusLeftHandLen + 1) + opPlusLeftHandLen);
+      addPos+=2;
+    }
+ else     if (tokenIs("div")) {
+      nextToken();
+      insertOp(addPos,2,OpCodes.OP_DIV);
+      int opPlusLeftHandLen=m_ops.getOp(OpMap.MAPINDEX_LENGTH) - addPos;
+      addPos=MultiplicativeExpr(addPos);
+      m_ops.setOp(addPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(addPos + opPlusLeftHandLen + 1) + opPlusLeftHandLen);
+      addPos+=2;
+    }
+ else     if (tokenIs("mod")) {
+      nextToken();
+      insertOp(addPos,2,OpCodes.OP_MOD);
+      int opPlusLeftHandLen=m_ops.getOp(OpMap.MAPINDEX_LENGTH) - addPos;
+      addPos=MultiplicativeExpr(addPos);
+      m_ops.setOp(addPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(addPos + opPlusLeftHandLen + 1) + opPlusLeftHandLen);
+      addPos+=2;
+    }
+ else     if (tokenIs("quo")) {
+      nextToken();
+      insertOp(addPos,2,OpCodes.OP_QUO);
+      int opPlusLeftHandLen=m_ops.getOp(OpMap.MAPINDEX_LENGTH) - addPos;
+      addPos=MultiplicativeExpr(addPos);
+      m_ops.setOp(addPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(addPos + opPlusLeftHandLen + 1) + opPlusLeftHandLen);
+      addPos+=2;
+    }
+  }
+  return addPos;
+}

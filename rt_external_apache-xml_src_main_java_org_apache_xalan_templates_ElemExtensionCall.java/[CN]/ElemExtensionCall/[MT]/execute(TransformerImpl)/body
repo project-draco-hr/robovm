@@ -1,0 +1,43 @@
+{
+  if (transformer.getStylesheet().isSecureProcessing())   throw new TransformerException(XSLMessages.createMessage(XSLTErrorResources.ER_EXTENSION_ELEMENT_NOT_ALLOWED_IN_SECURE_PROCESSING,new Object[]{getRawName()}));
+  try {
+    transformer.getResultTreeHandler().flushPending();
+    ExtensionsTable etable=transformer.getExtensionsTable();
+    ExtensionHandler nsh=etable.get(m_extns);
+    if (null == nsh) {
+      if (hasFallbackChildren()) {
+        executeFallbacks(transformer);
+      }
+ else {
+        TransformerException te=new TransformerException(XSLMessages.createMessage(XSLTErrorResources.ER_CALL_TO_EXT_FAILED,new Object[]{getNodeName()}));
+        transformer.getErrorListener().fatalError(te);
+      }
+      return;
+    }
+    try {
+      nsh.processElement(this.getLocalName(),this,transformer,getStylesheet(),this);
+    }
+ catch (    Exception e) {
+      if (hasFallbackChildren())       executeFallbacks(transformer);
+ else {
+        if (e instanceof TransformerException) {
+          TransformerException te=(TransformerException)e;
+          if (null == te.getLocator())           te.setLocator(this);
+          transformer.getErrorListener().fatalError(te);
+        }
+ else         if (e instanceof RuntimeException) {
+          transformer.getErrorListener().fatalError(new TransformerException(e));
+        }
+ else {
+          transformer.getErrorListener().warning(new TransformerException(e));
+        }
+      }
+    }
+  }
+ catch (  TransformerException e) {
+    transformer.getErrorListener().fatalError(e);
+  }
+catch (  SAXException se) {
+    throw new TransformerException(se);
+  }
+}

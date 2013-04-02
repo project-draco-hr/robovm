@@ -1,0 +1,13 @@
+{
+  if (transformer.isRecursiveAttrSet(this)) {
+    throw new TransformerException(XSLMessages.createMessage(XSLTErrorResources.ER_XSLATTRSET_USED_ITSELF,new Object[]{m_qname.getLocalPart()}));
+  }
+  transformer.pushElemAttributeSet(this);
+  super.execute(transformer);
+  ElemAttribute attr=(ElemAttribute)getFirstChildElem();
+  while (null != attr) {
+    attr.execute(transformer);
+    attr=(ElemAttribute)attr.getNextSiblingElem();
+  }
+  transformer.popElemAttributeSet();
+}

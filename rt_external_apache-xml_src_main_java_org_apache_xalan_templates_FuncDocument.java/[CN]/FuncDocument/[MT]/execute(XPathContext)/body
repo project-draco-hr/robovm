@@ -1,0 +1,58 @@
+{
+  int context=xctxt.getCurrentNode();
+  DTM dtm=xctxt.getDTM(context);
+  int docContext=dtm.getDocumentRoot(context);
+  XObject arg=(XObject)this.getArg0().execute(xctxt);
+  String base="";
+  Expression arg1Expr=this.getArg1();
+  if (null != arg1Expr) {
+    XObject arg2=arg1Expr.execute(xctxt);
+    if (XObject.CLASS_NODESET == arg2.getType()) {
+      int baseNode=arg2.iter().nextNode();
+      if (baseNode == DTM.NULL) {
+        warn(xctxt,XSLTErrorResources.WG_EMPTY_SECOND_ARG,null);
+        XNodeSet nodes=new XNodeSet(xctxt.getDTMManager());
+        return nodes;
+      }
+ else {
+        DTM baseDTM=xctxt.getDTM(baseNode);
+        base=baseDTM.getDocumentBaseURI();
+      }
+    }
+ else {
+      arg2.iter();
+    }
+  }
+ else {
+    assertion(null != xctxt.getNamespaceContext(),"Namespace context can not be null!");
+    base=xctxt.getNamespaceContext().getBaseIdentifier();
+  }
+  XNodeSet nodes=new XNodeSet(xctxt.getDTMManager());
+  NodeSetDTM mnl=nodes.mutableNodeset();
+  DTMIterator iterator=(XObject.CLASS_NODESET == arg.getType()) ? arg.iter() : null;
+  int pos=DTM.NULL;
+  while ((null == iterator) || (DTM.NULL != (pos=iterator.nextNode()))) {
+    XMLString ref=(null != iterator) ? xctxt.getDTM(pos).getStringValue(pos) : arg.xstr();
+    if (null == arg1Expr && DTM.NULL != pos) {
+      DTM baseDTM=xctxt.getDTM(pos);
+      base=baseDTM.getDocumentBaseURI();
+    }
+    if (null == ref)     continue;
+    if (DTM.NULL == docContext) {
+      error(xctxt,XSLTErrorResources.ER_NO_CONTEXT_OWNERDOC,null);
+    }
+    int indexOfColon=ref.indexOf(':');
+    int indexOfSlash=ref.indexOf('/');
+    if ((indexOfColon != -1) && (indexOfSlash != -1) && (indexOfColon < indexOfSlash)) {
+      base=null;
+    }
+    int newDoc=getDoc(xctxt,context,ref.toString(),base);
+    if (DTM.NULL != newDoc) {
+      if (!mnl.contains(newDoc)) {
+        mnl.addElement(newDoc);
+      }
+    }
+    if (null == iterator || newDoc == DTM.NULL)     break;
+  }
+  return nodes;
+}

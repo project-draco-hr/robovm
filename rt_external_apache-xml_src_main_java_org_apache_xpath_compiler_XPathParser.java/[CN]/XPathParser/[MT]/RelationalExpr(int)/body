@@ -1,0 +1,36 @@
+{
+  int opPos=m_ops.getOp(OpMap.MAPINDEX_LENGTH);
+  if (-1 == addPos)   addPos=opPos;
+  AdditiveExpr(-1);
+  if (null != m_token) {
+    if (tokenIs('<')) {
+      nextToken();
+      if (tokenIs('=')) {
+        nextToken();
+        insertOp(addPos,2,OpCodes.OP_LTE);
+      }
+ else {
+        insertOp(addPos,2,OpCodes.OP_LT);
+      }
+      int opPlusLeftHandLen=m_ops.getOp(OpMap.MAPINDEX_LENGTH) - addPos;
+      addPos=RelationalExpr(addPos);
+      m_ops.setOp(addPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(addPos + opPlusLeftHandLen + 1) + opPlusLeftHandLen);
+      addPos+=2;
+    }
+ else     if (tokenIs('>')) {
+      nextToken();
+      if (tokenIs('=')) {
+        nextToken();
+        insertOp(addPos,2,OpCodes.OP_GTE);
+      }
+ else {
+        insertOp(addPos,2,OpCodes.OP_GT);
+      }
+      int opPlusLeftHandLen=m_ops.getOp(OpMap.MAPINDEX_LENGTH) - addPos;
+      addPos=RelationalExpr(addPos);
+      m_ops.setOp(addPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(addPos + opPlusLeftHandLen + 1) + opPlusLeftHandLen);
+      addPos+=2;
+    }
+  }
+  return addPos;
+}

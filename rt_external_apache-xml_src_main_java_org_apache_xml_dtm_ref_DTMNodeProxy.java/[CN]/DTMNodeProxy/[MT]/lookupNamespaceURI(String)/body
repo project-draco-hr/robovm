@@ -1,0 +1,53 @@
+{
+  short type=this.getNodeType();
+switch (type) {
+case Node.ELEMENT_NODE:
+{
+      String namespace=this.getNamespaceURI();
+      String prefix=this.getPrefix();
+      if (namespace != null) {
+        if (specifiedPrefix == null && prefix == specifiedPrefix) {
+          return namespace;
+        }
+ else         if (prefix != null && prefix.equals(specifiedPrefix)) {
+          return namespace;
+        }
+      }
+      if (this.hasAttributes()) {
+        NamedNodeMap map=this.getAttributes();
+        int length=map.getLength();
+        for (int i=0; i < length; i++) {
+          Node attr=map.item(i);
+          String attrPrefix=attr.getPrefix();
+          String value=attr.getNodeValue();
+          namespace=attr.getNamespaceURI();
+          if (namespace != null && namespace.equals("http://www.w3.org/2000/xmlns/")) {
+            if (specifiedPrefix == null && attr.getNodeName().equals("xmlns")) {
+              return value;
+            }
+ else             if (attrPrefix != null && attrPrefix.equals("xmlns") && attr.getLocalName().equals(specifiedPrefix)) {
+              return value;
+            }
+          }
+        }
+      }
+      return null;
+    }
+case Node.ENTITY_NODE:
+case Node.NOTATION_NODE:
+case Node.DOCUMENT_FRAGMENT_NODE:
+case Node.DOCUMENT_TYPE_NODE:
+  return null;
+case Node.ATTRIBUTE_NODE:
+{
+  if (this.getOwnerElement().getNodeType() == Node.ELEMENT_NODE) {
+    return getOwnerElement().lookupNamespaceURI(specifiedPrefix);
+  }
+  return null;
+}
+default :
+{
+return null;
+}
+}
+}

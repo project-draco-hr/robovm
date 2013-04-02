@@ -1,0 +1,22 @@
+{
+  org.apache.xml.utils.PrefixResolver prefixResolver=xctxt.getNamespaceContext();
+  if (prefixResolver instanceof org.apache.xalan.templates.ElemTemplateElement) {
+    org.apache.xalan.templates.ElemVariable vvar;
+    org.apache.xalan.templates.ElemTemplateElement prev=(org.apache.xalan.templates.ElemTemplateElement)prefixResolver;
+    if (!(prev instanceof org.apache.xalan.templates.Stylesheet)) {
+      while (!(prev.getParentNode() instanceof org.apache.xalan.templates.Stylesheet)) {
+        org.apache.xalan.templates.ElemTemplateElement savedprev=prev;
+        while (null != (prev=prev.getPreviousSiblingElem())) {
+          if (prev instanceof org.apache.xalan.templates.ElemVariable) {
+            vvar=(org.apache.xalan.templates.ElemVariable)prev;
+            if (vvar.getName().equals(qname))             return getLocalVariable(xctxt,vvar.getIndex());
+          }
+        }
+        prev=savedprev.getParentElem();
+      }
+    }
+    vvar=prev.getStylesheetRoot().getVariableOrParamComposed(qname);
+    if (null != vvar)     return getGlobalVariable(xctxt,vvar.getIndex());
+  }
+  throw new javax.xml.transform.TransformerException(XSLMessages.createXPATHMessage(XPATHErrorResources.ER_VAR_NOT_RESOLVABLE,new Object[]{qname.toString()}));
+}

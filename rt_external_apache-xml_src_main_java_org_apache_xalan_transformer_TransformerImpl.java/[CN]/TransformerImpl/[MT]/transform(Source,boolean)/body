@@ -1,0 +1,79 @@
+{
+  try {
+    if (getXPathContext().getNamespaceContext() == null) {
+      getXPathContext().setNamespaceContext(getStylesheet());
+    }
+    String base=source.getSystemId();
+    if (null == base) {
+      base=m_stylesheetRoot.getBaseIdentifier();
+    }
+    if (null == base) {
+      String currentDir="";
+      try {
+        currentDir=System.getProperty("user.dir");
+      }
+ catch (      SecurityException se) {
+      }
+      if (currentDir.startsWith(java.io.File.separator))       base="file://" + currentDir;
+ else       base="file:///" + currentDir;
+      base=base + java.io.File.separatorChar + source.getClass().getName();
+    }
+    setBaseURLOfSource(base);
+    DTMManager mgr=m_xcontext.getDTMManager();
+    if ((source instanceof StreamSource && source.getSystemId() == null && ((StreamSource)source).getInputStream() == null && ((StreamSource)source).getReader() == null) || (source instanceof SAXSource && ((SAXSource)source).getInputSource() == null && ((SAXSource)source).getXMLReader() == null) || (source instanceof DOMSource && ((DOMSource)source).getNode() == null)) {
+      try {
+        DocumentBuilderFactory builderF=DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder=builderF.newDocumentBuilder();
+        String systemID=source.getSystemId();
+        source=new DOMSource(builder.newDocument());
+        if (systemID != null) {
+          source.setSystemId(systemID);
+        }
+      }
+ catch (      ParserConfigurationException e) {
+        fatalError(e);
+      }
+    }
+    DTM dtm=mgr.getDTM(source,false,this,true,true);
+    dtm.setDocumentBaseURI(base);
+    boolean hardDelete=true;
+    try {
+      this.transformNode(dtm.getDocument());
+    }
+  finally {
+      if (shouldRelease)       mgr.release(dtm,hardDelete);
+    }
+    Exception e=getExceptionThrown();
+    if (null != e) {
+      if (e instanceof javax.xml.transform.TransformerException) {
+        throw (javax.xml.transform.TransformerException)e;
+      }
+ else       if (e instanceof org.apache.xml.utils.WrappedRuntimeException) {
+        fatalError(((org.apache.xml.utils.WrappedRuntimeException)e).getException());
+      }
+ else {
+        throw new javax.xml.transform.TransformerException(e);
+      }
+    }
+ else     if (null != m_serializationHandler) {
+      m_serializationHandler.endDocument();
+    }
+  }
+ catch (  org.apache.xml.utils.WrappedRuntimeException wre) {
+    Throwable throwable=wre.getException();
+    while (throwable instanceof org.apache.xml.utils.WrappedRuntimeException) {
+      throwable=((org.apache.xml.utils.WrappedRuntimeException)throwable).getException();
+    }
+    fatalError(throwable);
+  }
+catch (  org.xml.sax.SAXParseException spe) {
+    fatalError(spe);
+  }
+catch (  org.xml.sax.SAXException se) {
+    m_errorHandler.fatalError(new TransformerException(se));
+  }
+ finally {
+    m_hasTransformThreadErrorCatcher=false;
+    reset();
+  }
+}

@@ -1,0 +1,41 @@
+{
+  if ((fFeatures & WELLFORMED) != 0) {
+    isCDATASectionWellFormed(node);
+  }
+  if ((fFeatures & CDATA) != 0) {
+    String nodeValue=node.getNodeValue();
+    int endIndex=nodeValue.indexOf("]]>");
+    if ((fFeatures & SPLITCDATA) != 0) {
+      if (endIndex >= 0) {
+        String relatedData=nodeValue.substring(0,endIndex + 2);
+        String msg=Utils.messages.createMessage(MsgKey.ER_CDATA_SECTIONS_SPLIT,null);
+        if (fErrorHandler != null) {
+          fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_WARNING,msg,MsgKey.ER_CDATA_SECTIONS_SPLIT,null,relatedData,null));
+        }
+      }
+    }
+ else {
+      if (endIndex >= 0) {
+        String relatedData=nodeValue.substring(0,endIndex + 2);
+        String msg=Utils.messages.createMessage(MsgKey.ER_CDATA_SECTIONS_SPLIT,null);
+        if (fErrorHandler != null) {
+          fErrorHandler.handleError(new DOMErrorImpl(DOMError.SEVERITY_ERROR,msg,MsgKey.ER_CDATA_SECTIONS_SPLIT));
+        }
+        return;
+      }
+    }
+    if (!applyFilter(node,NodeFilter.SHOW_CDATA_SECTION)) {
+      return;
+    }
+    if (fLexicalHandler != null) {
+      fLexicalHandler.startCDATA();
+    }
+    dispatachChars(node);
+    if (fLexicalHandler != null) {
+      fLexicalHandler.endCDATA();
+    }
+  }
+ else {
+    dispatachChars(node);
+  }
+}

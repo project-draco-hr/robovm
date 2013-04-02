@@ -1,0 +1,39 @@
+{
+  int tokPos=getTokenQueuePosFromMap(m_patternMapSize - 1);
+  resetTokenMark(tokPos + 1);
+  if (m_processor.lookahead('(',1)) {
+    int tok=getKeywordToken(m_processor.m_token);
+switch (tok) {
+case OpCodes.NODETYPE_COMMENT:
+      targetStrings.addElement(PsuedoNames.PSEUDONAME_COMMENT);
+    break;
+case OpCodes.NODETYPE_TEXT:
+  targetStrings.addElement(PsuedoNames.PSEUDONAME_TEXT);
+break;
+case OpCodes.NODETYPE_NODE:
+targetStrings.addElement(PsuedoNames.PSEUDONAME_ANY);
+break;
+case OpCodes.NODETYPE_ROOT:
+targetStrings.addElement(PsuedoNames.PSEUDONAME_ROOT);
+break;
+case OpCodes.NODETYPE_ANYELEMENT:
+targetStrings.addElement(PsuedoNames.PSEUDONAME_ANY);
+break;
+case OpCodes.NODETYPE_PI:
+targetStrings.addElement(PsuedoNames.PSEUDONAME_ANY);
+break;
+default :
+targetStrings.addElement(PsuedoNames.PSEUDONAME_ANY);
+}
+}
+ else {
+if (m_processor.tokenIs('@')) {
+tokPos++;
+resetTokenMark(tokPos + 1);
+}
+if (m_processor.lookahead(':',1)) {
+tokPos+=2;
+}
+targetStrings.addElement(m_compiler.getTokenQueue().elementAt(tokPos));
+}
+}

@@ -1,0 +1,22 @@
+{
+  int stepType;
+  AxesWalker firstWalker=null;
+  AxesWalker walker, prevWalker=null;
+  int analysis=analyze(compiler,stepOpCodePos,stepIndex);
+  while (OpCodes.ENDOP != (stepType=compiler.getOp(stepOpCodePos))) {
+    walker=createDefaultWalker(compiler,stepOpCodePos,lpi,analysis);
+    walker.init(compiler,stepOpCodePos,stepType);
+    walker.exprSetParent(lpi);
+    if (null == firstWalker) {
+      firstWalker=walker;
+    }
+ else {
+      prevWalker.setNextWalker(walker);
+      walker.setPrevWalker(prevWalker);
+    }
+    prevWalker=walker;
+    stepOpCodePos=compiler.getNextStepPos(stepOpCodePos);
+    if (stepOpCodePos < 0)     break;
+  }
+  return firstWalker;
+}

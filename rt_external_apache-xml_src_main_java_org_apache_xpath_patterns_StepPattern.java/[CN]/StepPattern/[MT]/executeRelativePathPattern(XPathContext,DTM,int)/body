@@ -1,0 +1,17 @@
+{
+  XObject score=NodeTest.SCORE_NONE;
+  int context=currentNode;
+  DTMAxisTraverser traverser;
+  traverser=dtm.getAxisTraverser(m_axis);
+  for (int relative=traverser.first(context); DTM.NULL != relative; relative=traverser.next(context,relative)) {
+    try {
+      xctxt.pushCurrentNode(relative);
+      score=execute(xctxt);
+      if (score != NodeTest.SCORE_NONE)       break;
+    }
+  finally {
+      xctxt.popCurrentNode();
+    }
+  }
+  return score;
+}

@@ -1,0 +1,15 @@
+{
+  if (null == ns || ns.trim().length() == 0)   return null;
+  String className=classOrPackage;
+  if (className.startsWith("class:"))   className=className.substring(6);
+  int lastSlash=className.lastIndexOf("/");
+  if (-1 != lastSlash)   className=className.substring(lastSlash + 1);
+  if (null == className || className.trim().length() == 0)   return null;
+  try {
+    ExtensionHandler.getClassForName(className);
+    return new ExtensionNamespaceSupport(ns,"org.apache.xalan.extensions.ExtensionHandlerJavaClass",new Object[]{ns,"javaclass",className});
+  }
+ catch (  ClassNotFoundException e) {
+    return new ExtensionNamespaceSupport(ns,"org.apache.xalan.extensions.ExtensionHandlerJavaPackage",new Object[]{ns,"javapackage",className + "."});
+  }
+}

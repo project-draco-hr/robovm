@@ -1,0 +1,47 @@
+{
+  int end=m_length + m_start;
+  char[] buf=new char[m_length];
+  FastStringBuffer fsb=fsb();
+  boolean edit=false;
+  int d=0;
+  boolean pres=false;
+  for (int s=m_start; s < end; s++) {
+    char c=fsb.charAt(s);
+    if (isSpace(c)) {
+      if (!pres) {
+        if (' ' != c) {
+          edit=true;
+        }
+        buf[d++]=' ';
+        if (doublePunctuationSpaces && (d != 0)) {
+          char prevChar=buf[d - 1];
+          if (!((prevChar == '.') || (prevChar == '!') || (prevChar == '?'))) {
+            pres=true;
+          }
+        }
+ else {
+          pres=true;
+        }
+      }
+ else {
+        edit=true;
+        pres=true;
+      }
+    }
+ else {
+      buf[d++]=c;
+      pres=false;
+    }
+  }
+  if (trimTail && 1 <= d && ' ' == buf[d - 1]) {
+    edit=true;
+    d--;
+  }
+  int start=0;
+  if (trimHead && 0 < d && ' ' == buf[0]) {
+    edit=true;
+    start++;
+  }
+  XMLStringFactory xsf=XMLStringFactoryImpl.getFactory();
+  return edit ? xsf.newstr(buf,start,d - start) : this;
+}

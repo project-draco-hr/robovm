@@ -1,0 +1,18 @@
+{
+  transformer.pushCurrentTemplateRuleIsNull(false);
+  boolean pushMode=false;
+  try {
+    QName mode=transformer.getMode();
+    if (!m_isDefaultTemplate) {
+      if (((null == mode) && (null != m_mode)) || ((null != mode) && !mode.equals(m_mode))) {
+        pushMode=true;
+        transformer.pushMode(m_mode);
+      }
+    }
+    transformSelectedNodes(transformer);
+  }
+  finally {
+    if (pushMode)     transformer.popMode();
+    transformer.popCurrentTemplateRuleIsNull();
+  }
+}

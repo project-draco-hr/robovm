@@ -1,0 +1,21 @@
+{
+  Document doc=(m_root.getNodeType() == Node.DOCUMENT_NODE) ? (Document)m_root : m_root.getOwnerDocument();
+  if (null != doc) {
+    Node elem=doc.getElementById(elementId);
+    if (null != elem) {
+      int elemHandle=getHandleFromNode(elem);
+      if (DTM.NULL == elemHandle) {
+        int identity=m_nodes.size() - 1;
+        while (DTM.NULL != (identity=getNextNodeIdentity(identity))) {
+          Node node=getNode(identity);
+          if (node == elem) {
+            elemHandle=getHandleFromNode(elem);
+            break;
+          }
+        }
+      }
+      return elemHandle;
+    }
+  }
+  return DTM.NULL;
+}

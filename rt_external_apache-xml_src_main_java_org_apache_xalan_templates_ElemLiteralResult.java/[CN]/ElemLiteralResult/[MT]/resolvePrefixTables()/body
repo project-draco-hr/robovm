@@ -1,0 +1,31 @@
+{
+  super.resolvePrefixTables();
+  StylesheetRoot stylesheet=getStylesheetRoot();
+  if ((null != m_namespace) && (m_namespace.length() > 0)) {
+    NamespaceAlias nsa=stylesheet.getNamespaceAliasComposed(m_namespace);
+    if (null != nsa) {
+      m_namespace=nsa.getResultNamespace();
+      String resultPrefix=nsa.getStylesheetPrefix();
+      if ((null != resultPrefix) && (resultPrefix.length() > 0))       m_rawName=resultPrefix + ":" + m_localName;
+ else       m_rawName=m_localName;
+    }
+  }
+  if (null != m_avts) {
+    int n=m_avts.size();
+    for (int i=0; i < n; i++) {
+      AVT avt=(AVT)m_avts.get(i);
+      String ns=avt.getURI();
+      if ((null != ns) && (ns.length() > 0)) {
+        NamespaceAlias nsa=stylesheet.getNamespaceAliasComposed(m_namespace);
+        if (null != nsa) {
+          String namespace=nsa.getResultNamespace();
+          String resultPrefix=nsa.getStylesheetPrefix();
+          String rawName=avt.getName();
+          if ((null != resultPrefix) && (resultPrefix.length() > 0))           rawName=resultPrefix + ":" + rawName;
+          avt.setURI(namespace);
+          avt.setRawName(rawName);
+        }
+      }
+    }
+  }
+}

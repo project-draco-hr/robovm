@@ -1,0 +1,23 @@
+{
+  SAX2RTFDTM rtfdtm;
+  if (m_rtfdtm_stack == null) {
+    m_rtfdtm_stack=new Vector();
+    rtfdtm=(SAX2RTFDTM)m_dtmManager.getDTM(null,true,null,false,false);
+    m_rtfdtm_stack.addElement(rtfdtm);
+    ++m_which_rtfdtm;
+  }
+ else   if (m_which_rtfdtm < 0) {
+    rtfdtm=(SAX2RTFDTM)m_rtfdtm_stack.elementAt(++m_which_rtfdtm);
+  }
+ else {
+    rtfdtm=(SAX2RTFDTM)m_rtfdtm_stack.elementAt(m_which_rtfdtm);
+    if (rtfdtm.isTreeIncomplete()) {
+      if (++m_which_rtfdtm < m_rtfdtm_stack.size())       rtfdtm=(SAX2RTFDTM)m_rtfdtm_stack.elementAt(m_which_rtfdtm);
+ else {
+        rtfdtm=(SAX2RTFDTM)m_dtmManager.getDTM(null,true,null,false,false);
+        m_rtfdtm_stack.addElement(rtfdtm);
+      }
+    }
+  }
+  return rtfdtm;
+}

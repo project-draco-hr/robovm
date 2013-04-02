@@ -1,0 +1,19 @@
+{
+  if (tempNode == null) {
+    return;
+  }
+ else {
+    if (tempNode.getNodeType() == DTM.ELEMENT_NODE && (isLocalNameWildCard || tempNode.getLocalName().equals(localname))) {
+      String nsURI=tempNode.getNamespaceURI();
+      if ((namespaceURI == null && nsURI == null) || isNamespaceURIWildCard || (namespaceURI != null && namespaceURI.equals(nsURI))) {
+        listVector.add(tempNode);
+      }
+    }
+    if (tempNode.hasChildNodes()) {
+      NodeList nl=tempNode.getChildNodes();
+      for (int i=0; i < nl.getLength(); i++) {
+        traverseChildren(listVector,nl.item(i),namespaceURI,localname,isNamespaceURIWildCard,isLocalNameWildCard);
+      }
+    }
+  }
+}

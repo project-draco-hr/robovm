@@ -1,0 +1,19 @@
+{
+  if (null != attributeSetsNames) {
+    int nNames=attributeSetsNames.length;
+    for (int i=0; i < nNames; i++) {
+      QName qname=attributeSetsNames[i];
+      java.util.List attrSets=stylesheet.getAttributeSetComposed(qname);
+      if (null != attrSets) {
+        int nSets=attrSets.size();
+        for (int k=nSets - 1; k >= 0; k--) {
+          ElemAttributeSet attrSet=(ElemAttributeSet)attrSets.get(k);
+          attrSet.execute(transformer);
+        }
+      }
+ else {
+        throw new TransformerException(XSLMessages.createMessage(XSLTErrorResources.ER_NO_ATTRIB_SET,new Object[]{qname}),this);
+      }
+    }
+  }
+}

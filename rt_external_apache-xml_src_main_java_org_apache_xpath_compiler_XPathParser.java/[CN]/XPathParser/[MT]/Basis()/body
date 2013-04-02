@@ -1,0 +1,21 @@
+{
+  int opPos=m_ops.getOp(OpMap.MAPINDEX_LENGTH);
+  int axesType;
+  if (lookahead("::",1)) {
+    axesType=AxisName();
+    nextToken();
+    nextToken();
+  }
+ else   if (tokenIs('@')) {
+    axesType=OpCodes.FROM_ATTRIBUTES;
+    appendOp(2,axesType);
+    nextToken();
+  }
+ else {
+    axesType=OpCodes.FROM_CHILDREN;
+    appendOp(2,axesType);
+  }
+  m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+  NodeTest(axesType);
+  m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH + 1,m_ops.getOp(OpMap.MAPINDEX_LENGTH) - opPos);
+}

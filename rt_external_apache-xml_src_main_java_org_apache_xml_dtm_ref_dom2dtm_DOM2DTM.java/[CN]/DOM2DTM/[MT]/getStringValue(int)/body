@@ -1,0 +1,27 @@
+{
+  int type=getNodeType(nodeHandle);
+  Node node=getNode(nodeHandle);
+  if (DTM.ELEMENT_NODE == type || DTM.DOCUMENT_NODE == type || DTM.DOCUMENT_FRAGMENT_NODE == type) {
+    FastStringBuffer buf=StringBufferPool.get();
+    String s;
+    try {
+      getNodeData(node,buf);
+      s=(buf.length() > 0) ? buf.toString() : "";
+    }
+  finally {
+      StringBufferPool.free(buf);
+    }
+    return m_xstrf.newstr(s);
+  }
+ else   if (TEXT_NODE == type || CDATA_SECTION_NODE == type) {
+    FastStringBuffer buf=StringBufferPool.get();
+    while (node != null) {
+      buf.append(node.getNodeValue());
+      node=logicalNextDOMTextNode(node);
+    }
+    String s=(buf.length() > 0) ? buf.toString() : "";
+    StringBufferPool.free(buf);
+    return m_xstrf.newstr(s);
+  }
+ else   return m_xstrf.newstr(node.getNodeValue());
+}

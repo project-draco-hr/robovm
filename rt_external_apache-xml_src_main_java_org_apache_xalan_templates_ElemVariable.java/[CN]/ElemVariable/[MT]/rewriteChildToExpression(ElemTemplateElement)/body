@@ -1,0 +1,23 @@
+{
+  ElemTemplateElement t=varElem.getFirstChildElem();
+  if (null != t && null == t.getNextSiblingElem()) {
+    int etype=t.getXSLToken();
+    if (Constants.ELEMNAME_VALUEOF == etype) {
+      ElemValueOf valueof=(ElemValueOf)t;
+      if (valueof.getDisableOutputEscaping() == false && valueof.getDOMBackPointer() == null) {
+        varElem.m_firstChild=null;
+        return new XPath(new XRTreeFragSelectWrapper(valueof.getSelect().getExpression()));
+      }
+    }
+ else     if (Constants.ELEMNAME_TEXTLITERALRESULT == etype) {
+      ElemTextLiteral lit=(ElemTextLiteral)t;
+      if (lit.getDisableOutputEscaping() == false && lit.getDOMBackPointer() == null) {
+        String str=lit.getNodeValue();
+        XString xstr=new XString(str);
+        varElem.m_firstChild=null;
+        return new XPath(new XRTreeFragSelectWrapper(xstr));
+      }
+    }
+  }
+  return null;
+}

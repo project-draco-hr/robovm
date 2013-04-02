@@ -1,0 +1,23 @@
+{
+  m_ops=compiler;
+  m_namespaceContext=namespaceContext;
+  m_functionTable=compiler.getFunctionTable();
+  Lexer lexer=new Lexer(compiler,namespaceContext,this);
+  lexer.tokenize(expression);
+  m_ops.setOp(0,OpCodes.OP_MATCHPATTERN);
+  m_ops.setOp(OpMap.MAPINDEX_LENGTH,2);
+  nextToken();
+  Pattern();
+  if (null != m_token) {
+    String extraTokens="";
+    while (null != m_token) {
+      extraTokens+="'" + m_token + "'";
+      nextToken();
+      if (null != m_token)       extraTokens+=", ";
+    }
+    error(XPATHErrorResources.ER_EXTRA_ILLEGAL_TOKENS,new Object[]{extraTokens});
+  }
+  m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),OpCodes.ENDOP);
+  m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+  m_ops.shrink();
+}

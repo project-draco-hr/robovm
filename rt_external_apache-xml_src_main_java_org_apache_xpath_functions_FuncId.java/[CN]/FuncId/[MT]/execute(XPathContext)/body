@@ -1,0 +1,29 @@
+{
+  int context=xctxt.getCurrentNode();
+  DTM dtm=xctxt.getDTM(context);
+  int docContext=dtm.getDocument();
+  if (DTM.NULL == docContext)   error(xctxt,XPATHErrorResources.ER_CONTEXT_HAS_NO_OWNERDOC,null);
+  XObject arg=m_arg0.execute(xctxt);
+  int argType=arg.getType();
+  XNodeSet nodes=new XNodeSet(xctxt.getDTMManager());
+  NodeSetDTM nodeSet=nodes.mutableNodeset();
+  if (XObject.CLASS_NODESET == argType) {
+    DTMIterator ni=arg.iter();
+    StringVector usedrefs=null;
+    int pos=ni.nextNode();
+    while (DTM.NULL != pos) {
+      DTM ndtm=ni.getDTM(pos);
+      String refval=ndtm.getStringValue(pos).toString();
+      pos=ni.nextNode();
+      usedrefs=getNodesByID(xctxt,docContext,refval,usedrefs,nodeSet,DTM.NULL != pos);
+    }
+  }
+ else   if (XObject.CLASS_NULL == argType) {
+    return nodes;
+  }
+ else {
+    String refval=arg.str();
+    getNodesByID(xctxt,docContext,refval,null,nodeSet,false);
+  }
+  return nodes;
+}

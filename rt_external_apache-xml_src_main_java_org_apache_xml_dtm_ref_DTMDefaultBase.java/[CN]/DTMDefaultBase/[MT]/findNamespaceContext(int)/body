@@ -1,0 +1,41 @@
+{
+  if (null != m_namespaceDeclSetElements) {
+    int wouldBeAt=findInSortedSuballocatedIntVector(m_namespaceDeclSetElements,elementNodeIndex);
+    if (wouldBeAt >= 0)     return (SuballocatedIntVector)m_namespaceDeclSets.elementAt(wouldBeAt);
+    if (wouldBeAt == -1)     return null;
+    wouldBeAt=-1 - wouldBeAt;
+    int candidate=m_namespaceDeclSetElements.elementAt(--wouldBeAt);
+    int ancestor=_parent(elementNodeIndex);
+    if (wouldBeAt == 0 && candidate < ancestor) {
+      int rootHandle=getDocumentRoot(makeNodeHandle(elementNodeIndex));
+      int rootID=makeNodeIdentity(rootHandle);
+      int uppermostNSCandidateID;
+      if (getNodeType(rootHandle) == DTM.DOCUMENT_NODE) {
+        int ch=_firstch(rootID);
+        uppermostNSCandidateID=(ch != DTM.NULL) ? ch : rootID;
+      }
+ else {
+        uppermostNSCandidateID=rootID;
+      }
+      if (candidate == uppermostNSCandidateID) {
+        return (SuballocatedIntVector)m_namespaceDeclSets.elementAt(wouldBeAt);
+      }
+    }
+    while (wouldBeAt >= 0 && ancestor > 0) {
+      if (candidate == ancestor) {
+        return (SuballocatedIntVector)m_namespaceDeclSets.elementAt(wouldBeAt);
+      }
+ else       if (candidate < ancestor) {
+        do {
+          ancestor=_parent(ancestor);
+        }
+ while (candidate < ancestor);
+      }
+ else       if (wouldBeAt > 0) {
+        candidate=m_namespaceDeclSetElements.elementAt(--wouldBeAt);
+      }
+ else       break;
+    }
+  }
+  return null;
+}

@@ -1,0 +1,32 @@
+{
+  if (p_addToPath == null || p_addToPath.trim().length() == 0) {
+    return;
+  }
+  if (!isURIString(p_addToPath)) {
+    throw new MalformedURIException(Utils.messages.createMessage(MsgKey.ER_PATH_INVALID_CHAR,new Object[]{p_addToPath}));
+  }
+  if (m_path == null || m_path.trim().length() == 0) {
+    if (p_addToPath.startsWith("/")) {
+      m_path=p_addToPath;
+    }
+ else {
+      m_path="/" + p_addToPath;
+    }
+  }
+ else   if (m_path.endsWith("/")) {
+    if (p_addToPath.startsWith("/")) {
+      m_path=m_path.concat(p_addToPath.substring(1));
+    }
+ else {
+      m_path=m_path.concat(p_addToPath);
+    }
+  }
+ else {
+    if (p_addToPath.startsWith("/")) {
+      m_path=m_path.concat(p_addToPath);
+    }
+ else {
+      m_path=m_path.concat("/" + p_addToPath);
+    }
+  }
+}

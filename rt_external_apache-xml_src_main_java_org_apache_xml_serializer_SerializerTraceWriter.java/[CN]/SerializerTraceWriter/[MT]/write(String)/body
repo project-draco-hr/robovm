@@ -1,0 +1,25 @@
+{
+  if (m_writer != null)   m_writer.write(s);
+  final int length=s.length();
+  int lengthx3=(length << 1) + length;
+  if (lengthx3 >= buf_length) {
+    flushBuffer();
+    setBufferSize(2 * lengthx3);
+  }
+  if (lengthx3 > buf_length - count) {
+    flushBuffer();
+  }
+  for (int i=0; i < length; i++) {
+    final char c=s.charAt(i);
+    if (c < 0x80)     buf[count++]=(byte)(c);
+ else     if (c < 0x800) {
+      buf[count++]=(byte)(0xc0 + (c >> 6));
+      buf[count++]=(byte)(0x80 + (c & 0x3f));
+    }
+ else {
+      buf[count++]=(byte)(0xe0 + (c >> 12));
+      buf[count++]=(byte)(0x80 + ((c >> 6) & 0x3f));
+      buf[count++]=(byte)(0x80 + (c & 0x3f));
+    }
+  }
+}

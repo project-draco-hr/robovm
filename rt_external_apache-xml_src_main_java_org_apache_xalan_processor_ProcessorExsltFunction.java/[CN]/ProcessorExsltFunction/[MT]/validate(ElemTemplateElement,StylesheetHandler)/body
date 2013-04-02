@@ -1,0 +1,20 @@
+{
+  String msg="";
+  while (elem != null) {
+    if (elem instanceof ElemExsltFuncResult && elem.getNextSiblingElem() != null && !(elem.getNextSiblingElem() instanceof ElemFallback)) {
+      msg="func:result has an illegal following sibling (only xsl:fallback allowed)";
+      handler.error(msg,new SAXException(msg));
+    }
+    if ((elem instanceof ElemApplyImport || elem instanceof ElemApplyTemplates || elem instanceof ElemAttribute|| elem instanceof ElemCallTemplate|| elem instanceof ElemComment|| elem instanceof ElemCopy|| elem instanceof ElemCopyOf|| elem instanceof ElemElement|| elem instanceof ElemLiteralResult|| elem instanceof ElemNumber|| elem instanceof ElemPI|| elem instanceof ElemText|| elem instanceof ElemTextLiteral|| elem instanceof ElemValueOf) && !(ancestorIsOk(elem))) {
+      msg="misplaced literal result in a func:function container.";
+      handler.error(msg,new SAXException(msg));
+    }
+    ElemTemplateElement nextElem=elem.getFirstChildElem();
+    while (nextElem == null) {
+      nextElem=elem.getNextSiblingElem();
+      if (nextElem == null)       elem=elem.getParentElem();
+      if (elem == null || elem instanceof ElemExsltFunction)       return;
+    }
+    elem=nextElem;
+  }
+}

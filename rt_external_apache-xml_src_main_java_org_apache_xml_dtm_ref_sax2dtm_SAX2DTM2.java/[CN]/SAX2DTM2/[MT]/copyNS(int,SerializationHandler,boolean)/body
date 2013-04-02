@@ -1,0 +1,31 @@
+{
+  if (m_namespaceDeclSetElements != null && m_namespaceDeclSetElements.size() == 1 && m_namespaceDeclSets != null && ((SuballocatedIntVector)m_namespaceDeclSets.elementAt(0)).size() == 1)   return;
+  SuballocatedIntVector nsContext=null;
+  int nextNSNode;
+  if (inScope) {
+    nsContext=findNamespaceContext(nodeID);
+    if (nsContext == null || nsContext.size() < 1)     return;
+ else     nextNSNode=makeNodeIdentity(nsContext.elementAt(0));
+  }
+ else   nextNSNode=getNextNamespaceNode2(nodeID);
+  int nsIndex=1;
+  while (nextNSNode != DTM.NULL) {
+    int eType=_exptype2(nextNSNode);
+    String nodeName=m_extendedTypes[eType].getLocalName();
+    int dataIndex=m_dataOrQName.elementAt(nextNSNode);
+    if (dataIndex < 0) {
+      dataIndex=-dataIndex;
+      dataIndex=m_data.elementAt(dataIndex + 1);
+    }
+    String nodeValue=(String)m_values.elementAt(dataIndex);
+    handler.namespaceAfterStartElement(nodeName,nodeValue);
+    if (inScope) {
+      if (nsIndex < nsContext.size()) {
+        nextNSNode=makeNodeIdentity(nsContext.elementAt(nsIndex));
+        nsIndex++;
+      }
+ else       return;
+    }
+ else     nextNSNode=getNextNamespaceNode2(nextNSNode);
+  }
+}

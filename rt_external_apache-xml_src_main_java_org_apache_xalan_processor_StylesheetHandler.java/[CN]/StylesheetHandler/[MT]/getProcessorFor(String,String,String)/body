@@ -1,0 +1,10 @@
+{
+  XSLTElementProcessor currentProcessor=getCurrentProcessor();
+  XSLTElementDef def=currentProcessor.getElemDef();
+  XSLTElementProcessor elemProcessor=def.getProcessorFor(uri,localName);
+  if (null == elemProcessor && !(currentProcessor instanceof ProcessorStylesheetDoc) && ((null == getStylesheet() || Double.valueOf(getStylesheet().getVersion()).doubleValue() > Constants.XSLTVERSUPPORTED) || (!uri.equals(Constants.S_XSLNAMESPACEURL) && currentProcessor instanceof ProcessorStylesheetElement) || getElemVersion() > Constants.XSLTVERSUPPORTED)) {
+    elemProcessor=def.getProcessorForUnknown(uri,localName);
+  }
+  if (null == elemProcessor)   error(XSLMessages.createMessage(XSLTErrorResources.ER_NOT_ALLOWED_IN_POSITION,new Object[]{rawName}),null);
+  return elemProcessor;
+}

@@ -1,0 +1,21 @@
+{
+  Node parent;
+  short nodeType=node.getNodeType();
+  if (Node.ATTRIBUTE_NODE == nodeType) {
+    Document doc=node.getOwnerDocument();
+    DOMImplementation impl=doc.getImplementation();
+    if (impl != null && impl.hasFeature("Core","2.0")) {
+      parent=((Attr)node).getOwnerElement();
+      return parent;
+    }
+    Element rootElem=doc.getDocumentElement();
+    if (null == rootElem) {
+      throw new RuntimeException(XMLMessages.createXMLMessage(XMLErrorResources.ER_CHILD_HAS_NO_OWNER_DOCUMENT_ELEMENT,null));
+    }
+    parent=locateAttrParent(rootElem,node);
+  }
+ else {
+    parent=node.getParentNode();
+  }
+  return parent;
+}

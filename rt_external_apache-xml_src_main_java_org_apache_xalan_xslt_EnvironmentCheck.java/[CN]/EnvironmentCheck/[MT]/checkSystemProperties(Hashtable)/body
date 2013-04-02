@@ -1,0 +1,31 @@
+{
+  if (null == h)   h=new Hashtable();
+  try {
+    String javaVersion=System.getProperty("java.version");
+    h.put("java.version",javaVersion);
+  }
+ catch (  SecurityException se) {
+    h.put("java.version","WARNING: SecurityException thrown accessing system version properties");
+  }
+  try {
+    String cp=System.getProperty("java.class.path");
+    h.put("java.class.path",cp);
+    Vector classpathJars=checkPathForJars(cp,jarNames);
+    if (null != classpathJars)     h.put(FOUNDCLASSES + "java.class.path",classpathJars);
+    String othercp=System.getProperty("sun.boot.class.path");
+    if (null != othercp) {
+      h.put("sun.boot.class.path",othercp);
+      classpathJars=checkPathForJars(othercp,jarNames);
+      if (null != classpathJars)       h.put(FOUNDCLASSES + "sun.boot.class.path",classpathJars);
+    }
+    othercp=System.getProperty("java.ext.dirs");
+    if (null != othercp) {
+      h.put("java.ext.dirs",othercp);
+      classpathJars=checkPathForJars(othercp,jarNames);
+      if (null != classpathJars)       h.put(FOUNDCLASSES + "java.ext.dirs",classpathJars);
+    }
+  }
+ catch (  SecurityException se2) {
+    h.put("java.class.path","WARNING: SecurityException thrown accessing system classpath properties");
+  }
+}

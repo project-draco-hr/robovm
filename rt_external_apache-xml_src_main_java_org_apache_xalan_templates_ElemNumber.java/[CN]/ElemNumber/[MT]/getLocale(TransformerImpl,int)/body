@@ -1,0 +1,18 @@
+{
+  Locale locale=null;
+  if (null != m_lang_avt) {
+    XPathContext xctxt=transformer.getXPathContext();
+    String langValue=m_lang_avt.evaluate(xctxt,contextNode,this);
+    if (null != langValue) {
+      locale=new Locale(langValue.toUpperCase(),"");
+      if (null == locale) {
+        transformer.getMsgMgr().warn(this,null,xctxt.getDTM(contextNode).getNode(contextNode),XSLTErrorResources.WG_LOCALE_NOT_FOUND,new Object[]{langValue});
+        locale=Locale.getDefault();
+      }
+    }
+  }
+ else {
+    locale=Locale.getDefault();
+  }
+  return locale;
+}

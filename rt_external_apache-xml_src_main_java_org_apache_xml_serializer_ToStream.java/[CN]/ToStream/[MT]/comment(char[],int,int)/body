@@ -1,0 +1,39 @@
+{
+  int start_old=start;
+  if (m_inEntityRef)   return;
+  if (m_elemContext.m_startTagOpen) {
+    closeStartTag();
+    m_elemContext.m_startTagOpen=false;
+  }
+ else   if (m_needToCallStartDocument) {
+    startDocumentInternal();
+    m_needToCallStartDocument=false;
+  }
+  try {
+    final int limit=start + length;
+    boolean wasDash=false;
+    if (m_cdataTagOpen)     closeCDATA();
+    if (shouldIndent())     indent();
+    final java.io.Writer writer=m_writer;
+    writer.write(COMMENT_BEGIN);
+    for (int i=start; i < limit; i++) {
+      if (wasDash && ch[i] == '-') {
+        writer.write(ch,start,i - start);
+        writer.write(" -");
+        start=i + 1;
+      }
+      wasDash=(ch[i] == '-');
+    }
+    if (length > 0) {
+      final int remainingChars=(limit - start);
+      if (remainingChars > 0)       writer.write(ch,start,remainingChars);
+      if (ch[limit - 1] == '-')       writer.write(' ');
+    }
+    writer.write(COMMENT_END);
+  }
+ catch (  IOException e) {
+    throw new SAXException(e);
+  }
+  m_startNewLine=true;
+  if (m_tracer != null)   super.fireCommentEvent(ch,start_old,length);
+}

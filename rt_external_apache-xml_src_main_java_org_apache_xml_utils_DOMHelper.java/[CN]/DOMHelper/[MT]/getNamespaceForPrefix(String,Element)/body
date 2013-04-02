@@ -1,0 +1,25 @@
+{
+  int type;
+  Node parent=namespaceContext;
+  String namespace=null;
+  if (prefix.equals("xml")) {
+    namespace=QName.S_XMLNAMESPACEURI;
+  }
+ else   if (prefix.equals("xmlns")) {
+    namespace="http://www.w3.org/2000/xmlns/";
+  }
+ else {
+    String declname=(prefix == "") ? "xmlns" : "xmlns:" + prefix;
+    while ((null != parent) && (null == namespace) && (((type=parent.getNodeType()) == Node.ELEMENT_NODE) || (type == Node.ENTITY_REFERENCE_NODE))) {
+      if (type == Node.ELEMENT_NODE) {
+        Attr attr=((Element)parent).getAttributeNode(declname);
+        if (attr != null) {
+          namespace=attr.getNodeValue();
+          break;
+        }
+      }
+      parent=getParentOfNode(parent);
+    }
+  }
+  return namespace;
+}

@@ -1,0 +1,62 @@
+{
+  if (m_cdataTagOpen)   closeCDATA();
+  if (null != namespaceURI && namespaceURI.length() > 0) {
+    super.endElement(namespaceURI,localName,name);
+    return;
+  }
+  try {
+    ElemContext elemContext=m_elemContext;
+    final ElemDesc elemDesc=elemContext.m_elementDesc;
+    final int elemFlags=elemDesc.getFlags();
+    final boolean elemEmpty=(elemFlags & ElemDesc.EMPTY) != 0;
+    if (m_doIndent) {
+      final boolean isBlockElement=(elemFlags & ElemDesc.BLOCK) != 0;
+      boolean shouldIndent=false;
+      if (m_ispreserve) {
+        m_ispreserve=false;
+      }
+ else       if (m_doIndent && (!m_inBlockElem || isBlockElement)) {
+        m_startNewLine=true;
+        shouldIndent=true;
+      }
+      if (!elemContext.m_startTagOpen && shouldIndent)       indent(elemContext.m_currentElemDepth - 1);
+      m_inBlockElem=!isBlockElement;
+    }
+    final java.io.Writer writer=m_writer;
+    if (!elemContext.m_startTagOpen) {
+      writer.write("</");
+      writer.write(name);
+      writer.write('>');
+    }
+ else {
+      if (m_tracer != null)       super.fireStartElem(name);
+      int nAttrs=m_attributes.getLength();
+      if (nAttrs > 0) {
+        processAttributes(m_writer,nAttrs);
+        m_attributes.clear();
+      }
+      if (!elemEmpty) {
+        writer.write("></");
+        writer.write(name);
+        writer.write('>');
+      }
+ else {
+        writer.write('>');
+      }
+    }
+    if ((elemFlags & ElemDesc.WHITESPACESENSITIVE) != 0)     m_ispreserve=true;
+    m_isprevtext=false;
+    if (m_tracer != null)     super.fireEndElem(name);
+    if (elemEmpty) {
+      m_elemContext=elemContext.m_prev;
+      return;
+    }
+    if (!elemContext.m_startTagOpen) {
+      if (m_doIndent && !m_preserves.isEmpty())       m_preserves.pop();
+    }
+    m_elemContext=elemContext.m_prev;
+  }
+ catch (  IOException e) {
+    throw new SAXException(e);
+  }
+}

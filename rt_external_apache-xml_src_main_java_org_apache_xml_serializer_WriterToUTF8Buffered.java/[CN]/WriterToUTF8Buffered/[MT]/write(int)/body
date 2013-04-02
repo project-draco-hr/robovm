@@ -1,0 +1,21 @@
+{
+  if (count >= BYTES_MAX)   flushBuffer();
+  if (c < 0x80) {
+    m_outputBytes[count++]=(byte)(c);
+  }
+ else   if (c < 0x800) {
+    m_outputBytes[count++]=(byte)(0xc0 + (c >> 6));
+    m_outputBytes[count++]=(byte)(0x80 + (c & 0x3f));
+  }
+ else   if (c < 0x10000) {
+    m_outputBytes[count++]=(byte)(0xe0 + (c >> 12));
+    m_outputBytes[count++]=(byte)(0x80 + ((c >> 6) & 0x3f));
+    m_outputBytes[count++]=(byte)(0x80 + (c & 0x3f));
+  }
+ else {
+    m_outputBytes[count++]=(byte)(0xf0 + (c >> 18));
+    m_outputBytes[count++]=(byte)(0x80 + ((c >> 12) & 0x3f));
+    m_outputBytes[count++]=(byte)(0x80 + ((c >> 6) & 0x3f));
+    m_outputBytes[count++]=(byte)(0x80 + (c & 0x3f));
+  }
+}

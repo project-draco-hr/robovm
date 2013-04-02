@@ -1,0 +1,34 @@
+{
+  try {
+    String namespace=extFunction.getNamespace();
+    String functionName=extFunction.getFunctionName();
+    int arity=extFunction.getArgCount();
+    javax.xml.namespace.QName myQName=new javax.xml.namespace.QName(namespace,functionName);
+    if (extensionInvocationDisabled) {
+      String fmsg=XSLMessages.createXPATHMessage(XPATHErrorResources.ER_EXTENSION_FUNCTION_CANNOT_BE_INVOKED,new Object[]{myQName.toString()});
+      throw new XPathFunctionException(fmsg);
+    }
+    XPathFunction xpathFunction=resolver.resolveFunction(myQName,arity);
+    ArrayList argList=new ArrayList(arity);
+    for (int i=0; i < arity; i++) {
+      Object argument=argVec.elementAt(i);
+      if (argument instanceof XNodeSet) {
+        argList.add(i,((XNodeSet)argument).nodelist());
+      }
+ else       if (argument instanceof XObject) {
+        Object passedArgument=((XObject)argument).object();
+        argList.add(i,passedArgument);
+      }
+ else {
+        argList.add(i,argument);
+      }
+    }
+    return (xpathFunction.evaluate(argList));
+  }
+ catch (  XPathFunctionException xfe) {
+    throw new org.apache.xml.utils.WrappedRuntimeException(xfe);
+  }
+catch (  Exception e) {
+    throw new javax.xml.transform.TransformerException(e);
+  }
+}

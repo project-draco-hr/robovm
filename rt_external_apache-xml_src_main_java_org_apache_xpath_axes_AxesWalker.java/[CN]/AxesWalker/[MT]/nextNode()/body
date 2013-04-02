@@ -1,0 +1,28 @@
+{
+  int nextNode=DTM.NULL;
+  AxesWalker walker=wi().getLastUsedWalker();
+  while (true) {
+    if (null == walker)     break;
+    nextNode=walker.getNextNode();
+    if (DTM.NULL == nextNode) {
+      walker=walker.m_prevWalker;
+    }
+ else {
+      if (walker.acceptNode(nextNode) != DTMIterator.FILTER_ACCEPT) {
+        continue;
+      }
+      if (null == walker.m_nextWalker) {
+        wi().setLastUsedWalker(walker);
+        break;
+      }
+ else {
+        AxesWalker prev=walker;
+        walker=walker.m_nextWalker;
+        walker.setRoot(nextNode);
+        walker.m_prevWalker=prev;
+        continue;
+      }
+    }
+  }
+  return nextNode;
+}

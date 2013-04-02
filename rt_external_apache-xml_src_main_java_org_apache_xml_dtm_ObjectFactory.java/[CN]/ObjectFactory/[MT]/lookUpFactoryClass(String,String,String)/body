@@ -1,0 +1,18 @@
+{
+  String factoryClassName=lookUpFactoryClassName(factoryId,propertiesFilename,fallbackClassName);
+  ClassLoader cl=findClassLoader();
+  if (factoryClassName == null) {
+    factoryClassName=fallbackClassName;
+  }
+  try {
+    Class providerClass=findProviderClass(factoryClassName,cl,true);
+    debugPrintln("created new instance of " + providerClass + " using ClassLoader: "+ cl);
+    return providerClass;
+  }
+ catch (  ClassNotFoundException x) {
+    throw new ConfigurationError("Provider " + factoryClassName + " not found",x);
+  }
+catch (  Exception x) {
+    throw new ConfigurationError("Provider " + factoryClassName + " could not be instantiated: "+ x,x);
+  }
+}

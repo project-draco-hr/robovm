@@ -1,0 +1,28 @@
+{
+  if ((null == v) || (v.size() < 1))   return false;
+  boolean errors=false;
+  for (int i=0; i < v.size(); i++) {
+    Hashtable subhash=(Hashtable)v.elementAt(i);
+    for (Enumeration keys=subhash.keys(); keys.hasMoreElements(); ) {
+      Object key=keys.nextElement();
+      try {
+        String keyStr=(String)key;
+        if (keyStr.startsWith(ERROR)) {
+          errors=true;
+        }
+        Element node=factory.createElement("foundJar");
+        node.setAttribute("name",keyStr.substring(0,keyStr.indexOf("-")));
+        node.setAttribute("desc",keyStr.substring(keyStr.indexOf("-") + 1));
+        node.appendChild(factory.createTextNode((String)subhash.get(keyStr)));
+        container.appendChild(node);
+      }
+ catch (      Exception e) {
+        errors=true;
+        Element node=factory.createElement("foundJar");
+        node.appendChild(factory.createTextNode(ERROR + " Reading " + key+ " threw: "+ e.toString()));
+        container.appendChild(node);
+      }
+    }
+  }
+  return errors;
+}

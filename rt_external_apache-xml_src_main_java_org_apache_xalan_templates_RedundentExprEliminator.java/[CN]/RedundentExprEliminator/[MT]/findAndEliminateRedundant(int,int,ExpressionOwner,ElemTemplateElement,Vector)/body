@@ -1,0 +1,49 @@
+{
+  MultistepExprHolder head=null;
+  MultistepExprHolder tail=null;
+  int numPathsFound=0;
+  int n=paths.size();
+  Expression expr1=firstOccuranceOwner.getExpression();
+  if (DEBUG)   assertIsLocPathIterator(expr1,firstOccuranceOwner);
+  boolean isGlobal=(paths == m_absPaths);
+  LocPathIterator lpi=(LocPathIterator)expr1;
+  int stepCount=countSteps(lpi);
+  for (int j=start; j < n; j++) {
+    ExpressionOwner owner2=(ExpressionOwner)paths.elementAt(j);
+    if (null != owner2) {
+      Expression expr2=owner2.getExpression();
+      boolean isEqual=expr2.deepEquals(lpi);
+      if (isEqual) {
+        LocPathIterator lpi2=(LocPathIterator)expr2;
+        if (null == head) {
+          head=new MultistepExprHolder(firstOccuranceOwner,stepCount,null);
+          tail=head;
+          numPathsFound++;
+        }
+        tail.m_next=new MultistepExprHolder(owner2,stepCount,null);
+        tail=tail.m_next;
+        paths.setElementAt(null,j);
+        numPathsFound++;
+      }
+    }
+  }
+  if ((0 == numPathsFound) && isGlobal) {
+    head=new MultistepExprHolder(firstOccuranceOwner,stepCount,null);
+    numPathsFound++;
+  }
+  if (null != head) {
+    ElemTemplateElement root=isGlobal ? psuedoVarRecipient : findCommonAncestor(head);
+    LocPathIterator sharedIter=(LocPathIterator)head.m_exprOwner.getExpression();
+    ElemVariable var=createPseudoVarDecl(root,sharedIter,isGlobal);
+    if (DIAGNOSE_MULTISTEPLIST)     System.err.println("Created var: " + var.getName() + (isGlobal ? "(Global)" : ""));
+    QName uniquePseudoVarName=var.getName();
+    while (null != head) {
+      ExpressionOwner owner=head.m_exprOwner;
+      if (DIAGNOSE_MULTISTEPLIST)       diagnoseLineNumber(owner.getExpression());
+      changeToVarRef(uniquePseudoVarName,owner,paths,root);
+      head=head.m_next;
+    }
+    paths.setElementAt(var.getSelect(),firstOccuranceIndex);
+  }
+  return numPathsFound;
+}

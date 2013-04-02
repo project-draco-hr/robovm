@@ -1,0 +1,44 @@
+{
+  if (m_foundLast)   return DTM.NULL;
+  int next;
+  org.apache.xpath.VariableStack vars;
+  int savedStart;
+  if (-1 != m_stackFrame) {
+    vars=m_execContext.getVarStack();
+    savedStart=vars.getStackFrame();
+    vars.setStackFrame(m_stackFrame);
+  }
+ else {
+    vars=null;
+    savedStart=0;
+  }
+  try {
+    if (DEBUG)     System.out.println("m_pattern" + m_pattern.toString());
+    do {
+      next=getNextNode();
+      if (DTM.NULL != next) {
+        if (DTMIterator.FILTER_ACCEPT == acceptNode(next,m_execContext))         break;
+ else         continue;
+      }
+ else       break;
+    }
+ while (next != DTM.NULL);
+    if (DTM.NULL != next) {
+      if (DEBUG) {
+        System.out.println("next: " + next);
+        System.out.println("name: " + m_cdtm.getNodeName(next));
+      }
+      incrementCurrentPos();
+      return next;
+    }
+ else {
+      m_foundLast=true;
+      return DTM.NULL;
+    }
+  }
+  finally {
+    if (-1 != m_stackFrame) {
+      vars.setStackFrame(savedStart);
+    }
+  }
+}

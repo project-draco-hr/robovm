@@ -1,0 +1,53 @@
+{
+  String docTypeName=node.getNodeName();
+  String publicId=node.getPublicId();
+  String systemId=node.getSystemId();
+  String internalSubset=node.getInternalSubset();
+  if (internalSubset != null && !"".equals(internalSubset)) {
+    if (bStart) {
+      try {
+        Writer writer=fSerializer.getWriter();
+        StringBuffer dtd=new StringBuffer();
+        dtd.append("<!DOCTYPE ");
+        dtd.append(docTypeName);
+        if (null != publicId) {
+          dtd.append(" PUBLIC \"");
+          dtd.append(publicId);
+          dtd.append('\"');
+        }
+        if (null != systemId) {
+          if (null == publicId) {
+            dtd.append(" SYSTEM \"");
+          }
+ else {
+            dtd.append(" \"");
+          }
+          dtd.append(systemId);
+          dtd.append('\"');
+        }
+        dtd.append(" [ ");
+        dtd.append(fNewLine);
+        dtd.append(internalSubset);
+        dtd.append("]>");
+        dtd.append(new String(fNewLine));
+        writer.write(dtd.toString());
+        writer.flush();
+      }
+ catch (      IOException e) {
+        throw new SAXException(Utils.messages.createMessage(MsgKey.ER_WRITING_INTERNAL_SUBSET,null),e);
+      }
+    }
+  }
+ else {
+    if (bStart) {
+      if (fLexicalHandler != null) {
+        fLexicalHandler.startDTD(docTypeName,publicId,systemId);
+      }
+    }
+ else {
+      if (fLexicalHandler != null) {
+        fLexicalHandler.endDTD();
+      }
+    }
+  }
+}

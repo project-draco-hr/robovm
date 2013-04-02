@@ -1,0 +1,21 @@
+{
+  int identity=makeNodeIdentity(nodeHandle);
+  int type=_type(identity);
+  if (DTM.ELEMENT_NODE == type) {
+    int prefixIndex=_dataOrQName(identity);
+    if (0 == prefixIndex)     return "";
+ else {
+      String qname=m_valuesOrPrefixes.indexToString(prefixIndex);
+      return getPrefix(qname,null);
+    }
+  }
+ else   if (DTM.ATTRIBUTE_NODE == type) {
+    int prefixIndex=_dataOrQName(identity);
+    if (prefixIndex < 0) {
+      prefixIndex=m_data.elementAt(-prefixIndex);
+      String qname=m_valuesOrPrefixes.indexToString(prefixIndex);
+      return getPrefix(qname,null);
+    }
+  }
+  return "";
+}

@@ -1,0 +1,28 @@
+{
+  String absoluteURI=systemId;
+  if (isAbsoluteURI(systemId)) {
+    if (systemId.startsWith("file:")) {
+      String str=systemId.substring(5);
+      if (str != null && str.startsWith("/")) {
+        if (str.startsWith("///") || !str.startsWith("//")) {
+          int secondColonIndex=systemId.indexOf(':',5);
+          if (secondColonIndex > 0) {
+            String localPath=systemId.substring(secondColonIndex - 1);
+            try {
+              if (!isAbsolutePath(localPath))               absoluteURI=systemId.substring(0,secondColonIndex - 1) + getAbsolutePathFromRelativePath(localPath);
+            }
+ catch (            SecurityException se) {
+              return systemId;
+            }
+          }
+        }
+      }
+ else {
+        return getAbsoluteURIFromRelative(systemId.substring(5));
+      }
+      return replaceChars(absoluteURI);
+    }
+ else     return systemId;
+  }
+ else   return getAbsoluteURIFromRelative(systemId);
+}

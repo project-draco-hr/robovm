@@ -1,0 +1,19 @@
+{
+  super(mgr,domSource,dtmIdentity,whiteSpaceFilter,xstringfactory,doIndexing);
+  m_pos=m_root=domSource.getNode();
+  m_last_parent=m_last_kid=NULL;
+  m_last_kid=addNode(m_root,m_last_parent,m_last_kid,NULL);
+  if (ELEMENT_NODE == m_root.getNodeType()) {
+    NamedNodeMap attrs=m_root.getAttributes();
+    int attrsize=(attrs == null) ? 0 : attrs.getLength();
+    if (attrsize > 0) {
+      int attrIndex=NULL;
+      for (int i=0; i < attrsize; ++i) {
+        attrIndex=addNode(attrs.item(i),0,attrIndex,NULL);
+        m_firstch.setElementAt(DTM.NULL,attrIndex);
+      }
+      m_nextsib.setElementAt(DTM.NULL,attrIndex);
+    }
+  }
+  m_nodesAreProcessed=false;
+}

@@ -1,0 +1,57 @@
+{
+  int opPos=m_ops.getOp(OpMap.MAPINDEX_LENGTH);
+  int axesType;
+  int matchTypePos=-1;
+  if (tokenIs('@')) {
+    axesType=OpCodes.MATCH_ATTRIBUTE;
+    appendOp(2,axesType);
+    nextToken();
+  }
+ else   if (this.lookahead("::",1)) {
+    if (tokenIs("attribute")) {
+      axesType=OpCodes.MATCH_ATTRIBUTE;
+      appendOp(2,axesType);
+    }
+ else     if (tokenIs("child")) {
+      matchTypePos=m_ops.getOp(OpMap.MAPINDEX_LENGTH);
+      axesType=OpCodes.MATCH_IMMEDIATE_ANCESTOR;
+      appendOp(2,axesType);
+    }
+ else {
+      axesType=-1;
+      this.error(XPATHErrorResources.ER_AXES_NOT_ALLOWED,new Object[]{this.m_token});
+    }
+    nextToken();
+    nextToken();
+  }
+ else   if (tokenIs('/')) {
+    if (!isLeadingSlashPermitted) {
+      error(XPATHErrorResources.ER_EXPECTED_STEP_PATTERN,null);
+    }
+    axesType=OpCodes.MATCH_ANY_ANCESTOR;
+    appendOp(2,axesType);
+    nextToken();
+  }
+ else {
+    matchTypePos=m_ops.getOp(OpMap.MAPINDEX_LENGTH);
+    axesType=OpCodes.MATCH_IMMEDIATE_ANCESTOR;
+    appendOp(2,axesType);
+  }
+  m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+  NodeTest(axesType);
+  m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH + 1,m_ops.getOp(OpMap.MAPINDEX_LENGTH) - opPos);
+  while (tokenIs('[')) {
+    Predicate();
+  }
+  boolean trailingSlashConsumed;
+  if ((matchTypePos > -1) && tokenIs('/') && lookahead('/',1)) {
+    m_ops.setOp(matchTypePos,OpCodes.MATCH_ANY_ANCESTOR);
+    nextToken();
+    trailingSlashConsumed=true;
+  }
+ else {
+    trailingSlashConsumed=false;
+  }
+  m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) - opPos);
+  return trailingSlashConsumed;
+}

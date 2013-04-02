@@ -1,0 +1,45 @@
+{
+  try {
+    TemplatesHandler builder=newTemplatesHandler();
+    TreeWalker walker=new TreeWalker(builder,new org.apache.xml.utils.DOM2Helper(),builder.getSystemId());
+    walker.traverse(node);
+    return builder.getTemplates();
+  }
+ catch (  org.xml.sax.SAXException se) {
+    if (m_errorListener != null) {
+      try {
+        m_errorListener.fatalError(new TransformerException(se));
+      }
+ catch (      TransformerConfigurationException ex) {
+        throw ex;
+      }
+catch (      TransformerException ex) {
+        throw new TransformerConfigurationException(ex);
+      }
+      return null;
+    }
+ else {
+      throw new TransformerConfigurationException(XSLMessages.createMessage(XSLTErrorResources.ER_PROCESSFROMNODE_FAILED,null),se);
+    }
+  }
+catch (  TransformerConfigurationException tce) {
+    throw tce;
+  }
+catch (  Exception e) {
+    if (m_errorListener != null) {
+      try {
+        m_errorListener.fatalError(new TransformerException(e));
+      }
+ catch (      TransformerConfigurationException ex) {
+        throw ex;
+      }
+catch (      TransformerException ex) {
+        throw new TransformerConfigurationException(ex);
+      }
+      return null;
+    }
+ else {
+      throw new TransformerConfigurationException(XSLMessages.createMessage(XSLTErrorResources.ER_PROCESSFROMNODE_FAILED,null),e);
+    }
+  }
+}

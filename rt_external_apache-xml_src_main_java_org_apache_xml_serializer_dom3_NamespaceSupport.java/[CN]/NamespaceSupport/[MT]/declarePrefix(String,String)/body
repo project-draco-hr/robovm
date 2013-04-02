@@ -1,0 +1,19 @@
+{
+  if (prefix == PREFIX_XML || prefix == PREFIX_XMLNS) {
+    return false;
+  }
+  for (int i=fNamespaceSize; i > fContext[fCurrentContext]; i-=2) {
+    if (fNamespace[i - 2].equals(prefix)) {
+      fNamespace[i - 1]=uri;
+      return true;
+    }
+  }
+  if (fNamespaceSize == fNamespace.length) {
+    String[] namespacearray=new String[fNamespaceSize * 2];
+    System.arraycopy(fNamespace,0,namespacearray,0,fNamespaceSize);
+    fNamespace=namespacearray;
+  }
+  fNamespace[fNamespaceSize++]=prefix;
+  fNamespace[fNamespaceSize++]=uri;
+  return true;
+}

@@ -1,0 +1,27 @@
+{
+  int endFunc=opPos + getOp(opPos + 1) - 1;
+  opPos=getFirstChildPos(opPos);
+  int funcID=getOp(opPos);
+  opPos++;
+  if (-1 != funcID) {
+    Function func=m_functionTable.getFunction(funcID);
+    if (func instanceof FuncExtFunctionAvailable)     ((FuncExtFunctionAvailable)func).setFunctionTable(m_functionTable);
+    func.postCompileStep(this);
+    try {
+      int i=0;
+      for (int p=opPos; p < endFunc; p=getNextOpPos(p), i++) {
+        func.setArg(compile(p),i);
+      }
+      func.checkNumberArgs(i);
+    }
+ catch (    WrongNumberArgsException wnae) {
+      java.lang.String name=m_functionTable.getFunctionName(funcID);
+      m_errorHandler.fatalError(new TransformerException(XSLMessages.createXPATHMessage(XPATHErrorResources.ER_ONLY_ALLOWS,new Object[]{name,wnae.getMessage()}),m_locator));
+    }
+    return func;
+  }
+ else {
+    error(XPATHErrorResources.ER_FUNCTION_TOKEN_NOT_FOUND,null);
+    return null;
+  }
+}

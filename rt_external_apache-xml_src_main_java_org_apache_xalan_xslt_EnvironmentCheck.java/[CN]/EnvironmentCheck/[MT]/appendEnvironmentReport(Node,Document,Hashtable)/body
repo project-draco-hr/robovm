@@ -1,0 +1,53 @@
+{
+  if ((null == container) || (null == factory)) {
+    return;
+  }
+  try {
+    Element envCheckNode=factory.createElement("EnvironmentCheck");
+    envCheckNode.setAttribute("version","$Revision: 468646 $");
+    container.appendChild(envCheckNode);
+    if (null == h) {
+      Element statusNode=factory.createElement("status");
+      statusNode.setAttribute("result","ERROR");
+      statusNode.appendChild(factory.createTextNode("appendEnvironmentReport called with null Hashtable!"));
+      envCheckNode.appendChild(statusNode);
+      return;
+    }
+    boolean errors=false;
+    Element hashNode=factory.createElement("environment");
+    envCheckNode.appendChild(hashNode);
+    for (Enumeration keys=h.keys(); keys.hasMoreElements(); ) {
+      Object key=keys.nextElement();
+      String keyStr=(String)key;
+      try {
+        if (keyStr.startsWith(FOUNDCLASSES)) {
+          Vector v=(Vector)h.get(keyStr);
+          errors|=appendFoundJars(hashNode,factory,v,keyStr);
+        }
+ else {
+          if (keyStr.startsWith(ERROR)) {
+            errors=true;
+          }
+          Element node=factory.createElement("item");
+          node.setAttribute("key",keyStr);
+          node.appendChild(factory.createTextNode((String)h.get(keyStr)));
+          hashNode.appendChild(node);
+        }
+      }
+ catch (      Exception e) {
+        errors=true;
+        Element node=factory.createElement("item");
+        node.setAttribute("key",keyStr);
+        node.appendChild(factory.createTextNode(ERROR + " Reading " + key+ " threw: "+ e.toString()));
+        hashNode.appendChild(node);
+      }
+    }
+    Element statusNode=factory.createElement("status");
+    statusNode.setAttribute("result",(errors ? "ERROR" : "OK"));
+    envCheckNode.appendChild(statusNode);
+  }
+ catch (  Exception e2) {
+    System.err.println("appendEnvironmentReport threw: " + e2.toString());
+    e2.printStackTrace();
+  }
+}

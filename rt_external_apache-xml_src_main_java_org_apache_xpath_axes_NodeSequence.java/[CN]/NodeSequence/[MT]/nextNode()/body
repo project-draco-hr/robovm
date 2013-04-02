@@ -1,0 +1,35 @@
+{
+  NodeVector vec=getVector();
+  if (null != vec) {
+    if (m_next < vec.size()) {
+      int next=vec.elementAt(m_next);
+      m_next++;
+      return next;
+    }
+ else     if (cacheComplete() || (-1 != m_last) || (null == m_iter)) {
+      m_next++;
+      return DTM.NULL;
+    }
+  }
+  if (null == m_iter)   return DTM.NULL;
+  int next=m_iter.nextNode();
+  if (DTM.NULL != next) {
+    if (hasCache()) {
+      if (m_iter.isDocOrdered()) {
+        getVector().addElement(next);
+        m_next++;
+      }
+ else {
+        int insertIndex=addNodeInDocOrder(next);
+        if (insertIndex >= 0)         m_next++;
+      }
+    }
+ else     m_next++;
+  }
+ else {
+    markCacheComplete();
+    m_last=m_next;
+    m_next++;
+  }
+  return next;
+}

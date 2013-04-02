@@ -1,0 +1,108 @@
+{
+  int stepType=compiler.getOp(opPos);
+  boolean simpleInit=false;
+  boolean prevIsOneStepDown=true;
+  int whatToShow=compiler.getWhatToShow(opPos);
+  StepPattern ai=null;
+  int axis, predicateAxis;
+switch (stepType) {
+case OpCodes.OP_VARIABLE:
+case OpCodes.OP_EXTFUNCTION:
+case OpCodes.OP_FUNCTION:
+case OpCodes.OP_GROUP:
+    prevIsOneStepDown=false;
+  Expression expr;
+switch (stepType) {
+case OpCodes.OP_VARIABLE:
+case OpCodes.OP_EXTFUNCTION:
+case OpCodes.OP_FUNCTION:
+case OpCodes.OP_GROUP:
+  expr=compiler.compile(opPos);
+break;
+default :
+expr=compiler.compile(opPos + 2);
+}
+axis=Axis.FILTEREDLIST;
+predicateAxis=Axis.FILTEREDLIST;
+ai=new FunctionPattern(expr,axis,predicateAxis);
+simpleInit=true;
+break;
+case OpCodes.FROM_ROOT:
+whatToShow=DTMFilter.SHOW_DOCUMENT | DTMFilter.SHOW_DOCUMENT_FRAGMENT;
+axis=Axis.ROOT;
+predicateAxis=Axis.ROOT;
+ai=new StepPattern(DTMFilter.SHOW_DOCUMENT | DTMFilter.SHOW_DOCUMENT_FRAGMENT,axis,predicateAxis);
+break;
+case OpCodes.FROM_ATTRIBUTES:
+whatToShow=DTMFilter.SHOW_ATTRIBUTE;
+axis=Axis.PARENT;
+predicateAxis=Axis.ATTRIBUTE;
+break;
+case OpCodes.FROM_NAMESPACE:
+whatToShow=DTMFilter.SHOW_NAMESPACE;
+axis=Axis.PARENT;
+predicateAxis=Axis.NAMESPACE;
+break;
+case OpCodes.FROM_ANCESTORS:
+axis=Axis.DESCENDANT;
+predicateAxis=Axis.ANCESTOR;
+break;
+case OpCodes.FROM_CHILDREN:
+axis=Axis.PARENT;
+predicateAxis=Axis.CHILD;
+break;
+case OpCodes.FROM_ANCESTORS_OR_SELF:
+axis=Axis.DESCENDANTORSELF;
+predicateAxis=Axis.ANCESTORORSELF;
+break;
+case OpCodes.FROM_SELF:
+axis=Axis.SELF;
+predicateAxis=Axis.SELF;
+break;
+case OpCodes.FROM_PARENT:
+axis=Axis.CHILD;
+predicateAxis=Axis.PARENT;
+break;
+case OpCodes.FROM_PRECEDING_SIBLINGS:
+axis=Axis.FOLLOWINGSIBLING;
+predicateAxis=Axis.PRECEDINGSIBLING;
+break;
+case OpCodes.FROM_PRECEDING:
+axis=Axis.FOLLOWING;
+predicateAxis=Axis.PRECEDING;
+break;
+case OpCodes.FROM_FOLLOWING_SIBLINGS:
+axis=Axis.PRECEDINGSIBLING;
+predicateAxis=Axis.FOLLOWINGSIBLING;
+break;
+case OpCodes.FROM_FOLLOWING:
+axis=Axis.PRECEDING;
+predicateAxis=Axis.FOLLOWING;
+break;
+case OpCodes.FROM_DESCENDANTS_OR_SELF:
+axis=Axis.ANCESTORORSELF;
+predicateAxis=Axis.DESCENDANTORSELF;
+break;
+case OpCodes.FROM_DESCENDANTS:
+axis=Axis.ANCESTOR;
+predicateAxis=Axis.DESCENDANT;
+break;
+default :
+throw new RuntimeException(XSLMessages.createXPATHMessage(XPATHErrorResources.ER_NULL_ERROR_HANDLER,new Object[]{Integer.toString(stepType)}));
+}
+if (null == ai) {
+whatToShow=compiler.getWhatToShow(opPos);
+ai=new StepPattern(whatToShow,compiler.getStepNS(opPos),compiler.getStepLocalName(opPos),axis,predicateAxis);
+}
+if (false || DEBUG_PATTERN_CREATION) {
+System.out.print("new step: " + ai);
+System.out.print(", axis: " + Axis.getNames(ai.getAxis()));
+System.out.print(", predAxis: " + Axis.getNames(ai.getAxis()));
+System.out.print(", what: ");
+System.out.print("    ");
+ai.debugWhatToShow(ai.getWhatToShow());
+}
+int argLen=compiler.getFirstPredicateOpPos(opPos);
+ai.setPredicates(compiler.getCompiledPredicates(argLen));
+return ai;
+}

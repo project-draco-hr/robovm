@@ -1,0 +1,34 @@
+{
+  if (node == DTMDefaultBase.ROOTNODE)   node=getDocument();
+  m_realStartNode=node;
+  if (_isRestartable) {
+    int nodeID=makeNodeIdentity(node);
+    int nodeType=_nodeType;
+    if (!_includeSelf && node != DTM.NULL) {
+      nodeID=_parent(nodeID);
+    }
+    _startNode=node;
+    if (nodeType >= DTM.NTYPES) {
+      while (nodeID != END) {
+        int eType=_exptype(nodeID);
+        if (eType == nodeType) {
+          m_ancestors.addElement(makeNodeHandle(nodeID));
+        }
+        nodeID=_parent(nodeID);
+      }
+    }
+ else {
+      while (nodeID != END) {
+        int eType=_exptype(nodeID);
+        if ((eType >= DTM.NTYPES && m_expandedNameTable.getType(eType) == nodeType) || (eType < DTM.NTYPES && eType == nodeType)) {
+          m_ancestors.addElement(makeNodeHandle(nodeID));
+        }
+        nodeID=_parent(nodeID);
+      }
+    }
+    m_ancestorsPos=m_ancestors.size() - 1;
+    _currentNode=(m_ancestorsPos >= 0) ? m_ancestors.elementAt(m_ancestorsPos) : DTM.NULL;
+    return resetPosition();
+  }
+  return this;
+}

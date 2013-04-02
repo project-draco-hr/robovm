@@ -1,0 +1,27 @@
+{
+  if (ns != null && ns.length() > 0) {
+    int index=0;
+    String prefixFromRawName=(index=rawName.indexOf(":")) < 0 ? "" : rawName.substring(0,index);
+    if (index > 0) {
+      String uri=m_prefixMap.lookupNamespace(prefixFromRawName);
+      if (uri != null && uri.equals(ns)) {
+        return null;
+      }
+ else {
+        this.startPrefixMapping(prefixFromRawName,ns,false);
+        this.addAttribute("http://www.w3.org/2000/xmlns/",prefixFromRawName,"xmlns:" + prefixFromRawName,"CDATA",ns,false);
+        return prefixFromRawName;
+      }
+    }
+ else {
+      String prefix=m_prefixMap.lookupPrefix(ns);
+      if (prefix == null) {
+        prefix=m_prefixMap.generateNextPrefix();
+        this.startPrefixMapping(prefix,ns,false);
+        this.addAttribute("http://www.w3.org/2000/xmlns/",prefix,"xmlns:" + prefix,"CDATA",ns,false);
+      }
+      return prefix;
+    }
+  }
+  return null;
+}

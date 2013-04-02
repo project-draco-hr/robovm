@@ -1,0 +1,26 @@
+{
+  boolean pushed;
+  int pushDepth;
+  if (shouldFlush) {
+    flushPending();
+    pushDepth=m_elemContext.m_currentElemDepth + 1;
+  }
+ else {
+    pushDepth=m_elemContext.m_currentElemDepth;
+  }
+  pushed=m_prefixMap.pushNamespace(prefix,uri,pushDepth);
+  if (pushed) {
+    String name;
+    if (EMPTYSTRING.equals(prefix)) {
+      name="xmlns";
+      addAttributeAlways(XMLNS_URI,name,name,"CDATA",uri,false);
+    }
+ else {
+      if (!EMPTYSTRING.equals(uri)) {
+        name="xmlns:" + prefix;
+        addAttributeAlways(XMLNS_URI,prefix,name,"CDATA",uri,false);
+      }
+    }
+  }
+  return pushed;
+}

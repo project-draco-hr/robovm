@@ -1,0 +1,22 @@
+{
+  int nsIndex=m_expandedNameTable.getNamespaceID(expandedTypeID);
+  int lnIndex=m_expandedNameTable.getLocalNameID(expandedTypeID);
+  for (; ; ) {
+    int nextID=findElementFromIndex(nsIndex,lnIndex,nextPotential);
+    if (NOTPROCESSED != nextID) {
+      int parentID=m_parent.elementAt(nextID);
+      if (parentID == axisRoot)       return nextID;
+      if (parentID < axisRoot)       return NULL;
+      do {
+        parentID=m_parent.elementAt(parentID);
+        if (parentID < axisRoot)         return NULL;
+      }
+ while (parentID > axisRoot);
+      nextPotential=nextID + 1;
+      continue;
+    }
+    nextNode();
+    if (!(m_nextsib.elementAt(axisRoot) == NOTPROCESSED))     break;
+  }
+  return DTM.NULL;
+}

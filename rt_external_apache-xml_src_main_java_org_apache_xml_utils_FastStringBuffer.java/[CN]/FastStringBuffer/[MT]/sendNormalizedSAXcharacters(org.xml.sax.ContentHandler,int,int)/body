@@ -1,0 +1,18 @@
+{
+  int stateForNextChunk=SUPPRESS_LEADING_WS;
+  int stop=start + length;
+  int startChunk=start >>> m_chunkBits;
+  int startColumn=start & m_chunkMask;
+  int stopChunk=stop >>> m_chunkBits;
+  int stopColumn=stop & m_chunkMask;
+  for (int i=startChunk; i < stopChunk; ++i) {
+    if (i == 0 && m_innerFSB != null)     stateForNextChunk=m_innerFSB.sendNormalizedSAXcharacters(ch,startColumn,m_chunkSize - startColumn);
+ else     stateForNextChunk=sendNormalizedSAXcharacters(m_array[i],startColumn,m_chunkSize - startColumn,ch,stateForNextChunk);
+    startColumn=0;
+  }
+  if (stopChunk == 0 && m_innerFSB != null)   stateForNextChunk=m_innerFSB.sendNormalizedSAXcharacters(ch,startColumn,stopColumn - startColumn);
+ else   if (stopColumn > startColumn) {
+    stateForNextChunk=sendNormalizedSAXcharacters(m_array[stopChunk],startColumn,stopColumn - startColumn,ch,stateForNextChunk | SUPPRESS_TRAILING_WS);
+  }
+  return stateForNextChunk;
+}

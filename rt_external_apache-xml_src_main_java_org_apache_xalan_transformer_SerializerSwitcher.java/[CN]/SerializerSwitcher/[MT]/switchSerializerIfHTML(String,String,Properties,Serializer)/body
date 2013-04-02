@@ -1,0 +1,23 @@
+{
+  Serializer newSerializer=oldSerializer;
+  if (((null == ns) || (ns.length() == 0)) && localName.equalsIgnoreCase("html")) {
+    if (null != getOutputPropertyNoDefault(OutputKeys.METHOD,props))     return newSerializer;
+    Properties prevProperties=props;
+    OutputProperties htmlOutputProperties=new OutputProperties(Method.HTML);
+    htmlOutputProperties.copyFrom(prevProperties,true);
+    Properties htmlProperties=htmlOutputProperties.getProperties();
+{
+      if (null != oldSerializer) {
+        Serializer serializer=SerializerFactory.getSerializer(htmlProperties);
+        Writer writer=oldSerializer.getWriter();
+        if (null != writer)         serializer.setWriter(writer);
+ else {
+          OutputStream os=serializer.getOutputStream();
+          if (null != os)           serializer.setOutputStream(os);
+        }
+        newSerializer=serializer;
+      }
+    }
+  }
+  return newSerializer;
+}

@@ -1,0 +1,16 @@
+{
+  if (index >= m_firstFree)   return -1;
+  int bindex=index >>> m_SHIFT;
+  int boffset=index & m_MASK;
+  int maxindex=m_firstFree >>> m_SHIFT;
+  int[] block;
+  for (; bindex < maxindex; ++bindex) {
+    block=m_map[bindex];
+    if (block != null)     for (int offset=boffset; offset < m_blocksize; ++offset)     if (block[offset] == elem)     return offset + bindex * m_blocksize;
+    boffset=0;
+  }
+  int maxoffset=m_firstFree & m_MASK;
+  block=m_map[maxindex];
+  for (int offset=boffset; offset < maxoffset; ++offset)   if (block[offset] == elem)   return offset + maxindex * m_blocksize;
+  return -1;
+}

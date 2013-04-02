@@ -1,0 +1,26 @@
+{
+  NodeVector vec=getVector();
+  if (null != vec) {
+    int oldNode=vec.elementAt(index);
+    if (oldNode != node && m_cache.useCount() > 1) {
+      IteratorCache newCache=new IteratorCache();
+      final NodeVector nv;
+      try {
+        nv=(NodeVector)vec.clone();
+      }
+ catch (      CloneNotSupportedException e) {
+        e.printStackTrace();
+        RuntimeException rte=new RuntimeException(e.getMessage());
+        throw rte;
+      }
+      newCache.setVector(nv);
+      newCache.setCacheComplete(true);
+      m_cache=newCache;
+      vec=nv;
+      super.setObject(nv);
+    }
+    vec.setElementAt(node,index);
+    m_last=vec.size();
+  }
+ else   m_iter.setItem(node,index);
+}

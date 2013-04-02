@@ -1,0 +1,34 @@
+{
+  int length=ncName.length();
+  if (length == 0)   return false;
+  int i=1;
+  char ch=ncName.charAt(0);
+  if (!isXML11NCNameStart(ch)) {
+    if (length > 1 && isXML11NameHighSurrogate(ch)) {
+      char ch2=ncName.charAt(1);
+      if (!XMLChar.isLowSurrogate(ch2) || !isXML11NCNameStart(XMLChar.supplemental(ch,ch2))) {
+        return false;
+      }
+      i=2;
+    }
+ else {
+      return false;
+    }
+  }
+  while (i < length) {
+    ch=ncName.charAt(i);
+    if (!isXML11NCName(ch)) {
+      if (++i < length && isXML11NameHighSurrogate(ch)) {
+        char ch2=ncName.charAt(i);
+        if (!XMLChar.isLowSurrogate(ch2) || !isXML11NCName(XMLChar.supplemental(ch,ch2))) {
+          return false;
+        }
+      }
+ else {
+        return false;
+      }
+    }
+    ++i;
+  }
+  return true;
+}

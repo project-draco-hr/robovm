@@ -1,0 +1,89 @@
+{
+  DTM dtm=m_xcontext.getDTM(child);
+  short nodeType=dtm.getNodeType(child);
+  boolean isDefaultTextRule=false;
+  boolean isApplyImports=false;
+  isApplyImports=((xslInstruction == null) ? false : xslInstruction.getXSLToken() == Constants.ELEMNAME_APPLY_IMPORTS);
+  if (null == template || isApplyImports) {
+    int maxImportLevel, endImportLevel=0;
+    if (isApplyImports) {
+      maxImportLevel=template.getStylesheetComposed().getImportCountComposed() - 1;
+      endImportLevel=template.getStylesheetComposed().getEndImportCountComposed();
+    }
+ else {
+      maxImportLevel=-1;
+    }
+    if (isApplyImports && (maxImportLevel == -1)) {
+      template=null;
+    }
+ else {
+      XPathContext xctxt=m_xcontext;
+      try {
+        xctxt.pushNamespaceContext(xslInstruction);
+        QName mode=this.getMode();
+        if (isApplyImports)         template=m_stylesheetRoot.getTemplateComposed(xctxt,child,mode,maxImportLevel,endImportLevel,m_quietConflictWarnings,dtm);
+ else         template=m_stylesheetRoot.getTemplateComposed(xctxt,child,mode,m_quietConflictWarnings,dtm);
+      }
+  finally {
+        xctxt.popNamespaceContext();
+      }
+    }
+    if (null == template) {
+switch (nodeType) {
+case DTM.DOCUMENT_FRAGMENT_NODE:
+case DTM.ELEMENT_NODE:
+        template=m_stylesheetRoot.getDefaultRule();
+      break;
+case DTM.CDATA_SECTION_NODE:
+case DTM.TEXT_NODE:
+case DTM.ATTRIBUTE_NODE:
+    template=m_stylesheetRoot.getDefaultTextRule();
+  isDefaultTextRule=true;
+break;
+case DTM.DOCUMENT_NODE:
+template=m_stylesheetRoot.getDefaultRootRule();
+break;
+default :
+return false;
+}
+}
+}
+try {
+pushElemTemplateElement(template);
+m_xcontext.pushCurrentNode(child);
+pushPairCurrentMatched(template,child);
+if (!isApplyImports) {
+DTMIterator cnl=new org.apache.xpath.NodeSetDTM(child,m_xcontext.getDTMManager());
+m_xcontext.pushContextNodeList(cnl);
+}
+if (isDefaultTextRule) {
+switch (nodeType) {
+case DTM.CDATA_SECTION_NODE:
+case DTM.TEXT_NODE:
+ClonerToResultTree.cloneToResultTree(child,nodeType,dtm,getResultTreeHandler(),false);
+break;
+case DTM.ATTRIBUTE_NODE:
+dtm.dispatchCharactersEvents(child,getResultTreeHandler(),false);
+break;
+}
+}
+ else {
+m_xcontext.setSAXLocator(template);
+m_xcontext.getVarStack().link(template.m_frameSize);
+executeChildTemplates(template,true);
+}
+}
+ catch (org.xml.sax.SAXException se) {
+throw new TransformerException(se);
+}
+ finally {
+if (!isDefaultTextRule) m_xcontext.getVarStack().unlink();
+m_xcontext.popCurrentNode();
+if (!isApplyImports) {
+m_xcontext.popContextNodeList();
+}
+popCurrentMatched();
+popElemTemplateElement();
+}
+return true;
+}

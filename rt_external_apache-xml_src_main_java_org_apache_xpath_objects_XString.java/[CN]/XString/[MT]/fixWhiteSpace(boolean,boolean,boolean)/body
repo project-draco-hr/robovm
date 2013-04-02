@@ -1,0 +1,53 @@
+{
+  int len=this.length();
+  char[] buf=new char[len];
+  this.getChars(0,len,buf,0);
+  boolean edit=false;
+  int s;
+  for (s=0; s < len; s++) {
+    if (isSpace(buf[s])) {
+      break;
+    }
+  }
+  int d=s;
+  boolean pres=false;
+  for (; s < len; s++) {
+    char c=buf[s];
+    if (isSpace(c)) {
+      if (!pres) {
+        if (' ' != c) {
+          edit=true;
+        }
+        buf[d++]=' ';
+        if (doublePunctuationSpaces && (s != 0)) {
+          char prevChar=buf[s - 1];
+          if (!((prevChar == '.') || (prevChar == '!') || (prevChar == '?'))) {
+            pres=true;
+          }
+        }
+ else {
+          pres=true;
+        }
+      }
+ else {
+        edit=true;
+        pres=true;
+      }
+    }
+ else {
+      buf[d++]=c;
+      pres=false;
+    }
+  }
+  if (trimTail && 1 <= d && ' ' == buf[d - 1]) {
+    edit=true;
+    d--;
+  }
+  int start=0;
+  if (trimHead && 0 < d && ' ' == buf[0]) {
+    edit=true;
+    start++;
+  }
+  XMLStringFactory xsf=XMLStringFactoryImpl.getFactory();
+  return edit ? xsf.newstr(new String(buf,start,d - start)) : this;
+}

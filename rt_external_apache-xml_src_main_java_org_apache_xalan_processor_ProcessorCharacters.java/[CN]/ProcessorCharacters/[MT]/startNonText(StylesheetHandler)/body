@@ -1,0 +1,27 @@
+{
+  if (this == handler.getCurrentProcessor()) {
+    handler.popProcessor();
+  }
+  int nChars=m_accumulator.length();
+  if ((nChars > 0) && ((null != m_xslTextElement) || !XMLCharacterRecognizer.isWhiteSpace(m_accumulator)) || handler.isSpacePreserve()) {
+    ElemTextLiteral elem=new ElemTextLiteral();
+    elem.setDOMBackPointer(m_firstBackPointer);
+    elem.setLocaterInfo(handler.getLocator());
+    try {
+      elem.setPrefixes(handler.getNamespaceSupport());
+    }
+ catch (    TransformerException te) {
+      throw new org.xml.sax.SAXException(te);
+    }
+    boolean doe=(null != m_xslTextElement) ? m_xslTextElement.getDisableOutputEscaping() : false;
+    elem.setDisableOutputEscaping(doe);
+    elem.setPreserveSpace(true);
+    char[] chars=new char[nChars];
+    m_accumulator.getChars(0,nChars,chars,0);
+    elem.setChars(chars);
+    ElemTemplateElement parent=handler.getElemTemplateElement();
+    parent.appendChild(elem);
+  }
+  m_accumulator.setLength(0);
+  m_firstBackPointer=null;
+}

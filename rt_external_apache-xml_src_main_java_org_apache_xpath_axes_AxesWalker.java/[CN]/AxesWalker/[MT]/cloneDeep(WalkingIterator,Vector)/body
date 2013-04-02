@@ -1,0 +1,19 @@
+{
+  AxesWalker clone=findClone(this,cloneList);
+  if (null != clone)   return clone;
+  clone=(AxesWalker)this.clone();
+  clone.setLocPathIterator(cloneOwner);
+  if (null != cloneList) {
+    cloneList.addElement(this);
+    cloneList.addElement(clone);
+  }
+  if (wi().m_lastUsedWalker == this)   cloneOwner.m_lastUsedWalker=clone;
+  if (null != m_nextWalker)   clone.m_nextWalker=m_nextWalker.cloneDeep(cloneOwner,cloneList);
+  if (null != cloneList) {
+    if (null != m_prevWalker)     clone.m_prevWalker=m_prevWalker.cloneDeep(cloneOwner,cloneList);
+  }
+ else {
+    if (null != m_nextWalker)     clone.m_nextWalker.m_prevWalker=clone;
+  }
+  return clone;
+}

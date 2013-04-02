@@ -1,0 +1,25 @@
+{
+  int opPos=m_ops.getOp(OpMap.MAPINDEX_LENGTH);
+  int filterExprMatch=FilterExpr();
+  if (filterExprMatch != FILTER_MATCH_FAILED) {
+    boolean locationPathStarted=(filterExprMatch == FILTER_MATCH_PREDICATES);
+    if (tokenIs('/')) {
+      nextToken();
+      if (!locationPathStarted) {
+        insertOp(opPos,2,OpCodes.OP_LOCATIONPATH);
+        locationPathStarted=true;
+      }
+      if (!RelativeLocationPath()) {
+        error(XPATHErrorResources.ER_EXPECTED_REL_LOC_PATH,null);
+      }
+    }
+    if (locationPathStarted) {
+      m_ops.setOp(m_ops.getOp(OpMap.MAPINDEX_LENGTH),OpCodes.ENDOP);
+      m_ops.setOp(OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) + 1);
+      m_ops.setOp(opPos + OpMap.MAPINDEX_LENGTH,m_ops.getOp(OpMap.MAPINDEX_LENGTH) - opPos);
+    }
+  }
+ else {
+    LocationPath();
+  }
+}

@@ -1,0 +1,22 @@
+{
+  if (inScope) {
+    SuballocatedIntVector nsContext=findNamespaceContext(makeNodeIdentity(baseHandle));
+    if (nsContext == null)     return NULL;
+    int i=1 + nsContext.indexOf(nodeHandle);
+    if (i <= 0 || i == nsContext.size())     return NULL;
+    return nsContext.elementAt(i);
+  }
+ else {
+    int identity=makeNodeIdentity(nodeHandle);
+    while (DTM.NULL != (identity=getNextNodeIdentity(identity))) {
+      int type=_type(identity);
+      if (type == DTM.NAMESPACE_NODE) {
+        return makeNodeHandle(identity);
+      }
+ else       if (type != DTM.ATTRIBUTE_NODE) {
+        break;
+      }
+    }
+  }
+  return DTM.NULL;
+}

@@ -1,0 +1,27 @@
+{
+  UnionPathIterator upi=new UnionPathIterator(compiler,opPos);
+  int nPaths=upi.m_exprs.length;
+  boolean isAllChildIterators=true;
+  for (int i=0; i < nPaths; i++) {
+    LocPathIterator lpi=upi.m_exprs[i];
+    if (lpi.getAxis() != Axis.CHILD) {
+      isAllChildIterators=false;
+      break;
+    }
+ else {
+      if (HasPositionalPredChecker.check(lpi)) {
+        isAllChildIterators=false;
+        break;
+      }
+    }
+  }
+  if (isAllChildIterators) {
+    UnionChildIterator uci=new UnionChildIterator();
+    for (int i=0; i < nPaths; i++) {
+      PredicatedNodeTest lpi=upi.m_exprs[i];
+      uci.addNodeTest(lpi);
+    }
+    return uci;
+  }
+ else   return upi;
+}

@@ -1,0 +1,41 @@
+{
+  QName uniquePseudoVarName=null;
+  boolean foundFirst=false;
+  int numPathsFound=0;
+  int n=paths.size();
+  Expression expr1=firstOccuranceOwner.getExpression();
+  if (DEBUG)   assertIsLocPathIterator(expr1,firstOccuranceOwner);
+  boolean isGlobal=(paths == m_absPaths);
+  LocPathIterator lpi=(LocPathIterator)expr1;
+  for (int j=start; j < n; j++) {
+    ExpressionOwner owner2=(ExpressionOwner)paths.elementAt(j);
+    if (null != owner2) {
+      Expression expr2=owner2.getExpression();
+      boolean isEqual=expr2.deepEquals(lpi);
+      if (isEqual) {
+        LocPathIterator lpi2=(LocPathIterator)expr2;
+        if (!foundFirst) {
+          foundFirst=true;
+          ElemVariable var=createPseudoVarDecl(psuedoVarRecipient,lpi,isGlobal);
+          if (null == var)           return 0;
+          uniquePseudoVarName=var.getName();
+          changeToVarRef(uniquePseudoVarName,firstOccuranceOwner,paths,psuedoVarRecipient);
+          paths.setElementAt(var.getSelect(),firstOccuranceIndex);
+          numPathsFound++;
+        }
+        changeToVarRef(uniquePseudoVarName,owner2,paths,psuedoVarRecipient);
+        paths.setElementAt(null,j);
+        numPathsFound++;
+      }
+    }
+  }
+  if ((0 == numPathsFound) && (paths == m_absPaths)) {
+    ElemVariable var=createPseudoVarDecl(psuedoVarRecipient,lpi,true);
+    if (null == var)     return 0;
+    uniquePseudoVarName=var.getName();
+    changeToVarRef(uniquePseudoVarName,firstOccuranceOwner,paths,psuedoVarRecipient);
+    paths.setElementAt(var.getSelect(),firstOccuranceIndex);
+    numPathsFound++;
+  }
+  return numPathsFound;
+}

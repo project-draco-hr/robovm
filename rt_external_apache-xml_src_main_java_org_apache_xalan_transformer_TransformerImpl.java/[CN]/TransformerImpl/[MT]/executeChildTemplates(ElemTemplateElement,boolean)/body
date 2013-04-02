@@ -1,0 +1,39 @@
+{
+  ElemTemplateElement t=elem.getFirstChildElem();
+  if (null == t)   return;
+  if (elem.hasTextLitOnly() && m_optimizer) {
+    char[] chars=((ElemTextLiteral)t).getChars();
+    try {
+      this.pushElemTemplateElement(t);
+      m_serializationHandler.characters(chars,0,chars.length);
+    }
+ catch (    SAXException se) {
+      throw new TransformerException(se);
+    }
+ finally {
+      this.popElemTemplateElement();
+    }
+    return;
+  }
+  XPathContext xctxt=m_xcontext;
+  xctxt.pushSAXLocatorNull();
+  int currentTemplateElementsTop=m_currentTemplateElements.size();
+  m_currentTemplateElements.push(null);
+  try {
+    for (; t != null; t=t.getNextSiblingElem()) {
+      if (!shouldAddAttrs && t.getXSLToken() == Constants.ELEMNAME_ATTRIBUTE)       continue;
+      xctxt.setSAXLocator(t);
+      m_currentTemplateElements.setElementAt(t,currentTemplateElementsTop);
+      t.execute(this);
+    }
+  }
+ catch (  RuntimeException re) {
+    TransformerException te=new TransformerException(re);
+    te.setLocator(t);
+    throw te;
+  }
+ finally {
+    m_currentTemplateElements.pop();
+    xctxt.popSAXLocator();
+  }
+}
