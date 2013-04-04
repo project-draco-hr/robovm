@@ -1,0 +1,14 @@
+{
+  if ("file".equals(file.getScheme())) {
+    return new File(file).isFile();
+  }
+  if ("jar".equals(file.getScheme())) {
+    try {
+      JarURLConnection conn=(JarURLConnection)file.toURL().openConnection();
+      return conn.getJarEntry() != null && !conn.getJarEntry().getName().endsWith("/");
+    }
+ catch (    IOException e) {
+    }
+  }
+  return false;
+}

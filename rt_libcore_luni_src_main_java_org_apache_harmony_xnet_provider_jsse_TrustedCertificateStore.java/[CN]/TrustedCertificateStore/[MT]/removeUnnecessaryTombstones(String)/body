@@ -8,15 +8,15 @@
   }
   String hash=alias.substring(PREFIX_USER.length(),dotIndex);
   int lastTombstoneIndex=Integer.parseInt(alias.substring(dotIndex + 1));
-  if (file(addedDir,hash,lastTombstoneIndex + 1).exists()) {
+  if (exists(file(addedDir,hash,lastTombstoneIndex + 1))) {
     return;
   }
   while (lastTombstoneIndex >= 0) {
-    File file=file(addedDir,hash,lastTombstoneIndex);
+    URI file=file(addedDir,hash,lastTombstoneIndex);
     if (!isTombstone(file)) {
       break;
     }
-    if (!file.delete()) {
+    if (!"file".equals(file.getScheme()) || !new File(file).delete()) {
       throw new IOException("Could not remove " + file);
     }
     lastTombstoneIndex--;

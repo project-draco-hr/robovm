@@ -2,19 +2,19 @@
   if (cert == null) {
     throw new NullPointerException("cert == null");
   }
-  File system=getCertificateFile(systemDir,cert);
-  if (system.exists()) {
-    File deleted=getCertificateFile(deletedDir,cert);
-    if (deleted.exists()) {
-      if (!deleted.delete()) {
+  URI system=getCertificateFile(systemDir,cert);
+  if (exists(system)) {
+    URI deleted=getCertificateFile(deletedDir,cert);
+    if (exists(deleted)) {
+      if (!"file".equals(deleted.getScheme()) || !new File(deleted).delete()) {
         throw new IOException("Could not remove " + deleted);
       }
       return;
     }
     return;
   }
-  File user=getCertificateFile(addedDir,cert);
-  if (user.exists()) {
+  URI user=getCertificateFile(addedDir,cert);
+  if (exists(user)) {
     return;
   }
   writeCertificate(user,cert);

@@ -1,0 +1,24 @@
+{
+  if (!isFile(file)) {
+    return null;
+  }
+  InputStream is=null;
+  try {
+    if ("file".equals(file.getScheme())) {
+      is=new BufferedInputStream(new FileInputStream(new File(file)));
+    }
+ else {
+      is=file.toURL().openStream();
+    }
+    return (X509Certificate)CERT_FACTORY.generateCertificate(is);
+  }
+ catch (  IOException e) {
+    return null;
+  }
+catch (  CertificateException e) {
+    return null;
+  }
+ finally {
+    IoUtils.closeQuietly(is);
+  }
+}

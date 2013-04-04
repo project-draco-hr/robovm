@@ -1,0 +1,35 @@
+{
+  if ("file".equals(file.getScheme())) {
+    return new File(file).list();
+  }
+  if ("jar".equals(file.getScheme())) {
+    try {
+      JarURLConnection conn=(JarURLConnection)file.toURL().openConnection();
+      JarFile jarFile=conn.getJarFile();
+      String uriStr=file.toString();
+      if (!uriStr.endsWith("/")) {
+        uriStr+="/";
+      }
+      String path=uriStr.substring(uriStr.lastIndexOf('!') + 1);
+      if (path.startsWith("/")) {
+        path=path.substring(1);
+      }
+      Enumeration<JarEntry> en=jarFile.entries();
+      List<String> result=new ArrayList<String>();
+      while (en.hasMoreElements()) {
+        JarEntry entry=en.nextElement();
+        String name=entry.getName();
+        if (name.startsWith(path) && !name.endsWith("/")) {
+          int lastSlash=name.lastIndexOf('/');
+          if (lastSlash == path.length() - 1) {
+            result.add(name.substring(lastSlash + 1));
+          }
+        }
+      }
+      return result.toArray(new String[result.size()]);
+    }
+ catch (    IOException e) {
+    }
+  }
+  return null;
+}

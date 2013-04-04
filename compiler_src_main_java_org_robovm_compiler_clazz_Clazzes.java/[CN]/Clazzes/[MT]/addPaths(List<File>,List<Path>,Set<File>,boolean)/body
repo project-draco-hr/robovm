@@ -1,0 +1,19 @@
+{
+  for (  File file : files) {
+    if (!file.exists()) {
+      config.getLogger().warn("Classpath entry %s does not exist",file);
+      continue;
+    }
+    if (file.isFile() && !isArchive(file)) {
+      throw new IOException("File is not an archive file: " + file.getAbsolutePath());
+    }
+    if (file.isDirectory() && isEmpty(file)) {
+      continue;
+    }
+    if (!seen.contains(file)) {
+      Path p=createPath(file,cp,inBootclasspath);
+      cp.add(p);
+      seen.add(file);
+    }
+  }
+}
