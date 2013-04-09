@@ -1,0 +1,29 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  String prov=null;
+  for (int i=0; i < validValues.length; i++) {
+    try {
+      SecretKeyFactory.getInstance(validValues[i],prov);
+      fail("IllegalArgumentException was not thrown as expected (algorithm: ".concat(validValues[i]).concat(" provider: null"));
+    }
+ catch (    IllegalArgumentException e) {
+    }
+    try {
+      SecretKeyFactory.getInstance(validValues[i],"");
+      fail("IllegalArgumentException was not thrown as expected (algorithm: ".concat(validValues[i]).concat(" provider: empty"));
+    }
+ catch (    IllegalArgumentException e) {
+    }
+    for (int j=1; j < invalidValues.length; j++) {
+      try {
+        SecretKeyFactory.getInstance(validValues[i],invalidValues[j]);
+        fail("NoSuchProviderException was not thrown as expected (algorithm: ".concat(validValues[i]).concat(" provider: ").concat(invalidValues[j]).concat(")"));
+      }
+ catch (      NoSuchProviderException e) {
+      }
+    }
+  }
+}

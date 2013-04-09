@@ -1,0 +1,59 @@
+{
+  for (int i=0; i < list_wf.length; i++) {
+    try {
+      HashMap<String,String> hm=sp.readFile(list_out_hb[i].getPath());
+      MyHandler dh=new MyHandler();
+      parser.parse(list_wf[i].toURI().toString(),dh);
+      assertTrue(SAXParserTestSupport.equalsMaps(hm,dh.createData()));
+    }
+ catch (    IOException ioe) {
+      fail("Unexpected IOException " + ioe.toString());
+    }
+catch (    SAXException sax) {
+      fail("Unexpected SAXException " + sax.toString());
+    }
+  }
+  for (int i=0; i < list_nwf.length; i++) {
+    try {
+      MyHandler dh=new MyHandler();
+      parser.parse(list_nwf[i].toURI().toString(),dh);
+      fail("SAXException is not thrown");
+    }
+ catch (    org.xml.sax.SAXException se) {
+    }
+catch (    FileNotFoundException fne) {
+      fail("Unexpected FileNotFoundException " + fne.toString());
+    }
+catch (    IOException ioe) {
+      fail("Unexpected IOException " + ioe.toString());
+    }
+  }
+  try {
+    MyHandler dh=new MyHandler();
+    parser.parse((String)null,dh);
+    fail("java.lang.IllegalArgumentException is not thrown");
+  }
+ catch (  java.lang.IllegalArgumentException iae) {
+  }
+catch (  IOException ioe) {
+    fail("Unexpected IOException " + ioe.toString());
+  }
+catch (  SAXException sax) {
+    fail("Unexpected SAXException " + sax.toString());
+  }
+  try {
+    parser.parse(list_wf[0].toURI().toString(),(HandlerBase)null);
+  }
+ catch (  java.lang.IllegalArgumentException iae) {
+    fail("java.lang.IllegalArgumentException is thrown");
+  }
+catch (  FileNotFoundException fne) {
+    fail("Unexpected FileNotFoundException " + fne.toString());
+  }
+catch (  IOException ioe) {
+    fail("Unexpected IOException " + ioe.toString());
+  }
+catch (  SAXException sax) {
+    fail("Unexpected SAXException " + sax.toString());
+  }
+}

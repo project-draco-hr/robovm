@@ -1,0 +1,85 @@
+{
+  Timer t=null;
+  try {
+    t=new Timer();
+    TimerTestTask testTask=new TimerTestTask();
+    t.cancel();
+    boolean exception=false;
+    try {
+      t.scheduleAtFixedRate(testTask,100,100);
+    }
+ catch (    IllegalStateException e) {
+      exception=true;
+    }
+    assertTrue("scheduleAtFixedRate after Timer.cancel() should throw exception",exception);
+    t=new Timer();
+    testTask=new TimerTestTask();
+    exception=false;
+    try {
+      t.scheduleAtFixedRate(testTask,-100,100);
+    }
+ catch (    IllegalArgumentException e) {
+      exception=true;
+    }
+    assertTrue("scheduleAtFixedRate with negative delay should throw IllegalArgumentException",exception);
+    t.cancel();
+    t=new Timer();
+    testTask=new TimerTestTask();
+    exception=false;
+    try {
+      t.scheduleAtFixedRate(testTask,100,-100);
+    }
+ catch (    IllegalArgumentException e) {
+      exception=true;
+    }
+    assertTrue("scheduleAtFixedRate with negative period should throw IllegalArgumentException",exception);
+    t.cancel();
+    t=new Timer();
+    testTask=new TimerTestTask();
+    t.scheduleAtFixedRate(testTask,100,100);
+    try {
+      Thread.sleep(400);
+    }
+ catch (    InterruptedException e) {
+    }
+    assertTrue("TimerTask.run() method should have been called at least twice (" + testTask.wasRun() + ")",testTask.wasRun() >= 2);
+    t.cancel();
+class SlowThenFastTask extends TimerTask {
+      int wasRun=0;
+      long startedAt;
+      long lastDelta;
+      public void run(){
+        if (wasRun == 0)         startedAt=System.currentTimeMillis();
+        lastDelta=System.currentTimeMillis() - (startedAt + (100 * wasRun));
+        wasRun++;
+        if (wasRun == 2) {
+          try {
+            Thread.sleep(200);
+          }
+ catch (          InterruptedException e) {
+          }
+        }
+      }
+      public long lastDelta(){
+        return lastDelta;
+      }
+      public int wasRun(){
+        return wasRun;
+      }
+    }
+    t=new Timer();
+    SlowThenFastTask slowThenFastTask=new SlowThenFastTask();
+    t.scheduleAtFixedRate(slowThenFastTask,100,100);
+    try {
+      Thread.sleep(1000);
+    }
+ catch (    InterruptedException e) {
+    }
+    long lastDelta=slowThenFastTask.lastDelta();
+    assertTrue("Fixed Rate Schedule should catch up, but is off by " + lastDelta + " ms",slowThenFastTask.lastDelta < 300);
+    t.cancel();
+  }
+  finally {
+    if (t != null)     t.cancel();
+  }
+}

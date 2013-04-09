@@ -1,0 +1,45 @@
+{
+  try {
+    assertEquals("zoo",rsmd.getTableName(1));
+  }
+ catch (  SQLException e) {
+    fail("SQLException is thrown: " + e.getMessage());
+  }
+  Statement st1=null;
+  ResultSet rs1=null;
+  try {
+    String create="create table hutch (id integer not null, animal_id integer, address char(20), primary key (id));";
+    String insert1="insert into hutch (id, animal_id, address) values (1, 2, 'Birds-house, 1');";
+    String insert2="insert into hutch (id, animal_id, address) values (2, 1, 'Horse-house, 5');";
+    String query="select name, animal_id from hutch, zoo where zoo.id = 1";
+    st1=conn.createStatement();
+    st1.executeUpdate(create);
+    st1.executeUpdate(insert1);
+    st1.executeUpdate(insert2);
+    rs1=st1.executeQuery(query);
+    assertNotNull(rs1);
+    ResultSetMetaData rsmd1=rs1.getMetaData();
+    assertEquals("zoo",rsmd1.getTableName(1));
+    assertEquals("hutch",rsmd1.getTableName(2));
+  }
+ catch (  SQLException e) {
+    fail("SQLException is thrown: " + e.getMessage());
+  }
+ finally {
+    try {
+      if (rs1 != null)       rs1.close();
+      if (st1 != null) {
+        st1.executeUpdate("drop table if exists hutch");
+        st1.close();
+      }
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  try {
+    String name=rsmd.getTableName(0);
+    fail("SQLException Expected");
+  }
+ catch (  SQLException e) {
+  }
+}

@@ -1,0 +1,19 @@
+{
+  CharsetDecoder decoder=Charset.forName("UTF-8").newDecoder();
+  char[] cBuf=new char[10];
+  CharBuffer out=CharBuffer.wrap(cBuf);
+  assertTrue(out.hasArray());
+  decoder.decode(ByteBuffer.wrap(new byte[]{(byte)'a',(byte)'b',(byte)'c',(byte)'d'}),out,false);
+  assertEquals("abcd",new String(cBuf,0,4));
+  assertEquals(0,cBuf[4]);
+  assertEquals(0,cBuf[5]);
+  byte[] bBuf=new byte[10];
+  out=ByteBuffer.wrap(bBuf).asCharBuffer();
+  assertFalse(out.hasArray());
+  decoder.decode(ByteBuffer.wrap(new byte[]{(byte)'x'}),out,true);
+  assertEquals('x',bBuf[1]);
+  assertEquals(0,bBuf[3]);
+  assertEquals("abcd",new String(cBuf,0,4));
+  assertEquals(0,cBuf[4]);
+  assertEquals(0,cBuf[5]);
+}

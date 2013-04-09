@@ -1,0 +1,65 @@
+{
+  byte[] b={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+  ByteBuffer bInput=ByteBuffer.allocate(256);
+  ByteBuffer bOutput=ByteBuffer.allocate(256);
+  Cipher c=Cipher.getInstance("DES/CBC/NoPadding");
+  c.init(Cipher.ENCRYPT_MODE,cipherKeyDES);
+  bInput.put(b,0,10);
+  bInput.rewind();
+  bOutput.rewind();
+  c.update(bInput,bOutput);
+  c=Cipher.getInstance("DES/CBC/NoPadding");
+  try {
+    c.update(bInput,bOutput);
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+  c=Cipher.getInstance("DES/CBC/NoPadding");
+  c.init(Cipher.ENCRYPT_MODE,cipherKeyDES);
+  bInput=ByteBuffer.allocate(16);
+  bInput.put(b,0,16);
+  bInput.rewind();
+  bOutput.rewind();
+  c.update(bInput,bOutput);
+  SecureRandom sr=new SecureRandom();
+  byte[] iv=new byte[8];
+  sr.nextBytes(iv);
+  AlgorithmParameterSpec ap=new IvParameterSpec(iv);
+  c=Cipher.getInstance("DES/CBC/PKCS5Padding");
+  c.init(Cipher.DECRYPT_MODE,cipherKeyDES,ap);
+  bInput=ByteBuffer.allocate(64);
+  c=Cipher.getInstance("DES/CBC/NoPadding");
+  c.init(Cipher.ENCRYPT_MODE,cipherKeyDES);
+  bInput.put(b,0,16);
+  bInput.rewind();
+  try {
+    c.update(bInput,bInput);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  c=Cipher.getInstance("DES/CBC/NoPadding");
+  c.init(Cipher.ENCRYPT_MODE,cipherKeyDES);
+  bInput.put(b,0,16);
+  bInput.rewind();
+  bOutput.rewind();
+  try {
+    c.update(bInput,bOutput.asReadOnlyBuffer());
+    fail();
+  }
+ catch (  ReadOnlyBufferException expected) {
+  }
+  bInput.rewind();
+  bInput.put(b,0,16);
+  bInput.rewind();
+  bOutput=ByteBuffer.allocate(8);
+  c=Cipher.getInstance("DESede");
+  c.init(Cipher.ENCRYPT_MODE,cipherKey);
+  try {
+    c.update(bInput,bOutput);
+    fail();
+  }
+ catch (  ShortBufferException expected) {
+  }
+}

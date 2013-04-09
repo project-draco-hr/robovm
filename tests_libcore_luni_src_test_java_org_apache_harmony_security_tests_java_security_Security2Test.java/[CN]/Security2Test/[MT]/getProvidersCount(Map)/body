@@ -1,0 +1,41 @@
+{
+  int result=0;
+  Provider[] allProviders=Security.getProviders();
+  for (int i=0; i < allProviders.length; i++) {
+    Provider provider=allProviders[i];
+    Set allProviderKeys=provider.keySet();
+    boolean noMatchFoundForFilterEntry=false;
+    Set allFilterKeys=filterMap.keySet();
+    Iterator fkIter=allFilterKeys.iterator();
+    while (fkIter.hasNext()) {
+      String filterString=((String)fkIter.next()).trim();
+      if (filterString.endsWith("=")) {
+        filterString=filterString.substring(0,filterString.length() - 1);
+      }
+      if (filterString != null) {
+        if (filterString.indexOf(" ") == -1) {
+          if (!allProviderKeys.contains(filterString)) {
+            if (!allProviderKeys.contains("Alg.Alias." + filterString)) {
+              noMatchFoundForFilterEntry=true;
+              break;
+            }
+          }
+        }
+ else {
+          if (allProviderKeys.contains(filterString)) {
+            String filterVal=(String)filterMap.get(filterString);
+            String providerVal=(String)provider.get(filterString);
+            if (providerVal == null || !providerVal.equals(filterVal)) {
+              noMatchFoundForFilterEntry=true;
+              break;
+            }
+          }
+        }
+      }
+    }
+    if (!noMatchFoundForFilterEntry) {
+      result++;
+    }
+  }
+  return result;
+}

@@ -1,0 +1,26 @@
+{
+  Document doc;
+  NodeList genderList;
+  Node genderNode;
+  Node entText;
+  EntityReference entReference;
+  Node appendedChild;
+  doc=(Document)load("staff",true);
+  genderList=doc.getElementsByTagName("gender");
+  genderNode=genderList.item(2);
+  entReference=doc.createEntityReference("ent3");
+  assertNotNull("createdEntRefNotNull",entReference);
+  appendedChild=genderNode.appendChild(entReference);
+  entText=entReference.getFirstChild();
+  assertNotNull("entTextNotNull",entText);
+{
+    boolean success=false;
+    try {
+      ((CharacterData)entText).appendData("newString");
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.NO_MODIFICATION_ALLOWED_ERR);
+    }
+    assertTrue("throw_NO_MODIFICATION_ALLOWED_ERR",success);
+  }
+}

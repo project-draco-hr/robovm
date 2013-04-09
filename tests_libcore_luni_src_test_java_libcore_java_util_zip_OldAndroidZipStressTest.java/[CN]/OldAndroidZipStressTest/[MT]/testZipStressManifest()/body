@@ -1,0 +1,17 @@
+{
+  long time0=System.currentTimeMillis();
+  byte[] buffer=new byte[512];
+  for (  File file : getFiles()) {
+    System.out.println("ZIP stress test processing " + file + "...");
+    ZipFile zip=new ZipFile(file);
+    ZipEntry entry=zip.getEntry("AndroidManifest.xml");
+    InputStream stream=zip.getInputStream(entry);
+    int j=stream.read(buffer);
+    while (j != -1) {
+      j=stream.read(buffer);
+    }
+    stream.close();
+  }
+  long time1=System.currentTimeMillis();
+  System.out.println("ZIP stress test finished, time was " + (time1 - time0) + "ms");
+}

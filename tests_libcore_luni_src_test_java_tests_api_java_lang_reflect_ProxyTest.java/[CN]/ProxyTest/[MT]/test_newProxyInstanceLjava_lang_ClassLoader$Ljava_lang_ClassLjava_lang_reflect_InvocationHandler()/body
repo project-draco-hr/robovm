@@ -1,0 +1,72 @@
+{
+  Object p=Proxy.newProxyInstance(Support_Proxy_I1.class.getClassLoader(),new Class[]{Support_Proxy_I1.class,Support_Proxy_I2.class},new InvocationHandler(){
+    public Object invoke(    Object proxy,    Method method,    Object[] args) throws Throwable {
+      if (method.getName().equals("equals"))       return new Boolean(proxy == args[0]);
+      if (method.getName().equals("array"))       return new int[]{(int)((long[])args[0])[1],-1};
+      if (method.getName().equals("string")) {
+        if ("".equals(args[0]))         throw new Support_Proxy_SubException();
+        if ("clone".equals(args[0]))         throw new Support_Proxy_ParentException();
+        if ("error".equals(args[0]))         throw new ArrayStoreException();
+        if ("any".equals(args[0]))         throw new IllegalAccessException();
+      }
+      return null;
+    }
+  }
+);
+  Support_Proxy_I1 proxy=(Support_Proxy_I1)p;
+  assertTrue("Failed identity test ",proxy.equals(proxy));
+  assertTrue("Failed not equals test ",!proxy.equals(""));
+  int[] result=(int[])proxy.array(new long[]{100L,-200L});
+  assertEquals("Failed primitive type conversion test ",-200,result[0]);
+  boolean worked=false;
+  try {
+    proxy.string("");
+  }
+ catch (  Support_Proxy_SubException e) {
+    worked=true;
+  }
+catch (  Support_Proxy_ParentException e) {
+  }
+  assertTrue("Problem converting exception ",worked);
+  worked=false;
+  try {
+    proxy.string("clone");
+  }
+ catch (  Support_Proxy_ParentException e) {
+  }
+catch (  UndeclaredThrowableException e) {
+    worked=true;
+  }
+  assertTrue("Problem converting exception ",worked);
+  worked=false;
+  try {
+    proxy.string("error");
+  }
+ catch (  Support_Proxy_ParentException e) {
+  }
+catch (  UndeclaredThrowableException e) {
+  }
+catch (  RuntimeException e) {
+    worked=e.getClass() == ArrayStoreException.class;
+  }
+  assertTrue("Problem converting exception ",worked);
+  worked=false;
+  try {
+    proxy.string("any");
+  }
+ catch (  Support_Proxy_ParentException e) {
+  }
+catch (  UndeclaredThrowableException e) {
+    worked=true;
+  }
+  assertTrue("Problem converting exception ",worked);
+  Broken1 proxyObject=null;
+  try {
+    proxyObject=(Broken1)Proxy.newProxyInstance(Broken1.class.getClassLoader(),new Class[]{Broken1.class},new Broken1Invoke());
+  }
+ catch (  Throwable e) {
+    fail("Failed to create proxy for class: " + Broken1.class + " - "+ e);
+  }
+  float brokenResult=proxyObject.method(2.1f,5.8f);
+  assertTrue("Invalid invoke result",brokenResult == 5.8f);
+}

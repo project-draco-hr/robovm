@@ -1,0 +1,35 @@
+{
+  byte[] ba=new byte[600];
+  fileURLCon.setDoInput(true);
+  fileURLCon.connect();
+  InputStream helloWorld2=(InputStream)fileURLCon.getContent(new Class[]{InputStream.class});
+  assertNotNull(helloWorld2);
+  BufferedReader r=new BufferedReader(new InputStreamReader(helloWorld2),testString.getBytes().length);
+  assertTrue("Incorrect content returned from fileURL",testString.equals(r.readLine().trim()));
+  String test=(String)fileURLCon.getContent(new Class[]{String.class});
+  assertNull(test);
+  ((HttpURLConnection)uc).disconnect();
+  try {
+    uc.getContent();
+  }
+ catch (  IOException e) {
+  }
+  try {
+    ((InputStream)fileURLCon.getContent(null)).read(ba,0,600);
+    fail("should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    ((InputStream)fileURLCon.getContent(new Class[]{})).read(ba,0,600);
+    fail("should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    ((InputStream)fileURLCon.getContent(new Class[]{Class.class})).read(ba,0,600);
+    fail("should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+}

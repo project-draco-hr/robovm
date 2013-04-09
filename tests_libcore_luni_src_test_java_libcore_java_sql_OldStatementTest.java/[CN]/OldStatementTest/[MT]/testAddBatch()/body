@@ -1,0 +1,48 @@
+{
+  Statement st=null;
+  try {
+    st=conn.createStatement();
+    st.addBatch("INSERT INTO zoo VALUES (3,'Tuzik','dog')");
+    st.addBatch("INSERT INTO zoo VALUES (4,'Mashka','cat')");
+    int[] updateCounts=st.executeBatch();
+    assertEquals(2,updateCounts.length);
+    assertEquals(1,updateCounts[0]);
+    assertEquals(1,updateCounts[1]);
+  }
+  finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    st=conn.createStatement();
+    st.addBatch("");
+    st.executeBatch();
+    fail("SQLException is not thrown");
+  }
+ catch (  SQLException e) {
+  }
+ finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    st=conn.createStatement();
+    st.addBatch(null);
+    st.executeBatch();
+  }
+ catch (  SQLException e) {
+  }
+ finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+}

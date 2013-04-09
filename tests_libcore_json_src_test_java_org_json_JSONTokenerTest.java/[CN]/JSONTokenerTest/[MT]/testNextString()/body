@@ -1,0 +1,18 @@
+{
+  assertEquals("",new JSONTokener("'").nextString('\''));
+  assertEquals("",new JSONTokener("\"").nextString('\"'));
+  assertEquals("ABC",new JSONTokener("ABC'DEF").nextString('\''));
+  assertEquals("ABC",new JSONTokener("ABC'''DEF").nextString('\''));
+  assertEquals("ABC",new JSONTokener("A\\B\\C'DEF").nextString('\''));
+  JSONTokener tokener=new JSONTokener(" 'abc' 'def' \"ghi\"");
+  tokener.next();
+  assertEquals('\'',tokener.next());
+  assertEquals("abc",tokener.nextString('\''));
+  tokener.next();
+  assertEquals('\'',tokener.next());
+  assertEquals("def",tokener.nextString('\''));
+  tokener.next();
+  assertEquals('"',tokener.next());
+  assertEquals("ghi",tokener.nextString('\"'));
+  assertFalse(tokener.more());
+}

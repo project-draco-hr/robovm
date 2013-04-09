@@ -1,0 +1,28 @@
+{
+  int sport=startServer("SServer getSoLinger");
+  try {
+    int portNumber=Support_PortManager.getNextPort();
+    s=new Socket(InetAddress.getLocalHost(),sport,null,portNumber);
+    s.setSoLinger(true,200);
+    assertEquals("Returned incorrect linger",200,s.getSoLinger());
+    ensureExceptionThrownIfOptionIsUnsupportedOnOS(SO_LINGER);
+    s.setSoLinger(false,0);
+  }
+ catch (  Exception e) {
+    handleException(e,SO_LINGER);
+  }
+  try {
+    int portNumber=Support_PortManager.getNextPort();
+    s=new Socket(InetAddress.getLocalHost(),sport,null,portNumber);
+    s.close();
+    try {
+      s.getSoLinger();
+      fail("SocketException was not thrown.");
+    }
+ catch (    SocketException ioe) {
+    }
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception was thrown: " + e.toString());
+  }
+}

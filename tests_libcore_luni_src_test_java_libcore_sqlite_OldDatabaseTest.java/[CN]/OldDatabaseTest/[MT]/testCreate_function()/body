@@ -1,0 +1,14 @@
+{
+  double input=1.0;
+  db.exec("create table TEST (res double)",null);
+  db.exec("insert into TEST values (" + Double.toString(input) + ")",null);
+  TableResult res=new TableResult();
+  Function sinFunc=(Function)new SinFunc();
+  db.create_function("sin",1,sinFunc);
+  db.exec("select sin(res) from TEST WHERE res = " + Double.toString(input),res);
+  String row[]=(String[])res.rows.elementAt(0);
+  String val=row[0];
+  double sinusVal=Double.parseDouble(val);
+  double funcVal=Math.sin(input);
+  assertTrue(Math.round(funcVal) == Math.round(sinusVal));
+}

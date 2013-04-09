@@ -1,0 +1,41 @@
+{
+  PreparedStatement ps1=null;
+  PreparedStatement ps2=null;
+  try {
+    Statement s=conn.createStatement();
+    s.addBatch("create table t1 (a text);");
+    s.addBatch("insert into t1 values('abc');");
+    s.addBatch("insert into t1 values('def');");
+    s.addBatch("insert into t1 values('ghi');");
+    s.executeBatch();
+    s.close();
+    conn.commit();
+    ps1=conn.prepareStatement("select * from t1");
+    ps2=conn.prepareStatement("select * from t1 whe a like '?000'");
+    ResultSet rs1=ps1.executeQuery();
+    try {
+      ResultSet rs2=ps2.executeQuery();
+      while (rs2.next()) {
+      }
+      fail("Should get SQLException");
+    }
+ catch (    SQLException sqle) {
+    }
+    while (rs1.next()) {
+    }
+    conn.commit();
+    rs1.close();
+    ps1.close();
+    ps2.close();
+  }
+  finally {
+    try {
+      if (ps1 != null)       ps1.close();
+      if (ps2 != null)       ps2.close();
+      conn.rollback();
+    }
+ catch (    SQLException e) {
+      e.printStackTrace();
+    }
+  }
+}

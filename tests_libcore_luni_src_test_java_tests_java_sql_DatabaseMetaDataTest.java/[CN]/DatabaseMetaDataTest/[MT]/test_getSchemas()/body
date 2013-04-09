@@ -1,0 +1,19 @@
+{
+  ResultSet rs=meta.getSchemas();
+  ResultSetMetaData rsmd=rs.getMetaData();
+  assertTrue("Rows do not obtained",rs.next());
+  int col=rsmd.getColumnCount();
+  assertEquals("Incorrect number of columns",1,col);
+  String[] columnNames={"TABLE_SCHEM","TABLE_CATALOG"};
+  for (int c=1; c <= col; ++c) {
+    assertEquals("Incorrect column name",columnNames[c - 1],rsmd.getColumnName(c));
+  }
+  rs.close();
+  conn.close();
+  try {
+    meta.getSchemas();
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

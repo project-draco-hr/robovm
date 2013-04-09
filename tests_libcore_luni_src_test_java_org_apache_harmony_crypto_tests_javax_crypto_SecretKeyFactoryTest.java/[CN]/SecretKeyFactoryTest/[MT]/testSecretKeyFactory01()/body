@@ -1,0 +1,22 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  SecretKeyFactorySpi spi=new MySecretKeyFactorySpi();
+  SecretKeyFactory secKF=new mySecretKeyFactory(spi,defaultProvider,defaultAlgorithm);
+  assertEquals("Incorrect algorithm",secKF.getAlgorithm(),defaultAlgorithm);
+  assertEquals("Incorrect provider",secKF.getProvider(),defaultProvider);
+  assertNull("Incorrect result",secKF.generateSecret(null));
+  assertNull("Incorrect result",secKF.getKeySpec(null,null));
+  assertNull("Incorrect result",secKF.translateKey(null));
+  secKF=new mySecretKeyFactory(null,null,null);
+  assertNull("Algorithm must be null",secKF.getAlgorithm());
+  assertNull("Provider must be null",secKF.getProvider());
+  try {
+    secKF.translateKey(null);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+}

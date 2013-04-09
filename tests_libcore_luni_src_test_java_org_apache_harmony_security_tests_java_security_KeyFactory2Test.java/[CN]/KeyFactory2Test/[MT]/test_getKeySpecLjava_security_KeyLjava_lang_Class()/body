@@ -1,0 +1,36 @@
+{
+  for (int i=0; i < keyfactAlgs.length; i++) {
+    try {
+      KeyFactory fact=KeyFactory.getInstance(keyfactAlgs[i],providerName);
+      KeyPairGenerator keyGen=KeyPairGenerator.getInstance(keyfactAlgs[i]);
+      SecureRandom random=new SecureRandom();
+      keyGen.initialize(StandardNames.getMinimumKeySize(keyfactAlgs[i]),random);
+      KeepAlive keepalive=createKeepAlive(keyfactAlgs[i]);
+      KeyPair keys=keyGen.generateKeyPair();
+      if (keepalive != null) {
+        keepalive.interrupt();
+      }
+      KeySpec privateKeySpec=fact.getKeySpec(keys.getPrivate(),StandardNames.getPrivateKeySpecClass(keyfactAlgs[i]));
+      KeySpec publicKeySpec=fact.getKeySpec(keys.getPublic(),StandardNames.getPublicKeySpecClass(keyfactAlgs[i]));
+      PrivateKey privateKey=fact.generatePrivate(privateKeySpec);
+      PublicKey publicKey=fact.generatePublic(publicKeySpec);
+      boolean samePublic=Arrays.equals(keys.getPublic().getEncoded(),publicKey.getEncoded());
+      boolean samePrivate=Arrays.equals(keys.getPrivate().getEncoded(),privateKey.getEncoded());
+      assertTrue("generatePrivate generated different key for algorithm " + keyfactAlgs[i],samePrivate);
+      assertTrue("generatePublic generated different key for algorithm " + keyfactAlgs[i],samePublic);
+      KeySpec encodedSpec=fact.getKeySpec(keys.getPublic(),X509EncodedKeySpec.class);
+      assertTrue("improper key spec for encoded public key",encodedSpec.getClass().equals(X509EncodedKeySpec.class));
+      encodedSpec=fact.getKeySpec(keys.getPrivate(),PKCS8EncodedKeySpec.class);
+      assertTrue("improper key spec for encoded private key",encodedSpec.getClass().equals(PKCS8EncodedKeySpec.class));
+    }
+ catch (    NoSuchAlgorithmException e) {
+      fail("getInstance did not find algorithm " + keyfactAlgs[i]);
+    }
+catch (    NoSuchProviderException e) {
+      fail("getInstance did not find provider " + providerName);
+    }
+catch (    InvalidKeySpecException e) {
+      fail("invalid key spec for algorithm " + keyfactAlgs[i]);
+    }
+  }
+}

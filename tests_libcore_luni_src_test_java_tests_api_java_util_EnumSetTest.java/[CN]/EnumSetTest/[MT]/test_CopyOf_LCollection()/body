@@ -1,0 +1,66 @@
+{
+  try {
+    EnumSet.copyOf((Collection)null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException npe) {
+  }
+  Collection collection=new ArrayList();
+  try {
+    EnumSet.copyOf(collection);
+    fail("Should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  collection.add(new Object());
+  try {
+    EnumSet.copyOf(collection);
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  Collection<EnumFoo> enumCollection=new ArrayList<EnumFoo>();
+  enumCollection.add(EnumFoo.b);
+  EnumSet<EnumFoo> copyOfEnumCollection=EnumSet.copyOf(enumCollection);
+  assertEquals("Size of copyOfEnumCollection should be 1:",1,copyOfEnumCollection.size());
+  assertTrue("copyOfEnumCollection should contain EnumFoo.b:",copyOfEnumCollection.contains(EnumFoo.b));
+  enumCollection.add(null);
+  assertEquals("Size of enumCollection should be 2:",2,enumCollection.size());
+  try {
+    copyOfEnumCollection=EnumSet.copyOf(enumCollection);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException npe) {
+  }
+  Collection rawEnumCollection=new ArrayList();
+  rawEnumCollection.add(EnumFoo.a);
+  rawEnumCollection.add(EnumWithInnerClass.a);
+  try {
+    EnumSet.copyOf(rawEnumCollection);
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  Collection<HugeEnum> hugeEnumCollection=new ArrayList<HugeEnum>();
+  hugeEnumCollection.add(HugeEnum.b);
+  EnumSet<HugeEnum> copyOfHugeEnumCollection=EnumSet.copyOf(hugeEnumCollection);
+  assertEquals(1,copyOfHugeEnumCollection.size());
+  assertTrue(copyOfHugeEnumCollection.contains(HugeEnum.b));
+  hugeEnumCollection.add(null);
+  assertEquals(2,hugeEnumCollection.size());
+  try {
+    copyOfHugeEnumCollection=EnumSet.copyOf(hugeEnumCollection);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException npe) {
+  }
+  rawEnumCollection=new ArrayList();
+  rawEnumCollection.add(HugeEnum.a);
+  rawEnumCollection.add(HugeEnumWithInnerClass.a);
+  try {
+    EnumSet.copyOf(rawEnumCollection);
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+}

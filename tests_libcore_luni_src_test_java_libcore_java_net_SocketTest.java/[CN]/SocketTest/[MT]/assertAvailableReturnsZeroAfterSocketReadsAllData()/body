@@ -1,0 +1,27 @@
+{
+  final byte[] data="foo".getBytes();
+  final ServerSocket serverSocket=new ServerSocket(0);
+  new Thread(){
+    @Override public void run(){
+      try {
+        Socket socket=serverSocket.accept();
+        socket.getOutputStream().write(data);
+        socket.close();
+      }
+ catch (      IOException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+.start();
+  Socket socket=new Socket("localhost",serverSocket.getLocalPort());
+  byte[] readBuffer=new byte[128];
+  InputStream in=socket.getInputStream();
+  int total=0;
+  while (total < data.length) {
+    total+=in.read(readBuffer);
+  }
+  assertEquals(0,in.available());
+  socket.close();
+  serverSocket.close();
+}

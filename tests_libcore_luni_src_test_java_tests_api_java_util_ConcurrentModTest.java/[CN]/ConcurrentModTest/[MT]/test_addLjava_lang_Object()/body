@@ -1,0 +1,58 @@
+{
+  AbstractList abstr=new AbstractList(){
+    @Override public Object get(    int arg0){
+      return null;
+    }
+    @Override public int size(){
+      return 0;
+    }
+  }
+;
+  try {
+    abstr.add(null);
+    fail("UnsupportedOperationException expected");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  abstr=new AbstractList<Double>(){
+    @Override public boolean add(    Double value){
+      return true;
+    }
+    @Override public Double get(    int index){
+      return null;
+    }
+    @Override public int size(){
+      return 0;
+    }
+  }
+;
+  try {
+    abstr.add(1);
+    fail("ClassCastException expected");
+  }
+ catch (  ClassCastException ee) {
+  }
+  abstr=new AbstractList<Integer>(){
+    final int forbiddenValue=33;
+    @Override public boolean add(    Integer value){
+      if (value == forbiddenValue) {
+        throw new IllegalArgumentException();
+      }
+      return true;
+    }
+    @Override public Integer get(    int index){
+      return null;
+    }
+    @Override public int size(){
+      return 0;
+    }
+  }
+;
+  abstr.add(1);
+  try {
+    abstr.add(33);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException ee) {
+  }
+}

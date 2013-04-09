@@ -1,0 +1,34 @@
+{
+  try {
+    AlgorithmParameterGenerator.getInstance(null,mProv);
+    fail("NullPointerException or NoSuchAlgorithmException should be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+catch (  NoSuchAlgorithmException e) {
+  }
+  for (int i=0; i < invalidValues.length; i++) {
+    try {
+      AlgorithmParameterGenerator.getInstance(invalidValues[i],mProv);
+      fail("NoSuchAlgorithmException must be thrown (algorithm: ".concat(invalidValues[i]).concat(")"));
+    }
+ catch (    NoSuchAlgorithmException e) {
+    }
+  }
+  Provider prov=null;
+  for (int i=0; i < validValues.length; i++) {
+    try {
+      AlgorithmParameterGenerator.getInstance(validValues[i],prov);
+      fail("IllegalArgumentException must be thrown when provider is null (algorithm: ".concat(invalidValues[i]).concat(")"));
+    }
+ catch (    IllegalArgumentException e) {
+    }
+  }
+  AlgorithmParameterGenerator apG;
+  for (int i=0; i < validValues.length; i++) {
+    apG=AlgorithmParameterGenerator.getInstance(validValues[i],mProv);
+    assertEquals("Incorrect algorithm",apG.getAlgorithm(),validValues[i]);
+    assertEquals("Incorrect provider",apG.getProvider(),mProv);
+    checkResult(apG);
+  }
+}

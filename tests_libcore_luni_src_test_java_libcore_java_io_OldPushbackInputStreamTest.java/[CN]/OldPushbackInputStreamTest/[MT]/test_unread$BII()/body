@@ -1,0 +1,56 @@
+{
+  PushbackInputStream tobj;
+  String str2="0123456789";
+  byte[] buf2=(str2 + str2 + str2).getBytes();
+  byte[] readBuf=new byte[10];
+  tobj=new PushbackInputStream(underlying,10);
+  tobj.unread(buf2,15,10);
+  assertEquals("Wrong number!",30 + 10,tobj.available());
+  try {
+    tobj.unread(buf2,15,10);
+    fail("IOException not thrown.");
+  }
+ catch (  IOException e) {
+  }
+  tobj.read(readBuf);
+  assertEquals("Incorrect bytes read","5678901234",new String(readBuf));
+  underlying.throwExceptionOnNextUse=true;
+  try {
+    tobj.read(buf2,15,10);
+    fail("IOException not thrown.");
+  }
+ catch (  IOException e) {
+  }
+  try {
+    byte[] buf=new byte[100];
+    pis.read(buf,0,buf.length);
+    assertTrue("Incorrect bytes read",new String(buf).equals(fileString.substring(0,100)));
+    pis.unread(buf,50,50);
+    pis.read(buf,0,50);
+    assertTrue("Failed to unread bytes",new String(buf,0,50).equals(fileString.substring(50,100)));
+  }
+ catch (  IOException e) {
+    fail("IOException during unread test : " + e.getMessage());
+  }
+  try {
+    byte[] buf=new byte[10];
+    pis.unread(buf,0,-1);
+    fail("IndexOutOfBoundsException was not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    byte[] buf=new byte[10];
+    pis.unread(buf,-1,1);
+    fail("IndexOutOfBoundsException was not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    byte[] buf=new byte[10];
+    pis.unread(buf,10,1);
+    fail("IndexOutOfBoundsException was not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+}

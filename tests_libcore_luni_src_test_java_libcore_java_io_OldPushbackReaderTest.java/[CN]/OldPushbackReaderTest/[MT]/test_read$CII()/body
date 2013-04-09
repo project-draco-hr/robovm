@@ -1,0 +1,26 @@
+{
+  PushbackReader tobj;
+  char[] buf=("01234567890123456789").toCharArray();
+  tobj=new PushbackReader(underlying);
+  tobj.read(buf,6,5);
+  assertEquals("Wrong value read!","BEGIN",new String(buf,6,5));
+  assertEquals("Too much read!","012345BEGIN123456789",new String(buf));
+  underlying.throwExceptionOnNextUse=true;
+  try {
+    tobj.read(buf,6,5);
+    fail("IOException not thrown.");
+  }
+ catch (  IOException e) {
+  }
+  try {
+    char[] c=new char[5];
+    pbr.read(c,0,5);
+    assertTrue("Failed to read chars",new String(c).equals(pbString.substring(0,5)));
+    assertEquals(0,pbr.read(c,0,0));
+    assertEquals(c.length,pbr.read(c,0,c.length));
+    assertEquals(0,pbr.read(c,c.length,0));
+  }
+ catch (  IOException e) {
+    fail("IOException during read test : " + e.getMessage());
+  }
+}

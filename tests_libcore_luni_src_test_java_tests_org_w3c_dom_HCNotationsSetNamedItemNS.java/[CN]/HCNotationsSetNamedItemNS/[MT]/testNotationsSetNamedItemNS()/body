@@ -1,0 +1,28 @@
+{
+  Document doc;
+  NamedNodeMap notations;
+  DocumentType docType;
+  Element elem;
+  doc=(Document)load("hc_staff",builder);
+  docType=doc.getDoctype();
+  if (!(("text/html".equals(getContentType())))) {
+    assertNotNull("docTypeNotNull",docType);
+    notations=docType.getNotations();
+    assertNotNull("notationsNotNull",notations);
+    elem=doc.createElementNS("http://www.w3.org/1999/xhtml","br");
+    try {
+      notations.setNamedItemNS(elem);
+      fail("throw_HIER_OR_NO_MOD_ERR");
+    }
+ catch (    DOMException ex) {
+switch (ex.code) {
+case 3:
+        break;
+case 7:
+      break;
+default :
+    throw ex;
+}
+}
+}
+}

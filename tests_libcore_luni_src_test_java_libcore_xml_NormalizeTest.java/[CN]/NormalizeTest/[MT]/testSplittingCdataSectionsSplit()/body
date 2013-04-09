@@ -1,0 +1,12 @@
+{
+  ErrorRecorder errorRecorder=new ErrorRecorder();
+  domConfiguration.setParameter("split-cdata-sections",true);
+  domConfiguration.setParameter("error-handler",errorRecorder);
+  domConfiguration.setParameter("namespaces",false);
+  Element root=document.createElement("foo");
+  document.appendChild(root);
+  root.appendChild(document.createCDATASection("ABC]]>DEF]]>GHI"));
+  document.normalizeDocument();
+  errorRecorder.assertAllErrors(DOMError.SEVERITY_WARNING,"cdata-sections-splitted");
+  assertChildren(root,"<![CDATA[ABC]]]]>","<![CDATA[>DEF]]]]>","<![CDATA[>GHI]]>");
+}

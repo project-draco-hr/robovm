@@ -1,0 +1,60 @@
+{
+  Statement st=null;
+  ResultSet rs=null;
+  ResultSet rs1=null;
+  try {
+    conn.setAutoCommit(true);
+    st=conn.createStatement();
+    st.execute("insert into zoo (id, name, family) values (3, 'Chichichi', 'monkey');");
+    conn.commit();
+  }
+ catch (  SQLException e) {
+  }
+ finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    st=conn.createStatement();
+    st.execute("select * from zoo");
+    rs=st.getResultSet();
+    assertEquals(3,getCount(rs));
+  }
+  finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    conn.setAutoCommit(false);
+    st=conn.createStatement();
+    st.execute("insert into zoo (id, name, family) values (4, 'Burenka', 'cow');");
+    st.execute("select * from zoo");
+    rs=st.getResultSet();
+    assertEquals(4,getCount(rs));
+    conn.commit();
+    rs1=st.getResultSet();
+    assertEquals(0,getCount(rs1));
+  }
+  finally {
+    try {
+      rs.close();
+      rs1.close();
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  conn.close();
+  try {
+    conn.setAutoCommit(true);
+    fail("Exception expected");
+  }
+ catch (  SQLException e) {
+  }
+}

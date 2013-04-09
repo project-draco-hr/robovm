@@ -1,0 +1,65 @@
+{
+  boolean exception=false;
+  Map c=Collections.unmodifiableMap(hm);
+  assertTrue("Returned map is of incorrect size",c.size() == hm.size());
+  Iterator i=hm.keySet().iterator();
+  while (i.hasNext()) {
+    Object x=i.next();
+    assertTrue("Returned map missing elements",c.get(x).equals(hm.get(x)));
+  }
+  try {
+    c.put(new Object(),"");
+  }
+ catch (  UnsupportedOperationException e) {
+    exception=true;
+  }
+  assertTrue("Allowed modification of map",exception);
+  exception=false;
+  try {
+    c.remove(new Object());
+  }
+ catch (  UnsupportedOperationException e) {
+    exception=true;
+  }
+  assertTrue("Allowed modification of map",exception);
+  exception=false;
+  Iterator it=c.entrySet().iterator();
+  Map.Entry entry=(Map.Entry)it.next();
+  try {
+    entry.setValue("modified");
+  }
+ catch (  UnsupportedOperationException e) {
+    exception=true;
+  }
+  assertTrue("Allowed modification of entry",exception);
+  exception=false;
+  Object[] array=c.entrySet().toArray();
+  try {
+    ((Map.Entry)array[0]).setValue("modified");
+  }
+ catch (  UnsupportedOperationException e) {
+    exception=true;
+  }
+  assertTrue("Allowed modification of array entry",exception);
+  exception=false;
+  Map.Entry[] array2=(Map.Entry[])c.entrySet().toArray(new Map.Entry[0]);
+  try {
+    array2[0].setValue("modified");
+  }
+ catch (  UnsupportedOperationException e) {
+    exception=true;
+  }
+  assertTrue("Allowed modification of array entry2",exception);
+  HashMap smallMap=new HashMap();
+  smallMap.put(null,new Long(30));
+  smallMap.put(new Long(25),null);
+  Map unmodMap=Collections.unmodifiableMap(smallMap);
+  assertNull("Trying to use a null value in map failed",unmodMap.get(new Long(25)));
+  assertTrue("Trying to use a null key in map failed",unmodMap.get(null).equals(new Long(30)));
+  smallMap=new HashMap();
+  for (int counter=0; counter < 100; counter++) {
+    smallMap.put(objArray[counter].toString(),objArray[counter]);
+  }
+  unmodMap=Collections.unmodifiableMap(smallMap);
+  new Support_UnmodifiableMapTest("",unmodMap).runTest();
+}

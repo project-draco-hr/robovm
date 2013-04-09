@@ -1,0 +1,34 @@
+{
+  ResourceBundle bundle;
+  String name="tests.support.Support_TestResource";
+  Locale defLocale=Locale.getDefault();
+  Locale.setDefault(new Locale("en","US"));
+  bundle=ResourceBundle.getBundle(name,new Locale("fr","FR","VAR"));
+  assertEquals("Wrong bundle fr_FR_VAR","frFRVARValue4",bundle.getString("parent4"));
+  bundle=ResourceBundle.getBundle(name,new Locale("fr","FR","v1"));
+  assertEquals("Wrong bundle fr_FR_v1","frFRValue4",bundle.getString("parent4"));
+  bundle=ResourceBundle.getBundle(name,new Locale("fr","US","VAR"));
+  assertEquals("Wrong bundle fr_US_var","frValue4",bundle.getString("parent4"));
+  bundle=ResourceBundle.getBundle(name,new Locale("de","FR","VAR"));
+  assertEquals("Wrong bundle de_FR_var","enUSValue4",bundle.getString("parent4"));
+  Locale.setDefault(new Locale("fr","FR","VAR"));
+  bundle=ResourceBundle.getBundle(name,new Locale("de","FR","v1"));
+  assertEquals("Wrong bundle de_FR_var 2","frFRVARValue4",bundle.getString("parent4"));
+  Locale.setDefault(new Locale("de","US"));
+  bundle=ResourceBundle.getBundle(name,new Locale("de","FR","var"));
+  assertEquals("Wrong bundle de_FR_var 2","parentValue4",bundle.getString("parent4"));
+  Locale.setDefault(new Locale("en","US"));
+  try {
+    ResourceBundle.getBundle(null,Locale.getDefault());
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException ee) {
+  }
+  try {
+    ResourceBundle.getBundle("",new Locale("xx","yy"));
+    fail("MissingResourceException expected");
+  }
+ catch (  MissingResourceException ee) {
+  }
+  Locale.setDefault(defLocale);
+}

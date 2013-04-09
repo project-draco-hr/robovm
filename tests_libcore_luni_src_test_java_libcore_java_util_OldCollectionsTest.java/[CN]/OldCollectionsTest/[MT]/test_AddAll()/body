@@ -1,0 +1,35 @@
+{
+  List<Object> l=new ArrayList<Object>();
+  assertFalse(Collections.addAll(l,new Object[]{}));
+  assertTrue(l.isEmpty());
+  assertTrue(Collections.addAll(l,new Object[]{new Integer(1),new Integer(2),new Integer(3)}));
+  assertFalse(l.isEmpty());
+  assertTrue(l.equals(Arrays.asList(new Object[]{new Integer(1),new Integer(2),new Integer(3)})));
+  try {
+    Collections.addAll(null,new Object[]{new Integer(1),new Integer(2),new Integer(3)});
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  Collection c=new Mock_Collection();
+  try {
+    Collections.addAll(c,new Object[]{new Integer(1),new Integer(2),new Integer(3)});
+    fail("UnsupportedOperationException expected");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  c=new Mock_WrongCollection();
+  try {
+    Collections.addAll(c,new String[]{"String","Correct element",null});
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    Collections.addAll(c,new String[]{"String","Wrong element","Correct element"});
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  Collections.addAll(c,new String[]{"String","","Correct element"});
+}

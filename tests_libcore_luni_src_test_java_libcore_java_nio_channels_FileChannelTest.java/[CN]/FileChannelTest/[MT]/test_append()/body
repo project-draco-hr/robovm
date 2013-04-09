@@ -1,0 +1,11 @@
+{
+  File tmp=File.createTempFile("FileChannelTest","tmp");
+  FileOutputStream fos=new FileOutputStream(tmp,true);
+  FileChannel fc=fos.getChannel();
+  fc.write(ByteBuffer.wrap("hello".getBytes("US-ASCII")));
+  fc.position(0);
+  assertEquals(0,fc.position());
+  fc.write(ByteBuffer.wrap(" world".getBytes("US-ASCII")));
+  fos.close();
+  assertEquals("hello world",new String(IoUtils.readFileAsString(tmp.getPath())));
+}

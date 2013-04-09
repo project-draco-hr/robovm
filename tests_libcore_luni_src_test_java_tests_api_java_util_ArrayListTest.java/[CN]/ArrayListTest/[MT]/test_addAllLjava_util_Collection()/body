@@ -1,0 +1,40 @@
+{
+  List l=new ArrayList();
+  l.addAll(alist);
+  for (int i=0; i < alist.size(); i++)   assertTrue("Failed to add elements properly",l.get(i).equals(alist.get(i)));
+  alist.addAll(alist);
+  assertEquals("Returned incorrect size after adding to existing list",200,alist.size());
+  for (int i=0; i < 100; i++) {
+    assertTrue("Added to list in incorrect order",alist.get(i).equals(l.get(i)));
+    assertTrue("Failed to add to existing list",alist.get(i + 100).equals(l.get(i)));
+  }
+  Set setWithNulls=new HashSet();
+  setWithNulls.add(null);
+  setWithNulls.add(null);
+  setWithNulls.add("yoink");
+  setWithNulls.add("kazoo");
+  setWithNulls.add(null);
+  alist.addAll(100,setWithNulls);
+  Iterator i=setWithNulls.iterator();
+  assertTrue("Item at slot 100 is wrong: " + alist.get(100),alist.get(100) == i.next());
+  assertTrue("Item at slot 101 is wrong: " + alist.get(101),alist.get(101) == i.next());
+  assertTrue("Item at slot 103 is wrong: " + alist.get(102),alist.get(102) == i.next());
+  ArrayList<Integer> originalList=new ArrayList<Integer>(12);
+  for (int j=0; j < 12; j++) {
+    originalList.add(j);
+  }
+  originalList.remove(0);
+  originalList.remove(0);
+  ArrayList<Integer> additionalList=new ArrayList<Integer>(11);
+  for (int j=0; j < 11; j++) {
+    additionalList.add(j);
+  }
+  assertTrue(originalList.addAll(additionalList));
+  assertEquals(21,originalList.size());
+  try {
+    alist.addAll(null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+}

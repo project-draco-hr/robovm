@@ -1,0 +1,13 @@
+{
+  server.enqueue(new MockResponse().clearHeaders().addHeader("Content-Length: 100"));
+  server.enqueue(new MockResponse().setBody("A"));
+  server.play();
+  HttpURLConnection connection1=(HttpURLConnection)server.getUrl("/").openConnection();
+  connection1.setRequestMethod("HEAD");
+  assertEquals("100",connection1.getHeaderField("Content-Length"));
+  assertContent("",connection1);
+  HttpURLConnection connection2=(HttpURLConnection)server.getUrl("/").openConnection();
+  assertEquals("A",readAscii(connection2.getInputStream(),Integer.MAX_VALUE));
+  assertEquals(0,server.takeRequest().getSequenceNumber());
+  assertEquals(1,server.takeRequest().getSequenceNumber());
+}

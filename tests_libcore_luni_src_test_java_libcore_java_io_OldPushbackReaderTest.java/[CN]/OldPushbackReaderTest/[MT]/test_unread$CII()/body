@@ -1,0 +1,23 @@
+{
+  PushbackReader tobj;
+  String str2="0123456789";
+  char[] buf2=(str2 + str2 + str2).toCharArray();
+  char[] readBuf=new char[10];
+  tobj=new PushbackReader(underlying,10);
+  tobj.unread(buf2,15,10);
+  try {
+    tobj.unread(buf2,15,10);
+    fail("IOException not thrown.");
+  }
+ catch (  IOException e) {
+  }
+  tobj.read(readBuf);
+  assertEquals("Incorrect bytes read","5678901234",new String(readBuf));
+  underlying.throwExceptionOnNextUse=true;
+  try {
+    tobj.read(buf2,15,10);
+    fail("IOException not thrown.");
+  }
+ catch (  IOException e) {
+  }
+}

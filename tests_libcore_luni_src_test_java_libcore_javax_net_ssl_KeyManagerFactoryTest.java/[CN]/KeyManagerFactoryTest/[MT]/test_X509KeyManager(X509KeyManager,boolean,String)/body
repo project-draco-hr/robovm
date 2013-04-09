@@ -1,0 +1,39 @@
+{
+  String[] keyTypes=keyTypes(algorithm);
+  for (  String keyType : keyTypes) {
+    String[] aliases=km.getClientAliases(keyType,null);
+    if (empty || keyType == null || keyType.isEmpty()) {
+      assertNull(keyType,aliases);
+      continue;
+    }
+    assertNotNull(keyType,aliases);
+    for (    String alias : aliases) {
+      test_X509KeyManager_alias(km,alias,keyType,false,empty);
+    }
+  }
+  for (  String keyType : keyTypes) {
+    String[] aliases=km.getServerAliases(keyType,null);
+    if (empty || keyType == null || keyType.isEmpty()) {
+      assertNull(keyType,aliases);
+      continue;
+    }
+    assertNotNull(keyType,aliases);
+    for (    String alias : aliases) {
+      test_X509KeyManager_alias(km,alias,keyType,false,empty);
+    }
+  }
+  String a=km.chooseClientAlias(keyTypes,null,null);
+  test_X509KeyManager_alias(km,a,null,true,empty);
+  for (  String keyType : keyTypes) {
+    String[] array=new String[]{keyType};
+    String alias=km.chooseClientAlias(array,null,null);
+    test_X509KeyManager_alias(km,alias,keyType,false,empty);
+  }
+  for (  String keyType : keyTypes) {
+    String alias=km.chooseServerAlias(keyType,null,null);
+    test_X509KeyManager_alias(km,alias,keyType,false,empty);
+  }
+  if (km instanceof X509ExtendedKeyManager) {
+    test_X509ExtendedKeyManager((X509ExtendedKeyManager)km,empty,algorithm);
+  }
+}

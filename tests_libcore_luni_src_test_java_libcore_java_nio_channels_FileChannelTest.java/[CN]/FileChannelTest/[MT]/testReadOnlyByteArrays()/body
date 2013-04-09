@@ -1,0 +1,36 @@
+{
+  ByteBuffer readOnly=ByteBuffer.allocate(1).asReadOnlyBuffer();
+  File tmp=File.createTempFile("FileChannelTest","tmp");
+  FileChannel fc=new FileInputStream(tmp).getChannel();
+  try {
+    fc.read(readOnly);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    fc.read(new ByteBuffer[]{readOnly});
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    fc.read(new ByteBuffer[]{readOnly},0,1);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    fc.read(readOnly,0L);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  fc.close();
+  fc=new FileOutputStream(tmp).getChannel();
+  fc.write(readOnly);
+  fc.write(new ByteBuffer[]{readOnly});
+  fc.write(new ByteBuffer[]{readOnly},0,1);
+  fc.write(readOnly,0L);
+  fc.close();
+}

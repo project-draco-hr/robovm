@@ -1,0 +1,22 @@
+{
+  String original=domToString(document);
+  Document newDocument=builder.newDocument();
+  boolean isAttribute=node.getNodeType() == Node.ATTRIBUTE_NODE;
+  Node parent=isAttribute ? ((Attr)node).getOwnerElement() : node.getParentNode();
+  Node nextSibling=node.getNextSibling();
+  assertSame(node,newDocument.adoptNode(node));
+  assertDetached(parent,node);
+  assertSame(menu,newDocument.adoptNode(menu));
+  newDocument.appendChild(menu);
+  if (isAttribute) {
+    ((Element)parent).setAttributeNodeNS((Attr)node);
+  }
+ else   if (nextSibling != null) {
+    parent.insertBefore(node,nextSibling);
+  }
+ else   if (parent != document) {
+    parent.appendChild(node);
+  }
+  assertEquals(original,domToString(newDocument));
+  document=newDocument;
+}

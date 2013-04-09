@@ -1,0 +1,43 @@
+{
+  List<Time> times=new LinkedList<Time>();
+  List<String> stringTimes=Arrays.asList("timeVal","TS","DT");
+  Iterator<String> it=stringTimes.iterator();
+  Calendar cal=new GregorianCalendar();
+  cal.clear();
+  cal.set(Calendar.HOUR_OF_DAY,12);
+  cal.set(Calendar.MINUTE,35);
+  cal.set(Calendar.SECOND,45);
+  cal.set(Calendar.MILLISECOND,0);
+  long millis=cal.getTime().getTime();
+  Time t1=new java.sql.Time(millis);
+  String col=it.next();
+  Time timeRes=res.getTime(col);
+  assertNotNull(timeRes);
+  assertEquals(t1.toString(),timeRes.toString());
+  assertEquals(t1.getTime(),timeRes.getTime());
+  assertEquals(t1,timeRes);
+  Calendar cal2=new GregorianCalendar();
+  cal2.set(Calendar.YEAR,2007);
+  cal2.set(Calendar.MONTH,Calendar.OCTOBER);
+  cal2.set(Calendar.DATE,9);
+  cal2.set(Calendar.HOUR_OF_DAY,14);
+  cal2.set(Calendar.MINUTE,28);
+  cal2.set(Calendar.SECOND,02);
+  cal2.set(Calendar.MILLISECOND,0);
+  long millis2=cal.getTime().getTime();
+  Time t2=new java.sql.Time(millis2);
+  col=it.next();
+  timeRes=res.getTime(col);
+  assertNotNull(timeRes);
+  assertEquals(t2.toString(),timeRes.toString());
+  assertEquals(t2.getTime(),timeRes.getTime());
+  assertEquals(t2,timeRes);
+  res.next();
+  assertNull(res.getTime(col));
+  try {
+    res.getTime("bla");
+    fail("Exception expected");
+  }
+ catch (  SQLException e) {
+  }
+}

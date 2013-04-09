@@ -1,0 +1,280 @@
+{
+  try {
+    ds=new java.net.DatagramSocket();
+    InetAddress inetAddress=InetAddress.getLocalHost();
+    int portNumber=Support_PortManager.getNextPortForUDP();
+    ds.connect(inetAddress,portNumber);
+    assertTrue("Incorrect InetAddress",ds.getInetAddress().equals(inetAddress));
+    assertTrue("Incorrect Port",ds.getPort() == portNumber);
+    ds.disconnect();
+  }
+ catch (  Exception e) {
+    fail("Exception during test : " + e.getMessage());
+  }
+  System.out.println("Running test_connectLjava_net_InetAddressI" + "(DatagramSocketTest) with IPv6GlobalAddressJcl4: " + Support_Configuration.IPv6GlobalAddressJcl4);
+  try {
+    ds=new java.net.DatagramSocket();
+    InetAddress inetAddress=InetAddress.getByName(Support_Configuration.IPv6GlobalAddressJcl4);
+    int portNumber=Support_PortManager.getNextPortForUDP();
+    ds.connect(inetAddress,portNumber);
+    assertTrue("Incorrect InetAddress",ds.getInetAddress().equals(inetAddress));
+    assertTrue("Incorrect Port",ds.getPort() == portNumber);
+    ds.disconnect();
+  }
+ catch (  Exception e) {
+    fail("Exception during test : " + e.getMessage());
+  }
+  try {
+    InetAddress localHost=InetAddress.getLocalHost();
+    DatagramSocket ds=new DatagramSocket();
+    int port=ds.getLocalPort();
+    ds.connect(localHost,port);
+    DatagramPacket send=new DatagramPacket(new byte[10],10,localHost,port);
+    ds.send(send);
+    DatagramPacket receive=new DatagramPacket(new byte[20],20);
+    ds.setSoTimeout(2000);
+    ds.receive(receive);
+    ds.close();
+    assertTrue("Wrong size: " + receive.getLength(),receive.getLength() == 10);
+    assertTrue("Wrong receiver",receive.getAddress().equals(localHost));
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException : " + e.getMessage());
+  }
+class DatagramServer extends Thread {
+    public DatagramSocket ms;
+    boolean running=true;
+    public byte[] rbuf=new byte[512];
+    DatagramPacket rdp=null;
+    public void run(){
+      try {
+        while (running) {
+          try {
+            ms.receive(rdp);
+            ms.send(rdp);
+          }
+ catch (          java.io.InterruptedIOException e) {
+            Thread.yield();
+          }
+        }
+      }
+ catch (      java.io.IOException e) {
+        System.out.println("Multicast server failed: " + e);
+      }
+ finally {
+        ms.close();
+      }
+    }
+    public void stopServer(){
+      running=false;
+    }
+    public DatagramServer(    int aPort,    InetAddress address) throws java.io.IOException {
+      rbuf=new byte[512];
+      rbuf[0]=-1;
+      rdp=new DatagramPacket(rbuf,rbuf.length);
+      ms=new DatagramSocket(aPort,address);
+      ms.setSoTimeout(2000);
+    }
+  }
+  try {
+    ds=new java.net.DatagramSocket();
+    InetAddress inetAddress=InetAddress.getLocalHost();
+    int portNumber=Support_PortManager.getNextPortForUDP();
+    ds.connect(inetAddress,portNumber);
+    DatagramPacket send=new DatagramPacket(new byte[10],10);
+    ds.send(send);
+    DatagramPacket receive=new DatagramPacket(new byte[20],20);
+    ds.setSoTimeout(10000);
+    ds.receive(receive);
+    ds.close();
+    fail("No PortUnreachableException when connected at native level on recv ");
+  }
+ catch (  Exception e) {
+    assertTrue("Wrong exception when trying to connect at native level on recv: " + e.toString(),(e instanceof PortUnreachableException));
+  }
+  DatagramServer server=null;
+  int[] ports=Support_PortManager.getNextPortsForUDP(3);
+  int serverPortNumber=ports[0];
+  try {
+    InetAddress localHost=InetAddress.getLocalHost();
+    DatagramSocket ds=new DatagramSocket(ports[1]);
+    DatagramSocket ds2=new DatagramSocket(ports[2]);
+    try {
+      server=new DatagramServer(serverPortNumber,localHost);
+      server.start();
+      Thread.sleep(1000);
+    }
+ catch (    Exception e) {
+      fail("Failed to set up datagram server for native connected Dgram socket test ");
+    }
+    int port=ds.getLocalPort();
+    ds.connect(localHost,serverPortNumber);
+    byte[] sendBytes={'T','e','s','t',0};
+    DatagramPacket send=new DatagramPacket(sendBytes,sendBytes.length);
+    ds.send(send);
+    DatagramPacket receive=new DatagramPacket(new byte[20],20);
+    ds.setSoTimeout(2000);
+    ds.receive(receive);
+    ds.close();
+    assertTrue("Wrong size data received: " + receive.getLength(),receive.getLength() == sendBytes.length);
+    assertTrue("Wrong data received" + new String(receive.getData(),0,receive.getLength()) + ":"+ new String(sendBytes),new String(receive.getData(),0,receive.getLength()).equals(new String(sendBytes)));
+    assertTrue("Wrong receiver:" + receive.getAddress() + ":"+ localHost,receive.getAddress().equals(localHost));
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception when sending data on dgram connected at native level:" + e.toString());
+  }
+  if (server != null) {
+    server.stopServer();
+  }
+  try {
+    ds=new java.net.DatagramSocket();
+    InetAddress inetAddress=InetAddress.getLocalHost();
+    int portNumber=Support_PortManager.getNextPortForUDP();
+    ds.connect(inetAddress,portNumber);
+    ds.disconnect();
+    ds.close();
+  }
+ catch (  Exception e) {
+    assertTrue("Unexpected exception when trying to connect at native" + e.toString(),(e instanceof PortUnreachableException));
+  }
+  try {
+    ds=new java.net.DatagramSocket();
+    InetAddress inetAddress=InetAddress.getLocalHost();
+    int portNumber=Support_PortManager.getNextPortForUDP();
+    ds.connect(inetAddress,portNumber);
+    DatagramPacket send=new DatagramPacket(new byte[10],10,inetAddress,portNumber + 1);
+    ds.send(send);
+    ds.close();
+    fail("No Exception when trying to send to a different address on a connected socket ");
+  }
+ catch (  Exception e) {
+    assertTrue("Wrong exception when trying to send to a different address on a connected socket: " + e.toString(),(e instanceof IllegalArgumentException));
+  }
+  server=null;
+  ports=Support_PortManager.getNextPortsForUDP(3);
+  serverPortNumber=ports[0];
+  try {
+    InetAddress localHost=InetAddress.getLocalHost();
+    DatagramSocket ds=new DatagramSocket(ports[1]);
+    DatagramSocket ds2=new DatagramSocket(ports[2]);
+    try {
+      server=new DatagramServer(serverPortNumber,localHost);
+      server.start();
+      Thread.sleep(1000);
+    }
+ catch (    Exception e) {
+      fail("Failed to set up datagram server for native connected Dgram socket test ");
+    }
+    int port=ds.getLocalPort();
+    ds.connect(localHost,serverPortNumber + 1);
+    ds.disconnect();
+    ds.connect(localHost,serverPortNumber);
+    byte[] sendBytes={'T','e','s','t',0};
+    DatagramPacket send=new DatagramPacket(sendBytes,sendBytes.length);
+    ds.send(send);
+    DatagramPacket receive=new DatagramPacket(new byte[20],20);
+    ds.setSoTimeout(2000);
+    ds.receive(receive);
+    ds.close();
+    assertTrue("connect/disconnect/connect - Wrong size data received: " + receive.getLength(),receive.getLength() == sendBytes.length);
+    assertTrue("connect/disconnect/connect - Wrong data received" + new String(receive.getData(),0,receive.getLength()) + ":"+ new String(sendBytes),new String(receive.getData(),0,receive.getLength()).equals(new String(sendBytes)));
+    assertTrue("connect/disconnect/connect - Wrong receiver:" + receive.getAddress() + ":"+ localHost,receive.getAddress().equals(localHost));
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception when sending data on dgram connected at native level after connect/disconnect/connect:" + e.toString());
+  }
+  if (server != null) {
+    server.stopServer();
+  }
+  server=null;
+  ports=Support_PortManager.getNextPortsForUDP(3);
+  serverPortNumber=ports[0];
+  try {
+    InetAddress localHost=InetAddress.getLocalHost();
+    DatagramSocket ds=new DatagramSocket(ports[1]);
+    DatagramSocket ds2=new DatagramSocket(ports[2]);
+    try {
+      server=new DatagramServer(serverPortNumber,localHost);
+      server.start();
+      Thread.sleep(1000);
+    }
+ catch (    Exception e) {
+      fail("Failed to set up datagram server for native connected Dgram socket test ");
+    }
+    int port=ds.getLocalPort();
+    ds.connect(localHost,serverPortNumber + 1);
+    ds.disconnect();
+    byte[] sendBytes={'T','e','s','t',0};
+    DatagramPacket send=new DatagramPacket(sendBytes,sendBytes.length,localHost,serverPortNumber);
+    ds.send(send);
+    DatagramPacket receive=new DatagramPacket(new byte[20],20);
+    ds.setSoTimeout(2000);
+    ds.receive(receive);
+    ds.close();
+    assertTrue("connect/disconnect - Wrong size data received: " + receive.getLength(),receive.getLength() == sendBytes.length);
+    assertTrue("connect/disconnect - Wrong data received" + new String(receive.getData(),0,receive.getLength()) + ":"+ new String(sendBytes),new String(receive.getData(),0,receive.getLength()).equals(new String(sendBytes)));
+    assertTrue("connect/disconnect - Wrong receiver:" + receive.getAddress() + ":"+ localHost,receive.getAddress().equals(localHost));
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception when sending data on dgram connected at native level after connect/disconnect:" + e.toString());
+  }
+  if (server != null) {
+    server.stopServer();
+  }
+  server=null;
+  ports=Support_PortManager.getNextPortsForUDP(3);
+  serverPortNumber=ports[0];
+  try {
+    InetAddress localHost=InetAddress.getLocalHost();
+    DatagramSocket ds=new DatagramSocket(ports[1]);
+    DatagramSocket ds2=new DatagramSocket(ports[2]);
+    try {
+      server=new DatagramServer(serverPortNumber,localHost);
+      server.start();
+      Thread.sleep(1000);
+    }
+ catch (    Exception e) {
+      fail("Failed to set up datagram server for native connected Dgram socket test ");
+    }
+    int port=ds.getLocalPort();
+    ds.connect(localHost,serverPortNumber + 1);
+    ds.connect(localHost,serverPortNumber);
+    byte[] sendBytes={'T','e','s','t',0};
+    DatagramPacket send=new DatagramPacket(sendBytes,sendBytes.length);
+    ds.send(send);
+    DatagramPacket receive=new DatagramPacket(new byte[20],20);
+    ds.setSoTimeout(2000);
+    ds.receive(receive);
+    ds.close();
+    assertTrue("connect/connect - Wrong size data received: " + receive.getLength(),receive.getLength() == sendBytes.length);
+    assertTrue("connect/connect - Wrong data received" + new String(receive.getData(),0,receive.getLength()) + ":"+ new String(sendBytes),new String(receive.getData(),0,receive.getLength()).equals(new String(sendBytes)));
+    assertTrue("connect/connect - Wrong receiver:" + receive.getAddress() + ":"+ localHost,receive.getAddress().equals(localHost));
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception when sending data on dgram connected at native level after connect/connect: " + e.toString());
+  }
+  if (server != null) {
+    server.stopServer();
+  }
+  try {
+    ds=new java.net.DatagramSocket();
+    byte[] addressBytes={0,0,0,0};
+    InetAddress inetAddress=InetAddress.getByAddress(addressBytes);
+    int portNumber=Support_PortManager.getNextPortForUDP();
+    ds.connect(inetAddress,portNumber);
+  }
+ catch (  Exception e) {
+    fail("Unexcpected exception when trying to connect at native level with bad address for signature with no exception to be returned: " + e.toString());
+  }
+  System.out.println("Running test_connectLjava_net_InetAddressI(DatagramSocketTest) with IPv6 address");
+  try {
+    ds=new java.net.DatagramSocket();
+    byte[] addressBytes={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    InetAddress inetAddress=InetAddress.getByAddress(addressBytes);
+    int portNumber=Support_PortManager.getNextPortForUDP();
+    ds.connect(inetAddress,portNumber);
+  }
+ catch (  Exception e) {
+    fail("Unexcpected exception when trying to connect at native level with bad IPv6 address for signature with no exception to be returned: " + e.toString());
+  }
+}

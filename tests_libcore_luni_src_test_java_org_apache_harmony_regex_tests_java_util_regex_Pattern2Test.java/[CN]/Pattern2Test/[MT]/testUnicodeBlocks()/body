@@ -1,0 +1,33 @@
+{
+  Pattern p;
+  Matcher m;
+  int i, j;
+  for (i=0; i < UBlocks.length; i++) {
+    p=Pattern.compile("\\p{In" + UBlocks[i].name + "}");
+    if (UBlocks[i].low > 0) {
+      m=p.matcher(Character.toString((char)(UBlocks[i].low - 1)));
+      assertFalse(UBlocks[i].name,m.matches());
+    }
+    for (j=UBlocks[i].low; j <= UBlocks[i].high; j++) {
+      m=p.matcher(Character.toString((char)j));
+      assertTrue(UBlocks[i].name,m.matches());
+    }
+    if (UBlocks[i].high < 0xFFFF) {
+      m=p.matcher(Character.toString((char)(UBlocks[i].high + 1)));
+      assertFalse(UBlocks[i].name,m.matches());
+    }
+    p=Pattern.compile("\\P{In" + UBlocks[i].name + "}");
+    if (UBlocks[i].low > 0) {
+      m=p.matcher(Character.toString((char)(UBlocks[i].low - 1)));
+      assertTrue(UBlocks[i].name,m.matches());
+    }
+    for (j=UBlocks[i].low; j < UBlocks[i].high; j++) {
+      m=p.matcher(Character.toString((char)j));
+      assertFalse(UBlocks[i].name,m.matches());
+    }
+    if (UBlocks[i].high < 0xFFFF) {
+      m=p.matcher(Character.toString((char)(UBlocks[i].high + 1)));
+      assertTrue(UBlocks[i].name,m.matches());
+    }
+  }
+}

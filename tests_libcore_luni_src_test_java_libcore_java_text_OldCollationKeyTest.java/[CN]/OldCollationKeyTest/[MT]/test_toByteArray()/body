@@ -1,0 +1,23 @@
+{
+  Collator collator=Collator.getInstance();
+  collator.setStrength(Collator.PRIMARY);
+  CollationKey key1=collator.getCollationKey("abc");
+  byte[] bytes=key1.toByteArray();
+  assertTrue("Not enough bytes",bytes.length >= 3);
+  try {
+    collator=new RuleBasedCollator("= 1 , 2 ; 3 , 4 < 5 ; 6 , 7");
+  }
+ catch (  ParseException e) {
+    fail("ParseException");
+    return;
+  }
+  byte[] bytes1=collator.getCollationKey("12").toByteArray();
+  byte[] bytes2=collator.getCollationKey("123").toByteArray();
+  byte[] bytes3=collator.getCollationKey("124").toByteArray();
+  byte[] bytes4=collator.getCollationKey("1245").toByteArray();
+  byte[] bytes5=collator.getCollationKey("1245").toByteArray();
+  assertTrue("returned collation key does not sort correctly",compareUnsignedByteArrays(bytes1,bytes2) < 0);
+  assertTrue("returned collation key does not sort correctly",compareUnsignedByteArrays(bytes2,bytes3) < 0);
+  assertTrue("returned collation key does not sort correctly",compareUnsignedByteArrays(bytes3,bytes4) < 0);
+  assertTrue("returned collation key does not sort correctly",compareUnsignedByteArrays(bytes4,bytes5) == 0);
+}

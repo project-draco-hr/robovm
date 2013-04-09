@@ -1,0 +1,78 @@
+{
+  try {
+    KeyStore.Builder.newInstance(null,null);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    KeyStore.Builder.newInstance(null,protPass);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+  KeyStore.Builder ksB;
+  KeyStore ks=KeyStore.getInstance(KeyStore.getDefaultType());
+  try {
+    KeyStore.Builder.newInstance(ks,null);
+    fail("NullPointerException must be thrown when ProtectionParameter is null");
+  }
+ catch (  NullPointerException e) {
+  }
+  KeyStore.PasswordProtection protPass1=new KeyStore.PasswordProtection(pass);
+  KeyStore.ProtectionParameter[] pp={protPass,protPass1,callbackHand,myProtParam};
+  for (int i=0; i < pp.length; i++) {
+    ks=KeyStore.getInstance(KeyStore.getDefaultType());
+    try {
+      KeyStore.Builder.newInstance(ks,pp[i]);
+      fail("IllegalArgumentException must be thrown because KeyStore was not initialized");
+    }
+ catch (    IllegalArgumentException e) {
+    }
+    ks.load(null,pass);
+    ksB=KeyStore.Builder.newInstance(ks,pp[i]);
+    assertEquals("Incorrect KeyStore",ksB.getKeyStore().size(),0);
+    ksB=KeyStore.Builder.newInstance(ks,pp[i]);
+    assertEquals("Incorrect KeyStore",ks,ksB.getKeyStore());
+    try {
+      ksB.getProtectionParameter(null);
+      fail("NullPointerException must be thrown");
+    }
+ catch (    NullPointerException e) {
+    }
+    try {
+      assertEquals(ksB.getProtectionParameter("aaa"),pp[i]);
+    }
+ catch (    KeyStoreException e) {
+      fail("Unexpected: " + e.toString() + " was thrown");
+    }
+    try {
+      assertEquals(ksB.getProtectionParameter("Bad alias"),pp[i]);
+    }
+ catch (    KeyStoreException e) {
+    }
+    try {
+      assertEquals(ksB.getProtectionParameter(""),pp[i]);
+    }
+ catch (    KeyStoreException e) {
+    }
+    KeyStore.ProtectionParameter pPar=ksB.getProtectionParameter("aaa");
+switch (i) {
+case 0:
+      assertTrue(pPar instanceof KeyStore.PasswordProtection);
+    break;
+case 1:
+  assertTrue(pPar instanceof KeyStore.PasswordProtection);
+break;
+case 2:
+assertTrue(pPar instanceof KeyStore.CallbackHandlerProtection);
+break;
+case 3:
+assertTrue(pPar instanceof MyProtectionParameter);
+break;
+default :
+fail("Incorrect protection parameter");
+}
+assertEquals(pPar,pp[i]);
+}
+}

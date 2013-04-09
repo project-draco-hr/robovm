@@ -1,0 +1,61 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  byte val=0;
+  try {
+    f=x.getClass().getDeclaredField("byteField");
+    val=f.getByte(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during getbyte test : " + e.getMessage());
+  }
+  assertTrue("Returned incorrect byte field value",val == Byte.MAX_VALUE);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("doubleField");
+    f.getByte(x);
+    fail("IllegalArgumentException expected but not thrown");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("IllegalArgumentException expected but not thrown");
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("bytePFField");
+    f.getByte(x);
+    fail("IllegalAccessException expected but not thrown");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("IllegalAccessException expected but not thrown" + ex.getMessage());
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("byteField");
+    f.getByte(null);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("byteSField");
+    byte staticValue=f.getByte(null);
+    assertEquals("Wrong value returned",Byte.MAX_VALUE,staticValue);
+  }
+ catch (  Exception ex) {
+    fail("No exception expected " + ex.getMessage());
+  }
+}

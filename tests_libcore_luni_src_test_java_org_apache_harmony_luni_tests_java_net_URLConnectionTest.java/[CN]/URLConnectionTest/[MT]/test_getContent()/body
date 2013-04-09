@@ -1,0 +1,31 @@
+{
+  byte[] ba=new byte[testString.getBytes().length];
+  String buf=null;
+  Object obj=fileURLCon.getContent();
+  if (obj instanceof String) {
+    buf=(String)obj;
+    assertTrue("Incorrect content returned from fileURL: " + buf,testString.equals(buf.trim()));
+  }
+ else   if (obj instanceof InputStream) {
+    InputStream i=(InputStream)obj;
+    BufferedReader r=new BufferedReader(new InputStreamReader(i),testString.getBytes().length);
+    buf=r.readLine();
+    assertTrue("Incorrect content returned from fileURL: " + buf,testString.equals(buf.trim()));
+  }
+ else {
+    fail("Some unkown type is returned " + obj.toString());
+  }
+  URL url=new URL("http://a/b/c/?y");
+  URLConnection fakeCon=url.openConnection();
+  try {
+    fakeCon.getContent();
+  }
+ catch (  IOException e) {
+  }
+  ((HttpURLConnection)uc).disconnect();
+  try {
+    uc.getContent();
+  }
+ catch (  IOException e) {
+  }
+}

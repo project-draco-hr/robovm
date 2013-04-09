@@ -1,0 +1,30 @@
+{
+  BasicObjectInputStream bois;
+  byte[] buffer=new byte[10];
+  fillStreamHeader(buffer);
+  bois=new BasicObjectInputStream(new ByteArrayInputStream(buffer));
+  try {
+    bois.resolveProxyClass(null);
+    fail("Test 1: NullPointerException expected.");
+  }
+ catch (  NullPointerException npe) {
+  }
+catch (  ClassNotFoundException cnfe) {
+    fail("Test 1: Unexpected ClassNotFoundException.");
+  }
+  try {
+    String[] interfaces={"java.io.Closeable","java.lang.Cloneable"};
+    bois.resolveProxyClass(interfaces);
+  }
+ catch (  ClassNotFoundException cnfe) {
+    fail("Test 2: Unexpected ClassNotFoundException.");
+  }
+  try {
+    String[] interfaces={"java.io.Closeable","java.io.Closeable"};
+    bois.resolveProxyClass(interfaces);
+    fail("Test 3: ClassNotFoundException expected.");
+  }
+ catch (  ClassNotFoundException cnfe) {
+  }
+  bois.close();
+}

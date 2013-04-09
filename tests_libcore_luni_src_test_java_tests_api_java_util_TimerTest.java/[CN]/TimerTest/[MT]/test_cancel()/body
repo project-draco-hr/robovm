@@ -1,0 +1,85 @@
+{
+  Timer t=null;
+  try {
+    t=new Timer();
+    TimerTestTask testTask=new TimerTestTask();
+    t.cancel();
+    boolean exception=false;
+    try {
+      t.schedule(testTask,100,200);
+    }
+ catch (    IllegalStateException e) {
+      exception=true;
+    }
+    assertTrue("Scheduling a task after Timer.cancel() should throw exception",exception);
+    t=new Timer();
+    testTask=new TimerTestTask();
+    t.schedule(testTask,100,500);
+synchronized (sync) {
+      try {
+        sync.wait(1000);
+      }
+ catch (      InterruptedException e) {
+      }
+    }
+    assertEquals("TimerTask.run() method not called after 200ms",1,testTask.wasRun());
+    t.cancel();
+synchronized (sync) {
+      try {
+        sync.wait(500);
+      }
+ catch (      InterruptedException e) {
+      }
+    }
+    assertEquals("TimerTask.run() method should not have been called after cancel",1,testTask.wasRun());
+    t=new Timer();
+    testTask=new TimerTestTask();
+    t.schedule(testTask,100,500);
+synchronized (sync) {
+      try {
+        sync.wait(500);
+      }
+ catch (      InterruptedException e) {
+      }
+    }
+    assertEquals("TimerTask.run() method not called after 200ms",1,testTask.wasRun());
+    t.cancel();
+    t.cancel();
+    t.cancel();
+synchronized (sync) {
+      try {
+        sync.wait(500);
+      }
+ catch (      InterruptedException e) {
+      }
+    }
+    assertEquals("TimerTask.run() method should not have been called after cancel",1,testTask.wasRun());
+    t=new Timer();
+    testTask=new TimerTestTask(t);
+    testTask.incrementCount(true);
+    testTask.terminateCount(5);
+    t.schedule(testTask,100,100);
+synchronized (sync) {
+      try {
+        sync.wait(200);
+        sync.wait(200);
+        sync.wait(200);
+        sync.wait(200);
+        sync.wait(200);
+        sync.wait(200);
+      }
+ catch (      InterruptedException e) {
+      }
+    }
+    assertTrue("TimerTask.run() method should be called 5 times not " + testTask.wasRun(),testTask.wasRun() == 5);
+    t.cancel();
+    try {
+      Thread.sleep(200);
+    }
+ catch (    InterruptedException e) {
+    }
+  }
+  finally {
+    if (t != null)     t.cancel();
+  }
+}

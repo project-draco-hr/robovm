@@ -1,0 +1,17 @@
+{
+  if (responseQueue.isEmpty()) {
+    throw new IllegalStateException("Unexpected request: " + request);
+  }
+  if (request.getRequestLine().equals("GET /favicon.ico HTTP/1.1")) {
+    System.out.println("served " + request.getRequestLine());
+    return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
+  }
+  if (singleResponse) {
+    return responseQueue.peek();
+  }
+ else {
+    requestCount.incrementAndGet();
+    requestQueue.add(request);
+    return responseQueue.take();
+  }
+}

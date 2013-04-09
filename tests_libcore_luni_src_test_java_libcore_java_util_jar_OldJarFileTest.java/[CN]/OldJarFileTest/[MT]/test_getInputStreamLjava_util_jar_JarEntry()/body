@@ -1,0 +1,40 @@
+{
+  Support_Resources.copyFile(resources,null,jarName);
+  File localFile=new File(resources,jarName);
+  byte[] b=new byte[1024];
+  JarFile jf=new JarFile(localFile);
+  InputStream is=jf.getInputStream(jf.getEntry(entryName));
+  assertTrue("Returned invalid stream",is.available() > 0);
+  int r=is.read(b,0,1024);
+  is.close();
+  StringBuilder stringBuffer=new StringBuilder(r);
+  for (int i=0; i < r; i++) {
+    stringBuffer.append((char)(b[i] & 0xff));
+  }
+  String contents=stringBuffer.toString();
+  assertTrue("Incorrect stream read",contents.indexOf("bar") > 0);
+  jf.close();
+  jf=new JarFile(localFile);
+  InputStream in=jf.getInputStream(new JarEntry("invalid"));
+  assertNull("Got stream for non-existent entry",in);
+  try {
+    Support_Resources.copyFile(resources,null,jarName);
+    File signedFile=new File(resources,jarName);
+    jf=new JarFile(signedFile);
+    JarEntry jre=new JarEntry("foo/bar/A.class");
+    jf.getInputStream(jre);
+  }
+ catch (  ZipException expected) {
+  }
+  try {
+    Support_Resources.copyFile(resources,null,jarName);
+    File signedFile=new File(resources,jarName);
+    jf=new JarFile(signedFile);
+    JarEntry jre=new JarEntry("foo/bar/A.class");
+    jf.close();
+    jf.getInputStream(jre);
+    fail("Should throw IllegalStateException");
+  }
+ catch (  IllegalStateException expected) {
+  }
+}

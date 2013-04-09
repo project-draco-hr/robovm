@@ -1,0 +1,35 @@
+{
+  MySignature1 s=new MySignature1("ABC");
+  byte[] outbuf=new byte[10];
+  try {
+    s.sign(outbuf,0,outbuf.length);
+    fail("No expected SignatureException");
+  }
+ catch (  SignatureException e) {
+  }
+  s.initVerify(new MyPublicKey());
+  try {
+    s.sign(outbuf,0,outbuf.length);
+    fail("No expected SignatureException");
+  }
+ catch (  SignatureException e) {
+  }
+  s.initSign(new MyPrivateKey());
+  assertEquals(s.getBufferLength(),s.sign(outbuf,0,outbuf.length));
+  assertEquals("state",MySignature1.SIGN,s.getState());
+  assertTrue("sign() failed",s.runEngineSign);
+  try {
+    s.initSign(new MyPrivateKey());
+    s.sign(outbuf,outbuf.length,0);
+    fail("expected SignatureException");
+  }
+ catch (  SignatureException e) {
+  }
+  try {
+    s.initSign(new MyPrivateKey());
+    s.sign(outbuf,outbuf.length,3);
+    fail("expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

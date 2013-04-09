@@ -1,0 +1,28 @@
+{
+  Statement st=null;
+  ResultSet res=null;
+  try {
+    String[] queries={"update zoo set name='Masha', family='cat' where id=2;","insert into zoo (id, name, family) values (3, 'Vorobey', 'sparrow');","insert into zoo (id, name, family) values (4, 'Slon', 'elephant');","select * from zoo"};
+    st=conn.createStatement();
+    for (int i=0; i < queries.length; i++) {
+      st.execute(queries[i]);
+    }
+    res=st.getResultSet();
+    assertNotNull(res);
+    assertTrue(res.next());
+    st.close();
+  }
+  finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    res.next();
+    fail("Exception expected");
+  }
+ catch (  SQLException e) {
+  }
+}

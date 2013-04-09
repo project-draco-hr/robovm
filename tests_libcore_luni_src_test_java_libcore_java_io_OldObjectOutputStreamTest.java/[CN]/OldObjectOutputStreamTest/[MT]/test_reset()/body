@@ -1,0 +1,23 @@
+{
+  String o="HelloWorld";
+  sos=new Support_OutputStream(200);
+  oos.close();
+  oos=new ObjectOutputStream(sos);
+  oos.writeObject(o);
+  oos.writeObject(o);
+  oos.reset();
+  oos.writeObject(o);
+  sos.setThrowsException(true);
+  try {
+    oos.reset();
+    fail("Test 1: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  sos.setThrowsException(false);
+  ois=new ObjectInputStream(new ByteArrayInputStream(sos.toByteArray()));
+  assertEquals("Test 2: Incorrect object read.",o,ois.readObject());
+  assertEquals("Test 3: Incorrect object read.",o,ois.readObject());
+  assertEquals("Test 4: Incorrect object read.",o,ois.readObject());
+  ois.close();
+}

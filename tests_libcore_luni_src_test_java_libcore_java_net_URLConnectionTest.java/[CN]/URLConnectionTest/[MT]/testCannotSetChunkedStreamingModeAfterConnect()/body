@@ -1,0 +1,12 @@
+{
+  server.enqueue(new MockResponse().setBody("A"));
+  server.play();
+  HttpURLConnection connection=(HttpURLConnection)server.getUrl("/").openConnection();
+  assertEquals("A",readAscii(connection.getInputStream(),Integer.MAX_VALUE));
+  try {
+    connection.setChunkedStreamingMode(1);
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+}

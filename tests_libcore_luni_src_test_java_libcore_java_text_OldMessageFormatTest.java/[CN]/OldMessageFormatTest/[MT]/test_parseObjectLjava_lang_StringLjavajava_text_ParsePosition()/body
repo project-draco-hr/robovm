@@ -1,0 +1,32 @@
+{
+  MessageFormat mf=new MessageFormat("{0,number,#.##}, {0,number,#.#}");
+  try {
+    Object[] objs={new Double(3.1415)};
+    String result=mf.format(objs);
+    Object[] res=null;
+    ParsePosition pp=new ParsePosition(0);
+    int parseIndex=pp.getIndex();
+    res=(Object[])mf.parseObject(result,pp);
+    assertTrue("Parse operation return null",res != null);
+    assertTrue("parse operation return array with incorrect length",1 == res.length);
+    assertTrue("ParseIndex is incorrect",pp.getIndex() != parseIndex);
+    assertTrue("Result object is incorrect",new Double(3.1).equals(res[0]));
+    pp.setIndex(0);
+    char[] cur=result.toCharArray();
+    cur[cur.length / 2]='Z';
+    String partialCorrect=new String(cur);
+    res=(Object[])mf.parseObject(partialCorrect,pp);
+    assertTrue("Parse operation return null",res == null);
+    assertTrue("ParseIndex is incorrect",pp.getIndex() == 0);
+    assertTrue("ParseErrorIndex is incorrect",pp.getErrorIndex() == cur.length / 2);
+    try {
+      mf.parseObject(result,null);
+      fail("Expected NullPointerException was not thrown");
+    }
+ catch (    NullPointerException e) {
+    }
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception " + e.toString());
+  }
+}

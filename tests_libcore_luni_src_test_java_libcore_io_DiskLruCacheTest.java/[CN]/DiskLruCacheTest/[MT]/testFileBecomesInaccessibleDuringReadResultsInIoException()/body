@@ -1,0 +1,14 @@
+{
+  set("A","aaaaa","a");
+  DiskLruCache.Snapshot snapshot=cache.get("A");
+  InputStream in=snapshot.getInputStream(0);
+  assertEquals('a',in.read());
+  mockOs.enqueueFault("read");
+  try {
+    in.read();
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+  snapshot.close();
+}

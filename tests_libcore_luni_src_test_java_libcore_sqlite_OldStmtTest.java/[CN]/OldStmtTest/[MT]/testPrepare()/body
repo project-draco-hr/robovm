@@ -1,0 +1,27 @@
+{
+  try {
+    st=db.prepare("");
+    st.prepare();
+    fail("statement is closed");
+  }
+ catch (  SQLite.Exception expected) {
+    assertEquals("stmt already closed",expected.getMessage());
+  }
+  st=new Stmt();
+  st=db.prepare("select * from " + DatabaseCreator.SIMPLE_TABLE1);
+  assertFalse(st.prepare());
+  st=new Stmt();
+  st=db.prepare("insert into " + DatabaseCreator.SIMPLE_TABLE1 + " values (:one,:two,:three)");
+  assertFalse(st.prepare());
+  st=new Stmt();
+  st=db.prepare("insert into " + DatabaseCreator.SIMPLE_TABLE1 + " values (:one,:two,:three)");
+  st.bind(1,1);
+  st.bind(2,10);
+  st.bind(3,30);
+  assertFalse(st.prepare());
+  st=db.prepare("select * from " + DatabaseCreator.SIMPLE_TABLE1 + "; "+ "delete from "+ DatabaseCreator.SIMPLE_TABLE1+ " where id = 5; "+ "insert into "+ DatabaseCreator.SIMPLE_TABLE1+ " values(5, 10, 20); "+ "select * from "+ DatabaseCreator.SIMPLE_TABLE1+ ";");
+  assertTrue(st.prepare());
+  assertTrue(st.prepare());
+  assertTrue(st.prepare());
+  assertFalse(st.prepare());
+}

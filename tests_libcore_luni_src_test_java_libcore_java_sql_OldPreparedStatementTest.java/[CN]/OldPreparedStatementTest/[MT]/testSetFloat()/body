@@ -1,0 +1,54 @@
+{
+  float value1=12345678.12345689f;
+  float value2=-12345678.12345689f;
+  PreparedStatement ps=null;
+  String query="insert into type (FloatVal) values (?);";
+  ps=conn.prepareStatement(query);
+  try {
+    Statement st=null;
+    try {
+      ps.setFloat(1,value1);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where FloatVal=" + value1);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    try {
+      ps.setFloat(1,value2);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where FloatVal=" + value2);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+    ps.close();
+    try {
+      ps.setFloat(1,Float.MIN_VALUE);
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+}

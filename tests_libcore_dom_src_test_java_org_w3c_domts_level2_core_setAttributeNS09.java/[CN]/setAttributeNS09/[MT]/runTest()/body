@@ -1,0 +1,27 @@
+{
+  String localName="newAttr";
+  String namespaceURI="http://www.newattr.com";
+  String qualifiedName="emp:newAttr";
+  Document doc;
+  NodeList elementList;
+  Node testAddr;
+  Attr addrAttr;
+  String resultAttr;
+  String resultNamespaceURI;
+  String resultLocalName;
+  String resultPrefix;
+  doc=(Document)load("staffNS",true);
+  elementList=doc.getElementsByTagName("emp:address");
+  testAddr=elementList.item(0);
+  assertNotNull("empAddrNotNull",testAddr);
+  ((Element)testAddr).setAttributeNS(namespaceURI,qualifiedName,"newValue");
+  addrAttr=((Element)testAddr).getAttributeNodeNS(namespaceURI,localName);
+  resultAttr=((Element)testAddr).getAttributeNS(namespaceURI,localName);
+  assertEquals("attrValue","newValue",resultAttr);
+  resultNamespaceURI=addrAttr.getNamespaceURI();
+  assertEquals("nsuri","http://www.newattr.com",resultNamespaceURI);
+  resultLocalName=addrAttr.getLocalName();
+  assertEquals("lname","newAttr",resultLocalName);
+  resultPrefix=addrAttr.getPrefix();
+  assertEquals("prefix","emp",resultPrefix);
+}

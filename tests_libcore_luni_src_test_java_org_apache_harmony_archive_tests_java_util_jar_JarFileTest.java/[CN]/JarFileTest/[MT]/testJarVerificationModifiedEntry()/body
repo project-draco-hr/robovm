@@ -1,0 +1,17 @@
+{
+  Support_Resources.copyFile(resources,null,integrateJar);
+  File f=new File(resources,integrateJar);
+  JarFile jarFile=new JarFile(f);
+  ZipEntry zipEntry=jarFile.getJarEntry(integrateJarEntry);
+  zipEntry.setSize(zipEntry.getSize() + 1);
+  jarFile.getInputStream(zipEntry).skip(Long.MAX_VALUE);
+  jarFile=new JarFile(f);
+  zipEntry=jarFile.getJarEntry(integrateJarEntry);
+  zipEntry.setSize(zipEntry.getSize() - 1);
+  try {
+    jarFile.getInputStream(zipEntry).read(new byte[5000],0,5000);
+    fail("SecurityException expected");
+  }
+ catch (  SecurityException e) {
+  }
+}

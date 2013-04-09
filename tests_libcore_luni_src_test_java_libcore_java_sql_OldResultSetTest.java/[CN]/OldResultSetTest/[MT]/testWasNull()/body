@@ -1,0 +1,23 @@
+{
+  try {
+    assertFalse(target.wasNull());
+  }
+ catch (  SQLException e) {
+  }
+  stForward.execute("insert into zoo values(8,null,null);");
+  stForward.execute(selectAllAnimals);
+  target=stForward.getResultSet();
+  assertNotNull(target);
+  assertTrue(target.last());
+  assertNull(target.getObject(2));
+  assertTrue(target.wasNull());
+  assertNotNull(target.getObject(1));
+  assertFalse(target.wasNull());
+  target.close();
+  try {
+    target.wasNull();
+    fail("Exception expected");
+  }
+ catch (  SQLException e) {
+  }
+}

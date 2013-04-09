@@ -1,0 +1,82 @@
+{
+  byte[] buff=new byte[2048];
+  try {
+    serverSocket.setSoTimeout(TIMEOUT);
+    peerSocket=serverSocket.accept();
+    peerSocket.setSoTimeout(TIMEOUT);
+    log("Client connection ACCEPTED");
+    InputStream is=peerSocket.getInputStream();
+    OutputStream os=peerSocket.getOutputStream();
+    int num=is.read(buff);
+    if (num == -1) {
+      log("Unexpected EOF");
+      return null;
+    }
+    String message=new String(buff,0,num);
+    log("Got request:\n" + message);
+    log("------------------");
+    if (!actAsProxy) {
+      if (message.startsWith("POST")) {
+        log("try to read client data");
+        String data=message.substring(message.indexOf("\r\n\r\n") + 4);
+        log("client's data: '" + data + "'");
+        assertEquals(clientsData,data);
+      }
+    }
+ else {
+      if (needProxyAuthentication) {
+        log("Authentication required...");
+        os.write(respAuthenticationRequired.getBytes());
+        num=is.read(buff);
+        if (num == -1) {
+          closeSocket(peerSocket);
+          peerSocket=serverSocket.accept();
+          peerSocket.setSoTimeout(TIMEOUT);
+          log("New client connection ACCEPTED");
+          is=peerSocket.getInputStream();
+          os=peerSocket.getOutputStream();
+          num=is.read(buff);
+        }
+        message=new String(buff,0,num);
+        log("Got authenticated request:\n" + message);
+        log("------------------");
+        assertTrue("no proxy-authorization credentials: " + message,message.toLowerCase().indexOf("proxy-authorization:") != -1);
+      }
+      assertTrue(message.startsWith("CONNECT"));
+      log("Send proxy response");
+      os.write(proxyResponse.getBytes());
+      log("Perform SSL Handshake...");
+      SSLSocket sslSocket=(SSLSocket)getContext().getSocketFactory().createSocket(peerSocket,"localhost",peerSocket.getPort(),true);
+      sslSocket.setUseClientMode(false);
+      sslSocket.setNeedClientAuth(true);
+      sslSocket.startHandshake();
+      peerSocket=sslSocket;
+      is=peerSocket.getInputStream();
+      os=peerSocket.getOutputStream();
+      num=is.read(buff);
+      message=new String(buff,0,num);
+      log("[Remote Server] Request from SSL tunnel:\n" + message);
+      log("------------------");
+      if (message.startsWith("POST")) {
+        log("[Remote Server] try to read client data");
+        String data=message.substring(message.indexOf("\r\n\r\n") + 4);
+        log("[Remote Server] client's data: '" + message + "'");
+        assertEquals(clientsData,data);
+      }
+      log("[Remote Server] Sending the response by SSL tunnel...");
+    }
+    os.write(("HTTP/1.1 " + responseCode + " Message\r\n"+ httpsResponseTail).getBytes());
+    os.flush();
+    os.close();
+    log("Work is DONE actAsProxy=" + actAsProxy);
+    return null;
+  }
+  finally {
+    closeSocket(peerSocket);
+    try {
+      serverSocket.close();
+    }
+ catch (    IOException e) {
+    }
+  }
+}

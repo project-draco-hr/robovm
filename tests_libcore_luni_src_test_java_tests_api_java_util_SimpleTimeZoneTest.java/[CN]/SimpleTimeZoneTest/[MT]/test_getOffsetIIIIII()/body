@@ -1,0 +1,40 @@
+{
+  st1=new SimpleTimeZone(TimeZone.getTimeZone("EST").getRawOffset(),"EST");
+  assertTrue("Incorrect offset returned",st1.getOffset(GregorianCalendar.AD,1998,Calendar.NOVEMBER,11,Calendar.WEDNESDAY,0) == -(5 * 60 * 60* 1000));
+  st1=new SimpleTimeZone(TimeZone.getTimeZone("EST").getRawOffset(),"EST");
+  assertEquals("Incorrect offset returned",-(5 * 60 * 60* 1000),st1.getOffset(GregorianCalendar.AD,1998,Calendar.JUNE,11,Calendar.THURSDAY,0));
+  st1=new SimpleTimeZone(TimeZone.getDefault().getRawOffset(),TimeZone.getDefault().getID());
+  int fourHours=4 * 60 * 60* 1000;
+  st1.setRawOffset(fourHours);
+  assertEquals(fourHours,st1.getOffset(1,2099,01,1,5,0));
+  try {
+    st1.getOffset(-1,2099,01,1,5,0);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    st1.getOffset(1,2099,15,1,5,0);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    st1.getOffset(1,2099,01,100,5,0);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    st1.getOffset(1,2099,01,1,50,0);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    st1.getOffset(1,2099,01,1,5,-10);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

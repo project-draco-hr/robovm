@@ -1,0 +1,48 @@
+{
+  byte[] buf=new byte[testLength];
+  RandomAccessFile raf=new java.io.RandomAccessFile(fileName,"rw");
+  raf.writeBytes(testString);
+  raf.seek(0);
+  try {
+    raf.readFully(null);
+    fail("Test 1: NullPointerException expected.");
+  }
+ catch (  NullPointerException e) {
+  }
+  raf.readFully(buf,5,testLength - 10);
+  for (int i=0; i < 5; i++) {
+    assertEquals("Test 2: Incorrect bytes read;",0,buf[i]);
+  }
+  assertEquals("Test 3: Incorrect bytes written or read;",testString.substring(0,testLength - 10),new String(buf,5,testLength - 10));
+  try {
+    raf.readFully(buf,3,testLength - 6);
+    fail("Test 4: EOFException expected.");
+  }
+ catch (  EOFException e) {
+  }
+  try {
+    raf.readFully(buf,-1,1);
+    fail("Test 5: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    raf.readFully(buf,0,-1);
+    fail("Test 6: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    raf.readFully(buf,2,testLength);
+    fail("Test 7: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  raf.close();
+  try {
+    raf.readFully(buf);
+    fail("Test 8: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+}

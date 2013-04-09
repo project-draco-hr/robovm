@@ -1,0 +1,20 @@
+{
+  TestSSLSessions s=TestSSLSessions.create();
+  try {
+    s.invalid.getPeerCertificates();
+    fail();
+  }
+ catch (  SSLPeerUnverifiedException expected) {
+  }
+  assertNotNull(s.client.getPeerCertificates());
+  TestKeyStore.assertChainLength(s.client.getPeerCertificates());
+  TestSSLContext.assertServerCertificateChain(s.s.c.serverTrustManager,s.client.getPeerCertificates());
+  TestSSLContext.assertCertificateInKeyStore(s.client.getPeerCertificates()[0],s.s.c.serverKeyStore);
+  try {
+    s.server.getPeerCertificates();
+    fail();
+  }
+ catch (  SSLPeerUnverifiedException expected) {
+  }
+  s.close();
+}

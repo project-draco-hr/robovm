@@ -1,0 +1,37 @@
+{
+  if (isTestable) {
+    DatagramSocketImplFactory factory=new TestDatagramSocketImplFactory();
+    assertFalse(isCreateDatagramSocketImpl);
+    DatagramSocket.setDatagramSocketImplFactory(factory);
+    try {
+      new java.net.DatagramSocket();
+      assertTrue(isCreateDatagramSocketImpl);
+      assertTrue(isDatagramSocketImplCalled);
+    }
+ catch (    Exception e) {
+      fail("Exception during test : " + e.getMessage());
+    }
+    try {
+      DatagramSocket.setDatagramSocketImplFactory(factory);
+      fail("SocketException was not thrown.");
+    }
+ catch (    SocketException se) {
+    }
+    try {
+      DatagramSocket.setDatagramSocketImplFactory(null);
+      fail("SocketException was not thrown.");
+    }
+ catch (    SocketException se) {
+    }
+  }
+ else {
+    TestDatagramSocketImplFactory dsf=new TestDatagramSocketImplFactory();
+    DatagramSocketImpl dsi=dsf.createDatagramSocketImpl();
+    try {
+      assertNull(dsi.getOption(0));
+    }
+ catch (    SocketException e) {
+      fail("SocketException was thrown.");
+    }
+  }
+}

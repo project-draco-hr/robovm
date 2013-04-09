@@ -1,0 +1,20 @@
+{
+  ByteArrayOutputStream bytes=new ByteArrayOutputStream();
+  ObjectOutputStream out=new ObjectOutputStream(bytes);
+  MyNumberFormat field;
+  NumberFormat.Field nfield=NumberFormat.Field.CURRENCY;
+  field=new MyNumberFormat(null);
+  out.writeObject(nfield);
+  out.writeObject(field);
+  ObjectInputStream in=new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()));
+  NumberFormat.Field nfield2=(NumberFormat.Field)in.readObject();
+  assertSame("resolved incorrectly",nfield,nfield2);
+  try {
+    in.readObject();
+    fail("Expected InvalidObjectException for subclass instance with null name");
+  }
+ catch (  InvalidObjectException e) {
+  }
+  in.close();
+  out.close();
+}

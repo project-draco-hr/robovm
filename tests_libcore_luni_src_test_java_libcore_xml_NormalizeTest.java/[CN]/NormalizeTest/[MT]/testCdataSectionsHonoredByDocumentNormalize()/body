@@ -1,0 +1,12 @@
+{
+  String xml="<foo>ABC<![CDATA[DEF]]>GHI</foo>";
+  parse(xml);
+  domConfiguration.setParameter("cdata-sections",true);
+  document.normalizeDocument();
+  assertEquals(xml,domToString(document));
+  parse(xml);
+  domConfiguration.setParameter("cdata-sections",false);
+  document.normalizeDocument();
+  String expected=xml.replace("<![CDATA[DEF]]>","DEF");
+  assertEquals(expected,domToString(document));
+}

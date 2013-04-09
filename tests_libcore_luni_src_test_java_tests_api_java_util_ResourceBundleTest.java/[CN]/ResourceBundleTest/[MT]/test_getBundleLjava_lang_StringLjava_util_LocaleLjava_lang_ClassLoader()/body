@@ -1,0 +1,53 @@
+{
+  String classPath=System.getProperty("java.class.path");
+  StringTokenizer tok=new StringTokenizer(classPath,File.pathSeparator);
+  Vector<URL> urlVec=new Vector<URL>();
+  String resPackage=Support_Resources.RESOURCE_PACKAGE;
+  try {
+    while (tok.hasMoreTokens()) {
+      String path=tok.nextToken();
+      String url;
+      if (new File(path).isDirectory())       url="file:" + path + resPackage+ "subfolder/";
+ else       url="jar:file:" + path + "!"+ resPackage+ "subfolder/";
+      urlVec.addElement(new URL(url));
+    }
+  }
+ catch (  MalformedURLException e) {
+  }
+  URL[] urls=new URL[urlVec.size()];
+  for (int i=0; i < urlVec.size(); i++)   urls[i]=urlVec.elementAt(i);
+  URLClassLoader loader=new URLClassLoader(urls,null);
+  String name=Support_Resources.RESOURCE_PACKAGE_NAME + ".hyts_resource";
+  ResourceBundle bundle=ResourceBundle.getBundle(name,Locale.getDefault());
+  assertEquals("Wrong value read","parent",bundle.getString("property"));
+  bundle=ResourceBundle.getBundle(name,Locale.getDefault(),loader);
+  assertEquals("Wrong cached value","resource",bundle.getString("property"));
+  try {
+    ResourceBundle.getBundle(null,Locale.getDefault(),loader);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException ee) {
+  }
+  try {
+    ResourceBundle.getBundle(name,null,loader);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException ee) {
+  }
+  try {
+    ResourceBundle.getBundle(name,Locale.getDefault(),(ClassLoader)null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException ee) {
+  }
+  try {
+    ResourceBundle.getBundle("",Locale.getDefault(),loader);
+    fail("MissingResourceException expected");
+  }
+ catch (  MissingResourceException ee) {
+  }
+  B bb=new B();
+  String s=bb.find("nonexistent");
+  s=bb.find("name");
+  assertEquals("Wrong property got","Name",s);
+}

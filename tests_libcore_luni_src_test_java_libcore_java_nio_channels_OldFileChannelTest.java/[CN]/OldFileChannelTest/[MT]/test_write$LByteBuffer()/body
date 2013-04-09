@@ -1,0 +1,18 @@
+{
+  ByteBuffer[] writeBuffers=new ByteBuffer[2];
+  writeBuffers[0]=ByteBuffer.wrap(CONTENT_AS_BYTES);
+  writeBuffers[1]=ByteBuffer.wrap(CONTENT_AS_BYTES);
+  long result=writeOnlyFileChannel.write(writeBuffers);
+  assertEquals(CONTENT_AS_BYTES_LENGTH * 2,result);
+  assertEquals(CONTENT_AS_BYTES_LENGTH,writeBuffers[0].position());
+  assertEquals(CONTENT_AS_BYTES_LENGTH,writeBuffers[1].position());
+  writeOnlyFileChannel.close();
+  assertEquals(CONTENT_AS_BYTES_LENGTH * 2,fileOfWriteOnlyFileChannel.length());
+  fis=new FileInputStream(fileOfWriteOnlyFileChannel);
+  byte[] inputBuffer=new byte[CONTENT_AS_BYTES_LENGTH];
+  fis.read(inputBuffer);
+  byte[] expectedResult=new byte[CONTENT_AS_BYTES_LENGTH * 2];
+  System.arraycopy(CONTENT_AS_BYTES,0,expectedResult,0,CONTENT_AS_BYTES_LENGTH);
+  System.arraycopy(CONTENT_AS_BYTES,0,expectedResult,CONTENT_AS_BYTES_LENGTH,CONTENT_AS_BYTES_LENGTH);
+  assertTrue(Arrays.equals(CONTENT_AS_BYTES,inputBuffer));
+}

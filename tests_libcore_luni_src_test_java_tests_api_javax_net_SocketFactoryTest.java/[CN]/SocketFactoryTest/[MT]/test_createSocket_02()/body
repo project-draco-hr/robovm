@@ -1,0 +1,47 @@
+{
+  SocketFactory sf=SocketFactory.getDefault();
+  int portNumber=Support_PortManager.getNextPort();
+  int sport=startServer("Cons String,I");
+  int[] invalidPorts={Integer.MIN_VALUE,-1,65536,Integer.MAX_VALUE};
+  try {
+    Socket s=sf.createSocket(InetAddress.getLocalHost().getHostName(),sport);
+    assertNotNull(s);
+    assertTrue("Failed to create socket",s.getPort() == sport);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception: " + e);
+  }
+  try {
+    Socket s=sf.createSocket("bla-bla",sport);
+    fail("UnknownHostException wasn't thrown");
+  }
+ catch (  UnknownHostException uhe) {
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of UnknownHostException");
+  }
+  for (int i=0; i < invalidPorts.length; i++) {
+    try {
+      Socket s=sf.createSocket(InetAddress.getLocalHost().getHostName(),invalidPorts[i]);
+      fail("IllegalArgumentException wasn't thrown for " + invalidPorts[i]);
+    }
+ catch (    IllegalArgumentException iae) {
+    }
+catch (    Exception e) {
+      fail(e + " was thrown instead of IllegalArgumentException for " + invalidPorts[i]);
+    }
+  }
+  try {
+    Socket s=sf.createSocket(InetAddress.getLocalHost().getHostName(),portNumber);
+    fail("IOException wasn't thrown");
+  }
+ catch (  IOException ioe) {
+  }
+  SocketFactory f=SocketFactory.getDefault();
+  try {
+    Socket s=f.createSocket("localhost",8082);
+    fail("IOException wasn't thrown ...");
+  }
+ catch (  IOException e) {
+  }
+}

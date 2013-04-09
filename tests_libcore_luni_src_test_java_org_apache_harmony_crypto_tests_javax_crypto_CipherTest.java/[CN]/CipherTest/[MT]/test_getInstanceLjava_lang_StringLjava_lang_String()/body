@@ -1,0 +1,26 @@
+{
+  Provider[] providers=Security.getProviders("Cipher.DES");
+  assertNotNull("No installed providers support Cipher.DES",providers);
+  for (int i=0; i < providers.length; i++) {
+    Cipher cipher=Cipher.getInstance("DES",providers[i].getName());
+    assertNotNull("Cipher.getInstance() returned a null value",cipher);
+    try {
+      cipher=Cipher.getInstance("DoBeDoBeDo",providers[i]);
+      fail();
+    }
+ catch (    NoSuchAlgorithmException expected) {
+    }
+  }
+  try {
+    Cipher.getInstance("DES",(String)null);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    Cipher.getInstance("DES","IHaveNotBeenConfigured");
+    fail();
+  }
+ catch (  NoSuchProviderException expected) {
+  }
+}

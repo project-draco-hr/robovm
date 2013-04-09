@@ -1,0 +1,34 @@
+{
+  byte[] buf1=new byte[100];
+  byte[] buf2=new byte[100];
+  try {
+    is.reset();
+    fail("Test 1: IOException expected if no mark has been set.");
+  }
+ catch (  IOException e) {
+  }
+  is.skip(10);
+  is.mark(100);
+  is.read(buf1,0,buf1.length);
+  is.reset();
+  is.read(buf2,0,buf2.length);
+  is.reset();
+  assertTrue("Test 2: Failed to mark correct position or reset failed.",new String(buf1,0,buf1.length).equals(new String(buf2,0,buf2.length)));
+  is.skip(10);
+  try {
+    is.reset();
+  }
+ catch (  IOException e) {
+    fail("Test 3: Unexpected IOException " + e.getMessage());
+  }
+  is.read(buf2,0,buf2.length);
+  is.reset();
+  assertTrue("Test 4: Failed to mark correct position, or reset failed.",new String(buf1,0,buf1.length).equals(new String(buf2,0,buf2.length)));
+  is.close();
+  try {
+    is.reset();
+    fail("Test 8: IOException expected because the input stream is closed.");
+  }
+ catch (  IOException e) {
+  }
+}

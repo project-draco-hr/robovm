@@ -1,0 +1,22 @@
+{
+  int res=0;
+  double resDouble=0.0;
+  try {
+    ResultSet result=statement.executeQuery(query);
+    while (result.next()) {
+      res=result.getInt(name);
+      if (res != 0) {
+        assertEquals(expected,res);
+        break;
+      }
+      resDouble=Double.parseDouble(result.getString(name));
+      res=(int)Math.rint(resDouble);
+      assertEquals(expected,res);
+    }
+    assertFalse("wrong size of result set",result.next());
+    result.close();
+  }
+ catch (  SQLException e) {
+    fail(e.getMessage());
+  }
+}

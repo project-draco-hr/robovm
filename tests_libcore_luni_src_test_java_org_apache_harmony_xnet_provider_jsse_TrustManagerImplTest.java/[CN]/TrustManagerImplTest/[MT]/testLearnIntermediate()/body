@@ -1,0 +1,22 @@
+{
+  KeyStore.PrivateKeyEntry pke=TestKeyStore.getServer().getPrivateKey("RSA","RSA");
+  X509Certificate[] chain3=(X509Certificate[])pke.getCertificateChain();
+  X509Certificate root=chain3[2];
+  X509Certificate intermediate=chain3[1];
+  X509Certificate server=chain3[0];
+  X509Certificate[] chain2=new X509Certificate[]{server,intermediate};
+  X509Certificate[] chain1=new X509Certificate[]{server};
+  assertValid(chain3,trustManager(root));
+  assertValid(chain2,trustManager(root));
+  assertInvalid(chain1,trustManager(root));
+  assertValid(chain3,trustManager(intermediate));
+  assertValid(chain2,trustManager(intermediate));
+  assertValid(chain1,trustManager(intermediate));
+  assertValid(chain3,trustManager(server));
+  assertValid(chain2,trustManager(server));
+  assertValid(chain1,trustManager(server));
+  X509TrustManager tm=trustManager(root);
+  assertInvalid(chain1,tm);
+  assertValid(chain2,tm);
+  assertValid(chain1,tm);
+}

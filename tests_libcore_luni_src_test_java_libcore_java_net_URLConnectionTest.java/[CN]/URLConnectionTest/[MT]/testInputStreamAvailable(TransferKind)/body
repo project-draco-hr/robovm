@@ -1,0 +1,15 @@
+{
+  String body="ABCDEFGH";
+  MockResponse response=new MockResponse();
+  transferKind.setBody(response,body,4);
+  server.enqueue(response);
+  server.play();
+  URLConnection connection=server.getUrl("/").openConnection();
+  InputStream in=connection.getInputStream();
+  for (int i=0; i < body.length(); i++) {
+    assertTrue(in.available() >= 0);
+    assertEquals(body.charAt(i),in.read());
+  }
+  assertEquals(0,in.available());
+  assertEquals(-1,in.read());
+}

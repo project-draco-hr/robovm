@@ -1,0 +1,37 @@
+{
+  Mock_CipherSpi cSpi=new Mock_CipherSpi();
+  int len=10;
+  byte[] bbuf=new byte[len];
+  for (int i=0; i < bbuf.length; i++) {
+    bbuf[i]=(byte)i;
+  }
+  ByteBuffer bb1=ByteBuffer.wrap(bbuf);
+  ByteBuffer bbNull=null;
+  try {
+    cSpi.engineDoFinal(bbNull,bb1);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    cSpi.engineDoFinal(bb1,bbNull);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+  ByteBuffer bb2=ByteBuffer.allocate(len);
+  bb1.position(bb1.limit());
+  assertEquals("Incorrect result",0,cSpi.engineDoFinal(bb1,bb2));
+  bb1.position(0);
+  bb2.position(len - 2);
+  try {
+    cSpi.engineDoFinal(bb1,bb2);
+    fail("ShortBufferException must be thrown. Output buffer remaining: ".concat(Integer.toString(bb2.remaining())));
+  }
+ catch (  ShortBufferException e) {
+  }
+  int pos=5;
+  bb1.position(pos);
+  bb2.position(0);
+  assertTrue("Incorrect result",cSpi.engineDoFinal(bb1,bb2) > 0);
+}

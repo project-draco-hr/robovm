@@ -1,0 +1,7 @@
+{
+  server.enqueue(response.setBody(gzip("ABCABCABC".getBytes("UTF-8"))).addHeader("Content-Encoding: gzip"));
+  server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_MODIFIED));
+  server.play();
+  assertEquals("ABCABCABC",readAscii(server.getUrl("/").openConnection()));
+  assertEquals("ABCABCABC",readAscii(server.getUrl("/").openConnection()));
+}

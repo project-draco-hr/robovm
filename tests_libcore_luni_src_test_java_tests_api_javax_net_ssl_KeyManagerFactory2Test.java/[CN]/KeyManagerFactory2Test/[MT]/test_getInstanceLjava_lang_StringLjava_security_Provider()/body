@@ -1,0 +1,34 @@
+{
+  try {
+    KeyManagerFactory.getInstance(null,mProv);
+    fail("NoSuchAlgorithmException or NullPointerException should be thrown (algorithm is null");
+  }
+ catch (  NoSuchAlgorithmException e) {
+  }
+catch (  NullPointerException e) {
+  }
+  for (int i=0; i < invalidValues.length; i++) {
+    try {
+      KeyManagerFactory.getInstance(invalidValues[i],mProv);
+      fail("NoSuchAlgorithmException must be thrown (algorithm: ".concat(invalidValues[i]).concat(")"));
+    }
+ catch (    NoSuchAlgorithmException e) {
+    }
+  }
+  Provider prov=null;
+  for (int i=0; i < validValues.length; i++) {
+    try {
+      KeyManagerFactory.getInstance(validValues[i],prov);
+      fail("IllegalArgumentException must be thrown when provider is null (algorithm: ".concat(invalidValues[i]).concat(")"));
+    }
+ catch (    IllegalArgumentException e) {
+    }
+  }
+  KeyManagerFactory keyMF;
+  for (int i=0; i < validValues.length; i++) {
+    keyMF=KeyManagerFactory.getInstance(validValues[i],mProv);
+    assertEquals("Incorrect algorithm",keyMF.getAlgorithm(),validValues[i]);
+    assertEquals("Incorrect provider",keyMF.getProvider(),mProv);
+    checkResult(keyMF);
+  }
+}

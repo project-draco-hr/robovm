@@ -1,0 +1,27 @@
+{
+  Document doc;
+  Element element;
+  Attr attribute;
+  Attr attribute2;
+  EntityReference entRef;
+  NodeList elementList;
+  doc=(Document)load("staffNS",builder);
+  element=doc.createElementNS("http://www.w3.org/DOM/Test","elem1");
+  attribute=doc.createAttributeNS("http://www.w3.org/DOM/Test","attr");
+  entRef=doc.createEntityReference("ent4");
+  attribute.appendChild(entRef);
+  element.setAttributeNodeNS(attribute);
+  elementList=entRef.getChildNodes();
+  element=(Element)elementList.item(0);
+  attribute2=doc.createAttributeNS("http://www.w3.org/DOM/Test","attr2");
+{
+    boolean success=false;
+    try {
+      element.setAttributeNodeNS(attribute2);
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.NO_MODIFICATION_ALLOWED_ERR);
+    }
+    assertTrue("elementsetattributenodens06",success);
+  }
+}

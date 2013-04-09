@@ -1,0 +1,24 @@
+{
+  Statement st=null;
+  st=conn.prepareStatement("insert into zoo values (7,'Speedy Gonzales','Mouse');");
+  CancelThread c=new CancelThread(st);
+  InsertThread ins=new InsertThread((PreparedStatement)st);
+  try {
+    ins.t.join();
+    c.t.join();
+  }
+ catch (  InterruptedException e) {
+    fail("Error in test setup: ");
+  }
+catch (  Exception e) {
+  }
+  ResultSet res=st.executeQuery("select * from zoo where id=7");
+  assertFalse(res.next());
+  try {
+    st.close();
+    st.cancel();
+    fail("Exception expected");
+  }
+ catch (  SQLException e) {
+  }
+}

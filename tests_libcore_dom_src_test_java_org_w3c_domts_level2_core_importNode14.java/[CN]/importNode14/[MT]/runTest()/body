@@ -1,0 +1,25 @@
+{
+  Document doc;
+  Document aNewDoc;
+  ProcessingInstruction pi;
+  ProcessingInstruction aNode;
+  Document ownerDocument;
+  DocumentType docType;
+  String system;
+  String target;
+  String data;
+  java.util.List result=new java.util.ArrayList();
+  doc=(Document)load("staffNS",true);
+  aNewDoc=(Document)load("staffNS",true);
+  pi=aNewDoc.createProcessingInstruction("target1","data1");
+  aNode=(ProcessingInstruction)doc.importNode(pi,false);
+  ownerDocument=aNode.getOwnerDocument();
+  assertNotNull("ownerDocumentNotNull",ownerDocument);
+  docType=ownerDocument.getDoctype();
+  system=docType.getSystemId();
+  assertURIEquals("systemId",null,null,null,"staffNS.dtd",null,null,null,null,system);
+  target=aNode.getTarget();
+  assertEquals("piTarget","target1",target);
+  data=aNode.getData();
+  assertEquals("piData","data1",data);
+}

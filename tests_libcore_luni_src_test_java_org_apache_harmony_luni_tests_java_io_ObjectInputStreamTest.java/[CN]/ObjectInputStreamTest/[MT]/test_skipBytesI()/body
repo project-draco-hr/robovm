@@ -1,0 +1,18 @@
+{
+  byte[] buf=new byte[10];
+  oos.writeBytes("HelloWorld");
+  oos.close();
+  ois=new ObjectInputStream(new ByteArrayInputStream(bao.toByteArray()));
+  ois.skipBytes(5);
+  ois.read(buf,0,5);
+  ois.close();
+  assertEquals("Skipped incorrect bytes","World",new String(buf,0,5,"UTF-8"));
+  try {
+    new ObjectInputStream(){
+    }
+.skipBytes(0);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+}

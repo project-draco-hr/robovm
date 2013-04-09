@@ -1,0 +1,40 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportedMsg);
+    return;
+  }
+  Mac[] macs=createMacs();
+  assertNotNull("Mac objects were not created",macs);
+  byte[] b={(byte)1,(byte)2,(byte)3,(byte)4,(byte)5};
+  SecretKeySpec sks=new SecretKeySpec(b,"SHA1");
+  DHGenParameterSpec algPS=new DHGenParameterSpec(1,2);
+  PSSParameterSpec algPSS=new PSSParameterSpec(20);
+  SecretKeySpec sks1=new SecretKeySpec(b,"RSA");
+  for (int i=0; i < macs.length; i++) {
+    macs[i].init(sks);
+    try {
+      macs[i].init(sks1,algPSS);
+      fail("init(..) accepts incorrect AlgorithmParameterSpec parameter");
+    }
+ catch (    InvalidAlgorithmParameterException e) {
+    }
+    try {
+      macs[i].init(sks,algPS);
+      fail("init(..) accepts incorrect AlgorithmParameterSpec parameter");
+    }
+ catch (    InvalidAlgorithmParameterException e) {
+    }
+    try {
+      macs[i].init(null,null);
+      fail("InvalidKeyException must be thrown");
+    }
+ catch (    InvalidKeyException e) {
+    }
+    try {
+      macs[i].init(null);
+      fail("InvalidKeyException must be thrown");
+    }
+ catch (    InvalidKeyException e) {
+    }
+  }
+}

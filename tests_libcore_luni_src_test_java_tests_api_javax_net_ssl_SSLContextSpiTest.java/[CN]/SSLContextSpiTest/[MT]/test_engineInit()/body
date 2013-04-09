@@ -1,0 +1,32 @@
+{
+  SSLContextSpiImpl ssl=new SSLContextSpiImpl();
+  String defaultAlgorithm=Security.getProperty("ssl.KeyManagerFactory.algorithm");
+  try {
+    KeyManagerFactory kmf=KeyManagerFactory.getInstance(defaultAlgorithm);
+    char[] pass="password".toCharArray();
+    kmf.init(null,pass);
+    KeyManager[] km=kmf.getKeyManagers();
+    defaultAlgorithm=Security.getProperty("ssl.TrustManagerFactory.algorithm");
+    TrustManagerFactory trustMF=TrustManagerFactory.getInstance(defaultAlgorithm);
+    KeyStore ks=KeyStore.getInstance(KeyStore.getDefaultType());
+    ks.load(null,null);
+    trustMF.init(ks);
+    TrustManager[] tm=trustMF.getTrustManagers();
+    SecureRandom sr=SecureRandom.getInstance("SHA1PRNG");
+    try {
+      ssl.engineInit(km,tm,sr);
+    }
+ catch (    KeyManagementException kme) {
+      fail(kme + " was throw for engineInit method");
+    }
+    try {
+      ssl.engineInit(km,tm,null);
+      fail("KeyManagementException wasn't thrown");
+    }
+ catch (    KeyManagementException kme) {
+    }
+  }
+ catch (  Exception ex) {
+    fail(ex + " unexpected exception");
+  }
+}

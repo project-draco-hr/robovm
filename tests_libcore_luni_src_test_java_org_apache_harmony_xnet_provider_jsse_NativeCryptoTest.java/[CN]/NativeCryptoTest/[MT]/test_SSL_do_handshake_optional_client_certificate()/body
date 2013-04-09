@@ -1,0 +1,40 @@
+{
+  final ServerSocket listener=new ServerSocket(0);
+  Hooks cHooks=new Hooks(){
+    @Override public void clientCertificateRequested(    int s){
+      super.clientCertificateRequested(s);
+      NativeCrypto.SSL_use_PrivateKey(s,getClientPrivateKey());
+      NativeCrypto.SSL_use_certificate(s,getClientCertificates());
+    }
+  }
+;
+  Hooks sHooks=new ServerHooks(getServerPrivateKey(),getServerCertificates()){
+    @Override public int beforeHandshake(    int c) throws SSLException {
+      int s=super.beforeHandshake(c);
+      NativeCrypto.SSL_set_client_CA_list(s,getCaPrincipals());
+      NativeCrypto.SSL_set_verify(s,NativeCrypto.SSL_VERIFY_PEER);
+      return s;
+    }
+  }
+;
+  Future<TestSSLHandshakeCallbacks> client=handshake(listener,0,true,cHooks,null);
+  Future<TestSSLHandshakeCallbacks> server=handshake(listener,0,false,sHooks,null);
+  TestSSLHandshakeCallbacks clientCallback=client.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+  TestSSLHandshakeCallbacks serverCallback=server.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+  assertTrue(clientCallback.verifyCertificateChainCalled);
+  assertEqualCertificateChains(getServerCertificates(),clientCallback.asn1DerEncodedCertificateChain);
+  assertEquals("RSA",clientCallback.authMethod);
+  assertTrue(serverCallback.verifyCertificateChainCalled);
+  assertEqualCertificateChains(getClientCertificates(),serverCallback.asn1DerEncodedCertificateChain);
+  assertEquals("RSA",serverCallback.authMethod);
+  assertTrue(clientCallback.clientCertificateRequestedCalled);
+  assertNotNull(clientCallback.keyTypes);
+  assertEquals(3,clientCallback.keyTypes.length);
+  assertEquals("RSA",CipherSuite.getClientKeyType(clientCallback.keyTypes[0]));
+  assertEquals("DSA",CipherSuite.getClientKeyType(clientCallback.keyTypes[1]));
+  assertEquals("EC",CipherSuite.getClientKeyType(clientCallback.keyTypes[2]));
+  assertEqualPrincipals(getCaPrincipals(),clientCallback.asn1DerEncodedX500Principals);
+  assertFalse(serverCallback.clientCertificateRequestedCalled);
+  assertTrue(clientCallback.handshakeCompletedCalled);
+  assertTrue(serverCallback.handshakeCompletedCalled);
+}

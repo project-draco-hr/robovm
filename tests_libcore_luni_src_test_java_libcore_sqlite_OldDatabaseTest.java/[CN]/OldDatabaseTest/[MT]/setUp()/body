@@ -1,0 +1,18 @@
+{
+  super.setUp();
+  assertNotNull("Could not establish DB connection",conn);
+  tracker=new ErrorTracker();
+  statement=conn.createStatement();
+  DatabaseMetaData meta=conn.getMetaData();
+  assertNotNull(meta);
+  ResultSet userTab=meta.getTables(null,null,null,null);
+  while (userTab.next()) {
+    String tableName=userTab.getString("TABLE_NAME");
+    this.statement.execute("drop table " + tableName);
+  }
+  statement.execute(DatabaseCreator.CREATE_TABLE_SIMPLE1);
+  statement.close();
+  db=new Database();
+  db.open(dbFile.getPath(),0);
+  db.busy_handler(null);
+}

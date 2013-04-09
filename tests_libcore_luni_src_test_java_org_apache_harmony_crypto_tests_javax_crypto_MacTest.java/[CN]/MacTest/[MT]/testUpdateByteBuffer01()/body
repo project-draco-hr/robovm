@@ -1,0 +1,36 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportedMsg);
+    return;
+  }
+  Mac[] macs=createMacs();
+  assertNotNull("Mac objects were not created",macs);
+  byte[] bb={(byte)1,(byte)2,(byte)3,(byte)4,(byte)5};
+  SecretKeySpec sks=new SecretKeySpec(bb,"SHA1");
+  ByteBuffer byteNull=null;
+  ByteBuffer byteBuff=ByteBuffer.allocate(0);
+  byte[] bb1;
+  byte[] bb2;
+  for (int i=0; i < macs.length; i++) {
+    macs[i].init(sks);
+    bb1=macs[i].doFinal();
+    try {
+      macs[i].update(byteNull);
+      fail("IllegalArgumentException must be thrown because buffer is null");
+    }
+ catch (    IllegalArgumentException e) {
+    }
+    macs[i].update(byteBuff);
+    bb2=macs[i].doFinal();
+    for (int t=0; t < bb1.length; t++) {
+      assertEquals("Incorrect doFinal result",bb1[t],bb2[t]);
+    }
+    macs[i].init(sks);
+    bb1=macs[i].doFinal();
+    macs[i].update(null,0,0);
+    bb2=macs[i].doFinal();
+    for (int t=0; t < bb1.length; t++) {
+      assertEquals("Incorrect doFinal result",bb1[t],bb2[t]);
+    }
+  }
+}

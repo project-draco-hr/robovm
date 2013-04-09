@@ -1,0 +1,271 @@
+{
+  checkBuffer(b);
+  b.order(ByteOrder.LITTLE_ENDIAN);
+  ByteBuffer dupe=b.duplicate();
+  assertEquals(ByteOrder.BIG_ENDIAN,dupe.order());
+  b.order(ByteOrder.BIG_ENDIAN);
+  try {
+    b.put(-1,(byte)0);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    b.put(b.limit(),(byte)0);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    byte[] data=new byte[8];
+    b.position(0);
+    b.put(data,-1,2);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    byte[] data=new byte[8];
+    b.position(0);
+    b.put(data,1,8);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    byte[] data=new byte[8];
+    b.position(b.limit() - 2);
+    b.put(data,0,3);
+    fail("expected exception not thrown");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  b.position(0);
+  for (int i=0; i < b.capacity(); i++) {
+    b.put((byte)(0xA0 + i));
+  }
+  try {
+    b.put((byte)0xFF);
+    fail("expected exception not thrown");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  b.position(0);
+  assertEquals((byte)0xA7,b.get(7));
+  try {
+    b.get(12);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    b.get(-10);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  b.position(0);
+  b.order(ByteOrder.LITTLE_ENDIAN);
+  assertEquals((byte)0xA0,b.get());
+  assertEquals((byte)0xA1,b.get());
+  assertEquals((byte)0xA2,b.get());
+  assertEquals((byte)0xA3,b.get());
+  assertEquals((byte)0xA4,b.get());
+  assertEquals((byte)0xA5,b.get());
+  assertEquals((byte)0xA6,b.get());
+  assertEquals((byte)0xA7,b.get());
+  assertEquals((byte)0xA8,b.get());
+  assertEquals((byte)0xA9,b.get());
+  assertEquals((byte)0xAA,b.get());
+  assertEquals((byte)0xAB,b.get());
+  try {
+    b.get();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  b.position(0);
+  b.order(ByteOrder.BIG_ENDIAN);
+  assertEquals((byte)0xA0,b.get());
+  assertEquals((byte)0xA1,b.get());
+  assertEquals((byte)0xA2,b.get());
+  assertEquals((byte)0xA3,b.get());
+  assertEquals((byte)0xA4,b.get());
+  assertEquals((byte)0xA5,b.get());
+  assertEquals((byte)0xA6,b.get());
+  assertEquals((byte)0xA7,b.get());
+  assertEquals((byte)0xA8,b.get());
+  assertEquals((byte)0xA9,b.get());
+  assertEquals((byte)0xAA,b.get());
+  assertEquals((byte)0xAB,b.get());
+  try {
+    b.get();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  b.position(6);
+  b.limit(10);
+  assertEquals((byte)0xA6,b.get());
+  b.position(6);
+  ByteBuffer bb=b.slice();
+  checkBuffer(bb);
+  assertEquals(0,bb.position());
+  assertEquals(4,bb.limit());
+  assertEquals(4,bb.capacity());
+  assertEquals((byte)0xA6,bb.get());
+  assertEquals((byte)0xA7,bb.get());
+  assertEquals((byte)0xA8,bb.get());
+  assertEquals((byte)0xA9,bb.get());
+  try {
+    bb.get();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  b.position(0);
+  b.limit(b.capacity());
+  b.order(ByteOrder.LITTLE_ENDIAN);
+  b.position(0);
+  assertEquals((short)0xA1A0,b.getShort());
+  assertEquals((short)0xA3A2,b.getShort());
+  assertEquals((short)0xA5A4,b.getShort());
+  assertEquals((short)0xA7A6,b.getShort());
+  assertEquals((short)0xA9A8,b.getShort());
+  assertEquals((short)0xABAA,b.getShort());
+  try {
+    bb.getShort();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  b.order(ByteOrder.BIG_ENDIAN);
+  b.position(0);
+  assertEquals((short)0xA0A1,b.getShort());
+  assertEquals((short)0xA2A3,b.getShort());
+  assertEquals((short)0xA4A5,b.getShort());
+  assertEquals((short)0xA6A7,b.getShort());
+  assertEquals((short)0xA8A9,b.getShort());
+  assertEquals((short)0xAAAB,b.getShort());
+  try {
+    bb.getShort();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  b.order(ByteOrder.LITTLE_ENDIAN);
+  b.position(0);
+  assertEquals(0xA3A2A1A0,b.getInt());
+  assertEquals(0xA7A6A5A4,b.getInt());
+  assertEquals(0xABAAA9A8,b.getInt());
+  try {
+    bb.getInt();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  b.order(ByteOrder.BIG_ENDIAN);
+  b.position(0);
+  assertEquals(0xA0A1A2A3,b.getInt());
+  assertEquals(0xA4A5A6A7,b.getInt());
+  assertEquals(0xA8A9AAAB,b.getInt());
+  try {
+    bb.getInt();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  b.order(ByteOrder.LITTLE_ENDIAN);
+  b.position(0);
+  assertEquals(0xA3A2A1A0,Float.floatToRawIntBits(b.getFloat()));
+  assertEquals(0xA7A6A5A4,Float.floatToRawIntBits(b.getFloat()));
+  assertEquals(0xABAAA9A8,Float.floatToRawIntBits(b.getFloat()));
+  try {
+    b.getFloat();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  b.order(ByteOrder.BIG_ENDIAN);
+  b.position(0);
+  assertEquals(0xA0A1A2A3,Float.floatToRawIntBits(b.getFloat()));
+  assertEquals(0xA4A5A6A7,Float.floatToRawIntBits(b.getFloat()));
+  assertEquals(0xA8A9AAAB,Float.floatToRawIntBits(b.getFloat()));
+  try {
+    b.getFloat();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  b.order(ByteOrder.LITTLE_ENDIAN);
+  assertEquals(0xA7A6A5A4A3A2A1A0L,Double.doubleToRawLongBits(b.getDouble(0)));
+  assertEquals(0xA8A7A6A5A4A3A2A1L,Double.doubleToRawLongBits(b.getDouble(1)));
+  try {
+    b.getDouble(-1);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    b.getDouble(5);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  b.order(ByteOrder.BIG_ENDIAN);
+  assertEquals(0xA0A1A2A3A4A5A6A7L,Double.doubleToRawLongBits(b.getDouble(0)));
+  assertEquals(0xA1A2A3A4A5A6A7A8L,Double.doubleToRawLongBits(b.getDouble(1)));
+  try {
+    b.getDouble(-1);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    b.getDouble(5);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  b.position(1);
+  b.limit(5);
+  b.order(ByteOrder.LITTLE_ENDIAN);
+  bb=b.slice();
+  assertEquals(4,bb.capacity());
+  assertEquals(ByteOrder.BIG_ENDIAN,bb.order());
+  assertEquals(0xA1A2A3A4,bb.getInt(0));
+  bb.order(ByteOrder.LITTLE_ENDIAN);
+  assertEquals(0xA4A3A2A1,bb.getInt(0));
+  bb.order(ByteOrder.LITTLE_ENDIAN);
+  ShortBuffer sb=bb.asShortBuffer();
+  checkBuffer(sb);
+  assertEquals(2,sb.capacity());
+  assertEquals((short)0xA2A1,sb.get());
+  assertEquals((short)0xA4A3,sb.get());
+  bb.order(ByteOrder.BIG_ENDIAN);
+  sb=bb.asShortBuffer();
+  checkBuffer(sb);
+  assertEquals(2,sb.capacity());
+  assertEquals((short)0xA1A2,sb.get());
+  assertEquals((short)0xA3A4,sb.get());
+  bb.order(ByteOrder.LITTLE_ENDIAN);
+  IntBuffer ib=bb.asIntBuffer();
+  checkBuffer(ib);
+  assertEquals(1,ib.capacity());
+  assertEquals(0xA4A3A2A1,ib.get());
+  bb.order(ByteOrder.BIG_ENDIAN);
+  ib=bb.asIntBuffer();
+  checkBuffer(ib);
+  assertEquals(1,ib.capacity());
+  assertEquals(0xA1A2A3A4,ib.get());
+  bb.order(ByteOrder.LITTLE_ENDIAN);
+  FloatBuffer fb=bb.asFloatBuffer();
+  checkBuffer(fb);
+  assertEquals(1,fb.capacity());
+  assertEquals(0xA4A3A2A1,Float.floatToRawIntBits(fb.get()));
+  bb.order(ByteOrder.BIG_ENDIAN);
+  fb=bb.asFloatBuffer();
+  checkBuffer(fb);
+  assertEquals(1,fb.capacity());
+  assertEquals(0xA1A2A3A4,Float.floatToRawIntBits(fb.get()));
+}

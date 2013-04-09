@@ -1,0 +1,50 @@
+{
+  Set<EnumFoo> set=EnumSet.noneOf(EnumFoo.class);
+  Enum[] elements=EnumFoo.class.getEnumConstants();
+  for (int i=0; i < elements.length; i++) {
+    set.add((EnumFoo)elements[i]);
+  }
+  boolean result=set.contains(null);
+  assertFalse("Should not contain null:",result);
+  result=set.contains(EnumFoo.a);
+  assertTrue("Should contain EnumFoo.a",result);
+  result=set.contains(EnumFoo.ll);
+  assertTrue("Should contain EnumFoo.ll",result);
+  result=set.contains(EnumFoo.b);
+  assertTrue("Should contain EnumFoo.b",result);
+  result=set.contains(new Object());
+  assertFalse("Should not contain Object instance",result);
+  result=set.contains(EnumWithInnerClass.a);
+  assertFalse("Should not contain EnumWithSubclass.a",result);
+  set=EnumSet.noneOf(EnumFoo.class);
+  set.add(EnumFoo.aa);
+  set.add(EnumFoo.bb);
+  set.add(EnumFoo.cc);
+  assertEquals("Size of set should be 3",3,set.size());
+  assertTrue("set should contain EnumFoo.aa",set.contains(EnumFoo.aa));
+  Set<EnumWithInnerClass> setWithSubclass=EnumSet.noneOf(EnumWithInnerClass.class);
+  setWithSubclass.add(EnumWithInnerClass.a);
+  setWithSubclass.add(EnumWithInnerClass.b);
+  setWithSubclass.add(EnumWithInnerClass.c);
+  setWithSubclass.add(EnumWithInnerClass.d);
+  setWithSubclass.add(EnumWithInnerClass.e);
+  setWithSubclass.add(EnumWithInnerClass.f);
+  result=setWithSubclass.contains(EnumWithInnerClass.f);
+  assertTrue("Should contain EnumWithSubclass.f",result);
+  Set<HugeEnum> hugeSet=EnumSet.allOf(HugeEnum.class);
+  hugeSet.add(HugeEnum.a);
+  result=hugeSet.contains(HugeEnum.a);
+  assertTrue(result);
+  result=hugeSet.contains(HugeEnum.b);
+  assertTrue(result);
+  result=hugeSet.contains(null);
+  assertFalse(result);
+  result=hugeSet.contains(HugeEnum.a);
+  assertTrue(result);
+  result=hugeSet.contains(HugeEnum.ll);
+  assertTrue(result);
+  result=hugeSet.contains(new Object());
+  assertFalse(result);
+  result=hugeSet.contains(Enum.class);
+  assertFalse(result);
+}

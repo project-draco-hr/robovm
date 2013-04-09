@@ -1,0 +1,29 @@
+{
+  int mod=0;
+  try {
+    Constructor<? extends ConstructorTestHelper> ctor=new ConstructorTestHelper().getClass().getConstructor(new Class[0]);
+    mod=ctor.getModifiers();
+    assertTrue("Returned incorrect modifers for public ctor",((mod & Modifier.PUBLIC) == Modifier.PUBLIC) && ((mod & Modifier.PRIVATE) == 0));
+  }
+ catch (  NoSuchMethodException e) {
+    fail("Exception during test : " + e.getMessage());
+  }
+  try {
+    Class[] cl={int.class};
+    Constructor<? extends ConstructorTestHelper> ctor=new ConstructorTestHelper().getClass().getDeclaredConstructor(cl);
+    mod=ctor.getModifiers();
+    assertTrue("Returned incorrect modifers for private ctor",((mod & Modifier.PRIVATE) == Modifier.PRIVATE) && ((mod & Modifier.PUBLIC) == 0));
+  }
+ catch (  NoSuchMethodException e) {
+    fail("Exception during test : " + e.getMessage());
+  }
+  try {
+    Class[] cl={long.class};
+    Constructor<? extends ConstructorTestHelper> ctor=new ConstructorTestHelper().getClass().getDeclaredConstructor(cl);
+    mod=ctor.getModifiers();
+    assertTrue("Returned incorrect modifers for private ctor",((mod & Modifier.PROTECTED) == Modifier.PROTECTED) && ((mod & Modifier.PUBLIC) == 0));
+  }
+ catch (  NoSuchMethodException e) {
+    fail("NoSuchMethodException during test : " + e.getMessage());
+  }
+}

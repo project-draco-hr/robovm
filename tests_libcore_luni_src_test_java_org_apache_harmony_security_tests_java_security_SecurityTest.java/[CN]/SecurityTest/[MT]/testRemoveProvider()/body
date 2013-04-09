@@ -1,0 +1,20 @@
+{
+  Provider[] providers;
+  Provider[] providers1;
+  providers=Security.getProviders();
+  try {
+    for (int i=0; i < providers.length; i++) {
+      Security.removeProvider(providers[i].getName());
+    }
+    assertEquals("Providers not removed",0,Security.getProviders().length);
+  }
+  finally {
+    for (int i=0; i < providers.length; i++) {
+      Security.addProvider(providers[i]);
+    }
+    providers1=Security.getProviders();
+    for (int i=0; i < providers1.length; i++) {
+      assertEquals("Providers not restored correctly",providers[i],providers1[i]);
+    }
+  }
+}

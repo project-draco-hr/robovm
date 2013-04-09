@@ -1,0 +1,29 @@
+{
+  Provider[] providers=Security.getProviders();
+  for (  Provider provider : providers) {
+    Set<Provider.Service> services=provider.getServices();
+    for (    Provider.Service service : services) {
+      String type=service.getType();
+      if (!type.equals("KeyGenerator")) {
+        continue;
+      }
+      String algorithm=service.getAlgorithm();
+      try {
+        KeyGenerator kg1=KeyGenerator.getInstance(algorithm);
+        assertEquals(algorithm,kg1.getAlgorithm());
+        test_KeyGenerator(kg1);
+        KeyGenerator kg2=KeyGenerator.getInstance(algorithm,provider);
+        assertEquals(algorithm,kg2.getAlgorithm());
+        assertEquals(provider,kg2.getProvider());
+        test_KeyGenerator(kg2);
+        KeyGenerator kg3=KeyGenerator.getInstance(algorithm,provider.getName());
+        assertEquals(algorithm,kg3.getAlgorithm());
+        assertEquals(provider,kg3.getProvider());
+        test_KeyGenerator(kg3);
+      }
+ catch (      Exception e) {
+        throw new Exception("Problem testing KeyPairGenerator." + algorithm,e);
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  int portNumber=Support_PortManager.getNextPort();
+  ServerSocket newSocket=new ServerSocket(portNumber);
+  newSocket.setSoTimeout(500);
+  try {
+    Socket accepted=newSocket.accept();
+    fail("SocketTimeoutException was not thrown: " + accepted);
+  }
+ catch (  SocketTimeoutException expected) {
+  }
+  newSocket.close();
+  ServerSocketChannel ssc=ServerSocketChannel.open();
+  ServerSocket ss=ssc.socket();
+  try {
+    ss.accept();
+    fail("IllegalBlockingModeException was not thrown.");
+  }
+ catch (  IllegalBlockingModeException ibme) {
+  }
+ finally {
+    ss.close();
+    ssc.close();
+  }
+}

@@ -1,0 +1,51 @@
+{
+  CallableStatement cstmt=null;
+  ResultSet rs=null;
+  ResultSet rs1=null;
+  Statement st=null;
+  Statement st1=null;
+  try {
+    cstmt=conn.prepareCall("call welcomeAnimal(3, 'Petya', 'Cock')");
+    st=conn.createStatement();
+    st.execute("select * from zoo");
+    rs=st.getResultSet();
+    assertEquals(2,getCount(rs));
+    cstmt.execute();
+    st1=conn.createStatement();
+    st1.execute("select * from zoo");
+    rs1=st1.getResultSet();
+    assertEquals(3,getCount(rs1));
+  }
+ catch (  SQLException e) {
+  }
+ finally {
+    try {
+      st.close();
+      st1.close();
+      rs.close();
+      rs1.close();
+      cstmt.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    conn.prepareCall("welcomeAnimal(4, 'Petya', 'Cock')");
+    fail("SQL Exception is not thrown");
+  }
+ catch (  SQLException e) {
+  }
+  try {
+    conn.prepareCall(null);
+    fail("SQL Exception is not thrown");
+  }
+ catch (  SQLException e) {
+  }
+  conn.close();
+  try {
+    conn.prepareCall("");
+    fail("Could execute statement on closed connection.");
+  }
+ catch (  SQLException e) {
+  }
+}

@@ -1,0 +1,29 @@
+{
+  Statement st=null;
+  try {
+    String[] queries1={"update zoo set name='Masha', family='cat' where id=2;","drop table if exists hutch","create table hutch (id integer not null, animal_id integer, address char(20), primary key (id));","insert into hutch (id, animal_id, address) values (1, 2, 'Birds-house, 1');","insert into hutch (id, animal_id, address) values (2, 1, 'Horse-house, 5');","create view address as select address from hutch where animal_id=2","drop view address;","drop table hutch;"};
+    Vector<int[]> array=new Vector<int[]>();
+    array.addElement(null);
+    array.addElement(new int[]{1,2,3});
+    array.addElement(new int[]{1,2,10,100});
+    array.addElement(new int[]{});
+    array.addElement(new int[]{100,200});
+    array.addElement(new int[]{-1,0});
+    array.addElement(new int[]{0,0,0,1,2,3});
+    array.addElement(new int[]{-100,-200});
+    st=conn.createStatement();
+    for (int i=0; i < queries1.length; i++) {
+      st.executeUpdate(queries1[i],(int[])array.elementAt(i));
+      fail("Exception expected");
+    }
+  }
+ catch (  SQLFeatureNotSupportedException e) {
+  }
+ finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+}

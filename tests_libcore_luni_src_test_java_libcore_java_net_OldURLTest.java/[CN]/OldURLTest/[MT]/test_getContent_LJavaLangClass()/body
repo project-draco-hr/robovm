@@ -1,0 +1,27 @@
+{
+  File sampleFile=createTempHelloWorldFile();
+  byte[] ba;
+  String s;
+  InputStream is=null;
+  try {
+    u=new URL("file:///data/tmp/hyts_htmltest.html");
+    is=(InputStream)u.getContent(new Class[]{InputStream.class});
+    is.read(ba=new byte[4096]);
+    fail("No error occurred reading from nonexisting file");
+  }
+ catch (  IOException e) {
+  }
+  try {
+    u=new URL("file:///data/tmp/hyts_htmltest.html");
+    is=(InputStream)u.getContent(new Class[]{String.class,InputStream.class});
+    is.read(ba=new byte[4096]);
+    fail("No error occurred reading from nonexisting file");
+  }
+ catch (  IOException e) {
+  }
+  u=sampleFile.toURL();
+  u.openConnection();
+  assertNotNull(u);
+  s=(String)u.getContent(new Class[]{String.class});
+  assertNull(s);
+}

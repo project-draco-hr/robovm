@@ -1,0 +1,25 @@
+{
+  PushbackInputStream tobj;
+  tobj=new PushbackInputStream(underlying);
+  tobj.unread(23);
+  tobj.skip(2);
+  tobj.unread(23);
+  assertEquals("Wrong number!",30,tobj.available());
+  assertEquals("Wrong value read!",23,tobj.read());
+  tobj.unread(13);
+  try {
+    tobj.unread(13);
+    fail("IOException not thrown (ACTUALLY NOT SURE WHETHER IT REALLY MUST BE THROWN!).");
+  }
+ catch (  IOException e) {
+  }
+  try {
+    int x;
+    assertTrue("Incorrect byte read",(x=pis.read()) == fileString.getBytes()[0]);
+    pis.unread(x);
+    assertTrue("Failed to unread",pis.read() == x);
+  }
+ catch (  IOException e) {
+    fail("IOException during read test : " + e.getMessage());
+  }
+}

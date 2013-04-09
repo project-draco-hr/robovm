@@ -1,0 +1,24 @@
+{
+  X509CRLSelector selector=new X509CRLSelector();
+  String iss1="O=First Org.";
+  String iss2="O=Second Org.";
+  TestCRL crl1=new TestCRL(new X500Principal(iss1));
+  TestCRL crl2=new TestCRL(new X500Principal(iss2));
+  try {
+    selector.addIssuerName(iss1);
+  }
+ catch (  IOException e) {
+    e.printStackTrace();
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("The CRL should match the selection criteria.",selector.match(crl1));
+  assertFalse("The CRL should not match the selection criteria.",selector.match(crl2));
+  try {
+    selector.addIssuerName(iss2);
+  }
+ catch (  IOException e) {
+    e.printStackTrace();
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("The CRL should match the selection criteria.",selector.match(crl2));
+}

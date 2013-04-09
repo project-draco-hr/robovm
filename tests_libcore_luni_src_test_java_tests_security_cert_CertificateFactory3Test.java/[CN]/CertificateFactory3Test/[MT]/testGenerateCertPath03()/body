@@ -1,0 +1,17 @@
+{
+  String certPathEncoding="PkiPath";
+  CertificateFactory[] certFs=initCertFs();
+  assertNotNull("CertificateFactory objects were not created",certFs);
+  for (int i=0; i < certFs.length; i++) {
+    Iterator<String> it=certFs[0].getCertPathEncodings();
+    assertTrue("no CertPath encodings",it.hasNext());
+    assertEquals("Incorrect default encoding",certPathEncoding,it.next());
+    CertPath certPath=null;
+    InputStream fis=Support_Resources.getResourceStream(fileCertPathPki);
+    certPath=certFs[i].generateCertPath(fis);
+    fis.close();
+    assertEquals(defaultType,certPath.getType());
+    List<? extends Certificate> list1=certPath.getCertificates();
+    assertFalse("Result list is empty",list1.isEmpty());
+  }
+}

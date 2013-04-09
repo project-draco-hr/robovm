@@ -1,0 +1,35 @@
+{
+  SSLContextSpiImpl ssl=new SSLContextSpiImpl();
+  String defaultAlgorithm=Security.getProperty("ssl.KeyManagerFactory.algorithm");
+  try {
+    KeyManagerFactory kmf=KeyManagerFactory.getInstance(defaultAlgorithm);
+    char[] pass="password".toCharArray();
+    kmf.init(null,pass);
+    KeyManager[] km=kmf.getKeyManagers();
+    defaultAlgorithm=Security.getProperty("ssl.TrustManagerFactory.algorithm");
+    TrustManagerFactory trustMF=TrustManagerFactory.getInstance(defaultAlgorithm);
+    KeyStore ks=KeyStore.getInstance(KeyStore.getDefaultType());
+    ks.load(null,null);
+    trustMF.init(ks);
+    TrustManager[] tm=trustMF.getTrustManagers();
+    SecureRandom sr=SecureRandom.getInstance("SHA1PRNG");
+    ssl.engineInit(km,tm,sr);
+  }
+ catch (  Exception ex) {
+    fail(ex + " unexpected exception");
+  }
+  try {
+    assertNotNull("Subtest_01: Object is NULL",ssl.engineCreateSSLEngine());
+    SSLEngine sleng=ssl.engineCreateSSLEngine("localhost",1080);
+    assertNotNull("Subtest_02: Object is NULL",sleng);
+    assertEquals(sleng.getPeerPort(),1080);
+    assertEquals(sleng.getPeerHost(),"localhost");
+    assertNull("Subtest_03: Object not NULL",ssl.engineGetClientSessionContext());
+    assertNull("Subtest_04: Object not NULL",ssl.engineGetServerSessionContext());
+    assertNull("Subtest_05: Object not NULL",ssl.engineGetServerSocketFactory());
+    assertNull("Subtest_06: Object not NULL",ssl.engineGetSocketFactory());
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception " + e);
+  }
+}

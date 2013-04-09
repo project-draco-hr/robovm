@@ -1,0 +1,12 @@
+{
+  System.setProperty("ftp.proxyHost","a");
+  System.setProperty("http.proxyHost","b");
+  System.setProperty("https.proxyHost","c");
+  System.setProperty("other.proxyHost","d");
+  System.setProperty("socket.proxyHost","d");
+  assertEquals(Arrays.asList(new Proxy(Proxy.Type.HTTP,createUnresolved("a",80))),proxySelector.select(ftpUri));
+  assertEquals(Arrays.asList(new Proxy(Proxy.Type.HTTP,createUnresolved("b",80))),proxySelector.select(httpUri));
+  assertEquals(Arrays.asList(new Proxy(Proxy.Type.HTTP,createUnresolved("c",443))),proxySelector.select(httpsUri));
+  assertEquals(Arrays.asList(Proxy.NO_PROXY),proxySelector.select(otherUri));
+  assertEquals(Arrays.asList(Proxy.NO_PROXY),proxySelector.select(socketUri));
+}

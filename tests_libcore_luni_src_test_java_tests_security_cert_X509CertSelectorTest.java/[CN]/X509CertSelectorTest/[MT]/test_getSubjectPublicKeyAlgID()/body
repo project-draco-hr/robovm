@@ -1,0 +1,24 @@
+{
+  X509CertSelector selector=new X509CertSelector();
+  String[] validOIDs={"0.0.20","1.25.0","2.0.39","0.2.10","1.35.15","2.17.89"};
+  assertNull("Selector should return null",selector.getSubjectPublicKeyAlgID());
+  for (int i=0; i < validOIDs.length; i++) {
+    try {
+      selector.setSubjectPublicKeyAlgID(validOIDs[i]);
+      assertEquals(validOIDs[i],selector.getSubjectPublicKeyAlgID());
+    }
+ catch (    IOException e) {
+      System.out.println("t = " + e.getMessage());
+    }
+  }
+  String pkaid1="1.2.840.113549.1.1.1";
+  String pkaid2="1.2.840.113549.1.1.4";
+  try {
+    selector.setSubjectPublicKeyAlgID(pkaid1);
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("The returned oid should be equal to specified",pkaid1.equals(selector.getSubjectPublicKeyAlgID()));
+  assertFalse("The returned oid should differ",pkaid2.equals(selector.getSubjectPublicKeyAlgID()));
+}

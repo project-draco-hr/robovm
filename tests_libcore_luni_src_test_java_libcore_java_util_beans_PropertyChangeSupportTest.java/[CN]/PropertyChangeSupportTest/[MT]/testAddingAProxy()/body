@@ -1,0 +1,18 @@
+{
+  Object bean=new Object();
+  PropertyChangeSupport support=new PropertyChangeSupport(bean);
+  PropertyChangeListener listener=new PropertyChangeListener(){
+    public void propertyChange(    PropertyChangeEvent event){
+    }
+  }
+;
+  PropertyChangeListenerProxy proxy=new PropertyChangeListenerProxy("a",listener);
+  support.addPropertyChangeListener("b",proxy);
+  PropertyChangeListenerProxy p1=(PropertyChangeListenerProxy)support.getPropertyChangeListeners()[0];
+  assertEquals(PropertyChangeListenerProxy.class,p1.getClass());
+  assertEquals("b",p1.getPropertyName());
+  PropertyChangeListenerProxy p2=(PropertyChangeListenerProxy)p1.getListener();
+  assertEquals(PropertyChangeListenerProxy.class,p2.getClass());
+  assertEquals("a",p2.getPropertyName());
+  assertEquals(listener,p2.getListener());
+}

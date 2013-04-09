@@ -1,0 +1,9 @@
+{
+  server.enqueue(new MockResponse().setBody(gzip("ABCABCABC".getBytes("UTF-8"))).addHeader("Content-Encoding: gzip"));
+  server.play();
+  URLConnection connection=server.getUrl("/").openConnection();
+  assertEquals("ABCABCABC",readAscii(connection.getInputStream(),Integer.MAX_VALUE));
+  assertNull(connection.getContentEncoding());
+  RecordedRequest request=server.takeRequest();
+  assertContains(request.getHeaders(),"Accept-Encoding: gzip");
+}

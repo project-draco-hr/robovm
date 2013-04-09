@@ -1,0 +1,23 @@
+{
+  String[] validIPAddresses={"::1.2.3.4","::","::","1::0","1::","::1","FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF","FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:255.255.255.255","0:0:0:0:0:0:0:0","0:0:0:0:0:0:0.0.0.0","127.0.0.1","localhost","42.42.42.42","0.0.0.0"};
+  String[] results={"0:0:0:0:0:0:102:304","0:0:0:0:0:0:0:0","0:0:0:0:0:0:0:0","1:0:0:0:0:0:0:0","1:0:0:0:0:0:0:0","0:0:0:0:0:0:0:1","ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff","ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff","0:0:0:0:0:0:0:0","0:0:0:0:0:0:0:0","localhost","localhost","42.42.42.42","0.0.0.0"};
+  for (int i=0; i < validIPAddresses.length; i++) {
+    InetAddress ia=InetAddress.getByName(validIPAddresses[i]);
+    InetSocketAddress isa=new InetSocketAddress(ia,80);
+    assertEquals(80,isa.getPort());
+  }
+  InetSocketAddress isa=new InetSocketAddress((InetAddress)null,80);
+  assertEquals("0.0.0.0",isa.getHostName());
+  try {
+    new InetSocketAddress(InetAddress.getByName("localhost"),65536);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    new InetSocketAddress(InetAddress.getByName("localhost"),-1);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+}

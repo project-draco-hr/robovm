@@ -1,0 +1,10 @@
+{
+  String xml="<foo>abc<![CDATA[def]]>ghi</foo>";
+  DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+  factory.setCoalescing(true);
+  document=factory.newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
+  Element documentElement=document.getDocumentElement();
+  Text text=(Text)documentElement.getFirstChild();
+  assertEquals("abcdefghi",text.getTextContent());
+  assertNull(text.getNextSibling());
+}

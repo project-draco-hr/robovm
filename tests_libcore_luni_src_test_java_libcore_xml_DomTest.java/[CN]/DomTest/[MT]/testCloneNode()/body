@@ -1,0 +1,21 @@
+{
+  document=builder.parse(new InputSource(new StringReader("<menu " + "xmlns:f=\"http://food\" xmlns:a=\"http://addons\">" + "<f:item a:standard=\"strawberry\" deluxe=\"yes\">Waffles</f:item></menu>")));
+  name=(Element)document.getFirstChild().getFirstChild();
+  Element clonedName=(Element)name.cloneNode(true);
+  assertNull(clonedName.getParentNode());
+  assertNull(clonedName.getNextSibling());
+  assertNull(clonedName.getPreviousSibling());
+  assertEquals("http://food",clonedName.getNamespaceURI());
+  assertEquals("f:item",clonedName.getNodeName());
+  assertEquals("item",clonedName.getLocalName());
+  assertEquals("http://food",clonedName.getNamespaceURI());
+  assertEquals("yes",clonedName.getAttribute("deluxe"));
+  assertEquals("strawberry",clonedName.getAttribute("a:standard"));
+  assertEquals("strawberry",clonedName.getAttributeNS("http://addons","standard"));
+  assertEquals(1,name.getChildNodes().getLength());
+  Text clonedChild=(Text)clonedName.getFirstChild();
+  assertSame(clonedName,clonedChild.getParentNode());
+  assertNull(clonedChild.getNextSibling());
+  assertNull(clonedChild.getPreviousSibling());
+  assertEquals("Waffles",clonedChild.getTextContent());
+}

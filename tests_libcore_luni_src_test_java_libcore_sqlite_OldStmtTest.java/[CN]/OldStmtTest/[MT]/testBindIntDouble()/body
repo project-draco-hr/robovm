@@ -1,0 +1,49 @@
+{
+  double input=0.0;
+  double maxVal=Double.MAX_VALUE;
+  double minVal=Double.MIN_VALUE;
+  double negInf=Double.NEGATIVE_INFINITY;
+  double posInf=Double.POSITIVE_INFINITY;
+  double nan=Double.NaN;
+  db.exec("create table TEST (res double)",null);
+  st=db.prepare("insert into TEST values (:one);");
+  st.bind(1,input);
+  st.step();
+  st.reset();
+  st.bind(1,maxVal);
+  st.step();
+  st.reset();
+  st.bind(1,minVal);
+  st.step();
+  st.reset();
+  st.bind(1,negInf);
+  st.step();
+  st.reset();
+  st.bind(1,posInf);
+  st.step();
+  st.reset();
+  st.bind(1,nan);
+  st.step();
+  TableResult r=db.get_table("select * from TEST");
+  String[] row0=(String[])r.rows.elementAt(0);
+  assertTrue(Double.compare(input,Double.parseDouble(row0[0])) == 0);
+  String[] row1=(String[])r.rows.elementAt(1);
+  assertFalse(Double.compare(maxVal,Double.parseDouble(row1[0])) == 0);
+  assertTrue(Double.compare(maxVal,Double.parseDouble(row1[0])) < 0);
+  assertTrue(Double.isInfinite(Double.parseDouble(row1[0])));
+  String[] row2=(String[])r.rows.elementAt(2);
+  assertTrue(Double.compare(minVal,Double.parseDouble(row2[0])) == 0);
+  String[] row3=(String[])r.rows.elementAt(3);
+  assertEquals("Double.NEGATIVE_INFINITY SQLite representation","-Inf",row3[0]);
+  String[] row4=(String[])r.rows.elementAt(4);
+  assertEquals("Double.POSITIVE_INFINITY SQLite representation","Inf",row4[0]);
+  String[] row5=(String[])r.rows.elementAt(4);
+  assertEquals("Double.Nan SQLite representation","Inf",row5[0]);
+  try {
+    st.close();
+    st.bind(1,0.0);
+    fail("Exception expected");
+  }
+ catch (  SQLite.Exception expected) {
+  }
+}

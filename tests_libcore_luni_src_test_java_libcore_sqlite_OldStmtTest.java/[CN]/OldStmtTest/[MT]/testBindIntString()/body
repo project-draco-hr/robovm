@@ -1,0 +1,18 @@
+{
+  String name="Hello World";
+  db.exec(DatabaseCreator.CREATE_TABLE_PARENT,null);
+  st=db.prepare("insert into " + DatabaseCreator.PARENT_TABLE + " values (:one, :two);");
+  st.bind(1,2);
+  st.bind(2,name);
+  st.step();
+  TableResult r=db.get_table("select * from " + DatabaseCreator.PARENT_TABLE);
+  String[] row=(String[])r.rows.elementAt(0);
+  assertEquals(name,row[1]);
+  try {
+    st.close();
+    st.bind(1,name);
+    fail("Exception expected");
+  }
+ catch (  SQLite.Exception expected) {
+  }
+}

@@ -1,0 +1,20 @@
+{
+  URL url=new URL("http://localhost:8080/");
+  URLConnection connection=url.openConnection();
+  Calendar cal=new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+  cal.clear();
+  cal.set(2000,Calendar.MARCH,5);
+  long sinceTime=cal.getTime().getTime();
+  connection.setIfModifiedSince(sinceTime);
+  assertEquals("Wrong date set",sinceTime,connection.getIfModifiedSince());
+  uc2.setIfModifiedSince(sinceTime);
+  uc2.connect();
+  assertEquals(200,((HttpURLConnection)uc2).getResponseCode());
+  try {
+    uc2.setIfModifiedSince(2);
+    fail("Exception expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+  ((HttpURLConnection)uc2).disconnect();
+}

@@ -1,0 +1,16 @@
+{
+  Provider[] providers=Security.getProviders("CertificateFactory.X509");
+  for (  Provider provider : providers) {
+    CertificateFactory certificateFactory=CertificateFactory.getInstance("X509",provider);
+    Certificate certificate=certificateFactory.generateCertificate(new ByteArrayInputStream(selfSignedCertMD2.getBytes()));
+    try {
+      certificate.verify(certificate.getPublicKey());
+      fail("MD2 should not be allowed");
+    }
+ catch (    NoSuchAlgorithmException e) {
+    }
+catch (    Throwable e) {
+      throw new AssertionError(provider.getName(),e);
+    }
+  }
+}

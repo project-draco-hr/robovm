@@ -1,0 +1,23 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      keyStore.store(null);
+      fail();
+    }
+ catch (    KeyStoreException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    keyStore.load(null,null);
+    try {
+      keyStore.store(null);
+      fail();
+    }
+ catch (    UnsupportedOperationException expected) {
+      assertFalse(isLoadStoreParameterSupported(keyStore));
+    }
+catch (    IllegalArgumentException expected) {
+      assertTrue(isLoadStoreParameterSupported(keyStore));
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  try {
+    InetAddress addr=InetAddress.getLocalHost();
+    int[] ports=Support_PortManager.getNextPortsForUDP(3);
+    int port=ports[0];
+    DatagramSocket theSocket=new DatagramSocket(ports[1]);
+    assertTrue("Socket indicated  not bound when it should be (1)",theSocket.isBound());
+    theSocket.close();
+    theSocket=new DatagramSocket(new InetSocketAddress(addr,port));
+    assertTrue("Socket indicated  not bound when it should be (2)",theSocket.isBound());
+    theSocket.close();
+    theSocket=new DatagramSocket((SocketAddress)null);
+    assertFalse("Socket indicated  bound when it should not be (1)",theSocket.isBound());
+    theSocket.close();
+    theSocket=new DatagramSocket((SocketAddress)null);
+    theSocket.connect(new InetSocketAddress(addr,port));
+    assertTrue("Socket indicated not bound when it should be (3)",theSocket.isBound());
+    theSocket.close();
+    InetSocketAddress theLocalAddress=new InetSocketAddress(InetAddress.getLocalHost(),ports[2]);
+    theSocket=new DatagramSocket((SocketAddress)null);
+    assertFalse("Socket indicated bound when it should not be (2)",theSocket.isBound());
+    theSocket.bind(theLocalAddress);
+    assertTrue("Socket indicated not bound when it should be (4)",theSocket.isBound());
+    theSocket.close();
+    assertTrue("Socket indicated not bound when it should be (5)",theSocket.isBound());
+  }
+ catch (  Exception e) {
+    fail("Got exception during isBound tests" + e.toString());
+  }
+}

@@ -1,0 +1,24 @@
+{
+  Statement st=null;
+  try {
+    st=conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY,ResultSet.CLOSE_CURSORS_AT_COMMIT);
+    assertNotNull(st);
+    st.execute("select id, name from zoo");
+    ResultSet rs=st.getResultSet();
+    try {
+      rs.close();
+      fail("SQLException was not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    if (st != null) {
+      try {
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+  }
+}

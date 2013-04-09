@@ -1,0 +1,31 @@
+{
+  byte[] name1=new byte[]{48,21,49,19,48,17,6,3,85,4,10,19,10,70,105,114,115,116,32,79,114,103,46};
+  byte[] name2=new byte[]{48,22,49,20,48,18,6,3,85,4,10,19,11,83,101,99,111,110,100,32,79,114,103,46};
+  X500Principal iss1=new X500Principal(name1);
+  X500Principal iss2=new X500Principal(name2);
+  TestCert cert1=new TestCert(iss1);
+  TestCert cert2=new TestCert(iss2);
+  X509CertSelector selector=new X509CertSelector();
+  try {
+    selector.setIssuer((byte[])null);
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("Any certificates should match " + "in the case of null issuer criteria.",selector.match(cert1) && selector.match(cert2));
+  try {
+    selector.setIssuer(name1);
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert1));
+  assertFalse("The certificate should not match the selection criteria.",selector.match(cert2));
+  try {
+    selector.setIssuer(name2);
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert2));
+}

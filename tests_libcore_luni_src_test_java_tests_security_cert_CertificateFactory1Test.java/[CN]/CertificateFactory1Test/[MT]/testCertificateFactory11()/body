@@ -1,0 +1,54 @@
+{
+  if (!X509Support) {
+    fail(NotSupportMsg);
+    return;
+  }
+  CertificateFactory[] certFs=initCertFs();
+  assertNotNull("CertificateFactory objects were not created",certFs);
+  MyCertificate mc=createMC();
+  ByteArrayOutputStream os=new ByteArrayOutputStream();
+  ObjectOutputStream oos=new ObjectOutputStream(os);
+  oos.writeObject(mc);
+  oos.flush();
+  oos.close();
+  Certificate cer;
+  Collection<?> colCer;
+  CRL crl;
+  Collection<?> colCrl;
+  byte[] arr=os.toByteArray();
+  ByteArrayInputStream is;
+  for (int i=0; i < certFs.length; i++) {
+    is=new ByteArrayInputStream(arr);
+    try {
+      cer=certFs[i].generateCertificate(is);
+      assertNull("Not null certificate was created",cer);
+    }
+ catch (    CertificateException e) {
+    }
+    is=new ByteArrayInputStream(arr);
+    try {
+      colCer=certFs[i].generateCertificates(is);
+      if (colCer != null) {
+        assertTrue("Not empty certificate Collection was created",colCer.isEmpty());
+      }
+    }
+ catch (    CertificateException e) {
+    }
+    is=new ByteArrayInputStream(arr);
+    try {
+      crl=certFs[i].generateCRL(is);
+      assertNull("Not null CRL was created",crl);
+    }
+ catch (    CRLException e) {
+    }
+    is=new ByteArrayInputStream(arr);
+    try {
+      colCrl=certFs[i].generateCRLs(is);
+      if (colCrl != null) {
+        assertTrue("Not empty CRL Collection was created",colCrl.isEmpty());
+      }
+    }
+ catch (    CRLException e) {
+    }
+  }
+}

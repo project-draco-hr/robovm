@@ -1,0 +1,20 @@
+{
+  String str="AbCdEfGhIjKlMnOpQrStUvWxYzX" + "\u00a3\u00c5\u00c9";
+  ByteArrayInputStream aa=new ByteArrayInputStream(str.getBytes());
+  InputStreamReader a=new InputStreamReader(aa);
+  try {
+    assertEquals("UTF8",a.getEncoding());
+    int x=a.read();
+    assertEquals('A',x);
+    char[] c=new char[29];
+    x=a.read(c,0,3);
+    assertEquals(3,x);
+    assertEquals("bCd",new String(c,0,3));
+    x=a.read(c,3,26);
+    assertEquals(26,x);
+    assertEquals("EfGhIjKlMnOpQrStUvWxYzX\u00a3\u00c5\u00c9",new String(c,3,26));
+  }
+  finally {
+    a.close();
+  }
+}

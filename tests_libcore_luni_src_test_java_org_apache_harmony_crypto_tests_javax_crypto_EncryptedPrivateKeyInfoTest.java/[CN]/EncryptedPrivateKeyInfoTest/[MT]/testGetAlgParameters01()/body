@@ -1,0 +1,17 @@
+{
+  boolean performed=false;
+  for (int i=0; i < EncryptedPrivateKeyInfoData.algName0.length; i++) {
+    try {
+      EncryptedPrivateKeyInfo epki=new EncryptedPrivateKeyInfo(EncryptedPrivateKeyInfoData.getValidEncryptedPrivateKeyInfoEncoding(EncryptedPrivateKeyInfoData.algName0[i][0]));
+      AlgorithmParameters apar=epki.getAlgParameters();
+      if (apar == null) {
+        continue;
+      }
+      assertTrue(Arrays.equals(EncryptedPrivateKeyInfoData.getParametersEncoding(EncryptedPrivateKeyInfoData.algName0[i][0]),apar.getEncoded()));
+      performed=true;
+    }
+ catch (    NoSuchAlgorithmException allowedFailure) {
+    }
+  }
+  assertTrue("Test not performed",performed);
+}

@@ -1,0 +1,36 @@
+{
+  int inputVal=3;
+  TestProgressHandler prog=new TestProgressHandler();
+  db.exec("create table TEST5(id integer, firstname text, lastname text)",null);
+  Vm vm=db.compile("select * from TEST5; " + "insert into TEST5 values(3, 'James', 'Bond'); " + "delete from TEST5 where id = 3; "+ "select * from TEST5");
+  int stmt=0;
+  do {
+    ++stmt;
+    if (stmt > inputVal) {
+      db.progress_handler(inputVal,prog);
+    }
+ else {
+      assertEquals(0,prog.getCounts());
+    }
+    while (vm.step(prog)) {
+    }
+  }
+ while (vm.compile());
+  assertEquals(inputVal,prog.getCounts());
+  inputVal=0;
+  TestProgressHandler progBoundary=new TestProgressHandler();
+  db.progress_handler(inputVal,progBoundary);
+  Vm vm2=db.compile("select * from TEST5; " + "insert into TEST5 values(3, 'James', 'Bond'); " + "delete from TEST5 where id = 3; "+ "select * from TEST5");
+  do {
+    vm2.step(progBoundary);
+  }
+ while (vm2.compile());
+  assertEquals(inputVal,progBoundary.getCounts());
+  try {
+    db.exec("drop table TEST5",null);
+  }
+ catch (  Exception e) {
+    System.out.println(e.getMessage());
+    e.printStackTrace();
+  }
+}

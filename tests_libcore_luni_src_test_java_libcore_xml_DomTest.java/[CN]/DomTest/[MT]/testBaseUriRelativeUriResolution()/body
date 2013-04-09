@@ -1,0 +1,25 @@
+{
+  File file=File.createTempFile("DomTest.java","xml");
+  File parentFile=file.getParentFile();
+  FileWriter writer=new FileWriter(file);
+  writer.write("<a>" + "  <b xml:base=\"b1/b2\">" + "    <c>"+ "      <d xml:base=\"../d1/d2\"><e/></d>"+ "    </c>"+ "  </b>"+ "  <h xml:base=\"h1/h2/\">"+ "    <i xml:base=\"../i1/i2\"/>"+ "  </h>"+ "</a>");
+  writer.close();
+  document=builder.parse(file);
+  assertFileUriEquals("",file.getPath(),document.getBaseURI());
+  assertFileUriEquals("",file.getPath(),document.getDocumentURI());
+  Element a=document.getDocumentElement();
+  assertFileUriEquals("",file.getPath(),a.getBaseURI());
+  String message="This implementation's getBaseURI() doesn't handle relative URIs";
+  Element b=(Element)a.getChildNodes().item(1);
+  Element c=(Element)b.getChildNodes().item(1);
+  Element d=(Element)c.getChildNodes().item(1);
+  Element e=(Element)d.getChildNodes().item(0);
+  Element h=(Element)a.getChildNodes().item(3);
+  Element i=(Element)h.getChildNodes().item(1);
+  assertFileUriEquals(message,parentFile + "/b1/b2",b.getBaseURI());
+  assertFileUriEquals(message,parentFile + "/b1/b2",c.getBaseURI());
+  assertFileUriEquals(message,parentFile + "/d1/d2",d.getBaseURI());
+  assertFileUriEquals(message,parentFile + "/d1/d2",e.getBaseURI());
+  assertFileUriEquals(message,parentFile + "/h1/h2/",h.getBaseURI());
+  assertFileUriEquals(message,parentFile + "/h1/i1/i2",i.getBaseURI());
+}

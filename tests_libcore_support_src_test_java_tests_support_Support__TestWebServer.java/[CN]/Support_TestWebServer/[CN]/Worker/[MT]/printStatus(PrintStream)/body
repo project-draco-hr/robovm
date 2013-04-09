@@ -1,0 +1,22 @@
+{
+  if (redirectCode != -1) {
+    log("REDIRECTING TO " + redirectHost + " status "+ redirectCode);
+    psPrint(ps,HTTP_VERSION_STRING + " " + redirectCode+ " Moved permanently");
+    psWriteEOL(ps);
+    psPrint(ps,"Location: " + redirectHost);
+    psWriteEOL(ps);
+    return;
+  }
+  if (testID.startsWith("test")) {
+    testNum=Integer.valueOf(testID.substring(4)) - 1;
+  }
+  if ((testNum < -1) || (testNum > Support_TestWebData.tests.length - 1)) {
+    psPrint(ps,HTTP_VERSION_STRING + " " + HTTP_NOT_FOUND+ " not found");
+    psWriteEOL(ps);
+  }
+ else {
+    psPrint(ps,HTTP_VERSION_STRING + " " + HTTP_OK+ " OK");
+    psWriteEOL(ps);
+  }
+  log("Status sent");
+}

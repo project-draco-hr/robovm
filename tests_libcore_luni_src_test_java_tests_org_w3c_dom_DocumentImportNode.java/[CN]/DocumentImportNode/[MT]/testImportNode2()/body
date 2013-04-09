@@ -1,0 +1,26 @@
+{
+  Document doc;
+  Document docImported;
+  Element element;
+  Attr attr;
+  Node importedAttr;
+  String nodeName;
+  int nodeType;
+  String nodeValue;
+  NodeList addresses;
+  Node attrsParent;
+  doc=(Document)load("staffNS",builder);
+  docImported=(Document)load("staff",builder);
+  addresses=doc.getElementsByTagNameNS("http://www.nist.gov","address");
+  element=(Element)addresses.item(1);
+  attr=element.getAttributeNodeNS("http://www.nist.gov","zone");
+  importedAttr=docImported.importNode(attr,false);
+  nodeName=importedAttr.getNodeName();
+  nodeType=(int)importedAttr.getNodeType();
+  nodeValue=importedAttr.getNodeValue();
+  attrsParent=importedAttr.getParentNode();
+  assertNull("documentimportnode02_parentNull",attrsParent);
+  assertEquals("documentimportnode02_nodeName","emp:zone",nodeName);
+  assertEquals("documentimportnode02_nodeType",2,nodeType);
+  assertEquals("documentimportnode02_nodeValue","CANADA",nodeValue);
+}

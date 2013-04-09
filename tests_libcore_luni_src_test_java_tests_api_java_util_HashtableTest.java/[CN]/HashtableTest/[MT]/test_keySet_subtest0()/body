@@ -1,0 +1,33 @@
+{
+  Set s1=ht10.keySet();
+  assertTrue("should contain key",s1.remove("Key 0"));
+  assertTrue("should not contain key",!s1.remove("Key 0"));
+  final int iterations=10000;
+  final Hashtable ht=new Hashtable();
+  Thread t1=new Thread(){
+    public void run(){
+      for (int i=0; i < iterations; i++) {
+        ht.put(String.valueOf(i),"");
+        ht.remove(String.valueOf(i));
+      }
+    }
+  }
+;
+  t1.start();
+  Set set=ht.keySet();
+  for (int i=0; i < iterations; i++) {
+    Iterator it=set.iterator();
+    try {
+      it.next();
+      it.remove();
+      int size;
+      if ((size=ht.size()) < 0) {
+        fail("invalid size: " + size);
+      }
+    }
+ catch (    NoSuchElementException e) {
+    }
+catch (    ConcurrentModificationException e) {
+    }
+  }
+}

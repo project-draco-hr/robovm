@@ -1,0 +1,23 @@
+{
+  final int bufSize=10;
+  byte[] buf1=new byte[bufSize];
+  byte[] buf2=new byte[bufSize];
+  is.read(buf1,0,bufSize);
+  is.mark(2 * bufSize);
+  is.read(buf1,0,bufSize);
+  try {
+    is.reset();
+  }
+ catch (  IOException e) {
+  }
+  is.read(buf2,0,bufSize);
+  assertFalse("Test 1: mark() should have no effect.",Arrays.equals(buf1,buf2));
+  is.close();
+  is=new MyFilterInputStream(new BufferedInputStream(new java.io.FileInputStream(fileName),100));
+  is.read(buf1,0,bufSize);
+  is.mark(2 * bufSize);
+  is.read(buf1,0,bufSize);
+  is.reset();
+  is.read(buf2,0,bufSize);
+  assertTrue("Test 2: mark() or reset() has failed.",Arrays.equals(buf1,buf2));
+}

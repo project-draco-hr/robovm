@@ -1,0 +1,84 @@
+{
+  Statement st=null;
+  Statement st1=null;
+  ResultSet rs1=null;
+  ResultSet rs2=null;
+  ResultSet rs3=null;
+  try {
+    conn.setAutoCommit(false);
+    st=conn.createStatement();
+    st.execute("insert into zoo (id, name, family) values (3, 'Vorobey', 'sparrow');");
+    st.execute("insert into zoo (id, name, family) values (4, 'Orel', 'eagle');");
+    conn.rollback();
+    st1=conn.createStatement();
+    st1.execute("select * from zoo");
+    rs1=st1.getResultSet();
+    assertEquals("Rollback was ineffective",2,getCount(rs1));
+  }
+  finally {
+    conn.setAutoCommit(true);
+    try {
+      st.close();
+      st1.close();
+      rs1.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    conn.setAutoCommit(false);
+    st=conn.createStatement();
+    st.execute("insert into zoo (id, name, family) values (3, 'Vorobey', 'sparrow');");
+    st.execute("insert into zoo (id, name, family) values (4, 'Orel', 'eagle');");
+    if (!conn.getAutoCommit()) {
+      st1=conn.createStatement();
+      st1.execute("select * from zoo");
+      rs1=st1.getResultSet();
+      assertEquals(4,getCount(rs1));
+      Statement st2=null;
+      Statement st3=null;
+      try {
+        conn.commit();
+        st2=conn.createStatement();
+        st2.execute("select * from zoo");
+        rs2=st2.getResultSet();
+        assertEquals(4,getCount(rs2));
+        conn.rollback();
+        st3=conn.createStatement();
+        st3.execute("select * from zoo");
+        rs3=st3.getResultSet();
+        assertEquals(4,getCount(rs3));
+      }
+  finally {
+        conn.setAutoCommit(true);
+        try {
+          rs2.close();
+          rs3.close();
+          st2.close();
+          st3.close();
+        }
+ catch (        SQLException ee) {
+        }
+      }
+    }
+ else {
+      fail("Error in test setup: cannot turn autocommit off.");
+    }
+  }
+  finally {
+    try {
+      st.close();
+      st1.close();
+      rs1.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  conn.close();
+  try {
+    conn.rollback();
+    fail("SQLException expected");
+  }
+ catch (  SQLException e) {
+  }
+}

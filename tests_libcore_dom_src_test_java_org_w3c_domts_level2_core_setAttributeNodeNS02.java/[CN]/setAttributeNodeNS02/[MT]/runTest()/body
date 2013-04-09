@@ -1,0 +1,35 @@
+{
+  Document doc;
+  NodeList genderList;
+  Node gender;
+  NodeList genList;
+  Node gen;
+  NodeList gList;
+  Element genElement;
+  Attr newAttr;
+  Attr setAttr1;
+  doc=(Document)load("staffNS",true);
+  if (!isExpandEntityReferences()) {
+    genderList=doc.getElementsByTagName("gender");
+    gender=genderList.item(2);
+    genList=gender.getChildNodes();
+    gen=genList.item(0);
+  }
+ else {
+    gen=doc.createEntityReference("ent4");
+  }
+  gList=gen.getChildNodes();
+  genElement=(Element)gList.item(0);
+  assertNotNull("notnull",genElement);
+  newAttr=doc.createAttributeNS("www.xyz.com","emp:local1");
+{
+    boolean success=false;
+    try {
+      setAttr1=genElement.setAttributeNodeNS(newAttr);
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.NO_MODIFICATION_ALLOWED_ERR);
+    }
+    assertTrue("throw_NO_MODIFICATION_ALLOWED_ERR",success);
+  }
+}

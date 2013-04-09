@@ -1,0 +1,32 @@
+{
+  final MockWebServer server=new MockWebServer();
+  try {
+    server.enqueue(new MockResponse().setBody("<bar></bar>"));
+    server.play();
+class Handler extends DefaultHandler {
+      final List<String> elementNames=new ArrayList<String>();
+      @Override public InputSource resolveEntity(      String publicId,      String systemId) throws IOException {
+        assertEquals(server.getUrl("/systemBar").toString(),systemId);
+        return new InputSource(systemId);
+      }
+      @Override public void startElement(      String uri,      String localName,      String qName,      Attributes attributes){
+        elementNames.add(localName);
+      }
+      @Override public void endElement(      String uri,      String localName,      String qName){
+        elementNames.add("/" + localName);
+      }
+    }
+    Reader in=new StringReader("<?xml version=\"1.0\"?>\n" + "<!DOCTYPE foo [\n" + "  <!ENTITY bar SYSTEM 'systemBar'>\n"+ "]>\n"+ "<foo>&bar;</foo>");
+    ExpatReader reader=new ExpatReader();
+    Handler handler=new Handler();
+    reader.setContentHandler(handler);
+    reader.setEntityResolver(handler);
+    InputSource source=new InputSource(in);
+    source.setSystemId(server.getUrl("/systemFoo").toString());
+    reader.parse(source);
+    assertEquals(Arrays.asList("foo","bar","/bar","/foo"),handler.elementNames);
+  }
+  finally {
+    server.shutdown();
+  }
+}

@@ -1,0 +1,26 @@
+{
+  URL gamelan=new URL("http://www.gamelan.com/pages/");
+  URL gamelanNetwork=new URL(gamelan,"Gamelan.net.html");
+  URL gamelanNetworkBottom=new URL(gamelanNetwork,"#BOTTOM");
+  assertEquals("Assert 0: wrong anchor","BOTTOM",gamelanNetworkBottom.getRef());
+  assertEquals("Assert 1: wrong protocol","http",gamelanNetworkBottom.getProtocol());
+  URL gamelanNetworBottom2=new URL(gamelanNetwork,"http://www.gamelan.com/pages/Gamelan.net.html#BOTTOM");
+  assertEquals(gamelanNetwork.getProtocol(),gamelanNetworBottom2.getProtocol());
+  URL gamelanNetworkBottom3=new URL(gamelanNetwork,"ftp://www.gamelan2.com/pages/Gamelan.net.html#BOTTOM");
+  URL absoluteNew=new URL("ftp://www.gamelan2.com/pages/Gamelan.net.html#BOTTOM");
+  assertEquals("Host of context URL instead of new URL","ftp",gamelanNetworkBottom3.getProtocol());
+  assertTrue("URL is context URL instead of new URL",gamelanNetworkBottom3.sameFile(absoluteNew));
+  try {
+    u=null;
+    u1=new URL(u,"somefile.java");
+    fail("didn't throw the expected MalFormedURLException");
+  }
+ catch (  MalformedURLException e) {
+  }
+  try {
+    u=new URL(gamelanNetwork,"someFancyNewProt://www.gamelan2.com/pages/Gamelan.net.html#BOTTOM");
+    assertTrue("someFancyNewProt".equalsIgnoreCase(u.getProtocol()));
+  }
+ catch (  MalformedURLException e) {
+  }
+}

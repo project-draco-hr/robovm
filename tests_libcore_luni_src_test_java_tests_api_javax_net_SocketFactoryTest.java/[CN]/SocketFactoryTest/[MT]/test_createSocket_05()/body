@@ -1,0 +1,53 @@
+{
+  SocketFactory sf=SocketFactory.getDefault();
+  int portNumber=Support_PortManager.getNextPort();
+  int sport=startServer("Cons String,I,InetAddress,I");
+  int[] invalidPorts={Integer.MIN_VALUE,-1,65536,Integer.MAX_VALUE};
+  try {
+    Socket s=sf.createSocket(InetAddress.getLocalHost().getHostName(),sport,InetAddress.getLocalHost(),portNumber);
+    assertNotNull(s);
+    assertTrue("1: Failed to create socket",s.getPort() == sport);
+    assertTrue("2: Failed to create socket",s.getLocalPort() == portNumber);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception: " + e);
+  }
+  portNumber=Support_PortManager.getNextPort();
+  try {
+    Socket s=sf.createSocket("bla-bla",sport,InetAddress.getLocalHost(),portNumber);
+    fail("UnknownHostException wasn't thrown");
+  }
+ catch (  UnknownHostException uhe) {
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of UnknownHostException");
+  }
+  for (int i=0; i < invalidPorts.length; i++) {
+    portNumber=Support_PortManager.getNextPort();
+    try {
+      Socket s=sf.createSocket(InetAddress.getLocalHost().getHostName(),invalidPorts[i],InetAddress.getLocalHost(),portNumber);
+      fail("IllegalArgumentException wasn't thrown for " + invalidPorts[i]);
+    }
+ catch (    IllegalArgumentException iae) {
+    }
+catch (    Exception e) {
+      fail(e + " was thrown instead of IllegalArgumentException for " + invalidPorts[i]);
+    }
+    try {
+      Socket s=sf.createSocket(InetAddress.getLocalHost().getHostName(),sport,InetAddress.getLocalHost(),invalidPorts[i]);
+      fail("IllegalArgumentException wasn't thrown for " + invalidPorts[i]);
+    }
+ catch (    IllegalArgumentException iae) {
+    }
+catch (    Exception e) {
+      fail(e + " was thrown instead of IllegalArgumentException for " + invalidPorts[i]);
+    }
+  }
+  SocketFactory f=SocketFactory.getDefault();
+  try {
+    Socket s=f.createSocket("localhost",8081,InetAddress.getLocalHost(),8082);
+    fail("IOException wasn't thrown ...");
+  }
+ catch (  IOException e) {
+  }
+}

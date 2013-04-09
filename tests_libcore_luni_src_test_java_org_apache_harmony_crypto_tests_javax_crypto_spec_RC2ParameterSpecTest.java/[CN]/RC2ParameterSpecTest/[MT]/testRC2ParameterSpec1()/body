@@ -1,0 +1,19 @@
+{
+  int effectiveKeyBits=10;
+  byte[] iv={1,2,3,4,5,6,7,8};
+  try {
+    new RC2ParameterSpec(effectiveKeyBits,null);
+    fail("An IllegalArgumentException should be thrown " + "in the case of null iv.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new RC2ParameterSpec(effectiveKeyBits,new byte[]{1,2,3,4,5});
+    fail("An IllegalArgumentException should be thrown " + "in the case of short iv.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  RC2ParameterSpec ps=new RC2ParameterSpec(effectiveKeyBits,iv);
+  iv[0]++;
+  assertFalse("The change of iv specified in the constructor " + "should not cause the change of internal array.",iv[0] == ps.getIV()[0]);
+}

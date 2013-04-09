@@ -1,0 +1,23 @@
+{
+  String test="Test string";
+  try {
+    AttributedString attrString=new AttributedString(test,new WeakHashMap<AttributedCharacterIterator.Attribute,String>());
+    AttributedCharacterIterator it=attrString.getIterator();
+    StringBuffer buf=new StringBuffer();
+    buf.append(it.first());
+    char ch;
+    while ((ch=it.next()) != CharacterIterator.DONE)     buf.append(ch);
+    assertTrue("Wrong string: " + buf,buf.toString().equals(test));
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception " + e.toString());
+  }
+  try {
+    Map<AttributedCharacterIterator.Attribute,String> whm=new WeakHashMap<AttributedCharacterIterator.Attribute,String>();
+    whm.put(new TestAttributedCharacterIteratorAttribute("test"),"value");
+    new AttributedString("",whm);
+    fail("Expected IllegalArgumentException was not thrown");
+  }
+ catch (  Exception e) {
+  }
+}

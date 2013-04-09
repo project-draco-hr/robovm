@@ -1,0 +1,59 @@
+{
+  try {
+    final SSLSocket client=(SSLSocket)context.clientContext.getSocketFactory().createSocket(context.host,context.port);
+    final SSLSocket server=(SSLSocket)context.serverSocket.accept();
+    ExecutorService executor=Executors.newFixedThreadPool(2);
+    Future s=executor.submit(new Callable<Void>(){
+      public Void call() throws Exception {
+        if (serverCipherSuites != null) {
+          server.setEnabledCipherSuites(serverCipherSuites);
+        }
+        server.startHandshake();
+        return null;
+      }
+    }
+);
+    Future c=executor.submit(new Callable<Void>(){
+      public Void call() throws Exception {
+        if (clientCipherSuites != null) {
+          client.setEnabledCipherSuites(clientCipherSuites);
+        }
+        client.startHandshake();
+        return null;
+      }
+    }
+);
+    executor.shutdown();
+    Exception serverException;
+    try {
+      s.get(30,TimeUnit.SECONDS);
+      serverException=null;
+    }
+ catch (    Exception e) {
+      serverException=e;
+      e.printStackTrace();
+    }
+    Exception clientException;
+    try {
+      c.get(30,TimeUnit.SECONDS);
+      clientException=null;
+    }
+ catch (    Exception e) {
+      clientException=e;
+      e.printStackTrace();
+    }
+    if (serverException != null) {
+      throw serverException;
+    }
+    if (clientException != null) {
+      throw clientException;
+    }
+    return new SSLSocket[]{server,client};
+  }
+ catch (  RuntimeException e) {
+    throw e;
+  }
+catch (  Exception e) {
+    throw new RuntimeException(e);
+  }
+}

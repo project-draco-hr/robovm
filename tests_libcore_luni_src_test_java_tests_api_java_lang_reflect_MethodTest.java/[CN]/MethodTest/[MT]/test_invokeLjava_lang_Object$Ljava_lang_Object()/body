@@ -1,0 +1,118 @@
+{
+  Class cl=TestMethod.class;
+  Class[] dcl=new Class[0];
+  Method mth=cl.getDeclaredMethod("invokeStaticTest",dcl);
+  Object ret=mth.invoke(null,new Object[0]);
+  assertEquals("Invoke returned incorrect value",1,((Integer)ret).intValue());
+  mth=cl.getDeclaredMethod("invokeInstanceTest",dcl);
+  ret=mth.invoke(new TestMethod(),new Object[0]);
+  assertEquals("Invoke returned incorrect value",1,((Integer)ret).intValue());
+  mth=cl.getDeclaredMethod("privateInvokeTest",dcl);
+  try {
+    ret=mth.invoke(new TestMethod(),new Object[0]);
+  }
+ catch (  IllegalAccessException e) {
+  }
+catch (  Exception e) {
+    fail("Exception during invoke test : " + e.getMessage());
+  }
+  mth=cl.getDeclaredMethod("invokeInstanceTest",dcl);
+  try {
+    Object[] args={Object.class};
+    ret=mth.invoke(new TestMethod(),args);
+  }
+ catch (  IllegalArgumentException e) {
+  }
+catch (  Exception e) {
+    fail("Exception during invoke test : " + e.getMessage());
+  }
+  mth=cl.getDeclaredMethod("invokeInstanceTest",dcl);
+  try {
+    ret=mth.invoke(null,new Object[0]);
+  }
+ catch (  NullPointerException e) {
+  }
+catch (  Exception e) {
+    fail("Exception during invoke test : " + e.getMessage());
+  }
+  mth=cl.getDeclaredMethod("invokeExceptionTest",dcl);
+  try {
+    ret=mth.invoke(new TestMethod(),new Object[0]);
+  }
+ catch (  InvocationTargetException e) {
+  }
+catch (  Exception e) {
+    fail("Exception during invoke test : " + e.getMessage());
+  }
+  TestMethod testMethod=new TestMethod();
+  Method methods[]=cl.getMethods();
+  for (int i=0; i < methods.length; i++) {
+    if (methods[i].getName().startsWith("invokeCastTest1")) {
+      Class param=methods[i].getParameterTypes()[0];
+      try {
+        methods[i].invoke(testMethod,new Object[]{new Byte((byte)1)});
+        assertTrue("invalid invoke with Byte: " + methods[i],param == Byte.TYPE || param == Short.TYPE || param == Integer.TYPE || param == Long.TYPE || param == Float.TYPE || param == Double.TYPE);
+      }
+ catch (      Exception e) {
+        assertTrue("Byte invalid exception: " + e,e instanceof IllegalArgumentException);
+        assertTrue("Byte invalid failure: " + methods[i],param == Boolean.TYPE || param == Character.TYPE);
+      }
+      try {
+        methods[i].invoke(testMethod,new Object[]{new Short((short)1)});
+        assertTrue("invalid invoke with Short: " + methods[i],param == Short.TYPE || param == Integer.TYPE || param == Long.TYPE || param == Float.TYPE || param == Double.TYPE);
+      }
+ catch (      Exception e) {
+        assertTrue("Short invalid exception: " + e,e instanceof IllegalArgumentException);
+        assertTrue("Short invalid failure: " + methods[i],param == Byte.TYPE || param == Boolean.TYPE || param == Character.TYPE);
+      }
+      try {
+        methods[i].invoke(testMethod,new Object[]{new Integer(1)});
+        assertTrue("invalid invoke with Integer: " + methods[i],param == Integer.TYPE || param == Long.TYPE || param == Float.TYPE || param == Double.TYPE);
+      }
+ catch (      Exception e) {
+        assertTrue("Integer invalid exception: " + e,e instanceof IllegalArgumentException);
+        assertTrue("Integer invalid failure: " + methods[i],param == Byte.TYPE || param == Short.TYPE || param == Boolean.TYPE || param == Character.TYPE);
+      }
+      try {
+        methods[i].invoke(testMethod,new Object[]{new Long(1)});
+        assertTrue("invalid invoke with Long: " + methods[i],param == Long.TYPE || param == Float.TYPE || param == Double.TYPE);
+      }
+ catch (      Exception e) {
+        assertTrue("Long invalid exception: " + e,e instanceof IllegalArgumentException);
+        assertTrue("Long invalid failure: " + methods[i],param == Byte.TYPE || param == Short.TYPE || param == Integer.TYPE || param == Boolean.TYPE || param == Character.TYPE);
+      }
+      try {
+        methods[i].invoke(testMethod,new Object[]{new Character('a')});
+        assertTrue("invalid invoke with Character: " + methods[i],param == Character.TYPE || param == Integer.TYPE || param == Long.TYPE || param == Float.TYPE || param == Double.TYPE);
+      }
+ catch (      Exception e) {
+        assertTrue("Character invalid exception: " + e,e instanceof IllegalArgumentException);
+        assertTrue("Character invalid failure: " + methods[i],param == Byte.TYPE || param == Short.TYPE || param == Boolean.TYPE);
+      }
+      try {
+        methods[i].invoke(testMethod,new Object[]{new Float(1)});
+        assertTrue("invalid invoke with Float: " + methods[i],param == Float.TYPE || param == Double.TYPE);
+      }
+ catch (      Exception e) {
+        assertTrue("Float invalid exception: " + e,e instanceof IllegalArgumentException);
+        assertTrue("Float invalid failure: " + methods[i],param == Byte.TYPE || param == Short.TYPE || param == Integer.TYPE || param == Long.TYPE || param == Boolean.TYPE || param == Character.TYPE);
+      }
+      try {
+        methods[i].invoke(testMethod,new Object[]{new Double(1)});
+        assertTrue("invalid invoke with Double: " + methods[i],param == Double.TYPE);
+      }
+ catch (      Exception e) {
+        assertTrue("Double invalid exception: " + e,e instanceof IllegalArgumentException);
+        assertTrue("Double invalid failure: " + methods[i],param == Byte.TYPE || param == Short.TYPE || param == Integer.TYPE || param == Long.TYPE || param == Boolean.TYPE || param == Character.TYPE || param == Float.TYPE);
+      }
+      try {
+        methods[i].invoke(testMethod,new Object[]{new Boolean(true)});
+        assertTrue("invalid invoke with Boolean: " + methods[i],param == Boolean.TYPE);
+      }
+ catch (      Exception e) {
+        assertTrue("Boolean invalid exception: " + e,e instanceof IllegalArgumentException);
+        assertTrue("Boolean invalid failure: " + methods[i],param == Byte.TYPE || param == Short.TYPE || param == Integer.TYPE || param == Long.TYPE || param == Character.TYPE || param == Float.TYPE || param == Double.TYPE);
+      }
+    }
+  }
+}

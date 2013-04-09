@@ -1,0 +1,31 @@
+{
+  waiter.spin=true;
+  waiter.start();
+  try {
+    Thread.currentThread().sleep(500);
+  }
+ catch (  InterruptedException ex) {
+    throw new RuntimeException("Test sleep interrupted.",ex);
+  }
+  waiter.interrupt();
+  waiter.spin=false;
+  for (int i=0; i < 3; i++) {
+synchronized (waiter.interrupterLock) {
+      try {
+        waiter.interrupterLock.wait();
+      }
+ catch (      InterruptedException ex) {
+        throw new RuntimeException("Test wait interrupted.",ex);
+      }
+    }
+synchronized (waiter) {
+      waiter.interrupt();
+    }
+  }
+  try {
+    waiter.join();
+  }
+ catch (  InterruptedException ex) {
+    throw new RuntimeException("Test join interrupted.",ex);
+  }
+}

@@ -1,0 +1,14 @@
+{
+  PreparedStatement stat=conn.prepareStatement("INSERT INTO " + DatabaseCreator.TEST_TABLE5 + " VALUES(?, ?)");
+  stat.setInt(1,1);
+  stat.setString(2,"1");
+  stat.execute();
+  stat.setInt(1,2);
+  stat.setString(2,"3");
+  stat.execute();
+  ResultSet r=statement.executeQuery("SELECT COUNT(*) FROM " + DatabaseCreator.TEST_TABLE5 + " WHERE (testId = 1 AND testValue = '1') "+ "OR (testId = 2 AND testValue = '3')");
+  r.next();
+  assertEquals("Incorrect number of records",2,r.getInt(1));
+  r.close();
+  stat.close();
+}

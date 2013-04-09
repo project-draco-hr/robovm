@@ -1,0 +1,56 @@
+{
+  InputStream is=new ByteArrayInputStream("DATA".getBytes());
+  char[] password="PASSWORD".toCharArray();
+  try {
+    keyStore.load(is,password);
+    assertTrue(keyStore.containsAlias("keyalias"));
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  CertificateException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  IOException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  KeyStoreException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    keyStore.load(new ByteArrayInputStream("".getBytes()),password);
+    fail("expected IOException");
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  CertificateException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  IOException e) {
+  }
+  try {
+    keyStore.load(is,null);
+    fail("expected NoSuchAlgorithmException");
+  }
+ catch (  NoSuchAlgorithmException e) {
+  }
+catch (  CertificateException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  IOException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    keyStore.load(is,new char[]{});
+    fail("expected CertificateException");
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  CertificateException e) {
+  }
+catch (  IOException e) {
+    fail("unexpected exception: " + e);
+  }
+}

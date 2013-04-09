@@ -1,0 +1,36 @@
+{
+  LinkedList smallList=new LinkedList();
+  for (int i=0; i < 50; i++) {
+    smallList.add(objArray[i]);
+  }
+  final int numberOfLoops=200;
+  Collection synchCol=Collections.synchronizedCollection(smallList);
+  SynchCollectionChecker normalSynchChecker=new SynchCollectionChecker(synchCol,false,numberOfLoops);
+  SynchCollectionChecker offsetSynchChecker=new SynchCollectionChecker(synchCol,true,numberOfLoops);
+  Thread normalThread=new Thread(normalSynchChecker);
+  Thread offsetThread=new Thread(offsetSynchChecker);
+  normalThread.start();
+  offsetThread.start();
+  while ((normalSynchChecker.getNumberOfChecks() < numberOfLoops) || (offsetSynchChecker.getNumberOfChecks() < numberOfLoops)) {
+    try {
+      Thread.sleep(10);
+    }
+ catch (    InterruptedException e) {
+    }
+  }
+  assertTrue("Returned collection corrupted by multiple thread access",normalSynchChecker.getResult() && offsetSynchChecker.getResult());
+  try {
+    normalThread.join(5000);
+    offsetThread.join(5000);
+  }
+ catch (  InterruptedException e) {
+    fail("join() interrupted");
+  }
+  synchCol.add(null);
+  assertTrue("Trying to use nulls in collection failed",synchCol.contains(null));
+  smallList=new LinkedList();
+  for (int i=0; i < 100; i++) {
+    smallList.add(objArray[i]);
+  }
+  new Support_CollectionTest("",Collections.synchronizedCollection(smallList)).runTest();
+}

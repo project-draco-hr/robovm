@@ -1,0 +1,31 @@
+{
+  URLStreamHandlerFactory factory=new MyURLStreamHandlerFactory();
+  Field streamHandlerFactoryField=null;
+  int counter=0;
+  File sampleFile=createTempHelloWorldFile();
+  URL fileURL=sampleFile.toURL();
+  Field[] fields=URL.class.getDeclaredFields();
+  for (  Field f : fields) {
+    if (URLStreamHandlerFactory.class.equals(f.getType())) {
+      counter++;
+      streamHandlerFactoryField=f;
+    }
+  }
+  if (counter != 1) {
+    fail("Error in test setup: not Factory found");
+  }
+  streamHandlerFactoryField.setAccessible(true);
+  URLStreamHandlerFactory old=(URLStreamHandlerFactory)streamHandlerFactoryField.get(null);
+  try {
+    streamHandlerFactoryField.set(null,factory);
+    BufferedReader buf=new BufferedReader(new InputStreamReader(fileURL.openStream()),helloWorldString.getBytes().length);
+    String nextline;
+    while ((nextline=buf.readLine()) != null) {
+      assertEquals(helloWorldString,nextline);
+    }
+    buf.close();
+  }
+  finally {
+    streamHandlerFactoryField.set(null,old);
+  }
+}

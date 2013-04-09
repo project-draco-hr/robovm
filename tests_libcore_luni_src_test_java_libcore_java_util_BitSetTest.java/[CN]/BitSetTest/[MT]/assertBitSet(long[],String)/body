@@ -1,0 +1,13 @@
+{
+  assertBitSet(BitSet.valueOf(longs),longs,s);
+  assertBitSet(BitSet.valueOf(LongBuffer.wrap(longs)),longs,s);
+  long[] paddedLongs=new long[1 + longs.length + 1];
+  paddedLongs[0]=paddedLongs[paddedLongs.length - 1]=-1L;
+  System.arraycopy(longs,0,paddedLongs,1,longs.length);
+  assertBitSet(BitSet.valueOf(LongBuffer.wrap(paddedLongs,1,longs.length)),longs,s);
+  if (longs.length > 0) {
+    BitSet original=BitSet.valueOf(longs);
+    longs[0]=~longs[0];
+    assertFalse(BitSet.valueOf(longs).equals(original));
+  }
+}

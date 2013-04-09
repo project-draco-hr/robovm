@@ -1,0 +1,18 @@
+{
+  conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+  assertEquals(ResultSet.HOLD_CURSORS_OVER_COMMIT,conn.getHoldability());
+  try {
+    conn.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+    assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT,conn.getHoldability());
+  }
+ catch (  SQLException e) {
+    assertEquals("not supported",e.getMessage());
+  }
+  conn.close();
+  try {
+    conn.getHoldability();
+    fail("Could execute statement on closed connection.");
+  }
+ catch (  SQLException e) {
+  }
+}

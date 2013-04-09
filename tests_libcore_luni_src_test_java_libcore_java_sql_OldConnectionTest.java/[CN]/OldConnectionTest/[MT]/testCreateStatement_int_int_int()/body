@@ -1,0 +1,28 @@
+{
+  Statement st=null;
+  try {
+    assertNotNull(conn);
+    st=conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY,ResultSet.HOLD_CURSORS_OVER_COMMIT);
+    assertNotNull(st);
+    st.execute("select id, name from zoo");
+    ResultSet rs=st.getResultSet();
+    rs.next();
+    int pos=rs.getRow();
+    conn.commit();
+    assertEquals("ResultSet cursor position has changed",pos,rs.getRow());
+    rs.close();
+  }
+  finally {
+    try {
+      if (st != null)       st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY,-100);
+    fail("SQLException was not thrown");
+  }
+ catch (  SQLException sqle) {
+  }
+}

@@ -1,0 +1,94 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      keyStore.store(null,null);
+      fail();
+    }
+ catch (    KeyStoreException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    keyStore.load(null,null);
+    ByteArrayOutputStream out=new ByteArrayOutputStream();
+    if (isReadOnly(keyStore)) {
+      try {
+        keyStore.store(out,null);
+        fail();
+      }
+ catch (      UnsupportedOperationException expected) {
+      }
+      continue;
+    }
+    if (isNullPasswordAllowed(keyStore)) {
+      keyStore.store(out,null);
+      assertEqualsKeyStores(keyStore,out,null);
+      continue;
+    }
+    try {
+      keyStore.store(out,null);
+      fail();
+    }
+ catch (    Exception e) {
+      if (e.getClass() != IllegalArgumentException.class && e.getClass() != NullPointerException.class) {
+        throw e;
+      }
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    populate(keyStore);
+    ByteArrayOutputStream out=new ByteArrayOutputStream();
+    if (isReadOnly(keyStore)) {
+      try {
+        keyStore.store(out,null);
+        fail();
+      }
+ catch (      UnsupportedOperationException e) {
+      }
+    }
+ else     if (isNullPasswordAllowed(keyStore)) {
+      keyStore.store(out,null);
+      assertEqualsKeyStores(keyStore,out,null);
+    }
+ else {
+      try {
+        keyStore.store(out,null);
+        fail();
+      }
+ catch (      Exception e) {
+        if (e.getClass() != IllegalArgumentException.class && e.getClass() != NullPointerException.class) {
+          throw e;
+        }
+      }
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    keyStore.load(null,null);
+    ByteArrayOutputStream out=new ByteArrayOutputStream();
+    if (isReadOnly(keyStore)) {
+      try {
+        keyStore.store(out,PASSWORD_STORE);
+        fail();
+      }
+ catch (      UnsupportedOperationException e) {
+      }
+      continue;
+    }
+    keyStore.store(out,PASSWORD_STORE);
+    assertEqualsKeyStores(keyStore,out,PASSWORD_STORE);
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    populate(keyStore);
+    ByteArrayOutputStream out=new ByteArrayOutputStream();
+    if (isReadOnly(keyStore)) {
+      try {
+        keyStore.store(out,PASSWORD_STORE);
+        fail();
+      }
+ catch (      UnsupportedOperationException e) {
+      }
+      continue;
+    }
+    keyStore.store(out,PASSWORD_STORE);
+    assertEqualsKeyStores(keyStore,out,PASSWORD_STORE);
+  }
+}

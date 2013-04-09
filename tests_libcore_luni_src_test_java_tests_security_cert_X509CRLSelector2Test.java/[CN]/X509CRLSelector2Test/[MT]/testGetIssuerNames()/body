@@ -1,0 +1,16 @@
+{
+  X509CRLSelector selector=new X509CRLSelector();
+  byte[] iss1=new byte[]{48,21,49,19,48,17,6,3,85,4,10,19,10,70,105,114,115,116,32,79,114,103,46};
+  byte[] iss2=new byte[]{48,22,49,20,48,18,6,3,85,4,10,19,11,83,101,99,111,110,100,32,79,114,103,46};
+  assertNull("The collection should be null.",selector.getIssuerNames());
+  try {
+    selector.addIssuerName(iss1);
+    selector.addIssuerName(iss2);
+  }
+ catch (  IOException e) {
+    e.printStackTrace();
+    fail("Unexpected IOException was thrown.");
+  }
+  Collection<Object> result=selector.getIssuerNames();
+  assertEquals("The collection should contain all of the specified DNs.",2,result.size());
+}

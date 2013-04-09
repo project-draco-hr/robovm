@@ -1,0 +1,14 @@
+{
+  X500Principal iss1=new X500Principal("O=First Org.");
+  X500Principal iss2=new X500Principal("O=Second Org.");
+  TestCert cert1=new TestCert(iss1);
+  TestCert cert2=new TestCert(iss2);
+  X509CertSelector selector=new X509CertSelector();
+  selector.setIssuer((X500Principal)null);
+  assertTrue("Any certificates should match " + "in the case of null issuer criteria.",selector.match(cert1) && selector.match(cert2));
+  selector.setIssuer(iss1);
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert1));
+  assertFalse("The certificate should not match the selection criteria.",selector.match(cert2));
+  selector.setIssuer(iss2);
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert2));
+}

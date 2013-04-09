@@ -1,0 +1,29 @@
+{
+  Support_SQL.loadDriver();
+  connection=Support_SQL.getConnection();
+  exec("drop table if exists t_orig;");
+  exec("drop table if exists t_copy;");
+  exec("create table t_orig (a int)");
+  exec("create table t_copy (a int)");
+  for (int i=0; i < 7; i++) {
+    exec("insert into t_orig values (" + i + ");");
+  }
+  Database database=((JDBCConnection)connection).getSQLiteDatabase();
+  database.create_function("DELAY",2,new Function(){
+    @Override public void function(    FunctionContext functionContext,    String[] args){
+      try {
+        int seconds=Integer.parseInt(args[0]);
+        Thread.sleep(seconds * 1000);
+      }
+ catch (      InterruptedException ignored) {
+      }
+      functionContext.set_result(Integer.parseInt(args[1]));
+    }
+    @Override public void last_step(    FunctionContext functionContext){
+    }
+    @Override public void step(    FunctionContext functionContext,    String[] args){
+    }
+  }
+);
+  connection.setAutoCommit(true);
+}

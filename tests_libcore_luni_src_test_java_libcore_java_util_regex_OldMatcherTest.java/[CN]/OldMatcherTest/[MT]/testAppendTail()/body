@@ -1,0 +1,33 @@
+{
+  Pattern p=Pattern.compile("cat");
+  Matcher m=p.matcher("one-cat-two-cats-in-the-yard");
+  StringBuffer sb=new StringBuffer();
+  while (m.find()) {
+    m.appendReplacement(sb,"dog");
+  }
+  m.appendTail(sb);
+  assertEquals("one-dog-two-dogs-in-the-yard",sb.toString());
+  p=Pattern.compile("cat|yard");
+  m=p.matcher("one-cat-two-cats-in-the-yard");
+  sb=new StringBuffer();
+  while (m.find()) {
+    m.appendReplacement(sb,"dog");
+  }
+  assertEquals("one-dog-two-dogs-in-the-dog",sb.toString());
+  m.appendTail(sb);
+  assertEquals("one-dog-two-dogs-in-the-dog",sb.toString());
+  p=Pattern.compile("cat");
+  m=p.matcher("one-cat-two-cats-in-the-yard");
+  sb=new StringBuffer();
+  while (m.find()) {
+    m.appendReplacement(sb,"dog");
+  }
+  Throwable t=null;
+  try {
+    m.appendTail(null);
+  }
+ catch (  NullPointerException e) {
+    t=e;
+  }
+  assertNotNull(t);
+}

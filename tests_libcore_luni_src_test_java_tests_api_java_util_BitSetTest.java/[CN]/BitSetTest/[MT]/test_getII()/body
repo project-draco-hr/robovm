@@ -1,0 +1,118 @@
+{
+  BitSet bitset=new BitSet(30);
+  bitset.get(3,3);
+  BitSet bs, resultbs, correctbs;
+  bs=new BitSet(512);
+  bs.set(3,9);
+  bs.set(10,20);
+  bs.set(60,75);
+  bs.set(121);
+  bs.set(130,140);
+  resultbs=bs.get(3,6);
+  correctbs=new BitSet(3);
+  correctbs.set(0,3);
+  assertEquals("Test1: Returned incorrect BitSet",correctbs,resultbs);
+  resultbs=bs.get(100,125);
+  correctbs=new BitSet(25);
+  correctbs.set(21);
+  assertEquals("Test2: Returned incorrect BitSet",correctbs,resultbs);
+  resultbs=bs.get(15,125);
+  correctbs=new BitSet(25);
+  correctbs.set(0,5);
+  correctbs.set(45,60);
+  correctbs.set(121 - 15);
+  assertEquals("Test3: Returned incorrect BitSet",correctbs,resultbs);
+  resultbs=bs.get(70,145);
+  correctbs=new BitSet(75);
+  correctbs.set(0,5);
+  correctbs.set(51);
+  correctbs.set(60,70);
+  assertEquals("Test4: Returned incorrect BitSet",correctbs,resultbs);
+  resultbs=bs.get(5,145);
+  correctbs=new BitSet(140);
+  correctbs.set(0,4);
+  correctbs.set(5,15);
+  correctbs.set(55,70);
+  correctbs.set(116);
+  correctbs.set(125,135);
+  assertEquals("Test5: Returned incorrect BitSet",correctbs,resultbs);
+  resultbs=bs.get(5,250);
+  correctbs=new BitSet(200);
+  correctbs.set(0,4);
+  correctbs.set(5,15);
+  correctbs.set(55,70);
+  correctbs.set(116);
+  correctbs.set(125,135);
+  assertEquals("Test6: Returned incorrect BitSet",correctbs,resultbs);
+  assertEquals("equality principle 1 ",bs.get(0,bs.size()),bs);
+  BitSet bs2=new BitSet(129);
+  bs2.set(0,20);
+  bs2.set(62,65);
+  bs2.set(121,123);
+  resultbs=bs2.get(1,124);
+  correctbs=new BitSet(129);
+  correctbs.set(0,19);
+  correctbs.set(61,64);
+  correctbs.set(120,122);
+  assertEquals("Test7: Returned incorrect BitSet",correctbs,resultbs);
+  bs2=new BitSet(128);
+  bs2.set(2,20);
+  bs2.set(62);
+  bs2.set(121,123);
+  bs2.set(127);
+  resultbs=bs2.get(0,bs2.size());
+  assertEquals("equality principle 2 ",resultbs,bs2);
+  bs2=new BitSet(128);
+  bs2.set(2,20);
+  bs2.set(62);
+  bs2.set(121,123);
+  bs2.set(127);
+  bs2.flip(0,128);
+  resultbs=bs2.get(0,bs.size());
+  assertEquals("equality principle 3 ",resultbs,bs2);
+  bs=new BitSet(0);
+  assertEquals("Test1: Wrong length,",0,bs.length());
+  assertEquals("Test1: Wrong size,",0,bs.size());
+  bs.get(0,2);
+  assertEquals("Test2: Wrong length,",0,bs.length());
+  assertEquals("Test2: Wrong size,",0,bs.size());
+  bs.get(60,64);
+  assertEquals("Test3: Wrong length,",0,bs.length());
+  assertEquals("Test3: Wrong size,",0,bs.size());
+  bs.get(64,120);
+  assertEquals("Test4: Wrong length,",0,bs.length());
+  assertEquals("Test4: Wrong size,",0,bs.size());
+  bs.set(25);
+  assertEquals("Test5: Wrong length,",26,bs.length());
+  assertEquals("Test5: Wrong size,",64,bs.size());
+  bs.get(60,64);
+  assertEquals("Test6: Wrong length,",26,bs.length());
+  assertEquals("Test6: Wrong size,",64,bs.size());
+  bs.get(64,120);
+  assertEquals("Test7: Wrong size,",64,bs.size());
+  assertEquals("Test7: Wrong length,",26,bs.length());
+  bs.get(80);
+  assertEquals("Test8: Wrong size,",64,bs.size());
+  assertEquals("Test8: Wrong length,",26,bs.length());
+  bs.get(25);
+  assertEquals("Test9: Wrong size,",64,bs.size());
+  assertEquals("Test9: Wrong length,",26,bs.length());
+  try {
+    bs2.get(-1,0);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  try {
+    bs2.get(bs2.size() / 2,0);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  try {
+    bs2.get(bs2.size() / 2,-1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+}

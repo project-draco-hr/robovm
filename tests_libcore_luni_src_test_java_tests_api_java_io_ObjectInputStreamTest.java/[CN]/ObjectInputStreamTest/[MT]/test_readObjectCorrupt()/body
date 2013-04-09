@@ -1,0 +1,20 @@
+{
+  byte[] bytes={00,00,00,0x64,0x43,0x48,(byte)0xFD,0x71,00,00,0x0B,(byte)0xB8,0x4D,0x65};
+  ByteArrayInputStream bin=new ByteArrayInputStream(bytes);
+  boolean exception=false;
+  try {
+    ObjectInputStream in=new ObjectInputStream(bin);
+    in.readObject();
+    fail("Unexpected read of corrupted stream");
+  }
+ catch (  StreamCorruptedException e) {
+    exception=true;
+  }
+catch (  IOException e) {
+    fail("Unexpected: " + e);
+  }
+catch (  ClassNotFoundException e) {
+    fail("Unexpected: " + e);
+  }
+  assertTrue("Expected StreamCorruptedException",exception);
+}

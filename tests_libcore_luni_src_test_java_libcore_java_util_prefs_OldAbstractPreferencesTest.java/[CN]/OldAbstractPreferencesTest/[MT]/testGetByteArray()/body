@@ -1,0 +1,38 @@
+{
+  byte[] bArray=new byte[]{1,2,3,4,5};
+  byte[] tmp=new byte[]{5};
+  byte[] array=null;
+  int i;
+  pref.put("Value","String");
+  pref.putDouble("DoubleValue",new Double(9.10938188e-31));
+  pref.putByteArray("Array",bArray);
+  pref.flush();
+  array=pref.getByteArray("Value",tmp);
+  assertEquals(tmp.length,array.length);
+  for (i=0; i < tmp.length; i++) {
+    assertEquals(tmp[i],array[i]);
+  }
+  array=pref.getByteArray("DoubleValue",tmp);
+  assertEquals(tmp.length,array.length);
+  for (i=0; i < tmp.length; i++) {
+    assertEquals(tmp[i],array[i]);
+  }
+  array=pref.getByteArray("Array",tmp);
+  assertEquals(bArray.length,array.length);
+  for (i=0; i < bArray.length; i++) {
+    assertEquals(bArray[i],array[i]);
+  }
+  try {
+    pref.getByteArray(null,tmp);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  pref.removeNode();
+  try {
+    pref.getByteArray("Array",tmp);
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+}

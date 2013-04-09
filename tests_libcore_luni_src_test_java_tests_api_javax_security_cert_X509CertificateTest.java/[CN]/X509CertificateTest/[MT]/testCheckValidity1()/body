@@ -1,0 +1,29 @@
+{
+  if (this.cert == null) {
+    return;
+  }
+  Date date=new Date();
+  Date nb_date=tbt_cert.getNotBefore();
+  Date na_date=tbt_cert.getNotAfter();
+  try {
+    tbt_cert.checkValidity();
+    assertFalse("CertificateExpiredException expected",date.compareTo(na_date) > 0);
+    assertFalse("CertificateNotYetValidException expected",date.compareTo(nb_date) < 0);
+  }
+ catch (  CertificateExpiredException e) {
+    assertTrue("Unexpected CertificateExpiredException was thrown",date.compareTo(na_date) > 0);
+  }
+catch (  CertificateNotYetValidException e) {
+    assertTrue("Unexpected CertificateNotYetValidException was thrown",date.compareTo(nb_date) < 0);
+  }
+  try {
+    tbt_cert.checkValidity();
+  }
+ catch (  CertificateExpiredException e) {
+  }
+  try {
+    cert.checkValidity();
+  }
+ catch (  java.security.cert.CertificateExpiredException e) {
+  }
+}

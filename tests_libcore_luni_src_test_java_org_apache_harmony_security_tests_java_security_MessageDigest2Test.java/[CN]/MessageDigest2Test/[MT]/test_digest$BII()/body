@@ -1,0 +1,17 @@
+{
+  for (  Entry<Provider,List<String>> e : digestAlgs.entrySet()) {
+    for (    String algorithm : e.getValue()) {
+      MessageDigest digest=MessageDigest.getInstance(algorithm,e.getKey().getName());
+      assertNotNull(digest);
+      int len=digest.getDigestLength();
+      byte[] digestBytes=new byte[len];
+      digest.digest(digestBytes,0,digestBytes.length);
+    }
+    try {
+      MessageDigest.getInstance("SHA").digest(new byte[]{},Integer.MAX_VALUE,755);
+      fail();
+    }
+ catch (    IllegalArgumentException expected) {
+    }
+  }
+}

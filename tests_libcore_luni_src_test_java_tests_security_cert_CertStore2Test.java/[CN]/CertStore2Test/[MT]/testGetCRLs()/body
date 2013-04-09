@@ -1,0 +1,34 @@
+{
+  CertStore certStore=null;
+  try {
+    certStore=CertStore.getInstance(CERT_STORE_NAME,new MyCertStoreParameters());
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+  assertNotNull(certStore);
+  try {
+    Collection<? extends CRL> ls=certStore.getCRLs(null);
+    assertNull(ls);
+  }
+ catch (  CertStoreException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    Collection<? extends CRL> ls=certStore.getCRLs(new MyCRLSelector());
+    assertNotNull(ls);
+    assertTrue(ls.isEmpty());
+  }
+ catch (  CertStoreException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    certStore.getCRLs(new MyOtherCRLSelector());
+    fail("expected CertStoreException");
+  }
+ catch (  CertStoreException e) {
+  }
+}

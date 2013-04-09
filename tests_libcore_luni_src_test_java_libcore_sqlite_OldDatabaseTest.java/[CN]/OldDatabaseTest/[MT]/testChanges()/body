@@ -1,0 +1,14 @@
+{
+  TableResult res=new TableResult();
+  assertTrue(db.changes() == 0);
+  db.exec("INSERT INTO " + DatabaseCreator.SIMPLE_TABLE1 + " VALUES(2, 5, 7);",null);
+  int rows=(int)db.changes();
+  assertEquals(1,db.changes());
+  db.exec("update " + DatabaseCreator.SIMPLE_TABLE1 + " set speed = 7, size= 5 where id = 2;",null);
+  assertEquals(1,db.changes());
+  db.exec("select * from " + DatabaseCreator.SIMPLE_TABLE1,res);
+  assertEquals(0,db.changes());
+  db.exec("INSERT INTO " + DatabaseCreator.SIMPLE_TABLE1 + " VALUES(8, 5, 7);",null);
+  db.exec("Update " + DatabaseCreator.SIMPLE_TABLE1 + " set speed = 10;",null);
+  assertTrue(db.changes() > 2);
+}

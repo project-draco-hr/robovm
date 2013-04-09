@@ -1,0 +1,15 @@
+{
+  MockServer server=new MockServer();
+  server.enqueue(new byte[]{5,3},0);
+  Socket socket=new Socket("localhost",server.port);
+  InputStream in=socket.getInputStream();
+  assertEquals(5,in.read());
+  assertEquals(3,in.read());
+  assertEquals(-1,in.read());
+  assertEquals(-1,in.read());
+  socket.close();
+  in.close();
+  assertEquals(-1,in.read());
+  assertEquals(-1,in.read());
+  server.shutdown();
+}

@@ -1,0 +1,53 @@
+{
+  try {
+    NativeCrypto.SSL_set_session_creation_enabled(NULL,false);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+{
+    int c=NativeCrypto.SSL_CTX_new();
+    int s=NativeCrypto.SSL_new(c);
+    NativeCrypto.SSL_set_session_creation_enabled(s,false);
+    NativeCrypto.SSL_set_session_creation_enabled(s,true);
+    NativeCrypto.SSL_free(s);
+    NativeCrypto.SSL_CTX_free(c);
+  }
+  final ServerSocket listener=new ServerSocket(0);
+  try {
+    Hooks cHooks=new Hooks(){
+      @Override public int beforeHandshake(      int c) throws SSLException {
+        int s=super.beforeHandshake(c);
+        NativeCrypto.SSL_set_session_creation_enabled(s,false);
+        return s;
+      }
+    }
+;
+    Hooks sHooks=new ServerHooks(getServerPrivateKey(),getServerCertificates());
+    Future<TestSSLHandshakeCallbacks> client=handshake(listener,0,true,cHooks,null);
+    Future<TestSSLHandshakeCallbacks> server=handshake(listener,0,false,sHooks,null);
+    client.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+    fail();
+  }
+ catch (  ExecutionException expected) {
+    assertEquals(SSLProtocolException.class,expected.getCause().getClass());
+  }
+  try {
+    Hooks cHooks=new Hooks();
+    Hooks sHooks=new ServerHooks(getServerPrivateKey(),getServerCertificates()){
+      @Override public int beforeHandshake(      int c) throws SSLException {
+        int s=super.beforeHandshake(c);
+        NativeCrypto.SSL_set_session_creation_enabled(s,false);
+        return s;
+      }
+    }
+;
+    Future<TestSSLHandshakeCallbacks> client=handshake(listener,0,true,cHooks,null);
+    Future<TestSSLHandshakeCallbacks> server=handshake(listener,0,false,sHooks,null);
+    client.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+    fail();
+  }
+ catch (  ExecutionException expected) {
+    assertEquals(SSLProtocolException.class,expected.getCause().getClass());
+  }
+}

@@ -1,0 +1,18 @@
+{
+  InputStream is=new ByteArrayInputStream(writeProperties());
+  MyProvider myProvider=new MyProvider("name",1,"info");
+  myProvider.load(is);
+  assertEquals("tests.security",myProvider.get("test.pkg"));
+  assertEquals("Unit Tests",myProvider.get("test.proj"));
+  assertNull(myProvider.get("#commented.entry"));
+  assertEquals("info",myProvider.get("Provider.id info"));
+  String className=myProvider.getClass().toString();
+  assertEquals(className.substring("class ".length(),className.length()),myProvider.get("Provider.id className"));
+  assertEquals("1.0",myProvider.get("Provider.id version"));
+  try {
+    myProvider.load((InputStream)null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+}

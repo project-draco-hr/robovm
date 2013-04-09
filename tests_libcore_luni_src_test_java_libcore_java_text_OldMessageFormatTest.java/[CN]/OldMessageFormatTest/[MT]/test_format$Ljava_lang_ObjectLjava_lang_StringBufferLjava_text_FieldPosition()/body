@@ -1,0 +1,29 @@
+{
+  MessageFormat format=new MessageFormat("{1,number,integer}");
+  StringBuffer buffer=new StringBuffer();
+  format.format(new Object[]{"0",new Double(53.863)},buffer,new FieldPosition(MessageFormat.Field.ARGUMENT));
+  assertEquals("Wrong result","54",buffer.toString());
+  format.format(new Object[]{"0",new Double(53.863)},buffer,new FieldPosition(MessageFormat.Field.ARGUMENT));
+  assertEquals("Wrong result","5454",buffer.toString());
+  buffer=new StringBuffer();
+  format.applyPattern("{0,choice,0#zero|1#one '{1,choice,2#two {2,time}}'}");
+  Date date=new Date();
+  String expected="one two " + DateFormat.getTimeInstance().format(date);
+  format.format(new Object[]{new Double(1.6),new Integer(3),date},buffer,new FieldPosition(MessageFormat.Field.ARGUMENT));
+  assertEquals("Choice not recursive:\n" + expected + "\n"+ buffer,expected,buffer.toString());
+  StringBuffer str=format.format(new Object[]{new Double(0.6),new Integer(3)},buffer,null);
+  assertEquals(expected + "zero",str.toString());
+  assertEquals(expected + "zero",buffer.toString());
+  try {
+    format.format(new Object[]{"0",new Double(1),""},buffer,new FieldPosition(MessageFormat.Field.ARGUMENT));
+    fail("IllegalArgumentException was not thrown.");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  try {
+    format.format(new Object[]{"",new Integer(3)},buffer,new FieldPosition(MessageFormat.Field.ARGUMENT));
+    fail("IllegalArgumentException was not thrown.");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+}

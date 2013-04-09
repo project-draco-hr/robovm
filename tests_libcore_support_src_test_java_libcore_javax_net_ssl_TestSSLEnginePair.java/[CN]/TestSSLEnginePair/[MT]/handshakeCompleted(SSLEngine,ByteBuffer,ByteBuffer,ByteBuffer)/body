@@ -1,0 +1,41 @@
+{
+  try {
+    input.flip();
+    HandshakeStatus status=engine.getHandshakeStatus();
+switch (status) {
+case NEED_TASK:
+      boolean progress=false;
+    while (true) {
+      Runnable runnable=engine.getDelegatedTask();
+      if (runnable == null) {
+        return progress;
+      }
+      runnable.run();
+      progress=true;
+    }
+case NEED_UNWRAP:
+  if (input.remaining() == 0) {
+    return false;
+  }
+SSLEngineResult unwrapResult=engine.unwrap(input,scratch);
+assertEquals(SSLEngineResult.Status.OK,unwrapResult.getStatus());
+assertEquals(0,scratch.position());
+return true;
+case NEED_WRAP:
+if (output.remaining() != output.capacity()) {
+return false;
+}
+SSLEngineResult wrapResult=engine.wrap(EMPTY_BYTE_BUFFER,output);
+assertEquals(SSLEngineResult.Status.OK,wrapResult.getStatus());
+return true;
+case NOT_HANDSHAKING:
+case FINISHED:
+throw new IllegalStateException("Unexpected HandshakeStatus = " + status);
+default :
+throw new IllegalStateException("Unknown HandshakeStatus = " + status);
+}
+}
+  finally {
+input.compact();
+}
+}

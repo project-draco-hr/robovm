@@ -1,0 +1,42 @@
+{
+  String testString="Lorem ipsum";
+  BasicObjectInputStream bois;
+  short magic=java.io.ObjectStreamConstants.STREAM_MAGIC;
+  short version=java.io.ObjectStreamConstants.STREAM_VERSION;
+  byte[] buffer=new byte[20];
+  fillStreamHeader(buffer);
+  System.arraycopy(testString.getBytes(),0,buffer,4,testString.length());
+  try {
+    readStreamHeaderCalled=false;
+    bois=new BasicObjectInputStream(new ByteArrayInputStream(buffer));
+    bois.close();
+  }
+ catch (  StreamCorruptedException e) {
+    fail("Test 1: Unexpected StreamCorruptedException.");
+  }
+  assertTrue("Test 1: readStreamHeader() has not been called.",readStreamHeaderCalled);
+  buffer[0]=(byte)magic;
+  buffer[1]=(byte)(magic >> 8);
+  try {
+    readStreamHeaderCalled=false;
+    bois=new BasicObjectInputStream(new ByteArrayInputStream(buffer));
+    fail("Test 2: StreamCorruptedException expected.");
+    bois.close();
+  }
+ catch (  StreamCorruptedException e) {
+  }
+  assertTrue("Test 2: readStreamHeader() has not been called.",readStreamHeaderCalled);
+  buffer[0]=(byte)(magic >> 8);
+  buffer[1]=(byte)magic;
+  buffer[2]=(byte)(version);
+  buffer[3]=(byte)(version >> 8);
+  try {
+    readStreamHeaderCalled=false;
+    bois=new BasicObjectInputStream(new ByteArrayInputStream(buffer));
+    fail("Test 3: StreamCorruptedException expected.");
+    bois.close();
+  }
+ catch (  StreamCorruptedException e) {
+  }
+  assertTrue("Test 3: readStreamHeader() has not been called.",readStreamHeaderCalled);
+}

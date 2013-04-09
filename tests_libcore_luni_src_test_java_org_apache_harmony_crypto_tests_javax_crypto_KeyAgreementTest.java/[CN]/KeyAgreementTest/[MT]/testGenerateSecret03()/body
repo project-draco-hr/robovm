@@ -1,0 +1,22 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  createKeys();
+  KeyAgreement[] kAgs=createKAs();
+  byte[] bb;
+  byte[] bb1=new byte[10];
+  for (int i=0; i < kAgs.length; i++) {
+    kAgs[i].init(privKey);
+    kAgs[i].doPhase(publKey,true);
+    bb=kAgs[i].generateSecret();
+    kAgs[i].init(privKey);
+    kAgs[i].doPhase(publKey,true);
+    bb1=new byte[bb.length + 10];
+    kAgs[i].generateSecret(bb1,9);
+    kAgs[i].init(privKey);
+    kAgs[i].doPhase(publKey,true);
+    kAgs[i].generateSecret("DES");
+  }
+}

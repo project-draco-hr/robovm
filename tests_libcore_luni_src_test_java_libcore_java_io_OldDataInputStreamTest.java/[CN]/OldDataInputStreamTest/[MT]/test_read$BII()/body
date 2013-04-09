@@ -1,0 +1,24 @@
+{
+  byte rbytes[]=new byte[testLength - 5];
+  Support_ASimpleInputStream sis=new Support_ASimpleInputStream();
+  int r;
+  os.write(fileString.getBytes());
+  os.close();
+  openDataInputStream();
+  r=dis.read(rbytes,1,testLength - 10);
+  assertEquals("Test 1: Incorrect number of bytes read;",testLength - 10,r);
+  assertEquals("Test 2: Incorrect data read.",0,rbytes[0]);
+  assertTrue("Test 3: Incorrect data written or read.",new String(rbytes,1,r).equals(fileString.substring(0,r)));
+  r=dis.read(rbytes,0,15);
+  assertEquals("Test 3: Incorrect number of bytes read;",10,r);
+  assertTrue("Test 4: Incorrect data written or read.",new String(rbytes,0,r).equals(fileString.substring(testLength - 10)));
+  dis.close();
+  sis.throwExceptionOnNextUse=true;
+  dis=new DataInputStream(sis);
+  try {
+    dis.read(rbytes,1,5);
+    fail("Test 5: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+}

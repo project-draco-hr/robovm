@@ -1,0 +1,12 @@
+{
+  KeyPairGenerator keyGen=KeyPairGenerator.getInstance("DSA");
+  keyGen.initialize(1024);
+  KeyPair keys=keyGen.generateKeyPair();
+  KeyFactory fact=KeyFactory.getInstance("DSA");
+  byte[] encoded=keys.getPublic().getEncoded();
+  Key key=fact.generatePublic(new X509EncodedKeySpec(encoded));
+  assertTrue("public key encodings were different",isEqual(key,keys.getPublic()));
+  encoded=keys.getPrivate().getEncoded();
+  key=fact.generatePrivate(new PKCS8EncodedKeySpec(encoded));
+  assertTrue("private key encodings were different",isEqual(key,keys.getPrivate()));
+}

@@ -1,0 +1,51 @@
+{
+class TestObject {
+    public boolean finalized;
+    public TestObject(){
+      finalized=false;
+    }
+    protected void finalize(){
+      finalized=true;
+    }
+  }
+  final ReferenceQueue rq=new ReferenceQueue();
+class TestThread extends Thread {
+    public void run(){
+      Object testObj=new TestObject();
+      r=new SoftReference(testObj,rq);
+    }
+  }
+  Reference ref;
+  try {
+    TestThread t=new TestThread();
+    t.start();
+    t.join();
+    Vector<StringBuffer> v=new Vector<StringBuffer>();
+    try {
+      while (true) {
+        v.add(new StringBuffer(10000));
+      }
+    }
+ catch (    OutOfMemoryError ofme) {
+      v=null;
+    }
+  }
+ catch (  InterruptedException e) {
+    fail("InterruptedException : " + e.getMessage());
+  }
+  assertNull("get() should return null " + "if OutOfMemoryError is thrown.",r.get());
+  try {
+    TestThread t=new TestThread();
+    t.start();
+    t.join();
+    System.gc();
+    System.runFinalization();
+    ref=rq.poll();
+    assertNotNull("Object not garbage collected.",ref);
+    assertNull("Object is not null.",ref.get());
+    assertNotNull("Object could not be reclaimed.",r.get());
+  }
+ catch (  Exception e) {
+    fail("Exception : " + e.getMessage());
+  }
+}

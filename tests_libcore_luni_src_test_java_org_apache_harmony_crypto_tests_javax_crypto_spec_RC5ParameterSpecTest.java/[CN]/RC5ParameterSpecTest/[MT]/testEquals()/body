@@ -1,0 +1,23 @@
+{
+  int version=1;
+  int rounds=5;
+  int wordSize=16;
+  byte[] iv={1,2,3,4,5,6};
+  RC5ParameterSpec ps1=new RC5ParameterSpec(version,rounds,wordSize,iv);
+  RC5ParameterSpec ps2=new RC5ParameterSpec(version,rounds,wordSize,iv);
+  RC5ParameterSpec ps3=new RC5ParameterSpec(version,rounds,wordSize,new byte[]{1,2,3,4});
+  assertTrue("The equivalence relation should be reflexive.",ps1.equals(ps1));
+  assertTrue("Objects built on the same parameters should be equal.",ps1.equals(ps2));
+  assertTrue("The equivalence relation should be symmetric.",ps2.equals(ps1));
+  assertTrue("Objects built on the equal parameters should be equal.",ps2.equals(ps3));
+  assertTrue("The equivalence relation should be transitive.",ps1.equals(ps3));
+  assertFalse("Should return not be equal to null object.",ps1.equals(null));
+  ps2=new RC5ParameterSpec(version + 1,rounds,wordSize,iv);
+  assertFalse("Objects should not be equal.",ps1.equals(ps2));
+  ps2=new RC5ParameterSpec(version,rounds + 1,wordSize,iv);
+  assertFalse("Objects should not be equal.",ps1.equals(ps2));
+  ps2=new RC5ParameterSpec(version,rounds,wordSize / 2,iv);
+  assertFalse("Objects should not be equal.",ps1.equals(ps2));
+  ps2=new RC5ParameterSpec(version,rounds,wordSize,new byte[]{4,3,2,1});
+  assertFalse("Objects should not be equal.",ps1.equals(ps2));
+}

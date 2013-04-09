@@ -1,0 +1,45 @@
+{
+  String a="-238768787678287e214";
+  int precision=5;
+  RoundingMode rm=RoundingMode.CEILING;
+  MathContext mc=new MathContext(precision,rm);
+  String res="-23876";
+  int resScale=-224;
+  BigDecimal result=new BigDecimal(a,mc);
+  assertEquals("incorrect value",res,result.unscaledValue().toString());
+  assertEquals("incorrect scale",resScale,result.scale());
+  String biStr=new String("12345678901234567890123456789012345.0E+10");
+  String nbiStr=new String("-12345678901234567890123456789012345.E+10");
+  BigDecimal bd;
+  mc=new MathContext(31,RoundingMode.UP);
+  bd=new BigDecimal(biStr,mc);
+  assertEquals("incorrect value","1.234567890123456789012345678902E+44",bd.toString());
+  bd=new BigDecimal(nbiStr,mc);
+  assertEquals("incorrect value","-1.234567890123456789012345678902E+44",bd.toString());
+  mc=new MathContext(28,RoundingMode.DOWN);
+  bd=new BigDecimal(biStr,mc);
+  assertEquals("incorrect value","1.234567890123456789012345678E+44",bd.toString());
+  bd=new BigDecimal(nbiStr,mc);
+  assertEquals("incorrect value","-1.234567890123456789012345678E+44",bd.toString());
+  mc=new MathContext(33,RoundingMode.CEILING);
+  bd=new BigDecimal(biStr,mc);
+  assertEquals("incorrect value","1.23456789012345678901234567890124E+44",bd.toString());
+  bd=new BigDecimal(nbiStr,mc);
+  assertEquals("incorrect value","-1.23456789012345678901234567890123E+44",bd.toString());
+  mc=new MathContext(34,RoundingMode.UNNECESSARY);
+  try {
+    bd=new BigDecimal(biStr,mc);
+    fail("No ArithmeticException for RoundingMode.UNNECESSARY");
+  }
+ catch (  ArithmeticException e) {
+  }
+  try {
+    bd=new BigDecimal(nbiStr,mc);
+    fail("No ArithmeticException for RoundingMode.UNNECESSARY");
+  }
+ catch (  ArithmeticException e) {
+  }
+  mc=new MathContext(7,RoundingMode.FLOOR);
+  bd=new BigDecimal("1000000.9",mc);
+  assertEquals("incorrect value","1000000",bd.toString());
+}

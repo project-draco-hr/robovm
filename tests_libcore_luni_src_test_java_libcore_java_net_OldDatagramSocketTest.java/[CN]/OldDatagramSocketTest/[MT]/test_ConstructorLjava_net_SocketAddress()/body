@@ -1,0 +1,37 @@
+{
+class mySocketAddress extends SocketAddress {
+    public mySocketAddress(){
+    }
+  }
+  try {
+    try {
+      int portNumber=Support_PortManager.getNextPortForUDP();
+      ds=new java.net.DatagramSocket(new InetSocketAddress(InetAddress.getLocalHost(),portNumber));
+      assertTrue(ds.getBroadcast());
+      assertTrue("Created socket with incorrect port",ds.getLocalPort() == portNumber);
+      assertTrue("Created socket with incorrect address",ds.getLocalAddress().equals(InetAddress.getLocalHost()));
+    }
+ catch (    Exception e) {
+      fail("Could not create DatagramSocket : " + e.getMessage());
+    }
+    try {
+      int portNumber=Support_PortManager.getNextPortForUDP();
+      ds=new java.net.DatagramSocket(new mySocketAddress());
+      fail("No exception when constucting datagramSocket with unsupported SocketAddress type");
+    }
+ catch (    IllegalArgumentException e) {
+    }
+    ds=new DatagramSocket((SocketAddress)null);
+    assertTrue(ds.getBroadcast());
+  }
+ catch (  Exception ex) {
+    fail("unexpected exception when datagramSocket SocketAddress constructor test");
+  }
+  InetSocketAddress isa=null;
+  try {
+    isa=new InetSocketAddress(InetAddress.getLocalHost(),1);
+  }
+ catch (  UnknownHostException e) {
+    fail("UnknownHostException was thrown.");
+  }
+}

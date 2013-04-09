@@ -1,0 +1,10 @@
+{
+  String xml="<foo>abc&#38;def&#x26;ghi</foo>";
+  DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+  factory.setExpandEntityReferences(false);
+  document=factory.newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
+  Element documentElement=document.getDocumentElement();
+  Text text=(Text)documentElement.getFirstChild();
+  assertEquals("abc&def&ghi",text.getTextContent());
+  assertNull(text.getNextSibling());
+}

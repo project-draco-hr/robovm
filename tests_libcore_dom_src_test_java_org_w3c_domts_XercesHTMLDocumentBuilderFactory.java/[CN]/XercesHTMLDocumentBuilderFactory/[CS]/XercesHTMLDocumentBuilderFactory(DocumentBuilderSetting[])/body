@@ -1,0 +1,33 @@
+{
+  super(settings);
+  try {
+    ClassLoader classLoader=ClassLoader.getSystemClassLoader();
+    Class htmlBuilderClass=classLoader.loadClass("org.apache.html.dom.HTMLBuilder");
+    htmlBuilderConstructor=htmlBuilderClass.getConstructor(NO_CLASSES);
+    getHTMLDocumentMethod=htmlBuilderClass.getMethod("getHTMLDocument",NO_CLASSES);
+    Class htmlDOMImpl=classLoader.loadClass("org.apache.html.dom.HTMLDOMImplementationImpl");
+    Method method=htmlDOMImpl.getMethod("getHTMLDOMImplementation",NO_CLASSES);
+    domImpl=(DOMImplementation)method.invoke(null,NO_OBJECTS);
+    Class saxFactoryClass=classLoader.loadClass("org.apache.xerces.jaxp.SAXParserFactoryImpl");
+    factory=(SAXParserFactory)saxFactoryClass.newInstance();
+  }
+ catch (  InvocationTargetException ex) {
+    throw new DOMTestIncompatibleException(ex.getTargetException(),null);
+  }
+catch (  Exception ex) {
+    throw new DOMTestIncompatibleException(ex,null);
+  }
+  if (settings != null) {
+    for (int i=0; i < settings.length; i++) {
+    }
+  }
+  try {
+    factory.newSAXParser();
+  }
+ catch (  ParserConfigurationException ex) {
+    throw new DOMTestIncompatibleException(ex,null);
+  }
+catch (  SAXException ex) {
+    throw new DOMTestIncompatibleException(ex,null);
+  }
+}

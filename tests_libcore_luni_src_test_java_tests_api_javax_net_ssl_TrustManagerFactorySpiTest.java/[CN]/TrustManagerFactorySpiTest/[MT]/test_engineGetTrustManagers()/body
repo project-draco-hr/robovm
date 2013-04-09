@@ -1,0 +1,18 @@
+{
+  factory.reset();
+  Provider provider=new MyProvider();
+  TrustManagerFactory tmf=TrustManagerFactory.getInstance("MyTMF",provider);
+  TrustManager[] tm=tmf.getTrustManagers();
+  assertTrue(factory.isEngineGetTrustManagersCalled());
+  factory.reset();
+  try {
+    KeyStore ks=KeyStore.getInstance(KeyStore.getDefaultType());
+    ks.load(null,null);
+    tmf.init(ks);
+    tm=tmf.getTrustManagers();
+    assertTrue(factory.isEngineGetTrustManagersCalled());
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception " + e.toString());
+  }
+}

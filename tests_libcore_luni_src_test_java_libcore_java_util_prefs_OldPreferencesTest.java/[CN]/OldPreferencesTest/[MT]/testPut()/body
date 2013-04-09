@@ -1,0 +1,49 @@
+{
+  Preferences pref=Preferences.userNodeForPackage(Preferences.class);
+  pref.put("","emptyvalue");
+  assertEquals("emptyvalue",pref.get("",null));
+  pref.put("testPutkey","value1");
+  assertEquals("value1",pref.get("testPutkey",null));
+  pref.put("testPutkey","value2");
+  assertEquals("value2",pref.get("testPutkey",null));
+  pref.put("","emptyvalue");
+  assertEquals("emptyvalue",pref.get("",null));
+  try {
+    pref.put(null,"value");
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    pref.put("key",null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  pref.put(longKey,longValue);
+  try {
+    pref.put(longKey + 1,longValue);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    pref.put(longKey,longValue + 1);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  pref.removeNode();
+  try {
+    pref.put(longKey,longValue + 1);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    pref.put(longKey,longValue);
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+}

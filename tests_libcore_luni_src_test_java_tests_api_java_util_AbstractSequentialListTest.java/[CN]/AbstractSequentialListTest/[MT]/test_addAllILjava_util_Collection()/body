@@ -1,0 +1,65 @@
+{
+  AbstractSequentialList asl=new AbstractSequentialList(){
+    @Override public int size(){
+      return 0;
+    }
+    @Override public ListIterator listIterator(    int index){
+      return new Mock_unsupportedListIterator();
+    }
+  }
+;
+  Collection strV=new Vector<String>();
+  strV.add("String");
+  strV.add("1");
+  strV.add("3.14");
+  try {
+    asl.addAll(0,strV);
+    fail("UnsupportedOperationException expected.");
+  }
+ catch (  UnsupportedOperationException ee) {
+  }
+  try {
+    asl.addAll(0,null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException ee) {
+  }
+  asl=new AbstractSequentialList(){
+    @Override public int size(){
+      return 0;
+    }
+    @Override public ListIterator listIterator(    int index){
+      return new Mock_ListIterator();
+    }
+  }
+;
+  try {
+    asl.addAll(0,strV);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  strV.remove("String");
+  strV.add(null);
+  try {
+    asl.addAll(0,strV);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  strV.remove(null);
+  asl.addAll(0,strV);
+  asl=new LinkedList();
+  try {
+    asl.addAll(-10,strV);
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    asl.addAll(1,strV);
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+}

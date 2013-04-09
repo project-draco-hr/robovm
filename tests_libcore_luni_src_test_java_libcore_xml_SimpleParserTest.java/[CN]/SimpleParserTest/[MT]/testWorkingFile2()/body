@@ -1,0 +1,17 @@
+{
+  SAXParserFactory factory=SAXParserFactory.newInstance();
+  factory.setValidating(false);
+  factory.setNamespaceAware(false);
+  factory.setFeature("http://xml.org/sax/features/namespace-prefixes",true);
+  SAXParser parser=factory.newSAXParser();
+  parser.getXMLReader().setContentHandler(contentHandler);
+  parser.parse(getClass().getResourceAsStream("/SimpleParserTest.xml"),(DefaultHandler)null);
+  assertFalse(parser.isNamespaceAware());
+  assertEquals("The:quick,brown:fox",instructions.toString());
+  assertEquals("t:stuff,nestedStuff,nestedStuff,nestedStuff",elements2.toString());
+  assertEquals("Some text here,some more here...",text.toString());
+  assertEquals("eins",attributes2.get("one"));
+  assertEquals("zwei",attributes2.get("two"));
+  assertEquals("drei",attributes2.get("three"));
+  assertEquals(0,namespaces2.size());
+}

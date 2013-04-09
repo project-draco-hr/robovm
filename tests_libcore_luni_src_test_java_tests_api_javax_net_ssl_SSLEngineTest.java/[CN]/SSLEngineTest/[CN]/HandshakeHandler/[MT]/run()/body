@@ -1,0 +1,63 @@
+{
+  try {
+    while (true) {
+switch (status) {
+case FINISHED:
+{
+          log(status);
+          return;
+        }
+case NEED_TASK:
+{
+        log(status);
+        Runnable task;
+        while ((task=engine.getDelegatedTask()) != null) {
+          task.run();
+        }
+        status=engine.getHandshakeStatus();
+        break;
+      }
+case NEED_UNWRAP:
+{
+      log(status);
+      ByteBuffer source=read();
+      writeBuffer.clear();
+      while (status == HandshakeStatus.NEED_UNWRAP) {
+        SSLEngineResult result=engine.unwrap(source,writeBuffer);
+        status=result.getHandshakeStatus();
+        log(result);
+      }
+      break;
+    }
+case NEED_WRAP:
+{
+    log(status);
+    writeBuffer.clear();
+    int produced=0;
+    SSLEngineResult result=null;
+    while (status == HandshakeStatus.NEED_WRAP) {
+      result=engine.wrap(EMPTY,writeBuffer);
+      status=result.getHandshakeStatus();
+      produced+=result.bytesProduced();
+      log(result);
+    }
+    writeBuffer.rewind();
+    writeBuffer.limit(produced);
+    log("write: " + produced);
+    out.write(writeBuffer);
+    break;
+  }
+case NOT_HANDSHAKING:
+{
+  log("Not Handshaking");
+  return;
+}
+}
+}
+}
+ catch (IOException e) {
+log(e);
+}
+catch (RuntimeException e) {
+}
+}

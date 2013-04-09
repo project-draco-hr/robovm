@@ -1,0 +1,27 @@
+{
+  String dirName=null;
+  String fileName="input.tst";
+  String userDir=System.getProperty("java.io.tmpdir");
+  System.setProperty("user.dir",userDir);
+  File f=new File(dirName,fileName);
+  if (!userDir.regionMatches((userDir.length() - 1),slash,0,1))   userDir+=slash;
+  userDir+="input.tst";
+  String error=String.format("Test 1: Incorrect file created: %s; %s expected.",f.getAbsolutePath(),userDir);
+  assertTrue(error,f.getAbsolutePath().equals(userDir));
+  dirName=System.getProperty("java.io.tmpdir");
+  fileName=null;
+  try {
+    f=new File(dirName,fileName);
+    fail("Test 2: NullPointerException expected.");
+  }
+ catch (  NullPointerException e) {
+  }
+  fileName="input.tst";
+  f=new File(dirName,fileName);
+  assertTrue("Test 3: Incorrect file created.",f.getPath().equals(userDir));
+  String s=null;
+  f=new File("/abc");
+  File d=new File(s,"/abc");
+  assertEquals("Test 4: Incorrect file created;",d.getAbsolutePath(),f.getAbsolutePath());
+  assertEquals("Test3: Created Incorrect File","/abc",f.getAbsolutePath());
+}

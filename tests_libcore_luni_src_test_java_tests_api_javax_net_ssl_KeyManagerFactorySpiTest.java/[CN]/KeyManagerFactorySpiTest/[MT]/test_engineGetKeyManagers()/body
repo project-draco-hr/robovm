@@ -1,0 +1,22 @@
+{
+  KeyManagerFactorySpiImpl kmf=new KeyManagerFactorySpiImpl();
+  try {
+    KeyManager[] km=kmf.engineGetKeyManagers();
+    fail("IllegalStateException wasn't thrown");
+  }
+ catch (  IllegalStateException ise) {
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of IllegalStateException");
+  }
+  try {
+    char[] psw="password".toCharArray();
+    Parameters pr=new Parameters(psw);
+    kmf.engineInit(pr);
+    KeyManager[] km=kmf.engineGetKeyManagers();
+    assertNull("Object is not NULL",km);
+  }
+ catch (  Exception e) {
+    fail(e + " unexpected exception was thrown");
+  }
+}

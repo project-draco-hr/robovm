@@ -1,0 +1,25 @@
+{
+  for (int i=0; i < keyfactAlgs.length; i++) {
+    try {
+      KeyFactory fact=KeyFactory.getInstance(keyfactAlgs[i],providerName);
+      KeyPairGenerator keyGen=KeyPairGenerator.getInstance(keyfactAlgs[i]);
+      SecureRandom random=new SecureRandom();
+      keyGen.initialize(StandardNames.getMinimumKeySize(keyfactAlgs[i]),random);
+      KeepAlive keepalive=createKeepAlive(keyfactAlgs[i]);
+      KeyPair keys=keyGen.generateKeyPair();
+      if (keepalive != null) {
+        keepalive.interrupt();
+      }
+      fact.translateKey(keys.getPrivate());
+    }
+ catch (    NoSuchAlgorithmException e) {
+      fail("getInstance did not find algorithm " + keyfactAlgs[i]);
+    }
+catch (    NoSuchProviderException e) {
+      fail("getInstance did not find provider " + providerName);
+    }
+catch (    InvalidKeyException e) {
+      fail("generatePublic did not generate right spec for algorithm " + keyfactAlgs[i]);
+    }
+  }
+}

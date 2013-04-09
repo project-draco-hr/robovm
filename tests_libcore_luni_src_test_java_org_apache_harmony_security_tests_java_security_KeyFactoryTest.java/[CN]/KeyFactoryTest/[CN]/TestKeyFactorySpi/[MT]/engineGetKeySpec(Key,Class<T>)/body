@@ -1,0 +1,46 @@
+{
+  if (key == null) {
+    throw new NullPointerException();
+  }
+  Constructor<T> constructor=null;
+  if (TestPrivateKeySpec.class == keySpec) {
+    try {
+      constructor=keySpec.getConstructor(TestPrivateKey.class);
+    }
+ catch (    SecurityException e) {
+      throw new InvalidKeySpecException(e);
+    }
+catch (    NoSuchMethodException e) {
+      throw new InvalidKeySpecException(e);
+    }
+  }
+ else   if (TestPublicKeySpec.class == keySpec) {
+    try {
+      constructor=keySpec.getConstructor(TestPublicKey.class);
+    }
+ catch (    SecurityException e) {
+      throw new InvalidKeySpecException(e);
+    }
+catch (    NoSuchMethodException e) {
+      throw new InvalidKeySpecException(e);
+    }
+  }
+  if (constructor == null) {
+    throw new InvalidKeySpecException();
+  }
+  try {
+    return constructor.newInstance(key);
+  }
+ catch (  IllegalArgumentException e) {
+    throw new InvalidKeySpecException(e);
+  }
+catch (  InstantiationException e) {
+    throw new InvalidKeySpecException(e);
+  }
+catch (  IllegalAccessException e) {
+    throw new InvalidKeySpecException(e);
+  }
+catch (  InvocationTargetException e) {
+    throw new InvalidKeySpecException(e);
+  }
+}

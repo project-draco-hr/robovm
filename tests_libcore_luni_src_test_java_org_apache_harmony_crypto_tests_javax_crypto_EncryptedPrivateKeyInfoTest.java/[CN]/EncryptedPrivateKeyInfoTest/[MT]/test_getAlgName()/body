@@ -1,0 +1,24 @@
+{
+  boolean performed=false;
+  for (int i=0; i < algName.length; i++) {
+    try {
+      TestDataGenerator g=new TestDataGenerator(algName[i][0],algName[i][1],privateKeyInfoDamaged,null);
+      EncryptedPrivateKeyInfo epki;
+      if (g.ap() == null) {
+        epki=new EncryptedPrivateKeyInfo(algName[i][0],g.ct());
+      }
+ else {
+        epki=new EncryptedPrivateKeyInfo(g.ap(),g.ct());
+      }
+      if (algName[i].length == 3) {
+        assertEquals(algName[i][2],epki.getAlgName());
+      }
+      performed=true;
+    }
+ catch (    TestDataGenerator.AllowedFailure allowedFailure) {
+    }
+catch (    NoSuchAlgorithmException allowedFailure) {
+    }
+  }
+  assertTrue("Test not performed",performed);
+}

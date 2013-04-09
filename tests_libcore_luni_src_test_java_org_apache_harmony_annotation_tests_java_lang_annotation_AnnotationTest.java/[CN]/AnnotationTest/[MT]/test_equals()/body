@@ -1,0 +1,45 @@
+{
+  Method m1=AnnotatedClass2.class.getDeclaredMethod("a",new Class[]{});
+  Method m2=AnnotatedClass2.class.getDeclaredMethod("b",new Class[]{});
+  assertFalse("other annotation class type",m1.getDeclaredAnnotations()[0].equals(m2.getDeclaredAnnotations()[0]));
+  List<Method> methods=Arrays.asList(AnnotatedClass.class.getDeclaredMethods());
+  Map<String,List<Method>> eqs=new HashMap<String,List<Method>>();
+  Map<String,List<Method>> neqs=new HashMap<String,List<Method>>();
+  for (  Method m : methods) {
+    String name=m.getName();
+    Map<String,List<Method>> curT=name.charAt(0) == 'e' ? eqs : neqs;
+    String testNum=name.substring(1,3);
+    List<Method> mlist=curT.get(testNum);
+    if (mlist == null) {
+      mlist=new ArrayList<Method>();
+      curT.put(testNum,mlist);
+    }
+    mlist.add(AnnotatedClass.class.getDeclaredMethod(name,new Class[]{}));
+  }
+  for (  List<Method> eqList : eqs.values()) {
+    for (int i=0; i < eqList.size() - 1; i++) {
+      for (int j=i + 1; j < eqList.size(); j++) {
+        Method me1=eqList.get(i);
+        Method me2=eqList.get(j);
+        Annotation a1=me1.getDeclaredAnnotations()[0];
+        Annotation a2=me2.getDeclaredAnnotations()[0];
+        assertEquals("must be equal : method1:" + me1.getName() + ", method2: "+ me2.getName(),a1,a2);
+        assertEquals("same hashcode",a1.hashCode(),a2.hashCode());
+      }
+    }
+  }
+  for (  List<Method> eqList : neqs.values()) {
+    for (int i=0; i < eqList.size() - 1; i++) {
+      for (int j=i + 1; j < eqList.size(); j++) {
+        Method me1=eqList.get(i);
+        Method me2=eqList.get(j);
+        Annotation a1=me1.getDeclaredAnnotations()[0];
+        Annotation a2=me2.getDeclaredAnnotations()[0];
+        assertFalse("must not be equal : method1:" + me1.getName() + ", method2: "+ me2.getName(),a1.equals(a2));
+        if (a1.hashCode() != a2.hashCode()) {
+          assertFalse("not same hashcode -> not equals",a1.equals(a2));
+        }
+      }
+    }
+  }
+}

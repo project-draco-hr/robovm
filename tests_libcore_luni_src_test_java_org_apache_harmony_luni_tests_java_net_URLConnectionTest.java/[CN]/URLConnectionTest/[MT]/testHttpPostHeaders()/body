@@ -1,0 +1,14 @@
+{
+  String path="/" + Math.random();
+  HttpURLConnection connection=(HttpURLConnection)new URL("http://localhost:" + port + path).openConnection();
+  connection.setDoOutput(true);
+  OutputStreamWriter writer=new OutputStreamWriter(connection.getOutputStream());
+  writer.write("hello");
+  writer.flush();
+  assertEquals(200,connection.getResponseCode());
+  Map<String,String> headers=server.pathToRequest().get(path).getHeaders();
+  assertNull(headers.get("Accept"));
+  assertEquals("application/x-www-form-urlencoded",headers.get("Content-Type"));
+  assertEquals("5",headers.get("Content-Length"));
+  assertEquals("localhost:" + port,headers.get("Host"));
+}

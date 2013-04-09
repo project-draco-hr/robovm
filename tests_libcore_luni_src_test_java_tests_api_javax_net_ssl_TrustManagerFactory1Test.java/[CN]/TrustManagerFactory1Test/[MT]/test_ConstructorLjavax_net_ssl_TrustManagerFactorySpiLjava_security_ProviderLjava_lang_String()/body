@@ -1,0 +1,18 @@
+{
+  TrustManagerFactorySpi spi=new MyTrustManagerFactorySpi();
+  TrustManagerFactory tmF=new myTrustManagerFactory(spi,getDefaultProvider(),getDefaultAlgorithm());
+  assertTrue("Not CertStore object",tmF instanceof TrustManagerFactory);
+  assertEquals("Incorrect algorithm",tmF.getAlgorithm(),getDefaultAlgorithm());
+  assertEquals("Incorrect provider",tmF.getProvider(),getDefaultProvider());
+  assertNull("Incorrect result",tmF.getTrustManagers());
+  tmF=new myTrustManagerFactory(null,null,null);
+  assertTrue("Not CertStore object",tmF instanceof TrustManagerFactory);
+  assertNull("Provider must be null",tmF.getProvider());
+  assertNull("Algorithm must be null",tmF.getAlgorithm());
+  try {
+    tmF.getTrustManagers();
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+}

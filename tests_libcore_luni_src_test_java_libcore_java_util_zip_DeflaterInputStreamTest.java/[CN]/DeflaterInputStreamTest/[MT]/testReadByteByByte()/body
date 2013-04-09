@@ -1,0 +1,19 @@
+{
+  byte[] data={1,2,3,4,5,6,7,8,9,10};
+  InputStream in=new DeflaterInputStream(new ByteArrayInputStream(data));
+  ByteArrayOutputStream out=new ByteArrayOutputStream();
+  assertEquals(1,in.available());
+  int b;
+  while ((b=in.read()) != -1) {
+    out.write(b);
+  }
+  assertEquals(0,in.available());
+  assertEquals(Arrays.toString(data),Arrays.toString(inflate(out.toByteArray())));
+  in.close();
+  try {
+    in.available();
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+}

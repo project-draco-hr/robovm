@@ -1,0 +1,50 @@
+{
+  char[] buf=null;
+  try {
+    br=new BufferedReader(new Support_StringReader(testString));
+    br.skip(500);
+    br.mark(1000);
+    br.skip(250);
+    br.reset();
+    buf=new char[testString.length()];
+    br.read(buf,0,500);
+    assertTrue("Failed to set mark properly",testString.substring(500,1000).equals(new String(buf,0,500)));
+  }
+ catch (  java.io.IOException e) {
+    fail("Exception during mark test");
+  }
+  try {
+    br=new BufferedReader(new Support_StringReader(testString),800);
+    br.skip(500);
+    br.mark(250);
+    br.read(buf,0,1000);
+    br.reset();
+    fail("Failed to invalidate mark properly");
+  }
+ catch (  IOException x) {
+  }
+  char[] chars=new char[256];
+  for (int i=0; i < 256; i++)   chars[i]=(char)i;
+  Reader in=new BufferedReader(new Support_StringReader(new String(chars)),12);
+  try {
+    in.skip(6);
+    in.mark(14);
+    in.read(new char[14],0,14);
+    in.reset();
+    assertTrue("Wrong chars",in.read() == (char)6 && in.read() == (char)7);
+  }
+ catch (  IOException e) {
+    fail("Exception during mark test 2:" + e);
+  }
+  in=new BufferedReader(new Support_StringReader(new String(chars)),12);
+  try {
+    in.skip(6);
+    in.mark(8);
+    in.skip(7);
+    in.reset();
+    assertTrue("Wrong chars 2",in.read() == (char)6 && in.read() == (char)7);
+  }
+ catch (  IOException e) {
+    fail("Exception during mark test 3:" + e);
+  }
+}

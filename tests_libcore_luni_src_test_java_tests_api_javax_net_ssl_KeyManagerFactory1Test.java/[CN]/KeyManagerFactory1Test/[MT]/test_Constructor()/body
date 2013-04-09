@@ -1,0 +1,27 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportedMsg);
+    return;
+  }
+  KeyManagerFactorySpi spi=new MyKeyManagerFactorySpi();
+  KeyManagerFactory keyMF=new myKeyManagerFactory(spi,defaultProvider,defaultAlgorithm);
+  assertEquals("Incorrect algorithm",keyMF.getAlgorithm(),defaultAlgorithm);
+  assertEquals("Incorrect provider",keyMF.getProvider(),defaultProvider);
+  try {
+    keyMF.init(null,new char[1]);
+    fail("UnrecoverableKeyException must be thrown");
+  }
+ catch (  UnrecoverableKeyException e) {
+  }
+catch (  Exception e) {
+    fail("Unexpected: " + e.toString() + " was thrown");
+  }
+  keyMF=new myKeyManagerFactory(null,null,null);
+  assertNull("Aalgorithm must be null",keyMF.getAlgorithm());
+  assertNull("Provider must be null",keyMF.getProvider());
+  try {
+    keyMF.getKeyManagers();
+  }
+ catch (  NullPointerException e) {
+  }
+}

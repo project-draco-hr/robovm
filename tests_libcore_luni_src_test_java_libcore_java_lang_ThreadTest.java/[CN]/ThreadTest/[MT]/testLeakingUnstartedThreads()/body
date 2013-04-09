@@ -1,0 +1,13 @@
+{
+  final AtomicInteger finalizedThreadsCount=new AtomicInteger();
+  for (int i=0; true; i++) {
+    try {
+      newThread(finalizedThreadsCount,1024 << i);
+    }
+ catch (    OutOfMemoryError expected) {
+      break;
+    }
+  }
+  FinalizationTester.induceFinalization();
+  assertTrue("Unstarted threads were never finalized!",finalizedThreadsCount.get() > 0);
+}

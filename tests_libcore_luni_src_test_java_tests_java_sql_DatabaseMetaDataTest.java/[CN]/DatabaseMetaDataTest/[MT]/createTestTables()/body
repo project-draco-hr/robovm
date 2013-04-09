@@ -1,0 +1,25 @@
+{
+  try {
+    ResultSet userTab=meta.getTables(null,null,null,null);
+    while (userTab.next()) {
+      String tableName=userTab.getString("TABLE_NAME");
+      if (tableName.equals(DatabaseCreator.TEST_TABLE1)) {
+        statement.execute(DatabaseCreator.DROP_TABLE1);
+      }
+ else       if (tableName.equals(DatabaseCreator.TEST_TABLE3)) {
+        statement.execute(DatabaseCreator.DROP_TABLE3);
+      }
+ else       if (tableName.equals(VIEW_NAME)) {
+        statement.execute(DROP_VIEW_QUERY);
+      }
+    }
+    userTab.close();
+    statement.execute(DatabaseCreator.CREATE_TABLE3);
+    statement.execute(DatabaseCreator.CREATE_TABLE1);
+    statement.execute(CREATE_VIEW_QUERY);
+    meta=conn.getMetaData();
+  }
+ catch (  SQLException e) {
+    fail("Unexpected SQLException " + e.toString());
+  }
+}

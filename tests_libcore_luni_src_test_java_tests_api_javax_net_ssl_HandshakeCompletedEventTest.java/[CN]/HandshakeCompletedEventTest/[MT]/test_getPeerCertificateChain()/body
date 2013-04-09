@@ -1,0 +1,18 @@
+{
+  ByteArrayInputStream bis=new ByteArrayInputStream(certificate.getBytes());
+  mySSLSession session=new mySSLSession((X509Certificate[])null);
+  SSLSocket socket=(SSLSocket)SSLSocketFactory.getDefault().createSocket();
+  HandshakeCompletedEvent event=new HandshakeCompletedEvent(socket,session);
+  try {
+    event.getPeerCertificateChain();
+    fail("SSLPeerUnverifiedException wasn't thrown");
+  }
+ catch (  SSLPeerUnverifiedException expected) {
+  }
+  X509Certificate xc=X509Certificate.getInstance(bis);
+  X509Certificate[] xcs={xc};
+  session=new mySSLSession(xcs);
+  event=new HandshakeCompletedEvent(socket,session);
+  X509Certificate[] res=event.getPeerCertificateChain();
+  assertEquals(1,res.length);
+}

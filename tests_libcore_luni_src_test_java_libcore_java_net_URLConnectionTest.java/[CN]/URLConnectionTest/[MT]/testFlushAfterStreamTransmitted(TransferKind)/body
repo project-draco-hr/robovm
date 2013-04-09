@@ -1,0 +1,23 @@
+{
+  server.enqueue(new MockResponse().setBody("abc"));
+  server.play();
+  HttpURLConnection connection=(HttpURLConnection)server.getUrl("/").openConnection();
+  connection.setDoOutput(true);
+  byte[] upload="def".getBytes("UTF-8");
+  if (transferKind == TransferKind.CHUNKED) {
+    connection.setChunkedStreamingMode(0);
+  }
+ else   if (transferKind == TransferKind.FIXED_LENGTH) {
+    connection.setFixedLengthStreamingMode(upload.length);
+  }
+  OutputStream out=connection.getOutputStream();
+  out.write(upload);
+  assertEquals("abc",readAscii(connection.getInputStream(),Integer.MAX_VALUE));
+  out.flush();
+  try {
+    out.write("ghi".getBytes("UTF-8"));
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+}

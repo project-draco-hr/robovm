@@ -1,0 +1,11 @@
+{
+  X509CRLSelector selector=new X509CRLSelector();
+  BigInteger minCRL=new BigInteger("10000");
+  CRL crl=new TestCRL(minCRL);
+  selector.setMinCRLNumber(null);
+  assertTrue("Any CRL should match in the case of null minCRLNumber.",selector.match(crl));
+  selector.setMinCRLNumber(minCRL);
+  assertTrue("The CRL should match the selection criteria.",selector.match(crl));
+  selector.setMinCRLNumber(new BigInteger("10001"));
+  assertFalse("The CRL should not match the selection criteria.",selector.match(crl));
+}

@@ -1,0 +1,11 @@
+{
+  Reader in=new StringReader("<a><![CDATA[<b></b>]]> <![CDATA[<c></c>]]></a>");
+  ExpatReader reader=new ExpatReader();
+  TestCdataHandler handler=new TestCdataHandler();
+  reader.setContentHandler(handler);
+  reader.setLexicalHandler(handler);
+  reader.parse(new InputSource(in));
+  assertEquals(2,handler.startCdata);
+  assertEquals(2,handler.endCdata);
+  assertEquals("<b></b> <c></c>",handler.buffer.toString());
+}

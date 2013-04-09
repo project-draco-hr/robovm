@@ -1,0 +1,33 @@
+{
+  for (int i=0; i < list_wf.length; i++) {
+    HashMap<String,String> hm=new SAXParserTestSupport().readFile(list_out_dh[i].getPath());
+    MyDefaultHandler dh=new MyDefaultHandler();
+    InputStream is=new FileInputStream(list_wf[i]);
+    parser.parse(is,dh);
+    assertTrue(SAXParserTestSupport.equalsMaps(hm,dh.createData()));
+  }
+  for (int i=0; i < list_nwf.length; i++) {
+    try {
+      MyDefaultHandler dh=new MyDefaultHandler();
+      InputStream is=new FileInputStream(list_nwf[i]);
+      parser.parse(is,dh);
+      fail("SAXException is not thrown");
+    }
+ catch (    org.xml.sax.SAXException se) {
+    }
+  }
+  try {
+    MyDefaultHandler dh=new MyDefaultHandler();
+    parser.parse((InputStream)null,dh);
+    fail("java.lang.IllegalArgumentException is not thrown");
+  }
+ catch (  java.lang.IllegalArgumentException iae) {
+  }
+  try {
+    InputStream is=new FileInputStream(list_wf[0]);
+    parser.parse(is,(DefaultHandler)null);
+  }
+ catch (  java.lang.IllegalArgumentException iae) {
+    fail("java.lang.IllegalArgumentException is thrown");
+  }
+}

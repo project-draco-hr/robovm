@@ -1,0 +1,40 @@
+{
+  InputStream is=getClass().getResourceAsStream("/systemid.xml");
+  try {
+    Document d=db.parse(is,SAXParserTestSupport.XML_SYSTEM_ID);
+    assertNotNull(d);
+    assertEquals(4,d.getChildNodes().getLength());
+    assertEquals("collection",d.getChildNodes().item(0).getNodeName());
+    assertEquals("#comment",d.getChildNodes().item(1).getNodeName());
+    assertEquals("collection",d.getChildNodes().item(2).getNodeName());
+    assertEquals("#comment",d.getChildNodes().item(3).getNodeName());
+  }
+ catch (  IOException ioe) {
+    fail("Unexpected IOException " + ioe.toString());
+  }
+catch (  SAXException sax) {
+    fail("Unexpected SAXException " + sax.toString());
+  }
+  try {
+    db.parse((InputStream)null,SAXParserTestSupport.XML_SYSTEM_ID);
+    fail("Expected IllegalArgumentException was not thrown");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+catch (  IOException ioe) {
+    fail("Unexpected IOException " + ioe.toString());
+  }
+catch (  SAXException sax) {
+    fail("Unexpected SAXException " + sax.toString());
+  }
+  try {
+    is=getClass().getResourceAsStream("/wrong.xml");
+    db.parse(is,SAXParserTestSupport.XML_SYSTEM_ID);
+    fail("Expected SAXException was not thrown");
+  }
+ catch (  IOException ioe) {
+    fail("Unexpected IOException " + ioe.toString());
+  }
+catch (  SAXException sax) {
+  }
+}

@@ -1,0 +1,42 @@
+{
+  for (  String protocol : StandardNames.SSL_CONTEXT_PROTOCOLS) {
+    if (protocol.equals(StandardNames.SSL_CONTEXT_PROTOCOLS_DEFAULT)) {
+      SSLContext.getInstance(protocol).createSSLEngine();
+    }
+ else {
+      try {
+        SSLContext.getInstance(protocol).createSSLEngine();
+        fail();
+      }
+ catch (      IllegalStateException expected) {
+      }
+    }
+    if (protocol.equals(StandardNames.SSL_CONTEXT_PROTOCOLS_DEFAULT)) {
+      SSLContext.getInstance(protocol).createSSLEngine(null,-1);
+    }
+ else {
+      try {
+        SSLContext.getInstance(protocol).createSSLEngine(null,-1);
+        fail();
+      }
+ catch (      IllegalStateException expected) {
+      }
+    }
+{
+      SSLContext sslContext=SSLContext.getInstance(protocol);
+      if (!protocol.equals(StandardNames.SSL_CONTEXT_PROTOCOLS_DEFAULT)) {
+        sslContext.init(null,null,null);
+      }
+      SSLEngine se=sslContext.createSSLEngine();
+      assertNotNull(se);
+    }
+{
+      SSLContext sslContext=SSLContext.getInstance(protocol);
+      if (!protocol.equals(StandardNames.SSL_CONTEXT_PROTOCOLS_DEFAULT)) {
+        sslContext.init(null,null,null);
+      }
+      SSLEngine se=sslContext.createSSLEngine(null,-1);
+      assertNotNull(se);
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  try {
+    InputStream in=Class.forName("tests.support.Support_SQL").getResourceAsStream("/connection.properties");
+    loadProperties(in);
+    in.close();
+    String tmp=System.getProperty("java.io.tmpdir");
+    File tmpDir=new File(tmp);
+    if (tmpDir.isDirectory()) {
+      dbFile=File.createTempFile("sqliteTest",".db",tmpDir);
+      dbFile.deleteOnExit();
+    }
+ else {
+      System.err.println("java.io.tmpdir does not exist");
+    }
+    Class.forName("SQLite.JDBCDriver").newInstance();
+    sqlUrl="jdbc:sqlite:/" + dbFile.getPath();
+    Class.forName(sqlDriver).newInstance();
+  }
+ catch (  Exception ex) {
+    throw new RuntimeException(ex);
+  }
+}

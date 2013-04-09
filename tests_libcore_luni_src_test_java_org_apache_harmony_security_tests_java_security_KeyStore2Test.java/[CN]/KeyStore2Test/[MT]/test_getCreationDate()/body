@@ -1,0 +1,59 @@
+{
+  String type="DSA";
+  KeyStore keyTest=KeyStore.getInstance(KeyStore.getDefaultType());
+  try {
+    keyTest.getCreationDate("anAlias");
+    fail();
+  }
+ catch (  KeyStoreException expected) {
+  }
+  keyTest.load(null,pssWord);
+  assertNull(keyTest.getCreationDate(""));
+  try {
+    keyTest.getCreationDate(null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  Certificate[] chain={new MyCertificate(type,testEncoding),new MyCertificate(type,testEncoding)};
+  PrivateKey privateKey1=KeyFactory.getInstance(type).generatePrivate(new DSAPrivateKeySpec(new BigInteger("0"),new BigInteger("0"),new BigInteger("0"),new BigInteger("0")));
+  KeyStore.PasswordProtection pp=new KeyStore.PasswordProtection(pssWord);
+  KeyStore.PrivateKeyEntry pke=new KeyStore.PrivateKeyEntry(getPrivateKey(),chain);
+  KeyStore.PrivateKeyEntry pke1=new KeyStore.PrivateKeyEntry(privateKey1,chain);
+  keyTest.setEntry("alias1",pke,pp);
+  keyTest.setEntry("alias2",pke1,pp);
+  Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+  int dayExpected=Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+  int monthExpected=Calendar.getInstance().get(Calendar.MONTH);
+  int yearExpected=Calendar.getInstance().get(Calendar.YEAR);
+  int hourExpected=Calendar.getInstance().get(Calendar.HOUR);
+  int minuteExpected=Calendar.getInstance().get(Calendar.MINUTE);
+  Calendar.getInstance().setTimeInMillis(keyTest.getCreationDate("alias1").getTime());
+  int dayActual1=Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+  int monthActual1=Calendar.getInstance().get(Calendar.MONTH);
+  int yearActual1=Calendar.getInstance().get(Calendar.YEAR);
+  int hourActual1=Calendar.getInstance().get(Calendar.HOUR);
+  int minuteActual1=Calendar.getInstance().get(Calendar.MINUTE);
+  assertEquals(dayExpected,dayActual1);
+  assertEquals(monthExpected,monthActual1);
+  assertEquals(yearExpected,yearActual1);
+  assertEquals(hourExpected,hourActual1);
+  assertEquals(minuteExpected,minuteActual1);
+  Calendar.getInstance().setTimeInMillis(keyTest.getCreationDate("alias2").getTime());
+  int dayActual2=Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+  int monthActual2=Calendar.getInstance().get(Calendar.MONTH);
+  int yearActual2=Calendar.getInstance().get(Calendar.YEAR);
+  int hourActual2=Calendar.getInstance().get(Calendar.HOUR);
+  int minuteActual2=Calendar.getInstance().get(Calendar.MINUTE);
+  assertEquals(dayExpected,dayActual2);
+  assertEquals(monthExpected,monthActual2);
+  assertEquals(yearExpected,yearActual2);
+  assertEquals(hourExpected,hourActual2);
+  assertEquals(minuteExpected,minuteActual2);
+  try {
+    keyTest.getCreationDate(null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+}

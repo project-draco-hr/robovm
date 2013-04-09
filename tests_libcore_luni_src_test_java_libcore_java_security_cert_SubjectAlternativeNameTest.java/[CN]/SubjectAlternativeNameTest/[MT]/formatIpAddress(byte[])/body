@@ -1,0 +1,10 @@
+{
+  Certificate root=new TestKeyStore.Builder().addSubjectAltNameIpAddress(ipAddress).build().getRootCertificate("RSA");
+  X509Certificate javaCertificate=bouncycastleToJava(root);
+  Collection<List<?>> subjectAlternativeNames=javaCertificate.getSubjectAlternativeNames();
+  assertEquals(1,subjectAlternativeNames.size());
+  List<?> subjectAlternativeName=subjectAlternativeNames.iterator().next();
+  assertEquals(2,subjectAlternativeName.size());
+  assertEquals(GeneralName.iPAddress,subjectAlternativeName.get(0));
+  return (String)subjectAlternativeName.get(1);
+}

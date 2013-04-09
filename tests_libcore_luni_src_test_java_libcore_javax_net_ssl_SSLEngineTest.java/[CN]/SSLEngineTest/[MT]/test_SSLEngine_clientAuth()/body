@@ -1,0 +1,28 @@
+{
+  TestSSLContext c=TestSSLContext.create();
+  SSLEngine e=c.clientContext.createSSLEngine();
+  assertFalse(e.getWantClientAuth());
+  assertFalse(e.getNeedClientAuth());
+  e.setWantClientAuth(true);
+  assertTrue(e.getWantClientAuth());
+  assertFalse(e.getNeedClientAuth());
+  e.setNeedClientAuth(true);
+  assertFalse(e.getWantClientAuth());
+  assertTrue(e.getNeedClientAuth());
+  e.setWantClientAuth(true);
+  assertTrue(e.getWantClientAuth());
+  assertFalse(e.getNeedClientAuth());
+  TestSSLContext clientAuthContext=TestSSLContext.create(TestKeyStore.getClientCertificate(),TestKeyStore.getServer());
+  TestSSLEnginePair p=TestSSLEnginePair.create(clientAuthContext,new TestSSLEnginePair.Hooks(){
+    @Override void beforeBeginHandshake(    SSLEngine client,    SSLEngine server){
+      server.setWantClientAuth(true);
+    }
+  }
+);
+  assertConnected(p);
+  assertNotNull(p.client.getSession().getLocalCertificates());
+  TestKeyStore.assertChainLength(p.client.getSession().getLocalCertificates());
+  TestSSLContext.assertClientCertificateChain(clientAuthContext.clientTrustManager,p.client.getSession().getLocalCertificates());
+  clientAuthContext.close();
+  c.close();
+}

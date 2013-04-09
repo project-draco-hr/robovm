@@ -1,0 +1,27 @@
+{
+  BigInteger q=i1.divide(i2);
+  BigInteger r=i1.remainder(i2);
+  BigInteger[] temp=i1.divideAndRemainder(i2);
+  assertTrue("divide and divideAndRemainder do not agree",q.equals(temp[0]));
+  assertTrue("remainder and divideAndRemainder do not agree",r.equals(temp[1]));
+  assertTrue("signum and equals(zero) do not agree on quotient",q.signum() != 0 || q.equals(zero));
+  assertTrue("signum and equals(zero) do not agree on remainder",r.signum() != 0 || r.equals(zero));
+  assertTrue("wrong sign on quotient",q.signum() == 0 || q.signum() == i1.signum() * i2.signum());
+  assertTrue("wrong sign on remainder",r.signum() == 0 || r.signum() == i1.signum());
+  assertTrue("remainder out of range",r.abs().compareTo(i2.abs()) < 0);
+  assertTrue("quotient too small",q.abs().add(one).multiply(i2.abs()).compareTo(i1.abs()) > 0);
+  assertTrue("quotient too large",q.abs().multiply(i2.abs()).compareTo(i1.abs()) <= 0);
+  BigInteger p=q.multiply(i2);
+  BigInteger a=p.add(r);
+  assertTrue("(a/b)*b+(a%b) != a",a.equals(i1));
+  try {
+    BigInteger mod=i1.mod(i2);
+    assertTrue("mod is negative",mod.signum() >= 0);
+    assertTrue("mod out of range",mod.abs().compareTo(i2.abs()) < 0);
+    assertTrue("positive remainder == mod",r.signum() < 0 || r.equals(mod));
+    assertTrue("negative remainder == mod - divisor",r.signum() >= 0 || r.equals(mod.subtract(i2)));
+  }
+ catch (  ArithmeticException e) {
+    assertTrue("mod fails on negative divisor only",i2.signum() <= 0);
+  }
+}

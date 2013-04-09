@@ -1,0 +1,45 @@
+{
+  final MyAlgorithmParameterSpec spec=new MyAlgorithmParameterSpec();
+  MyAlgorithmParameters paramSpi=new MyAlgorithmParameters(){
+    protected void engineInit(    AlgorithmParameterSpec paramSpec) throws InvalidParameterSpecException {
+      assertSame(spec,paramSpec);
+      runEngineInit_AlgParamSpec=true;
+    }
+  }
+;
+  AlgorithmParameters params=new DummyAlgorithmParameters(paramSpi,p,"algorithm");
+  params.init(spec);
+  assertTrue(paramSpi.runEngineInit_AlgParamSpec);
+  try {
+    params.init(spec);
+    fail("No expected InvalidParameterSpecException");
+  }
+ catch (  InvalidParameterSpecException e) {
+  }
+  params=new DummyAlgorithmParameters(paramSpi,p,"algorithm");
+  params.init(new byte[0]);
+  try {
+    params.init(spec);
+    fail("No expected InvalidParameterSpecException");
+  }
+ catch (  InvalidParameterSpecException e) {
+  }
+  params=new DummyAlgorithmParameters(paramSpi,p,"algorithm");
+  params.init(new byte[0],"format");
+  try {
+    params.init(spec);
+    fail("No expected InvalidParameterSpecException");
+  }
+ catch (  InvalidParameterSpecException e) {
+  }
+  paramSpi=new MyAlgorithmParameters(){
+    protected void engineInit(    AlgorithmParameterSpec paramSpec) throws InvalidParameterSpecException {
+      assertNull(paramSpec);
+      runEngineInit_AlgParamSpec=true;
+    }
+  }
+;
+  params=new DummyAlgorithmParameters(paramSpi,p,"algorithm");
+  params.init((AlgorithmParameterSpec)null);
+  assertTrue(paramSpi.runEngineInit_AlgParamSpec);
+}

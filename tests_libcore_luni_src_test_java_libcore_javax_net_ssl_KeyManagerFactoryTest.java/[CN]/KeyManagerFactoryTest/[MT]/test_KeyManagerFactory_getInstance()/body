@@ -1,0 +1,35 @@
+{
+  Provider[] providers=Security.getProviders();
+  for (  Provider provider : providers) {
+    Set<Provider.Service> services=provider.getServices();
+    for (    Provider.Service service : services) {
+      String type=service.getType();
+      if (!type.equals("KeyManagerFactory")) {
+        continue;
+      }
+      String algorithm=service.getAlgorithm();
+      try {
+{
+          KeyManagerFactory kmf=KeyManagerFactory.getInstance(algorithm);
+          assertEquals(algorithm,kmf.getAlgorithm());
+          test_KeyManagerFactory(kmf);
+        }
+{
+          KeyManagerFactory kmf=KeyManagerFactory.getInstance(algorithm,provider);
+          assertEquals(algorithm,kmf.getAlgorithm());
+          assertEquals(provider,kmf.getProvider());
+          test_KeyManagerFactory(kmf);
+        }
+{
+          KeyManagerFactory kmf=KeyManagerFactory.getInstance(algorithm,provider.getName());
+          assertEquals(algorithm,kmf.getAlgorithm());
+          assertEquals(provider,kmf.getProvider());
+          test_KeyManagerFactory(kmf);
+        }
+      }
+ catch (      Exception e) {
+        throw new Exception("Problem with algorithm " + algorithm,e);
+      }
+    }
+  }
+}

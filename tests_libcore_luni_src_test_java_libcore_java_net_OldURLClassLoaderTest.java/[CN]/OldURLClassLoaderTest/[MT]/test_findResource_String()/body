@@ -1,0 +1,28 @@
+{
+  File tempFile1=File.createTempFile("textFile",".txt");
+  tempFile1.createNewFile();
+  tempFile1.deleteOnExit();
+  File tempFile2=File.createTempFile("jarFile",".jar");
+  tempFile2.delete();
+  tempFile2.deleteOnExit();
+  Support_TestWebServer server=new Support_TestWebServer();
+  int port=Support_PortManager.getNextPort();
+  try {
+    server.initServer(port,false);
+    String tempPath1=tempFile1.getParentFile().getAbsolutePath() + "/";
+    InputStream is=getClass().getResourceAsStream("/tests/resources/hyts_patch.jar");
+    Support_Resources.copyLocalFileto(tempFile2,is);
+    String tempPath2=tempFile2.getAbsolutePath();
+    String tempPath3="http://localhost:" + port + "/";
+    URLClassLoader urlLoader=getURLClassLoader(tempPath1,tempPath2);
+    assertNull("Found inexistant resource",urlLoader.findResource("XXX"));
+    assertNotNull("Couldn't find resource from directory",urlLoader.findResource(tempFile1.getName()));
+    assertNotNull("Couldn't find resource from jar",urlLoader.findResource("Blah.txt"));
+    urlLoader=getURLClassLoader(tempPath1,tempPath2,tempPath3);
+    assertNotNull("Couldn't find resource from web",urlLoader.findResource("test1"));
+    assertNull("Found inexistant resource from web",urlLoader.findResource("test3"));
+  }
+  finally {
+    server.close();
+  }
+}

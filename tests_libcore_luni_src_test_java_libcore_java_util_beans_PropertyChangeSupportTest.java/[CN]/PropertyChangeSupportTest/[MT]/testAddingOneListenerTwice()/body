@@ -1,0 +1,14 @@
+{
+  Object bean=new Object();
+  PropertyChangeSupport support=new PropertyChangeSupport(bean);
+  EventLog log=new EventLog();
+  support.addPropertyChangeListener("a",log);
+  support.addPropertyChangeListener(log);
+  support.addPropertyChangeListener(log);
+  support.addPropertyChangeListener("a",log);
+  PropertyChangeEvent eventA=new PropertyChangeEvent(bean,"a",false,true);
+  PropertyChangeEvent eventB=new PropertyChangeEvent(bean,"b",false,true);
+  support.firePropertyChange(eventA);
+  support.firePropertyChange(eventB);
+  assertEquals(Arrays.asList(eventA,eventA,eventA,eventA,eventB,eventB),log.log);
+}

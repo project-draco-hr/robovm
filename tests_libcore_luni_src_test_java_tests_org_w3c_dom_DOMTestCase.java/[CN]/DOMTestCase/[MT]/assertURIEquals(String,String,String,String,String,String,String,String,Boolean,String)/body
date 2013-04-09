@@ -1,0 +1,65 @@
+{
+  assertNotNull(assertID,actual);
+  String uri=actual;
+  int lastPound=actual.lastIndexOf("#");
+  String actualFragment="";
+  if (lastPound != -1) {
+    uri=actual.substring(0,lastPound);
+    actualFragment=actual.substring(lastPound + 1);
+  }
+  if (fragment != null) {
+    assertEquals(assertID,fragment,actualFragment);
+  }
+  int lastQuestion=uri.lastIndexOf("?");
+  String actualQuery="";
+  if (lastQuestion != -1) {
+    uri=actual.substring(0,lastQuestion);
+    actualQuery=actual.substring(lastQuestion + 1);
+  }
+  if (query != null) {
+    assertEquals(assertID,query,actualQuery);
+  }
+  int firstColon=uri.indexOf(":");
+  int firstSlash=uri.indexOf("/");
+  String actualPath=uri;
+  String actualScheme="";
+  if (firstColon != -1 && firstColon < firstSlash) {
+    actualScheme=uri.substring(0,firstColon);
+    actualPath=uri.substring(firstColon + 1);
+  }
+  if (scheme != null) {
+    assertEquals(assertID,scheme,actualScheme);
+  }
+  if (path != null) {
+    assertEquals(assertID,path,actualPath);
+  }
+  if (host != null) {
+    String actualHost="";
+    if (actualPath.startsWith("//")) {
+      int termSlash=actualPath.indexOf("/",2);
+      actualHost=actualPath.substring(0,termSlash);
+    }
+    assertEquals(assertID,host,actualHost);
+  }
+  String actualFile=actualPath;
+  if (file != null || name != null) {
+    int finalSlash=actualPath.lastIndexOf("/");
+    if (finalSlash != -1) {
+      actualFile=actualPath.substring(finalSlash + 1);
+    }
+    if (file != null) {
+      assertEquals(assertID,file,actualFile);
+    }
+  }
+  if (name != null) {
+    String actualName=actualFile;
+    int finalPeriod=actualFile.lastIndexOf(".");
+    if (finalPeriod != -1) {
+      actualName=actualFile.substring(0,finalPeriod);
+    }
+    assertEquals(assertID,name,actualName);
+  }
+  if (isAbsolute != null) {
+    assertEquals(assertID,isAbsolute.booleanValue(),actualPath.startsWith("/") || actualPath.startsWith("file:/"));
+  }
+}

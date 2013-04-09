@@ -1,0 +1,14 @@
+{
+  MockServer httpServer=new MockServer("ServerSocket for HttpURLConnectionTest");
+  httpServer.start();
+synchronized (bound) {
+    if (!httpServer.started) {
+      bound.wait(5000);
+    }
+  }
+  HttpURLConnection c=(HttpURLConnection)new URL("http://localhost:" + httpServer.port()).openConnection();
+  c.setDoOutput(true);
+  c.setRequestMethod(new String("POST"));
+  c.getOutputStream();
+  httpServer.join();
+}

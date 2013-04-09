@@ -1,0 +1,22 @@
+{
+  try {
+    int sport=startServer("SServer setKeepAlive");
+    int portNumber=Support_PortManager.getNextPort();
+    Socket theSocket=new Socket(InetAddress.getLocalHost(),sport,null,portNumber);
+    theSocket.setKeepAlive(true);
+    theSocket.setKeepAlive(false);
+    ensureExceptionThrownIfOptionIsUnsupportedOnOS(SO_KEEPALIVE);
+  }
+ catch (  Exception e) {
+    handleException(e,SO_KEEPALIVE);
+  }
+  new TestSocket((SocketImpl)null).setKeepAlive(true);
+  try {
+    Socket theSocket=new Socket();
+    theSocket.close();
+    theSocket.setKeepAlive(true);
+    fail("SocketException was not thrown.");
+  }
+ catch (  SocketException ioe) {
+  }
+}

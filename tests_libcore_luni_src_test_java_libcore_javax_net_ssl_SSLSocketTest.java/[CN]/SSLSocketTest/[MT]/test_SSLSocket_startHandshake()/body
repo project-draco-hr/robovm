@@ -1,0 +1,46 @@
+{
+  final TestSSLContext c=TestSSLContext.create();
+  SSLSocket client=(SSLSocket)c.clientContext.getSocketFactory().createSocket(c.host,c.port);
+  final SSLSocket server=(SSLSocket)c.serverSocket.accept();
+  Thread thread=new Thread(new Runnable(){
+    public void run(){
+      try {
+        server.startHandshake();
+        assertNotNull(server.getSession());
+        try {
+          server.getSession().getPeerCertificates();
+          fail();
+        }
+ catch (        SSLPeerUnverifiedException expected) {
+        }
+        Certificate[] localCertificates=server.getSession().getLocalCertificates();
+        assertNotNull(localCertificates);
+        TestKeyStore.assertChainLength(localCertificates);
+        assertNotNull(localCertificates[0]);
+        TestSSLContext.assertServerCertificateChain(c.serverTrustManager,localCertificates);
+        TestSSLContext.assertCertificateInKeyStore(localCertificates[0],c.serverKeyStore);
+      }
+ catch (      RuntimeException e) {
+        throw e;
+      }
+catch (      Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+);
+  thread.start();
+  client.startHandshake();
+  assertNotNull(client.getSession());
+  assertNull(client.getSession().getLocalCertificates());
+  Certificate[] peerCertificates=client.getSession().getPeerCertificates();
+  assertNotNull(peerCertificates);
+  TestKeyStore.assertChainLength(peerCertificates);
+  assertNotNull(peerCertificates[0]);
+  TestSSLContext.assertServerCertificateChain(c.clientTrustManager,peerCertificates);
+  TestSSLContext.assertCertificateInKeyStore(peerCertificates[0],c.serverKeyStore);
+  thread.join();
+  client.close();
+  server.close();
+  c.close();
+}

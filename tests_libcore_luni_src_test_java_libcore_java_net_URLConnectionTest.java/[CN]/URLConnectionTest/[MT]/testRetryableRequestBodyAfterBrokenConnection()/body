@@ -1,0 +1,12 @@
+{
+  server.enqueue(new MockResponse().setBody("abc").setSocketPolicy(DISCONNECT_AT_END));
+  server.enqueue(new MockResponse().setBody("def"));
+  server.play();
+  assertContent("abc",server.getUrl("/a").openConnection());
+  HttpURLConnection connection=(HttpURLConnection)server.getUrl("/b").openConnection();
+  connection.setDoOutput(true);
+  OutputStream out=connection.getOutputStream();
+  out.write(new byte[]{1,2,3});
+  out.close();
+  assertContent("def",connection);
+}

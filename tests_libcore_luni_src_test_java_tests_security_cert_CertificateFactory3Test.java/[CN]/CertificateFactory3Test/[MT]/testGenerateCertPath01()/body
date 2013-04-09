@@ -1,0 +1,16 @@
+{
+  CertificateFactory[] certFs=initCertFs();
+  assertNotNull("CertificateFactory objects were not created",certFs);
+  Certificate cert=certFs[0].generateCertificate(new ByteArrayInputStream(TestUtils.getEncodedX509Certificate()));
+  List<Certificate> list=new Vector<Certificate>();
+  list.add(cert);
+  for (int i=0; i < certFs.length; i++) {
+    CertPath certPath=null;
+    certPath=certFs[i].generateCertPath(list);
+    assertEquals(cert.getType(),certPath.getType());
+    List<? extends Certificate> list1=certPath.getCertificates();
+    assertFalse("Result list is empty",list1.isEmpty());
+    Iterator<? extends Certificate> it=list1.iterator();
+    assertEquals("Incorrect Certificate in CertPath",cert,it.next());
+  }
+}

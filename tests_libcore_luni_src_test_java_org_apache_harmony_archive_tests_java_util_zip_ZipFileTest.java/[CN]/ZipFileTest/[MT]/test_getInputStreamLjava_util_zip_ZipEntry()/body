@@ -1,0 +1,31 @@
+{
+  ZipEntry zentry=null;
+  InputStream is=null;
+  try {
+    zentry=zfile.getEntry("File1.txt");
+    is=zfile.getInputStream(zentry);
+    byte[] rbuf=new byte[1000];
+    int r;
+    is.read(rbuf,0,r=(int)zentry.getSize());
+    assertEquals("getInputStream read incorrect data","This is text",new String(rbuf,0,r));
+  }
+ catch (  java.io.IOException e) {
+    fail("IOException during getInputStream");
+  }
+ finally {
+    try {
+      is.close();
+    }
+ catch (    java.io.IOException e) {
+      fail("Failed to close input stream");
+    }
+  }
+  zentry=zfile.getEntry("File2.txt");
+  zfile.close();
+  try {
+    is=zfile.getInputStream(zentry);
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException ee) {
+  }
+}

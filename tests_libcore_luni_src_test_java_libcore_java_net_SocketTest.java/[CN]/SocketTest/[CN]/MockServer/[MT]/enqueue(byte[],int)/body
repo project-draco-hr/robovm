@@ -1,0 +1,18 @@
+{
+  return executor.submit(new Callable<byte[]>(){
+    @Override public byte[] call() throws Exception {
+      Socket socket=serverSocket.accept();
+      OutputStream out=socket.getOutputStream();
+      out.write(sendBytes);
+      InputStream in=socket.getInputStream();
+      byte[] result=new byte[receiveByteCount];
+      int total=0;
+      while (total < receiveByteCount) {
+        total+=in.read(result,total,result.length - total);
+      }
+      socket.close();
+      return result;
+    }
+  }
+);
+}

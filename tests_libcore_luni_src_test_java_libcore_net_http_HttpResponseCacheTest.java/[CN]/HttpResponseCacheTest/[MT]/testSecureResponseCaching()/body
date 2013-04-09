@@ -1,0 +1,25 @@
+{
+  TestSSLContext testSSLContext=TestSSLContext.create();
+  server.useHttps(testSSLContext.serverContext.getSocketFactory(),false);
+  server.enqueue(new MockResponse().addHeader("Last-Modified: " + formatDate(-1,TimeUnit.HOURS)).addHeader("Expires: " + formatDate(1,TimeUnit.HOURS)).setBody("ABC"));
+  server.play();
+  HttpsURLConnection connection=(HttpsURLConnection)server.getUrl("/").openConnection();
+  connection.setSSLSocketFactory(testSSLContext.clientContext.getSocketFactory());
+  assertEquals("ABC",readAscii(connection));
+  String suite=connection.getCipherSuite();
+  List<Certificate> localCerts=toListOrNull(connection.getLocalCertificates());
+  List<Certificate> serverCerts=toListOrNull(connection.getServerCertificates());
+  Principal peerPrincipal=connection.getPeerPrincipal();
+  Principal localPrincipal=connection.getLocalPrincipal();
+  connection=(HttpsURLConnection)server.getUrl("/").openConnection();
+  connection.setSSLSocketFactory(testSSLContext.clientContext.getSocketFactory());
+  assertEquals("ABC",readAscii(connection));
+  assertEquals(2,cache.getRequestCount());
+  assertEquals(1,cache.getNetworkCount());
+  assertEquals(1,cache.getHitCount());
+  assertEquals(suite,connection.getCipherSuite());
+  assertEquals(localCerts,toListOrNull(connection.getLocalCertificates()));
+  assertEquals(serverCerts,toListOrNull(connection.getServerCertificates()));
+  assertEquals(peerPrincipal,connection.getPeerPrincipal());
+  assertEquals(localPrincipal,connection.getLocalPrincipal());
+}

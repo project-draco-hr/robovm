@@ -1,0 +1,18 @@
+{
+  ThreadGroup tg=new ThreadGroup("Test Group2");
+  st=new Thread(tg,new SimpleThread(1),"SimpleThread3",1);
+  assertTrue("Constructed incorrect thread",(st.getThreadGroup() == tg) && st.getName().equals("SimpleThread3"));
+  st.start();
+  try {
+    st.join();
+  }
+ catch (  InterruptedException e) {
+  }
+  tg.destroy();
+  try {
+    new Thread(tg,new SimpleThread(1),"SimpleThread3",Integer.MAX_VALUE);
+    fail("StackOverflowError/OutOfMemoryError is not thrown.");
+  }
+ catch (  IllegalThreadStateException itse) {
+  }
+}

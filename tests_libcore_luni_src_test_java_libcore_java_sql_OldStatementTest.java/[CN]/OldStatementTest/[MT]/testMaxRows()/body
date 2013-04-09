@@ -1,0 +1,35 @@
+{
+  Statement st=null;
+  try {
+    st=conn.createStatement();
+    for (int i=0; i < 300; i+=50) {
+      st.setMaxRows(i);
+      assertEquals(i,st.getMaxRows());
+      ResultSet r=st.executeQuery("select * from zoo;");
+      int rowCount=0;
+      while (r.next()) {
+        ++rowCount;
+      }
+      if (i == 0) {
+        assertTrue("rowCount=" + rowCount + " i="+ i,rowCount > i);
+      }
+ else {
+        assertTrue("rowCount=" + rowCount + " i="+ i,rowCount <= i);
+      }
+      r.close();
+    }
+    try {
+      st.setMaxRows(-1);
+      fail("SQLException isn't thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+}

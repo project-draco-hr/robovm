@@ -1,0 +1,28 @@
+{
+  InputStream source=new ByteArrayInputStream("</a>".getBytes());
+  MethodLogger logger=new MethodLogger();
+  ErrorHandler handler=new MockHandler(logger);
+  try {
+    db=dbf.newDocumentBuilder();
+    db.setErrorHandler(handler);
+    db.parse(source);
+  }
+ catch (  SAXParseException e) {
+  }
+catch (  Exception e) {
+    throw new RuntimeException("Unexpected exception",e);
+  }
+  assertEquals("error",logger.getMethod());
+  assertTrue(logger.getArgs()[0] instanceof SAXParseException);
+  source=new ByteArrayInputStream("</a>".getBytes());
+  try {
+    db=dbf.newDocumentBuilder();
+    db.setErrorHandler(null);
+    db.parse(source);
+  }
+ catch (  SAXParseException e) {
+  }
+catch (  Exception e) {
+    throw new RuntimeException("Unexpected exception",e);
+  }
+}

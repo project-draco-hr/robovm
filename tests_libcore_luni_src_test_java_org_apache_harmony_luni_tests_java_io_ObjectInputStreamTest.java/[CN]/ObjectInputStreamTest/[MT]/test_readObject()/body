@@ -1,0 +1,28 @@
+{
+  String s="HelloWorld";
+  oos.writeObject(s);
+  oos.close();
+  ois=new ObjectInputStream(new ByteArrayInputStream(bao.toByteArray()));
+  assertEquals("Read incorrect Object value",s,ois.readObject());
+  ois.close();
+  byte[] cName=C.class.getName().getBytes("UTF-8");
+  byte[] aName=A.class.getName().getBytes("UTF-8");
+  ByteArrayOutputStream out=new ByteArrayOutputStream();
+  byte[] begStream=new byte[]{(byte)0xac,(byte)0xed,(byte)0x00,(byte)0x05,(byte)0x73,(byte)0x72,(byte)0x00};
+  out.write(begStream,0,begStream.length);
+  out.write(cName.length);
+  out.write(cName,0,cName.length);
+  byte[] midStream=new byte[]{(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x21,(byte)0x02,(byte)0x00,(byte)0x00,(byte)0x78,(byte)0x72,(byte)0x00};
+  out.write(midStream,0,midStream.length);
+  out.write(aName.length);
+  out.write(aName,0,aName.length);
+  byte[] endStream=new byte[]{(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x0b,(byte)0x02,(byte)0x00,(byte)0x01,(byte)0x4c,(byte)0x00,(byte)0x04,(byte)0x6e,(byte)0x61,(byte)0x6d,(byte)0x65,(byte)0x74,(byte)0x00,(byte)0x12,(byte)0x4c,(byte)0x6a,(byte)0x61,(byte)0x76,(byte)0x61,(byte)0x2f,(byte)0x6c,(byte)0x61,(byte)0x6e,(byte)0x67,(byte)0x2f,(byte)0x53,(byte)0x74,(byte)0x72,(byte)0x69,(byte)0x6e,(byte)0x67,(byte)0x3b,(byte)0x78,(byte)0x70,(byte)0x74,(byte)0x00,(byte)0x04,(byte)0x6e,(byte)0x61,(byte)0x6d,(byte)0x65};
+  out.write(endStream,0,endStream.length);
+  out.flush();
+  ObjectInputStream ois=new ObjectInputStream(new ByteArrayInputStream(out.toByteArray()));
+  Object o=ois.readObject();
+  assertEquals(C.class,o.getClass());
+  assertNull(new ObjectInputStream(){
+  }
+.readObject());
+}

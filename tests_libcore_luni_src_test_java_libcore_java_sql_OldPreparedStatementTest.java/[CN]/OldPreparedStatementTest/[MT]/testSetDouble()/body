@@ -1,0 +1,52 @@
+{
+  PreparedStatement ps=null;
+  String query="insert into type (DoubleVal) values (?);";
+  ps=conn.prepareStatement(query);
+  try {
+    Statement st=null;
+    try {
+      ps.setDouble(1,Double.MAX_VALUE);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where DoubleVal=" + Double.MAX_VALUE);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    try {
+      ps.setDouble(1,Double.MIN_VALUE);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where DoubleVal=" + Double.MIN_VALUE);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+    ps.close();
+    try {
+      ps.setDouble(1,2.0);
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+}

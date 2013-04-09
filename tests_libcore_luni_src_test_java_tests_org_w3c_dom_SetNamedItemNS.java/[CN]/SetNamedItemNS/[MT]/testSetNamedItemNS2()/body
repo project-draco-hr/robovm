@@ -1,0 +1,27 @@
+{
+  String namespaceURI="http://www.usa.com";
+  String qualifiedName="dmstc:domestic";
+  Document doc;
+  Document anotherDoc;
+  Node arg;
+  NodeList elementList;
+  Node testAddress;
+  NamedNodeMap attributes;
+  doc=(Document)load("staffNS",builder);
+  anotherDoc=(Document)load("staffNS",builder);
+  arg=anotherDoc.createAttributeNS(namespaceURI,qualifiedName);
+  arg.setNodeValue("Maybe");
+  elementList=doc.getElementsByTagName("address");
+  testAddress=elementList.item(0);
+  attributes=testAddress.getAttributes();
+{
+    boolean success=false;
+    try {
+      attributes.setNamedItemNS(arg);
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.WRONG_DOCUMENT_ERR);
+    }
+    assertTrue("throw_WRONG_DOCUMENT_ERR",success);
+  }
+}

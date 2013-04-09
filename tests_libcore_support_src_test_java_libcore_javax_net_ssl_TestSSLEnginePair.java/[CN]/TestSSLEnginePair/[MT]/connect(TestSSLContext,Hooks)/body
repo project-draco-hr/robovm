@@ -1,0 +1,36 @@
+{
+  if (hooks == null) {
+    hooks=new Hooks();
+  }
+  SSLSession session=c.clientContext.createSSLEngine().getSession();
+  int packetBufferSize=session.getPacketBufferSize();
+  ByteBuffer clientToServer=ByteBuffer.allocate(packetBufferSize);
+  ByteBuffer serverToClient=ByteBuffer.allocate(packetBufferSize);
+  int applicationBufferSize=session.getApplicationBufferSize();
+  ByteBuffer scratch=ByteBuffer.allocate(applicationBufferSize);
+  SSLEngine client=c.clientContext.createSSLEngine();
+  SSLEngine server=c.serverContext.createSSLEngine();
+  client.setUseClientMode(true);
+  server.setUseClientMode(false);
+  hooks.beforeBeginHandshake(client,server);
+  client.beginHandshake();
+  server.beginHandshake();
+  while (true) {
+    boolean clientDone=client.getHandshakeStatus() == HandshakeStatus.NOT_HANDSHAKING;
+    boolean serverDone=server.getHandshakeStatus() == HandshakeStatus.NOT_HANDSHAKING;
+    if (clientDone && serverDone) {
+      break;
+    }
+    boolean progress=false;
+    if (!clientDone) {
+      progress|=handshakeCompleted(client,clientToServer,serverToClient,scratch);
+    }
+    if (!serverDone) {
+      progress|=handshakeCompleted(server,serverToClient,clientToServer,scratch);
+    }
+    if (!progress) {
+      break;
+    }
+  }
+  return new SSLEngine[]{server,client};
+}

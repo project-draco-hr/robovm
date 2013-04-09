@@ -1,0 +1,29 @@
+{
+  Document doc;
+  DocumentType docType;
+  NamedNodeMap notations;
+  NamedNodeMap attributes;
+  Notation notation;
+  Element element;
+  NodeList elementList;
+  Node newNode;
+  String nullNS=null;
+  doc=(Document)load("staffNS",true);
+  docType=doc.getDoctype();
+  notations=docType.getNotations();
+  assertNotNull("notationsNotNull",notations);
+  notation=(Notation)notations.getNamedItem("notation1");
+  elementList=doc.getElementsByTagNameNS("http://www.nist.gov","address");
+  element=(Element)elementList.item(0);
+  attributes=element.getAttributes();
+{
+    boolean success=false;
+    try {
+      newNode=attributes.setNamedItemNS(notation);
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.HIERARCHY_REQUEST_ERR);
+    }
+    assertTrue("throw_HIERARCHY_REQUEST_ERR",success);
+  }
+}

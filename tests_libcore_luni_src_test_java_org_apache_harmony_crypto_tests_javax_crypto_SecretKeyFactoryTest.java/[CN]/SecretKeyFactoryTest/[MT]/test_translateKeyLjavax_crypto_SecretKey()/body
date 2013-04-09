@@ -1,0 +1,19 @@
+{
+  KeyGenerator kg=null;
+  Key key=null;
+  SecretKeyFactory secKF=null;
+  for (int i=0; i < validValues.length; i++) {
+    secKF=SecretKeyFactory.getInstance(validValues[i]);
+    assertNotNull(secKF.getProvider());
+    kg=KeyGenerator.getInstance(secKF.getAlgorithm());
+    kg.init(new SecureRandom());
+    key=kg.generateKey();
+    secKF.translateKey((SecretKey)key);
+  }
+  try {
+    secKF.translateKey(null);
+    fail("InvalidKeyException expected");
+  }
+ catch (  InvalidKeyException e) {
+  }
+}

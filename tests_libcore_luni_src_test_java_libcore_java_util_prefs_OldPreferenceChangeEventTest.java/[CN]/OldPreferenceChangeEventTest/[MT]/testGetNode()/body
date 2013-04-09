@@ -1,0 +1,23 @@
+{
+  AbstractPreferences parent=(AbstractPreferences)Preferences.userNodeForPackage(Preferences.class);
+  AbstractPreferences pref=(AbstractPreferences)parent.node("mock");
+  MockPreferenceChangeListener pl=new MockPreferenceChangeListener(){
+    public void preferenceChange(    PreferenceChangeEvent pce){
+      if (pce != null && "mock".equals(pce.getNode().name())) {
+        result=true;
+      }
+      super.preferenceChange(pce);
+    }
+  }
+;
+  pref.addPreferenceChangeListener(pl);
+  try {
+    pref.putInt("key_int",Integer.MAX_VALUE);
+    assertEquals(1,pl.getChanged());
+    assertTrue(pl.getResult());
+    pl.reset();
+  }
+  finally {
+    pref.removePreferenceChangeListener(pl);
+  }
+}

@@ -1,0 +1,24 @@
+{
+  ByteBuffer readOnly=ByteBuffer.allocate(1).asReadOnlyBuffer();
+  DatagramSocket ds=new DatagramSocket(0);
+  DatagramChannel dc=DatagramChannel.open();
+  dc.connect(ds.getLocalSocketAddress());
+  try {
+    dc.read(readOnly);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    dc.read(new ByteBuffer[]{readOnly});
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    dc.read(new ByteBuffer[]{readOnly},0,1);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+}

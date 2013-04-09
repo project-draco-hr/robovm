@@ -1,0 +1,19 @@
+{
+  Provider[] pp=Security.getProviders("MessageDigest.ASH-1");
+  if (pp == null) {
+    return;
+  }
+  Provider p2=pp[0];
+  String old=p2.getProperty("MessageDigest.ASH-1");
+  p2.put("MessageDigest.ASH-1","AnotherClassName");
+  Provider.Service s=p2.getService("MessageDigest","ASH-1");
+  if (!"AnotherClassName".equals(s.getClassName())) {
+    fail("Incorrect class name " + s.getClassName());
+  }
+  try {
+    s.newInstance(null);
+    fail("No expected NoSuchAlgorithmException");
+  }
+ catch (  NoSuchAlgorithmException e) {
+  }
+}

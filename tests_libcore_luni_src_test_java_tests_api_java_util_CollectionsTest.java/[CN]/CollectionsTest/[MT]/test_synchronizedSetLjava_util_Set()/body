@@ -1,0 +1,37 @@
+{
+  HashSet smallSet=new HashSet();
+  for (int i=0; i < 50; i++) {
+    smallSet.add(objArray[i]);
+  }
+  final int numberOfLoops=200;
+  Set synchSet=Collections.synchronizedSet(smallSet);
+  SynchCollectionChecker normalSynchChecker=new SynchCollectionChecker(synchSet,false,numberOfLoops);
+  SynchCollectionChecker offsetSynchChecker=new SynchCollectionChecker(synchSet,true,numberOfLoops);
+  Thread normalThread=new Thread(normalSynchChecker);
+  Thread offsetThread=new Thread(offsetSynchChecker);
+  normalThread.start();
+  offsetThread.start();
+  while ((normalSynchChecker.getNumberOfChecks() < numberOfLoops) || (offsetSynchChecker.getNumberOfChecks() < numberOfLoops)) {
+    try {
+      Thread.sleep(10);
+    }
+ catch (    InterruptedException e) {
+    }
+  }
+  assertTrue("Returned set corrupted by multiple thread access",normalSynchChecker.getResult() && offsetSynchChecker.getResult());
+  try {
+    normalThread.join(5000);
+    offsetThread.join(5000);
+  }
+ catch (  InterruptedException e) {
+    fail("join() interrupted");
+  }
+  Set mySet=Collections.synchronizedSet(smallSet);
+  mySet.add(null);
+  assertTrue("Trying to use nulls in list failed",mySet.contains(null));
+  smallSet=new HashSet();
+  for (int i=0; i < 100; i++) {
+    smallSet.add(objArray[i]);
+  }
+  new Support_SetTest("",Collections.synchronizedSet(smallSet)).runTest();
+}

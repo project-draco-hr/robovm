@@ -1,0 +1,99 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      keyStore.setCertificateEntry(null,null);
+      fail();
+    }
+ catch (    KeyStoreException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    populate(keyStore);
+    try {
+      keyStore.setCertificateEntry(null,null);
+      fail();
+    }
+ catch (    Exception e) {
+      if (e.getClass() != NullPointerException.class && e.getClass() != KeyStoreException.class) {
+        throw e;
+      }
+    }
+    if (isReadOnly(keyStore)) {
+      try {
+        assertNull(keyStore.getCertificate(ALIAS_CERTIFICATE));
+        keyStore.setCertificateEntry(ALIAS_CERTIFICATE,null);
+        fail();
+      }
+ catch (      UnsupportedOperationException expected) {
+      }
+      continue;
+    }
+    if (isCertificateEnabled(keyStore)) {
+      assertCertificate(keyStore.getCertificate(ALIAS_CERTIFICATE));
+      try {
+        int size=keyStore.size();
+        keyStore.setCertificateEntry(ALIAS_CERTIFICATE,null);
+        assertNull(keyStore.getCertificate(ALIAS_CERTIFICATE));
+        assertEquals(size,keyStore.size());
+        assertTrue(keyStore.isCertificateEntry(ALIAS_CERTIFICATE));
+        assertTrue(Collections.list(keyStore.aliases()).contains(ALIAS_CERTIFICATE));
+      }
+ catch (      NullPointerException expectedSometimes) {
+        assertEquals("PKCS12",keyStore.getType());
+        assertEquals("BC",keyStore.getProvider().getName());
+      }
+    }
+ else {
+      try {
+        keyStore.setCertificateEntry(ALIAS_CERTIFICATE,null);
+        fail();
+      }
+ catch (      KeyStoreException expected) {
+      }
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    if (!isCertificateEnabled(keyStore)) {
+      continue;
+    }
+    keyStore.load(null,null);
+    assertNull(keyStore.getCertificate(ALIAS_CERTIFICATE));
+    if (isReadOnly(keyStore)) {
+      try {
+        setCertificate(keyStore);
+        fail();
+      }
+ catch (      UnsupportedOperationException expected) {
+      }
+      continue;
+    }
+    setCertificate(keyStore);
+    assertCertificate(keyStore.getCertificate(ALIAS_CERTIFICATE));
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    if (!isCertificateEnabled(keyStore)) {
+      continue;
+    }
+    populate(keyStore);
+    if (isReadOnly(keyStore)) {
+      assertNull(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
+      assertNull(keyStore.getKey(ALIAS_ALT_CASE_PRIVATE,PASSWORD_KEY));
+      assertNull(keyStore.getKey(ALIAS_SECRET,PASSWORD_KEY));
+      assertNull(keyStore.getKey(ALIAS_ALT_CASE_SECRET,PASSWORD_KEY));
+    }
+ else     if (isCaseSensitive(keyStore)) {
+      assertCertificate(keyStore.getCertificate(ALIAS_CERTIFICATE));
+      assertNull(keyStore.getCertificate(ALIAS_ALT_CASE_CERTIFICATE));
+      setCertificate(keyStore,ALIAS_ALT_CASE_CERTIFICATE,getPrivateKey2().getCertificate());
+      assertCertificate(keyStore.getCertificate(ALIAS_CERTIFICATE));
+      assertCertificate2(keyStore.getCertificate(ALIAS_ALT_CASE_CERTIFICATE));
+    }
+ else {
+      assertCertificate(keyStore.getCertificate(ALIAS_CERTIFICATE));
+      assertCertificate(keyStore.getCertificate(ALIAS_ALT_CASE_CERTIFICATE));
+      setCertificate(keyStore,ALIAS_ALT_CASE_CERTIFICATE,getPrivateKey2().getCertificate());
+      assertCertificate2(keyStore.getCertificate(ALIAS_CERTIFICATE));
+      assertCertificate2(keyStore.getCertificate(ALIAS_ALT_CASE_CERTIFICATE));
+    }
+  }
+}

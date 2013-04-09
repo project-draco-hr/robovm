@@ -1,0 +1,21 @@
+{
+  File tmpDir=new File(System.getProperty("java.io.tmpdir"));
+  File sampleFile=null;
+  try {
+    if (tmpDir.isDirectory()) {
+      sampleFile=File.createTempFile("openStreamTest",".txt",tmpDir);
+      sampleFile.deleteOnExit();
+    }
+ else {
+      fail("Error in test setup tmpDir does not exist");
+    }
+    FileWriter fstream=new FileWriter(sampleFile);
+    BufferedWriter out=new BufferedWriter(fstream,testString.getBytes().length);
+    out.write(testString);
+    out.close();
+  }
+ catch (  Exception e) {
+    fail("Error: in test setup" + e.getMessage());
+  }
+  return sampleFile.toURL();
+}

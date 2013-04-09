@@ -1,0 +1,38 @@
+{
+  Timestamp[] timestamps={new Timestamp(2007,10,17,19,06,50,23),new Timestamp(123)};
+  PreparedStatement ps=null;
+  PreparedStatement ps1=null;
+  try {
+    String query="insert into type (TS) values (?);";
+    ps=conn.prepareStatement(query);
+    for (int i=0; i < timestamps.length; i++) {
+      ps.setTimestamp(1,timestamps[i]);
+      assertFalse(ps.execute());
+      assertTrue(ps.getUpdateCount() > 0);
+    }
+    try {
+      ps.setTimestamp(2,timestamps[0]);
+      fail("SQLException is not thrown");
+    }
+ catch (    Exception sqle) {
+    }
+    try {
+      ps.setTimestamp(-2,timestamps[0]);
+      fail("SQLException is not thrown");
+    }
+ catch (    Exception sqle) {
+    }
+    String query1="insert into type (Tint) values (?);";
+    ps1=conn.prepareStatement(query1);
+    ps1.setTimestamp(1,timestamps[0]);
+    ps1.execute();
+  }
+  finally {
+    try {
+      ps.close();
+      ps1.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+}

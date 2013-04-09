@@ -1,0 +1,81 @@
+{
+  Set<EnumFoo> set=EnumSet.noneOf(EnumFoo.class);
+  set.add(EnumFoo.a);
+  set.add(EnumFoo.b);
+  try {
+    set.add(null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  Set rawSet=set;
+  try {
+    rawSet.add(HugeEnumWithInnerClass.b);
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  set.clear();
+  try {
+    set.add(null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  boolean result=set.add(EnumFoo.a);
+  assertEquals("Size should be 1:",1,set.size());
+  assertTrue("Return value should be true",result);
+  result=set.add(EnumFoo.a);
+  assertEquals("Size should be 1:",1,set.size());
+  assertFalse("Return value should be false",result);
+  set.add(EnumFoo.b);
+  assertEquals("Size should be 2:",2,set.size());
+  rawSet=set;
+  try {
+    rawSet.add(EnumWithAllInnerClass.a);
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  try {
+    rawSet.add(EnumWithInnerClass.a);
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  try {
+    rawSet.add(new Object());
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  Set<HugeEnum> hugeSet=EnumSet.noneOf(HugeEnum.class);
+  result=hugeSet.add(HugeEnum.a);
+  assertTrue(result);
+  result=hugeSet.add(HugeEnum.a);
+  assertFalse(result);
+  try {
+    hugeSet.add(null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  rawSet=hugeSet;
+  try {
+    rawSet.add(HugeEnumWithInnerClass.b);
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  try {
+    rawSet.add(new Object());
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  result=hugeSet.add(HugeEnum.mm);
+  assertTrue(result);
+  result=hugeSet.add(HugeEnum.mm);
+  assertFalse(result);
+  assertEquals(2,hugeSet.size());
+}

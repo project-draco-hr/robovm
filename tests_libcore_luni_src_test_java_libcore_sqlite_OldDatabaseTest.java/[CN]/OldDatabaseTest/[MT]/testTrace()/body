@@ -1,0 +1,17 @@
+{
+  String stmt="create table TEST (res double);";
+  TestTrace t=new TestTrace();
+  assertFalse(t.traceCalled);
+  assertEquals(db.last_error(),Constants.SQLITE_OK);
+  db.trace((Trace)t);
+  db.exec(stmt,t);
+  assertTrue(t.traceCalled);
+  assertEquals(t.getTrace(),stmt);
+  try {
+    db.close();
+    db.exec(stmt,t);
+    fail("Exception Expected");
+  }
+ catch (  Exception e) {
+  }
+}

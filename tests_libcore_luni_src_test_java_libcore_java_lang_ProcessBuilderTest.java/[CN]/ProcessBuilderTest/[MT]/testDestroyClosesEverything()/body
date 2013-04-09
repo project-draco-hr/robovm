@@ -1,0 +1,26 @@
+{
+  Process process=new ProcessBuilder(shell(),"-c","echo out; echo err 1>&2").start();
+  InputStream in=process.getInputStream();
+  InputStream err=process.getErrorStream();
+  OutputStream out=process.getOutputStream();
+  process.destroy();
+  try {
+    in.read();
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+  try {
+    err.read();
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+  try {
+    out.write(1);
+    out.flush();
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+}

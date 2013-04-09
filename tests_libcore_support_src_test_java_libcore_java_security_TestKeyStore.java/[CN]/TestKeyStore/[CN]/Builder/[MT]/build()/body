@@ -1,0 +1,29 @@
+{
+  try {
+    if (StandardNames.IS_RI) {
+      if (storePassword == null) {
+        storePassword="password".toCharArray();
+      }
+      if (keyPassword == null) {
+        keyPassword="password".toCharArray();
+      }
+    }
+    KeyStore keyStore=createKeyStore();
+    for (    String keyAlgorithm : keyAlgorithms) {
+      String publicAlias=aliasPrefix + "-public-" + keyAlgorithm;
+      String privateAlias=aliasPrefix + "-private-" + keyAlgorithm;
+      if (keyAlgorithm.equals("EC_RSA") && signer == null && rootCa == null) {
+        createKeys(keyStore,keyAlgorithm,publicAlias,privateAlias,privateKey(keyStore,keyPassword,"RSA","RSA"));
+        continue;
+      }
+      createKeys(keyStore,keyAlgorithm,publicAlias,privateAlias,signer);
+    }
+    if (rootCa != null) {
+      keyStore.setCertificateEntry(aliasPrefix + "-root-ca-" + rootCa.getPublicKey().getAlgorithm(),rootCa);
+    }
+    return new TestKeyStore(keyStore,storePassword,keyPassword);
+  }
+ catch (  Exception e) {
+    throw new RuntimeException(e);
+  }
+}

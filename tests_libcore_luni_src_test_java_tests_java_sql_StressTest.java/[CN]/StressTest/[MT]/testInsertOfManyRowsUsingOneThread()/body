@@ -1,0 +1,25 @@
+{
+  Logger.global.info("java.sql stress test: single thread and many operations.");
+  int maxConnections=getConnectionNum();
+  Logger.global.info("Opening " + maxConnections + " to database "+ Support_SQL.getFilename());
+  openConnections(maxConnections);
+  int tasksPerConnection=Support_SQL.sqlMaxTasks / maxConnections;
+  Logger.global.info("TasksPerConnection =  " + Support_SQL.sqlMaxTasks + " by (maxConnections) "+ maxConnections+ " = "+ tasksPerConnection);
+  int pk=1;
+  for (int i=0; i < vc.size(); ++i) {
+    Logger.global.info(" creating " + tasksPerConnection + "tasks for Connection "+ i);
+    Connection c=vc.elementAt(i);
+    for (int j=0; j < tasksPerConnection; ++j) {
+      insertNewRecord(c,pk++);
+    }
+  }
+  try {
+    ResultSet rs=statement.executeQuery("SELECT COUNT(*) as counter FROM " + DatabaseCreator.TEST_TABLE2);
+    assertTrue("RecordSet is empty",rs.next());
+    assertEquals("Incorrect number of records",tasksPerConnection * maxConnections,rs.getInt("counter"));
+    rs.close();
+  }
+ catch (  SQLException sql) {
+    fail("Unexpected SQLException " + sql.toString());
+  }
+}

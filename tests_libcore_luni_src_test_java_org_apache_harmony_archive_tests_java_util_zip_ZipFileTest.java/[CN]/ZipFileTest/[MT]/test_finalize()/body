@@ -1,0 +1,18 @@
+{
+  InputStream in=Support_Resources.getStream("hyts_ZipFile.zip");
+  File file=Support_Resources.createTempFile(".jar");
+  OutputStream out=new FileOutputStream(file);
+  int result;
+  byte[] buf=new byte[4096];
+  while ((result=in.read(buf)) != -1) {
+    out.write(buf,0,result);
+  }
+  in.close();
+  out.close();
+  assertNotNull("Did not find entry",test_finalize1(test_finalize2(file)));
+  System.gc();
+  System.gc();
+  System.runFinalization();
+  file.delete();
+  assertTrue("Zip should not exist",!file.exists());
+}

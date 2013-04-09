@@ -1,0 +1,14 @@
+{
+  String tmp=System.getProperty("java.io.tmpdir");
+  File tmpDir=new File(tmp);
+  if (tmpDir.isDirectory()) {
+    dbFile=File.createTempFile("sqliteTest",".db",tmpDir);
+    dbFile.deleteOnExit();
+  }
+ else {
+    System.err.println("java.io.tmpdir does not exist");
+  }
+  Class.forName("SQLite.JDBCDriver").newInstance();
+  conn=DriverManager.getConnection("jdbc:sqlite:/" + dbFile.getPath());
+  assertNotNull("Connection created ",conn);
+}

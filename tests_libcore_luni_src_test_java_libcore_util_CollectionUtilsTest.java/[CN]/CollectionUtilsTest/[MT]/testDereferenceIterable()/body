@@ -1,0 +1,33 @@
+{
+  List<Reference<String>> refs=new ArrayList<Reference<String>>();
+  refs.add(newLiteralReference("a"));
+  refs.add(newLiteralReference("b"));
+  refs.add(newLiteralReference("c"));
+  refs.add(newLiteralReference("d"));
+  refs.add(newLiteralReference("e"));
+  Iterable<String> strings=CollectionUtils.dereferenceIterable(refs,true);
+  assertEquals(Arrays.<String>asList("a","b","c","d","e"),toList(strings));
+  refs.get(1).clear();
+  assertEquals(Arrays.<String>asList("a","c","d","e"),toList(strings));
+  assertEquals(4,refs.size());
+  Iterator<String> i=strings.iterator();
+  assertEquals("a",i.next());
+  i.remove();
+  assertEquals(3,refs.size());
+  assertEquals("c",i.next());
+  assertEquals("d",i.next());
+  assertTrue(i.hasNext());
+  try {
+    i.remove();
+    fail("Expected hasNext() to make remove() impossible.");
+  }
+ catch (  IllegalStateException expected) {
+  }
+  assertEquals("e",i.next());
+  i.remove();
+  assertEquals(2,refs.size());
+  assertFalse(i.hasNext());
+  refs.get(0).clear();
+  refs.get(1).clear();
+  assertEquals(Arrays.<String>asList(),toList(strings));
+}

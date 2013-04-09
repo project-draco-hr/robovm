@@ -1,0 +1,17 @@
+{
+  String selectQuery="SELECT rating, SUM(snum) AS sum FROM " + DatabaseCreator.CUSTOMERS_TABLE + " GROUP BY rating";
+  ResultSet result=statement.executeQuery(selectQuery);
+  HashMap<Integer,Integer> values=new HashMap<Integer,Integer>();
+  values.put(100,3006);
+  values.put(200,2005);
+  values.put(300,2009);
+  while (result.next()) {
+    int rating=result.getInt("rating");
+    int sum=result.getInt("sum");
+    assertTrue("Wrong value of rating field",values.containsKey(rating));
+    assertEquals("Wrong value of sum field",values.get(rating),new Integer(sum));
+    assertEquals(new Integer(sum),values.remove(rating));
+  }
+  result.close();
+  assertTrue("Result set has wrong size",values.isEmpty());
+}

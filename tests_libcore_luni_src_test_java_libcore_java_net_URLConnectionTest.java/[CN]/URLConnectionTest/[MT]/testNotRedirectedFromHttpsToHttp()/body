@@ -1,0 +1,9 @@
+{
+  TestSSLContext testSSLContext=TestSSLContext.create();
+  server.useHttps(testSSLContext.serverContext.getSocketFactory(),false);
+  server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP).addHeader("Location: http://anyhost/foo").setBody("This page has moved!"));
+  server.play();
+  HttpsURLConnection connection=(HttpsURLConnection)server.getUrl("/").openConnection();
+  connection.setSSLSocketFactory(testSSLContext.clientContext.getSocketFactory());
+  assertEquals("This page has moved!",readAscii(connection.getInputStream(),Integer.MAX_VALUE));
+}

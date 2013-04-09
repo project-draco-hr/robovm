@@ -1,0 +1,32 @@
+{
+  for (int i=0; i < 50; i++) {
+    smallList.add(objArray[i]);
+  }
+  final int numberOfLoops=200;
+  List synchList=Collections.synchronizedList(smallList);
+  if (type.equals("Random Access"))   assertTrue("Returned synchronized list should implement the Random Access interface",synchList instanceof RandomAccess);
+ else   assertTrue("Returned synchronized list should not implement the Random Access interface",!(synchList instanceof RandomAccess));
+  SynchCollectionChecker normalSynchChecker=new SynchCollectionChecker(synchList,false,numberOfLoops);
+  SynchCollectionChecker offsetSynchChecker=new SynchCollectionChecker(synchList,true,numberOfLoops);
+  Thread normalThread=new Thread(normalSynchChecker);
+  Thread offsetThread=new Thread(offsetSynchChecker);
+  normalThread.start();
+  offsetThread.start();
+  while ((normalSynchChecker.getNumberOfChecks() < numberOfLoops) || (offsetSynchChecker.getNumberOfChecks() < numberOfLoops)) {
+    try {
+      Thread.sleep(10);
+    }
+ catch (    InterruptedException e) {
+    }
+  }
+  assertTrue(type + " list tests: Returned list corrupted by multiple thread access",normalSynchChecker.getResult() && offsetSynchChecker.getResult());
+  try {
+    normalThread.join(5000);
+    offsetThread.join(5000);
+  }
+ catch (  InterruptedException e) {
+    fail(type + " list tests: join() interrupted");
+  }
+  synchList.set(25,null);
+  assertNull(type + " list tests: Trying to use nulls in list failed",synchList.get(25));
+}

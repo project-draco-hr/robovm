@@ -1,0 +1,18 @@
+{
+  try {
+    Security.addProvider(null);
+    fail("No expected NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  Provider p=new MyProvider();
+  int initNum=Security.getProviders().length;
+  try {
+    assertEquals(initNum + 1,Security.addProvider(p));
+    assertSame(p,Security.getProviders()[initNum]);
+    assertEquals(-1,Security.addProvider(p));
+  }
+  finally {
+    Security.removeProvider(p.getName());
+  }
+}

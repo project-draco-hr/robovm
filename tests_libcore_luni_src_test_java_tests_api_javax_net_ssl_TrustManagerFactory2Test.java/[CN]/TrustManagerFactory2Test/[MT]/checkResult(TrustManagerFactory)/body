@@ -1,0 +1,36 @@
+{
+  KeyStore kStore=null;
+  ManagerFactoryParameters mfp=null;
+  try {
+    tmf.init(kStore);
+    fail("KeyStoreException must be thrown");
+  }
+ catch (  KeyStoreException e) {
+  }
+  try {
+    tmf.init(mfp);
+    fail("InvalidAlgorithmParameterException must be thrown");
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+  }
+  assertNull("getTrustManagers() should return null object",tmf.getTrustManagers());
+  try {
+    kStore=KeyStore.getInstance(KeyStore.getDefaultType());
+    kStore.load(null,null);
+  }
+ catch (  KeyStoreException e) {
+    fail("default keystore is not supported");
+    return;
+  }
+  tmf.init(kStore);
+  mfp=(ManagerFactoryParameters)new MyTrustManagerFactorySpi.Parameters(null);
+  try {
+    tmf.init(mfp);
+    fail("RuntimeException must be thrown");
+  }
+ catch (  RuntimeException e) {
+    assertTrue("Incorrect exception",e.getCause() instanceof KeyStoreException);
+  }
+  mfp=(ManagerFactoryParameters)new MyTrustManagerFactorySpi.Parameters(kStore);
+  tmf.init(mfp);
+}

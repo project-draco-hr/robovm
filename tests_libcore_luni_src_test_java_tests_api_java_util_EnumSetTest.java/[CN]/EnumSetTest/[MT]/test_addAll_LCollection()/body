@@ -1,0 +1,127 @@
+{
+  Set<EnumFoo> set=EnumSet.noneOf(EnumFoo.class);
+  assertEquals("Size should be 0:",0,set.size());
+  try {
+    set.addAll(null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  Set emptySet=EnumSet.noneOf(EmptyEnum.class);
+  Enum[] elements=EmptyEnum.class.getEnumConstants();
+  for (int i=0; i < elements.length; i++) {
+    emptySet.add(elements[i]);
+  }
+  boolean result=set.addAll(emptySet);
+  assertFalse(result);
+  Collection<EnumFoo> collection=new ArrayList<EnumFoo>();
+  collection.add(EnumFoo.a);
+  collection.add(EnumFoo.b);
+  result=set.addAll(collection);
+  assertTrue("addAll should be successful",result);
+  assertEquals("Size should be 2:",2,set.size());
+  set=EnumSet.noneOf(EnumFoo.class);
+  Collection rawCollection=new ArrayList<Integer>();
+  result=set.addAll(rawCollection);
+  assertFalse(result);
+  rawCollection.add(1);
+  try {
+    set.addAll(rawCollection);
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  Set<EnumFoo> fullSet=EnumSet.noneOf(EnumFoo.class);
+  fullSet.add(EnumFoo.a);
+  fullSet.add(EnumFoo.b);
+  result=set.addAll(fullSet);
+  assertTrue("addAll should be successful",result);
+  assertEquals("Size of set should be 2",2,set.size());
+  try {
+    fullSet.addAll(null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  Set fullSetWithSubclass=EnumSet.noneOf(EnumWithInnerClass.class);
+  elements=EnumWithInnerClass.class.getEnumConstants();
+  for (int i=0; i < elements.length; i++) {
+    fullSetWithSubclass.add(elements[i]);
+  }
+  try {
+    set.addAll(fullSetWithSubclass);
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  Set<EnumWithInnerClass> setWithSubclass=fullSetWithSubclass;
+  result=setWithSubclass.addAll(setWithSubclass);
+  assertFalse("Should return false",result);
+  Set<EnumWithInnerClass> anotherSetWithSubclass=EnumSet.noneOf(EnumWithInnerClass.class);
+  elements=EnumWithInnerClass.class.getEnumConstants();
+  for (int i=0; i < elements.length; i++) {
+    anotherSetWithSubclass.add((EnumWithInnerClass)elements[i]);
+  }
+  result=setWithSubclass.addAll(anotherSetWithSubclass);
+  assertFalse("Should return false",result);
+  anotherSetWithSubclass.remove(EnumWithInnerClass.a);
+  result=setWithSubclass.addAll(anotherSetWithSubclass);
+  assertFalse("Should return false",result);
+  Set<HugeEnum> hugeSet=EnumSet.noneOf(HugeEnum.class);
+  assertEquals(0,hugeSet.size());
+  try {
+    hugeSet.addAll(null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  hugeSet=EnumSet.allOf(HugeEnum.class);
+  result=hugeSet.addAll(hugeSet);
+  assertFalse(result);
+  hugeSet=EnumSet.noneOf(HugeEnum.class);
+  Collection<HugeEnum> hugeCollection=new ArrayList<HugeEnum>();
+  hugeCollection.add(HugeEnum.a);
+  hugeCollection.add(HugeEnum.b);
+  result=hugeSet.addAll(hugeCollection);
+  assertTrue(result);
+  assertEquals(2,set.size());
+  hugeSet=EnumSet.noneOf(HugeEnum.class);
+  rawCollection=new ArrayList<Integer>();
+  result=hugeSet.addAll(rawCollection);
+  assertFalse(result);
+  rawCollection.add(1);
+  try {
+    hugeSet.addAll(rawCollection);
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  EnumSet<HugeEnum> aHugeSet=EnumSet.noneOf(HugeEnum.class);
+  aHugeSet.add(HugeEnum.a);
+  aHugeSet.add(HugeEnum.b);
+  result=hugeSet.addAll(aHugeSet);
+  assertTrue(result);
+  assertEquals(2,hugeSet.size());
+  try {
+    aHugeSet.addAll(null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  Set hugeSetWithSubclass=EnumSet.allOf(HugeEnumWithInnerClass.class);
+  try {
+    hugeSet.addAll(hugeSetWithSubclass);
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  Set<HugeEnumWithInnerClass> hugeSetWithInnerSubclass=hugeSetWithSubclass;
+  result=hugeSetWithInnerSubclass.addAll(hugeSetWithInnerSubclass);
+  assertFalse(result);
+  Set<HugeEnumWithInnerClass> anotherHugeSetWithSubclass=EnumSet.allOf(HugeEnumWithInnerClass.class);
+  result=hugeSetWithSubclass.addAll(anotherHugeSetWithSubclass);
+  assertFalse(result);
+  anotherHugeSetWithSubclass.remove(HugeEnumWithInnerClass.a);
+  result=setWithSubclass.addAll(anotherSetWithSubclass);
+  assertFalse(result);
+}

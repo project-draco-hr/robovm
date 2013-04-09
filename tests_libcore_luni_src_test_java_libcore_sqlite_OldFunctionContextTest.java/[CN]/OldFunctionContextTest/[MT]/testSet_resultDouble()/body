@@ -1,0 +1,10 @@
+{
+  SinFunc testD=new SinFunc();
+  db.exec("insert into " + DatabaseCreator.TEST_TABLE2 + " (fdouble)  values ("+ testD.testDouble+ ")",null);
+  db.create_function("testDouble",1,testD);
+  TableResult res=db.get_table("select testDouble(fdouble) from " + DatabaseCreator.TEST_TABLE2);
+  String row[]=(String[])res.rows.elementAt(0);
+  String val=row[0];
+  assertEquals(testD.testDouble,Double.parseDouble(val));
+  assertTrue(testD.functionCalled);
+}

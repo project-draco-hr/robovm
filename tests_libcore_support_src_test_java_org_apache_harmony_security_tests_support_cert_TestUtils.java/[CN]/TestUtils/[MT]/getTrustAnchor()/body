@@ -1,0 +1,27 @@
+{
+  CertificateFactory cf=null;
+  try {
+    cf=CertificateFactory.getInstance(certType);
+  }
+ catch (  CertificateException e) {
+    throw new RuntimeException(e);
+  }
+  BufferedInputStream bis=null;
+  try {
+    bis=new BufferedInputStream(new ByteArrayInputStream(getEncodedX509Certificate()));
+    X509Certificate c1=(X509Certificate)cf.generateCertificate(bis);
+    return new TrustAnchor(c1,null);
+  }
+ catch (  Exception e) {
+    throw new RuntimeException(e);
+  }
+ finally {
+    if (bis != null) {
+      try {
+        bis.close();
+      }
+ catch (      IOException ign) {
+      }
+    }
+  }
+}

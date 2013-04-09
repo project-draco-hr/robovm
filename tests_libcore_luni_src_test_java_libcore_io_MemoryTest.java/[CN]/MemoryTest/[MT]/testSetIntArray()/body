@@ -1,0 +1,22 @@
+{
+  int[] values={3,7,31,127,8191,131071,524287,2147483647};
+  int[] swappedValues=new int[values.length];
+  for (int i=0; i < values.length; ++i) {
+    swappedValues[i]=Integer.reverseBytes(values[i]);
+  }
+  int scale=4;
+  VMRuntime runtime=VMRuntime.getRuntime();
+  byte[] array=(byte[])runtime.newNonMovableArray(byte.class,scale * values.length);
+  int ptr=(int)runtime.addressOf(array);
+  Memory.pokeIntArray(ptr,values,0,values.length,false);
+  assertIntsEqual(values,ptr,false);
+  assertIntsEqual(swappedValues,ptr,true);
+  Memory.pokeIntArray(ptr,values,0,values.length,true);
+  assertIntsEqual(values,ptr,true);
+  assertIntsEqual(swappedValues,ptr,false);
+  for (int i=0; i < values.length; ++i) {
+    Memory.pokeIntArray(ptr + i * scale,values,i,1,true);
+  }
+  assertIntsEqual(values,ptr,true);
+  assertIntsEqual(swappedValues,ptr,false);
+}

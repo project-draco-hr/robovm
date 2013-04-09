@@ -1,0 +1,21 @@
+{
+  try {
+    int[] ports=Support_PortManager.getNextPortsForUDP(3);
+    int sport=ports[0];
+    int portNumber=ports[1];
+    DatagramSocket s=new DatagramSocket(new InetSocketAddress(InetAddress.getLocalHost(),portNumber));
+    s.connect(new InetSocketAddress(InetAddress.getLocalHost(),sport));
+    assertTrue("Returned incorrect InetSocketAddress(1):" + s.getLocalSocketAddress().toString(),s.getRemoteSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),sport)));
+    s.close();
+    DatagramSocket theSocket=new DatagramSocket((SocketAddress)null);
+    portNumber=ports[2];
+    theSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(),portNumber));
+    assertNull("Returned incorrect InetSocketAddress -unconnected socket:" + "Expected: NULL",theSocket.getRemoteSocketAddress());
+    theSocket.connect(new InetSocketAddress(InetAddress.getLocalHost(),sport));
+    assertTrue("Returned incorrect InetSocketAddress(2):" + theSocket.getRemoteSocketAddress().toString(),theSocket.getRemoteSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),sport)));
+    theSocket.close();
+  }
+ catch (  Exception e) {
+    fail("Exception during getRemoteSocketAddress test: " + e);
+  }
+}

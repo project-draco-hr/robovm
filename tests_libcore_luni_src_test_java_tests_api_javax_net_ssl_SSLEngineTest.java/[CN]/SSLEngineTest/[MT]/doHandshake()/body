@@ -1,0 +1,18 @@
+{
+  Thread clientThread=new Thread(clientEngine);
+  clientThread.start();
+  Thread serverThread=new Thread(serverEngine);
+  serverThread.start();
+  int i=0;
+  while (clientThread.isAlive() && serverThread.isAlive() && i < 20) {
+    Thread.sleep(500);
+    i++;
+  }
+  if (clientThread.isAlive()) {
+    clientThread.interrupt();
+  }
+  if (serverThread.isAlive()) {
+    serverThread.interrupt();
+  }
+  return clientEngine.getStatus() == HandshakeStatus.FINISHED && serverEngine.getStatus() == HandshakeStatus.FINISHED;
+}

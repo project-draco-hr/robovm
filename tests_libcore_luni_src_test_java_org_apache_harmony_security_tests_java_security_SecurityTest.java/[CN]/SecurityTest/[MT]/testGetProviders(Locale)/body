@@ -1,0 +1,30 @@
+{
+  Locale defaultLocale=Locale.getDefault();
+  Locale.setDefault(locale);
+  Provider p=new MyProvider();
+  try {
+    Security.addProvider(p);
+    String filter="MyService.MyAlgorithm";
+    assertTrue(filter,Arrays.equals(new Provider[]{p},Security.getProviders(filter)));
+    filter="MyService.MyAlgorithm KeySize:512";
+    assertTrue(filter,Arrays.equals(new Provider[]{p},Security.getProviders(filter)));
+    filter="MyService.MyAlgorithm KeySize:1025";
+    assertNull(filter,Security.getProviders(filter));
+    filter="MyService.MyAlgorithm imPLementedIn:softWARE";
+    assertTrue(filter,Arrays.equals(new Provider[]{p},Security.getProviders(filter)));
+    filter="MyService.MyAlgorithm ATTribute:attributeVALUE";
+    assertTrue(filter,Arrays.equals(new Provider[]{p},Security.getProviders(filter)));
+    filter="MyService.MyAlgorithm \u0130mPLemented\u0131n:softWARE";
+    assertTrue(filter,Arrays.equals(new Provider[]{p},Security.getProviders(filter)));
+    filter="MyService.NoKeySize KeySize:512";
+    assertNull(filter,Security.getProviders(filter));
+    filter="MyService.NoImplementedIn ImplementedIn:Software";
+    assertNull(filter,Security.getProviders(filter));
+    filter="ABCService.NoAttribute Attribute:ABC";
+    assertNull(filter,Security.getProviders(filter));
+  }
+  finally {
+    Security.removeProvider(p.getName());
+    Locale.setDefault(defaultLocale);
+  }
+}

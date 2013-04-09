@@ -1,0 +1,19 @@
+{
+  if (!DEFSupported)   fail(NotSupportMsg);
+  SSLContext[] sslC=createSSLCon();
+  assertNotNull("SSLContext objects were not created",sslC);
+  String tAlg=TrustManagerFactory.getDefaultAlgorithm();
+  String kAlg=KeyManagerFactory.getDefaultAlgorithm();
+  if (tAlg == null)   fail("TrustManagerFactory default algorithm is not defined");
+  if (kAlg == null)   fail("KeyManagerFactory default algorithm is not defined");
+  KeyManagerFactory kmf=KeyManagerFactory.getInstance(kAlg);
+  kmf.init(null,new char[11]);
+  TrustManagerFactory tmf=TrustManagerFactory.getInstance(tAlg);
+  KeyStore ks=KeyStore.getInstance(KeyStore.getDefaultType());
+  tmf.init(ks);
+  TrustManager[] tms=tmf.getTrustManagers();
+  for (  SSLContext sslCi : sslC) {
+    sslCi.init(kmf.getKeyManagers(),tms,new SecureRandom());
+    assertNotNull("Socket factory is incorrectly instantiated",sslCi.getSocketFactory());
+  }
+}

@@ -1,0 +1,26 @@
+{
+  final ServerSocket ss=new ServerSocket(0);
+  new Thread(new Runnable(){
+    public void run(){
+      try {
+        ss.accept();
+      }
+ catch (      Exception ex) {
+        ex.printStackTrace();
+      }
+    }
+  }
+).start();
+  Socket s=new Socket();
+  s.connect(ss.getLocalSocketAddress());
+  new Killer(s).start();
+  try {
+    System.err.println("read...");
+    int i=s.getInputStream().read();
+    fail("read returned " + i);
+  }
+ catch (  SocketException expected) {
+    assertEquals("Socket closed",expected.getMessage());
+  }
+  ss.close();
+}

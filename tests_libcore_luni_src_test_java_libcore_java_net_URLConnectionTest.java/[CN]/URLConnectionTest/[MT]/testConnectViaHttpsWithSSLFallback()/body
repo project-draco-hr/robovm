@@ -1,0 +1,12 @@
+{
+  TestSSLContext testSSLContext=TestSSLContext.create();
+  server.useHttps(testSSLContext.serverContext.getSocketFactory(),false);
+  server.enqueue(new MockResponse().setSocketPolicy(DISCONNECT_AT_START));
+  server.enqueue(new MockResponse().setBody("this response comes via SSL"));
+  server.play();
+  HttpsURLConnection connection=(HttpsURLConnection)server.getUrl("/foo").openConnection();
+  connection.setSSLSocketFactory(testSSLContext.clientContext.getSocketFactory());
+  assertContent("this response comes via SSL",connection);
+  RecordedRequest request=server.takeRequest();
+  assertEquals("GET /foo HTTP/1.1",request.getRequestLine());
+}

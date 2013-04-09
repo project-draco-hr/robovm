@@ -1,0 +1,38 @@
+{
+  ZipFile zipFile;
+  ZipEntry entry1, entry2;
+  byte buf[]=new byte[16384];
+  InputStream stream1, stream2;
+  int len, totalLen1, totalLen2;
+  zipFile=new ZipFile(fileName);
+  entry1=zipFile.getEntry("file-1");
+  entry2=zipFile.getEntry("file-2");
+  assertEquals("file-1",entry1.getName());
+  assertEquals("file-2",entry2.getName());
+  stream1=zipFile.getInputStream(entry1);
+  stream2=zipFile.getInputStream(entry2);
+  totalLen1=stream1.read(buf);
+  assertTrue("initial read failed on #1",totalLen1 >= 0);
+  totalLen2=stream2.read(buf);
+  assertTrue("initial read failed on #2",totalLen2 >= 0);
+  while ((len=stream1.read(buf)) > 0) {
+    totalLen1+=len;
+  }
+  assertEquals(SAMPLE_SIZE,totalLen1);
+  stream1.close();
+  while ((len=stream2.read(buf)) > 0) {
+    totalLen2+=len;
+  }
+  assertEquals(SAMPLE_SIZE,totalLen2);
+  stream2.close();
+  stream1=zipFile.getInputStream(zipFile.getEntry("file-0"));
+  zipFile.close();
+  Exception error=null;
+  try {
+    stream1.read(buf);
+  }
+ catch (  Exception ex) {
+    error=ex;
+  }
+  assertNotNull("ZipFile shouldn't allow reading of closed files.",error);
+}

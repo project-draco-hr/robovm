@@ -1,0 +1,27 @@
+{
+  Timer t=null;
+  try {
+    t=new Timer();
+    assertEquals(0,t.purge());
+    TimerTestTask[] tasks=new TimerTestTask[100];
+    int[] delayTime={50,80,20,70,40,10,90,30,60};
+    int j=0;
+    for (int i=0; i < 100; i++) {
+      tasks[i]=new TimerTestTask();
+      t.schedule(tasks[i],delayTime[j++],200);
+      if (j == 9) {
+        j=0;
+      }
+    }
+    for (int i=0; i < 50; i++) {
+      tasks[i].cancel();
+    }
+    assertTrue(t.purge() <= 50);
+    assertEquals(0,t.purge());
+  }
+  finally {
+    if (t != null) {
+      t.cancel();
+    }
+  }
+}

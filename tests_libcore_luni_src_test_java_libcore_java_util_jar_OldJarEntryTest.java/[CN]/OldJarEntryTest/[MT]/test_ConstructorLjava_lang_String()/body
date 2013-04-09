@@ -1,0 +1,24 @@
+{
+  assertNotNull("Jar file is null",jarFile);
+  zipEntry=jarFile.getEntry(entryName);
+  assertNotNull("Zip entry is null",zipEntry);
+  jarEntry=new JarEntry(entryName);
+  assertNotNull("Jar entry is null",jarEntry);
+  assertEquals("Wrong entry constructed--wrong name",entryName,jarEntry.getName());
+  try {
+    jarEntry=new JarEntry((String)null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException ee) {
+  }
+  StringBuffer sb=new StringBuffer();
+  for (int i=0; i < 0x10000; i++) {
+    sb.append('3');
+  }
+  try {
+    jarEntry=new JarEntry(new String(sb));
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException ee) {
+  }
+}

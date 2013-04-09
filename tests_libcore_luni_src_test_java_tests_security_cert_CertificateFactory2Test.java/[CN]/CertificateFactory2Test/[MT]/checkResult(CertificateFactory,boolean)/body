@@ -1,0 +1,95 @@
+{
+  MyCertificateFactorySpi.putMode(mode);
+  ByteArrayInputStream bais=new ByteArrayInputStream(new byte[0]);
+  DataInputStream dis=new DataInputStream(bais);
+  try {
+    certFactory.generateCertPath(bais);
+    fail("CertificateException must be thrown");
+  }
+ catch (  CertificateException e) {
+  }
+  try {
+    certFactory.generateCertPath(dis);
+    if (!mode) {
+      fail("CertificateException must be thrown because encodings list is empty");
+    }
+  }
+ catch (  CertificateException e) {
+    if (mode) {
+      fail("Unexpected CertificateFactoryException was thrown");
+    }
+  }
+  try {
+    certFactory.generateCertPath(bais,"aa");
+    fail("CertificateException must be thrown");
+  }
+ catch (  CertificateException e) {
+  }
+  try {
+    certFactory.generateCertPath(dis,"");
+    if (mode) {
+      fail("IllegalArgumentException must be thrown");
+    }
+  }
+ catch (  IllegalArgumentException e) {
+    if (!mode) {
+      fail("Unexpected IllegalArgumentException was thrown");
+    }
+  }
+  certFactory.generateCertPath(dis,"ss");
+  try {
+    certFactory.generateCertificate(bais);
+    fail("CertificateException must be thrown");
+  }
+ catch (  CertificateException e) {
+  }
+  try {
+    certFactory.generateCertificates(null);
+    fail("CertificateException must be thrown");
+  }
+ catch (  CertificateException e) {
+  }
+  Certificate cert=certFactory.generateCertificate(dis);
+  assertNull("Result must be null",cert);
+  Collection<? extends Certificate> col=certFactory.generateCertificates(dis);
+  assertNull("Result must be null",col);
+  try {
+    certFactory.generateCRL(bais);
+    fail("CRLException must be thrown");
+  }
+ catch (  CRLException e) {
+  }
+  try {
+    certFactory.generateCRLs(null);
+    fail("CRLException must be thrown");
+  }
+ catch (  CRLException e) {
+  }
+  CRL crl=certFactory.generateCRL(dis);
+  assertNull("Result must be null",crl);
+  Collection<? extends CRL> colc=certFactory.generateCRLs(dis);
+  assertNull("Result must be null",colc);
+  List<Certificate> list=null;
+  CertPath cp;
+  try {
+    cp=certFactory.generateCertPath(list);
+    if (mode) {
+      fail("NullPointerException must be thrown");
+    }
+ else {
+      assertNull("Must be null",cp);
+    }
+  }
+ catch (  NullPointerException e) {
+    if (!mode) {
+      fail("Unexpected NullPointerException was thrown");
+    }
+  }
+  Iterator<String> it=certFactory.getCertPathEncodings();
+  if (mode) {
+    assertTrue(it.hasNext());
+  }
+ else {
+    assertFalse(it.hasNext());
+  }
+}

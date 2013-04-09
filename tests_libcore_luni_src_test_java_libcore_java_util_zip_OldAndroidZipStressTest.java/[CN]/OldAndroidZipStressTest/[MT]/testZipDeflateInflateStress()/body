@@ -1,0 +1,38 @@
+{
+  final int DATA_SIZE=16384;
+  Random random=new Random(42);
+  for (int j=1; j <= 2; j++) {
+    byte[] input=new byte[DATA_SIZE];
+    if (j == 1) {
+      random.nextBytes(input);
+    }
+ else {
+      int pos=0;
+      while (pos < input.length) {
+        byte what=(byte)random.nextInt(256);
+        int howMany=random.nextInt(32);
+        if (pos + howMany >= input.length) {
+          howMany=input.length - pos;
+        }
+        Arrays.fill(input,pos,pos + howMany,what);
+        pos+=howMany;
+      }
+    }
+    for (int i=1; i <= 9; i++) {
+      System.out.println("ZipDeflateInflateStress test (" + j + ","+ i+ ")...");
+      byte[] zipped=new byte[2 * DATA_SIZE];
+      Deflater deflater=new Deflater(i);
+      deflater.setInput(input);
+      deflater.finish();
+      deflater.deflate(zipped);
+      deflater.end();
+      byte[] output=new byte[DATA_SIZE];
+      Inflater inflater=new Inflater();
+      inflater.setInput(zipped);
+      inflater.finished();
+      inflater.inflate(output);
+      inflater.end();
+      assertEquals(input,output);
+    }
+  }
+}

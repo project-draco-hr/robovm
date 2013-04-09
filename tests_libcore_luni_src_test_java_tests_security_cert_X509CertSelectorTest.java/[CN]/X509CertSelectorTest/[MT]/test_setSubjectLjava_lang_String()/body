@@ -1,0 +1,31 @@
+{
+  String name1="O=First Org.";
+  String name2="O=Second Org.";
+  X500Principal sub1=new X500Principal(name1);
+  X500Principal sub2=new X500Principal(name2);
+  TestCert cert1=new TestCert(sub1);
+  TestCert cert2=new TestCert(sub2);
+  X509CertSelector selector=new X509CertSelector();
+  try {
+    selector.setSubject((String)null);
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("Any certificates should match " + "in the case of null subject criteria.",selector.match(cert1) && selector.match(cert2));
+  try {
+    selector.setSubject(name1);
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert1));
+  assertFalse("The certificate should not match the selection criteria.",selector.match(cert2));
+  try {
+    selector.setSubject(name2);
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert2));
+}

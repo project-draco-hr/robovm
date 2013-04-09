@@ -1,0 +1,34 @@
+{
+  final int[] ports=Support_PortManager.getNextPortsForUDP(2);
+  final int portNumber=ports[0];
+class TestDGRcvOver implements Runnable {
+    public void run(){
+      InetAddress localHost=null;
+      try {
+        localHost=InetAddress.getLocalHost();
+        Thread.sleep(1000);
+        DatagramSocket sds=new DatagramSocket(ports[1]);
+        DatagramPacket rdp=new DatagramPacket("0123456789".getBytes(),10,localHost,portNumber);
+        sds.send(rdp);
+        sds.close();
+      }
+ catch (      Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+  try {
+    new Thread(new TestDGRcvOver(),"DGSenderOver").start();
+    ds=new java.net.DatagramSocket(portNumber);
+    ds.setSoTimeout(6000);
+    byte rbuf[]=new byte[5];
+    DatagramPacket rdp=new DatagramPacket(rbuf,rbuf.length);
+    ;
+    ds.receive(rdp);
+    ds.close();
+    assertTrue("Send/Receive oversize failed to return correct data: " + new String(rbuf,0,5),new String(rbuf,0,5).equals("01234"));
+  }
+  finally {
+    ds.close();
+  }
+}

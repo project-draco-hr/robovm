@@ -1,0 +1,52 @@
+{
+  PrintStream out=System.out;
+  out.println("context=" + context);
+  out.println("\tkeyStore=" + keyStore);
+  out.println("\tkeyStore.type=" + keyStore.getType());
+  out.println("\tkeyStore.provider=" + keyStore.getProvider());
+  out.println("\tkeyPassword=" + ((keyPassword == null) ? null : new String(keyPassword)));
+  out.println("\tsize=" + keyStore.size());
+  for (  String alias : Collections.list(keyStore.aliases())) {
+    out.println("alias=" + alias);
+    out.println("\tcreationDate=" + keyStore.getCreationDate(alias));
+    if (keyStore.isCertificateEntry(alias)) {
+      out.println("\tcertificate:");
+      out.println("==========================================");
+      out.println(keyStore.getCertificate(alias));
+      out.println("==========================================");
+      continue;
+    }
+    if (keyStore.isKeyEntry(alias)) {
+      out.println("\tkey:");
+      out.println("==========================================");
+      String key;
+      try {
+        key=("Key retrieved using password\n" + keyStore.getKey(alias,keyPassword));
+      }
+ catch (      UnrecoverableKeyException e1) {
+        try {
+          key=("Key retrieved without password\n" + keyStore.getKey(alias,null));
+        }
+ catch (        UnrecoverableKeyException e2) {
+          key="Key could not be retrieved";
+        }
+      }
+      out.println(key);
+      out.println("==========================================");
+      Certificate[] chain=keyStore.getCertificateChain(alias);
+      if (chain == null) {
+        out.println("No certificate chain associated with key");
+        out.println("==========================================");
+      }
+ else {
+        for (int i=0; i < chain.length; i++) {
+          out.println("Certificate chain element #" + i);
+          out.println(chain[i]);
+          out.println("==========================================");
+        }
+      }
+      continue;
+    }
+    out.println("\tunknown entry type");
+  }
+}

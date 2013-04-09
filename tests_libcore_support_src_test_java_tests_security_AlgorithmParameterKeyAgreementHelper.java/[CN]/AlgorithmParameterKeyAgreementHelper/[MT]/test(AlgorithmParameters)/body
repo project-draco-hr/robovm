@@ -1,0 +1,34 @@
+{
+  KeyPairGenerator generator=null;
+  try {
+    generator=KeyPairGenerator.getInstance(algorithmName);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    Assert.fail(e.getMessage());
+  }
+  generator.initialize(1024);
+  KeyPair keyPair=generator.generateKeyPair();
+  KeyAgreement keyAgreement=null;
+  try {
+    keyAgreement=KeyAgreement.getInstance(algorithmName);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    Assert.fail(e.getMessage());
+  }
+  try {
+    keyAgreement.init(keyPair.getPrivate());
+  }
+ catch (  InvalidKeyException e) {
+    Assert.fail(e.getMessage());
+  }
+  try {
+    keyAgreement.doPhase(keyPair.getPublic(),true);
+  }
+ catch (  InvalidKeyException e) {
+    Assert.fail(e.getMessage());
+  }
+catch (  IllegalStateException e) {
+    Assert.fail(e.getMessage());
+  }
+  Assert.assertNotNull("generated secret is null",keyAgreement.generateSecret());
+}

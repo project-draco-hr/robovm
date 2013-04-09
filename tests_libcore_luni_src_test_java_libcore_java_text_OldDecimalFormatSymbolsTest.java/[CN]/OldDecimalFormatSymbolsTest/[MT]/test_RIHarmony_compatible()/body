@@ -1,0 +1,22 @@
+{
+  ObjectInputStream i=null;
+  try {
+    DecimalFormatSymbols symbols=new DecimalFormatSymbols(Locale.FRANCE);
+    i=new ObjectInputStream(getClass().getClassLoader().getResourceAsStream("serialization/java/text/DecimalFormatSymbols.ser"));
+    DecimalFormatSymbols symbolsD=(DecimalFormatSymbols)i.readObject();
+    assertEquals(symbols,symbolsD);
+  }
+ catch (  NullPointerException e) {
+    assertNotNull("Failed to load /serialization/java/text/" + "DecimalFormatSymbols.ser",i);
+  }
+ finally {
+    try {
+      if (i != null) {
+        i.close();
+      }
+    }
+ catch (    Exception e) {
+    }
+  }
+  assertDecimalFormatSymbolsRIFrance(dfs);
+}

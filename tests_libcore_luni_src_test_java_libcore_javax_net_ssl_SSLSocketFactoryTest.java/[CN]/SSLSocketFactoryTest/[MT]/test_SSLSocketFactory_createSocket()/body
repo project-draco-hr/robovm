@@ -1,0 +1,25 @@
+{
+  try {
+    SSLSocketFactory sf=(SSLSocketFactory)SSLSocketFactory.getDefault();
+    Socket s=sf.createSocket(null,null,-1,false);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    SSLSocketFactory sf=(SSLSocketFactory)SSLSocketFactory.getDefault();
+    Socket ssl=sf.createSocket(new Socket(),null,-1,false);
+    fail();
+  }
+ catch (  SocketException expected) {
+  }
+  ServerSocket ss=ServerSocketFactory.getDefault().createServerSocket(0);
+  InetSocketAddress sa=(InetSocketAddress)ss.getLocalSocketAddress();
+  InetAddress host=sa.getAddress();
+  int port=sa.getPort();
+  Socket s=new Socket(host,port);
+  SSLSocketFactory sf=(SSLSocketFactory)SSLSocketFactory.getDefault();
+  Socket ssl=sf.createSocket(s,null,-1,false);
+  assertNotNull(ssl);
+  assertTrue(SSLSocket.class.isAssignableFrom(ssl.getClass()));
+}

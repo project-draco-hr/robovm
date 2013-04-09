@@ -1,0 +1,22 @@
+{
+  KeyStore store=KeyStore.getInstance("PKCS12");
+  KeyStoreTestPKCS12 k=new KeyStoreTestPKCS12();
+  ByteArrayInputStream stream=new ByteArrayInputStream(k.keyStoreData);
+  try {
+    PKIXParameters p=new PKIXParameters(store);
+  }
+ catch (  KeyStoreException e) {
+  }
+  store=KeyStore.getInstance("PKCS12");
+  store.load(stream,new String(KeyStoreTestPKCS12.keyStorePassword).toCharArray());
+  stream.close();
+  try {
+    PKIXParameters p=new PKIXParameters(store);
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+  }
+  KeyStore keystore=KeyStore.getInstance(KeyStore.getDefaultType());
+  keystore.load(null,null);
+  keystore.setCertificateEntry("test",TestUtils.rootCertificateSS);
+  PKIXParameters p=new PKIXParameters(keystore);
+}

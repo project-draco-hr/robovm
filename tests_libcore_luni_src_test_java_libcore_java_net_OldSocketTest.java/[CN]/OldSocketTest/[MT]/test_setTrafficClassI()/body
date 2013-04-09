@@ -1,0 +1,37 @@
+{
+  try {
+    int IPTOS_LOWCOST=0x2;
+    int IPTOS_THROUGHPUT=0x8;
+    new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+    Socket theSocket=new Socket();
+    try {
+      theSocket.setTrafficClass(256);
+      fail("No exception was thrown when traffic class set to 256");
+    }
+ catch (    IllegalArgumentException e) {
+    }
+    try {
+      theSocket.setTrafficClass(-1);
+      fail("No exception was thrown when traffic class set to -1");
+    }
+ catch (    IllegalArgumentException e) {
+    }
+    theSocket.setTrafficClass(IPTOS_LOWCOST);
+    theSocket.setTrafficClass(IPTOS_THROUGHPUT);
+    ensureExceptionThrownIfOptionIsUnsupportedOnOS(IP_TOS);
+  }
+ catch (  Exception e) {
+    handleException(e,IP_TOS);
+  }
+  try {
+    Socket theSocket=new Socket();
+    theSocket.close();
+    theSocket.setTrafficClass(0);
+    fail("SocketException was not thrown.");
+  }
+ catch (  SocketException ioe) {
+  }
+catch (  IOException ioe) {
+    fail("IOException was thrown.");
+  }
+}

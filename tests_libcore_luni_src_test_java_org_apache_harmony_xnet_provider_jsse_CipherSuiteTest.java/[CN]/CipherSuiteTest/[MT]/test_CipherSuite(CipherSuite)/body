@@ -1,0 +1,38 @@
+{
+  assertNotNull(cs);
+  String name=cs.getName();
+  assertNotNull(name);
+  assertSame(name,cs,CipherSuite.getByName(name));
+  assertTrue(name,StandardNames.CIPHER_SUITES.contains(name));
+  assertTrue(name,name.startsWith("SSL_") || name.startsWith("TLS_"));
+  assertEquals(cs.isAnonymous(),name.contains("_anon_"));
+  byte[] bytes=cs.toBytes();
+  assertNotNull(name,bytes);
+  assertEquals(name,2,bytes.length);
+  assertTrue(name + bytes[0],bytes[0] == (byte)0x00 || bytes[0] == (byte)0xc0);
+  assertSame(name,cs,CipherSuite.getByCode(bytes[0],bytes[1]));
+  assertSame(name,cs,CipherSuite.getByCode((byte)0,bytes[0],bytes[1]));
+  assertTrue(name,cs.toString().contains(name));
+  String bulkEncryptionAlgorithm=cs.getBulkEncryptionAlgorithm();
+  int blockSize=cs.getBlockSize();
+  if (bulkEncryptionAlgorithm == null) {
+    assertTrue(name,name.contains("_NULL_"));
+    assertEquals(name,0,blockSize);
+  }
+ else {
+    assertNotNull(name,Cipher.getInstance(cs.getBulkEncryptionAlgorithm()));
+    assertTrue(name,blockSize == 0 || blockSize == 8 || blockSize == 16);
+  }
+  String hmacName=cs.getHmacName();
+  assertNotNull(name,hmacName);
+  assertNotNull(name,Mac.getInstance(hmacName));
+  String hashName=cs.getHashName();
+  assertNotNull(name,hashName);
+  assertNotNull(name,MessageDigest.getInstance(hashName));
+  int macLength=cs.getMACLength();
+  assertTrue(name,macLength == 0 || macLength == 16 || macLength == 20);
+  assertTrue(name,cs.isExportable() == name.contains("_EXPORT_") || cs.isExportable() == name.contains("_NULL_"));
+  String keyType=cs.getServerKeyType();
+  assertEquals(name,cs.isAnonymous(),keyType == null);
+  assertTrue(name,keyType == null || StandardNames.KEY_TYPES.contains(keyType));
+}

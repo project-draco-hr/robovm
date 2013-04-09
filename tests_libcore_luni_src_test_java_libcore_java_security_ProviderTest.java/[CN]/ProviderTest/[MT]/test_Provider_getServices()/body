@@ -1,0 +1,48 @@
+{
+  Map<String,Set<String>> remaining=new HashMap<String,Set<String>>(StandardNames.PROVIDER_ALGORITHMS);
+  for (  Entry<String,Set<String>> entry : remaining.entrySet()) {
+    entry.setValue(new HashSet<String>(entry.getValue()));
+  }
+  List<String> extra=new ArrayList();
+  List<String> missing=new ArrayList();
+  Provider[] providers=Security.getProviders();
+  for (  Provider provider : providers) {
+    String providerName=provider.getName();
+    if (StandardNames.IS_RI && providerName.equals("BC")) {
+      continue;
+    }
+    Set<Provider.Service> services=provider.getServices();
+    assertNotNull(services);
+    assertFalse(services.isEmpty());
+    for (    Provider.Service service : services) {
+      String type=service.getType();
+      String algorithm=service.getAlgorithm().toUpperCase();
+      String className=service.getClassName();
+      if (false) {
+        System.out.println(providerName + " " + type+ " "+ algorithm+ " "+ className);
+      }
+      Set<String> algorithms=remaining.get(type);
+      if (algorithms == null || !algorithms.remove(algorithm)) {
+        if (!(StandardNames.PROVIDER_ALGORITHMS.containsKey(type) && StandardNames.PROVIDER_ALGORITHMS.get(type).contains(algorithm))) {
+          extra.add("Unknown " + type + " "+ algorithm+ " "+ providerName+ "\n");
+        }
+      }
+      if (algorithms != null && algorithms.isEmpty()) {
+        remaining.remove(type);
+      }
+      try {
+        assertNotNull(Class.forName(className,true,provider.getClass().getClassLoader()));
+      }
+ catch (      ClassNotFoundException e) {
+        if (!className.equals("sun.security.pkcs11.P11MAC")) {
+          missing.add(className);
+        }
+      }
+    }
+  }
+  Collections.sort(extra);
+  assertEquals("Extra algorithms",Collections.EMPTY_LIST,extra);
+  assertEquals("Missing algorithms",Collections.EMPTY_MAP,remaining);
+  Collections.sort(missing);
+  assertEquals("Missing classes",Collections.EMPTY_LIST,missing);
+}

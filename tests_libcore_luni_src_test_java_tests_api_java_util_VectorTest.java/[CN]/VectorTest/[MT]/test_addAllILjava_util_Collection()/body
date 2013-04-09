@@ -1,0 +1,46 @@
+{
+  Collection l=new LinkedList();
+  for (int i=0; i < 100; i++)   l.add("Test " + i);
+  Vector v=new Vector();
+  tVector.addAll(50,l);
+  for (int i=50; i < 100; i++)   assertTrue("Failed to add all elements",tVector.get(i) == ((List)l).get(i - 50));
+  v=new Vector();
+  v.add("one");
+  int r=0;
+  try {
+    v.addAll(3,Arrays.asList(new String[]{"two","three"}));
+  }
+ catch (  ArrayIndexOutOfBoundsException e) {
+    r=1;
+  }
+catch (  IndexOutOfBoundsException e) {
+    r=2;
+  }
+  assertTrue("Invalid add: " + r,r == 1);
+  l=new LinkedList();
+  l.add(null);
+  l.add("gah");
+  l.add(null);
+  tVector.addAll(50,l);
+  assertNull("Wrong element at position 50--wanted null",tVector.get(50));
+  assertEquals("Wrong element at position 51--wanted 'gah'","gah",tVector.get(51));
+  assertNull("Wrong element at position 52--wanted null",tVector.get(52));
+  try {
+    tVector.addAll(-5,Arrays.asList(new String[]{"two","three"}));
+    fail("ArrayIndexOutOfBoundsException expected");
+  }
+ catch (  ArrayIndexOutOfBoundsException e) {
+  }
+  try {
+    tVector.addAll(tVector.size() + 1,Arrays.asList(new String[]{"two","three"}));
+    fail("ArrayIndexOutOfBoundsException expected");
+  }
+ catch (  ArrayIndexOutOfBoundsException e) {
+  }
+  try {
+    tVector.addAll(tVector.size() / 2,null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+}

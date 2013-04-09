@@ -1,0 +1,21 @@
+{
+  File resources=Support_Resources.createTempFolder();
+  Support_Resources.copyFile(resources,null,"Broken_manifest.jar");
+  FileInputStream fis=new FileInputStream(new File(resources,"Broken_manifest.jar"));
+  ZipInputStream zis1=new ZipInputStream(fis);
+  zis1.getNextEntry();
+  zis1.getNextEntry();
+  try {
+    zis1.skip(10);
+    fail("ZipException expected");
+  }
+ catch (  ZipException ee) {
+  }
+  try {
+    zis1.close();
+    zis1.skip(10);
+    fail("IOException expected");
+  }
+ catch (  IOException ee) {
+  }
+}

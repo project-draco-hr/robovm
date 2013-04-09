@@ -1,0 +1,51 @@
+{
+  if (purpose != null) {
+    System.out.println("Purpose: " + purpose);
+  }
+  if (spec != null) {
+    System.out.println("Spec: " + spec);
+  }
+  Result result;
+  if ("XML".equals(compareAs)) {
+    DOMResult domResult=new DOMResult();
+    domResult.setNode(documentBuilder.newDocument().createElementNS("","result"));
+    result=domResult;
+  }
+ else {
+    result=new StreamResult(new StringWriter());
+  }
+  ErrorRecorder errorRecorder=new ErrorRecorder();
+  transformerFactory.setErrorListener(errorRecorder);
+  Transformer transformer;
+  try {
+    Source xslt=new StreamSource(principalStylesheet);
+    transformer=transformerFactory.newTransformer(xslt);
+    if (errorRecorder.error == null) {
+      transformer.setErrorListener(errorRecorder);
+      transformer.transform(new StreamSource(principalData),result);
+    }
+  }
+ catch (  TransformerConfigurationException e) {
+    errorRecorder.fatalError(e);
+  }
+  if (operation.equals("standard")) {
+    if (errorRecorder.error != null) {
+      throw errorRecorder.error;
+    }
+  }
+ else   if (operation.equals("execution-error")) {
+    if (errorRecorder.error != null) {
+      return;
+    }
+    fail("Expected " + operation + ", but transform completed normally."+ " (Warning="+ errorRecorder.warning+ ")");
+  }
+ else {
+    throw new UnsupportedOperationException("Unexpected operation: " + operation);
+  }
+  if ("XML".equals(compareAs)) {
+    assertNodesAreEquivalent(principal,((DOMResult)result).getNode());
+  }
+ else {
+    throw new UnsupportedOperationException("Cannot compare as " + compareAs);
+  }
+}

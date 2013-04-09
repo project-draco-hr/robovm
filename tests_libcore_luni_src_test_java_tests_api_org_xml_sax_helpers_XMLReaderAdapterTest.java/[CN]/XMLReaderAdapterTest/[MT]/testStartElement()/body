@@ -1,0 +1,14 @@
+{
+  AttributesImpl atts=new AttributesImpl();
+  atts.addAttribute("http://some.other.uri","gabba","gabba:hey","int","42");
+  try {
+    adapter.startElement("http://some.uri","bar","foo:bar",atts);
+  }
+ catch (  SAXException e) {
+    throw new RuntimeException("Unexpected exception",e);
+  }
+  assertEquals(logger.size(),1);
+  assertEquals("startElement",logger.getMethod());
+  assertEquals("foo:bar",logger.getArgs()[0]);
+  assertEquals("gabba:hey",((AttributeList)logger.getArgs()[1]).getName(0));
+}

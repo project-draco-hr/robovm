@@ -1,0 +1,29 @@
+{
+  Pattern p=Pattern.compile("abba");
+  Matcher m=p.matcher("Gabba gabba hey");
+  m.region(0,15);
+  assertTrue(m.find());
+  assertTrue(m.find());
+  assertFalse(m.find());
+  m.region(5,15);
+  assertTrue(m.find());
+  assertFalse(m.find());
+  m.region(10,15);
+  assertFalse(m.find());
+  Throwable t=null;
+  try {
+    m.region(-1,15);
+  }
+ catch (  IndexOutOfBoundsException e) {
+    t=e;
+  }
+  assertNotNull(t);
+  t=null;
+  try {
+    m.region(0,16);
+  }
+ catch (  IndexOutOfBoundsException e) {
+    t=e;
+  }
+  assertNotNull(t);
+}

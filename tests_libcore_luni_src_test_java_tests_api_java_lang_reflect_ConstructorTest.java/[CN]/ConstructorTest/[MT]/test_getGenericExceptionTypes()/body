@@ -1,0 +1,20 @@
+{
+  Type[] types=null;
+  try {
+    Constructor<? extends ConstructorTestHelper> ctor=new ConstructorTestHelper().getClass().getConstructor(new Class[0]);
+    types=ctor.getGenericExceptionTypes();
+  }
+ catch (  Exception e) {
+    fail("Exception during getGenericExceptionTypes test:" + e.toString());
+  }
+  assertEquals("Wrong number of exception types returned",1,types.length);
+  try {
+    Constructor<GenericConstructorTestHelper> constructor=GenericConstructorTestHelper.class.getConstructor();
+    types=constructor.getGenericExceptionTypes();
+  }
+ catch (  Exception e) {
+    fail("Exception during getGenericExceptionTypes test:" + e.toString());
+  }
+  assertEquals("Wrong number of exception types returned",1,types.length);
+  assertEquals("Wrong exception name returned.","E",((TypeVariable)types[0]).getName());
+}

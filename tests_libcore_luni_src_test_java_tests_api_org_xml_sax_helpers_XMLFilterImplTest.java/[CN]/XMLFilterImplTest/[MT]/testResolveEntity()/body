@@ -1,0 +1,28 @@
+{
+  InputSource expected=new InputSource();
+  MockResolver resolver=new MockResolver();
+  resolver.addEntity("foo","bar",expected);
+  InputSource result=null;
+  parent.setEntityResolver(resolver);
+  try {
+    result=parent.resolveEntity("foo","bar");
+  }
+ catch (  SAXException e) {
+    throw new RuntimeException("Unexpected exception",e);
+  }
+catch (  IOException e) {
+    throw new RuntimeException("Unexpected exception",e);
+  }
+  assertEquals(expected,result);
+  parent.setEntityResolver(null);
+  try {
+    result=parent.resolveEntity("foo","bar");
+  }
+ catch (  SAXException e) {
+    throw new RuntimeException("Unexpected exception",e);
+  }
+catch (  IOException e) {
+    throw new RuntimeException("Unexpected exception",e);
+  }
+  assertEquals(null,result);
+}

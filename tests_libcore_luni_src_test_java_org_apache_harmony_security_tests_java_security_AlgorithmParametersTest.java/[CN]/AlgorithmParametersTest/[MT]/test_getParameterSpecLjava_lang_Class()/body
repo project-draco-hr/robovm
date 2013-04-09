@@ -1,0 +1,34 @@
+{
+  final MyAlgorithmParameterSpec myParamSpec=new MyAlgorithmParameterSpec();
+  MyAlgorithmParameters paramSpi=new MyAlgorithmParameters(){
+    protected AlgorithmParameterSpec engineGetParameterSpec(    Class paramSpec){
+      return myParamSpec;
+    }
+  }
+;
+  AlgorithmParameters params=new DummyAlgorithmParameters(paramSpi,p,"algorithm");
+  try {
+    params.getParameterSpec(null);
+    fail("No expected InvalidParameterSpecException");
+  }
+ catch (  InvalidParameterSpecException e) {
+  }
+  try {
+    params.getParameterSpec(MyAlgorithmParameterSpec.class);
+    fail("No expected InvalidParameterSpecException");
+  }
+ catch (  InvalidParameterSpecException e) {
+  }
+  params.init(new MyAlgorithmParameterSpec());
+  assertSame(myParamSpec,params.getParameterSpec(MyAlgorithmParameterSpec.class));
+  paramSpi=new MyAlgorithmParameters(){
+    protected AlgorithmParameterSpec engineGetParameterSpec(    Class paramSpec){
+      assertNull(paramSpec);
+      return null;
+    }
+  }
+;
+  params=new DummyAlgorithmParameters(paramSpi,p,"algorithm");
+  params.init(new MyAlgorithmParameterSpec());
+  assertNull(params.getParameterSpec(null));
+}

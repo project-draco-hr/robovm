@@ -1,0 +1,46 @@
+{
+  int limit=120;
+  int count=1;
+  boolean append=false;
+  do {
+    append=!append;
+    handler=new FileHandler("%t/log/string",limit,count,append);
+    assertEquals("character encoding is non equal to actual value","iso-8859-1",handler.getEncoding());
+    assertNotNull("Filter is null",handler.getFilter());
+    assertNotNull("Formatter is null",handler.getFormatter());
+    assertEquals("is non equal to actual value",Level.FINE,handler.getLevel());
+    assertNotNull("ErrorManager is null",handler.getErrorManager());
+    handler.publish(r);
+    handler.close();
+    for (int i=0; i < 3; i++) {
+      handler=new FileHandler("%t/log/string",limit,count,append);
+      handler.publish(r);
+      handler.close();
+    }
+    if (append) {
+      assertFileContent(TEMPPATH + SEP + "log","/string",new LogRecord[]{r,null,r,null,r,null,r},new MockFormatter());
+    }
+ else {
+      assertFileContent(TEMPPATH + SEP + "log","/string",new LogRecord[]{r},new MockFormatter());
+    }
+  }
+ while (append);
+  try {
+    new FileHandler("",limit,count,true);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new FileHandler("%t/log/string",-1,count,false);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new FileHandler("%t/log/string",limit,0,true);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

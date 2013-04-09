@@ -1,0 +1,81 @@
+{
+  if (!X509Support) {
+    fail(NotSupportMsg);
+    return;
+  }
+  CertificateFactory[] certFs=initCertFs();
+  assertNotNull("CertificateFactory objects were not created",certFs);
+  byte[] bb={};
+  InputStream is=new ByteArrayInputStream(bb);
+  Collection<?> colCer;
+  Collection<?> colCrl;
+  for (int i=0; i < certFs.length; i++) {
+    try {
+      certFs[i].generateCertificate(null);
+      fail("generateCertificate must thrown CertificateException or NullPointerEXception when input stream is null");
+    }
+ catch (    CertificateException e) {
+    }
+catch (    NullPointerException e) {
+    }
+    is=new ByteArrayInputStream(bb);
+    try {
+      certFs[i].generateCertificates(null);
+      fail("generateCertificates must throw CertificateException or NullPointerException when input stream is null");
+    }
+ catch (    CertificateException e) {
+    }
+catch (    NullPointerException e) {
+    }
+    is=new ByteArrayInputStream(bb);
+    try {
+      certFs[i].generateCertificate(is);
+    }
+ catch (    CertificateException e) {
+    }
+    is=new ByteArrayInputStream(bb);
+    try {
+      colCer=certFs[i].generateCertificates(is);
+      if (colCer != null) {
+        assertTrue("Not empty certificate collection",colCer.isEmpty());
+      }
+    }
+ catch (    CertificateException e) {
+    }
+  }
+  for (int i=0; i < certFs.length; i++) {
+    try {
+      certFs[i].generateCRL(null);
+    }
+ catch (    CRLException e) {
+    }
+catch (    NullPointerException e) {
+    }
+    try {
+      colCrl=certFs[i].generateCRLs(null);
+      if (colCrl != null) {
+        assertTrue("Not empty CRL collection was returned from null stream",colCrl.isEmpty());
+      }
+    }
+ catch (    CRLException e) {
+    }
+catch (    NullPointerException e) {
+    }
+    is=new ByteArrayInputStream(bb);
+    try {
+      certFs[i].generateCRL(is);
+    }
+ catch (    CRLException e) {
+    }
+    is=new ByteArrayInputStream(bb);
+    try {
+      certFs[i].generateCRLs(is);
+      colCrl=certFs[i].generateCRLs(null);
+      if (colCrl != null) {
+        assertTrue("Not empty CRL collection was returned from empty stream",colCrl.isEmpty());
+      }
+    }
+ catch (    CRLException e) {
+    }
+  }
+}

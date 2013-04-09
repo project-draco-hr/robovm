@@ -1,0 +1,128 @@
+{
+  BitSet bitset=new BitSet();
+  for (int i=0; i < 20; i++) {
+    bitset.set(i);
+  }
+  bitset.flip(10,10);
+  BitSet bs=new BitSet(16);
+  bs.set(7);
+  bs.set(10);
+  bs.flip(7,11);
+  for (int i=0; i < 7; i++) {
+    assertTrue("Shouldn't have flipped bit " + i,!bs.get(i));
+  }
+  assertFalse("Failed to flip bit 7",bs.get(7));
+  assertTrue("Failed to flip bit 8",bs.get(8));
+  assertTrue("Failed to flip bit 9",bs.get(9));
+  assertFalse("Failed to flip bit 10",bs.get(10));
+  for (int i=11; i < bs.size(); i++) {
+    assertTrue("Shouldn't have flipped bit " + i,!bs.get(i));
+  }
+  bs=new BitSet(16);
+  bs.set(7);
+  bs.set(10);
+  bs.flip(7,64);
+  assertEquals("Failed to grow BitSet",64,bs.size());
+  for (int i=0; i < 7; i++) {
+    assertTrue("Shouldn't have flipped bit " + i,!bs.get(i));
+  }
+  assertFalse("Failed to flip bit 7",bs.get(7));
+  assertTrue("Failed to flip bit 8",bs.get(8));
+  assertTrue("Failed to flip bit 9",bs.get(9));
+  assertFalse("Failed to flip bit 10",bs.get(10));
+  for (int i=11; i < 64; i++) {
+    assertTrue("failed to flip bit " + i,bs.get(i));
+  }
+  assertFalse("Shouldn't have flipped bit 64",bs.get(64));
+  bs=new BitSet(32);
+  bs.flip(0,64);
+  for (int i=0; i < 64; i++) {
+    assertTrue("Failed to flip bit " + i,bs.get(i));
+  }
+  assertFalse("Shouldn't have flipped bit 64",bs.get(64));
+  bs=new BitSet(32);
+  bs.flip(0,65);
+  for (int i=0; i < 65; i++) {
+    assertTrue("Failed to flip bit " + i,bs.get(i));
+  }
+  assertFalse("Shouldn't have flipped bit 65",bs.get(65));
+  bs=new BitSet(128);
+  bs.set(7);
+  bs.set(10);
+  bs.set(72);
+  bs.set(110);
+  bs.flip(9,74);
+  for (int i=0; i < 7; i++) {
+    assertFalse("Shouldn't have flipped bit " + i,bs.get(i));
+  }
+  assertTrue("Shouldn't have flipped bit 7",bs.get(7));
+  assertFalse("Shouldn't have flipped bit 8",bs.get(8));
+  assertTrue("Failed to flip bit 9",bs.get(9));
+  assertFalse("Failed to flip bit 10",bs.get(10));
+  for (int i=11; i < 72; i++) {
+    assertTrue("failed to flip bit " + i,bs.get(i));
+  }
+  assertFalse("Failed to flip bit 72",bs.get(72));
+  assertTrue("Failed to flip bit 73",bs.get(73));
+  for (int i=74; i < 110; i++) {
+    assertFalse("Shouldn't have flipped bit " + i,bs.get(i));
+  }
+  assertTrue("Shouldn't have flipped bit 110",bs.get(110));
+  for (int i=111; i < bs.size(); i++) {
+    assertFalse("Shouldn't have flipped bit " + i,bs.get(i));
+  }
+  bs=new BitSet(256);
+  bs.set(7);
+  bs.set(10);
+  bs.set(72);
+  bs.set(110);
+  bs.set(181);
+  bs.set(220);
+  bs.flip(9,219);
+  for (int i=0; i < 7; i++) {
+    assertFalse("Shouldn't have flipped bit " + i,bs.get(i));
+  }
+  assertTrue("Shouldn't have flipped bit 7",bs.get(7));
+  assertFalse("Shouldn't have flipped bit 8",bs.get(8));
+  assertTrue("Failed to flip bit 9",bs.get(9));
+  assertFalse("Failed to flip bit 10",bs.get(10));
+  for (int i=11; i < 72; i++) {
+    assertTrue("failed to flip bit " + i,bs.get(i));
+  }
+  assertFalse("Failed to flip bit 72",bs.get(72));
+  for (int i=73; i < 110; i++) {
+    assertTrue("failed to flip bit " + i,bs.get(i));
+  }
+  assertFalse("Failed to flip bit 110",bs.get(110));
+  for (int i=111; i < 181; i++) {
+    assertTrue("failed to flip bit " + i,bs.get(i));
+  }
+  assertFalse("Failed to flip bit 181",bs.get(181));
+  for (int i=182; i < 219; i++) {
+    assertTrue("failed to flip bit " + i,bs.get(i));
+  }
+  assertFalse("Shouldn't have flipped bit 219",bs.get(219));
+  assertTrue("Shouldn't have flipped bit 220",bs.get(220));
+  for (int i=221; i < bs.size(); i++) {
+    assertTrue("Shouldn't have flipped bit " + i,!bs.get(i));
+  }
+  bs=new BitSet(10);
+  try {
+    bs.flip(-1,3);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  try {
+    bs.flip(2,-1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  try {
+    bs.flip(4,2);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+}

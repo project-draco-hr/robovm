@@ -1,0 +1,35 @@
+{
+  Stmt statement2;
+  Blob blobInput=new Blob();
+  InputStream inStream=null;
+  byte[] in={(byte)1,(byte)2,(byte)3,(byte)4};
+  db.exec("create table TEST (res blob)",null);
+  inStream=Class.forName(this.getClass().getName()).getResourceAsStream("/blob.c");
+  assertNotNull(inStream);
+  statement2=db.prepare("insert into TEST(res) values (?)");
+  statement2.bind(1,in);
+  statement2.step();
+  statement2.close();
+  Blob blob=db.open_blob(dbFile.getPath(),"TEST","res",1,true);
+  if (blob == null) {
+    fail("Blob could not be retrieved");
+  }
+  InputStream is=blob.getInputStream();
+  int i=0;
+  int outByte=0;
+  byte[] out=new byte[4];
+  while ((outByte=is.read()) > -1) {
+    out[i]=(byte)outByte;
+    i++;
+  }
+  is.close();
+  blob.close();
+  assertTrue(Arrays.equals(in,out));
+  db.exec("insert into TEST values(zeroblob(128))",null);
+  Blob blob2=db.open_blob(dbFile.getPath(),"TEST","res",2,true);
+  is=blob2.getInputStream();
+  for (i=0; i < 128; i++) {
+    assertEquals(0,is.read());
+  }
+  is.close();
+}

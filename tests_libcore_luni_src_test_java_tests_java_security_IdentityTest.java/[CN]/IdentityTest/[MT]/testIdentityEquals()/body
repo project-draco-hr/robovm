@@ -1,0 +1,14 @@
+{
+  String name="nnn";
+  PublicKey pk=new PublicKeyStub("aaa","fff",new byte[]{1,2,3,4,5});
+  IdentityStub i=new IdentityStub(name);
+  i.setPublicKey(pk);
+  Object[] value={new IdentityStub("111"),Boolean.FALSE,new IdentityStub(name),Boolean.FALSE,new IdentityStub(name,IdentityScope.getSystemScope()),Boolean.FALSE,i,Boolean.TRUE,new IdentityStub(name,pk),Boolean.TRUE};
+  for (int k=0; k < value.length; k+=2) {
+    assertEquals(value[k + 1],new Boolean(i.identityEquals((Identity)value[k])));
+    if (Boolean.TRUE.equals(value[k + 1]))     assertEquals(i.hashCode(),value[k].hashCode());
+  }
+  Identity i2=IdentityScope.getSystemScope().getIdentity(name);
+  i2.setPublicKey(pk);
+  assertTrue(i.identityEquals(i2));
+}

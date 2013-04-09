@@ -1,0 +1,21 @@
+{
+  running=true;
+  while (running) {
+    try {
+      Socket s=ss.accept();
+      acceptedConnections++;
+      if (acceptedConnections >= acceptLimit) {
+        running=false;
+      }
+      new Thread(new Worker(s),"additional worker").start();
+    }
+ catch (    SocketException e) {
+      log(e.getMessage());
+      running=false;
+    }
+catch (    IOException e) {
+      log(e.getMessage());
+    }
+  }
+  log("AcceptThread terminated" + this);
+}

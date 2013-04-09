@@ -1,0 +1,38 @@
+{
+  fos.setThrowsException(true);
+  try {
+    osw.close();
+    fail("Test 1: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  ByteArrayOutputStream bout=new ByteArrayOutputStream();
+  try {
+    OutputStreamWriter writer=new OutputStreamWriter(bout,"ISO2022JP");
+    writer.write(new char[]{'a'});
+    writer.close();
+    String converted=new String(bout.toByteArray(),"ISO8859_1");
+    assertTrue("Test 4: Invalid conversion: " + converted,converted.equals("a"));
+    bout.reset();
+    writer=new OutputStreamWriter(bout,"ISO2022JP");
+    writer.write(new char[]{'\u3048'});
+    writer.flush();
+    converted=new String(bout.toByteArray(),"ISO8859_1");
+    assertTrue("Test 5: Invalid conversion: " + converted,converted.equals("\u001b$B$("));
+    writer.close();
+    converted=new String(bout.toByteArray(),"ISO8859_1");
+    assertTrue("Test 6: Invalid conversion: " + converted,converted.equals("\u001b$B$(\u001b(B"));
+    bout.reset();
+    writer=new OutputStreamWriter(bout,"ISO2022JP");
+    writer.write(new char[]{'\u3048'});
+    writer.write(new char[]{'\u3048'});
+    writer.close();
+    assertEquals("Test 7: Invalid conversion. ","\u001b$B$($(\u001b(B",new String(bout.toByteArray(),"ISO8859_1"));
+  }
+ catch (  UnsupportedEncodingException e) {
+    System.out.println(e);
+  }
+catch (  IOException e) {
+    fail("Unexpected: " + e);
+  }
+}

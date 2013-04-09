@@ -1,0 +1,87 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      keyStore.deleteEntry(null);
+      fail();
+    }
+ catch (    KeyStoreException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    keyStore.load(null,null);
+    if (isReadOnly(keyStore)) {
+      try {
+        keyStore.deleteEntry(null);
+        fail();
+      }
+ catch (      UnsupportedOperationException expected) {
+      }
+      continue;
+    }
+    try {
+      keyStore.deleteEntry(null);
+      fail();
+    }
+ catch (    Exception e) {
+      if (e.getClass() != NullPointerException.class && e.getClass() != KeyStoreException.class) {
+        throw e;
+      }
+    }
+    keyStore.deleteEntry("");
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    populate(keyStore);
+    if (isReadOnly(keyStore)) {
+      try {
+        keyStore.deleteEntry(ALIAS_PRIVATE);
+      }
+ catch (      UnsupportedOperationException e) {
+      }
+      continue;
+    }
+    assertPrivateKey(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
+    assertCertificateChain(keyStore.getCertificateChain(ALIAS_PRIVATE));
+    keyStore.deleteEntry(ALIAS_PRIVATE);
+    assertNull(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
+    if (isSecretKeyEnabled(keyStore)) {
+      assertSecretKey(keyStore.getKey(ALIAS_SECRET,PASSWORD_KEY));
+      keyStore.deleteEntry(ALIAS_SECRET);
+      assertNull(keyStore.getKey(ALIAS_SECRET,PASSWORD_KEY));
+    }
+ else {
+      keyStore.deleteEntry(ALIAS_SECRET);
+    }
+    if (isCertificateEnabled(keyStore)) {
+      assertCertificate(keyStore.getCertificate(ALIAS_CERTIFICATE));
+      keyStore.deleteEntry(ALIAS_CERTIFICATE);
+      assertNull(keyStore.getCertificate(ALIAS_CERTIFICATE));
+    }
+ else {
+      keyStore.deleteEntry(ALIAS_CERTIFICATE);
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    populate(keyStore);
+    if (isCaseSensitive(keyStore)) {
+      assertPrivateKey(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
+      keyStore.deleteEntry(ALIAS_ALT_CASE_PRIVATE);
+      assertPrivateKey(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
+      if (isSecretKeyEnabled(keyStore)) {
+        assertSecretKey(keyStore.getKey(ALIAS_SECRET,PASSWORD_KEY));
+        keyStore.deleteEntry(ALIAS_ALT_CASE_SECRET);
+        assertSecretKey(keyStore.getKey(ALIAS_SECRET,PASSWORD_KEY));
+      }
+ else {
+        keyStore.deleteEntry(ALIAS_SECRET);
+      }
+      if (isCertificateEnabled(keyStore)) {
+        assertCertificate(keyStore.getCertificate(ALIAS_CERTIFICATE));
+        keyStore.deleteEntry(ALIAS_ALT_CASE_CERTIFICATE);
+        assertCertificate(keyStore.getCertificate(ALIAS_CERTIFICATE));
+      }
+ else {
+        keyStore.deleteEntry(ALIAS_CERTIFICATE);
+      }
+    }
+  }
+}

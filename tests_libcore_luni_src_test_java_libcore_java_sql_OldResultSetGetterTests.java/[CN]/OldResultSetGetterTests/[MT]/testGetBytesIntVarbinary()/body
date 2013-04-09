@@ -1,0 +1,27 @@
+{
+  Statement st=null;
+  Statement stQuery=null;
+  PreparedStatement stPrep=null;
+  ResultSet res=null;
+  try {
+    String testString="HelloWorld";
+    st=conn.createStatement();
+    st.executeUpdate("create table testBinary (VARBINARY value);");
+    stPrep=conn.prepareStatement("insert into testBinary values (?);");
+    stPrep.setBytes(1,testString.getBytes());
+    stPrep.execute();
+    stQuery=conn.createStatement();
+    res=stQuery.executeQuery("select * from testBinary");
+    assertTrue(res.next());
+    byte[] output=res.getBytes(1);
+    String helloTest=new String(output);
+    assertNotNull(helloTest);
+    assertEquals(testString,helloTest);
+  }
+  finally {
+    if (res != null)     res.close();
+    if (stPrep != null)     stPrep.close();
+    if (st != null)     st.close();
+    if (stQuery != null)     stQuery.close();
+  }
+}

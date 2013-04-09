@@ -1,0 +1,15 @@
+{
+  XsltXPathConformanceTestSuite suite=new XsltXPathConformanceTestSuite();
+  Document document=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(catalogXml);
+  Element testSuiteElement=document.getDocumentElement();
+  TestSuite result=new TestSuite();
+  for (  Element testCatalog : elementsOf(testSuiteElement.getElementsByTagName("test-catalog"))) {
+    Element majorPathElement=(Element)testCatalog.getElementsByTagName("major-path").item(0);
+    String majorPath=majorPathElement.getTextContent();
+    File base=new File(catalogXml.getParentFile(),majorPath);
+    for (    Element testCaseElement : elementsOf(testCatalog.getElementsByTagName("test-case"))) {
+      result.addTest(suite.create(base,testCaseElement));
+    }
+  }
+  return result;
+}

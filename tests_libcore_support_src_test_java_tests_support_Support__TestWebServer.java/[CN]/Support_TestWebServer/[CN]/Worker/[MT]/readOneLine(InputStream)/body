@@ -1,0 +1,26 @@
+{
+  int read=0;
+  clearBuffer();
+  try {
+    log("Reading one line: started =" + readStarted + " avail="+ is.available());
+    StringBuilder log=new StringBuilder();
+    while ((!readStarted) || (is.available() > 0)) {
+      int data=is.read();
+      if (data == -1) {
+        log("EOF returned");
+        return -1;
+      }
+      buf[read]=(byte)data;
+      log.append((char)data);
+      readStarted=true;
+      if (buf[read++] == (byte)'\n') {
+        log(log.toString());
+        return read;
+      }
+    }
+  }
+ catch (  IOException e) {
+    log("IOException from readOneLine");
+  }
+  return read;
+}

@@ -1,0 +1,25 @@
+{
+  File resources=Support_Resources.createTempFolder();
+  Support_Resources.copyFile(resources,null,"Broken_entry_data.jar");
+  InputStream is=Support_Resources.getStream("Broken_entry_data.jar");
+  JarInputStream jis=new JarInputStream(is,true);
+  byte b[]=new byte[100];
+  jis.getNextEntry();
+  jis.read(b,0,100);
+  jis.getNextEntry();
+  jis.getNextEntry();
+  jis.getNextEntry();
+  try {
+    jis.read(b,0,100);
+    fail("ZipException expected");
+  }
+ catch (  ZipException ee) {
+  }
+  try {
+    jis.close();
+    jis.read(b,0,100);
+    fail("IOException expected");
+  }
+ catch (  IOException ee) {
+  }
+}

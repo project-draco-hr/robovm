@@ -1,0 +1,24 @@
+{
+  if (!PKIXSupport) {
+    fail(NotSupportMsg);
+    return;
+  }
+  CertPathValidator[] certPV=createCPVs();
+  assertNotNull("CertPathValidator objects were not created",certPV);
+  MyCertPath mCP=new MyCertPath(new byte[0]);
+  invalidParams mPar=new invalidParams();
+  for (int i=0; i < certPV.length; i++) {
+    try {
+      certPV[i].validate(mCP,mPar);
+      fail("InvalidAlgorithmParameterException must be thrown");
+    }
+ catch (    InvalidAlgorithmParameterException e) {
+    }
+    try {
+      certPV[i].validate(mCP,null);
+      fail("InvalidAlgorithmParameterException must be thrown");
+    }
+ catch (    InvalidAlgorithmParameterException e) {
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  PreparedStatement ps=null;
+  PreparedStatement ps1=null;
+  try {
+    String query="insert into type (BoolVal) values (?);";
+    ps=conn.prepareStatement(query);
+    Statement st=null;
+    try {
+      ps.setBoolean(1,false);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where BoolVal = 0");
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    try {
+      ps.setBoolean(1,true);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where BoolVal= 1");
+      ResultSet rs=st.getResultSet();
+      assertEquals(2,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    ps.close();
+    try {
+      ps.setBoolean(1,false);
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+    String query1="insert into type (Tint) values (?);";
+    ps1=conn.prepareStatement(query1);
+    ps1.setBoolean(1,true);
+    ps1.execute();
+  }
+  finally {
+    try {
+      ps.close();
+      ps1.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+}

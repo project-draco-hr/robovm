@@ -1,0 +1,40 @@
+{
+  alist.addAll(50,alist);
+  assertEquals("Returned incorrect size after adding to existing list",200,alist.size());
+  for (int i=0; i < 50; i++)   assertTrue("Manipulated elements < index",alist.get(i) == objArray[i]);
+  for (int i=0; i >= 50 && (i < 150); i++)   assertTrue("Failed to ad elements properly",alist.get(i) == objArray[i - 50]);
+  for (int i=0; i >= 150 && (i < 200); i++)   assertTrue("Failed to ad elements properly",alist.get(i) == objArray[i - 100]);
+  ArrayList listWithNulls=new ArrayList();
+  listWithNulls.add(null);
+  listWithNulls.add(null);
+  listWithNulls.add("yoink");
+  listWithNulls.add("kazoo");
+  listWithNulls.add(null);
+  alist.addAll(100,listWithNulls);
+  assertTrue("Incorrect size: " + alist.size(),alist.size() == 205);
+  assertNull("Item at slot 100 should be null",alist.get(100));
+  assertNull("Item at slot 101 should be null",alist.get(101));
+  assertEquals("Item at slot 102 should be 'yoink'","yoink",alist.get(102));
+  assertEquals("Item at slot 103 should be 'kazoo'","kazoo",alist.get(103));
+  assertNull("Item at slot 104 should be null",alist.get(104));
+  alist.addAll(205,listWithNulls);
+  assertTrue("Incorrect size2: " + alist.size(),alist.size() == 210);
+  try {
+    alist.addAll(-1,listWithNulls);
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    alist.addAll(alist.size() + 1,listWithNulls);
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    alist.addAll(0,null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+}

@@ -1,0 +1,33 @@
+{
+  Signature sig=Signature.getInstance("DSA");
+  sig.initSign(getDsaKeys().getPrivate());
+  sig.update(MESSAGE.getBytes());
+  byte[] signature=sig.sign();
+  sig.initVerify(getDsaKeys().getPublic());
+  sig.update(MESSAGE.getBytes());
+  assertTrue("Sign/Verify does not pass",sig.verify(signature,0,signature.length));
+  try {
+    sig.verify(null,0,signature.length);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    sig.verify(signature,-5,signature.length);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    sig.verify(signature,signature.length,0);
+    fail();
+  }
+ catch (  SignatureException expected) {
+  }
+  try {
+    sig.verify(signature,0,signature.length * 2);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+}

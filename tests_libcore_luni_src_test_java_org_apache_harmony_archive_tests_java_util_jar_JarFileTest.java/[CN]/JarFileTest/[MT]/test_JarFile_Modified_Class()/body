@@ -1,0 +1,21 @@
+{
+  String modifiedJarName="Modified_Class.jar";
+  Support_Resources.copyFile(resources,null,modifiedJarName);
+  JarFile jarFile=new JarFile(new File(resources,modifiedJarName),true);
+  Enumeration<JarEntry> entries=jarFile.entries();
+  while (entries.hasMoreElements()) {
+    ZipEntry zipEntry=entries.nextElement();
+    jarFile.getInputStream(zipEntry);
+  }
+  ZipEntry zipEntry=jarFile.getEntry("Test.class");
+  InputStream in=jarFile.getInputStream(zipEntry);
+  byte[] buffer=new byte[1024];
+  try {
+    while (in.available() > 0) {
+      in.read(buffer);
+    }
+    fail("SecurityException expected");
+  }
+ catch (  SecurityException e) {
+  }
+}

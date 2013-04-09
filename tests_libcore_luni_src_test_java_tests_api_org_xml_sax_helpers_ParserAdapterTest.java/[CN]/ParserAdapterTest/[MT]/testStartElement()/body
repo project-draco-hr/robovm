@@ -1,0 +1,16 @@
+{
+  AttributeListImpl atts=new AttributeListImpl();
+  atts.addAttribute("john:doe","int","42");
+  try {
+    adapter.startDocument();
+    adapter.startElement("foo:bar",atts);
+  }
+ catch (  SAXException e) {
+    throw new RuntimeException("Unexpected exception",e);
+  }
+  assertEquals("startElement",logger.getMethod());
+  assertEquals("",logger.getArgs()[0]);
+  assertEquals("",logger.getArgs()[1]);
+  assertEquals("foo:bar",logger.getArgs()[2]);
+  assertEquals("john:doe",((Attributes)logger.getArgs()[3]).getQName(0));
+}

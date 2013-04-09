@@ -1,0 +1,22 @@
+{
+  observable.addObserver(observer=new TestObserver());
+  observable.notifyObservers();
+  assertEquals("Notified when unchnaged",0,((TestObserver)observer).updateCount());
+  ((TestObservable)observable).doChange();
+  observable.notifyObservers();
+  assertEquals("Failed to notify",1,((TestObserver)observer).updateCount());
+  DeleteTestObserver observer1, observer2;
+  observable.deleteObservers();
+  observable.addObserver(observer1=new DeleteTestObserver(false));
+  observable.addObserver(observer2=new DeleteTestObserver(false));
+  observable.doChange();
+  observable.notifyObservers();
+  assertTrue("Failed to notify all",observer1.updateCount() == 1 && observer2.updateCount() == 1);
+  assertEquals("Failed to delete all",0,observable.countObservers());
+  observable.addObserver(observer1=new DeleteTestObserver(false));
+  observable.addObserver(observer2=new DeleteTestObserver(false));
+  observable.doChange();
+  observable.notifyObservers();
+  assertTrue("Failed to notify all 2",observer1.updateCount() == 1 && observer2.updateCount() == 1);
+  assertEquals("Failed to delete all 2",0,observable.countObservers());
+}

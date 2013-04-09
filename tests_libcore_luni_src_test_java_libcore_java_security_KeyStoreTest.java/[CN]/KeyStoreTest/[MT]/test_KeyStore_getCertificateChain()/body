@@ -1,0 +1,35 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      keyStore.getCertificateChain(null);
+      fail();
+    }
+ catch (    KeyStoreException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    populate(keyStore);
+    try {
+      keyStore.getCertificateChain(null);
+      fail();
+    }
+ catch (    Exception e) {
+      if (e.getClass() != NullPointerException.class && e.getClass() != IllegalArgumentException.class) {
+        throw e;
+      }
+    }
+    assertNull(keyStore.getCertificateChain(""));
+    if (isReadOnly(keyStore)) {
+      assertNull(keyStore.getCertificateChain(ALIAS_PRIVATE));
+    }
+ else {
+      assertCertificateChain(keyStore.getCertificateChain(ALIAS_PRIVATE));
+    }
+    if (isReadOnly(keyStore) || isCaseSensitive(keyStore)) {
+      assertNull(keyStore.getCertificateChain(ALIAS_ALT_CASE_PRIVATE));
+    }
+ else {
+      assertCertificateChain(keyStore.getCertificateChain(ALIAS_ALT_CASE_PRIVATE));
+    }
+  }
+}

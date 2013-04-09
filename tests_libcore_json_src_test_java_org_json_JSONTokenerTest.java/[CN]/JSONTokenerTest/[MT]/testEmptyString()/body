@@ -1,0 +1,38 @@
+{
+  JSONTokener backTokener=new JSONTokener("");
+  backTokener.back();
+  assertEquals(" at character 0 of ",backTokener.toString());
+  assertFalse(new JSONTokener("").more());
+  assertEquals('\0',new JSONTokener("").next());
+  try {
+    new JSONTokener("").next(3);
+    fail();
+  }
+ catch (  JSONException expected) {
+  }
+  try {
+    new JSONTokener("").next('A');
+    fail();
+  }
+ catch (  JSONException e) {
+  }
+  assertEquals('\0',new JSONTokener("").nextClean());
+  try {
+    new JSONTokener("").nextString('"');
+    fail();
+  }
+ catch (  JSONException e) {
+  }
+  assertEquals("",new JSONTokener("").nextTo('A'));
+  assertEquals("",new JSONTokener("").nextTo("ABC"));
+  try {
+    new JSONTokener("").nextValue();
+    fail();
+  }
+ catch (  JSONException e) {
+  }
+  new JSONTokener("").skipPast("ABC");
+  assertEquals('\0',new JSONTokener("").skipTo('A'));
+  assertEquals("foo! at character 0 of ",new JSONTokener("").syntaxError("foo!").getMessage());
+  assertEquals(" at character 0 of ",new JSONTokener("").toString());
+}

@@ -1,0 +1,26 @@
+{
+  assertTrue("Returned invalid size",ht10.size() == 10 && (ht100.size() == 0));
+  final Hashtable ht=new Hashtable();
+  ht.put("0","");
+  Thread t1=new Thread(){
+    public void run(){
+      while (ht.size() > 0)       ;
+      ht.put("final","");
+    }
+  }
+;
+  t1.start();
+  for (int i=1; i < 10000; i++) {
+synchronized (ht) {
+      ht.remove(String.valueOf(i - 1));
+      ht.put(String.valueOf(i),"");
+    }
+    int size;
+    if ((size=ht.size()) != 1) {
+      String result="Size is not 1: " + size + " "+ ht;
+      ht.clear();
+      fail(result);
+    }
+  }
+  ht.clear();
+}

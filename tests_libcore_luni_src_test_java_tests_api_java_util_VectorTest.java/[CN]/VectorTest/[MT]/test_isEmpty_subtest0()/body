@@ -1,0 +1,25 @@
+{
+  final Vector v=new Vector();
+  v.addElement("initial");
+  Thread t1=new Thread(){
+    public void run(){
+      while (!v.isEmpty())       ;
+      v.addElement("final");
+    }
+  }
+;
+  t1.start();
+  for (int i=0; i < 10000; i++) {
+synchronized (v) {
+      v.removeElementAt(0);
+      v.addElement(String.valueOf(i));
+    }
+    int size;
+    if ((size=v.size()) != 1) {
+      String result="Size is not 1: " + size + " "+ v;
+      v.removeAllElements();
+      fail(result);
+    }
+  }
+  v.removeElementAt(0);
+}

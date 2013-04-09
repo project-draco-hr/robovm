@@ -1,0 +1,80 @@
+{
+  char[] chars=testString.toCharArray();
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  Support_OutputStream out=new Support_OutputStream(500);
+  OutputStreamWriter writer;
+  writer=new OutputStreamWriter(out,"utf-8");
+  try {
+    writer.write(chars,-1,1);
+    fail("Test 1: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    writer.write(chars,0,-1);
+    fail("Test 2: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    writer.write(new char[0],0,1);
+    fail("Test 3: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    writer.write((char[])null,0,1);
+    fail("Test 4: NullPointerException expected.");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    writer.write(chars,1,chars.length);
+    fail("Test 5a: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    writer.write(chars,0,chars.length + 1);
+    fail("Test 5b: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    writer.write(chars,chars.length,1);
+    fail("Test 5c: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    writer.write(chars,chars.length + 1,0);
+    fail("Test 5d: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  out.setThrowsException(true);
+  try {
+    for (int i=0; i < 200; i++) {
+      writer.write(chars,0,chars.length);
+    }
+    fail("Test 6: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  out.setThrowsException(false);
+  writer.close();
+  writer=new OutputStreamWriter(baos,"utf-8");
+  writer.write(chars,1,2);
+  writer.flush();
+  assertEquals("Test 7: write(char[], int, int) has not produced the " + "expected content in the output stream.","hi",baos.toString("utf-8"));
+  writer.write(chars,0,chars.length);
+  writer.flush();
+  assertEquals("Test 8: write(char[], int, int) has not produced the " + "expected content in the output stream.","hi" + testString,baos.toString("utf-8"));
+  writer.close();
+  try {
+    writer.write((char[])null,-1,-1);
+    fail("Test 9: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+}

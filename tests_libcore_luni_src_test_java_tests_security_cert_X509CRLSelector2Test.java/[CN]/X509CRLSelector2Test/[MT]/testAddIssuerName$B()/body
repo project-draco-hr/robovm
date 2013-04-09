@@ -1,0 +1,24 @@
+{
+  X509CRLSelector selector=new X509CRLSelector();
+  byte[] iss1=new byte[]{48,21,49,19,48,17,6,3,85,4,10,19,10,70,105,114,115,116,32,79,114,103,46};
+  byte[] iss2=new byte[]{48,22,49,20,48,18,6,3,85,4,10,19,11,83,101,99,111,110,100,32,79,114,103,46};
+  TestCRL crl1=new TestCRL(new X500Principal(iss1));
+  TestCRL crl2=new TestCRL(new X500Principal(iss2));
+  try {
+    selector.addIssuerName(iss1);
+  }
+ catch (  IOException e) {
+    e.printStackTrace();
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("The CRL should match the selection criteria.",selector.match(crl1));
+  assertFalse("The CRL should not match the selection criteria.",selector.match(crl2));
+  try {
+    selector.addIssuerName(iss2);
+  }
+ catch (  IOException e) {
+    e.printStackTrace();
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("The CRL should match the selection criteria.",selector.match(crl2));
+}

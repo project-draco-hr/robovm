@@ -1,0 +1,24 @@
+{
+  Locale usLocale=Locale.US;
+  NumberFormat format=NumberFormat.getCurrencyInstance(usLocale);
+  assertNotSame("Instance is null",null,format);
+  assertTrue(format instanceof NumberFormat);
+  assertEquals("$35.76",format.format(35.76));
+  assertEquals("$123,456.79",format.format(123456.789));
+  assertEquals("$0.10",format.format(0.1));
+  assertEquals("$1.00",format.format(0.999));
+  Locale atLocale=new Locale("de","AT");
+  if (Support_Locale.isLocaleAvailable(atLocale)) {
+    format=NumberFormat.getCurrencyInstance(atLocale);
+    assertEquals("\u20ac\u00a035,76",format.format(35.76));
+    assertEquals("\u20ac\u00a0123.456,79",format.format(123456.789));
+    assertEquals("\u20ac\u00a00,10",format.format(0.1));
+    assertEquals("\u20ac\u00a01,00",format.format(0.999));
+    try {
+      NumberFormat.getCurrencyInstance(null);
+      fail("java.lang.NullPointerException is not thrown");
+    }
+ catch (    java.lang.NullPointerException expected) {
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  server.enqueue(new MockResponse().setBody("ABCDEFGHIJKLMNOPQR"));
+  server.play();
+  HttpURLConnection connection=(HttpURLConnection)server.getUrl("/").openConnection();
+  InputStream in=connection.getInputStream();
+  assertEquals('A',(char)in.read());
+  connection.disconnect();
+  try {
+    in.read();
+    fail("Expected a connection closed exception");
+  }
+ catch (  IOException expected) {
+  }
+}

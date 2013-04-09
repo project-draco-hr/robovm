@@ -1,0 +1,25 @@
+{
+  RecordingHostnameVerifier hostnameVerifier=new RecordingHostnameVerifier();
+  TestSSLContext testSSLContext=TestSSLContext.create();
+  server.useHttps(testSSLContext.serverContext.getSocketFactory(),true);
+  server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.UPGRADE_TO_SSL_AT_END).clearHeaders());
+  server.enqueue(new MockResponse().setBody("encrypted response from the origin server"));
+  server.play();
+  URL url=new URL("https://android.com/foo");
+  HttpsURLConnection connection=(HttpsURLConnection)url.openConnection(server.toProxyAddress());
+  connection.addRequestProperty("Private","Secret");
+  connection.addRequestProperty("Proxy-Authorization","bar");
+  connection.addRequestProperty("User-Agent","baz");
+  connection.setSSLSocketFactory(testSSLContext.clientContext.getSocketFactory());
+  connection.setHostnameVerifier(hostnameVerifier);
+  assertContent("encrypted response from the origin server",connection);
+  RecordedRequest connect=server.takeRequest();
+  assertContainsNoneMatching(connect.getHeaders(),"Private.*");
+  assertContains(connect.getHeaders(),"Proxy-Authorization: bar");
+  assertContains(connect.getHeaders(),"User-Agent: baz");
+  assertContains(connect.getHeaders(),"Host: android.com");
+  assertContains(connect.getHeaders(),"Proxy-Connection: Keep-Alive");
+  RecordedRequest get=server.takeRequest();
+  assertContains(get.getHeaders(),"Private: Secret");
+  assertEquals(Arrays.asList("verify android.com"),hostnameVerifier.calls);
+}

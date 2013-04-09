@@ -1,0 +1,20 @@
+{
+  SSLSocket ssl=getSSLSocket();
+  try {
+    ssl.setEnabledProtocols(null);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  ssl.setEnabledProtocols(new String[]{});
+  try {
+    ssl.setEnabledProtocols(new String[]{"blubb"});
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  ssl.setEnabledProtocols(ssl.getEnabledProtocols());
+  String[] res=ssl.getEnabledProtocols();
+  assertEquals("no enabled protocols set",ssl.getEnabledProtocols().length,res.length);
+  ssl.close();
+}

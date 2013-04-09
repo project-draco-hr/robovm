@@ -1,0 +1,45 @@
+{
+  List<Time> times=new LinkedList<Time>();
+  List<Calendar> cals=new LinkedList<Calendar>();
+  Calendar cal1=new GregorianCalendar();
+  cal1.clear();
+  cal1.set(Calendar.HOUR_OF_DAY,12);
+  cal1.set(Calendar.MINUTE,35);
+  cal1.set(Calendar.SECOND,45);
+  cal1.set(Calendar.MILLISECOND,0);
+  long millis=cal1.getTime().getTime();
+  Time t1=new java.sql.Time(millis);
+  Calendar cal2=new GregorianCalendar();
+  cal2.set(Calendar.YEAR,2007);
+  cal2.set(Calendar.MONTH,Calendar.OCTOBER);
+  cal2.set(Calendar.DATE,9);
+  cal2.set(Calendar.HOUR_OF_DAY,14);
+  cal2.set(Calendar.MINUTE,28);
+  cal2.set(Calendar.SECOND,02);
+  cal2.set(Calendar.MILLISECOND,0);
+  long millis2=cal2.getTime().getTime();
+  Time t2=new java.sql.Time(millis2);
+  int i=16;
+  Time timeRes=res.getTime(i,new GregorianCalendar());
+  assertNotNull(timeRes);
+  assertEquals(t1.toString(),timeRes.toString());
+  assertEquals(t1.getTime(),timeRes.getTime());
+  assertEquals(t1,timeRes);
+  i=17;
+  timeRes=res.getTime(i,new GregorianCalendar());
+  assertNotNull(timeRes);
+  assertEquals(t2.toString(),timeRes.toString());
+  assertEquals(t2.getTime(),timeRes.getTime());
+  assertEquals(t2,timeRes);
+  res.next();
+  for (  Calendar c : cals) {
+    assertNull(res.getTime(16,c));
+    i++;
+  }
+  try {
+    res.getTime(500,Calendar.getInstance());
+    fail("Exception expected");
+  }
+ catch (  SQLException e) {
+  }
+}

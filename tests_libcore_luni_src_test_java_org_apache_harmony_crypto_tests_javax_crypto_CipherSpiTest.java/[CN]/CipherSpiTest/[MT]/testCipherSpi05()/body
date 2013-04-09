@@ -1,0 +1,42 @@
+{
+  Mock_CipherSpi cSpi=new Mock_CipherSpi();
+  byte[] bb={(byte)0,(byte)1,(byte)2,(byte)3,(byte)4,(byte)5,(byte)6,(byte)7,(byte)8,(byte)9,(byte)10};
+  int pos=5;
+  int len=bb.length;
+  ByteBuffer bbNull=null;
+  ByteBuffer bb1=ByteBuffer.allocate(len);
+  bb1.put(bb);
+  bb1.position(0);
+  try {
+    cSpi.engineUpdate(bbNull,bb1);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    cSpi.engineUpdate(bb1,bbNull);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+  ByteBuffer bb2=ByteBuffer.allocate(bb.length);
+  bb1.position(len);
+  assertEquals("Incorrect number of stored bytes",0,cSpi.engineUpdate(bb1,bb2));
+  bb1.position(0);
+  bb2.position(len - 2);
+  try {
+    cSpi.engineUpdate(bb1,bb2);
+    fail("ShortBufferException bust be thrown. Output buffer remaining: ".concat(Integer.toString(bb2.remaining())));
+  }
+ catch (  ShortBufferException e) {
+  }
+  bb1.position(10);
+  bb2.position(0);
+  assertTrue("Incorrect number of stored bytes",cSpi.engineUpdate(bb1,bb2) > 0);
+  bb1.position(bb.length);
+  cSpi.engineUpdate(bb1,bb2);
+  bb1.position(pos);
+  bb2.position(0);
+  int res=cSpi.engineUpdate(bb1,bb2);
+  assertTrue("Incorrect result",res > 0);
+}

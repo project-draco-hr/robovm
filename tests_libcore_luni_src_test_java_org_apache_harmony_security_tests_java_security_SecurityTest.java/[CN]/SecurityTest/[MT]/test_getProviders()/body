@@ -1,0 +1,25 @@
+{
+  Provider[] prv;
+  MyProvider provider=new MyProvider();
+  try {
+    prv=Security.getProviders();
+    int len1=prv.length;
+    if (len1 == 0) {
+      fail("Array of providers is ampty");
+    }
+    Security.addProvider(provider);
+    prv=Security.getProviders();
+    int len2=prv.length;
+    if ((len2 == len1 + 1) && (prv[len2 - 1].toString().equals("MyProvider version 1.0"))) {
+    }
+ else {
+      fail("Method getProviders() returned incorrect values");
+    }
+  }
+ catch (  Exception ex) {
+    fail("Unexpected exception");
+  }
+ finally {
+    Security.removeProvider(provider.getName());
+  }
+}

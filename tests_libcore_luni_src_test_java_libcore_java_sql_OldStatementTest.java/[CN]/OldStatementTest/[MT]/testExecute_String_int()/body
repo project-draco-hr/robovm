@@ -1,0 +1,38 @@
+{
+  String[] queries={"update zoo set name='Masha', family='cat' where id=2;","drop table if exists hutch","create table hutch (id integer not null, animal_id integer, address char(20), primary key (id));","insert into hutch (id, animal_id, address) values (1, 2, 'Birds-house, 1');","insert into hutch (id, animal_id, address) values (2, 1, 'Horse-house, 5');","select animal_id, address from hutch where animal_id=1;","create view address as select address from hutch where animal_id=2","drop view address;","drop table hutch;"};
+  for (int i=0; i < queries.length; i++) {
+    Statement st=null;
+    try {
+      st=conn.createStatement();
+      st.execute(queries[i],Statement.NO_GENERATED_KEYS);
+      ResultSet rs=st.getGeneratedKeys();
+      assertFalse(rs.next());
+    }
+ catch (    SQLException e) {
+    }
+ finally {
+      try {
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+  }
+  for (int i=0; i < queries.length; i++) {
+    Statement st=null;
+    try {
+      st=conn.createStatement();
+      st.execute(queries[i],Statement.RETURN_GENERATED_KEYS);
+      fail("Exception expected: Not supported");
+    }
+ catch (    SQLException e) {
+    }
+ finally {
+      try {
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+  }
+}

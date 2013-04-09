@@ -1,0 +1,37 @@
+{
+  MockCookieHandler mch=new MockCookieHandler();
+  CookieHandler defaultHandler=CookieHandler.getDefault();
+  CookieHandler.setDefault(mch);
+class TestThread extends Thread {
+    public void run(){
+      try {
+        URL url=new URL(link);
+        URLConnection conn=url.openConnection();
+        conn.getContent();
+        url=new URL(link);
+        conn=url.openConnection();
+        conn.getContent();
+        completedSuccessfully=true;
+      }
+ catch (      Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+  try {
+    TestThread thread=new TestThread();
+    thread.start();
+    try {
+      thread.join();
+    }
+ catch (    InterruptedException e) {
+      fail("InterruptedException was thrown.");
+    }
+    assertTrue(isGetCalled);
+    assertTrue(isPutCalled);
+    assertTrue(completedSuccessfully);
+  }
+  finally {
+    CookieHandler.setDefault(defaultHandler);
+  }
+}

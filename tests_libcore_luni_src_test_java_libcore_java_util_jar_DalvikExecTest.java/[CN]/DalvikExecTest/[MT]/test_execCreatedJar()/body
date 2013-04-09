@@ -1,0 +1,16 @@
+{
+  File jarFile=File.createTempFile("cts_dalvikExecTest_",".jar");
+  jarFile.deleteOnExit();
+  JarOutputStream jarOut=new JarOutputStream(new FileOutputStream(jarFile));
+  jarOut.putNextEntry(new JarEntry("classes.dex"));
+  Streams.copy(Support_Resources.getResourceStream("cts_dalvikExecTest_classes.dex"),jarOut);
+  jarOut.putNextEntry(new JarEntry("dalvikExecTest/myResource"));
+  jarOut.write("This Resource contains some text.".getBytes());
+  jarOut.close();
+  String res;
+  res=execDalvik(jarFile.getAbsolutePath(),"dalvikExecTest.HelloWorld");
+  assertEquals("Hello Android World!","Hello Android World!\n",res);
+  res=execDalvik(jarFile.getAbsolutePath(),"dalvikExecTest.ResourceDumper");
+  assertTrue("Android Resource Dumper started",res.contains("Android Resource Dumper started"));
+  assertTrue("This Resource contains some text.",res.contains("This Resource contains some text."));
+}

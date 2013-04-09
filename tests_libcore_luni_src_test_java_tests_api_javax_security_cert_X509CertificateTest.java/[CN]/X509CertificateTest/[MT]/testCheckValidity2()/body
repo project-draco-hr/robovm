@@ -1,0 +1,39 @@
+{
+  if (this.cert == null) {
+    return;
+  }
+  Date[] date=new Date[4];
+  Calendar calendar=Calendar.getInstance();
+  for (int i=0; i < date.length; i++) {
+    calendar.set(i * 50,Calendar.JANUARY,1);
+    date[i]=calendar.getTime();
+  }
+  Date nb_date=tbt_cert.getNotBefore();
+  Date na_date=tbt_cert.getNotAfter();
+  for (int i=0; i < date.length; i++) {
+    try {
+      tbt_cert.checkValidity(date[i]);
+      assertFalse("CertificateExpiredException expected",date[i].compareTo(na_date) > 0);
+      assertFalse("CertificateNotYetValidException expected",date[i].compareTo(nb_date) < 0);
+    }
+ catch (    CertificateExpiredException e) {
+      assertTrue("Unexpected CertificateExpiredException was thrown",date[i].compareTo(na_date) > 0);
+    }
+catch (    CertificateNotYetValidException e) {
+      assertTrue("Unexpected CertificateNotYetValidException " + "was thrown",date[i].compareTo(nb_date) < 0);
+    }
+  }
+  Calendar calendarNow=Calendar.getInstance();
+  try {
+    tbt_cert.checkValidity(calendarNow.getTime());
+  }
+ catch (  CertificateExpiredException e) {
+  }
+  Calendar calendarPast=GregorianCalendar.getInstance();
+  calendarPast.clear();
+  try {
+    tbt_cert.checkValidity(calendarPast.getTime());
+  }
+ catch (  CertificateNotYetValidException e) {
+  }
+}

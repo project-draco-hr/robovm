@@ -1,0 +1,28 @@
+{
+  MySignature signature=new MySignature("dummy");
+  try {
+    signature.initSign(new PrivateKey(){
+      public String getFormat(){
+        return null;
+      }
+      public byte[] getEncoded(){
+        return null;
+      }
+      public String getAlgorithm(){
+        return null;
+      }
+    }
+);
+  }
+ catch (  InvalidKeyException e) {
+    fail("unexpected exception: " + e);
+  }
+  byte[] buf=new byte[10];
+  try {
+    signature.sign(buf,2,1);
+    assertTrue("SPI method not called",signature.wasMethodCalled("engineSign_[BII"));
+  }
+ catch (  SignatureException e) {
+    fail("unexpected exception: " + e);
+  }
+}

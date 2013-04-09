@@ -1,0 +1,25 @@
+{
+  try {
+    CertificateFactory.getInstance(null);
+    fail("NullPointerException or CertificateException must be thrown when type is null");
+  }
+ catch (  CertificateException e) {
+  }
+catch (  NullPointerException e) {
+  }
+  for (int i=0; i < invalidValues.length; i++) {
+    try {
+      CertificateFactory.getInstance(invalidValues[i]);
+      fail("CertificateException must be thrown (type: ".concat(invalidValues[i]).concat(")"));
+    }
+ catch (    CertificateException e) {
+    }
+  }
+  CertificateFactory cerF;
+  for (int i=0; i < validValues.length; i++) {
+    cerF=CertificateFactory.getInstance(validValues[i]);
+    assertEquals("Incorrect type",cerF.getType(),validValues[i]);
+    assertEquals("Incorrect provider",cerF.getProvider(),mProv);
+    checkResult(cerF,mode);
+  }
+}

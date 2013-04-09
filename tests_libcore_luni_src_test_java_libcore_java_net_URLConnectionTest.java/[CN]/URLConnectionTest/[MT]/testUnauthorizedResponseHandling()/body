@@ -1,0 +1,13 @@
+{
+  MockResponse response=new MockResponse().addHeader("WWW-Authenticate: Basic realm=\"protected area\"").setResponseCode(401).setBody("Unauthorized");
+  server.enqueue(response);
+  server.enqueue(response);
+  server.enqueue(response);
+  server.play();
+  URL url=server.getUrl("/");
+  HttpURLConnection conn=(HttpURLConnection)url.openConnection();
+  assertEquals(401,conn.getResponseCode());
+  assertEquals(401,conn.getResponseCode());
+  assertEquals(401,conn.getResponseCode());
+  assertEquals(1,server.getRequestCount());
+}

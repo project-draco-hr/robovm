@@ -1,0 +1,19 @@
+{
+  FileNameMap mapOld=URLConnection.getFileNameMap();
+  try {
+    assertEquals("text/html",mapOld.getContentTypeFor(".htm"));
+    assertEquals("text/html",mapOld.getContentTypeFor(".html"));
+    assertEquals("text/plain",mapOld.getContentTypeFor(".text"));
+    assertEquals("text/plain",mapOld.getContentTypeFor(".txt"));
+    URLConnection.setFileNameMap(new FileNameMap(){
+      public String getContentTypeFor(      String fileName){
+        return "Spam!";
+      }
+    }
+);
+    assertEquals("Incorrect FileNameMap returned","Spam!",URLConnection.getFileNameMap().getContentTypeFor(null));
+  }
+  finally {
+    URLConnection.setFileNameMap(mapOld);
+  }
+}

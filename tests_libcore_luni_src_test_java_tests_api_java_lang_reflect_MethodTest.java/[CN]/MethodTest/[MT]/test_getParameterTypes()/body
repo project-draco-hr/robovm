@@ -1,0 +1,35 @@
+{
+  Class cl=TestMethod.class;
+  Method mth=null;
+  Class[] parms=null;
+  Method[] methods=null;
+  Class[] plist={int.class,short.class,String.class,boolean.class,Object.class,long.class,byte.class,char.class,double.class,float.class};
+  try {
+    mth=cl.getMethod("voidMethod",new Class[0]);
+    parms=mth.getParameterTypes();
+  }
+ catch (  Exception e) {
+    fail("Exception during getParameterTypes test: " + e.toString());
+  }
+  assertEquals("Returned incorrect parameterTypes",0,parms.length);
+  try {
+    mth=cl.getMethod("parmTest",plist);
+    parms=mth.getParameterTypes();
+  }
+ catch (  Exception e) {
+    fail("Exception during getParameterTypes test: " + e.toString());
+  }
+  assertTrue("Invalid number of parameters returned",plist.length == parms.length);
+  for (int i=0; i < plist.length; i++)   assertTrue("Incorrect parameter returned",plist[i].equals(parms[i]));
+  methods=cl.getDeclaredMethods();
+  int i;
+  for (i=0; i < methods.length; i++)   if (methods[i].getName().equals("parmTest")) {
+    mth=methods[i];
+    i=methods.length + 1;
+  }
+  if (i < methods.length) {
+    parms=mth.getParameterTypes();
+    assertTrue("Incorrect number of parameters returned",parms.length == plist.length);
+    for (i=0; i < plist.length; i++)     assertTrue("Incorrect parameter returned",plist[i].equals(parms[i]));
+  }
+}

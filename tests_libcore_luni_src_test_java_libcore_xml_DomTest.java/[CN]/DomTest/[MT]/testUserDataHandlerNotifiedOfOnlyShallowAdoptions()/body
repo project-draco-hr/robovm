@@ -1,0 +1,17 @@
+{
+  domToString(document);
+  RecordingHandler handler=new RecordingHandler();
+  name.setUserData("a","apple",handler);
+  name.setUserData("b","banana",handler);
+  standard.setUserData("c","cat",handler);
+  waffles.setUserData("d","dog",handler);
+  Document newDocument=builder.newDocument();
+  assertSame(name,newDocument.adoptNode(name));
+  assertSame(newDocument,name.getOwnerDocument());
+  assertSame(newDocument,standard.getOwnerDocument());
+  assertSame(newDocument,waffles.getOwnerDocument());
+  Set<String> expected=new HashSet<String>();
+  expected.add(notification(NODE_ADOPTED,"a","apple",name,null));
+  expected.add(notification(NODE_ADOPTED,"b","banana",name,null));
+  assertEquals(expected,handler.calls);
+}

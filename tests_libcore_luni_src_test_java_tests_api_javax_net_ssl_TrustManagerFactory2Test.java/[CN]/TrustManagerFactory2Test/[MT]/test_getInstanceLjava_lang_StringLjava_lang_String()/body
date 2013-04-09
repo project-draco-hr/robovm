@@ -1,0 +1,51 @@
+{
+  try {
+    TrustManagerFactory.getInstance(null,mProv.getName());
+    fail("NoSuchAlgorithmException or NullPointerException should be thrown (algorithm is null");
+  }
+ catch (  NoSuchAlgorithmException e) {
+  }
+catch (  NullPointerException e) {
+  }
+  for (int i=0; i < invalidValues.length; i++) {
+    try {
+      TrustManagerFactory.getInstance(invalidValues[i],mProv.getName());
+      fail("NoSuchAlgorithmException must be thrown (algorithm: ".concat(invalidValues[i]).concat(")"));
+    }
+ catch (    NoSuchAlgorithmException e) {
+    }
+  }
+  String prov=null;
+  for (int i=0; i < validValues.length; i++) {
+    try {
+      TrustManagerFactory.getInstance(validValues[i],prov);
+      fail("IllegalArgumentException must be thrown when provider is null (algorithm: ".concat(invalidValues[i]).concat(")"));
+    }
+ catch (    IllegalArgumentException e) {
+    }
+    try {
+      TrustManagerFactory.getInstance(validValues[i],"");
+      fail("IllegalArgumentException must be thrown when provider is empty (algorithm: ".concat(invalidValues[i]).concat(")"));
+    }
+ catch (    IllegalArgumentException e) {
+    }
+  }
+  for (int i=0; i < validValues.length; i++) {
+    for (int j=1; j < invalidValues.length; j++) {
+      try {
+        TrustManagerFactory.getInstance(validValues[i],invalidValues[j]);
+        fail("NoSuchProviderException must be thrown (algorithm: ".concat(invalidValues[i]).concat(" provider: ").concat(invalidValues[j]).concat(")"));
+      }
+ catch (      NoSuchProviderException e) {
+      }
+    }
+  }
+  TrustManagerFactory tmf;
+  for (int i=0; i < validValues.length; i++) {
+    tmf=TrustManagerFactory.getInstance(validValues[i],mProv.getName());
+    assertTrue("Not instanceof TrustManagerFactory object",tmf instanceof TrustManagerFactory);
+    assertEquals("Incorrect algorithm",tmf.getAlgorithm(),validValues[i]);
+    assertEquals("Incorrect provider",tmf.getProvider().getName(),mProv.getName());
+    checkResult(tmf);
+  }
+}

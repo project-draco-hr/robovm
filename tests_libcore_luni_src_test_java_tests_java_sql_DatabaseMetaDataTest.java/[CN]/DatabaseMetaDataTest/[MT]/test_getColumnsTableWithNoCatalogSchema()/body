@@ -1,0 +1,39 @@
+{
+  try {
+    ResultSet noSchemaTable=meta.getColumns("","",DatabaseCreator.TEST_TABLE1,"fkey");
+    assertNotNull(noSchemaTable);
+    noSchemaTable.last();
+    int size=noSchemaTable.getRow();
+    assertEquals("Does not support empty string as input parameter or Wildcard %",1,size);
+  }
+ catch (  SQLException e) {
+    fail("Unexpected exception: " + e.getMessage());
+  }
+  try {
+    ResultSet noSchemaTable=meta.getColumns("","",DatabaseCreator.TEST_TABLE1,"%");
+    assertNotNull(noSchemaTable);
+    noSchemaTable.last();
+    int size=noSchemaTable.getRow();
+    assertEquals("Does not support empty string as input parameter or Wildcard %",5,size);
+  }
+ catch (  SQLException e) {
+    fail("Unexpected exception: " + e.getMessage());
+  }
+  try {
+    ResultSet noSchemaTable=meta.getColumns("","","%","%");
+    assertNotNull(noSchemaTable);
+    noSchemaTable.last();
+    int size=noSchemaTable.getRow();
+    assertEquals("Does not support double Wildcard '%' as input",6,size);
+  }
+ catch (  SQLException e) {
+    fail("Unexpected exception: " + e.getMessage());
+  }
+  conn.close();
+  try {
+    meta.getColumns(null,null,DatabaseCreator.TEST_TABLE1,"%");
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

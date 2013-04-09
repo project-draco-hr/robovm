@@ -1,0 +1,54 @@
+{
+  ResultSet privileges=meta.getTablePrivileges(conn.getCatalog(),"%",DatabaseCreator.TEST_TABLE3);
+  assertFalse("Some privilegies exist",privileges.next());
+  privileges.close();
+  privileges=meta.getTablePrivileges(null,null,null);
+  assertFalse("Some privilegies exist",privileges.next());
+  privileges.close();
+  HashSet<String> expectedPrivs=new HashSet<String>();
+  expectedPrivs.add("CREATE");
+  expectedPrivs.add("SELECT");
+  String query="GRANT CREATE, SELECT ON " + DatabaseCreator.TEST_TABLE3 + " TO "+ Support_SQL.sqlUser;
+  statement.execute(query);
+  privileges=meta.getTablePrivileges(conn.getCatalog(),null,DatabaseCreator.TEST_TABLE3);
+  while (privileges.next()) {
+    assertEquals("Wrong catalog name",Support_SQL.sqlCatalog,privileges.getString("TABLE_CAT"));
+    assertNull("Wrong schema",privileges.getString("TABLE_SCHEM"));
+    assertEquals("Wrong table name",DatabaseCreator.TEST_TABLE3,privileges.getString("TABLE_NAME"));
+    assertTrue("Wrong privilege " + privileges.getString("PRIVILEGE"),expectedPrivs.remove(privileges.getString("PRIVILEGE")));
+    assertEquals("Wrong grantor",Support_SQL.sqlLogin + "@" + Support_SQL.sqlHost,privileges.getString("GRANTOR"));
+    assertEquals("Wrong grantee",Support_SQL.sqlUser + "@%",privileges.getString("GRANTEE"));
+    assertNull("Wrong value of IS_GRANTABLE",privileges.getString("IS_GRANTABLE"));
+  }
+  privileges.close();
+  assertTrue("Wrong privileges were returned",expectedPrivs.isEmpty());
+  query="REVOKE CREATE, SELECT ON " + DatabaseCreator.TEST_TABLE3 + " FROM "+ Support_SQL.sqlUser;
+  statement.execute(query);
+  String[] privs=new String[]{"ALTER","CREATE","CREATE VIEW","DELETE","DROP","INDEX","INSERT","REFERENCES","SELECT","SHOW VIEW","UPDATE"};
+  expectedPrivs=new HashSet<String>();
+  for (int i=0; i < privs.length; i++) {
+    expectedPrivs.add(privs[i]);
+  }
+  query="GRANT ALL ON " + DatabaseCreator.TEST_TABLE3 + " TO "+ Support_SQL.sqlUser;
+  statement.execute(query);
+  privileges=meta.getTablePrivileges(conn.getCatalog(),null,DatabaseCreator.TEST_TABLE3);
+  while (privileges.next()) {
+    assertEquals("Wrong catalog name",Support_SQL.sqlCatalog,privileges.getString("TABLE_CAT"));
+    assertNull("Wrong schema",privileges.getString("TABLE_SCHEM"));
+    assertEquals("Wrong table name",DatabaseCreator.TEST_TABLE3,privileges.getString("TABLE_NAME"));
+    assertTrue("Wrong privilege " + privileges.getString("PRIVILEGE"),expectedPrivs.remove(privileges.getString("PRIVILEGE")));
+    assertEquals("Wrong grantor",Support_SQL.sqlLogin + "@" + Support_SQL.sqlHost,privileges.getString("GRANTOR"));
+    assertEquals("Wrong grantee",Support_SQL.sqlUser + "@%",privileges.getString("GRANTEE"));
+    assertNull("Wrong value of IS_GRANTABLE",privileges.getString("IS_GRANTABLE"));
+  }
+  privileges.close();
+  assertTrue("Wrong privileges were returned",expectedPrivs.isEmpty());
+  query="REVOKE ALL ON " + DatabaseCreator.TEST_TABLE3 + " FROM "+ Support_SQL.sqlUser;
+  statement.execute(query);
+  privileges=meta.getTablePrivileges(conn.getCatalog(),"%",DatabaseCreator.TEST_TABLE3);
+  assertFalse("Some privilegies exist",privileges.next());
+  privileges.close();
+  privileges=meta.getTablePrivileges(null,null,null);
+  assertFalse("Some privilegies exist",privileges.next());
+  privileges.close();
+}

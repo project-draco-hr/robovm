@@ -1,0 +1,23 @@
+{
+  CertificateFactory fact=CertificateFactory.getInstance("X.509");
+  for (int i=0; i < CERTIFICATES_ENCODED_X509.length; i++) {
+    ByteArrayInputStream bais=new ByteArrayInputStream(CERTIFICATES_ENCODED_X509[i].getBytes());
+    fact.generateCertificate(bais);
+    bais=new ByteArrayInputStream(CERTIFICATES_ENCODED_X509[i].getBytes());
+    fact.generateCertificate(bais);
+  }
+  InputStream is=Support_Resources.getResourceStream("hyts_badpem.cer");
+  try {
+    fact.generateCertificate(is);
+    fail("Test2: CertificateException not thrown");
+  }
+ catch (  CertificateException e) {
+  }
+ finally {
+    try {
+      is.close();
+    }
+ catch (    IOException ignore) {
+    }
+  }
+}

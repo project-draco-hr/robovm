@@ -1,0 +1,18 @@
+{
+  String sql="SELECT * FROM " + DatabaseCreator.TEST_TABLE2;
+  ResultSet result=statement.executeQuery(sql);
+  int counter=0;
+  while (result.next()) {
+    int id=result.getInt("finteger");
+    assertEquals("expected value doesn't equal actual",DatabaseCreator.defaultString + id,result.getString("ftext"));
+    assertEquals("expected value doesn't equal actual",DatabaseCreator.defaultCharacter + id,result.getString("fcharacter"));
+    assertEquals("expected value doesn't equal actual",BigDecimal.valueOf(id + 0.1).floatValue(),result.getFloat("ffloat"));
+    assertEquals("expected value doesn't equal actual",BigDecimal.valueOf(id + 0.1).doubleValue(),result.getDouble("freal"));
+    assertEquals("expected value doesn't equal actual",BigDecimal.valueOf(id + 0.1).doubleValue(),result.getDouble("fdouble"));
+    assertEquals("expected value doesn't equal actual",date.toString(),result.getDate("fdate").toString());
+    assertEquals("expected value doesn't equal actual",time.toString(),result.getTime("ftime").toString());
+    counter++;
+  }
+  assertEquals("number of rows in ResultSet is wrong",5,counter);
+  result.close();
+}

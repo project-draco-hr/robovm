@@ -1,0 +1,21 @@
+{
+  int inCount=inBuf.length;
+  int inPosn;
+  int outPosn;
+  inPosn=outPosn=0;
+  while (!deflater.finished()) {
+    int want=-1, got;
+    if (deflater.needsInput() && inCount != 0) {
+      want=(inCount < LOCAL_BUF_SIZE) ? inCount : LOCAL_BUF_SIZE;
+      deflater.setInput(inBuf,inPosn,want);
+      inCount-=want;
+      inPosn+=want;
+      if (inCount == 0) {
+        deflater.finish();
+      }
+    }
+    int compCount;
+    compCount=deflater.deflate(outBuf,outPosn,LOCAL_BUF_SIZE);
+    outPosn+=compCount;
+  }
+}

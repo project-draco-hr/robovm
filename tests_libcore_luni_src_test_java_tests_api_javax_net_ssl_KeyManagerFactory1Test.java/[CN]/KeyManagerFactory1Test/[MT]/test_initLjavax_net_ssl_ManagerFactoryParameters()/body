@@ -1,0 +1,29 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportedMsg);
+    return;
+  }
+  ManagerFactoryParameters par=null;
+  KeyManagerFactory[] keyMF=createKMFac();
+  assertNotNull("KeyManagerFactory object were not created",keyMF);
+  for (int i=0; i < keyMF.length; i++) {
+    try {
+      keyMF[i].init(par);
+      fail("InvalidAlgorithmParameterException must be thrown");
+    }
+ catch (    InvalidAlgorithmParameterException e) {
+    }
+  }
+  KeyStore.ProtectionParameter pp=new ProtectionParameterImpl();
+  KeyStore.Builder bld=KeyStore.Builder.newInstance("testType",null,pp);
+  assertNotNull("Null object KeyStore.Builder",bld);
+  try {
+    KeyManagerFactory kmf=KeyManagerFactory.getInstance(defaultAlgorithm);
+    KeyStoreBuilderParameters ksp=new KeyStoreBuilderParameters(bld);
+    assertNotNull(ksp.getParameters());
+    kmf.init(ksp);
+    fail("InvalidAlgorithmParameterException must be thrown");
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+  }
+}

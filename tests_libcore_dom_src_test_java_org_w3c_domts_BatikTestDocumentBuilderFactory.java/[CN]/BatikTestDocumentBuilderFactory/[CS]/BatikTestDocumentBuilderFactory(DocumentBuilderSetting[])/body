@@ -1,0 +1,26 @@
+{
+  super(settings);
+  domImpl=null;
+  SAXParserFactory saxFactory=SAXParserFactory.newInstance();
+  try {
+    SAXParser saxParser=saxFactory.newSAXParser();
+    xmlReader=saxParser.getXMLReader();
+  }
+ catch (  Exception ex) {
+    throw new DOMTestIncompatibleException(ex,null);
+  }
+  String xmlReaderClassName=xmlReader.getClass().getName();
+  try {
+    ClassLoader classLoader=ClassLoader.getSystemClassLoader();
+    Class domFactoryClass=classLoader.loadClass("org.apache.batik.dom.svg.SAXSVGDocumentFactory");
+    Constructor domFactoryConstructor=domFactoryClass.getConstructor(new Class[]{String.class});
+    domFactory=domFactoryConstructor.newInstance(new Object[]{xmlReaderClassName});
+    createDocument=domFactoryClass.getMethod("createDocument",new Class[]{String.class,java.io.InputStream.class});
+  }
+ catch (  InvocationTargetException ex) {
+    throw new DOMTestIncompatibleException(ex.getTargetException(),null);
+  }
+catch (  Exception ex) {
+    throw new DOMTestIncompatibleException(ex,null);
+  }
+}

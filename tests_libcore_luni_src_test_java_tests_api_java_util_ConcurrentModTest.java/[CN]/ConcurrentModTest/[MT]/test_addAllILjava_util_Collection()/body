@@ -1,0 +1,87 @@
+{
+  Collection c=new Vector();
+  c.add(new Double(33));
+  c.add(10);
+  c.add("String");
+  AbstractList abstr=new AbstractList(){
+    @Override public Object get(    int arg0){
+      return null;
+    }
+    @Override public int size(){
+      return 0;
+    }
+  }
+;
+  try {
+    abstr.addAll(0,null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException ee) {
+  }
+  try {
+    abstr.addAll(0,c);
+    fail("UnsuportedOperationException expected");
+  }
+ catch (  UnsupportedOperationException ee) {
+  }
+  abstr=new AbstractList<Double>(){
+    @Override public void add(    int index,    Double value){
+    }
+    @Override public Double get(    int arg0){
+      return null;
+    }
+    @Override public int size(){
+      return 0;
+    }
+  }
+;
+  try {
+    abstr.addAll(0,c);
+    fail("ClassCastException expected");
+  }
+ catch (  ClassCastException ee) {
+  }
+  abstr=new AbstractList<Integer>(){
+    final int forbiddenValue=33;
+    @Override public void add(    int index,    Integer value){
+      if (value == forbiddenValue) {
+        throw new IllegalArgumentException();
+      }
+    }
+    @Override public Integer get(    int arg0){
+      return null;
+    }
+    @Override public int size(){
+      return 0;
+    }
+  }
+;
+  c.clear();
+  c.add(new Integer(1));
+  c.add(new Integer(2));
+  c.add(new Integer(3));
+  c.add(new Integer(4));
+  c.add(new Integer(5));
+  abstr.addAll(0,c);
+  c.add(new Integer(33));
+  try {
+    abstr.addAll(0,c);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException ee) {
+  }
+  abstr=new ArrayList();
+  abstr.addAll(0,c);
+  try {
+    abstr.addAll(-1,c);
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException ee) {
+  }
+  try {
+    abstr.addAll(abstr.size() + 1,c);
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException ee) {
+  }
+}

@@ -1,0 +1,69 @@
+{
+  try {
+    CertStoreParameters parameters=new MyCertStoreParameters();
+    CertStore certStore=CertStore.getInstance(CERT_STORE_NAME,parameters,CERT_STORE_PROVIDER_NAME);
+    assertNotNull(certStore);
+    assertNotNull(certStore.getCertStoreParameters());
+    assertNotSame(parameters,certStore.getCertStoreParameters());
+    assertEquals(CERT_STORE_PROVIDER_NAME,certStore.getProvider().getName());
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  NoSuchProviderException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    CertStore certStore=CertStore.getInstance(CERT_STORE_NAME,null,CERT_STORE_PROVIDER_NAME);
+    assertNotNull(certStore);
+    assertNull(certStore.getCertStoreParameters());
+    assertEquals(CERT_STORE_PROVIDER_NAME,certStore.getProvider().getName());
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  NoSuchProviderException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    CertStore.getInstance("UnknownCertStore",new MyCertStoreParameters(),CERT_STORE_PROVIDER_NAME);
+    fail("expected NoSuchAlgorithmException");
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  NoSuchAlgorithmException e) {
+  }
+catch (  NoSuchProviderException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    CertStore.getInstance(CERT_STORE_NAME,null,"UnknownCertStoreProvider");
+    fail("expected NoSuchProviderException");
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  NoSuchProviderException e) {
+  }
+  try {
+    CertStore.getInstance(CERT_STORE_NAME,new MyOtherCertStoreParameters(),CERT_STORE_PROVIDER_NAME);
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+  }
+catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  NoSuchProviderException e) {
+    fail("unexpected exception: " + e);
+  }
+}

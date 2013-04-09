@@ -1,0 +1,25 @@
+{
+  byte[] key=new byte[]{1,2,3,4,5};
+  String algorithm="Algorithm";
+  try {
+    new SecretKeySpec(new byte[]{},algorithm);
+    fail("An IllegalArgumentException should be thrown " + "in the case of empty key.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new SecretKeySpec(null,algorithm);
+    fail("An IllegalArgumentException should be thrown " + "in the case of null key.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new SecretKeySpec(key,null);
+    fail("An IllegalArgumentException should be thrown " + "in the case of null algorithm.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  SecretKeySpec ks=new SecretKeySpec(key,algorithm);
+  key[0]++;
+  assertFalse("The change of key specified in the constructor " + "should not cause the change of internal array.",key[0] == ks.getEncoded()[0]);
+}

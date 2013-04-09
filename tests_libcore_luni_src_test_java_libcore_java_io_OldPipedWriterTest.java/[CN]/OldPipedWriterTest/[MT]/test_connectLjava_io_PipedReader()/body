@@ -1,0 +1,25 @@
+{
+  PipedReader rd=new PipedReader();
+  pw=new PipedWriter();
+  try {
+    pw.connect(rd);
+  }
+ catch (  Exception e) {
+    fail("Test 1: Unexpected exception when connecting: " + e.getLocalizedMessage());
+  }
+  readerThread=new Thread(reader=new PReader(rd),"connect");
+  readerThread.start();
+  try {
+    pw.write(testBuf);
+  }
+ catch (  IOException e) {
+    fail("Test 2: Unexpected IOException when writing after connecting.");
+  }
+  assertEquals("Test 3: Incorrect character string received.",testString,reader.read(testLength));
+  try {
+    pw.connect(new PipedReader());
+    fail("Test 4: IOException expected when reconnecting the writer.");
+  }
+ catch (  IOException e) {
+  }
+}

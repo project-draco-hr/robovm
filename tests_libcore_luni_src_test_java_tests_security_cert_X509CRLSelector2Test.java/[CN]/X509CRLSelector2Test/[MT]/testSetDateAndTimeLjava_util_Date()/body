@@ -1,0 +1,16 @@
+{
+  X509CRLSelector selector=new X509CRLSelector();
+  TestCRL crl=new TestCRL(new Date(200),new Date(300));
+  selector.setDateAndTime(null);
+  assertTrue("Any CRL should match in the case of null dateAndTime.",selector.match(crl));
+  selector.setDateAndTime(new Date(200));
+  assertTrue("The CRL should match the selection criteria.",selector.match(crl));
+  selector.setDateAndTime(new Date(250));
+  assertTrue("The CRL should match the selection criteria.",selector.match(crl));
+  selector.setDateAndTime(new Date(300));
+  assertTrue("The CRL should match the selection criteria.",selector.match(crl));
+  selector.setDateAndTime(new Date(150));
+  assertFalse("The CRL should not match the selection criteria.",selector.match(crl));
+  selector.setDateAndTime(new Date(350));
+  assertFalse("The CRL should not match the selection criteria.",selector.match(crl));
+}

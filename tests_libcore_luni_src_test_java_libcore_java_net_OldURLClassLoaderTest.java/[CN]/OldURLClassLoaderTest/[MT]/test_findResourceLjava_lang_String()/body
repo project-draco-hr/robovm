@@ -1,0 +1,17 @@
+{
+  int port=Support_PortManager.getNextPort();
+  File tmp=File.createTempFile("test",".txt");
+  Support_TestWebServer server=new Support_TestWebServer();
+  try {
+    server.initServer(port,tmp.getAbsolutePath(),"text/html");
+    URL[] urls={new URL("http://localhost:" + port + "/")};
+    ucl=new URLClassLoader(urls);
+    URL res=ucl.findResource("test1");
+    assertNotNull("Failed to locate resource",res);
+    StringBuffer sb=getResContent(res);
+    assertEquals("Returned incorrect resource",new String(Support_TestWebData.test1),sb.toString());
+  }
+  finally {
+    server.close();
+  }
+}

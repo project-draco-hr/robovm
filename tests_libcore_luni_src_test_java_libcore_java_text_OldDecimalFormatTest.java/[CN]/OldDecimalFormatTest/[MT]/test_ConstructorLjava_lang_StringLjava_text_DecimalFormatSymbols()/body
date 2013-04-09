@@ -1,0 +1,38 @@
+{
+  try {
+    DecimalFormatSymbols dfs=new DecimalFormatSymbols(Locale.CANADA);
+    DecimalFormat format1=new DecimalFormat("'$'1000.0000",dfs);
+    DecimalFormat format2=new DecimalFormat();
+    format2.applyPattern("'$'1000.0000");
+    format2.setDecimalFormatSymbols(dfs);
+    assertTrue("Constructed format did not match applied format object",format2.equals(format1));
+    assertTrue("Constructed format did not match applied format object",!format1.equals(new DecimalFormat("'$'1000.0000",new DecimalFormatSymbols(Locale.CHINA))));
+    try {
+      new DecimalFormat("'$'1000.0000",(DecimalFormatSymbols)null);
+      fail("Expected NullPointerException was not thrown");
+    }
+ catch (    NullPointerException e) {
+    }
+    try {
+      new DecimalFormat(null,new DecimalFormatSymbols());
+      fail("Expected NullPointerException was not thrown");
+    }
+ catch (    NullPointerException e) {
+    }
+    try {
+      new DecimalFormat(null,(DecimalFormatSymbols)null);
+      fail("Expected NullPointerException was not thrown");
+    }
+ catch (    NullPointerException e) {
+    }
+    try {
+      new DecimalFormat("$'",new DecimalFormatSymbols());
+      fail("Expected IllegalArgumentException was not thrown");
+    }
+ catch (    IllegalArgumentException e) {
+    }
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception " + e.toString());
+  }
+}

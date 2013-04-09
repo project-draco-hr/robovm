@@ -1,0 +1,28 @@
+{
+  try {
+    KeyFactory factory=KeyFactory.getInstance(TEST_KEYFACTORY_NAME,TEST_PROVIDER_NAME);
+    assertNotNull(factory);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  NoSuchProviderException e) {
+    fail("unexpected exception: " + e);
+  }
+  String[][] combinations={{"UnknownKeyFactory",TEST_PROVIDER_NAME},{TEST_KEYFACTORY_NAME,"UnknownProvider"},{TEST_KEYFACTORY_NAME,existingProvider.getName()},{null,TEST_PROVIDER_NAME},{TEST_KEYFACTORY_NAME,null},{null,null}};
+  Class[] exceptions={NoSuchAlgorithmException.class,NoSuchProviderException.class,NoSuchAlgorithmException.class,NullPointerException.class,IllegalArgumentException.class,IllegalArgumentException.class};
+  for (int i=0; i < combinations.length; i++) {
+    String[] combination=combinations[i];
+    String message="getInstance(\"" + combination[0] + "\", \""+ combination[1]+ "\")";
+    exceptionThrown=false;
+    try {
+      KeyFactory.getInstance(combination[0],combination[1]);
+    }
+ catch (    Exception e) {
+      checkException(message,e,exceptions[i]);
+    }
+ finally {
+      checkException(message,null,exceptions[i]);
+    }
+  }
+}

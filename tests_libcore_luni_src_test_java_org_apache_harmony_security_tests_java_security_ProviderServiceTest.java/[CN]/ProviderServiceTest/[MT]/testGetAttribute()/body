@@ -1,0 +1,27 @@
+{
+  Provider p=new MyProvider();
+  Provider.Service s=new Provider.Service(p,"type","algorithm","className",null,null);
+  try {
+    s.getAttribute(null);
+    fail("No expected NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  if (s.getAttribute("aaa") != null) {
+    fail("getAttribute(aaa) failed");
+  }
+  HashMap<String,String> hm=new HashMap<String,String>();
+  hm.put("attribute","value");
+  hm.put("KeySize","1024");
+  hm.put("AAA","BBB");
+  s=new Provider.Service(p,"type","algorithm","className",null,hm);
+  if (s.getAttribute("bbb") != null) {
+    fail("getAttribute(bbb) failed");
+  }
+  if (!s.getAttribute("attribute").equals("value")) {
+    fail("getAttribute(attribute) failed");
+  }
+  if (!s.getAttribute("KeySize").equals("1024")) {
+    fail("getAttribute(KeySize) failed");
+  }
+}

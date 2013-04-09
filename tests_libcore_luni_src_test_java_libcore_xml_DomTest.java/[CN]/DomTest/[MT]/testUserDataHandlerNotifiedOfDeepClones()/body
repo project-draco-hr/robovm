@@ -1,0 +1,16 @@
+{
+  RecordingHandler handler=new RecordingHandler();
+  name.setUserData("a","apple",handler);
+  name.setUserData("b","banana",handler);
+  standard.setUserData("c","cat",handler);
+  waffles.setUserData("d","dog",handler);
+  Element clonedName=(Element)name.cloneNode(true);
+  Attr clonedStandard=clonedName.getAttributeNode("a:standard");
+  Text clonedWaffles=(Text)clonedName.getChildNodes().item(0);
+  Set<String> expected=new HashSet<String>();
+  expected.add(notification(NODE_CLONED,"a","apple",name,clonedName));
+  expected.add(notification(NODE_CLONED,"b","banana",name,clonedName));
+  expected.add(notification(NODE_CLONED,"c","cat",standard,clonedStandard));
+  expected.add(notification(NODE_CLONED,"d","dog",waffles,clonedWaffles));
+  assertEquals(expected,handler.calls);
+}

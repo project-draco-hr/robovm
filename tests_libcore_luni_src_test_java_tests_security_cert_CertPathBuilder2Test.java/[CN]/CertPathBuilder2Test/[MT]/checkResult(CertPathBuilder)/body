@@ -1,0 +1,22 @@
+{
+  String dt=CertPathBuilder.getDefaultType();
+  String propName=CertPathBuilder1Test.DEFAULT_TYPE_PROPERTY;
+  String dtN;
+  for (int i=0; i < invalidValues.length; i++) {
+    Security.setProperty(propName,invalidValues[i]);
+    dtN=CertPathBuilder.getDefaultType();
+    if (!dtN.equals(invalidValues[i]) && !dtN.equals(dt)) {
+      fail("Incorrect default type: ".concat(dtN));
+    }
+  }
+  Security.setProperty(propName,dt);
+  assertEquals("Incorrect default type",CertPathBuilder.getDefaultType(),dt);
+  try {
+    certBuild.build(null);
+    fail("CertPathBuilderException must be thrown");
+  }
+ catch (  CertPathBuilderException e) {
+  }
+  CertPathBuilderResult cpbResult=certBuild.build(null);
+  assertNull("Not null CertPathBuilderResult",cpbResult);
+}

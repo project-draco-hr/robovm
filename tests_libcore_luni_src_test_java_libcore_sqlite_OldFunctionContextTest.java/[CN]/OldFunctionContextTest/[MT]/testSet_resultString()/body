@@ -1,0 +1,9 @@
+{
+  TestFCString testString=new TestFCString();
+  db.exec("insert into " + DatabaseCreator.TEST_TABLE2 + " (ftext) values ('TestInput')",null);
+  db.create_function("test",1,testString);
+  TableResult res=db.get_table("select test(ftext) from " + DatabaseCreator.TEST_TABLE2);
+  String row[]=(String[])res.rows.elementAt(0);
+  String val=row[0];
+  assertEquals("TestInput",val);
+}

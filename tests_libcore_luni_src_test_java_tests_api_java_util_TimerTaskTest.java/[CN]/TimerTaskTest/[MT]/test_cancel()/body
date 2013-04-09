@@ -1,0 +1,65 @@
+{
+  Timer t=null;
+  try {
+    TimerTestTask testTask=new TimerTestTask();
+    assertTrue("Unsheduled tasks should return false for cancel()",!testTask.cancel());
+    t=new Timer();
+    testTask=new TimerTestTask();
+    t.schedule(testTask,500);
+    assertTrue("TimerTask should not have run yet",testTask.cancel());
+    t.cancel();
+    t=new Timer();
+    testTask=new TimerTestTask();
+    t.schedule(testTask,50);
+    while (testTask.wasRun() == 0) {
+      try {
+        Thread.sleep(150);
+      }
+ catch (      InterruptedException e) {
+      }
+    }
+    assertFalse("TimerTask.cancel() should return false if task has run",testTask.cancel());
+    assertFalse("TimerTask.cancel() should return false if called a second time",testTask.cancel());
+    t.cancel();
+    t=new Timer();
+    testTask=new TimerTestTask();
+    t.schedule(testTask,500,500);
+    assertTrue("TimerTask.cancel() should return true if sheduled for repeated execution even if not run",testTask.cancel());
+    t.cancel();
+    t=new Timer();
+    testTask=new TimerTestTask();
+    t.schedule(testTask,50,50);
+    while (testTask.wasRun() == 0) {
+      try {
+        Thread.sleep(100);
+      }
+ catch (      InterruptedException e) {
+      }
+    }
+    assertTrue("TimerTask.cancel() should return true if sheduled for repeated execution and run",testTask.cancel());
+    t.cancel();
+    t=new Timer();
+    testTask=new TimerTestTask();
+    t.schedule(testTask,5000);
+    assertTrue("TimerTask.cancel() should return true if task has never run",testTask.cancel());
+    assertFalse("TimerTask.cancel() should return false if called a second time",testTask.cancel());
+    t.cancel();
+    t=new Timer();
+    testTask=new TimerTestTask();
+    testTask.sleepInRun(true);
+synchronized (testTask.start) {
+      t.schedule(testTask,0);
+      try {
+        testTask.start.wait();
+        Thread.sleep(50);
+      }
+ catch (      InterruptedException e) {
+      }
+    }
+    assertFalse("TimerTask should have been cancelled",testTask.cancel());
+    t.cancel();
+  }
+  finally {
+    if (t != null)     t.cancel();
+  }
+}

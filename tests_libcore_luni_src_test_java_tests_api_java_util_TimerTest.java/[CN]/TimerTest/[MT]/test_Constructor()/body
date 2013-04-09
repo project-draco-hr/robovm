@@ -1,0 +1,20 @@
+{
+  Timer t=null;
+  try {
+    t=new Timer();
+    TimerTestTask testTask=new TimerTestTask();
+    t.schedule(testTask,200);
+synchronized (sync) {
+      try {
+        sync.wait(1000);
+      }
+ catch (      InterruptedException e) {
+      }
+    }
+    assertEquals("TimerTask.run() method not called after 200ms",1,testTask.wasRun());
+    t.cancel();
+  }
+  finally {
+    if (t != null)     t.cancel();
+  }
+}

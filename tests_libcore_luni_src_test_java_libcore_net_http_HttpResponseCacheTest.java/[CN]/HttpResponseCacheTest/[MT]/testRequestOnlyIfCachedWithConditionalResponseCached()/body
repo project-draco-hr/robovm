@@ -1,0 +1,8 @@
+{
+  server.enqueue(new MockResponse().setBody("A").addHeader("Cache-Control: max-age=30").addHeader("Date: " + formatDate(-1,TimeUnit.MINUTES)));
+  server.play();
+  assertEquals("A",readAscii(server.getUrl("/").openConnection()));
+  HttpURLConnection connection=(HttpURLConnection)server.getUrl("/").openConnection();
+  connection.addRequestProperty("Cache-Control","only-if-cached");
+  assertBadGateway(connection);
+}

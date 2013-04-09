@@ -1,0 +1,18 @@
+{
+  try {
+    SSLContext.setDefault(null);
+  }
+ catch (  NullPointerException expected) {
+  }
+  SSLContext defaultContext=SSLContext.getDefault();
+  for (  String protocol : StandardNames.SSL_CONTEXT_PROTOCOLS) {
+    SSLContext oldContext=SSLContext.getDefault();
+    assertNotNull(oldContext);
+    SSLContext newContext=SSLContext.getInstance(protocol);
+    assertNotNull(newContext);
+    assertNotSame(oldContext,newContext);
+    SSLContext.setDefault(newContext);
+    assertSame(newContext,SSLContext.getDefault());
+  }
+  SSLContext.setDefault(defaultContext);
+}

@@ -1,0 +1,60 @@
+{
+  Statement st=null;
+  Statement st1=null;
+  Statement st2=null;
+  Statement st3=null;
+  Statement st4=null;
+  ResultSet rs1=null;
+  ResultSet rs2=null;
+  ResultSet rs3=null;
+  ResultSet rs4=null;
+  try {
+    conn.setAutoCommit(false);
+    st=conn.createStatement();
+    st.execute("insert into zoo (id, name, family) values (3, 'Vorobey', 'sparrow');");
+    st.execute("insert into zoo (id, name, family) values (4, 'Orel', 'eagle');");
+    st1=conn.createStatement();
+    st1.execute("select * from zoo");
+    rs1=st1.getResultSet();
+    assertEquals(4,getCount(rs1));
+    try {
+      conn.commit();
+      st2=conn.createStatement();
+      st2.execute("select * from zoo");
+      rs2=st2.getResultSet();
+      assertEquals(4,getCount(rs2));
+    }
+  finally {
+      try {
+        rs2.close();
+        st2.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+    try {
+      st3=conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY,ResultSet.HOLD_CURSORS_OVER_COMMIT);
+      st3.execute("select * from zoo");
+      rs3=st3.getResultSet();
+      conn.commit();
+      assertEquals(4,getCount(rs3));
+    }
+  finally {
+      try {
+        if (rs3 != null)         rs3.close();
+        if (st3 != null)         st3.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+  }
+  finally {
+    try {
+      rs1.close();
+      st.close();
+      st1.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+}

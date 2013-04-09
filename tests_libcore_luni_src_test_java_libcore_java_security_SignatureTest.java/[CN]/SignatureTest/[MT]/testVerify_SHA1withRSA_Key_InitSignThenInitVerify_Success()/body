@@ -1,0 +1,13 @@
+{
+  KeyFactory kf=KeyFactory.getInstance("RSA");
+  RSAPublicKeySpec pubKeySpec=new RSAPublicKeySpec(RSA_2048_modulus,RSA_2048_publicExponent);
+  PublicKey pubKey=kf.generatePublic(pubKeySpec);
+  RSAPrivateKeySpec privKeySpec=new RSAPrivateKeySpec(RSA_2048_modulus,RSA_2048_privateExponent);
+  PrivateKey privKey=kf.generatePrivate(privKeySpec);
+  Signature sig=Signature.getInstance("SHA1withRSA");
+  sig.initSign(privKey);
+  sig.update(Vector2Data);
+  sig.initVerify(pubKey);
+  sig.update(Vector1Data);
+  assertTrue("Signature must match expected signature",sig.verify(SHA1withRSA_Vector1Signature));
+}

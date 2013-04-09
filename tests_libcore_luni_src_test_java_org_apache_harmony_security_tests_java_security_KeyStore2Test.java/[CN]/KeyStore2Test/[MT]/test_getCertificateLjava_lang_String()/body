@@ -1,0 +1,21 @@
+{
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  X509Certificate cert[]=new X509Certificate[2];
+  cert[0]=(X509Certificate)cf.generateCertificate(certArray);
+  cert[1]=(X509Certificate)cf.generateCertificate(certArray2);
+  KeyStore keyTest=KeyStore.getInstance(KeyStore.getDefaultType());
+  try {
+    keyTest.getCertificate("anAlias");
+    fail();
+  }
+ catch (  KeyStoreException expected) {
+  }
+  keyTest.load(null,null);
+  PublicKey pub=cert[0].getPublicKey();
+  keyTest.setCertificateEntry("alias1",cert[0]);
+  Certificate certRes=keyTest.getCertificate("alias1");
+  assertEquals("the public key of the certificate from getCertificate() " + "did not equal the original certificate",pub,certRes.getPublicKey());
+  keyTest.setCertificateEntry("alias2",cert[0]);
+  Certificate cert2=keyTest.getCertificate("alias2");
+  assertEquals("the certificate for alias2 is supposed to exist",cert2,cert[0]);
+}

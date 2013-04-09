@@ -1,0 +1,67 @@
+{
+  PrivateKey caKey;
+  X509Certificate caCert;
+  X509Certificate[] caCertChain;
+  if (signer == null) {
+    caKey=null;
+    caCert=null;
+    caCertChain=null;
+  }
+ else {
+    caKey=signer.getPrivateKey();
+    caCert=(X509Certificate)signer.getCertificate();
+    caCertChain=(X509Certificate[])signer.getCertificateChain();
+  }
+  PrivateKey privateKey;
+  X509Certificate x509c;
+  if (publicAlias == null && privateAlias == null) {
+    privateKey=null;
+    x509c=null;
+  }
+ else {
+    int keySize;
+    if (keyAlgorithm.equals("RSA")) {
+      keySize=1024;
+    }
+ else     if (keyAlgorithm.equals("DSA")) {
+      keySize=512;
+    }
+ else     if (keyAlgorithm.equals("EC")) {
+      keySize=256;
+    }
+ else     if (keyAlgorithm.equals("EC_RSA")) {
+      keySize=256;
+      keyAlgorithm="EC";
+    }
+ else {
+      throw new IllegalArgumentException("Unknown key algorithm " + keyAlgorithm);
+    }
+    KeyPairGenerator kpg=KeyPairGenerator.getInstance(keyAlgorithm);
+    kpg.initialize(keySize,new SecureRandom());
+    KeyPair kp=kpg.generateKeyPair();
+    privateKey=kp.getPrivate();
+    PublicKey publicKey=kp.getPublic();
+    X500Principal issuer=((caCert != null) ? caCert.getSubjectX500Principal() : subject);
+    PrivateKey signingKey=(caKey == null) ? privateKey : caKey;
+    x509c=createCertificate(publicKey,signingKey,subject,issuer,keyUsage,ca,subjectAltNames,permittedNameConstraints,excludedNameConstraints);
+  }
+  X509Certificate[] x509cc;
+  if (privateAlias == null) {
+    x509cc=null;
+  }
+ else   if (caCertChain == null) {
+    x509cc=new X509Certificate[]{x509c};
+  }
+ else {
+    x509cc=new X509Certificate[caCertChain.length + 1];
+    x509cc[0]=x509c;
+    System.arraycopy(caCertChain,0,x509cc,1,caCertChain.length);
+  }
+  if (privateAlias != null) {
+    keyStore.setKeyEntry(privateAlias,privateKey,keyPassword,x509cc);
+  }
+  if (publicAlias != null) {
+    keyStore.setCertificateEntry(publicAlias,x509c);
+  }
+  return keyStore;
+}

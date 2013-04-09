@@ -1,0 +1,29 @@
+{
+  Process process=builder.start();
+  ExecutorService executorService=Executors.newFixedThreadPool(2);
+  try {
+    Future<String> errFuture=executorService.submit(streamToStringCallable(process.getErrorStream()));
+    Future<String> outFuture=executorService.submit(streamToStringCallable(process.getInputStream()));
+    Throwable failure;
+    String out="";
+    try {
+      out=outFuture.get(30,TimeUnit.SECONDS);
+      String err=errFuture.get(30,TimeUnit.SECONDS);
+      failure=err.length() > 0 ? new AssertionFailedError("Unexpected err stream data:\n" + err) : null;
+    }
+ catch (    Exception e) {
+      failure=e;
+    }
+    if (failure != null) {
+      AssertionFailedError error=new AssertionFailedError("Failed to execute " + builder.command() + "; output was:\n"+ out);
+      error.initCause(failure);
+      throw error;
+    }
+ else {
+      return out;
+    }
+  }
+  finally {
+    executorService.shutdown();
+  }
+}

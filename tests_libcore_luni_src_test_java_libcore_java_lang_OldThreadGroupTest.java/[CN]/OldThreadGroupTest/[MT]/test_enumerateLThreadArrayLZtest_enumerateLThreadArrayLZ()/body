@@ -1,0 +1,33 @@
+{
+  int initialThreadCount=initialThreadGroup.activeCount();
+  Thread[] initialThreads=new Thread[initialThreadCount];
+  assertEquals(initialThreadCount,initialThreadGroup.enumerate(initialThreads,false));
+  assertEquals(initialThreadCount,initialThreadGroup.enumerate(initialThreads,true));
+  assertTrue(inListOfThreads(initialThreads));
+  ThreadGroup group=new ThreadGroup(initialThreadGroup,"enumerateThreadArray");
+  int groupSize=3;
+  List<MyThread> newThreads=populateGroupsWithThreads(group,groupSize);
+  assertEquals(initialThreadCount,initialThreadGroup.enumerate(initialThreads,true));
+  assertTrue(inListOfThreads(initialThreads));
+  for (  MyThread thread : newThreads) {
+    thread.start();
+  }
+  Thread.sleep(500);
+  int afterStartCount=initialThreadGroup.activeCount();
+  Set<Thread> initialPlusNew=new HashSet<Thread>();
+  initialPlusNew.addAll(Arrays.asList(initialThreads));
+  initialPlusNew.addAll(newThreads);
+  Thread[] afterStartThreads=new Thread[afterStartCount];
+  assertEquals(afterStartCount,initialThreadGroup.enumerate(afterStartThreads,true));
+  assertEquals(initialPlusNew,new HashSet<Thread>(Arrays.asList(afterStartThreads)));
+  assertTrue(inListOfThreads(afterStartThreads));
+  for (  MyThread thread : newThreads) {
+    thread.interrupt();
+  }
+  Thread.sleep(500);
+  int afterDeathCount=initialThreadGroup.activeCount();
+  Thread[] afterDeathThreads=new Thread[afterDeathCount];
+  assertEquals(afterDeathCount,initialThreadGroup.enumerate(afterDeathThreads,false));
+  assertEquals(Arrays.asList(initialThreads),Arrays.asList(afterDeathThreads));
+  assertTrue(inListOfThreads(afterDeathThreads));
+}

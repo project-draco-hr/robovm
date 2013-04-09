@@ -1,0 +1,22 @@
+{
+  insertNewRecord();
+  String selectQuery="SELECT * FROM " + DatabaseCreator.TEST_TABLE1 + " GROUP BY field3";
+  try {
+    statement.executeQuery(selectQuery);
+    if (!meta.supportsGroupBy()) {
+      fail("group by are supported");
+    }
+  }
+ catch (  SQLException e) {
+    if (meta.supportsGroupBy()) {
+      fail("group by are not supported");
+    }
+  }
+  conn.close();
+  try {
+    meta.supportsGroupBy();
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

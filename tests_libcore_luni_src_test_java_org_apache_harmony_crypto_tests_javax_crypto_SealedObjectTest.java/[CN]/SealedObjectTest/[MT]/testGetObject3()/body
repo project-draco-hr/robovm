@@ -1,0 +1,37 @@
+{
+  try {
+    new SealedObject("secret string",new NullCipher()).getObject(new SecretKeySpec(new byte[]{0,0,0},"algorithm"),null);
+    fail("IllegalArgumentException should be thrown in the case of " + "null provider.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new SealedObject("secret string",new NullCipher()).getObject(new SecretKeySpec(new byte[]{0,0,0},"algorithm"),"");
+    fail("IllegalArgumentException should be thrown in the case of " + "empty provider.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  KeyGenerator kg=KeyGenerator.getInstance("DES");
+  Key key=kg.generateKey();
+  Cipher cipher=Cipher.getInstance("DES");
+  String provider=cipher.getProvider().getName();
+  cipher.init(Cipher.ENCRYPT_MODE,key);
+  String secret="secret string";
+  SealedObject so=new SealedObject(secret,cipher);
+  cipher.init(Cipher.DECRYPT_MODE,key);
+  assertEquals("The returned object does not equals to the " + "original object.",secret,so.getObject(key,provider));
+  kg=KeyGenerator.getInstance("DESede");
+  key=kg.generateKey();
+  try {
+    so.getObject(key,provider);
+    fail("InvalidKeyException expected");
+  }
+ catch (  InvalidKeyException e) {
+  }
+  try {
+    so.getObject(key,"Wrong provider name");
+    fail("NoSuchProviderException expected");
+  }
+ catch (  NoSuchProviderException e) {
+  }
+}

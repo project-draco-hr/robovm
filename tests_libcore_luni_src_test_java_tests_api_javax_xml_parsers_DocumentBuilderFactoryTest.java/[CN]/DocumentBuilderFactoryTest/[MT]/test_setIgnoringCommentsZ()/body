@@ -1,0 +1,40 @@
+{
+  commentElements.clear();
+  dbf.setIgnoringComments(true);
+  assertTrue(dbf.isIgnoringComments());
+  try {
+    DocumentBuilder parser=dbf.newDocumentBuilder();
+    Document document=parser.parse(getClass().getResourceAsStream("/recipt.xml"));
+    goThroughDocument((Node)document,"");
+    assertFalse(commentElements.contains("comment1"));
+    assertFalse(commentElements.contains("comment2"));
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException " + e.getMessage());
+  }
+catch (  ParserConfigurationException e) {
+    fail("Unexpected ParserConfigurationException " + e.getMessage());
+  }
+catch (  SAXException e) {
+    fail("Unexpected SAXException " + e.getMessage());
+  }
+  commentElements.clear();
+  dbf.setIgnoringComments(false);
+  assertFalse(dbf.isIgnoringComments());
+  try {
+    DocumentBuilder parser=dbf.newDocumentBuilder();
+    Document document=parser.parse(getClass().getResourceAsStream("/recipt.xml"));
+    goThroughDocument((Node)document,"");
+    assertTrue(commentElements.contains("comment1"));
+    assertTrue(commentElements.contains("comment2"));
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException " + e.getMessage());
+  }
+catch (  ParserConfigurationException e) {
+    fail("Unexpected ParserConfigurationException " + e.getMessage());
+  }
+catch (  SAXException e) {
+    fail("Unexpected SAXException " + e.getMessage());
+  }
+}

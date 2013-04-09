@@ -1,0 +1,24 @@
+{
+  baos=new java.io.ByteArrayOutputStream();
+  os=new java.io.BufferedOutputStream(baos);
+  os.write('t');
+  bais=new java.io.ByteArrayInputStream(baos.toByteArray());
+  assertEquals("Test 1: Byte written, not buffered;",0,bais.available());
+  os.flush();
+  bais=new java.io.ByteArrayInputStream(baos.toByteArray());
+  assertEquals("Test 2: Byte not written after flush;",1,bais.available());
+  byte[] wbytes=new byte[1];
+  bais.read(wbytes,0,1);
+  assertEquals("Test 3: Incorrect byte written or read;",'t',wbytes[0]);
+  os.close();
+  sos=new Support_OutputStream(true);
+  os=new BufferedOutputStream(sos,1);
+  os.write('t');
+  try {
+    os.write('e');
+    fail("Test 4: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  sos.setThrowsException(false);
+}

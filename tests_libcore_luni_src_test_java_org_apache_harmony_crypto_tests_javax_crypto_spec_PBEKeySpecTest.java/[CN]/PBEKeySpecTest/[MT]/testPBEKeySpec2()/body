@@ -1,0 +1,60 @@
+{
+  char[] password=new char[]{'1','2','3','4','5'};
+  byte[] salt=new byte[]{1,2,3,4,5};
+  int iterationCount=10;
+  int keyLength=10;
+  try {
+    PBEKeySpec pbeks=new PBEKeySpec(null,salt,iterationCount,keyLength);
+    assertTrue("An empty char[] should be used in case of null input " + "char array.",pbeks.getPassword().length == 0);
+  }
+ catch (  IllegalArgumentException e) {
+    fail("Unexpected IllegalArgumentException was thrown.");
+  }
+catch (  NullPointerException e) {
+    fail("Unexpected NullPointerException was thrown.");
+  }
+  try {
+    new PBEKeySpec(password,null,iterationCount,keyLength);
+    fail("A NullPointerException should be was thrown " + "in the case of null salt.");
+  }
+ catch (  IllegalArgumentException e) {
+    fail("Unexpected IllegalArgumentException was thrown.");
+  }
+catch (  NullPointerException e) {
+  }
+  try {
+    new PBEKeySpec(password,new byte[0],iterationCount,keyLength);
+    fail("An IllegalArgumentException should be thrown " + "in the case of empty salt.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new PBEKeySpec(password,salt,-1,keyLength);
+    fail("An IllegalArgumentException should be thrown " + "in the case of negative iterationCount.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new PBEKeySpec(password,salt,iterationCount,-1);
+    fail("An IllegalArgumentException should be thrown " + "in the case of negative keyLength.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new PBEKeySpec(password,salt,0,keyLength);
+    fail("An IllegalArgumentException should be thrown " + "in the case of zero iterationCount.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new PBEKeySpec(password,salt,iterationCount,0);
+    fail("An IllegalArgumentException should be thrown " + "in the case of zero keyLength.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  PBEKeySpec pbeks=new PBEKeySpec(password,salt,iterationCount,keyLength);
+  password[0]++;
+  assertFalse("The change of password specified in the constructor " + "should not cause the change of internal array.",password[0] == pbeks.getPassword()[0]);
+  salt[0]++;
+  assertFalse("The change of salt specified in the constructor " + " should not cause the change of internal array.",salt[0] == pbeks.getSalt()[0]);
+}

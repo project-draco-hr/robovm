@@ -1,0 +1,42 @@
+{
+  byte[] bArray=new byte[]{1,2,3,4,5};
+  byte[] array=null;
+  int i;
+  pref.putByteArray("Array",bArray);
+  pref.flush();
+  array=pref.getByteArray("Array",null);
+  assertEquals(bArray.length,array.length);
+  for (i=0; i < bArray.length; i++) {
+    assertEquals(bArray[i],array[i]);
+  }
+  try {
+    pref.putByteArray(null,bArray);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  StringBuffer sb=new StringBuffer();
+  for (i=0; i < Preferences.MAX_KEY_LENGTH + 1; i++) {
+    sb.append('c');
+  }
+  try {
+    pref.putByteArray(new String(sb),bArray);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  bArray=new byte[Preferences.MAX_VALUE_LENGTH * 3 / 4 + 1];
+  try {
+    pref.putByteArray("Big array",bArray);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  pref.removeNode();
+  try {
+    pref.putByteArray("Array",new byte[10]);
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+}

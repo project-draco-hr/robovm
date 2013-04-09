@@ -1,0 +1,27 @@
+{
+  out=new PipedOutputStream();
+  try {
+    out.connect(new PipedInputStream());
+  }
+ catch (  Exception e) {
+    fail("Test 1: Unexpected exception when connecting: " + e.getLocalizedMessage());
+  }
+  try {
+    out.write('B');
+  }
+ catch (  IOException e) {
+    fail("Test 2: Unexpected IOException when writing after connecting.");
+  }
+  try {
+    out.connect(new PipedInputStream());
+    fail("Test 3: IOException expected when reconnecting the stream.");
+  }
+ catch (  IOException e) {
+  }
+  try {
+    out.connect(null);
+    fail("Test 4: NullPointerException expected.");
+  }
+ catch (  NullPointerException e) {
+  }
+}

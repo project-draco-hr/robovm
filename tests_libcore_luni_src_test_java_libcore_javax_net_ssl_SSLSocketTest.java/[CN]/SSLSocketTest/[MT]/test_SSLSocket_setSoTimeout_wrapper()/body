@@ -1,0 +1,21 @@
+{
+  if (StandardNames.IS_RI) {
+    return;
+  }
+  ServerSocket listening=new ServerSocket(0);
+  Socket underlying=new Socket(listening.getInetAddress(),listening.getLocalPort());
+  Socket server=listening.accept();
+  SSLSocketFactory sf=(SSLSocketFactory)SSLSocketFactory.getDefault();
+  Socket clientWrapping=sf.createSocket(underlying,null,-1,false);
+  underlying.setSoTimeout(1);
+  try {
+    clientWrapping.getInputStream().read();
+    fail();
+  }
+ catch (  SocketTimeoutException expected) {
+  }
+  clientWrapping.close();
+  server.close();
+  underlying.close();
+  listening.close();
+}

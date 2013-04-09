@@ -1,0 +1,36 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  SSLContextSpi spi=new MySSLContextSpi();
+  SSLContext sslContext=new MySslContext(spi,defaultProvider,defaultProtocol);
+  assertEquals("Incorrect protocol",defaultProtocol,sslContext.getProtocol());
+  assertEquals("Incorrect provider",defaultProvider,sslContext.getProvider());
+  TrustManager[] tm=null;
+  KeyManager[] km=null;
+  sslContext.init(km,tm,new SecureRandom());
+  assertNotNull("No SSLEngine created",sslContext.createSSLEngine());
+  assertNotNull("No SSLEngine created",sslContext.createSSLEngine("host",8888));
+  try {
+    sslContext.init(km,tm,null);
+    fail("KeyManagementException should be thrown for null " + "SecureRandom");
+  }
+ catch (  KeyManagementException e) {
+  }
+  sslContext=new MySslContext(null,null,null);
+  assertNull("Incorrect protocol",sslContext.getProtocol());
+  assertNull("Incorrect provider",sslContext.getProvider());
+  try {
+    sslContext.createSSLEngine();
+    fail("NullPointerException should be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    sslContext.getSocketFactory();
+    fail("NullPointerException should be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+}

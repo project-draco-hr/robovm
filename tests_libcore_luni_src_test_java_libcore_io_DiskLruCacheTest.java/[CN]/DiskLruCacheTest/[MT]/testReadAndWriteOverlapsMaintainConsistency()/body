@@ -1,0 +1,22 @@
+{
+  DiskLruCache.Editor v1Creator=cache.edit("k1");
+  v1Creator.set(0,"AAaa");
+  v1Creator.set(1,"BBbb");
+  v1Creator.commit();
+  DiskLruCache.Snapshot snapshot1=cache.get("k1");
+  InputStream inV1=snapshot1.getInputStream(0);
+  assertEquals('A',inV1.read());
+  assertEquals('A',inV1.read());
+  DiskLruCache.Editor v1Updater=cache.edit("k1");
+  v1Updater.set(0,"CCcc");
+  v1Updater.set(1,"DDdd");
+  v1Updater.commit();
+  DiskLruCache.Snapshot snapshot2=cache.get("k1");
+  assertEquals("CCcc",snapshot2.getString(0));
+  assertEquals("DDdd",snapshot2.getString(1));
+  snapshot2.close();
+  assertEquals('a',inV1.read());
+  assertEquals('a',inV1.read());
+  assertEquals("BBbb",snapshot1.getString(1));
+  snapshot1.close();
+}

@@ -1,0 +1,50 @@
+{
+  EnumMap enumColorMap=new EnumMap<Color,Double>(Color.class);
+  enumColorMap.put(Color.Green,2);
+  EnumMap enumSizeMap=new EnumMap(Size.class);
+  enumColorMap.putAll(enumSizeMap);
+  enumSizeMap.put(Size.Big,1);
+  try {
+    enumColorMap.putAll(enumSizeMap);
+    fail("Expected ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  EnumMap enumColorMap1=new EnumMap<Color,Double>(Color.class);
+  enumColorMap1.put(Color.Blue,3);
+  enumColorMap.putAll(enumColorMap1);
+  assertEquals("Get returned incorrect value for given key",3,enumColorMap.get(Color.Blue));
+  assertEquals("Wrong Size",2,enumColorMap.size());
+  enumColorMap=new EnumMap<Color,Double>(Color.class);
+  HashMap hashColorMap=null;
+  try {
+    enumColorMap.putAll(hashColorMap);
+    fail("Expected NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  hashColorMap=new HashMap();
+  enumColorMap.putAll(hashColorMap);
+  hashColorMap.put(Color.Green,2);
+  enumColorMap.putAll(hashColorMap);
+  assertEquals("Get returned incorrect value for given key",2,enumColorMap.get(Color.Green));
+  assertNull("Get returned non-null for non mapped key",enumColorMap.get(Color.Red));
+  hashColorMap.put(Color.Red,new Integer(1));
+  enumColorMap.putAll(hashColorMap);
+  assertEquals("Get returned incorrect value for given key",new Integer(2),enumColorMap.get(Color.Green));
+  hashColorMap.put(Size.Big,3);
+  try {
+    enumColorMap.putAll(hashColorMap);
+    fail("Expected ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  hashColorMap=new HashMap();
+  hashColorMap.put(new Integer(1),1);
+  try {
+    enumColorMap.putAll(hashColorMap);
+    fail("Expected ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+}

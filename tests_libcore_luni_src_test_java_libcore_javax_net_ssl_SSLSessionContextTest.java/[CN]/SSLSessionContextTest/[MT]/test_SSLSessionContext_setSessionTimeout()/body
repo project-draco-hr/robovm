@@ -1,0 +1,29 @@
+{
+  TestSSLContext c=TestSSLContext.create();
+  assertEquals(TestSSLContext.EXPECTED_DEFAULT_SSL_SESSION_CACHE_TIMEOUT,c.clientContext.getClientSessionContext().getSessionTimeout());
+  assertEquals(TestSSLContext.EXPECTED_DEFAULT_SSL_SESSION_CACHE_TIMEOUT,c.serverContext.getServerSessionContext().getSessionTimeout());
+  c.clientContext.getClientSessionContext().setSessionTimeout(0);
+  c.serverContext.getServerSessionContext().setSessionTimeout(0);
+  assertEquals(0,c.clientContext.getClientSessionContext().getSessionTimeout());
+  assertEquals(0,c.serverContext.getServerSessionContext().getSessionTimeout());
+  try {
+    c.clientContext.getClientSessionContext().setSessionTimeout(-1);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    c.serverContext.getServerSessionContext().setSessionTimeout(-1);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  c.close();
+  TestSSLSocketPair s=TestSSLSocketPair.create();
+  assertSSLSessionContextSize(1,s.c);
+  Thread.sleep(1 * 1000);
+  s.c.clientContext.getClientSessionContext().setSessionTimeout(1);
+  s.c.serverContext.getServerSessionContext().setSessionTimeout(1);
+  assertSSLSessionContextSize(0,s.c);
+  s.close();
+}

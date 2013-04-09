@@ -1,0 +1,32 @@
+{
+  File sampleFile=createTempHelloWorldFile();
+  URL fileURL=sampleFile.toURL();
+  BufferedReader dis=null;
+  String inputLine;
+  StringBuffer buf=new StringBuffer(32);
+  try {
+    dis=new BufferedReader(new InputStreamReader(fileURL.openStream()),32);
+    while ((inputLine=dis.readLine()) != null) {
+      buf.append(inputLine);
+    }
+    dis.close();
+  }
+ catch (  IOException e) {
+    fail("Unexpected error in test setup: " + e.getMessage());
+  }
+  assertTrue("Assert 0: Nothing was read from file ",buf.length() > 0);
+  assertEquals("Assert 1: Wrong stream content","Hello World",buf.toString());
+  URL invalidFile=new URL("file:///nonexistenttestdir/tstfile");
+  try {
+    dis=new BufferedReader(new InputStreamReader(invalidFile.openStream()),32);
+    while ((inputLine=dis.readLine()) != null) {
+      buf.append(inputLine);
+    }
+    fail("Access to invalid file worked");
+  }
+ catch (  Exception e) {
+  }
+ finally {
+    dis.close();
+  }
+}

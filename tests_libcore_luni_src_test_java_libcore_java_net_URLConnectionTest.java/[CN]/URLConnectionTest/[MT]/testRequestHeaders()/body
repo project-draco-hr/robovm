@@ -1,0 +1,66 @@
+{
+  server.enqueue(new MockResponse());
+  server.play();
+  HttpURLConnection urlConnection=(HttpURLConnection)server.getUrl("/").openConnection();
+  urlConnection.addRequestProperty("D","e");
+  urlConnection.addRequestProperty("D","f");
+  assertEquals("f",urlConnection.getRequestProperty("D"));
+  assertEquals("f",urlConnection.getRequestProperty("d"));
+  Map<String,List<String>> requestHeaders=urlConnection.getRequestProperties();
+  assertEquals(newSet("e","f"),new HashSet<String>(requestHeaders.get("D")));
+  assertEquals(newSet("e","f"),new HashSet<String>(requestHeaders.get("d")));
+  try {
+    requestHeaders.put("G",Arrays.asList("h"));
+    fail("Modified an unmodifiable view.");
+  }
+ catch (  UnsupportedOperationException expected) {
+  }
+  try {
+    requestHeaders.get("D").add("i");
+    fail("Modified an unmodifiable view.");
+  }
+ catch (  UnsupportedOperationException expected) {
+  }
+  try {
+    urlConnection.setRequestProperty(null,"j");
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    urlConnection.addRequestProperty(null,"k");
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  urlConnection.setRequestProperty("NullValue",null);
+  assertNull(urlConnection.getRequestProperty("NullValue"));
+  urlConnection.addRequestProperty("AnotherNullValue",null);
+  assertNull(urlConnection.getRequestProperty("AnotherNullValue"));
+  urlConnection.getResponseCode();
+  RecordedRequest request=server.takeRequest();
+  assertContains(request.getHeaders(),"D: e");
+  assertContains(request.getHeaders(),"D: f");
+  assertContainsNoneMatching(request.getHeaders(),"NullValue.*");
+  assertContainsNoneMatching(request.getHeaders(),"AnotherNullValue.*");
+  assertContainsNoneMatching(request.getHeaders(),"G:.*");
+  assertContainsNoneMatching(request.getHeaders(),"null:.*");
+  try {
+    urlConnection.addRequestProperty("N","o");
+    fail("Set header after connect");
+  }
+ catch (  IllegalStateException expected) {
+  }
+  try {
+    urlConnection.setRequestProperty("P","q");
+    fail("Set header after connect");
+  }
+ catch (  IllegalStateException expected) {
+  }
+  try {
+    urlConnection.getRequestProperties();
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+}

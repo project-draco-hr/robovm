@@ -1,0 +1,18 @@
+{
+  assertNull(Security.getProvider("SOMEINCORRECTPROVIDERNAME"));
+  assertNull(Security.getProvider(null));
+  Provider[] providers=Security.getProviders();
+  assertTrue("getProviders returned zero length array",providers.length > 0);
+  for (  Provider p : providers) {
+    String providerName=p.getName();
+    assertSame(p,Security.getProvider(providerName));
+  }
+  Provider p=new MyProvider();
+  try {
+    Security.addProvider(p);
+    assertSame(p,Security.getProvider(p.getName()));
+  }
+  finally {
+    Security.removeProvider(p.getName());
+  }
+}

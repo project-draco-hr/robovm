@@ -1,0 +1,36 @@
+{
+  b=new Boolean(true);
+  Object obj=new Object();
+  String str="Test";
+  SoftReference sr=new SoftReference(b,rq);
+  WeakReference wr=new WeakReference(obj,rq);
+  PhantomReference pr=new PhantomReference(str,rq);
+  assertNull(rq.poll());
+  sr.enqueue();
+  wr.enqueue();
+  pr.enqueue();
+  try {
+    assertNull("Remove failed.",rq.poll().get());
+  }
+ catch (  Exception e) {
+    fail("Exception during the test : " + e.getMessage());
+  }
+  try {
+    assertEquals("Remove failed.",obj,(rq.poll().get()));
+  }
+ catch (  Exception e) {
+    fail("Exception during the test : " + e.getMessage());
+  }
+  try {
+    assertTrue("Remove failed.",((Boolean)rq.poll().get()).booleanValue());
+  }
+ catch (  Exception e) {
+    fail("Exception during the test : " + e.getMessage());
+  }
+  assertNull(rq.poll());
+  sr.enqueue();
+  wr.enqueue();
+  System.gc();
+  System.runFinalization();
+  assertNull(rq.poll());
+}

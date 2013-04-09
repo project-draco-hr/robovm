@@ -1,0 +1,43 @@
+{
+  String test="Test string";
+  try {
+    Map<AttributedCharacterIterator.Attribute,String> hm=new HashMap<AttributedCharacterIterator.Attribute,String>();
+    AttributedCharacterIterator.Attribute[] aci=new AttributedCharacterIterator.Attribute[3];
+    aci[0]=new TestAttributedCharacterIteratorAttribute("att1");
+    aci[1]=new TestAttributedCharacterIteratorAttribute("att2");
+    aci[2]=new TestAttributedCharacterIteratorAttribute("att3");
+    hm.put(aci[0],"value1");
+    hm.put(aci[1],"value2");
+    AttributedString attrString=new AttributedString(test);
+    attrString.addAttributes(hm,2,4);
+    AttributedCharacterIterator it=attrString.getIterator(aci,1,5);
+    assertTrue("Incorrect iteration on AttributedString",it.getAttribute(aci[0]) == null);
+    assertTrue("Incorrect iteration on AttributedString",it.getAttribute(aci[1]) == null);
+    assertTrue("Incorrect iteration on AttributedString",it.getAttribute(aci[2]) == null);
+    it.next();
+    assertTrue("Incorrect iteration on AttributedString",it.getAttribute(aci[0]).equals("value1"));
+    assertTrue("Incorrect iteration on AttributedString",it.getAttribute(aci[1]).equals("value2"));
+    assertTrue("Incorrect iteration on AttributedString",it.getAttribute(aci[2]) == null);
+    try {
+      attrString.getIterator(aci,-1,5);
+      fail("IllegalArgumentException is not thrown.");
+    }
+ catch (    IllegalArgumentException iae) {
+    }
+    try {
+      attrString.getIterator(aci,6,5);
+      fail("IllegalArgumentException is not thrown.");
+    }
+ catch (    IllegalArgumentException iae) {
+    }
+    try {
+      attrString.getIterator(aci,3,2);
+      fail("IllegalArgumentException is not thrown.");
+    }
+ catch (    IllegalArgumentException iae) {
+    }
+  }
+ catch (  Exception e) {
+    fail("Unexpected exceptiption " + e.toString());
+  }
+}

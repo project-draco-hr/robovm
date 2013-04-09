@@ -1,0 +1,39 @@
+{
+  StringBuilder name=new StringBuilder(Preferences.MAX_NAME_LENGTH);
+  for (int i=0; i < Preferences.MAX_NAME_LENGTH; i++) {
+    name.append('a');
+  }
+  String longName=name.toString();
+  Preferences root=Preferences.userRoot();
+  Preferences parent=Preferences.userNodeForPackage(Preferences.class);
+  Preferences pref=parent.node("mock");
+  try {
+    pref.node(null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    pref.node("/java/util/prefs/");
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    pref.node("/java//util/prefs");
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    pref.node(longName + "a");
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  assertNotNull(pref.node(longName));
+  assertSame(root,pref.node("/"));
+  Preferences prefs=pref.node("/java/util/prefs");
+  assertSame(prefs,parent);
+  assertSame(pref,pref.node(""));
+}

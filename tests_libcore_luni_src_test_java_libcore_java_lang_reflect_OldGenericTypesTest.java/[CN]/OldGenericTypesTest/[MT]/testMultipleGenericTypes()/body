@@ -1,0 +1,28 @@
+{
+  Class<? extends MultipleGenericTypes> clazz=MultipleGenericTypes.class;
+  TypeVariable<?>[] typeParameters=clazz.getTypeParameters();
+  assertEquals(2,typeParameters.length);
+  TypeVariable<?> typeVariableT=typeParameters[0];
+  assertEquals(clazz,typeVariableT.getGenericDeclaration());
+  assertEquals("T",typeVariableT.getName());
+  TypeVariable<?> typeVariableS=typeParameters[1];
+  assertEquals("S",typeVariableS.getName());
+  assertEquals(clazz,typeVariableS.getGenericDeclaration());
+  Method multipleGenericTypesT=clazz.getDeclaredMethod("multipleGenericTypesT",new Class[]{Object.class});
+  Type[] multipleGenericTypesTTypes=multipleGenericTypesT.getGenericParameterTypes();
+  assertLenghtOne(multipleGenericTypesTTypes);
+  Type multipleGenericTypesTType=multipleGenericTypesTTypes[0];
+  assertEquals(typeVariableT,multipleGenericTypesTType);
+  Method multipleGenericTypesS=clazz.getDeclaredMethod("multipleGenericTypesS",new Class[]{Object.class});
+  Type[] multipleGenericTypesSTypes=multipleGenericTypesS.getGenericParameterTypes();
+  assertLenghtOne(multipleGenericTypesSTypes);
+  Type multipleGenericTypesSType=multipleGenericTypesSTypes[0];
+  assertEquals(typeVariableS,multipleGenericTypesSType);
+  Method multipleGenericTypesTS=clazz.getDeclaredMethod("multipleGenericTypesTS",new Class[]{Object.class,Object.class});
+  Type[] multipleGenericTypesTSTypes=multipleGenericTypesTS.getGenericParameterTypes();
+  assertEquals(2,multipleGenericTypesTSTypes.length);
+  Type multipleGenericTypesTSTypeT=multipleGenericTypesTSTypes[0];
+  assertEquals(typeVariableT,multipleGenericTypesTSTypeT);
+  Type multipleGenericTypesTSTypeS=multipleGenericTypesTSTypes[1];
+  assertEquals(typeVariableS,multipleGenericTypesTSTypeS);
+}

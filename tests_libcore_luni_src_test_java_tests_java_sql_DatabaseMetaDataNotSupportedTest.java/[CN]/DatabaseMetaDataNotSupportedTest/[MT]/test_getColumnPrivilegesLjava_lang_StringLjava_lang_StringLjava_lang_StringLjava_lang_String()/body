@@ -1,0 +1,27 @@
+{
+  ResultSet rs=meta.getColumnPrivileges(conn.getCatalog(),null,DatabaseCreator.TEST_TABLE1,"id");
+  ResultSetMetaData rsmd=rs.getMetaData();
+  assertFalse("Rows are obtained",rs.next());
+  rs.close();
+  String query="GRANT REFERENCES(id) ON " + DatabaseCreator.TEST_TABLE1 + " TO "+ Support_SQL.sqlLogin;
+  statement.execute(query);
+  rs=meta.getColumnPrivileges(conn.getCatalog(),null,DatabaseCreator.TEST_TABLE1,"id");
+  rsmd=rs.getMetaData();
+  assertTrue("Rows do not obtained",rs.next());
+  int col=rsmd.getColumnCount();
+  assertEquals("Incorrect number of columns",8,col);
+  String[] columnNames={"TABLE_CAT","TABLE_SCHEM","TABLE_NAME","COLUMN_NAME","GRANTOR","GRANTEE","PRIVILEGE","IS_GRANTABLE"};
+  for (int c=1; c <= col; ++c) {
+    assertEquals("Incorrect column name",columnNames[c - 1],rsmd.getColumnName(c));
+  }
+  assertEquals("Incorrect table catalogue",conn.getCatalog(),rs.getString("TABLE_CAT").toLowerCase());
+  assertEquals("Incorrect table schema",null,rs.getString("TABLE_SCHEM"));
+  assertEquals("Incorrect table name",DatabaseCreator.TEST_TABLE1,rs.getString("TABLE_NAME").toLowerCase());
+  assertEquals("Incorrect column name","id",rs.getString("COLUMN_NAME").toLowerCase());
+  assertEquals("Incorrect grantor",Support_SQL.sqlLogin + "@" + Support_SQL.sqlHost,rs.getString("GRANTOR").toLowerCase());
+  assertTrue("Incorrect grantee",rs.getString("GRANTEE").indexOf("root") != -1);
+  assertEquals("Incorrect privilege","references",rs.getString("PRIVILEGE").toLowerCase());
+  query="REVOKE REFERENCES(id) ON " + DatabaseCreator.TEST_TABLE1 + " FROM "+ Support_SQL.sqlLogin;
+  statement.execute(query);
+  rs.close();
+}

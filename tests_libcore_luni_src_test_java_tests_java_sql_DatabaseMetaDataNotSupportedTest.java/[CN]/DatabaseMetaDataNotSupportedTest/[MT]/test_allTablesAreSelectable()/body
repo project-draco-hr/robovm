@@ -1,0 +1,21 @@
+{
+  String query="GRANT CREATE, SELECT ON " + DatabaseCreator.TEST_TABLE1 + " TO "+ Support_SQL.sqlUser;
+  statement.execute(query);
+  Connection userConn=Support_SQL.getConnection(Support_SQL.sqlUrl,Support_SQL.sqlUser,Support_SQL.sqlUser);
+  DatabaseMetaData userMeta=userConn.getMetaData();
+  ResultSet userTab=userMeta.getTables(null,null,null,null);
+  assertTrue("Tables are not obtained",userTab.next());
+  assertEquals("Incorrect name of obtained table",DatabaseCreator.TEST_TABLE1.toLowerCase(),userTab.getString("TABLE_NAME").toLowerCase());
+  assertTrue("Not all of obtained tables are selectable",userMeta.allTablesAreSelectable());
+  userTab.close();
+  query="REVOKE SELECT ON " + DatabaseCreator.TEST_TABLE1 + " FROM "+ Support_SQL.sqlUser;
+  statement.execute(query);
+  userTab=userMeta.getTables(null,null,null,null);
+  assertTrue("Tables are not obtained",userTab.next());
+  assertEquals("Incorrect name of obtained table",DatabaseCreator.TEST_TABLE1.toLowerCase(),userTab.getString("TABLE_NAME").toLowerCase());
+  assertFalse("No SELECT privileges",userMeta.allTablesAreSelectable());
+  userTab.close();
+  query="REVOKE CREATE ON " + DatabaseCreator.TEST_TABLE1 + " FROM "+ Support_SQL.sqlUser;
+  statement.execute(query);
+  userConn.close();
+}

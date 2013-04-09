@@ -1,0 +1,17 @@
+{
+  TestSSLContext c=TestSSLContext.create();
+  SSLEngine e=c.clientContext.createSSLEngine();
+  SSLParameters p=e.getSSLParameters();
+  assertNotNull(p);
+  String[] cipherSuites=p.getCipherSuites();
+  StandardNames.assertValidCipherSuites(StandardNames.CIPHER_SUITES,cipherSuites);
+  assertNotSame(cipherSuites,e.getEnabledCipherSuites());
+  assertEquals(Arrays.asList(cipherSuites),Arrays.asList(e.getEnabledCipherSuites()));
+  String[] protocols=p.getProtocols();
+  StandardNames.assertValidProtocols(StandardNames.SSL_SOCKET_PROTOCOLS,protocols);
+  assertNotSame(protocols,e.getEnabledProtocols());
+  assertEquals(Arrays.asList(protocols),Arrays.asList(e.getEnabledProtocols()));
+  assertEquals(p.getWantClientAuth(),e.getWantClientAuth());
+  assertEquals(p.getNeedClientAuth(),e.getNeedClientAuth());
+  c.close();
+}

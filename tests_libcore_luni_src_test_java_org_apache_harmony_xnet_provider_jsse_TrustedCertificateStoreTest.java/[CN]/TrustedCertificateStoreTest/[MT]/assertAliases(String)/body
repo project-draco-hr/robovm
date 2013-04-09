@@ -1,0 +1,17 @@
+{
+  Set<String> expected=new HashSet<String>(Arrays.asList(aliases));
+  Set<String> actual=new HashSet<String>();
+  for (  String alias : store.aliases()) {
+    boolean system=TrustedCertificateStore.isSystem(alias);
+    boolean user=TrustedCertificateStore.isUser(alias);
+    if (system || user) {
+      assertEquals(system,store.allSystemAliases().contains(alias));
+      assertEquals(user,store.userAliases().contains(alias));
+      actual.add(alias);
+    }
+ else {
+      throw new AssertionError(alias);
+    }
+  }
+  assertEquals(expected,actual);
+}

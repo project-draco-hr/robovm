@@ -1,0 +1,41 @@
+{
+  ClassLoader pcl=getClass().getClassLoader();
+  Class<?>[] classes={PublicTestClass.class,ExtendTestClass.class,ExtendTestClass1.class,TestInterface.class,String.class};
+  for (int i=0; i < classes.length; i++) {
+    Class<?> clazz=Class.forName(classes[i].getName(),true,pcl);
+    assertEquals(classes[i],clazz);
+    clazz=Class.forName(classes[i].getName(),false,pcl);
+    assertEquals(classes[i],clazz);
+  }
+  Class<?>[] systemClasses={String.class,Integer.class,Object.class,Object[].class};
+  for (int i=0; i < systemClasses.length; i++) {
+    Class<?> clazz=Class.forName(systemClasses[i].getName(),true,ClassLoader.getSystemClassLoader());
+    assertEquals(systemClasses[i],clazz);
+    clazz=Class.forName(systemClasses[i].getName(),false,ClassLoader.getSystemClassLoader());
+    assertEquals(systemClasses[i],clazz);
+  }
+  try {
+    Class.forName(null,true,pcl);
+    fail("NullPointerException is not thrown.");
+  }
+ catch (  NullPointerException npe) {
+  }
+  try {
+    Class.forName("NotExistClass",true,pcl);
+    fail("ClassNotFoundException is not thrown for non existent class.");
+  }
+ catch (  ClassNotFoundException cnfe) {
+  }
+  try {
+    Class.forName("String",false,pcl);
+    fail("ClassNotFoundException is not thrown for non existent class.");
+  }
+ catch (  ClassNotFoundException cnfe) {
+  }
+  try {
+    Class.forName("libcore.java.lang.NonexistentClass",false,pcl);
+    fail("ClassNotFoundException is not thrown for non existent class.");
+  }
+ catch (  ClassNotFoundException cnfe) {
+  }
+}

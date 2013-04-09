@@ -1,0 +1,12 @@
+{
+  String prefix=ProxyTest.class.getName();
+  ClassLoader loaderA=new ClassLoaderBuilder().withPrivateCopy(prefix).build();
+  ClassLoader loaderB=new ClassLoaderBuilder().withPrivateCopy(prefix).build();
+  Class[] interfacesA={loaderA.loadClass(prefix + "$Echo")};
+  try {
+    Proxy.newProxyInstance(loaderB,interfacesA,new TestInvocationHandler());
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+}

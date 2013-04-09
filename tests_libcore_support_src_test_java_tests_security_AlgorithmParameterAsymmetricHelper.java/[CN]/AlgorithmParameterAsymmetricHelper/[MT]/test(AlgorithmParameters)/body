@@ -1,0 +1,60 @@
+{
+  KeyPairGenerator generator=null;
+  try {
+    generator=KeyPairGenerator.getInstance(algorithmName);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    Assert.fail(e.getMessage());
+  }
+  generator.initialize(1024);
+  KeyPair keyPair=generator.generateKeyPair();
+  Cipher cipher=null;
+  try {
+    cipher=Cipher.getInstance(algorithmName);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    Assert.fail(e.getMessage());
+  }
+catch (  NoSuchPaddingException e) {
+    Assert.fail(e.getMessage());
+  }
+  try {
+    cipher.init(Cipher.ENCRYPT_MODE,keyPair.getPublic(),parameters);
+  }
+ catch (  InvalidKeyException e) {
+    Assert.fail(e.getMessage());
+  }
+catch (  InvalidAlgorithmParameterException e) {
+    Assert.fail(e.getMessage());
+  }
+  byte[] bs=null;
+  try {
+    bs=cipher.doFinal(plainData.getBytes());
+  }
+ catch (  IllegalBlockSizeException e) {
+    Assert.fail(e.getMessage());
+  }
+catch (  BadPaddingException e) {
+    Assert.fail(e.getMessage());
+  }
+  try {
+    cipher.init(Cipher.DECRYPT_MODE,keyPair.getPrivate(),parameters);
+  }
+ catch (  InvalidKeyException e) {
+    Assert.fail(e.getMessage());
+  }
+catch (  InvalidAlgorithmParameterException e) {
+    Assert.fail(e.getMessage());
+  }
+  byte[] decrypted=null;
+  try {
+    decrypted=cipher.doFinal(bs);
+  }
+ catch (  IllegalBlockSizeException e) {
+    Assert.fail(e.getMessage());
+  }
+catch (  BadPaddingException e) {
+    Assert.fail(e.getMessage());
+  }
+  Assert.assertTrue(Arrays.equals(plainData.getBytes(),decrypted));
+}

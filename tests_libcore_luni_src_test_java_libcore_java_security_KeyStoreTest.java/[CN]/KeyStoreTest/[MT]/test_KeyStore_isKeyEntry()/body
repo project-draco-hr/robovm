@@ -1,0 +1,34 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      keyStore.isKeyEntry(null);
+      fail();
+    }
+ catch (    KeyStoreException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    keyStore.load(null,null);
+    try {
+      keyStore.isKeyEntry(null);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+    assertFalse(keyStore.isKeyEntry(""));
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    populate(keyStore);
+    assertFalse(keyStore.isKeyEntry(""));
+    if (isReadOnly(keyStore)) {
+      assertFalse(keyStore.isKeyEntry(ALIAS_PRIVATE));
+      continue;
+    }
+    assertTrue(keyStore.isKeyEntry(ALIAS_PRIVATE));
+    assertEquals(isSecretKeyEnabled(keyStore),keyStore.isKeyEntry(ALIAS_SECRET));
+    assertFalse(keyStore.isKeyEntry(ALIAS_CERTIFICATE));
+    assertEquals(!isCaseSensitive(keyStore),keyStore.isKeyEntry(ALIAS_ALT_CASE_PRIVATE));
+    assertEquals(!isCaseSensitive(keyStore) && isSecretKeyEnabled(keyStore),keyStore.isKeyEntry(ALIAS_ALT_CASE_SECRET));
+    assertFalse(keyStore.isKeyEntry(ALIAS_ALT_CASE_CERTIFICATE));
+  }
+}

@@ -1,0 +1,33 @@
+{
+  SSLServerSocket ssl;
+  int portNumber=Support_PortManager.getNextPort();
+  int[] port_invalid={-1,65536,Integer.MIN_VALUE,Integer.MAX_VALUE};
+  try {
+    ssl=new mySSLServerSocket(portNumber);
+    assertEquals(portNumber,ssl.getLocalPort());
+  }
+ catch (  Exception ex) {
+    fail("Unexpected exception was thrown " + ex);
+  }
+  for (int i=0; i < port_invalid.length; i++) {
+    try {
+      ssl=new mySSLServerSocket(port_invalid[i]);
+      fail("IllegalArgumentException should be thrown");
+    }
+ catch (    IllegalArgumentException iae) {
+    }
+catch (    Exception e) {
+      fail(e + " was thrown instead of IllegalArgumentException");
+    }
+  }
+  try {
+    ssl=new mySSLServerSocket(portNumber);
+    new mySSLServerSocket(portNumber);
+    fail("IOException Expected when opening an already opened port");
+  }
+ catch (  IOException ioe) {
+  }
+catch (  Exception ex) {
+    fail("Unexpected exception was thrown " + ex);
+  }
+}

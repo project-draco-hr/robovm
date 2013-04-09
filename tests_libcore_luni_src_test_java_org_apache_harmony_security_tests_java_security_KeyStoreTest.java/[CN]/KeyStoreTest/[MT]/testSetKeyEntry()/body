@@ -1,0 +1,33 @@
+{
+  assertTrue(NotSupportMsg,KSSupported);
+  KeyStore[] kss=createKS();
+  assertNotNull("KeyStore objects were not created",kss);
+  byte[] kk={(byte)1,(byte)2,(byte)127,(byte)77};
+  String alias="keyEntry";
+  char[] pwd=new char[0];
+  byte[] res;
+  Certificate certs[]={new KeyStoreTestSupport.MCertificate(alias,kk),new KeyStoreTestSupport.MCertificate(alias,kk)};
+  for (int i=0; i < kss.length; i++) {
+    kss[i].load(null,null);
+    try {
+      kss[i].setKeyEntry("proba",null,null);
+      fail("KeyStoreException must be thrown");
+    }
+ catch (    KeyStoreException e) {
+    }
+    kss[i].setKeyEntry(alias,kk,certs);
+    res=kss[i].getKey(alias,pwd).getEncoded();
+    assertEquals(kk.length,res.length);
+    for (int j=0; j < res.length; j++) {
+      assertEquals(res[j],kk[j]);
+    }
+    assertEquals(kss[i].getCertificateChain(alias).length,certs.length);
+    kss[i].setKeyEntry(alias,kk,null);
+    res=kss[i].getKey(alias,pwd).getEncoded();
+    assertEquals(kk.length,res.length);
+    for (int j=0; j < res.length; j++) {
+      assertEquals(res[j],kk[j]);
+    }
+    assertNull(kss[i].getCertificateChain(alias));
+  }
+}

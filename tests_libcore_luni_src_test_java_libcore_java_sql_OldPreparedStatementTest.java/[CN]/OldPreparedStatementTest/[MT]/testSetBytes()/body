@@ -1,0 +1,43 @@
+{
+  byte[] bytesArray={1,0};
+  PreparedStatement ps=null;
+  PreparedStatement ps1=null;
+  try {
+    String query="insert into type (LBlob) values (?);";
+    ps=conn.prepareStatement(query);
+    try {
+      ps.setBytes(1,bytesArray);
+      assertFalse(ps.execute());
+      assertTrue(ps.getUpdateCount() > 0);
+    }
+ catch (    SQLException sqle) {
+      fail("SQLException is thrown: " + sqle.getMessage());
+    }
+    try {
+      ps.setBytes(2,bytesArray);
+      fail("SQLException is not thrown");
+    }
+ catch (    Exception sqle) {
+    }
+    ps.close();
+    try {
+      ps.setBytes(1,bytesArray);
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+    String query1="insert into type (TBlob) values (?);";
+    ps1=conn.prepareStatement(query1);
+    ps.setBytes(1,bytesArray);
+    assertFalse(ps.execute());
+    assertTrue(ps.getUpdateCount() > 0);
+  }
+  finally {
+    try {
+      if (ps != null)       ps.close();
+      if (ps1 != null)       ps1.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+}

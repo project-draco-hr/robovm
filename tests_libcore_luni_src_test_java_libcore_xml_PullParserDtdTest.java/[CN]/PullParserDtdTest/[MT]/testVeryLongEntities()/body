@@ -1,0 +1,12 @@
+{
+  String a=repeat('a',READ_BUFFER_SIZE + 1);
+  String b=repeat('b',READ_BUFFER_SIZE + 1);
+  String c=repeat('c',READ_BUFFER_SIZE + 1);
+  String xml="<!DOCTYPE foo [\n" + "  <!ENTITY " + a + "  \"d &"+ b+ "; e\">"+ "  <!ENTITY "+ b+ "  \"f "+ c+ " g\">"+ "]>"+ "<foo>h &"+ a+ "; i</foo>";
+  XmlPullParser parser=newPullParser(xml);
+  assertEquals(XmlPullParser.START_TAG,parser.next());
+  assertEquals(XmlPullParser.TEXT,parser.next());
+  assertEquals("h d f " + c + " g e i",parser.getText());
+  assertEquals(XmlPullParser.END_TAG,parser.next());
+  assertEquals(XmlPullParser.END_DOCUMENT,parser.next());
+}

@@ -1,0 +1,24 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  createKeys();
+  KeyAgreement[] kAgs=createKAs();
+  KeyAgreement ka=KeyAgreement.getInstance("DH");
+  byte[] bb1=new byte[1];
+  try {
+    ka.generateSecret(bb1,0);
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+  ka.init(privKey);
+  ka.doPhase(publKey,true);
+  try {
+    ka.generateSecret(bb1,0);
+    fail("ShortBufferException expected");
+  }
+ catch (  ShortBufferException e) {
+  }
+}

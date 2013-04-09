@@ -1,0 +1,13 @@
+{
+  server.enqueue(new MockResponse());
+  server.play();
+  HttpURLConnection urlConnection=(HttpURLConnection)server.getUrl("/").openConnection();
+  urlConnection.setChunkedStreamingMode(8);
+  urlConnection.setDoOutput(true);
+  OutputStream outputStream=urlConnection.getOutputStream();
+  outputStream.write("ABCDEFGHIJKLMNOPQ".getBytes("US-ASCII"));
+  assertEquals(200,urlConnection.getResponseCode());
+  RecordedRequest request=server.takeRequest();
+  assertEquals("ABCDEFGHIJKLMNOPQ",new String(request.getBody(),"US-ASCII"));
+  assertEquals(Arrays.asList(3,3,3,3,3,2),request.getChunkSizes());
+}

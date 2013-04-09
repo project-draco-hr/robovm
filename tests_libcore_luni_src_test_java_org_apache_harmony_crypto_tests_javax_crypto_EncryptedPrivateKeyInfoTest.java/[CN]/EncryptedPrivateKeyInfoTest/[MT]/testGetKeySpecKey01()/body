@@ -1,0 +1,21 @@
+{
+  boolean performed=false;
+  for (int i=0; i < EncryptedPrivateKeyInfoData.algName0.length; i++) {
+    try {
+      EncryptedPrivateKeyInfo epki=new EncryptedPrivateKeyInfo(EncryptedPrivateKeyInfoData.algName0[i][0],EncryptedPrivateKeyInfoData.encryptedData);
+      try {
+        epki.getKeySpec((Key)null);
+        fail(getName() + "NullPointerException has not been thrown");
+      }
+ catch (      NullPointerException ok) {
+      }
+catch (      InvalidKeyException e) {
+        fail(getName() + "Unexpected exception: " + e);
+      }
+      performed=true;
+    }
+ catch (    NoSuchAlgorithmException allowedFailure) {
+    }
+  }
+  assertTrue("Test not performed",performed);
+}

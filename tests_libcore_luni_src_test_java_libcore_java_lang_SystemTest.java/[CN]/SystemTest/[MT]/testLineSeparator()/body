@@ -1,0 +1,27 @@
+{
+  try {
+    assertEquals("\n",System.lineSeparator());
+    System.setProperty("line.separator","poop");
+    assertEquals("\n",System.lineSeparator());
+    assertFalse(System.lineSeparator().equals(System.getProperty("line.separator")));
+    StringWriter sw=new StringWriter();
+    BufferedWriter bw=new BufferedWriter(sw);
+    bw.newLine();
+    bw.flush();
+    assertEquals(System.lineSeparator(),sw.toString());
+    assertFalse(System.lineSeparator().equals(System.getProperty("line.separator")));
+    ByteArrayOutputStream baos=new ByteArrayOutputStream();
+    new PrintStream(baos).println();
+    assertEquals(System.lineSeparator(),new String(baos.toByteArray(),"UTF-8"));
+    assertFalse(System.lineSeparator().equals(System.getProperty("line.separator")));
+    sw=new StringWriter();
+    new PrintWriter(sw).println();
+    assertEquals(System.lineSeparator(),sw.toString());
+    assertFalse(System.lineSeparator().equals(System.getProperty("line.separator")));
+    assertEquals(System.lineSeparator(),new Formatter().format("%n").toString());
+    assertFalse(System.lineSeparator().equals(System.getProperty("line.separator")));
+  }
+  finally {
+    System.setProperty("line.separator","\n");
+  }
+}

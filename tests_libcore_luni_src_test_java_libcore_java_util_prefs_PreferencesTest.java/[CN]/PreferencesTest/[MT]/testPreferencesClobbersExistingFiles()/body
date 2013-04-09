@@ -1,0 +1,15 @@
+{
+  File userPrefs=new File(System.getProperty("user.home") + "/.java/.userPrefs/prefs.xml");
+  FileWriter writer=new FileWriter(userPrefs);
+  writer.write("lamb");
+  writer.close();
+  userPrefs.setReadable(false);
+  userPrefs.setWritable(false);
+  long oldLength=userPrefs.length();
+  Preferences userPreferences=Preferences.userRoot();
+  userPreferences.sync();
+  userPreferences.put("a","lion");
+  userPreferences.flush();
+  assertTrue("Expected to exist " + userPrefs,userPrefs.exists());
+  assertTrue("Expected file to be clobbered",oldLength != userPrefs.length());
+}

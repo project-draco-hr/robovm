@@ -1,0 +1,10 @@
+{
+  String prefix=ProxyTest.class.getName();
+  ClassLoader loaderA=new ClassLoaderBuilder().withPrivateCopy(prefix).build();
+  ClassLoader loaderB=new ClassLoaderBuilder().withPrivateCopy(prefix).build();
+  InvocationHandler invocationHandlerB=(InvocationHandler)loaderB.loadClass(prefix + "$TestInvocationHandler").newInstance();
+  Class[] interfacesA={loaderA.loadClass(prefix + "$Echo")};
+  Object proxy=Proxy.newProxyInstance(loaderA,interfacesA,invocationHandlerB);
+  assertEquals(loaderA,proxy.getClass().getClassLoader());
+  assertEquals("foo",proxy.getClass().getMethod("echo",String.class).invoke(proxy,"foo"));
+}

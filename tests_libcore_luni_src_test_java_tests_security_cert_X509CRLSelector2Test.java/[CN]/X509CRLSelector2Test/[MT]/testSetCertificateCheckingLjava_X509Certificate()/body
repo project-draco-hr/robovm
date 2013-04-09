@@ -1,0 +1,12 @@
+{
+  X509CRLSelector selector=new X509CRLSelector();
+  CertificateFactory certFact=CertificateFactory.getInstance("X509");
+  X509Certificate cert=(X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(TestUtils.getX509Certificate_v3()));
+  TestCRL crl=new TestCRL();
+  selector.setCertificateChecking(cert);
+  assertTrue("The CRL should match the selection criteria.",selector.match(crl));
+  assertEquals(cert,selector.getCertificateChecking());
+  selector.setCertificateChecking(null);
+  assertTrue("The CRL should match the selection criteria.",selector.match(crl));
+  assertNull(selector.getCertificateChecking());
+}

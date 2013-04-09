@@ -1,0 +1,22 @@
+{
+  super(settings);
+  try {
+    ClassLoader classLoader=ClassLoader.getSystemClassLoader();
+    Class domFactoryClass=classLoader.loadClass("org.dom4j.dom.DOMDocumentFactory");
+    Method getInstance=domFactoryClass.getMethod("getInstance",new Class[]{});
+    domFactory=getInstance.invoke(null,new Object[]{});
+    domImpl=(DOMImplementation)domFactory;
+    Class saxReaderClass=classLoader.loadClass("org.dom4j.io.SAXReader");
+    Constructor saxReaderConstructor=saxReaderClass.getConstructor(new Class[]{classLoader.loadClass("org.dom4j.DocumentFactory")});
+    saxReader=saxReaderConstructor.newInstance(new Object[]{domFactory});
+    Method getReaderMethod=saxReaderClass.getMethod("getXMLReader",new Class[]{});
+    xmlReader=(XMLReader)getReaderMethod.invoke(saxReader,new Object[0]);
+    readMethod=saxReaderClass.getMethod("read",new Class[]{java.net.URL.class});
+  }
+ catch (  InvocationTargetException ex) {
+    throw new DOMTestIncompatibleException(ex.getTargetException(),null);
+  }
+catch (  Exception ex) {
+    throw new DOMTestIncompatibleException(ex,null);
+  }
+}

@@ -1,0 +1,9 @@
+{
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  InputStream in=new ByteArrayInputStream(X509_MULTIPLE_SUBJECT_ALT);
+  X509Certificate x509=(X509Certificate)cf.generateCertificate(in);
+  mySSLSession session=new mySSLSession(new X509Certificate[]{x509});
+  HostnameVerifier verifier=HttpsURLConnection.getDefaultHostnameVerifier();
+  assertTrue(verifier.verify("127.0.0.1",session));
+  assertFalse(verifier.verify("127.0.0.2",session));
+}

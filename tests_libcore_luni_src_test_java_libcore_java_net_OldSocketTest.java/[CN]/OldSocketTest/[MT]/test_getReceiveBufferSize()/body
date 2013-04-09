@@ -1,0 +1,26 @@
+{
+  try {
+    int sport=startServer("SServer getReceiveBufferSize");
+    int portNumber=Support_PortManager.getNextPort();
+    s=new Socket(InetAddress.getLocalHost().getHostName(),sport,null,portNumber);
+    s.setReceiveBufferSize(130);
+    assertTrue("Incorrect buffer size",s.getReceiveBufferSize() >= 130);
+    ensureExceptionThrownIfOptionIsUnsupportedOnOS(SO_RCVBUF);
+  }
+ catch (  Exception e) {
+    handleException(e,SO_RCVBUF);
+  }
+  try {
+    Socket newSocket=new Socket();
+    newSocket.close();
+    try {
+      newSocket.getReceiveBufferSize();
+      fail("SocketException was not thrown.");
+    }
+ catch (    SocketException e) {
+    }
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception.");
+  }
+}

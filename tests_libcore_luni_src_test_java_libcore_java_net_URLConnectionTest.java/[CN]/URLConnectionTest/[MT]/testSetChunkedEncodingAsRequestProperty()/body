@@ -1,0 +1,11 @@
+{
+  server.enqueue(new MockResponse());
+  server.play();
+  HttpURLConnection urlConnection=(HttpURLConnection)server.getUrl("/").openConnection();
+  urlConnection.setRequestProperty("Transfer-encoding","chunked");
+  urlConnection.setDoOutput(true);
+  urlConnection.getOutputStream().write("ABC".getBytes("UTF-8"));
+  assertEquals(200,urlConnection.getResponseCode());
+  RecordedRequest request=server.takeRequest();
+  assertEquals("ABC",new String(request.getBody(),"UTF-8"));
+}

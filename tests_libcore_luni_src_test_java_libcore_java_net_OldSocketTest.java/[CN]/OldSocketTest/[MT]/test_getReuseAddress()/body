@@ -1,0 +1,26 @@
+{
+  try {
+    Socket theSocket=new Socket();
+    theSocket.setReuseAddress(true);
+    assertTrue("getReuseAddress false when it should be true",theSocket.getReuseAddress());
+    theSocket.setReuseAddress(false);
+    assertFalse("getReuseAddress true when it should be False",theSocket.getReuseAddress());
+    ensureExceptionThrownIfOptionIsUnsupportedOnOS(SO_REUSEADDR);
+  }
+ catch (  Exception e) {
+    handleException(e,SO_REUSEADDR);
+  }
+  try {
+    Socket newSocket=new Socket();
+    newSocket.close();
+    try {
+      newSocket.getReuseAddress();
+      fail("SocketException was not thrown.");
+    }
+ catch (    SocketException e) {
+    }
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception.");
+  }
+}

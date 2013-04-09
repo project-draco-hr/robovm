@@ -1,0 +1,29 @@
+{
+  pref.putDouble("DoubleValue",new Double(9.10938188e-31));
+  pref.flush();
+  assertEquals(new Double(9.10938188e-31),pref.getDouble("DoubleValue",new Double(2.14)));
+  try {
+    pref.putDouble(null,new Double(0.1));
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  int i;
+  StringBuffer sb=new StringBuffer();
+  for (i=0; i < Preferences.MAX_KEY_LENGTH + 1; i++) {
+    sb.append('c');
+  }
+  try {
+    pref.putDouble(new String(sb),new Double(0.1));
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  pref.removeNode();
+  try {
+    pref.putDouble("DoubleValue",new Double(0.1));
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+}

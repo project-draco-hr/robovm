@@ -1,0 +1,43 @@
+{
+  String[] queries1={"select * from zoo","select name, family from zoo where id = 1"};
+  String[] queries2={"update zoo set name='Masha', family='cat' where id=2;","drop table if exists hutch","create table hutch (id integer not null, animal_id integer, address char(20), primary key (id));","insert into hutch (id, animal_id, address) values (1, 2, 'Birds-house, 1');","insert into hutch (id, animal_id, address) values (2, 1, 'Horse-house, 5');","create view address as select address from hutch where animal_id=2","drop view address;","drop table hutch;","select from zoo"};
+  Statement st=null;
+  try {
+    st=conn.createStatement();
+    for (int i=0; i < queries1.length; i++) {
+      try {
+        ResultSet rs=st.executeQuery(queries1[i]);
+        assertNotNull(rs);
+      }
+ catch (      SQLException sqle) {
+        fail("SQLException is thrown for query: " + queries1[i]);
+      }
+    }
+  }
+  finally {
+    try {
+      st.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    st=conn.createStatement();
+    for (int i=0; i < queries2.length; i++) {
+      try {
+        ResultSet rs=st.executeQuery(queries2[i]);
+        assertNotNull(rs);
+        fail("SQLException is not thrown for query: " + queries2[i]);
+      }
+ catch (      SQLException sqle) {
+      }
+    }
+  }
+  finally {
+    try {
+      st.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+}

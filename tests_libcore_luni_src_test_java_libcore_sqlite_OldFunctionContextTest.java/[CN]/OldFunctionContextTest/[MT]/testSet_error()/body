@@ -1,0 +1,14 @@
+{
+  TestFCError testError=new TestFCError();
+  SinFunc testD=new SinFunc();
+  db.exec("insert into " + DatabaseCreator.TEST_TABLE2 + " (fdouble)  values ("+ testD.testDouble+ ")",null);
+  db.create_function("testError",1,testError);
+  try {
+    TableResult res=db.get_table("select testError(fdouble) from " + DatabaseCreator.TEST_TABLE2);
+    fail("Should get Exception");
+  }
+ catch (  Exception e) {
+    assertEquals("error in step",e.getMessage());
+  }
+  assertFalse(testD.functionCalled);
+}

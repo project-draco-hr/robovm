@@ -1,0 +1,24 @@
+{
+  Vector v=new Vector();
+  Collection l=new LinkedList();
+  for (int i=0; i < 100; i++)   l.add("Test " + i);
+  v.addAll(l);
+  assertTrue("Failed to add all elements",tVector.equals(v));
+  v.addAll(l);
+  int vSize=tVector.size();
+  for (int counter=vSize - 1; counter >= 0; counter--)   assertTrue("Failed to add elements correctly",v.get(counter) == v.get(counter + vSize));
+  l=new LinkedList();
+  l.add(null);
+  l.add("gah");
+  l.add(null);
+  tVector.addAll(l);
+  assertNull("Wrong element at 3rd last position--wanted null",tVector.get(vSize));
+  assertEquals("Wrong element at 2nd last position--wanted 'gah'","gah",tVector.get(vSize + 1));
+  assertNull("Wrong element at last position--wanted null",tVector.get(vSize + 2));
+  try {
+    tVector.addAll(tVector.size() / 2,null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+}

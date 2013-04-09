@@ -1,0 +1,29 @@
+{
+  try {
+    is.reset();
+    fail("Test 1: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  is=new MyFilterInputStream(new BufferedInputStream(new java.io.FileInputStream(fileName),100));
+  try {
+    is.reset();
+    fail("Test 2: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  final int bufSize=10;
+  byte[] buf1=new byte[bufSize];
+  byte[] buf2=new byte[bufSize];
+  is.read(buf1,0,bufSize);
+  is.mark(2 * bufSize);
+  is.read(buf1,0,bufSize);
+  try {
+    is.reset();
+  }
+ catch (  IOException e) {
+    fail("Test 3: Unexpected IOException.");
+  }
+  is.read(buf2,0,bufSize);
+  assertTrue("Test 4: mark() or reset() has failed.",Arrays.equals(buf1,buf2));
+}

@@ -1,0 +1,26 @@
+{
+  try {
+    db.close();
+    db.get_table("test");
+    fail();
+  }
+ catch (  Exception e) {
+    assertTrue(e.getMessage().equals("database already closed"));
+    try {
+      db.open(dbFile.getPath(),0);
+    }
+ catch (    Exception e1) {
+      fail("Database object could not be reopened after 'close': " + e.getMessage());
+      e1.printStackTrace();
+    }
+  }
+  try {
+    db.close();
+    db.close();
+    fail();
+  }
+ catch (  Exception e) {
+    assertTrue(e.getMessage().equals("database already closed"));
+    db.open(dbFile.getPath(),0);
+  }
+}

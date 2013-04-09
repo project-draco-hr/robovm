@@ -1,0 +1,20 @@
+{
+  CertificateFactory certificateFactory=CertificateFactory.getInstance("X509");
+  if (useMD2root) {
+    certs[0]=(X509Certificate)certificateFactory.generateCertificate(new ByteArrayInputStream(selfSignedCertMD2.getBytes()));
+    certs[1]=(X509Certificate)certificateFactory.generateCertificate(new ByteArrayInputStream(signedCert1Chain1.getBytes()));
+    certs[2]=(X509Certificate)certificateFactory.generateCertificate(new ByteArrayInputStream(signedCert2Chain1.getBytes()));
+  }
+ else {
+    certs[0]=(X509Certificate)certificateFactory.generateCertificate(new ByteArrayInputStream(selfSignedCertMD5.getBytes()));
+    certs[1]=(X509Certificate)certificateFactory.generateCertificate(new ByteArrayInputStream(signedCert1Chain2.getBytes()));
+    certs[2]=(X509Certificate)certificateFactory.generateCertificate(new ByteArrayInputStream(signedCert2Chain2.getBytes()));
+  }
+  ArrayList<Certificate> result=new ArrayList<Certificate>();
+  result.add(certs[2]);
+  result.add(certs[1]);
+  if (includeRootInChain) {
+    result.add(certs[0]);
+  }
+  return result;
+}

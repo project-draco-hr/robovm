@@ -1,0 +1,22 @@
+{
+  return new Runnable(){
+    public void run(){
+      try {
+        Connection c=Support_SQL.getConnection();
+        if (c == null) {
+          return;
+        }
+synchronized (this) {
+          vc.add(c);
+        }
+        int tasksPerConnection=Support_SQL.sqlMaxTasks / numConnections;
+        for (int i=0; i < tasksPerConnection; ++i) {
+          insertNewRecord(c,(i + 1) + tasksPerConnection * taskID);
+        }
+      }
+ catch (      SQLException sql) {
+      }
+    }
+  }
+;
+}

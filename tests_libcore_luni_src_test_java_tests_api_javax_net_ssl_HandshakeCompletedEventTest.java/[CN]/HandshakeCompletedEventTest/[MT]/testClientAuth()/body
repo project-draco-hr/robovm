@@ -1,0 +1,25 @@
+{
+  boolean useBKS=true;
+  listener=new MyHandshakeListener();
+  String serverKeys=(useBKS ? SERVER_KEYS_BKS : SERVER_KEYS_JKS);
+  String clientKeys=(useBKS ? CLIENT_KEYS_BKS : CLIENT_KEYS_JKS);
+  TestServer server=new TestServer(true,TestServer.CLIENT_AUTH_WANTED,serverKeys);
+  TestClient client=new TestClient(true,clientKeys);
+  Thread serverThread=new Thread(server);
+  Thread clientThread=new Thread(client);
+  serverThread.start();
+  Thread.currentThread().sleep(3000);
+  clientThread.start();
+  serverThread.join();
+  clientThread.join();
+  Exception e=server.getException();
+  if (e != null) {
+    e.printStackTrace();
+  }
+  e=client.getException();
+  if (e != null) {
+    e.printStackTrace();
+  }
+  assertNull(e);
+  assertTrue(listener.completeDone);
+}

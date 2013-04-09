@@ -1,0 +1,18 @@
+{
+  MockResponse responseOne=new MockResponse();
+  responseOne.addHeader("Content-Encoding: gzip");
+  transferKind.setBody(responseOne,gzip("one (gzipped)".getBytes("UTF-8")),5);
+  server.enqueue(responseOne);
+  MockResponse responseTwo=new MockResponse();
+  transferKind.setBody(responseTwo,"two (identity)",5);
+  server.enqueue(responseTwo);
+  server.play();
+  URLConnection connection=server.getUrl("/").openConnection();
+  connection.addRequestProperty("Accept-Encoding","gzip");
+  InputStream gunzippedIn=new GZIPInputStream(connection.getInputStream());
+  assertEquals("one (gzipped)",readAscii(gunzippedIn,Integer.MAX_VALUE));
+  assertEquals(0,server.takeRequest().getSequenceNumber());
+  connection=server.getUrl("/").openConnection();
+  assertEquals("two (identity)",readAscii(connection.getInputStream(),Integer.MAX_VALUE));
+  assertEquals(1,server.takeRequest().getSequenceNumber());
+}

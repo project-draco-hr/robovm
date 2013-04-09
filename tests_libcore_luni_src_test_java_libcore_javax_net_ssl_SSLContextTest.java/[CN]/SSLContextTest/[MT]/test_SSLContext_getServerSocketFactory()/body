@@ -1,0 +1,22 @@
+{
+  for (  String protocol : StandardNames.SSL_CONTEXT_PROTOCOLS) {
+    if (protocol.equals(StandardNames.SSL_CONTEXT_PROTOCOLS_DEFAULT)) {
+      SSLContext.getInstance(protocol).getServerSocketFactory();
+    }
+ else {
+      try {
+        SSLContext.getInstance(protocol).getServerSocketFactory();
+        fail();
+      }
+ catch (      IllegalStateException expected) {
+      }
+    }
+    SSLContext sslContext=SSLContext.getInstance(protocol);
+    if (!protocol.equals(StandardNames.SSL_CONTEXT_PROTOCOLS_DEFAULT)) {
+      sslContext.init(null,null,null);
+    }
+    ServerSocketFactory ssf=sslContext.getServerSocketFactory();
+    assertNotNull(ssf);
+    assertTrue(SSLServerSocketFactory.class.isAssignableFrom(ssf.getClass()));
+  }
+}

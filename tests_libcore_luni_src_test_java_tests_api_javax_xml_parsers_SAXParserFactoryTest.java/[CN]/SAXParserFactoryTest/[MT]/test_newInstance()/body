@@ -1,0 +1,25 @@
+{
+  try {
+    SAXParserFactory dtf=SAXParserFactory.newInstance();
+    assertNotNull("New Instance of DatatypeFactory is null",dtf);
+    System.setProperty("javax.xml.parsers.SAXParserFactory","org.apache.harmony.xml.parsers.SAXParserFactoryImpl");
+    SAXParserFactory spf1=SAXParserFactory.newInstance();
+    assertTrue(spf1 instanceof org.apache.harmony.xml.parsers.SAXParserFactoryImpl);
+    String key="javax.xml.parsers.SAXParserFactory = org.apache.harmony.xml.parsers.SAXParserFactoryImpl";
+    ByteArrayInputStream bis=new ByteArrayInputStream(key.getBytes());
+    Properties prop=System.getProperties();
+    prop.load(bis);
+    SAXParserFactory spf2=SAXParserFactory.newInstance();
+    assertTrue(spf2 instanceof org.apache.harmony.xml.parsers.SAXParserFactoryImpl);
+    System.setProperty("javax.xml.parsers.SAXParserFactory","");
+    try {
+      SAXParserFactory.newInstance();
+      fail("Expected FactoryConfigurationError was not thrown");
+    }
+ catch (    FactoryConfigurationError e) {
+    }
+  }
+ catch (  IOException ioe) {
+    fail("Unexpected exception " + ioe.toString());
+  }
+}

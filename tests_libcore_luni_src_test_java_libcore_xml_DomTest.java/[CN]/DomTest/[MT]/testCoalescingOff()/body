@@ -1,0 +1,14 @@
+{
+  String xml="<foo>abc<![CDATA[def]]>ghi</foo>";
+  DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+  factory.setCoalescing(false);
+  document=factory.newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
+  Element documentElement=document.getDocumentElement();
+  Text abc=(Text)documentElement.getFirstChild();
+  assertEquals("abc",abc.getTextContent());
+  CDATASection def=(CDATASection)abc.getNextSibling();
+  assertEquals("def",def.getTextContent());
+  Text ghi=(Text)def.getNextSibling();
+  assertEquals("ghi",ghi.getTextContent());
+  assertNull(ghi.getNextSibling());
+}

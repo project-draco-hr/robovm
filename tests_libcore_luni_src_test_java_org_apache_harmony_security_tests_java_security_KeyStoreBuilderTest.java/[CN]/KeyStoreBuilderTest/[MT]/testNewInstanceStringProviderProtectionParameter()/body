@@ -1,0 +1,93 @@
+{
+  try {
+    KeyStore.Builder.newInstance(null,defaultProvider,protPass);
+    fail("NullPointerException must be thrown when type is null");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    KeyStore.Builder.newInstance(defaultType,defaultProvider,null);
+    fail("NullPointerException must be thrown when ProtectionParameter is null");
+  }
+ catch (  NullPointerException e) {
+  }
+  MyProtectionParameter myPP=new MyProtectionParameter(new byte[5]);
+  KeyStore.ProtectionParameter[] pp={protPass,myPP,callbackHand};
+  KeyStore.Builder ksB, ksB1;
+  KeyStore ks=null;
+  for (int i=0; i < pp.length; i++) {
+    ksB=KeyStore.Builder.newInstance(defaultType,defaultProvider,pp[i]);
+    ksB1=KeyStore.Builder.newInstance(defaultType,null,pp[i]);
+switch (i) {
+case 0:
+      try {
+        ks=ksB.getKeyStore();
+        assertNotNull("KeyStore is null",ks);
+        try {
+          assertEquals(ksB.getProtectionParameter("Bad alias"),pp[i]);
+        }
+ catch (        KeyStoreException e) {
+        }
+        ks=ksB1.getKeyStore();
+        assertNotNull("KeyStore is null",ks);
+        try {
+          assertEquals(ksB1.getProtectionParameter("Bad alias"),pp[i]);
+        }
+ catch (        KeyStoreException e) {
+        }
+      }
+ catch (      KeyStoreException e) {
+        try {
+          ks=ksB.getKeyStore();
+        }
+ catch (        KeyStoreException e1) {
+          assertEquals("Incorrect exception",e.getMessage(),e1.getMessage());
+        }
+      }
+    break;
+case 1:
+case 2:
+  Exception ex1=null;
+Exception ex2=null;
+try {
+ks=ksB.getKeyStore();
+}
+ catch (KeyStoreException e) {
+ex1=e;
+}
+try {
+ks=ksB.getKeyStore();
+}
+ catch (KeyStoreException e) {
+ex2=e;
+}
+assertEquals("Incorrect exception",ex1.getMessage(),ex2.getMessage());
+try {
+ksB.getProtectionParameter("aaa");
+fail("IllegalStateException must be thrown because getKeyStore() was not invoked");
+}
+ catch (IllegalStateException e) {
+}
+try {
+ks=ksB1.getKeyStore();
+}
+ catch (KeyStoreException e) {
+ex1=e;
+}
+try {
+ks=ksB1.getKeyStore();
+}
+ catch (KeyStoreException e) {
+ex2=e;
+}
+assertEquals("Incorrect exception",ex1.getMessage(),ex2.getMessage());
+try {
+ksB1.getProtectionParameter("aaa");
+fail("IllegalStateException must be thrown because getKeyStore() was not invoked");
+}
+ catch (IllegalStateException e) {
+}
+break;
+}
+}
+}

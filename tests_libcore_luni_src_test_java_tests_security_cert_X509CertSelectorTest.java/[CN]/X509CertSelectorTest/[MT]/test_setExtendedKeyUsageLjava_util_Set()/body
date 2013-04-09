@@ -1,0 +1,28 @@
+{
+  HashSet<String> ku1=new HashSet<String>(Arrays.asList(new String[]{"1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2","1.3.6.1.5.5.7.3.3","1.3.6.1.5.5.7.3.4","1.3.6.1.5.5.7.3.8","1.3.6.1.5.5.7.3.9","1.3.6.1.5.5.7.3.5","1.3.6.1.5.5.7.3.6","1.3.6.1.5.5.7.3.7"}));
+  HashSet<String> ku2=new HashSet<String>(Arrays.asList(new String[]{"1.3.6.1.5.5.7.3.1","1.3.6.1.5.5.7.3.2","1.3.6.1.5.5.7.3.3","1.3.6.1.5.5.7.3.4","1.3.6.1.5.5.7.3.8","1.3.6.1.5.5.7.3.9","1.3.6.1.5.5.7.3.5","1.3.6.1.5.5.7.3.6"}));
+  TestCert cert1=new TestCert(ku1);
+  TestCert cert2=new TestCert(ku2);
+  X509CertSelector selector=new X509CertSelector();
+  try {
+    selector.setExtendedKeyUsage(null);
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("Any certificate should match in the case of null " + "extendedKeyUsage criteria.",selector.match(cert1) && selector.match(cert2));
+  try {
+    selector.setExtendedKeyUsage(ku1);
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException was thrown.");
+  }
+  assertEquals(ku1,selector.getExtendedKeyUsage());
+  try {
+    selector.setExtendedKeyUsage(ku2);
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException was thrown.");
+  }
+  assertEquals(ku2,selector.getExtendedKeyUsage());
+}

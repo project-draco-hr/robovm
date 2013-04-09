@@ -1,0 +1,20 @@
+{
+  SSLSocket ssl=getSSLSocket();
+  assertTrue(ssl.getUseClientMode());
+  ssl.setUseClientMode(false);
+  assertFalse(ssl.getUseClientMode());
+  ssl.close();
+  ssl=getSSLSocket("localhost",startServer("UseClientMode"));
+  try {
+    ssl.startHandshake();
+  }
+ catch (  IOException ioe) {
+  }
+  try {
+    ssl.setUseClientMode(false);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  ssl.close();
+}

@@ -1,0 +1,65 @@
+{
+  Statement st=null;
+  try {
+    conn.setReadOnly(true);
+    st=conn.createStatement();
+    st.execute("insert into zoo (id, name, family) values (3, 'ChiChiChi', 'monkey');");
+  }
+  finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  st=null;
+  try {
+    conn.setReadOnly(true);
+    st=conn.createStatement();
+    st.execute("insert into zoo (id, name, family) values (3, 'ChiChiChi', 'monkey');");
+    fail("SQLException is not thrown");
+  }
+ catch (  SQLException sqle) {
+  }
+ finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    conn.setReadOnly(true);
+    st=conn.createStatement();
+    st.executeUpdate("insert into zoo (id, name, family) values (4, 'ChaChaCha', 'monkey');");
+    fail("SQLException is not thrown");
+  }
+ catch (  SQLException sqle) {
+  }
+ finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    conn.setReadOnly(false);
+    st=conn.createStatement();
+    st.execute("insert into zoo (id, name, family) values (4, 'ChiChiChi', 'monkey');");
+  }
+  finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  conn.close();
+  try {
+    conn.setReadOnly(true);
+    fail("Exception expected");
+  }
+ catch (  SQLException e) {
+  }
+}

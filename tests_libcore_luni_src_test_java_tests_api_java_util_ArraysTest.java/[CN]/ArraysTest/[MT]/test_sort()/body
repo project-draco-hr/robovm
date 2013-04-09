@@ -1,0 +1,19 @@
+{
+  for (  int len : LENGTHS) {
+    PrimitiveTypeArrayBuilder.reset();
+    int[] golden=new int[len];
+    for (int m=1; m < 2 * len; m*=2) {
+      for (      PrimitiveTypeArrayBuilder builder : PrimitiveTypeArrayBuilder.values()) {
+        builder.build(golden,m);
+        int[] test=golden.clone();
+        for (        PrimitiveTypeConverter converter : PrimitiveTypeConverter.values()) {
+          Object convertedGolden=converter.convert(golden);
+          Object convertedTest=converter.convert(test);
+          sort(convertedTest);
+          checkSorted(convertedTest);
+          assertEquals(checkSum(convertedGolden),checkSum(convertedTest));
+        }
+      }
+    }
+  }
+}

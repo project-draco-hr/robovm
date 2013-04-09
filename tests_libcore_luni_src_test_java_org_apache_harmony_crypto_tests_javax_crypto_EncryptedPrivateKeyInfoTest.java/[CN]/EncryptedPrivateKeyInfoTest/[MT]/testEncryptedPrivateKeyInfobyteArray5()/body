@@ -1,0 +1,55 @@
+{
+  byte[] enc=null;
+  try {
+    enc=EncryptedPrivateKeyInfoData.getValidEncryptedPrivateKeyInfoEncoding("DSA");
+    enc[9]=(byte)6;
+    new EncryptedPrivateKeyInfo(enc);
+    fail(getName() + "(1): IOException has not been thrown");
+  }
+ catch (  IOException ok) {
+  }
+  try {
+    enc=EncryptedPrivateKeyInfoData.getValidEncryptedPrivateKeyInfoEncoding("DSA");
+    enc[307]=(byte)6;
+    new EncryptedPrivateKeyInfo(enc);
+    fail(getName() + "(2): IOException has not been thrown");
+  }
+ catch (  IOException ok) {
+  }
+  try {
+    enc=EncryptedPrivateKeyInfoData.getValidEncryptedPrivateKeyInfoEncoding("DSA");
+    enc[310]=(byte)1;
+    new EncryptedPrivateKeyInfo(enc);
+    fail(getName() + "(3): IOException has not been thrown");
+  }
+ catch (  IOException ok) {
+  }
+  try {
+    enc=EncryptedPrivateKeyInfoData.getValidEncryptedPrivateKeyInfoEncoding("DSA");
+    enc[17]=(byte)0x29;
+    EncryptedPrivateKeyInfo epki=new EncryptedPrivateKeyInfo(enc);
+    if (epki.getAlgParameters() == null) {
+    }
+ else {
+      fail(getName() + "(4): IOException has not been thrown");
+    }
+  }
+ catch (  IOException ok) {
+  }
+  try {
+    enc=EncryptedPrivateKeyInfoData.getValidEncryptedPrivateKeyInfoEncoding("DSA");
+    enc[20]=(byte)0x1d;
+    new EncryptedPrivateKeyInfo(enc);
+    fail(getName() + "(5): IOException has not been thrown");
+  }
+ catch (  IOException ok) {
+  }
+  try {
+    enc=EncryptedPrivateKeyInfoData.getValidEncryptedPrivateKeyInfoEncoding("DSA");
+    enc[20]=(byte)0x1f;
+    new EncryptedPrivateKeyInfo(enc);
+    fail(getName() + "(6): IOException has not been thrown");
+  }
+ catch (  IOException ok) {
+  }
+}

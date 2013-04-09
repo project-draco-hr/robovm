@@ -1,0 +1,45 @@
+{
+  if (localName == "one") {
+    assertEquals(2,prefixMappings.size());
+    assertEquals(1,locator.getLineNumber());
+    assertFalse(oneStarted);
+    assertFalse(twoStarted);
+    assertFalse(oneEnded);
+    assertFalse(twoEnded);
+    oneStarted=true;
+    assertSame("ns:default",uri);
+    assertEquals("one",qName);
+    assertEquals(1,atts.getLength());
+    assertSame("",atts.getURI(0));
+    assertSame("a",atts.getLocalName(0));
+    assertEquals("b",atts.getValue(0));
+    assertEquals(0,atts.getIndex("","a"));
+    assertEquals("b",atts.getValue("","a"));
+    return;
+  }
+  if (localName == "two") {
+    assertEquals(3,prefixMappings.size());
+    assertTrue(oneStarted);
+    assertFalse(twoStarted);
+    assertFalse(oneEnded);
+    assertFalse(twoEnded);
+    twoStarted=true;
+    assertSame("ns:1",uri);
+    Assert.assertEquals("n1:two",qName);
+    assertEquals(2,atts.getLength());
+    assertSame("",atts.getURI(0));
+    assertSame("c",atts.getLocalName(0));
+    assertEquals("d",atts.getValue(0));
+    assertEquals(0,atts.getIndex("","c"));
+    assertEquals("d",atts.getValue("","c"));
+    assertSame("ns:1",atts.getURI(1));
+    assertSame("e",atts.getLocalName(1));
+    assertEquals("f",atts.getValue(1));
+    assertEquals(1,atts.getIndex("ns:1","e"));
+    assertEquals("f",atts.getValue("ns:1","e"));
+    assertEquals(-1,atts.getIndex("ns:default","e"));
+    assertEquals(null,atts.getValue("ns:default","e"));
+    return;
+  }
+  fail();
+}

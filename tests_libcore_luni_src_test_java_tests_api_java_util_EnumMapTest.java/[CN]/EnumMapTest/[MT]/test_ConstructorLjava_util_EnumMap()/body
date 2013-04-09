@@ -1,0 +1,26 @@
+{
+  EnumMap enumMap;
+  EnumMap enumColorMap=null;
+  try {
+    enumMap=new EnumMap(enumColorMap);
+    fail("Expected NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  enumColorMap=new EnumMap<Color,Double>(Color.class);
+  Double double1=new Double(1);
+  enumColorMap.put(Color.Green,2);
+  enumColorMap.put(Color.Blue,double1);
+  enumMap=new EnumMap(enumColorMap);
+  assertEquals("Constructor fails",2,enumMap.get(Color.Green));
+  assertSame("Constructor fails",double1,enumMap.get(Color.Blue));
+  assertNull("Constructor fails",enumMap.get(Color.Red));
+  enumMap.put(Color.Red,1);
+  assertEquals("Wrong value",1,enumMap.get(Color.Red));
+  try {
+    enumMap.put(Size.Middle,2);
+    fail("Expected ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+}

@@ -1,0 +1,68 @@
+{
+  for (int index=1; index < 4; index++) {
+    Cipher c=Cipher.getInstance("DESEDE/CBC/PKCS5Padding");
+    byte[] keyMaterial=loadBytes("hyts_" + "des-ede3-cbc.test" + index + ".key");
+    DESedeKeySpec keySpec=new DESedeKeySpec(keyMaterial);
+    SecretKeyFactory skf=SecretKeyFactory.getInstance("DESEDE");
+    Key k=skf.generateSecret(keySpec);
+    byte[] ivMaterial=loadBytes("hyts_" + "des-ede3-cbc.test" + index + ".iv");
+    IvParameterSpec iv=new IvParameterSpec(ivMaterial);
+    c.init(Cipher.ENCRYPT_MODE,k,iv);
+    ByteArrayOutputStream baos=new ByteArrayOutputStream();
+    byte[] input=new byte[256];
+    String resPath="hyts_" + "des-ede3-cbc.test" + index + ".plaintext";
+    File resources=Support_Resources.createTempFolder();
+    Support_Resources.copyFile(resources,null,resPath);
+    InputStream is=Support_Resources.getStream(resPath);
+    int bytesRead=is.read(input,0,256);
+    while (bytesRead > 0) {
+      byte[] output=c.update(input,0,bytesRead);
+      if (output != null) {
+        baos.write(output);
+      }
+      bytesRead=is.read(input,0,256);
+    }
+    byte[] output=c.doFinal();
+    if (output != null) {
+      baos.write(output);
+    }
+    byte[] encryptedPlaintext=baos.toByteArray();
+    is.close();
+    byte[] cipherText=loadBytes("hyts_" + "des-ede3-cbc.test" + index + ".ciphertext");
+    assertTrue("Operation produced incorrect results",Arrays.equals(encryptedPlaintext,cipherText));
+  }
+  byte[] b={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+  byte[] b1=new byte[30];
+  Cipher c=Cipher.getInstance("DES/CBC/NoPadding");
+  c.init(Cipher.ENCRYPT_MODE,cipherKeyDES);
+  c.update(b,0,10,b1,5);
+  try {
+    c.doFinal();
+    fail();
+  }
+ catch (  IllegalBlockSizeException expected) {
+  }
+  c=Cipher.getInstance("DES/CBC/NoPadding");
+  try {
+    c.doFinal();
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+  c=Cipher.getInstance("DES/CBC/NoPadding");
+  c.init(Cipher.ENCRYPT_MODE,cipherKeyDES);
+  c.doFinal(b,0,16,b1,0);
+  SecureRandom sr=new SecureRandom();
+  byte[] iv=new byte[8];
+  sr.nextBytes(iv);
+  AlgorithmParameterSpec ap=new IvParameterSpec(iv);
+  c=Cipher.getInstance("DES/CBC/PKCS5Padding");
+  c.init(Cipher.DECRYPT_MODE,cipherKeyDES,ap);
+  c.update(b1,0,24,b,0);
+  try {
+    c.doFinal();
+    fail();
+  }
+ catch (  BadPaddingException expected) {
+  }
+}

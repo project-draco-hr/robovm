@@ -1,0 +1,17 @@
+{
+  MockServer server=new MockServer();
+  server.enqueue(new byte[0],3);
+  Socket socket=new Socket("localhost",server.port);
+  OutputStream out=socket.getOutputStream();
+  out.write(5);
+  out.write(3);
+  socket.close();
+  out.close();
+  try {
+    out.write(9);
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+  server.shutdown();
+}

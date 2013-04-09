@@ -1,0 +1,15 @@
+{
+  URL u=createContent("lf.jar","swt.dll");
+  juc=(JarURLConnection)u.openConnection();
+  Manifest manifest=juc.getManifest();
+  Map<String,Attributes> attr=manifest.getEntries();
+  assertEquals(new HashSet<String>(Arrays.asList("plus.bmp","swt.dll")),attr.keySet());
+  URL invURL=createContent("InvalidJar.jar","Test.class");
+  JarURLConnection juConn=(JarURLConnection)invURL.openConnection();
+  try {
+    juConn.getManifest();
+    fail("IOException was not thrown.");
+  }
+ catch (  java.io.IOException io) {
+  }
+}

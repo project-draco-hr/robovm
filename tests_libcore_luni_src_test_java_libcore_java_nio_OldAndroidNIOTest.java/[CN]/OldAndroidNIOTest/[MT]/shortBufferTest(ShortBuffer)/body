@@ -1,0 +1,90 @@
+{
+  checkBuffer(sb);
+  try {
+    sb.put(-1,(short)0);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    sb.put(sb.limit(),(short)0);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    short[] data=new short[8];
+    sb.position(0);
+    sb.put(data,-1,2);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    short[] data=new short[8];
+    sb.position(0);
+    sb.put(data,1,8);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    short[] data=new short[8];
+    sb.position(sb.limit() - 2);
+    sb.put(data,0,3);
+    fail("expected exception not thrown");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  short[] data={0,10,20,30,40,50,60,70};
+  sb.position(0);
+  sb.put(data);
+  try {
+    sb.get();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  sb.position(0);
+  assertEquals((short)0,sb.get());
+  assertEquals((short)10,sb.get());
+  assertEquals((short)20,sb.get());
+  assertEquals((short)30,sb.get());
+  assertEquals((short)40,sb.get());
+  assertEquals((short)50,sb.get());
+  assertEquals((short)60,sb.get());
+  assertEquals((short)70,sb.get());
+  try {
+    sb.get();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  sb.position(1);
+  sb.put((short)11);
+  assertEquals((short)11,sb.get(1));
+  short[] ss1={33,44,55,66};
+  sb.position(3);
+  sb.put(ss1);
+  sb.position(0);
+  assertEquals((short)0,sb.get());
+  assertEquals((short)11,sb.get());
+  assertEquals((short)20,sb.get());
+  assertEquals((short)33,sb.get());
+  assertEquals((short)44,sb.get());
+  assertEquals((short)55,sb.get());
+  assertEquals((short)66,sb.get());
+  assertEquals((short)70,sb.get());
+  short[] ss2={10,22,30};
+  sb.position(2);
+  sb.put(ss2,1,1);
+  sb.position(0);
+  assertEquals((short)0,sb.get());
+  assertEquals((short)11,sb.get());
+  assertEquals((short)22,sb.get());
+  assertEquals((short)33,sb.get());
+  assertEquals((short)44,sb.get());
+  assertEquals((short)55,sb.get());
+  assertEquals((short)66,sb.get());
+  assertEquals((short)70,sb.get());
+}

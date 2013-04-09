@@ -1,0 +1,30 @@
+{
+  uc.setRequestProperty("prop","yo");
+  uc.setRequestProperty("prop","yo2");
+  assertEquals("yo2",uc.getRequestProperty("prop"));
+  Map<String,List<String>> map=uc.getRequestProperties();
+  List<String> props=uc.getRequestProperties().get("prop");
+  assertEquals(1,props.size());
+  try {
+    map.put("hi",Arrays.asList(new String[]{"bye"}));
+    fail("could modify map");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  try {
+    props.add("hi");
+    fail("could modify list");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  JarURLConnection con1=openJarURLConnection();
+  map=con1.getRequestProperties();
+  assertNotNull(map);
+  assertEquals(0,map.size());
+  try {
+    map.put("hi",Arrays.asList(new String[]{"bye"}));
+    fail();
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+}

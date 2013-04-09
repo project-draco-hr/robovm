@@ -1,0 +1,40 @@
+{
+  String[] queries={"select * from zoo;","insert into zoo (id, name, family) values (3, 'Chichichi', 'monkey');","create table zoo_office(id integer not null, name varchar(20), primary key(id));","drop table zoo_office;"};
+  String[] native_queries={"select * from zoo;","insert into zoo (id, name, family) values (3, 'Chichichi', 'monkey');","create table zoo_office(id integer not null, name varchar(20), primary key(id));","drop table zoo_office;"};
+  Statement st=null;
+  String nativeQuery="";
+  try {
+    for (int i=0; i < queries.length; i++) {
+      nativeQuery=conn.nativeSQL(queries[i]);
+      assertEquals(native_queries[i],nativeQuery);
+      st=conn.createStatement();
+      st.execute(nativeQuery);
+    }
+  }
+ catch (  SQLException sqle) {
+  }
+ finally {
+    try {
+      st.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  String[] inc_queries={"","  ","not query"};
+  for (int i=0; i < inc_queries.length; i++) {
+    try {
+      nativeQuery=conn.nativeSQL(inc_queries[i]);
+      assertEquals(inc_queries[i],nativeQuery);
+    }
+ catch (    SQLException e) {
+      assertEquals("not supported",e.getMessage());
+    }
+  }
+  conn.close();
+  try {
+    conn.nativeSQL(inc_queries[0]);
+    fail("Could execute statement on closed connection.");
+  }
+ catch (  SQLException e) {
+  }
+}

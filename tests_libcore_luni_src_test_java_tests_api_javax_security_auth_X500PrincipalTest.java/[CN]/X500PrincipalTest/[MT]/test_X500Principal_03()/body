@@ -1,0 +1,33 @@
+{
+  String name="CN=Duke,OU=JavaSoft,O=Sun Microsystems,C=US";
+  byte[] ba=getByteArray(TestUtils.getX509Certificate_v1());
+  byte[] baNull=null;
+  try {
+    X500Principal xpr=new X500Principal(ba);
+    assertNotNull("Null object returned",xpr);
+    byte[] resArray=xpr.getEncoded();
+    assertEquals(ba.length,resArray.length);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception: " + e);
+  }
+  try {
+    X500Principal xpr=new X500Principal(baNull);
+    fail("IllegalArgumentException wasn't thrown");
+  }
+ catch (  IllegalArgumentException npe) {
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of IllegalArgumentException");
+  }
+  ba=name.getBytes();
+  try {
+    X500Principal xpr=new X500Principal(ba);
+    fail("IllegalArgumentException wasn't thrown");
+  }
+ catch (  IllegalArgumentException npe) {
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of IllegalArgumentException");
+  }
+}

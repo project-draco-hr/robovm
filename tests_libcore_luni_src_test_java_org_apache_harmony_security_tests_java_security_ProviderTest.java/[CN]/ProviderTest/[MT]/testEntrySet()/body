@@ -1,0 +1,41 @@
+{
+  p.put("MessageDigest.SHA-256","aaa.bbb.ccc.ddd");
+  Set s=p.entrySet();
+  try {
+    s.clear();
+    fail("Must return unmodifiable set");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  assertEquals("Incorrect set size",8,s.size());
+  for (Iterator it=s.iterator(); it.hasNext(); ) {
+    Entry e=(Entry)it.next();
+    String key=(String)e.getKey();
+    String val=(String)e.getValue();
+    if (key.equals("MessageDigest.SHA-1") && val.equals("SomeClassName")) {
+      continue;
+    }
+    if (key.equals("Alg.Alias.MessageDigest.SHA1") && val.equals("SHA-1")) {
+      continue;
+    }
+    if (key.equals("MessageDigest.abc") && val.equals("SomeClassName")) {
+      continue;
+    }
+    if (key.equals("Provider.id className") && val.equals(p.getClass().getName())) {
+      continue;
+    }
+    if (key.equals("Provider.id name") && val.equals("MyProvider")) {
+      continue;
+    }
+    if (key.equals("MessageDigest.SHA-256") && val.equals("aaa.bbb.ccc.ddd")) {
+      continue;
+    }
+    if (key.equals("Provider.id version") && val.equals("1.0")) {
+      continue;
+    }
+    if (key.equals("Provider.id info") && val.equals("Provider for testing")) {
+      continue;
+    }
+    fail("Incorrect set");
+  }
+}

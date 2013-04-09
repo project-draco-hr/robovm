@@ -1,0 +1,44 @@
+{
+  if (!X509Support) {
+    fail(NotSupportMsg);
+    return;
+  }
+  CertificateFactory[] certFs=initCertFs();
+  assertNotNull("CertificateFactory objects were not created",certFs);
+  InputStream is1=null;
+  InputStream is2=new ByteArrayInputStream(new byte[10]);
+  for (int i=0; i < certFs.length; i++) {
+    try {
+      certFs[i].generateCertPath(is1);
+      fail("generateCertificate must thrown CertificateException or NullPointerException when input stream is null");
+    }
+ catch (    CertificateException e) {
+    }
+catch (    NullPointerException e) {
+    }
+    try {
+      certFs[i].generateCertPath(is2);
+      fail("generateCertificate must thrown CertificateException when input stream contains invalid datas");
+    }
+ catch (    CertificateException e) {
+    }
+    Iterator<String> it=certFs[i].getCertPathEncodings();
+    while (it.hasNext()) {
+      String enc=it.next();
+      try {
+        certFs[i].generateCertPath(is1,enc);
+        fail("generateCertificate must thrown CertificateException or NullPointerException when input stream is null and encodings ".concat(enc));
+      }
+ catch (      CertificateException e) {
+      }
+catch (      NullPointerException e) {
+      }
+      try {
+        certFs[i].generateCertPath(is2,enc);
+        fail("generateCertificate must thrown CertificateException when input stream contains invalid datas  and encodings ".concat(enc));
+      }
+ catch (      CertificateException e) {
+      }
+    }
+  }
+}

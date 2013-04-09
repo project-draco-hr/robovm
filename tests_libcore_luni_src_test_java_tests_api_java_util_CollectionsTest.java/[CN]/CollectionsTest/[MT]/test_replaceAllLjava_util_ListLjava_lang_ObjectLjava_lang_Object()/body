@@ -1,0 +1,52 @@
+{
+  String string1="A-B-C-D-E-S-JF-SUB-G-H-I-J-SUBL-K-L-LIST-M-N--S-S-O-SUBLIS-P-Q-R-SUBLIST-S-T-U-V-W-X-Y-Z";
+  char[] chars=string1.toCharArray();
+  List list=new ArrayList();
+  for (int i=0; i < chars.length; i++) {
+    list.add(new Character(chars[i]));
+  }
+  try {
+    Collections.replaceAll(null,new Object(),new Object());
+    fail("Expected NullPointerException for null list parameter");
+  }
+ catch (  NullPointerException e) {
+  }
+  boolean result=Collections.replaceAll(list,new Character('1'),new Character('Z'));
+  assertFalse("Test1: Collections.replaceAll() returned wrong result",result);
+  assertEquals("Test2 : ReplaceAll modified the list incorrectly",string1,getString(list));
+  result=Collections.replaceAll(list,new Character('S'),new Character('K'));
+  assertTrue("Test3: Collections.replaceAll() returned wrong result",result);
+  assertEquals("Test4: ReplaceAll modified the list incorrectly",(string1=string1.replace('S','K')),getString(list));
+  result=Collections.replaceAll(list,new Character('Z'),new Character('N'));
+  assertTrue("Test5: Collections.replaceAll() returned wrong result",result);
+  assertEquals("Test6: ReplaceAll modified the list incorrectly",(string1=string1.replace('Z','N')),getString(list));
+  result=Collections.replaceAll(list,new Character('A'),new Character('B'));
+  assertTrue("Test7: Collections.replaceAll() returned wrong result",result);
+  assertEquals("Test8: ReplaceAll modified the list incorrectly",(string1=string1.replace('A','B')),getString(list));
+  LinkedList smallList=new LinkedList();
+  for (int i=0; i < 10; i++) {
+    smallList.add(objArray[i]);
+  }
+  smallList.set(4,new Integer(5));
+  result=Collections.replaceAll(smallList,new Integer(5),null);
+  assertTrue("Test9: Collections.replaceAll() returned wrong result",result);
+  for (int i=0; i < smallList.size(); i++) {
+    if (i == 4 || i == 5)     assertSame("Test9: ReplaceAll didn't replace element at " + i,null,smallList.get(i));
+ else     assertEquals("Test9: ReplaceAll shouldn't have replaced element at " + i,new Integer(i),smallList.get(i));
+  }
+  result=Collections.replaceAll(smallList,null,new Integer(99));
+  assertTrue("Test10: Collections.replaceAll() returned wrong result",result);
+  for (int i=0; i < smallList.size(); i++) {
+    if (i == 4 || i == 5)     assertEquals("Test10: ReplaceAll didn't replace element at " + i,new Integer(99),smallList.get(i));
+ else     assertEquals("Test10: ReplaceAll shouldn't have replaced element at " + i,new Integer(i),smallList.get(i));
+  }
+  Mock_ArrayList mal=new Mock_ArrayList();
+  mal.add("First");
+  mal.add("Second");
+  try {
+    Collections.replaceAll(mal,"Second",null);
+    fail("UnsupportedOperationException expected");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+}

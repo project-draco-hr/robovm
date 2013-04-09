@@ -1,0 +1,99 @@
+{
+  assertEquals(0,Calendar.ALL_STYLES);
+  assertEquals(1,Calendar.SHORT);
+  assertEquals(2,Calendar.LONG);
+  Calendar cal=Calendar.getInstance(Locale.US);
+  for (int field=0; field < Calendar.FIELD_COUNT; field++) {
+    for (    Locale locale : locales) {
+      Map<String,Integer> shortResult=cal.getDisplayNames(field,Calendar.SHORT,locale);
+      Map<String,Integer> longResult=cal.getDisplayNames(field,Calendar.LONG,locale);
+      Map<String,Integer> allResult=cal.getDisplayNames(field,Calendar.ALL_STYLES,locale);
+      DateFormatSymbols symbols=new DateFormatSymbols(locale);
+      String[] values=null;
+switch (field) {
+case Calendar.AM_PM:
+case Calendar.ERA:
+        values=(field == Calendar.AM_PM) ? symbols.getAmPmStrings() : symbols.getEras();
+      assertDisplayNameMap(values,shortResult,0);
+    assertDisplayNameMap(values,longResult,0);
+  assertDisplayNameMap(values,allResult,0);
+break;
+case Calendar.MONTH:
+values=symbols.getShortMonths();
+assertDisplayNameMap(values,shortResult,0);
+values=symbols.getMonths();
+assertDisplayNameMap(values,longResult,0);
+assertTrue(allResult.size() >= shortResult.size());
+assertTrue(allResult.size() >= longResult.size());
+assertTrue(allResult.size() <= shortResult.size() + longResult.size());
+break;
+case Calendar.DAY_OF_WEEK:
+values=symbols.getShortWeekdays();
+assertDisplayNameMap(values,shortResult,1);
+values=symbols.getWeekdays();
+assertDisplayNameMap(values,longResult,1);
+assertTrue(allResult.size() >= shortResult.size());
+assertTrue(allResult.size() >= longResult.size());
+assertTrue(allResult.size() <= shortResult.size() + longResult.size());
+break;
+default :
+assertNull(shortResult);
+assertNull(longResult);
+assertNull(allResult);
+}
+}
+}
+cal.setLenient(true);
+try {
+cal.getDisplayNames(-1,Calendar.SHORT,Locale.US);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+try {
+cal.getDisplayNames(Calendar.FIELD_COUNT,Calendar.LONG,Locale.US);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+try {
+cal.getDisplayNames(Calendar.MONTH,-1,Locale.US);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+try {
+cal.getDisplayNames(Calendar.MONTH,3,Locale.US);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+try {
+cal.getDisplayNames(Calendar.MONTH,Calendar.SHORT,null);
+fail("Should throw NullPointerException");
+}
+ catch (NullPointerException e) {
+}
+try {
+cal.getDisplayNames(-1,Calendar.SHORT,null);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+try {
+cal.getDisplayNames(Calendar.MONTH,-1,null);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+cal.set(Calendar.SECOND,999);
+cal.getDisplayNames(Calendar.MONTH,Calendar.SHORT,Locale.US);
+cal.setLenient(false);
+cal.set(Calendar.SECOND,999);
+try {
+cal.getDisplayNames(Calendar.MONTH,Calendar.SHORT,Locale.US);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+}

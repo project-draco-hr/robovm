@@ -1,0 +1,25 @@
+{
+  try {
+    CertPathBuilder.getInstance(null);
+    fail("NullPointerException or NoSuchAlgorithmException must be thrown when algorithm is null");
+  }
+ catch (  NullPointerException e) {
+  }
+catch (  NoSuchAlgorithmException e) {
+  }
+  for (int i=0; i < invalidValues.length; i++) {
+    try {
+      CertPathBuilder.getInstance(invalidValues[i]);
+      fail("NoSuchAlgorithmException must be thrown (type: ".concat(invalidValues[i]).concat(")"));
+    }
+ catch (    NoSuchAlgorithmException e) {
+    }
+  }
+  CertPathBuilder cerPB;
+  for (int i=0; i < validValues.length; i++) {
+    cerPB=CertPathBuilder.getInstance(validValues[i]);
+    assertEquals("Incorrect type",cerPB.getAlgorithm(),validValues[i]);
+    assertEquals("Incorrect provider",cerPB.getProvider(),mProv);
+    checkResult(cerPB);
+  }
+}

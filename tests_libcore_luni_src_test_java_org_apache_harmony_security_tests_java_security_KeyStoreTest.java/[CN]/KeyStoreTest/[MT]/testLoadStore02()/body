@@ -1,0 +1,30 @@
+{
+  assertTrue(NotSupportMsg,KSSupported);
+  KeyStore[] kss=createKS();
+  assertNotNull("KeyStore objects were not created",kss);
+  for (int i=0; i < kss.length; i++) {
+    try {
+      kss[i].load(null);
+      fail("IOException or IllegalArgumentException should be thrown for null parameter");
+    }
+ catch (    IOException e) {
+    }
+catch (    IllegalArgumentException e) {
+    }
+    kss[i].load(null,null);
+    try {
+      kss[i].store(null);
+      fail("IOException or IllegalArgumentException should be thrown for null parameter");
+    }
+ catch (    IOException e) {
+    }
+catch (    IllegalArgumentException e) {
+    }
+  }
+  KeyStore.LoadStoreParameter lParam=new MyLoadStoreParams(new KeyStore.PasswordProtection(new char[0]));
+  for (int i=0; i < kss.length; i++) {
+    kss[i].load(lParam);
+    assertEquals("Incorrect result",kss[i].size(),0);
+    kss[i].store(lParam);
+  }
+}

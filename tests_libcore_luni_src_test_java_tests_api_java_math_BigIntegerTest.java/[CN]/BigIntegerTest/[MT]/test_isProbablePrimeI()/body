@@ -1,0 +1,53 @@
+{
+  int fails=0;
+  bi=new BigInteger(20,20,rand);
+  if (!bi.isProbablePrime(17)) {
+    fails++;
+  }
+  bi=new BigInteger("4",10);
+  if (bi.isProbablePrime(17)) {
+    fail("isProbablePrime failed for: " + bi);
+  }
+  bi=BigInteger.valueOf(17L * 13L);
+  if (bi.isProbablePrime(17)) {
+    fail("isProbablePrime failed for: " + bi);
+  }
+  for (long a=2; a < 1000; a++) {
+    if (isPrime(a)) {
+      assertTrue("false negative on prime number <1000",BigInteger.valueOf(a).isProbablePrime(5));
+    }
+ else     if (BigInteger.valueOf(a).isProbablePrime(17)) {
+      System.out.println("isProbablePrime failed for: " + a);
+      fails++;
+    }
+  }
+  for (int a=0; a < 1000; a++) {
+    bi=BigInteger.valueOf(rand.nextInt(1000000)).multiply(BigInteger.valueOf(rand.nextInt(1000000)));
+    if (bi.isProbablePrime(17)) {
+      System.out.println("isProbablePrime failed for: " + bi);
+      fails++;
+    }
+  }
+  for (int a=0; a < 200; a++) {
+    bi=new BigInteger(70,rand).multiply(new BigInteger(70,rand));
+    if (bi.isProbablePrime(17)) {
+      System.out.println("isProbablePrime failed for: " + bi);
+      fails++;
+    }
+  }
+  assertTrue("Too many false positives - may indicate a problem",fails <= 1);
+  bi=new BigInteger("153890972191202256150310830154922163807316525358455215516067727076235016932726922093888770552128767458882963869421440585369743",10);
+  if (!bi.isProbablePrime(80)) {
+    fail("isProbablePrime failed for: " + bi);
+  }
+  bi=new BigInteger("2090575416269141767246491983797422123741252476560371649798066134123893524014911825188890458270426076468664046568752890122415061377308817346303546688282957897504000216241497550243010257911214329646877810655164658470278901030511157372440751259674247310396158238588463284702737181653",10);
+  if (!bi.isProbablePrime(80)) {
+    fail("isProbablePrime failed for: " + bi);
+  }
+  for (int bitLength=100; bitLength <= 600; bitLength+=100) {
+    BigInteger a=BigInteger.probablePrime(bitLength,rand);
+    BigInteger b=BigInteger.probablePrime(bitLength,rand);
+    BigInteger c=a.multiply(b);
+    assertFalse("isProbablePrime failed for product of two large primes" + a + " * "+ b+ " = "+ c+ " (bitLength = "+ bitLength+ ")",c.isProbablePrime(80));
+  }
+}

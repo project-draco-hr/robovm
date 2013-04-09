@@ -1,0 +1,24 @@
+{
+  String namespaceURI="http://www.newattr.com";
+  String qualifiedName="emp:newAttr";
+  Document doc1;
+  Document doc2;
+  Attr newAttr;
+  NodeList elementList;
+  Node testAddr;
+  doc1=(Document)load("staffNS",builder);
+  doc2=(Document)load("staffNS",builder);
+  newAttr=doc2.createAttributeNS(namespaceURI,qualifiedName);
+  elementList=doc1.getElementsByTagName("emp:address");
+  testAddr=elementList.item(0);
+{
+    boolean success=false;
+    try {
+      ((Element)testAddr).setAttributeNodeNS(newAttr);
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.WRONG_DOCUMENT_ERR);
+    }
+    assertTrue("throw_WRONG_DOCUMENT_ERR",success);
+  }
+}

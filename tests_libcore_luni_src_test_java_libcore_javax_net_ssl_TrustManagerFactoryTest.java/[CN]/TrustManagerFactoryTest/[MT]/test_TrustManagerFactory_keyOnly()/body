@@ -1,0 +1,10 @@
+{
+  KeyStore ks=TestKeyStore.createKeyStore();
+  KeyStore.PrivateKeyEntry pke=getTestKeyStore().getPrivateKey("RSA","RSA");
+  ks.setKeyEntry("key",pke.getPrivateKey(),"pw".toCharArray(),pke.getCertificateChain());
+  String algorithm=TrustManagerFactory.getDefaultAlgorithm();
+  TrustManagerFactory tmf=TrustManagerFactory.getInstance(algorithm);
+  tmf.init(ks);
+  X509TrustManager trustManager=(X509TrustManager)tmf.getTrustManagers()[0];
+  trustManager.checkServerTrusted((X509Certificate[])pke.getCertificateChain(),"RSA");
+}

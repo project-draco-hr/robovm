@@ -1,0 +1,32 @@
+{
+  String host="new host";
+  int port=8080;
+  ByteBuffer[] bbA={ByteBuffer.allocate(100),ByteBuffer.allocate(10),ByteBuffer.allocate(100)};
+  ByteBuffer bb=ByteBuffer.allocate(10);
+  SSLEngine sse=getEngine(host,port);
+  sse.setUseClientMode(true);
+  try {
+    sse.unwrap(bb,bbA,-1,3);
+    fail("IndexOutOfBoundsException wasn't thrown");
+  }
+ catch (  IndexOutOfBoundsException iobe) {
+  }
+  try {
+    sse.unwrap(bb,bbA,0,-3);
+    fail("IndexOutOfBoundsException wasn't thrown");
+  }
+ catch (  IndexOutOfBoundsException iobe) {
+  }
+  try {
+    sse.unwrap(bb,bbA,bbA.length + 1,bbA.length);
+    fail("IndexOutOfBoundsException wasn't thrown");
+  }
+ catch (  IndexOutOfBoundsException iobe) {
+  }
+  try {
+    sse.unwrap(bb,bbA,0,bbA.length + 1);
+    fail("IndexOutOfBoundsException wasn't thrown");
+  }
+ catch (  IndexOutOfBoundsException iobe) {
+  }
+}

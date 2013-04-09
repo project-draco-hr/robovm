@@ -1,0 +1,62 @@
+{
+  for (int i=0; i < list_wf.length; i++) {
+    try {
+      HashMap<String,String> hm=sp.readFile(list_out_hb[i].getPath());
+      MyDefaultHandler dh=new MyDefaultHandler();
+      InputStream is=new FileInputStream(list_wf[i]);
+      parser.parse(is,dh,SAXParserTestSupport.XML_SYSTEM_ID);
+      assertEquals(hm,dh.createData());
+    }
+ catch (    IOException ioe) {
+      fail("Unexpected IOException " + ioe.toString());
+    }
+catch (    SAXException sax) {
+      fail("Unexpected SAXException " + sax.toString());
+    }
+  }
+  for (int i=0; i < list_nwf.length; i++) {
+    try {
+      MyDefaultHandler dh=new MyDefaultHandler();
+      InputStream is=new FileInputStream(list_nwf[i]);
+      parser.parse(is,dh,SAXParserTestSupport.XML_SYSTEM_ID);
+      fail("SAXException is not thrown");
+    }
+ catch (    org.xml.sax.SAXException se) {
+    }
+catch (    FileNotFoundException fne) {
+      fail("Unexpected FileNotFoundException " + fne.toString());
+    }
+catch (    IOException ioe) {
+      fail("Unexpected IOException " + ioe.toString());
+    }
+  }
+  try {
+    MyDefaultHandler dh=new MyDefaultHandler();
+    parser.parse((InputStream)null,dh,SAXParserTestSupport.XML_SYSTEM_ID);
+    fail("java.lang.IllegalArgumentException is not thrown");
+  }
+ catch (  java.lang.IllegalArgumentException iae) {
+  }
+catch (  IOException ioe) {
+    fail("Unexpected IOException " + ioe.toString());
+  }
+catch (  SAXException sax) {
+    fail("Unexpected SAXException " + sax.toString());
+  }
+  try {
+    InputStream is=new FileInputStream(list_wf[0]);
+    parser.parse(is,(DefaultHandler)null,SAXParserTestSupport.XML_SYSTEM_ID);
+  }
+ catch (  java.lang.IllegalArgumentException iae) {
+    fail("java.lang.IllegalArgumentException is thrown");
+  }
+catch (  FileNotFoundException fne) {
+    fail("Unexpected FileNotFoundException " + fne.toString());
+  }
+catch (  IOException ioe) {
+    fail("Unexpected IOException " + ioe.toString());
+  }
+catch (  SAXException sax) {
+    fail("Unexpected SAXException " + sax.toString());
+  }
+}

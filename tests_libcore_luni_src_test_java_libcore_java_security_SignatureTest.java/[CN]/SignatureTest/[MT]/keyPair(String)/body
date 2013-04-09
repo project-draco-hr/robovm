@@ -1,0 +1,24 @@
+{
+  if (sigAlgorithm.endsWith("Encryption")) {
+    sigAlgorithm=sigAlgorithm.substring(0,sigAlgorithm.length() - "Encryption".length());
+  }
+  String kpAlgorithm;
+  if (sigAlgorithm.endsWith("ECDSA")) {
+    kpAlgorithm="EC";
+  }
+ else   if (sigAlgorithm.endsWith("DSA")) {
+    kpAlgorithm="DSA";
+  }
+ else   if (sigAlgorithm.endsWith("RSA")) {
+    kpAlgorithm="RSA";
+  }
+ else {
+    throw new Exception("Unknown KeyPair algorithm for Signature algorithm " + sigAlgorithm);
+  }
+  KeyPair kp=keypairAlgorithmToInstance.get(kpAlgorithm);
+  if (kp == null) {
+    kp=KeyPairGenerator.getInstance(kpAlgorithm).generateKeyPair();
+    keypairAlgorithmToInstance.put(sigAlgorithm,kp);
+  }
+  return kp;
+}

@@ -1,0 +1,46 @@
+{
+  try {
+    CertStoreParameters parameters=new MyCertStoreParameters();
+    CertStore certStore=CertStore.getInstance(CERT_STORE_NAME,parameters,provider);
+    assertNotNull(certStore);
+    assertNotNull(certStore.getCertStoreParameters());
+    assertNotSame(parameters,certStore.getCertStoreParameters());
+    assertSame(provider,certStore.getProvider());
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  InvalidAlgorithmParameterException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    CertStore certStore=CertStore.getInstance(CERT_STORE_NAME,null,provider);
+    assertNotNull(certStore);
+    assertNull(certStore.getCertStoreParameters());
+    assertSame(provider,certStore.getProvider());
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  InvalidAlgorithmParameterException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    CertStore.getInstance("UnknownCertStore",null,provider);
+    fail("expected NoSuchAlgorithmException");
+  }
+ catch (  NoSuchAlgorithmException e) {
+  }
+catch (  InvalidAlgorithmParameterException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    CertStore.getInstance(CERT_STORE_NAME,new MyOtherCertStoreParameters(),provider);
+    fail("expected InvalidAlgorithmParameterException");
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  InvalidAlgorithmParameterException e) {
+  }
+}

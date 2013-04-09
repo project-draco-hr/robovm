@@ -1,0 +1,23 @@
+{
+  Support_ASimpleReader ssr=new Support_ASimpleReader(true);
+  br=new BufferedReader(new Support_StringReader(testString));
+  try {
+    br.skip(-1);
+    fail("Test 1: IllegalArgumentException expected.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  br.skip(500);
+  char[] buf=new char[testString.length()];
+  br.read(buf,0,500);
+  assertTrue("Test 2: Failed to set skip properly.",testString.substring(500,1000).equals(new String(buf,0,500)));
+  br.close();
+  br=new BufferedReader(ssr);
+  try {
+    br.skip(1);
+    fail("Test 3: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  ssr.throwExceptionOnNextUse=false;
+}

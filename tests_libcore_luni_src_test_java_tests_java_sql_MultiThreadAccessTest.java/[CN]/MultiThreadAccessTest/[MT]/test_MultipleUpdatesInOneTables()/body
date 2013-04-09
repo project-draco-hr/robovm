@@ -1,0 +1,17 @@
+{
+  int id=1;
+  String field="field3";
+  String selectQuery="SELECT * FROM " + DatabaseCreator.TEST_TABLE1 + " WHERE id="+ id;
+  Statement statement=conn.createStatement();
+  ResultSet result=statement.executeQuery(selectQuery);
+  assertTrue("There is no records with id = " + id,result.next());
+  result.close();
+  for (int i=0; i < numThreads; i++) {
+    threadPool.runTask(createTask7(id,field));
+  }
+  threadPool.join();
+  double expectedVal=id + numThreads;
+  result=statement.executeQuery(selectQuery);
+  assertTrue("There is no records with id = " + id,result.next());
+  result.close();
+}

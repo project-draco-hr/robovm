@@ -1,0 +1,41 @@
+{
+  int bytesRead;
+  RandomAccessFile raf=new java.io.RandomAccessFile(fileName,"rw");
+  byte[] rbuf=new byte[4000];
+  FileOutputStream fos=new java.io.FileOutputStream(fileName);
+  fos.write(testString.getBytes(),0,testLength);
+  fos.close();
+  bytesRead=raf.read(rbuf,10,testLength / 2);
+  assertEquals("Test 1: Incorrect number of bytes read. ",testLength / 2,bytesRead);
+  assertEquals("Test 2: Incorrect bytes read. ",testString.substring(0,testLength / 2),new String(rbuf,10,testLength / 2));
+  bytesRead=raf.read(rbuf,0,testLength);
+  assertEquals("Test 3: Incorrect number of bytes read. ",testLength - (testLength / 2),bytesRead);
+  assertEquals("Test 4: Incorrect bytes read. ",testString.substring(testLength / 2,(testLength / 2) + bytesRead),new String(rbuf,0,bytesRead));
+  bytesRead=raf.read(rbuf,0,1);
+  assertTrue("Test 5: EOF (-1) expected. ",bytesRead == -1);
+  try {
+    raf.read(rbuf,-1,1);
+    fail("Test 6: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    raf.read(rbuf,0,-1);
+    fail("Test 7: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    raf.read(rbuf,2000,2001);
+    fail("Test 8: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  raf.close();
+  try {
+    bytesRead=raf.read(rbuf,0,1);
+    fail("Test 9: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+}

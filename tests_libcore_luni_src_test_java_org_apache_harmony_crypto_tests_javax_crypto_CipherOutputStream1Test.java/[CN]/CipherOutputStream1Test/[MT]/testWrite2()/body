@@ -1,0 +1,17 @@
+{
+  byte[] data=new byte[]{-127,-100,-50,-10,-1,0,1,10,50,127};
+  TestOutputStream tos=new TestOutputStream();
+  CipherOutputStream cos=new CipherOutputStream(tos,new NullCipher());
+  cos.write(data);
+  cos.flush();
+  byte[] result=tos.toByteArray();
+  if (!Arrays.equals(result,data)) {
+    fail("CipherOutputStream wrote incorrect data.");
+  }
+  try {
+    cos.write(null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+}

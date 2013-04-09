@@ -1,0 +1,12 @@
+{
+  PublicKey pk=new TestKeyPair(keyAlg).getPublic();
+  TrustAnchor ta1=new TrustAnchor(validCaNameRfc2253,pk,getFullEncoding());
+  assertTrue(Arrays.equals(getFullEncoding(),ta1.getNameConstraints()));
+  X500Principal x500p=new X500Principal(validCaNameRfc2253);
+  TrustAnchor ta2=new TrustAnchor(x500p,pk,getEncodingNoMinMax());
+  assertTrue(Arrays.equals(getEncodingNoMinMax(),ta2.getNameConstraints()));
+  CertificateFactory certFact=CertificateFactory.getInstance("X509");
+  X509Certificate pemCert=(X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(TestUtils.getX509Certificate_v3()));
+  TrustAnchor ta3=new TrustAnchor(pemCert,getEncodingPSOnly());
+  assertTrue(Arrays.equals(getEncodingPSOnly(),ta3.getNameConstraints()));
+}

@@ -1,0 +1,60 @@
+{
+  String request;
+  try {
+    request=readAsciiUntilCrlf(in);
+  }
+ catch (  IOException streamIsClosed) {
+    return null;
+  }
+  if (request.isEmpty()) {
+    return null;
+  }
+  List<String> headers=new ArrayList<String>();
+  int contentLength=-1;
+  boolean chunked=false;
+  String header;
+  while (!(header=readAsciiUntilCrlf(in)).isEmpty()) {
+    headers.add(header);
+    String lowercaseHeader=header.toLowerCase();
+    if (contentLength == -1 && lowercaseHeader.startsWith("content-length:")) {
+      contentLength=Integer.parseInt(header.substring(15).trim());
+    }
+    if (lowercaseHeader.startsWith("transfer-encoding:") && lowercaseHeader.substring(18).trim().equals("chunked")) {
+      chunked=true;
+    }
+  }
+  boolean hasBody=false;
+  TruncatingOutputStream requestBody=new TruncatingOutputStream();
+  List<Integer> chunkSizes=new ArrayList<Integer>();
+  if (contentLength != -1) {
+    hasBody=true;
+    transfer(contentLength,in,requestBody);
+  }
+ else   if (chunked) {
+    hasBody=true;
+    while (true) {
+      int chunkSize=Integer.parseInt(readAsciiUntilCrlf(in).trim(),16);
+      if (chunkSize == 0) {
+        readEmptyLine(in);
+        break;
+      }
+      chunkSizes.add(chunkSize);
+      transfer(chunkSize,in,requestBody);
+      readEmptyLine(in);
+    }
+  }
+  if (request.startsWith("OPTIONS ") || request.startsWith("GET ") || request.startsWith("HEAD ")|| request.startsWith("DELETE ")|| request.startsWith("TRACE ")|| request.startsWith("CONNECT ")) {
+    if (hasBody) {
+      throw new IllegalArgumentException("Request must not have a body: " + request);
+    }
+  }
+ else   if (request.startsWith("POST ") || request.startsWith("PUT ")) {
+    if (!hasBody) {
+      throw new IllegalArgumentException("Request must have a body: " + request);
+    }
+  }
+ else {
+    throw new UnsupportedOperationException("Unexpected method: " + request);
+  }
+  return new RecordedRequest(request,headers,chunkSizes,requestBody.numBytesReceived,requestBody.toByteArray(),sequenceNumber);
+}

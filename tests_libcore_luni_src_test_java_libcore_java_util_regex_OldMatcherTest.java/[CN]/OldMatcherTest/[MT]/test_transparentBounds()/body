@@ -1,0 +1,20 @@
+{
+  String testPattern="and(?=roid)";
+  String testString="android";
+  Pattern pat=Pattern.compile(testPattern);
+  Matcher mat=pat.matcher(testString);
+  mat.region(0,3);
+  mat.useTransparentBounds(false);
+  assertFalse("Shouldn't find pattern with opaque bounds",mat.matches());
+  mat.useTransparentBounds(true);
+  assertTrue("Should find pattern transparent bounds",mat.matches());
+  testPattern="and(?!roid)";
+  testString="android";
+  pat=Pattern.compile(testPattern);
+  mat=pat.matcher(testString);
+  mat.region(0,3);
+  mat.useTransparentBounds(false);
+  assertTrue("Should find pattern with opaque bounds",mat.matches());
+  mat.useTransparentBounds(true);
+  assertFalse("Shouldn't find pattern transparent bounds",mat.matches());
+}

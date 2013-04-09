@@ -1,0 +1,39 @@
+{
+  boolean performed=false;
+  for (int i=0; i < algName.length; i++) {
+    for (int l=0; l < provider.length; l++) {
+      if (provider[l] == null) {
+        continue;
+      }
+      TestDataGenerator g;
+      try {
+        g=new TestDataGenerator(algName[i][0],algName[i][1],privateKeyInfo,provider[l]);
+      }
+ catch (      TestDataGenerator.AllowedFailure allowedFailure) {
+        continue;
+      }
+      try {
+        EncryptedPrivateKeyInfo epki;
+        if (g.ap() == null) {
+          epki=new EncryptedPrivateKeyInfo(algName[i][0],g.ct());
+        }
+ else {
+          epki=new EncryptedPrivateKeyInfo(g.ap(),g.ct());
+        }
+        try {
+          PKCS8EncodedKeySpec eks=epki.getKeySpec(g.pubK() == null ? g.k() : g.pubK(),provider[l].getName());
+          if (!Arrays.equals(privateKeyInfo,eks.getEncoded())) {
+            fail(algName[i][0] + " != " + algName[i][1]);
+          }
+        }
+ catch (        InvalidKeyException e) {
+          fail(algName[i][0] + ", " + algName[i][1]+ ": "+ e);
+        }
+        performed=true;
+      }
+ catch (      NoSuchAlgorithmException allowedFailure) {
+      }
+    }
+  }
+  assertTrue("Test not performed",performed);
+}

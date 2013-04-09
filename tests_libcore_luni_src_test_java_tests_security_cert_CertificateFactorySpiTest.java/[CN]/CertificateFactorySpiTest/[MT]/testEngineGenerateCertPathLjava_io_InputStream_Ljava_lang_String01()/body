@@ -1,0 +1,21 @@
+{
+  CertificateFactorySpi certFactorySpi=new MyCertificateFactorySpi();
+  MyCertificateFactorySpi.putMode(true);
+  ByteArrayInputStream bais=new ByteArrayInputStream(new byte[0]);
+  DataInputStream dis=new DataInputStream(bais);
+  try {
+    certFactorySpi.engineGenerateCertPath(dis,"");
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+catch (  CertificateException e) {
+    fail("Unexpected CertificateException " + e.getMessage());
+  }
+  try {
+    assertNull(certFactorySpi.engineGenerateCertPath(dis,"encoding"));
+  }
+ catch (  CertificateException e) {
+    fail("Unexpected CertificateException " + e.getMessage());
+  }
+}

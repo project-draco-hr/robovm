@@ -1,0 +1,21 @@
+{
+  KeyFactory kf=KeyFactory.getInstance("RSA");
+  RSAPrivateCrtKeySpec keySpec=new RSAPrivateCrtKeySpec(null,RSA_2048_publicExponent,RSA_2048_privateExponent,RSA_2048_primeP,RSA_2048_primeQ,null,null,null);
+  final PrivateKey privKey;
+  try {
+    privKey=kf.generatePrivate(keySpec);
+  }
+ catch (  NullPointerException e) {
+    return;
+  }
+catch (  InvalidKeySpecException e) {
+    return;
+  }
+  Signature sig=Signature.getInstance("SHA1withRSA");
+  try {
+    sig.initSign(privKey);
+    fail("Should throw error when modulus is not available");
+  }
+ catch (  InvalidKeyException e) {
+  }
+}

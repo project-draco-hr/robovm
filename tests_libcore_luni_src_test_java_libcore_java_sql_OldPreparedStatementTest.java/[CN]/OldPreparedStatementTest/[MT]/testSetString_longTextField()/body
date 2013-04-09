@@ -1,0 +1,70 @@
+{
+  PreparedStatement ps=null;
+  try {
+    String str="test^text$test%test(text)test@text5test~test^text$test%test(text)test@text5test/test^text$test%test(text)test@text5test~test^text$test%test(text)test@text5test";
+    String query="insert into type (LText) values (?);";
+    ps=conn.prepareStatement(query);
+    Statement st=null;
+    try {
+      ps.setString(1,str);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where LText='" + str + "'");
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    try {
+      ps.setString(1,"");
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where LText=''");
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    try {
+      ps.setString(1,"                   ");
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where LText='                   '");
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    ps.setString(1,null);
+    ps.execute();
+    ps.close();
+    try {
+      ps.setString(1,"test text");
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+}

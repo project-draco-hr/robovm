@@ -1,0 +1,25 @@
+{
+  InetAddress addr=InetAddress.getLocalHost();
+  int port=Support_PortManager.getNextPort();
+  ServerSocket serverSocket=new ServerSocket(port,5,addr);
+  Socket theSocket=new Socket(addr,port);
+  Socket servSock=serverSocket.accept();
+  InputStream theInput=theSocket.getInputStream();
+  OutputStream theOutput=servSock.getOutputStream();
+  theSocket.shutdownInput();
+  String sendString=new String("Test");
+  theOutput.write(sendString.getBytes());
+  theOutput.flush();
+  Thread.sleep(1000);
+  assertEquals(0,theInput.available());
+  theSocket.close();
+  serverSocket.close();
+  Socket socket=new Socket();
+  socket.close();
+  try {
+    socket.shutdownInput();
+    fail("IOException was not thrown.");
+  }
+ catch (  IOException ioe) {
+  }
+}

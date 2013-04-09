@@ -1,0 +1,56 @@
+{
+  String query="insert into zoo (id, name, family) values (?, ?, ?);";
+  PreparedStatement st=null;
+  ResultSet rs=null;
+  try {
+    st=conn.prepareStatement(query,ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+    st.execute("select id, name from zoo");
+    rs=st.getResultSet();
+    try {
+      rs.deleteRow();
+      fail("Can delete row for READ_ONLY ResultSet");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      if (rs != null)       rs.close();
+      if (st != null)       st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    st=conn.prepareStatement(query,ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
+    st.execute("select name, family from zoo");
+    rs=st.getResultSet();
+    try {
+      rs.insertRow();
+      rs.updateObject("family","bird");
+      rs.next();
+      rs.previous();
+      assertEquals("bird",(rs.getString(1)));
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      rs.close();
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    conn.prepareStatement(query,ResultSet.TYPE_SCROLL_SENSITIVE,-1);
+  }
+ catch (  SQLException sqle) {
+  }
+  try {
+    conn.prepareStatement(query,Integer.MIN_VALUE,ResultSet.CONCUR_READ_ONLY);
+  }
+ catch (  SQLException sqle) {
+  }
+}

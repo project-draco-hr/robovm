@@ -1,0 +1,21 @@
+{
+  final SecureRandom secureRandom=SecureRandom.getInstance(algorithmName);
+  int threads=2;
+  ExecutorService executor=Executors.newFixedThreadPool(threads);
+  ExecutorCompletionService ecs=new ExecutorCompletionService(executor);
+  for (int t=0; t < threads; t++) {
+    ecs.submit(new Callable<Void>(){
+      public Void call(){
+        for (int i=0; i < 1000; i++) {
+          secureRandom.generateSeed(1024);
+        }
+        return null;
+      }
+    }
+);
+  }
+  executor.shutdown();
+  for (int i=0; i < threads; i++) {
+    ecs.take().get();
+  }
+}

@@ -1,0 +1,29 @@
+{
+  pref.putLong("LongValue",new Long(299792458));
+  pref.flush();
+  assertEquals(299792458L,pref.getLong("LongValue",new Long(1)));
+  try {
+    pref.putLong(null,new Long(1));
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  int i;
+  StringBuffer sb=new StringBuffer();
+  for (i=0; i < Preferences.MAX_KEY_LENGTH + 1; i++) {
+    sb.append('c');
+  }
+  try {
+    pref.putLong(new String(sb),new Long(1));
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  pref.removeNode();
+  try {
+    pref.putLong("LongValue",new Long(1));
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+}

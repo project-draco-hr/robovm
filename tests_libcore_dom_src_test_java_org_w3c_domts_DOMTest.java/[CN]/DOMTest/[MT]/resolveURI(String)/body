@@ -1,0 +1,33 @@
+{
+  String docURI=factory.addExtension(baseURI);
+  URL resolvedURI=null;
+  try {
+    resolvedURI=new URL(docURI);
+    if (resolvedURI.getProtocol() != null) {
+      return resolvedURI;
+    }
+  }
+ catch (  MalformedURLException ex) {
+  }
+  resolvedURI=getClass().getResource("/" + docURI);
+  if (resolvedURI == null) {
+    int firstSlash=docURI.indexOf('/');
+    try {
+      if (firstSlash == 0 || (firstSlash >= 1 && docURI.charAt(firstSlash - 1) == ':')) {
+        resolvedURI=new URL(docURI);
+      }
+ else {
+        String filename=getClass().getPackage().getName();
+        filename="tests/" + filename.substring(14).replace('.','/') + "/files/"+ docURI;
+        resolvedURI=new java.io.File(filename).toURL();
+      }
+    }
+ catch (    MalformedURLException ex) {
+      throw new DOMTestLoadException(ex);
+    }
+  }
+  if (resolvedURI == null) {
+    throw new DOMTestLoadException(new java.io.FileNotFoundException(docURI));
+  }
+  return resolvedURI;
+}

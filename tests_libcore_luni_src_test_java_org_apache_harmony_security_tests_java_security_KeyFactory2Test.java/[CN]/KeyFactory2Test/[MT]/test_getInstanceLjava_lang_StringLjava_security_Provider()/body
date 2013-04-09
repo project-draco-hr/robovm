@@ -1,0 +1,28 @@
+{
+  try {
+    Provider[] providers=Security.getProviders("KeyFactory.DSA");
+    if (providers != null) {
+      for (int i=0; i < providers.length; i++) {
+        KeyFactory.getInstance("DSA",providers[i]);
+      }
+    }
+ else {
+      fail("No providers support KeyFactory.DSA");
+    }
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("getInstance did not find algorithm");
+  }
+catch (  Exception e) {
+    fail("unexpected exception " + e.getMessage());
+  }
+  try {
+    KeyFactory.getInstance("DSA",(Provider)null);
+    fail("Expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+catch (  Exception e) {
+    fail("Expected IllegalArgumentException, got " + e);
+  }
+}

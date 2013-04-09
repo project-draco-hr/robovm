@@ -1,0 +1,37 @@
+{
+  Subject subj=new Subject();
+  PrivilegedExceptionAction<Object> pea=new myPrivilegedExceptionAction();
+  PrivilegedExceptionAction<Object> peaNull=null;
+  try {
+    Object obj=Subject.doAs(null,pea);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception: " + e);
+  }
+  try {
+    Object obj=Subject.doAs(subj,pea);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception: " + e);
+  }
+  try {
+    Object obj=Subject.doAs(subj,peaNull);
+    fail("NullPointerException wasn't thrown");
+  }
+ catch (  NullPointerException npe) {
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of NullPointerException");
+  }
+  try {
+    Subject.doAs(subj,new PrivilegedExceptionAction<Object>(){
+      public Object run() throws PrivilegedActionException {
+        throw new PrivilegedActionException(null);
+      }
+    }
+);
+    fail("PrivilegedActionException wasn't thrown");
+  }
+ catch (  PrivilegedActionException e) {
+  }
+}

@@ -1,0 +1,35 @@
+{
+  TestSSLContext c=TestSSLContext.create();
+  try {
+    c.clientContext.getClientSessionContext().getSession(null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  assertNull(c.clientContext.getClientSessionContext().getSession(new byte[0]));
+  assertNull(c.clientContext.getClientSessionContext().getSession(new byte[1]));
+  try {
+    c.serverContext.getServerSessionContext().getSession(null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  assertNull(c.serverContext.getServerSessionContext().getSession(new byte[0]));
+  assertNull(c.serverContext.getServerSessionContext().getSession(new byte[1]));
+  c.close();
+  TestSSLSocketPair s=TestSSLSocketPair.create();
+  SSLSessionContext client=s.c.clientContext.getClientSessionContext();
+  SSLSessionContext server=s.c.serverContext.getServerSessionContext();
+  byte[] clientId=(byte[])client.getIds().nextElement();
+  assertNotNull(client.getSession(clientId));
+  assertTrue(Arrays.equals(clientId,client.getSession(clientId).getId()));
+  if (TestSSLContext.sslServerSocketSupportsSessionTickets()) {
+    assertFalse(server.getIds().hasMoreElements());
+  }
+ else {
+    byte[] serverId=(byte[])server.getIds().nextElement();
+    assertNotNull(server.getSession(serverId));
+    assertTrue(Arrays.equals(serverId,server.getSession(serverId).getId()));
+  }
+  s.close();
+}

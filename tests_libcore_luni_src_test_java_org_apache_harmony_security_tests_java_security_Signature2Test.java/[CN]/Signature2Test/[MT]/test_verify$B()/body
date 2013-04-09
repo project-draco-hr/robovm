@@ -1,0 +1,15 @@
+{
+  Signature sig=Signature.getInstance("DSA");
+  try {
+    sig.verify(new byte[]{0,1,2,3});
+    fail();
+  }
+ catch (  SignatureException expected) {
+  }
+  sig.initSign(getDsaKeys().getPrivate());
+  sig.update(MESSAGE.getBytes());
+  byte[] signature=sig.sign();
+  sig.initVerify(getDsaKeys().getPublic());
+  sig.update(MESSAGE.getBytes());
+  assertTrue("Sign/Verify does not pass",sig.verify(signature));
+}

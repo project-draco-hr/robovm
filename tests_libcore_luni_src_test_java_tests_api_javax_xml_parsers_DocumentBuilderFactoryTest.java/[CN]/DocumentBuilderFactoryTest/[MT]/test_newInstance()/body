@@ -1,0 +1,36 @@
+{
+  String className=null;
+  try {
+    DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
+    assertNotNull(dbf);
+    className=System.getProperty("javax.xml.parsers.DocumentBuilderFactory");
+    System.setProperty("javax.xml.parsers.DocumentBuilderFactory","org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl");
+    dbf=DocumentBuilderFactory.newInstance();
+    assertNotNull(dbf);
+    assertTrue(dbf instanceof org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl);
+    String keyValuePair="javax.xml.parsers.DocumentBuilderFactory" + "=" + "org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl";
+    ByteArrayInputStream bis=new ByteArrayInputStream(keyValuePair.getBytes());
+    Properties prop=System.getProperties();
+    prop.load(bis);
+    dbf=DocumentBuilderFactory.newInstance();
+    assertNotNull(dbf);
+    assertTrue(dbf instanceof org.apache.harmony.xml.parsers.DocumentBuilderFactoryImpl);
+    System.setProperty("javax.xml.parsers.DocumentBuilderFactory","");
+    try {
+      DocumentBuilderFactory.newInstance();
+    }
+ catch (    FactoryConfigurationError fce) {
+    }
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception " + e.toString());
+  }
+ finally {
+    if (className == null) {
+      System.clearProperty("javax.xml.parsers.DocumentBuilderFactory");
+    }
+ else {
+      System.setProperty("javax.xml.parsers.DocumentBuilderFactory",className);
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  String posted="this is a test";
+  URLConnection uc3=new URL(Support_Configuration.hTTPURLgoogle).openConnection();
+  uc3.setDoOutput(true);
+  uc3.connect();
+  BufferedWriter w=new BufferedWriter(new OutputStreamWriter(uc3.getOutputStream()),posted.getBytes().length);
+  w.write(posted);
+  w.flush();
+  w.close();
+  int code=((HttpURLConnection)uc3).getResponseCode();
+  assertEquals("Got different responseCode ",405,code);
+  try {
+    fileURLCon.setDoOutput(true);
+    fileURLCon.connect();
+    fileURLCon.getOutputStream();
+  }
+ catch (  UnknownServiceException e) {
+  }
+  ((HttpURLConnection)uc2).disconnect();
+  try {
+    uc2.getOutputStream();
+    fail("Exception expected");
+  }
+ catch (  IOException e) {
+  }
+}

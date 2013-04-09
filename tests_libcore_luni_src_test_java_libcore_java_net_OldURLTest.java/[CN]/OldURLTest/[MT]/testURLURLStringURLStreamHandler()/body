@@ -1,0 +1,39 @@
+{
+  u=new URL("http://www.yahoo.com");
+  u1=new URL(u,"file.java",new MyHandler());
+  assertEquals("1 returns a wrong protocol","http",u1.getProtocol());
+  assertEquals("1 returns a wrong host","www.yahoo.com",u1.getHost());
+  assertEquals("1 returns a wrong port",-1,u1.getPort());
+  assertEquals("1 returns a wrong file","/file.java",u1.getFile());
+  assertNull("1 returns a wrong anchor",u1.getRef());
+  u1=new URL(u,"systemresource:/+/FILE0/test.java",new MyHandler());
+  assertEquals("2 returns a wrong protocol","systemresource",u1.getProtocol());
+  assertTrue("2 returns a wrong host",u1.getHost().equals(""));
+  assertEquals("2 returns a wrong port",-1,u1.getPort());
+  assertEquals("2 returns a wrong file","/+/FILE0/test.java",u1.getFile());
+  assertNull("2 returns a wrong anchor",u1.getRef());
+  u1=new URL(u,"dir1/dir2/../file.java",null);
+  assertEquals("3 returns a wrong protocol","http",u1.getProtocol());
+  assertEquals("3 returns a wrong host","www.yahoo.com",u1.getHost());
+  assertEquals("3 returns a wrong port",-1,u1.getPort());
+  assertEquals("3 returns a wrong file","/dir1/file.java",u1.getFile());
+  assertNull("3 returns a wrong anchor",u1.getRef());
+  u=new URL("http://www.foo.com/d0/d1/d2/cgi-bin?foo=bar/baz");
+  u1=new URL(u,"../dir1/dir2/../file.java",new MyHandler());
+  assertTrue("A) returns a wrong file: " + u1.getFile(),u1.getFile().equals("/d0/d1/dir1/file.java"));
+  u1=new URL(u,"/../dir1/dir2/../file.java",null);
+  assertEquals("B) returns a wrong file","/dir1/file.java",u1.getFile());
+  URL one;
+  try {
+    one=new URL("http://www.ibm.com");
+  }
+ catch (  MalformedURLException ex) {
+    throw new RuntimeException(ex.getMessage());
+  }
+  try {
+    new URL(one,(String)null,null);
+    fail("Specifying null spec on URL constructor should throw MalformedURLException");
+  }
+ catch (  MalformedURLException e) {
+  }
+}

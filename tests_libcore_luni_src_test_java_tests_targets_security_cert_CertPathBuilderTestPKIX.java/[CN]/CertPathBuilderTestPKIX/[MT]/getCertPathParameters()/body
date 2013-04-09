@@ -1,0 +1,17 @@
+{
+  KeyStore keyStore=KeyStore.getInstance(KeyStore.getDefaultType());
+  keyStore.load(null,null);
+  CertificateFactory certificateFactory=CertificateFactory.getInstance("X509");
+  X509Certificate selfSignedcertificate=(X509Certificate)certificateFactory.generateCertificate(new ByteArrayInputStream(selfSignedCert.getBytes()));
+  keyStore.setCertificateEntry("selfSignedCert",selfSignedcertificate);
+  X509CertSelector targetConstraints=new X509CertSelector();
+  targetConstraints.setCertificate(selfSignedcertificate);
+  List<Certificate> certList=new ArrayList<Certificate>();
+  certList.add(selfSignedcertificate);
+  CertStoreParameters storeParams=new CollectionCertStoreParameters(certList);
+  CertStore certStore=CertStore.getInstance("Collection",storeParams);
+  PKIXBuilderParameters parameters=new PKIXBuilderParameters(keyStore,targetConstraints);
+  parameters.addCertStore(certStore);
+  parameters.setRevocationEnabled(false);
+  return parameters;
+}

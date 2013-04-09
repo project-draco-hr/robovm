@@ -1,0 +1,14 @@
+{
+  ServerSocket listening=new ServerSocket(0);
+  Socket underlying=new Socket(listening.getInetAddress(),listening.getLocalPort());
+  assertEquals(0,underlying.getSoTimeout());
+  SSLSocketFactory sf=(SSLSocketFactory)SSLSocketFactory.getDefault();
+  Socket wrapping=sf.createSocket(underlying,null,-1,false);
+  assertEquals(0,wrapping.getSoTimeout());
+  wrapping.setSoTimeout(10);
+  assertEquals(10,wrapping.getSoTimeout());
+  assertEquals(10,underlying.getSoTimeout());
+  underlying.setSoTimeout(0);
+  assertEquals(0,wrapping.getSoTimeout());
+  assertEquals(0,underlying.getSoTimeout());
+}

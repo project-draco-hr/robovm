@@ -1,0 +1,40 @@
+{
+  ByteBuffer dst=ByteBuffer.allocate(10).asReadOnlyBuffer();
+  try {
+    dst.put(ByteBuffer.allocate(5));
+    fail();
+  }
+ catch (  ReadOnlyBufferException expected) {
+  }
+  dst=ByteBuffer.allocate(10);
+  try {
+    dst.put(dst);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    dst.put((ByteBuffer)null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    dst.put(ByteBuffer.allocate(dst.capacity() + 1));
+    fail();
+  }
+ catch (  BufferOverflowException expected) {
+  }
+  assertPutByteBuffer(ByteBuffer.allocate(10),ByteBuffer.allocate(8),false);
+  assertPutByteBuffer(ByteBuffer.allocate(10),ByteBuffer.allocateDirect(8),false);
+  assertPutByteBuffer(ByteBuffer.allocate(10),allocateMapped(8),false);
+  assertPutByteBuffer(ByteBuffer.allocate(10),ByteBuffer.allocate(8),true);
+  assertPutByteBuffer(ByteBuffer.allocate(10),ByteBuffer.allocateDirect(8),true);
+  assertPutByteBuffer(ByteBuffer.allocate(10),allocateMapped(8),true);
+  assertPutByteBuffer(ByteBuffer.allocateDirect(10),ByteBuffer.allocate(8),false);
+  assertPutByteBuffer(ByteBuffer.allocateDirect(10),ByteBuffer.allocateDirect(8),false);
+  assertPutByteBuffer(ByteBuffer.allocateDirect(10),allocateMapped(8),false);
+  assertPutByteBuffer(ByteBuffer.allocateDirect(10),ByteBuffer.allocate(8),true);
+  assertPutByteBuffer(ByteBuffer.allocateDirect(10),ByteBuffer.allocateDirect(8),true);
+  assertPutByteBuffer(ByteBuffer.allocateDirect(10),allocateMapped(8),true);
+}

@@ -1,0 +1,23 @@
+{
+  File f=File.createTempFile("your","mum");
+  List<String> filenames=Arrays.asList("us-ascii","\u043c\u0430\u0440\u0442\u0430","\u1f00\u03c0\u1f78","\u30b3\u30f3\u30cb\u30c1\u30cf");
+  ZipOutputStream out=new ZipOutputStream(new FileOutputStream(f));
+  for (  String filename : filenames) {
+    out.putNextEntry(new ZipEntry(filename));
+    out.closeEntry();
+  }
+  out.close();
+  ZipFile zipFile=new ZipFile(f);
+  for (  String filename : filenames) {
+    assertNotNull(filename,zipFile.getEntry(filename));
+  }
+  ZipInputStream in=new ZipInputStream(new FileInputStream(f));
+  ZipEntry entry;
+  int entryCount=0;
+  while ((entry=in.getNextEntry()) != null) {
+    assertTrue(entry.getName(),filenames.contains(entry.getName()));
+    ++entryCount;
+  }
+  assertEquals(filenames.size(),entryCount);
+  in.close();
+}

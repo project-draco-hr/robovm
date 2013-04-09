@@ -1,0 +1,20 @@
+{
+  cache.close();
+  cache=DiskLruCache.open(cacheDir,appVersion,2,10);
+  set("A","a","a");
+  set("B","b","b");
+  set("C","c","c");
+  set("D","d","d");
+  set("E","e","e");
+  cache.get("B").close();
+  set("F","f","f");
+  set("G","g","g");
+  cache.flush();
+  assertEquals(10,cache.size());
+  assertAbsent("A");
+  assertValue("B","b","b");
+  assertAbsent("C");
+  assertValue("D","d","d");
+  assertValue("E","e","e");
+  assertValue("F","f","f");
+}

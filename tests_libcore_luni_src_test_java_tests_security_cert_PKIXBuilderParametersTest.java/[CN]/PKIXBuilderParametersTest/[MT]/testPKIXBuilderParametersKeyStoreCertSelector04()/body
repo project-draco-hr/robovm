@@ -1,0 +1,21 @@
+{
+  KeyStore keyTest=KeyStore.getInstance(KeyStore.getDefaultType());
+  keyTest.load(null,null);
+  ByteArrayInputStream certArray=new ByteArrayInputStream(certificate.getBytes());
+  ByteArrayInputStream certArray2=new ByteArrayInputStream(certificate2.getBytes());
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  X509Certificate cert[]=new X509Certificate[2];
+  cert[0]=(X509Certificate)cf.generateCertificate(certArray);
+  cert[1]=(X509Certificate)cf.generateCertificate(certArray2);
+  keyTest.setCertificateEntry("alias1",cert[0]);
+  keyTest.setCertificateEntry("alias2",cert[0]);
+  keyTest.setCertificateEntry("alias3",cert[1]);
+  try {
+    PKIXBuilderParameters p=new PKIXBuilderParameters(keyTest,new X509CertSelector());
+    assertEquals(3,p.getTrustAnchors().size());
+    assertEquals(5,p.getMaxPathLength());
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception " + e.getMessage());
+  }
+}

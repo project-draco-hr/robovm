@@ -1,0 +1,18 @@
+{
+  Provider[] providers=Security.getProviders("CertificateFactory.X.509");
+  if (providers != null) {
+    for (int i=0; i < providers.length; i++) {
+      CertificateFactory fact=CertificateFactory.getInstance("X.509",providers[i].getName());
+      assertNotNull("factory is null",fact);
+    }
+  }
+ else {
+    fail("No providers support CertificateFactory.X.509");
+  }
+  try {
+    CertificateFactory.getInstance("X.509","IHaventBeenConfigured");
+    fail("Should have thrown NoSuchProviderException");
+  }
+ catch (  NoSuchProviderException e) {
+  }
+}

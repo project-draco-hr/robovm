@@ -1,0 +1,20 @@
+{
+  try {
+    boolean copied=false;
+    for (    String alias : Collections.list(src.aliases())) {
+      if (!src.isCertificateEntry(alias)) {
+        continue;
+      }
+      X509Certificate cert=(X509Certificate)src.getCertificate(alias);
+      if (!cert.getSubjectDN().equals(cert.getIssuerDN())) {
+        continue;
+      }
+      dst.setCertificateEntry(alias,cert);
+      copied=true;
+    }
+    return copied;
+  }
+ catch (  Exception e) {
+    throw new RuntimeException(e);
+  }
+}

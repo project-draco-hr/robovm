@@ -1,0 +1,32 @@
+{
+  String message="Test message";
+  NullPointerException npe=new NullPointerException();
+  IllegalArgumentException iae=new IllegalArgumentException();
+  Throwable thr=new Throwable();
+  thr.initCause(iae);
+  assertEquals("getCause returns incorrect cause.",iae,thr.getCause());
+  thr=new Throwable("message");
+  thr.initCause(npe);
+  assertEquals("getCause returns incorrect cause.",npe,thr.getCause());
+  thr=new Throwable(message,npe);
+  try {
+    thr.initCause(iae);
+    fail("IllegalStateException was not thrown.");
+  }
+ catch (  IllegalStateException ise) {
+  }
+  thr=new Throwable(npe);
+  try {
+    thr.initCause(iae);
+    fail("IllegalStateException was not thrown.");
+  }
+ catch (  IllegalStateException ise) {
+  }
+  thr=new Throwable();
+  try {
+    thr.initCause(thr);
+    fail("IllegalArgumentException was not thrown.");
+  }
+ catch (  IllegalArgumentException ise) {
+  }
+}

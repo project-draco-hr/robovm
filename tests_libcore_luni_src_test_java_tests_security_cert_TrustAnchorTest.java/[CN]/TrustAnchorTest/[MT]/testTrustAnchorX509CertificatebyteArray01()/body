@@ -1,0 +1,28 @@
+{
+  CertificateFactory certFact=CertificateFactory.getInstance("X509");
+  X509Certificate pemCert=(X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(TestUtils.getX509Certificate_v3()));
+  TrustAnchor ta1=new TrustAnchor(pemCert,getFullEncoding());
+  assertNull(ta1.getCA());
+  assertNull(ta1.getCAName());
+  assertNull(ta1.getCAPublicKey());
+  assertTrue(Arrays.equals(getFullEncoding(),ta1.getNameConstraints()));
+  assertEquals(pemCert,ta1.getTrustedCert());
+  TrustAnchor ta2=new TrustAnchor(pemCert,getEncodingPSOnly());
+  assertNull(ta2.getCA());
+  assertNull(ta2.getCAName());
+  assertNull(ta2.getCAPublicKey());
+  assertTrue(Arrays.equals(getEncodingPSOnly(),ta2.getNameConstraints()));
+  assertEquals(pemCert,ta2.getTrustedCert());
+  TrustAnchor ta3=new TrustAnchor(pemCert,getEncodingESOnly());
+  assertNull(ta3.getCA());
+  assertNull(ta3.getCAName());
+  assertNull(ta3.getCAPublicKey());
+  assertTrue(Arrays.equals(getEncodingESOnly(),ta3.getNameConstraints()));
+  assertEquals(pemCert,ta3.getTrustedCert());
+  TrustAnchor ta4=new TrustAnchor(pemCert,getEncodingNoMinMax());
+  assertNull(ta4.getCA());
+  assertNull(ta4.getCAName());
+  assertNull(ta4.getCAPublicKey());
+  assertTrue(Arrays.equals(getEncodingNoMinMax(),ta4.getNameConstraints()));
+  assertEquals(pemCert,ta4.getTrustedCert());
+}

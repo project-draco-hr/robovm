@@ -1,0 +1,24 @@
+{
+  try {
+    int sport=startServer("SServer setSendBufferSizeI");
+    int portNumber=Support_PortManager.getNextPort();
+    s=new Socket(InetAddress.getLocalHost(),sport,null,portNumber);
+    s.setSendBufferSize(134);
+    assertTrue("Incorrect buffer size",s.getSendBufferSize() >= 134);
+    ensureExceptionThrownIfOptionIsUnsupportedOnOS(SO_SNDBUF);
+  }
+ catch (  Exception e) {
+    handleException(e,SO_SNDBUF);
+  }
+  try {
+    Socket theSocket=new Socket();
+    theSocket.close();
+    theSocket.setSendBufferSize(1);
+    fail("SocketException was not thrown.");
+  }
+ catch (  SocketException ioe) {
+  }
+catch (  IOException ioe) {
+    fail("IOException was thrown.");
+  }
+}

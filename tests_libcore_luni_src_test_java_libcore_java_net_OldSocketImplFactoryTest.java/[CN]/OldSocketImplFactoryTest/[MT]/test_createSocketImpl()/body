@@ -1,0 +1,36 @@
+{
+  MockSocketImplFactory factory=new MockSocketImplFactory();
+  if (isTestable) {
+    assertFalse(isCreateSocketImpl);
+    Socket.setSocketImplFactory(factory);
+    try {
+      new Socket();
+      assertTrue(isCreateSocketImpl);
+      assertTrue(iSocketImplCalled);
+    }
+ catch (    Exception e) {
+      fail("Exception during test : " + e.getMessage());
+    }
+    try {
+      Socket.setSocketImplFactory(factory);
+      fail("SocketException was not thrown.");
+    }
+ catch (    SocketException se) {
+    }
+    try {
+      Socket.setSocketImplFactory(null);
+      fail("SocketException was not thrown.");
+    }
+ catch (    SocketException se) {
+    }
+  }
+ else {
+    SocketImpl si=factory.createSocketImpl();
+    try {
+      assertNull(si.getOption(0));
+    }
+ catch (    SocketException e) {
+      fail("SocketException was thrown.");
+    }
+  }
+}

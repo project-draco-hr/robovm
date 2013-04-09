@@ -1,0 +1,43 @@
+{
+  int index;
+  int nread=0;
+  log("Parse status line");
+  nread=readOneLine(is);
+  if (nread == -1) {
+    requestMethod=UNKNOWN_METHOD;
+    return -1;
+  }
+  if (buf[0] == (byte)'G' && buf[1] == (byte)'E' && buf[2] == (byte)'T' && buf[3] == (byte)' ') {
+    requestMethod=GET_METHOD;
+    log("GET request");
+    index=4;
+  }
+ else   if (buf[0] == (byte)'H' && buf[1] == (byte)'E' && buf[2] == (byte)'A' && buf[3] == (byte)'D' && buf[4] == (byte)' ') {
+    requestMethod=HEAD_METHOD;
+    log("HEAD request");
+    index=5;
+  }
+ else   if (buf[0] == (byte)'P' && buf[1] == (byte)'O' && buf[2] == (byte)'S' && buf[3] == (byte)'T' && buf[4] == (byte)' ') {
+    requestMethod=POST_METHOD;
+    log("POST request");
+    index=5;
+  }
+ else {
+    requestMethod=UNKNOWN_METHOD;
+    return -1;
+  }
+  if (requestMethod > UNKNOWN_METHOD) {
+    int i=index;
+    while (buf[i] != (byte)' ') {
+      if ((buf[i] == (byte)'\n') || (buf[i] == (byte)'\r')) {
+        requestMethod=UNKNOWN_METHOD;
+        return -1;
+      }
+      i++;
+    }
+    path=new String(buf,0,index,i - index);
+    testID=path.substring(1);
+    return nread;
+  }
+  return -1;
+}

@@ -1,0 +1,9 @@
+{
+  byte[] excluded={(byte)192,(byte)168,0,1};
+  X509CertSelector certSelector=new X509CertSelector();
+  certSelector.addPathToName(GeneralName.iPAddress,"127.0.0.1");
+  byte[] directMatch={127,0,0,1,-1,-1,-1,-1};
+  assertTrue(certSelector.match(newCertWithNameConstraint(directMatch,excluded)));
+  byte[] noMatch={127,0,0,2,-1,-1,-1,127};
+  assertFalse(certSelector.match(newCertWithNameConstraint(noMatch,excluded)));
+}

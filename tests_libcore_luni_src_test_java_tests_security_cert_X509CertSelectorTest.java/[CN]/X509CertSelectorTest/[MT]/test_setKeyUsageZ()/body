@@ -1,0 +1,17 @@
+{
+  boolean[] ku1=new boolean[]{true,true,true,true,true,true,true,true,true};
+  boolean[] ku2=new boolean[]{true,true,true,true,true,true,true,true,false};
+  TestCert cert1=new TestCert(ku1);
+  TestCert cert2=new TestCert(ku2);
+  TestCert cert3=new TestCert((boolean[])null);
+  X509CertSelector selector=new X509CertSelector();
+  selector.setKeyUsage(null);
+  assertTrue("Any certificate should match in the case of null " + "keyUsage criteria.",selector.match(cert1) && selector.match(cert2));
+  selector.setKeyUsage(ku1);
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert1));
+  assertFalse("The certificate should not match the selection criteria.",selector.match(cert2));
+  assertTrue("The certificate which does not have a keyUsage extension " + "implicitly allows all keyUsage values.",selector.match(cert3));
+  selector.setKeyUsage(ku2);
+  ku2[0]=!ku2[0];
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert2));
+}

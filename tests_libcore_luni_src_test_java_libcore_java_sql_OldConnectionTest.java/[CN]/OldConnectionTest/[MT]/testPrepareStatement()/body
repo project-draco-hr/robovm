@@ -1,0 +1,43 @@
+{
+  PreparedStatement prst=null;
+  Statement st=null;
+  ResultSet rs=null;
+  ResultSet rs1=null;
+  try {
+    String update="update zoo set family = ? where name = ?;";
+    prst=conn.prepareStatement(update);
+    prst.setString(1,"cat");
+    prst.setString(2,"Yasha");
+    st=conn.createStatement();
+    st.execute("select * from zoo where family = 'cat'");
+    rs=st.getResultSet();
+    assertEquals(0,getCount(rs));
+    prst.executeUpdate();
+    st.execute("select * from zoo where family = 'cat'");
+    rs1=st.getResultSet();
+    assertEquals(1,getCount(rs1));
+  }
+  finally {
+    try {
+      rs.close();
+      rs1.close();
+      prst.close();
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    prst=conn.prepareStatement("");
+    prst.execute();
+    fail("SQLException is not thrown");
+  }
+ catch (  SQLException e) {
+  }
+  try {
+    conn.prepareStatement(null);
+    fail("SQLException is not thrown");
+  }
+ catch (  Exception e) {
+  }
+}

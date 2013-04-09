@@ -1,0 +1,16 @@
+{
+  InetSocketAddress theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+  Socket theSocket=new Socket();
+  ServerSocket serverSocket=new ServerSocket();
+  serverSocket.bind(theAddress);
+  theSocket.connect(theAddress);
+  Socket servSock=serverSocket.accept();
+  InputStream theInput=theSocket.getInputStream();
+  OutputStream theOutput=servSock.getOutputStream();
+  assertFalse("Socket indicated output shutdown when it should not have",servSock.isOutputShutdown());
+  servSock.shutdownOutput();
+  assertTrue("Socket indicated output was NOT shutdown when it should have been",servSock.isOutputShutdown());
+  theSocket.close();
+  serverSocket.close();
+  assertFalse("Socket indicated output was output shutdown when the socket was closed",theSocket.isOutputShutdown());
+}

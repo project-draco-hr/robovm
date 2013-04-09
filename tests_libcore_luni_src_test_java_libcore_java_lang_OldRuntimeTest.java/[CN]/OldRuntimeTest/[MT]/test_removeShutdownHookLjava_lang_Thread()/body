@@ -1,0 +1,42 @@
+{
+  Thread thr1=new Thread(){
+    public void run(){
+      try {
+        Runtime.getRuntime().addShutdownHook(this);
+      }
+ catch (      IllegalStateException ise) {
+        fail("IllegalStateException shouldn't be thrown.");
+      }
+    }
+  }
+;
+  try {
+    Runtime.getRuntime().addShutdownHook(thr1);
+    Runtime.getRuntime().removeShutdownHook(thr1);
+  }
+ catch (  Throwable t) {
+    fail(t.getMessage());
+  }
+  Thread thr2=new Thread(){
+    public void run(){
+      try {
+        Runtime.getRuntime().removeShutdownHook(this);
+        fail("IllegalStateException wasn't thrown.");
+      }
+ catch (      IllegalStateException ise) {
+      }
+    }
+  }
+;
+  try {
+    Runtime.getRuntime().addShutdownHook(thr2);
+  }
+ catch (  Throwable t) {
+    fail(t.getMessage());
+  }
+  try {
+    Thread.currentThread().sleep(1000);
+  }
+ catch (  InterruptedException ie) {
+  }
+}

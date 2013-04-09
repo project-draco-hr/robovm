@@ -1,0 +1,16 @@
+{
+  KeyFactory kf=KeyFactory.getInstance("RSA");
+  RSAPrivateKeySpec keySpec=new RSAPrivateKeySpec(RSA_2048_modulus,RSA_2048_privateExponent);
+  PrivateKey privKey=kf.generatePrivate(keySpec);
+  Signature sig=Signature.getInstance("SHA512withRSA");
+  sig.initSign(privKey);
+  sig.update(Vector2Data);
+  byte[] signature=sig.sign();
+  assertNotNull("Signature must not be null",signature);
+  assertTrue("Signature should match expected",Arrays.equals(signature,SHA512withRSA_Vector2Signature));
+  RSAPublicKeySpec pubKeySpec=new RSAPublicKeySpec(RSA_2048_modulus,RSA_2048_publicExponent);
+  PublicKey pubKey=kf.generatePublic(pubKeySpec);
+  sig.initVerify(pubKey);
+  sig.update(Vector2Data);
+  assertTrue("Signature must verify correctly",sig.verify(signature));
+}

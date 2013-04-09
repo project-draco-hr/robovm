@@ -1,0 +1,25 @@
+{
+  format.applyPattern("*x##,##,#,##0.0#");
+  assertEquals("xxxxxxxxx123.0",format.format(123));
+  assertEquals(123,format.parse("xxxxxxxxx123.0").intValue());
+  format.applyPattern("$*x#,##0.00");
+  assertEquals("$xx123.00",format.format(123));
+  assertEquals("$1,234.00",format.format(1234));
+  format.applyPattern("*\u00e7#0 o''clock");
+  assertEquals("\u00e72 o'clock",format.format(2));
+  assertEquals("12 o'clock",format.format(12));
+  assertEquals(2,format.parse("\u00e72 o'clock").intValue());
+  assertEquals(12,format.parse("12 o'clock").intValue());
+  try {
+    format.applyPattern("#0.##*xE0");
+    fail("expected IllegalArgumentException was not thrown for" + "pattern \"#0.##*xE0\".");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    format.applyPattern("##0.## *");
+    fail("expected IllegalArgumentException was not thrown for " + "pattern \"##0.## *\".");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

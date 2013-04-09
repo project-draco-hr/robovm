@@ -1,0 +1,19 @@
+{
+  super.setUp();
+  String userDir=System.getProperty("java.io.tmpdir");
+  if (userDir == null)   throw new Exception("System property java.io.tmpdir not defined.");
+  System.setProperty("java.io.tmpdir",userDir);
+  if (!userDir.regionMatches((userDir.length() - 1),slash,0,1))   userDir+=slash;
+  tempDirectory=new File(userDir + "tempDir" + String.valueOf(System.currentTimeMillis()));
+  if (!tempDirectory.mkdir())   System.out.println("Setup for OldFileTest failed (1).");
+  tempFile=new File(tempDirectory,"tempfile");
+  FileOutputStream tempStream;
+  try {
+    tempStream=new FileOutputStream(tempFile.getPath(),false);
+    tempStream.close();
+  }
+ catch (  IOException e) {
+    System.out.println("Setup for OldFileTest failed (2).");
+    return;
+  }
+}

@@ -1,0 +1,32 @@
+{
+  Provider[] providers=Security.getProviders("Signature.DSA");
+  for (int i=0; i < providers.length; i++) {
+    Signature signature=Signature.getInstance("DSA",providers[i]);
+    assertEquals("DSA",signature.getAlgorithm());
+    assertEquals(providers[i],signature.getProvider());
+  }
+  try {
+    Signature.getInstance((String)null,(Provider)null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    Signature.getInstance("DSA",(Provider)null);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    Signature.getInstance((String)null,providers[0]);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    Signature.getInstance("bogus",providers[0]);
+    fail();
+  }
+ catch (  NoSuchAlgorithmException expected) {
+  }
+}

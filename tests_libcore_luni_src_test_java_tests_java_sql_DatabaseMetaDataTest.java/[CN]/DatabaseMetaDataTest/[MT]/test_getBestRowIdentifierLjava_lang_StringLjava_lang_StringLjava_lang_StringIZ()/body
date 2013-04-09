@@ -1,0 +1,26 @@
+{
+  ResultSet result=statementForward.executeQuery("SELECT * FROM " + DatabaseCreator.TEST_TABLE1);
+  statementForward.executeUpdate("INSERT INTO " + DatabaseCreator.TEST_TABLE1 + " (id, field1) VALUES( 1234567, 'test1');");
+  result.close();
+  ResultSet rs=meta.getBestRowIdentifier(null,null,DatabaseCreator.TEST_TABLE1,DatabaseMetaData.bestRowSession,true);
+  ResultSetMetaData rsmd=rs.getMetaData();
+  assertTrue("Rows not obtained",rs.next());
+  int col=rsmd.getColumnCount();
+  assertEquals("Incorrect number of columns",8,col);
+  String[] columnNames={"SCOPE","COLUMN_NAME","DATA_TYPE","TYPE_NAME","COLUMN_SIZE","BUFFER_LENGTH","DECIMAL_DIGITS","PSEUDO_COLUMN"};
+  for (int c=1; c <= col; ++c) {
+    assertEquals("Incorrect column name",columnNames[c - 1],rsmd.getColumnName(c));
+  }
+  assertEquals("Incorrect scope",DatabaseMetaData.bestRowSession,rs.getShort("SCOPE"));
+  assertEquals("Incorrect column name","_ROWID_",rs.getString("COLUMN_NAME"));
+  assertEquals("Incorrect data type",java.sql.Types.INTEGER,rs.getInt("DATA_TYPE"));
+  assertEquals("Incorrect type name","INTEGER",rs.getString("TYPE_NAME"));
+  rs.close();
+  conn.close();
+  try {
+    meta.getColumns(null,null,DatabaseCreator.TEST_TABLE1,"%");
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

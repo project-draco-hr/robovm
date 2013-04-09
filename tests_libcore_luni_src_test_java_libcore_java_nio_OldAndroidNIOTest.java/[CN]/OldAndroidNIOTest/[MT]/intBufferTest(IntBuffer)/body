@@ -1,0 +1,90 @@
+{
+  checkBuffer(ib);
+  try {
+    ib.put(-1,(int)0);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    ib.put(ib.limit(),(int)0);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    int[] data=new int[8];
+    ib.position(0);
+    ib.put(data,-1,2);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    int[] data=new int[8];
+    ib.position(0);
+    ib.put(data,1,8);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    int[] data=new int[8];
+    ib.position(ib.limit() - 2);
+    ib.put(data,0,3);
+    fail("expected exception not thrown");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  int[] data={0,10,20,30,40,50,60,70};
+  ib.position(0);
+  ib.put(data);
+  try {
+    ib.get();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  ib.position(0);
+  assertEquals((int)0,ib.get());
+  assertEquals((int)10,ib.get());
+  assertEquals((int)20,ib.get());
+  assertEquals((int)30,ib.get());
+  assertEquals((int)40,ib.get());
+  assertEquals((int)50,ib.get());
+  assertEquals((int)60,ib.get());
+  assertEquals((int)70,ib.get());
+  try {
+    ib.get();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  ib.position(1);
+  ib.put((int)11);
+  assertEquals((int)11,ib.get(1));
+  int[] ss1={33,44,55,66};
+  ib.position(3);
+  ib.put(ss1);
+  ib.position(0);
+  assertEquals((int)0,ib.get());
+  assertEquals((int)11,ib.get());
+  assertEquals((int)20,ib.get());
+  assertEquals((int)33,ib.get());
+  assertEquals((int)44,ib.get());
+  assertEquals((int)55,ib.get());
+  assertEquals((int)66,ib.get());
+  assertEquals((int)70,ib.get());
+  int[] ss2={10,22,30};
+  ib.position(2);
+  ib.put(ss2,1,1);
+  ib.position(0);
+  assertEquals((int)0,ib.get());
+  assertEquals((int)11,ib.get());
+  assertEquals((int)22,ib.get());
+  assertEquals((int)33,ib.get());
+  assertEquals((int)44,ib.get());
+  assertEquals((int)55,ib.get());
+  assertEquals((int)66,ib.get());
+  assertEquals((int)70,ib.get());
+}

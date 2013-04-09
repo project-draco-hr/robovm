@@ -1,0 +1,19 @@
+{
+  X509CertSelector selector=new X509CertSelector();
+  byte[] akid1=new byte[]{1,2,3,4,5};
+  byte[] akid2=new byte[]{5,4,3,2,1};
+  TestCert cert1=new TestCert(akid1);
+  TestCert cert2=new TestCert(akid2);
+  selector.setAuthorityKeyIdentifier(null);
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert1));
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert2));
+  assertNull(selector.getAuthorityKeyIdentifier());
+  selector.setAuthorityKeyIdentifier(akid1);
+  assertTrue("The certificate should not match the selection criteria.",selector.match(cert1));
+  assertFalse("The certificate should not match the selection criteria.",selector.match(cert2));
+  selector.setAuthorityKeyIdentifier(akid2);
+  assertFalse("The certificate should not match the selection criteria.",selector.match(cert1));
+  assertTrue("The certificate should not match the selection criteria.",selector.match(cert2));
+  akid2[0]++;
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert2));
+}

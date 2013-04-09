@@ -1,0 +1,30 @@
+{
+  final Set<String> prefixesToNotInherit=new HashSet<String>(this.prefixesToNotInherit);
+  final Set<String> prefixesToLoad=new HashSet<String>(this.prefixesToLoad);
+  ClassLoader bridge=new ClassLoader(parent){
+    @Override protected Class<?> loadClass(    String className,    boolean resolve) throws ClassNotFoundException {
+      for (      String prefix : prefixesToLoad) {
+        if (className.startsWith(prefix)) {
+          throw new ClassNotFoundException();
+        }
+      }
+      for (      String prefix : prefixesToNotInherit) {
+        if (className.startsWith(prefix)) {
+          throw new NoClassDefFoundError();
+        }
+      }
+      return super.loadClass(className,resolve);
+    }
+  }
+;
+  try {
+    String classPath=getApplicationClassPath();
+    return (ClassLoader)Class.forName("dalvik.system.PathClassLoader").getConstructor(String.class,ClassLoader.class).newInstance(classPath,bridge);
+  }
+ catch (  Exception ignored) {
+  }
+  List<URL> classpath=new ArrayList<URL>();
+  classpath.addAll(classpathToUrls("java.class.path"));
+  classpath.addAll(classpathToUrls("sun.boot.class.path"));
+  return new URLClassLoader(classpath.toArray(new URL[classpath.size()]),bridge);
+}

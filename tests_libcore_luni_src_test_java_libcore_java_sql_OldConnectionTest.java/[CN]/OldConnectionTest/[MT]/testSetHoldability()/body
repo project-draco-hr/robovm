@@ -1,0 +1,37 @@
+{
+  Statement st=null;
+  try {
+    conn.setAutoCommit(false);
+    conn.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+    assertEquals(ResultSet.CLOSE_CURSORS_AT_COMMIT,conn.getHoldability());
+    st=conn.createStatement();
+    st.execute("insert into zoo (id, name, family) values (4, 'ChiChiChi', 'monkey');");
+    ResultSet rs=st.getResultSet();
+    conn.commit();
+    try {
+      rs.next();
+    }
+ catch (    SQLException sqle) {
+    }
+    conn.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+    assertEquals(ResultSet.HOLD_CURSORS_OVER_COMMIT,conn.getHoldability());
+    st=conn.createStatement();
+    st.execute("insert into zoo (id, name, family) values (4, 'ChiChiChi', 'monkey');");
+    rs=st.getResultSet();
+    conn.commit();
+    rs.next();
+  }
+  finally {
+    try {
+      st.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    conn.setHoldability(-1);
+    fail("SQLException is not thrown");
+  }
+ catch (  SQLException sqle) {
+  }
+}

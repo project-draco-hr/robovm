@@ -1,0 +1,26 @@
+{
+  final DSAParameterSpec dsaSpec=new DSAParameterSpec(DSA_P,DSA_Q,DSA_G);
+  boolean failure=false;
+  final Provider[] providers=Security.getProviders();
+  for (  final Provider p : providers) {
+    Service s=p.getService("KeyPairGenerator","DSA");
+    if (s == null) {
+      continue;
+    }
+    final KeyPairGenerator kpg=KeyPairGenerator.getInstance("DSA",p);
+    kpg.initialize(dsaSpec);
+    KeyPair pair=kpg.generateKeyPair();
+    DSAPrivateKey privKey=(DSAPrivateKey)pair.getPrivate();
+    DSAPublicKey pubKey=(DSAPublicKey)pair.getPublic();
+    DSAParams actualParams=privKey.getParams();
+    assertNotNull("DSA params should not be null",actualParams);
+    assertEquals("DSA P should be the same as supplied with provider " + p.getName(),DSA_P,actualParams.getP());
+    assertEquals("DSA Q should be the same as supplied with provider " + p.getName(),DSA_Q,actualParams.getQ());
+    assertEquals("DSA G should be the same as supplied with provider " + p.getName(),DSA_G,actualParams.getG());
+    actualParams=pubKey.getParams();
+    assertNotNull("DSA params should not be null",actualParams);
+    assertEquals("DSA P should be the same as supplied with provider " + p.getName(),DSA_P,actualParams.getP());
+    assertEquals("DSA Q should be the same as supplied with provider " + p.getName(),DSA_Q,actualParams.getQ());
+    assertEquals("DSA G should be the same as supplied with provider " + p.getName(),DSA_G,actualParams.getG());
+  }
+}

@@ -1,0 +1,24 @@
+{
+  keyType=name;
+  try {
+    CertificateFactory cf=CertificateFactory.getInstance("X.509");
+    keyTest=KeyStore.getInstance(KeyStore.getDefaultType());
+    keyTest.load(null,null);
+    if (keyType.equals(client)) {
+      cert=new X509Certificate[2];
+      cert[0]=(X509Certificate)cf.generateCertificate(certArray);
+      cert[1]=(X509Certificate)cf.generateCertificate(certArray2);
+      keyTest.setCertificateEntry("clientAlias_01",cert[0]);
+      keyTest.setCertificateEntry("clientAlias_02",cert[0]);
+      keyTest.setCertificateEntry("clientAlias_03",cert[1]);
+    }
+ else     if (keyType.equals(server)) {
+      cert=new X509Certificate[1];
+      cert[0]=(X509Certificate)cf.generateCertificate(certArray3);
+      keyTest.setCertificateEntry("serverAlias_00",cert[0]);
+    }
+  }
+ catch (  Exception ex) {
+    throw new IllegalArgumentException(ex.getMessage());
+  }
+}

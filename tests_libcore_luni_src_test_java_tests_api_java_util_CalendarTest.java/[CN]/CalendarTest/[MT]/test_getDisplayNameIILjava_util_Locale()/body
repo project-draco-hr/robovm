@@ -1,0 +1,124 @@
+{
+  Calendar cal=Calendar.getInstance();
+  for (int field=0; field < Calendar.FIELD_COUNT; field++) {
+    for (    Locale locale : locales) {
+      DateFormatSymbols symbols=new DateFormatSymbols(locale);
+      String value=null;
+switch (field) {
+case Calendar.AM_PM:
+        cal.set(Calendar.AM_PM,Calendar.AM);
+      value=symbols.getAmPmStrings()[0];
+    assertEquals(cal.getDisplayName(field,Calendar.SHORT,locale),value);
+  assertEquals(cal.getDisplayName(field,Calendar.LONG,locale),value);
+cal.set(Calendar.AM_PM,Calendar.PM);
+value=symbols.getAmPmStrings()[1];
+assertEquals(cal.getDisplayName(field,Calendar.SHORT,locale),value);
+assertEquals(cal.getDisplayName(field,Calendar.LONG,locale),value);
+break;
+case Calendar.ERA:
+cal.set(Calendar.ERA,GregorianCalendar.BC);
+value=symbols.getEras()[0];
+assertEquals(cal.getDisplayName(field,Calendar.SHORT,locale),value);
+assertEquals(cal.getDisplayName(field,Calendar.LONG,locale),value);
+cal.set(Calendar.ERA,GregorianCalendar.AD);
+value=symbols.getEras()[1];
+assertEquals(cal.getDisplayName(field,Calendar.SHORT,locale),value);
+assertEquals(cal.getDisplayName(field,Calendar.LONG,locale),value);
+break;
+case Calendar.MONTH:
+cal.set(Calendar.DAY_OF_MONTH,1);
+for (int month=0; month <= 11; month++) {
+cal.set(Calendar.MONTH,month);
+value=symbols.getShortMonths()[month];
+assertEquals(cal.getDisplayName(field,Calendar.SHORT,locale),value);
+value=symbols.getMonths()[month];
+assertEquals(cal.getDisplayName(field,Calendar.LONG,locale),value);
+}
+break;
+case Calendar.DAY_OF_WEEK:
+for (int day=1; day <= 7; day++) {
+cal.set(Calendar.DAY_OF_WEEK,day);
+value=symbols.getShortWeekdays()[day];
+assertEquals(cal.getDisplayName(field,Calendar.SHORT,locale),value);
+value=symbols.getWeekdays()[day];
+assertEquals(cal.getDisplayName(field,Calendar.LONG,locale),value);
+}
+break;
+default :
+assertNull(cal.getDisplayName(field,Calendar.SHORT,locale));
+assertNull(cal.getDisplayName(field,Calendar.LONG,locale));
+}
+}
+}
+cal.setLenient(true);
+try {
+cal.getDisplayName(-1,Calendar.SHORT,Locale.US);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+try {
+cal.getDisplayName(Calendar.FIELD_COUNT,Calendar.LONG,Locale.US);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+try {
+cal.getDisplayName(Calendar.MONTH,-1,Locale.US);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+try {
+cal.getDisplayName(Calendar.MONTH,3,Locale.US);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+try {
+cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,null);
+fail("Should throw NullPointerException");
+}
+ catch (NullPointerException e) {
+}
+try {
+cal.getDisplayName(-1,Calendar.SHORT,null);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+try {
+cal.getDisplayName(Calendar.MONTH,-1,null);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+cal.set(Calendar.SECOND,999);
+cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US);
+for (int field=0; field < Calendar.FIELD_COUNT; field++) {
+for (Locale locale : locales) {
+String result=cal.getDisplayName(field,Calendar.ALL_STYLES,locale);
+if (field == Calendar.AM_PM || field == Calendar.ERA || field == Calendar.MONTH || field == Calendar.DAY_OF_WEEK) {
+assertEquals(result,cal.getDisplayName(field,Calendar.SHORT,locale));
+}
+ else {
+assertNull(result);
+}
+}
+}
+cal.setLenient(false);
+assertNotNull(cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US));
+cal.set(Calendar.SECOND,999);
+try {
+cal.getDisplayName(Calendar.MONTH,Calendar.SHORT,Locale.US);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+try {
+cal.getDisplayName(Calendar.MONTH,Calendar.ALL_STYLES,Locale.US);
+fail("Should throw IllegalArgumentException");
+}
+ catch (IllegalArgumentException e) {
+}
+}

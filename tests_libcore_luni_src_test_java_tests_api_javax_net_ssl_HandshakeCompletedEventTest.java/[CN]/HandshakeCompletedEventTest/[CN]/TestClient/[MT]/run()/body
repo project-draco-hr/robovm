@@ -1,0 +1,28 @@
+{
+  try {
+    KeyManager[] keyManagers=provideKeys ? getKeyManagers(keys) : null;
+    TrustManager[] trustManagers=new TrustManager[]{trustManager};
+    SSLContext sslContext=SSLContext.getInstance("TLS");
+    sslContext.init(keyManagers,trustManagers,null);
+    SSLSocket socket=(SSLSocket)sslContext.getSocketFactory().createSocket();
+    socket.connect(new InetSocketAddress(port));
+    socket.addHandshakeCompletedListener(listener);
+    socket.startHandshake();
+    OutputStream ostream=socket.getOutputStream();
+    for (int i=0; i < 256; i++) {
+      ostream.write(i);
+    }
+    ostream.flush();
+    ostream.close();
+    InputStream istream=socket.getInputStream();
+    for (int i=0; i < 256; i++) {
+      int j=istream.read();
+      assertEquals(i,j);
+    }
+    istream.close();
+    socket.close();
+  }
+ catch (  Exception ex) {
+    exception=ex;
+  }
+}

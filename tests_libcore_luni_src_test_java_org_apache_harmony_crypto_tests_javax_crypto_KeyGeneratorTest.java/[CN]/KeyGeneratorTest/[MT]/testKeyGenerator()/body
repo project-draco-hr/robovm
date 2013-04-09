@@ -1,0 +1,41 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  KeyGeneratorSpi spi=new MyKeyGeneratorSpi();
+  KeyGenerator keyG=new myKeyGenerator(spi,defaultProvider,defaultAlgorithm);
+  assertEquals("Incorrect algorithm",keyG.getAlgorithm(),defaultAlgorithm);
+  assertEquals("Incorrect provider",keyG.getProvider(),defaultProvider);
+  AlgorithmParameterSpec params=null;
+  int keysize=0;
+  try {
+    keyG.init(params,null);
+    fail("InvalidAlgorithmParameterException must be thrown");
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+  }
+  try {
+    keyG.init(keysize,null);
+    fail("IllegalArgumentException must be thrown");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  keyG=new myKeyGenerator(null,null,null);
+  assertNull("Algorithm must be null",keyG.getAlgorithm());
+  assertNull("Provider must be null",keyG.getProvider());
+  try {
+    keyG.init(params,null);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    keyG.init(keysize,null);
+    fail("NullPointerException or InvalidParameterException must be thrown");
+  }
+ catch (  InvalidParameterException e) {
+  }
+catch (  NullPointerException e) {
+  }
+}

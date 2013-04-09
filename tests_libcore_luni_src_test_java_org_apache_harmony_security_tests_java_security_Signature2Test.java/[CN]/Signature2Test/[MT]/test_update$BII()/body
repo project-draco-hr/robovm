@@ -1,0 +1,25 @@
+{
+  Signature sig=Signature.getInstance("DSA");
+  byte[] bytes=MESSAGE.getBytes();
+  try {
+    sig.update(bytes,0,bytes.length);
+    fail();
+  }
+ catch (  SignatureException expected) {
+  }
+  sig.initSign(getDsaKeys().getPrivate());
+  sig.update(bytes,0,bytes.length);
+  sig.update(bytes,bytes.length - 2,2);
+  try {
+    sig.update(bytes,bytes.length - 3,4);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    sig.update(null,0,5);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+}

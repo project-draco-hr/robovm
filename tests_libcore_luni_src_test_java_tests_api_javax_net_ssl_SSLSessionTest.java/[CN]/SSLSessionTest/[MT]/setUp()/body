@@ -1,0 +1,34 @@
+{
+  port=Support_PortManager.getNextPort();
+  String serverKeys=(useBKS ? SERVER_KEYS_BKS : SERVER_KEYS_JKS);
+  String clientKeys=(useBKS ? CLIENT_KEYS_BKS : CLIENT_KEYS_JKS);
+  server=new TestServer(true,TestServer.CLIENT_AUTH_WANTED,serverKeys);
+  client=new TestClient(true,clientKeys);
+  serverThread=new Thread(server);
+  clientThread=new Thread(client);
+  serverThread.start();
+  try {
+    Thread.currentThread().sleep(1000);
+    clientThread.start();
+  }
+ catch (  InterruptedException e) {
+    fail("Could not create server or cient " + e.getMessage());
+  }
+  while (clientSession == null && server.exception == null && client.exception == null) {
+    try {
+      Thread.currentThread().sleep(500);
+    }
+ catch (    InterruptedException e) {
+      fail("couldn't create session");
+    }
+  }
+  if (server.exception != null) {
+    server.exception.printStackTrace();
+  }
+  assertNull("server thread has a pending exception: " + server.exception,server.exception);
+  if (client.exception != null) {
+    client.exception.printStackTrace();
+  }
+  assertNull("client thread has a pending exception: " + client.exception,client.exception);
+  assertNotNull("Could not initialize session",clientSession);
+}

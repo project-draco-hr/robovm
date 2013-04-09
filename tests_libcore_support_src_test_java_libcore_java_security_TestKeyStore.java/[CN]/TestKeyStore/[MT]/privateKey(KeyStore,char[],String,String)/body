@@ -1,0 +1,30 @@
+{
+  try {
+    PrivateKeyEntry found=null;
+    PasswordProtection password=new PasswordProtection(keyPassword);
+    for (    String alias : Collections.list(keyStore.aliases())) {
+      if (!keyStore.entryInstanceOf(alias,PrivateKeyEntry.class)) {
+        continue;
+      }
+      PrivateKeyEntry privateKey=(PrivateKeyEntry)keyStore.getEntry(alias,password);
+      if (!privateKey.getPrivateKey().getAlgorithm().equals(keyAlgorithm)) {
+        continue;
+      }
+      X509Certificate certificate=(X509Certificate)privateKey.getCertificate();
+      if (!certificate.getSigAlgName().contains(signatureAlgorithm)) {
+        continue;
+      }
+      if (found != null) {
+        throw new IllegalStateException("KeyStore has more than one private key for " + " keyAlgorithm: " + keyAlgorithm + " signatureAlgorithm: "+ signatureAlgorithm+ "\nfirst: "+ found.getPrivateKey()+ "\nsecond: "+ privateKey.getPrivateKey());
+      }
+      found=privateKey;
+    }
+    if (found == null) {
+      throw new IllegalStateException("KeyStore contained no private key for " + " keyAlgorithm: " + keyAlgorithm + " signatureAlgorithm: "+ signatureAlgorithm);
+    }
+    return found;
+  }
+ catch (  Exception e) {
+    throw new RuntimeException(e);
+  }
+}

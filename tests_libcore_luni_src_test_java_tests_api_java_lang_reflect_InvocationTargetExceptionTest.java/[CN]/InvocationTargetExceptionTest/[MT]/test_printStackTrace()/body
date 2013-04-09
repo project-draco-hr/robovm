@@ -1,0 +1,16 @@
+{
+  try {
+    ByteArrayOutputStream bao=new ByteArrayOutputStream();
+    PrintStream ps=new PrintStream(bao);
+    PrintStream oldErr=System.err;
+    System.setErr(ps);
+    InvocationTargetException ite=new InvocationTargetException(null);
+    ite.printStackTrace();
+    System.setErr(oldErr);
+    String s=new String(bao.toByteArray());
+    assertTrue("Incorrect Stack trace: " + s,s != null && s.length() > 300);
+  }
+ catch (  Exception e) {
+    fail("printStackTrace() caused exception : " + e.getMessage());
+  }
+}

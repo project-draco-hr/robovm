@@ -1,0 +1,90 @@
+{
+  checkBuffer(fb);
+  try {
+    fb.put(-1,(float)0);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    fb.put(fb.limit(),(float)0);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    float[] data=new float[8];
+    fb.position(0);
+    fb.put(data,-1,2);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    float[] data=new float[8];
+    fb.position(0);
+    fb.put(data,1,8);
+    fail("expected exception not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    float[] data=new float[8];
+    fb.position(fb.limit() - 2);
+    fb.put(data,0,3);
+    fail("expected exception not thrown");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  float[] data={0,10,20,30,40,50,60,70};
+  fb.position(0);
+  fb.put(data);
+  try {
+    fb.get();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  fb.position(0);
+  assertEquals((float)0,fb.get());
+  assertEquals((float)10,fb.get());
+  assertEquals((float)20,fb.get());
+  assertEquals((float)30,fb.get());
+  assertEquals((float)40,fb.get());
+  assertEquals((float)50,fb.get());
+  assertEquals((float)60,fb.get());
+  assertEquals((float)70,fb.get());
+  try {
+    fb.get();
+    fail("expected exception not thrown");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  fb.position(1);
+  fb.put((float)11);
+  assertEquals((float)11,fb.get(1));
+  float[] ss1={33,44,55,66};
+  fb.position(3);
+  fb.put(ss1);
+  fb.position(0);
+  assertEquals((float)0,fb.get());
+  assertEquals((float)11,fb.get());
+  assertEquals((float)20,fb.get());
+  assertEquals((float)33,fb.get());
+  assertEquals((float)44,fb.get());
+  assertEquals((float)55,fb.get());
+  assertEquals((float)66,fb.get());
+  assertEquals((float)70,fb.get());
+  float[] ss2={10,22,30};
+  fb.position(2);
+  fb.put(ss2,1,1);
+  fb.position(0);
+  assertEquals((float)0,fb.get());
+  assertEquals((float)11,fb.get());
+  assertEquals((float)22,fb.get());
+  assertEquals((float)33,fb.get());
+  assertEquals((float)44,fb.get());
+  assertEquals((float)55,fb.get());
+  assertEquals((float)66,fb.get());
+  assertEquals((float)70,fb.get());
+}

@@ -1,0 +1,17 @@
+{
+  if (!PKIXSupport) {
+    fail(NotSupportMsg);
+    return;
+  }
+  for (int i=0; i < validValues.length; i++) {
+    CertPathBuilder cpb2=CertPathBuilder.getInstance(validValues[i],defaultProvider);
+    assertEquals("Incorrect provider",cpb2.getProvider(),defaultProvider);
+    try {
+      CertPathBuilder cpb3=CertPathBuilder.getInstance(validValues[i],defaultProviderName);
+      assertEquals("Incorrect provider",cpb3.getProvider(),defaultProvider);
+    }
+ catch (    NoSuchProviderException e) {
+      fail("Unexpected NoSuchProviderException " + e.getMessage());
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  int startIndex=arraySize / 4;
+  int endIndex=3 * arraySize / 4;
+  Object[] reversedArray=new Object[arraySize];
+  Object[] originalReversedArray=new Object[arraySize];
+  for (int counter=0; counter < arraySize; counter++) {
+    reversedArray[counter]=objectArray[arraySize - counter - 1];
+    originalReversedArray[counter]=reversedArray[counter];
+  }
+  Arrays.sort(reversedArray,startIndex,endIndex);
+  for (int counter=0; counter < startIndex; counter++)   assertTrue("Array modified outside of bounds",reversedArray[counter] == originalReversedArray[counter]);
+  for (int counter=startIndex; counter < endIndex - 1; counter++)   assertTrue("Array not sorted within bounds",((Comparable)reversedArray[counter]).compareTo(reversedArray[counter + 1]) <= 0);
+  for (int counter=endIndex; counter < arraySize; counter++)   assertTrue("Array modified outside of bounds",reversedArray[counter] == originalReversedArray[counter]);
+  try {
+    Arrays.sort(reversedArray,startIndex + 1,startIndex);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException ignore) {
+  }
+  try {
+    Arrays.sort(reversedArray,-1,startIndex);
+    fail("ArrayIndexOutOfBoundsException expected (1)");
+  }
+ catch (  ArrayIndexOutOfBoundsException ignore) {
+  }
+  try {
+    Arrays.sort(reversedArray,startIndex,reversedArray.length + 1);
+    fail("ArrayIndexOutOfBoundsException expected (2)");
+  }
+ catch (  ArrayIndexOutOfBoundsException ignore) {
+  }
+  Arrays.fill(reversedArray,0,reversedArray.length / 2,"String");
+  Arrays.fill(reversedArray,reversedArray.length / 2,reversedArray.length,new Integer(1));
+  try {
+    Arrays.sort(reversedArray,reversedArray.length / 4,3 * reversedArray.length / 4);
+    fail("ClassCastException expected");
+  }
+ catch (  ClassCastException e) {
+  }
+  Arrays.sort(reversedArray,0,reversedArray.length / 4);
+  Arrays.sort(reversedArray,3 * reversedArray.length / 4,reversedArray.length);
+}

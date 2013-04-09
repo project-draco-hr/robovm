@@ -1,0 +1,29 @@
+{
+  Statement st=null;
+  try {
+    String[] queries={"update zoo set name='Masha', family='cat' where id=2;","drop table if exists hutch","create table hutch (id integer not null, animal_id integer, address char(20), primary key (id));","insert into hutch (id, animal_id, address) values (1, 2, 'Birds-house, 1');","insert into hutch (id, animal_id, address) values (2, 1, 'Horse-house, 5');","create view address as select address from hutch where animal_id=2","drop view address;","drop table hutch;"};
+    Vector<String[]> array=new Vector<String[]>();
+    array.addElement(null);
+    array.addElement(new String[]{"","","","","","","",""});
+    array.addElement(new String[]{"field 1","","field2"});
+    array.addElement(new String[]{"id","family","name"});
+    array.addElement(new String[]{"id",null,"family",null,"name"});
+    array.addElement(new String[]{"id"," ","name"});
+    array.addElement(new String[]{null,null,null,null});
+    array.addElement(new String[]{" ","123 21","~!@#$%^&*()_+ ",null});
+    st=conn.createStatement();
+    for (int i=0; i < queries.length; i++) {
+      st.executeUpdate(queries[i],(String[])array.elementAt(i));
+      fail("Revise test implemenation for feature impl. has changed");
+    }
+  }
+ catch (  SQLFeatureNotSupportedException e) {
+  }
+ finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+}

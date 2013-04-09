@@ -1,0 +1,28 @@
+{
+  return new Runnable(){
+    public void run(){
+      try {
+        Statement statement=conn.createStatement();
+        ResultSet result=statement.executeQuery("SELECT * FROM " + DatabaseCreator.TEST_TABLE2);
+        while (result.next()) {
+          while (result.next()) {
+            int id=result.getInt("finteger");
+            assertEquals("Wrong value of ftext",DatabaseCreator.defaultString + id,result.getString("ftext"));
+            assertEquals("Wrong value of fcharacter",DatabaseCreator.defaultCharacter + id,result.getString("fcharacter"));
+            assertEquals("Wrong value of fdecimal",DatabaseCreator.defaultDouble + id,result.getDouble("fdecimal"));
+            assertEquals("Wrong value of fnumeric",DatabaseCreator.defaultDouble + id,result.getDouble("fnumeric"));
+            assertEquals("Wrong value of fsmallint",result.getInt("finteger"),result.getShort("fsmallint"));
+            assertEquals("Wrong value of ffloat",(float)DatabaseCreator.defaultDouble + id,result.getFloat("ffloat"));
+            assertEquals("Wrong value of freal",(float)DatabaseCreator.defaultDouble + id,result.getFloat("freal"));
+            assertEquals("Wrong value of fdouble",DatabaseCreator.defaultDouble + id,result.getDouble("fdouble"));
+          }
+        }
+        result.close();
+      }
+ catch (      Exception e) {
+        System.err.println("Task2 " + e.getMessage());
+      }
+    }
+  }
+;
+}

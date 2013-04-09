@@ -1,0 +1,38 @@
+{
+  try {
+    KeyManager[] keyManagers=provideKeys ? getKeyManagers(keys) : null;
+    TrustManager[] trustManagers=new TrustManager[]{trustManager};
+    SSLContext sslContext=SSLContext.getInstance("TLS");
+    sslContext.init(keyManagers,trustManagers,null);
+    SSLServerSocket serverSocket=(SSLServerSocket)sslContext.getServerSocketFactory().createServerSocket();
+    try {
+      serverSocket.bind(new InetSocketAddress(port));
+      sport=serverSocket.getLocalPort();
+      serverReady=true;
+      SSLSocket clientSocket=(SSLSocket)serverSocket.accept();
+      try {
+        InputStream stream=clientSocket.getInputStream();
+        try {
+          for (int i=0; i < 256; i++) {
+            int j=stream.read();
+            if (i != j) {
+              throw new RuntimeException("Error reading socket, expected " + i + ", got "+ j);
+            }
+          }
+        }
+  finally {
+          stream.close();
+        }
+      }
+  finally {
+        clientSocket.close();
+      }
+    }
+  finally {
+      serverSocket.close();
+    }
+  }
+ catch (  Exception ex) {
+    exception=ex;
+  }
+}

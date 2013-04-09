@@ -1,0 +1,30 @@
+{
+  final byte[] enc=new byte[]{0x02,0x01,0x03};
+  final String strFormatParam="format";
+  MyAlgorithmParameters paramSpi=new MyAlgorithmParameters(){
+    protected byte[] engineGetEncoded(    String format) throws IOException {
+      assertEquals(strFormatParam,format);
+      return enc;
+    }
+  }
+;
+  AlgorithmParameters params=new DummyAlgorithmParameters(paramSpi,p,"algorithm");
+  try {
+    params.getEncoded(strFormatParam);
+    fail("should not get encoded from un-initialized instance");
+  }
+ catch (  IOException e) {
+  }
+  params.init(new MyAlgorithmParameterSpec());
+  assertSame(enc,params.getEncoded(strFormatParam));
+  paramSpi=new MyAlgorithmParameters(){
+    protected byte[] engineGetEncoded(    String format) throws IOException {
+      assertNull(format);
+      return enc;
+    }
+  }
+;
+  params=new DummyAlgorithmParameters(paramSpi,p,"algorithm");
+  params.init(new MyAlgorithmParameterSpec());
+  assertSame(enc,params.getEncoded(null));
+}

@@ -1,0 +1,32 @@
+{
+  String[] nodeArray=new String[]{"First node","Second node","Last node"};
+  int i;
+  pref.put("Key","String");
+  for (i=0; i < nodeArray.length; i++) {
+    pref.node(nodeArray[i]);
+  }
+  pref.flush();
+  String[] str=pref.childrenNames();
+  assertEquals(nodeArray.length,str.length);
+  for (i=0; i < nodeArray.length; i++) {
+    pref.node(nodeArray[i]).removeNode();
+    str=pref.childrenNames();
+    assertEquals(nodeArray.length - i - 1,str.length);
+  }
+  assertEquals(1,pref.keys().length);
+  pref.node("Key").removeNode();
+  assertEquals(1,pref.keys().length);
+  pref.removeNode();
+  try {
+    pref.removeNode();
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+  try {
+    root.removeNode();
+    fail("UnsupportedOperationException expected");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+}

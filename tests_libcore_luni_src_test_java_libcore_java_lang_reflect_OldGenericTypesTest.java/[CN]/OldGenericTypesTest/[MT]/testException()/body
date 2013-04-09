@@ -1,0 +1,19 @@
+{
+  Class<? extends ExceptionTest> clazz=ExceptionTest.class;
+  TypeVariable<Class> typeVariable=getTypeParameter(clazz);
+  Method method=clazz.getDeclaredMethod("exceptionTest");
+  Type[] genericExceptionTypes=method.getGenericExceptionTypes();
+  assertLenghtOne(genericExceptionTypes);
+  assertEquals(typeVariable,genericExceptionTypes[0]);
+  Class<?>[] declaredClasses=clazz.getDeclaredClasses();
+  assertLenghtOne(declaredClasses);
+  Class<?> innerClazz=declaredClasses[0];
+  assertEquals(ExceptionTest.InnerClass.class,innerClazz);
+  Method declaredMethods=innerClazz.getDeclaredMethod("innerExceptionTest");
+  Type[] exceptionTypes=declaredMethods.getGenericExceptionTypes();
+  assertLenghtOne(exceptionTypes);
+  assertEquals(typeVariable,exceptionTypes[0]);
+  assertInstanceOf(TypeVariable.class,exceptionTypes[0]);
+  TypeVariable<?> methodTypeVariable=(TypeVariable<?>)exceptionTypes[0];
+  assertEquals(clazz,methodTypeVariable.getGenericDeclaration());
+}

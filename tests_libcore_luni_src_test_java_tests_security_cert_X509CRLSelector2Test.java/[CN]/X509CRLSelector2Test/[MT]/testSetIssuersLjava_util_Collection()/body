@@ -1,0 +1,19 @@
+{
+  X509CRLSelector selector=new X509CRLSelector();
+  X500Principal iss1=new X500Principal("O=First Org.");
+  X500Principal iss2=new X500Principal("O=Second Org.");
+  X500Principal iss3=new X500Principal("O=Third Org.");
+  TestCRL crl1=new TestCRL(iss1);
+  TestCRL crl2=new TestCRL(iss2);
+  TestCRL crl3=new TestCRL(iss3);
+  selector.setIssuers(null);
+  assertTrue("Any CRL issuers should match in the case of null issuers.",selector.match(crl1) && selector.match(crl2));
+  ArrayList<X500Principal> issuers=new ArrayList<X500Principal>(2);
+  issuers.add(iss1);
+  issuers.add(iss2);
+  selector.setIssuers(issuers);
+  assertTrue("The CRL should match the selection criteria.",selector.match(crl1) && selector.match(crl2));
+  assertFalse("The CRL should not match the selection criteria.",selector.match(crl3));
+  issuers.add(iss3);
+  assertFalse("The internal issuer collection is not protected " + "against the modifications.",selector.match(crl3));
+}

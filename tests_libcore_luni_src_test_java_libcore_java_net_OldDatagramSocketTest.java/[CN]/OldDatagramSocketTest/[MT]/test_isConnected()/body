@@ -1,0 +1,23 @@
+{
+  try {
+    InetAddress addr=InetAddress.getLocalHost();
+    int[] ports=Support_PortManager.getNextPortsForUDP(4);
+    int port=ports[0];
+    DatagramSocket theSocket=new DatagramSocket(ports[1]);
+    assertFalse("Socket indicated connected when it should not be",theSocket.isConnected());
+    theSocket.connect(new InetSocketAddress(addr,port));
+    assertTrue("Socket indicated  not connected when it should be",theSocket.isConnected());
+    theSocket.connect(new InetSocketAddress(addr,ports[2]));
+    assertTrue("Socket indicated  not connected when it should be",theSocket.isConnected());
+    theSocket.disconnect();
+    assertFalse("Socket indicated connected when it should not be",theSocket.isConnected());
+    theSocket.close();
+    theSocket=new DatagramSocket(ports[3]);
+    theSocket.connect(new InetSocketAddress(addr,port));
+    theSocket.close();
+    assertTrue("Socket indicated  not connected when it should be",theSocket.isConnected());
+  }
+ catch (  Exception e) {
+    fail("Got exception during isConnected tests" + e.toString());
+  }
+}

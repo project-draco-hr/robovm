@@ -1,0 +1,62 @@
+{
+  String[] commands={"sleep","1"};
+  process=Runtime.getRuntime().exec(commands,null,null);
+  try {
+    assertEquals(0,process.waitFor());
+  }
+ catch (  InterruptedException ie) {
+    fail("InterruptedException was thrown.");
+  }
+  isThrown=false;
+  thread=new Thread(){
+    public void run(){
+      String[] commands={"sleep","1000"};
+      try {
+        process=Runtime.getRuntime().exec(commands,null,null);
+      }
+ catch (      IOException e1) {
+        fail("IOException was thrown.");
+      }
+      try {
+        process.waitFor();
+        fail("InterruptedException was not thrown.");
+      }
+ catch (      InterruptedException ie) {
+        isThrown=true;
+      }
+    }
+  }
+;
+  Thread interruptThread=new Thread(){
+    public void run(){
+      try {
+        sleep(10);
+      }
+ catch (      InterruptedException ie) {
+        fail("InterruptedException was thrown in " + "the interruptThread.");
+      }
+      thread.interrupt();
+    }
+  }
+;
+  thread.start();
+  interruptThread.start();
+  try {
+    interruptThread.join();
+  }
+ catch (  InterruptedException e) {
+    fail("InterruptedException was thrown.");
+  }
+  try {
+    Thread.sleep(100);
+  }
+ catch (  InterruptedException ie) {
+  }
+  thread.interrupt();
+  try {
+    Thread.sleep(100);
+  }
+ catch (  InterruptedException ie) {
+  }
+  assertTrue(isThrown);
+}

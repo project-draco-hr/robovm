@@ -1,0 +1,21 @@
+{
+  assertNull(NumberFormat.getInstance().parseObject("0",new ParsePosition(-1)));
+  parseObjectTest(NumberFormat.getInstance(),"123.123",new ParsePosition(1),new Double(23.123),7,true);
+  parseObjectTest(NumberFormat.getInstance(),"123.123abc123",new ParsePosition(3),new Double(0.123),7,true);
+  if (Support_Locale.isLocaleAvailable(Locale.FRANCE)) {
+    parseObjectTest(NumberFormat.getInstance(Locale.FRANCE),"asd123,123abc123",new ParsePosition(3),new Double(123.123),10,true);
+    parseObjectTest(NumberFormat.getInstance(Locale.FRANCE),"test test",new ParsePosition(0),null,0,false);
+  }
+  parseObjectTest(NumberFormat.getIntegerInstance(),"asd123.123abc123",new ParsePosition(3),new Long(123),6,true);
+  parseObjectTest(NumberFormat.getNumberInstance(),"$-123,123.123#",new ParsePosition(1),new Double(-123123.123),13,true);
+  parseObjectTest(NumberFormat.getNumberInstance(),"$-123,123.123#",new ParsePosition(0),null,0,false);
+  parseObjectTest(NumberFormat.getNumberInstance(),"$-123,123.123#",new ParsePosition(13),null,13,false);
+  parseObjectTest(NumberFormat.getPercentInstance(),"%20.123#",new ParsePosition(0),new Double(20.123),0,false);
+  parseObjectTest(NumberFormat.getPercentInstance(),"%-200,123.123#",new ParsePosition(0),null,0,false);
+  try {
+    NumberFormat.getInstance().parseObject("test",null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+}

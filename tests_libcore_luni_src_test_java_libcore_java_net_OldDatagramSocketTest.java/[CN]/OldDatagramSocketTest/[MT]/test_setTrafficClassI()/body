@@ -1,0 +1,30 @@
+{
+  int IPTOS_LOWCOST=0x2;
+  int IPTOS_RELIABILTY=0x4;
+  int IPTOS_THROUGHPUT=0x8;
+  int IPTOS_LOWDELAY=0x10;
+  int[] ports=Support_PortManager.getNextPortsForUDP(2);
+  new InetSocketAddress(InetAddress.getLocalHost(),ports[0]);
+  DatagramSocket theSocket=new DatagramSocket(ports[1]);
+  try {
+    theSocket.setTrafficClass(256);
+    fail("No exception when traffic class set to 256");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    theSocket.setTrafficClass(-1);
+    fail("No exception when traffic class set to -1");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  theSocket.setTrafficClass(IPTOS_LOWCOST);
+  theSocket.setTrafficClass(IPTOS_THROUGHPUT);
+  theSocket.close();
+  try {
+    theSocket.setTrafficClass(1);
+    fail("SocketException was not thrown.");
+  }
+ catch (  SocketException se) {
+  }
+}

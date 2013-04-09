@@ -1,0 +1,16 @@
+{
+  Class<? extends SimpleInheritance> clazz=SimpleInheritance.class;
+  TypeVariable<Class> subTypeVariable=getTypeParameter(clazz);
+  assertInstanceOf(ParameterizedType.class,clazz.getGenericSuperclass());
+  ParameterizedType parameterizedSuperType=(ParameterizedType)clazz.getGenericSuperclass();
+  assertInstanceOf(Class.class,parameterizedSuperType.getRawType());
+  TypeVariable<Class> superTypeParameter=getTypeParameter((Class<?>)parameterizedSuperType.getRawType());
+  TypeVariable<Class> typeParameter=getTypeParameter(GenericType.class);
+  assertEquals(superTypeParameter,typeParameter);
+  assertNotEquals(subTypeVariable,superTypeParameter);
+  Type[] actualTypeArguments=parameterizedSuperType.getActualTypeArguments();
+  assertLenghtOne(actualTypeArguments);
+  assertInstanceOf(TypeVariable.class,actualTypeArguments[0]);
+  TypeVariable actualSuperTypeVariable=(TypeVariable)actualTypeArguments[0];
+  assertEquals(subTypeVariable,actualSuperTypeVariable);
+}

@@ -1,0 +1,40 @@
+{
+  KeyStoreSpi ksSpi=new MyKeyStoreSpi();
+  assertNull("engineGetKey(..) must return null",ksSpi.engineGetKey("",new char[0]));
+  assertNull("engineGetCertificateChain(..) must return null",ksSpi.engineGetCertificateChain(""));
+  assertNull("engineGetCertificate(..) must return null",ksSpi.engineGetCertificate(""));
+  assertEquals("engineGetCreationDate(..) must return Date(0)",new Date(0),ksSpi.engineGetCreationDate(""));
+  try {
+    ksSpi.engineSetKeyEntry("",null,new char[0],new Certificate[0]);
+    fail("KeyStoreException must be thrown from engineSetKeyEntry(..)");
+  }
+ catch (  KeyStoreException e) {
+  }
+  try {
+    ksSpi.engineSetKeyEntry("",new byte[0],new Certificate[0]);
+    fail("KeyStoreException must be thrown from engineSetKeyEntry(..)");
+  }
+ catch (  KeyStoreException e) {
+  }
+  try {
+    ksSpi.engineSetCertificateEntry("",null);
+    fail("KeyStoreException must be thrown " + "from engineSetCertificateEntry(..)");
+  }
+ catch (  KeyStoreException e) {
+  }
+  try {
+    ksSpi.engineDeleteEntry("");
+    fail("KeyStoreException must be thrown from engineDeleteEntry(..)");
+  }
+ catch (  KeyStoreException e) {
+  }
+  assertNull("engineAliases() must return null",ksSpi.engineAliases());
+  assertFalse("engineContainsAlias(..) must return false",ksSpi.engineContainsAlias(""));
+  assertEquals("engineSize() must return 0",0,ksSpi.engineSize());
+  try {
+    ksSpi.engineStore(null,null);
+    fail("IOException must be thrown");
+  }
+ catch (  IOException e) {
+  }
+}

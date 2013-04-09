@@ -1,0 +1,47 @@
+{
+  AbstractPreferences parent=(AbstractPreferences)Preferences.userNodeForPackage(Preferences.class);
+  AbstractPreferences pref=(AbstractPreferences)parent.node("mock");
+  MockNodeChangeListener nl=new MockNodeChangeListener(){
+    public synchronized void childAdded(    NodeChangeEvent e){
+      Preferences parent=e.getParent();
+      if (parent == null) {
+        addResult=false;
+      }
+ else {
+        if (parent.name() == "mock") {
+          addResult=true;
+        }
+      }
+      super.childAdded(e);
+    }
+    public synchronized void childRemoved(    NodeChangeEvent e){
+      Preferences parent=e.getParent();
+      if (parent == null) {
+        removeResult=false;
+      }
+ else {
+        if (parent.name() == "mock") {
+          removeResult=true;
+        }
+      }
+      super.childRemoved(e);
+    }
+  }
+;
+  try {
+    pref.addNodeChangeListener(nl);
+    Preferences child1=pref.node("mock1");
+    nl.waitForEvent();
+    assertEquals(1,nl.getAdded());
+    assertTrue(nl.getAddResult());
+    nl.reset();
+    child1.removeNode();
+    nl.waitForEvent();
+    assertEquals(1,nl.getRemoved());
+    assertTrue(nl.getRemoveResult());
+    nl.reset();
+  }
+  finally {
+    pref.removeNodeChangeListener(nl);
+  }
+}

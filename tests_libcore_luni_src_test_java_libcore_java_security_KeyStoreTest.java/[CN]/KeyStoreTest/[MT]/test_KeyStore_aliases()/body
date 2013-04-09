@@ -1,0 +1,42 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      keyStore.aliases();
+      fail();
+    }
+ catch (    KeyStoreException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    keyStore.load(null,null);
+    if (hasDefaultContents(keyStore)) {
+      assertTrue(keyStore.aliases().hasMoreElements());
+    }
+ else {
+      assertEquals(Collections.EMPTY_SET,new HashSet(Collections.list(keyStore.aliases())));
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    populate(keyStore);
+    Set<String> expected=new HashSet<String>();
+    expected.add(ALIAS_PRIVATE);
+    if (isNullPasswordAllowed(keyStore)) {
+      expected.add(ALIAS_NO_PASSWORD_PRIVATE);
+    }
+    if (isSecretKeyEnabled(keyStore)) {
+      expected.add(ALIAS_SECRET);
+      if (isNullPasswordAllowed(keyStore)) {
+        expected.add(ALIAS_NO_PASSWORD_SECRET);
+      }
+    }
+    if (isCertificateEnabled(keyStore)) {
+      expected.add(ALIAS_CERTIFICATE);
+    }
+    if (hasDefaultContents(keyStore)) {
+      assertTrue(keyStore.aliases().hasMoreElements());
+    }
+ else {
+      assertEquals(expected,new HashSet<String>(Collections.list(keyStore.aliases())));
+    }
+  }
+}

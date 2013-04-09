@@ -1,0 +1,35 @@
+{
+  ZipEntry zentry=zfile.getEntry("File1.txt");
+  InputStream is=zfile.getInputStream(zentry);
+  byte[] rbuf1=new byte[12];
+  byte[] rbuf2=new byte[12];
+  int r=is.read(rbuf1,0,4);
+  assertEquals(4,r);
+  is.mark(0);
+  r=is.read(rbuf1);
+  assertEquals(8,r);
+  assertEquals(-1,is.read());
+  try {
+    is.reset();
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+  is.close();
+  byte[] rbuf3=new byte[4185];
+  ZipEntry zentry2=zfile.getEntry("File3.txt");
+  is=zfile.getInputStream(zentry2);
+  r=is.read(rbuf3,0,3000);
+  assertEquals(3000,r);
+  is.mark(0);
+  r=is.read(rbuf3);
+  assertEquals(1183,r);
+  assertEquals(-1,is.read());
+  try {
+    is.reset();
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+  is.close();
+}

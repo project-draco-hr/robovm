@@ -1,0 +1,15 @@
+{
+  Set<TrustAnchor> taSet=TestUtils.getTrustAnchorSet();
+  if (taSet == null) {
+    fail(getName() + ": not performed (could not create test TrustAnchor set)");
+  }
+  PKIXParameters p=new PKIXParameters(taSet);
+  assertFalse(p.isPolicyMappingInhibited());
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  TestUtils.initCertPathSSCertChain();
+  Set<TrustAnchor> taSet2=Collections.singleton(new TrustAnchor(TestUtils.rootCertificateSS,null));
+  p=new PKIXParameters(taSet2);
+  assertFalse(p.isPolicyMappingInhibited());
+  p.setPolicyMappingInhibited(true);
+  assertTrue(p.isRevocationEnabled());
+}

@@ -1,0 +1,21 @@
+{
+  int[] ports=Support_PortManager.getNextPortsForUDP(3);
+  DatagramSocket theSocket=new DatagramSocket(ports[0]);
+  theSocket.setBroadcast(false);
+  byte theBytes[]={-1,-1,-1,-1};
+  try {
+    theSocket.connect(new InetSocketAddress(InetAddress.getByAddress(theBytes),ports[1]));
+    assertFalse("No exception when connecting to broadcast address with setBroadcast(false)",theSocket.getBroadcast());
+  }
+ catch (  SocketException ex) {
+  }
+  theSocket.setBroadcast(true);
+  theSocket.connect(new InetSocketAddress(InetAddress.getByAddress(theBytes),ports[2]));
+  theSocket.close();
+  try {
+    theSocket.setBroadcast(false);
+    fail("SocketException was not thrown.");
+  }
+ catch (  SocketException se) {
+  }
+}

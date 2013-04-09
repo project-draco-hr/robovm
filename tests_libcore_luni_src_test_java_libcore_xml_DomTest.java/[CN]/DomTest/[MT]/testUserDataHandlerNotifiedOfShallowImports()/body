@@ -1,0 +1,15 @@
+{
+  RecordingHandler handler=new RecordingHandler();
+  name.setUserData("a","apple",handler);
+  name.setUserData("b","banana",handler);
+  standard.setUserData("c","cat",handler);
+  waffles.setUserData("d","dog",handler);
+  Document newDocument=builder.newDocument();
+  Element importedName=(Element)newDocument.importNode(name,false);
+  Attr importedStandard=importedName.getAttributeNode("a:standard");
+  Set<String> expected=new HashSet<String>();
+  expected.add(notification(NODE_IMPORTED,"a","apple",name,importedName));
+  expected.add(notification(NODE_IMPORTED,"b","banana",name,importedName));
+  expected.add(notification(NODE_IMPORTED,"c","cat",standard,importedStandard));
+  assertEquals(expected,handler.calls);
+}

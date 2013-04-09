@@ -1,0 +1,25 @@
+{
+  if (!PKIXSupport) {
+    fail(NotSupportMsg);
+    return;
+  }
+  CertPathBuilderSpi spi=new MyCertPathBuilderSpi();
+  CertPathBuilder certPB=new myCertPathBuilder(spi,defaultProvider,defaultType);
+  assertEquals("Incorrect algorithm",certPB.getAlgorithm(),defaultType);
+  assertEquals("Incorrect provider",certPB.getProvider(),defaultProvider);
+  try {
+    certPB.build(null);
+    fail("CertPathBuilderException must be thrown ");
+  }
+ catch (  CertPathBuilderException e) {
+  }
+  certPB=new myCertPathBuilder(null,null,null);
+  assertNull("Incorrect algorithm",certPB.getAlgorithm());
+  assertNull("Incorrect provider",certPB.getProvider());
+  try {
+    certPB.build(null);
+    fail("NullPointerException must be thrown ");
+  }
+ catch (  NullPointerException e) {
+  }
+}

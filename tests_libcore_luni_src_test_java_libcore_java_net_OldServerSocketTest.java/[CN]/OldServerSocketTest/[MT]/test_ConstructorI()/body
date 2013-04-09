@@ -1,0 +1,29 @@
+{
+  int portNumber=Support_PortManager.getNextPort();
+  s=new ServerSocket(portNumber);
+  try {
+    new ServerSocket(portNumber);
+    fail("IOException was not thrown.");
+  }
+ catch (  IOException ioe) {
+  }
+  try {
+    startClient(s.getLocalPort());
+    sconn=s.accept();
+    assertNotNull("Was unable to accept connection",sconn);
+    sconn.close();
+  }
+  finally {
+    s.close();
+  }
+  s=new ServerSocket(0);
+  try {
+    startClient(s.getLocalPort());
+    sconn=s.accept();
+    assertNotNull("Was unable to accept connection",sconn);
+    sconn.close();
+  }
+  finally {
+    s.close();
+  }
+}

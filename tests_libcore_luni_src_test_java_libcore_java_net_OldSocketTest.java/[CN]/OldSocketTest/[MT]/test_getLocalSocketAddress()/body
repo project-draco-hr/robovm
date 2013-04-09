@@ -1,0 +1,21 @@
+{
+  int sport=startServer("SServer getLocSocketAddress");
+  int portNumber=Support_PortManager.getNextPort();
+  s=new Socket(InetAddress.getLocalHost(),sport,null,portNumber);
+  assertTrue("Returned incorrect InetSocketAddress(1):" + s.getLocalSocketAddress().toString() + "Expected: "+ (new InetSocketAddress(InetAddress.getLocalHost(),portNumber)).toString(),s.getLocalSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),portNumber)));
+  s.close();
+  Socket theSocket=new Socket();
+  assertNull("Returned incorrect InetSocketAddress -unbound socket- Expected null",theSocket.getLocalSocketAddress());
+  portNumber=Support_PortManager.getNextPort();
+  theSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(),portNumber));
+  assertTrue("Returned incorrect InetSocketAddress(2):" + theSocket.getLocalSocketAddress().toString() + "Expected: "+ (new InetSocketAddress(InetAddress.getLocalHost(),portNumber)).toString(),theSocket.getLocalSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),portNumber)));
+  theSocket.close();
+  s=new Socket();
+  s.bind(new InetSocketAddress(InetAddress.getByName("0.0.0.0"),0));
+  assertTrue("ANY address not IPv6: " + s.getLocalSocketAddress(),((InetSocketAddress)s.getLocalSocketAddress()).getAddress() instanceof Inet6Address);
+  s.close();
+  s=new Socket();
+  s.bind(new InetSocketAddress(InetAddress.getByName("0.0.0.0"),0));
+  assertTrue("ANY address not IPv6: " + s.getLocalSocketAddress(),((InetSocketAddress)s.getLocalSocketAddress()).getAddress() instanceof Inet6Address);
+  s.close();
+}

@@ -1,0 +1,18 @@
+{
+  Selector selector=Selector.open();
+  StuckServer ss=new StuckServer();
+  try {
+    SocketChannel sc=SocketChannel.open();
+    sc.configureBlocking(false);
+    ss.unblockAfterMs(2000);
+    sc.connect(ss.getLocalSocketAddress());
+    SelectionKey key=sc.register(selector,SelectionKey.OP_CONNECT);
+    assertEquals(1,selector.select());
+    assertEquals(SelectionKey.OP_CONNECT,key.readyOps());
+    sc.finishConnect();
+  }
+  finally {
+    selector.close();
+    ss.close();
+  }
+}

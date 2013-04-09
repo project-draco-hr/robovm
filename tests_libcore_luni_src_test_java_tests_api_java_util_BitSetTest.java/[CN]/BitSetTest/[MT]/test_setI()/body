@@ -1,0 +1,27 @@
+{
+  BitSet bs=new BitSet();
+  bs.set(8);
+  assertTrue("Failed to set bit",bs.get(8));
+  try {
+    bs.set(-1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  bs.set(128);
+  assertEquals("Failed to grow BitSet",192,bs.size());
+  assertTrue("Failed to set bit",bs.get(128));
+  bs=new BitSet(64);
+  for (int i=bs.size(); --i >= 0; ) {
+    bs.set(i);
+    assertTrue("Incorrectly set",bs.get(i));
+    assertTrue("Incorrect length",bs.length() == (i + 1));
+    for (int j=bs.size(); --j > i; )     assertTrue("Incorrectly set bit " + j,!bs.get(j));
+    for (int j=i; --j >= 0; )     assertTrue("Incorrectly set bit " + j,!bs.get(j));
+    bs.clear(i);
+  }
+  bs=new BitSet(0);
+  assertTrue("Test1: Wrong length, " + bs.size(),bs.length() == 0);
+  bs.set(0);
+  assertTrue("Test2: Wrong length" + bs.size(),bs.length() == 1);
+}

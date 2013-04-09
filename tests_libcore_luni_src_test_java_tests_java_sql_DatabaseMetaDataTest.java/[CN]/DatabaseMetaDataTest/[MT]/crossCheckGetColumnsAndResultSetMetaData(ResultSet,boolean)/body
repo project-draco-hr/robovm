@@ -1,0 +1,25 @@
+{
+  Statement s=conn.createStatement();
+  while (rs.next()) {
+    String schema=rs.getString("TABLE_SCHEM");
+    String table=rs.getString("TABLE_NAME");
+    ResultSet rst=s.executeQuery("SELECT * FROM " + schema + "."+ table);
+    ResultSetMetaData rsmdt=rst.getMetaData();
+    for (int col=1; col <= rsmdt.getColumnCount(); col++) {
+      if (!partial) {
+        if (col != 1)         assertTrue(rs.next());
+        assertEquals("ORDINAL_POSITION",col,rs.getInt("ORDINAL_POSITION"));
+      }
+      assertEquals("TABLE_CAT","",rs.getString("TABLE_CAT"));
+      assertEquals("TABLE_SCHEM",schema,rs.getString("TABLE_SCHEM"));
+      assertEquals("TABLE_NAME",table,rs.getString("TABLE_NAME"));
+      crossCheckGetColumnRowAndResultSetMetaData(rs,rsmdt);
+      if (partial)       break;
+    }
+    rst.close();
+  }
+  int count=rs.getRow();
+  rs.close();
+  s.close();
+  return count;
+}

@@ -1,0 +1,61 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  double val=0.0;
+  try {
+    f=x.getClass().getDeclaredField("doubleField");
+    val=f.getDouble(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during getDouble test: " + e.toString());
+  }
+  assertTrue("Returned incorrect double field value",val == Double.MAX_VALUE);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    f.getDouble(x);
+    fail("IllegalArgumentException expected but not thrown");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("IllegalArgumentException expected but not thrown " + ex.getMessage());
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("doublePFField");
+    f.getDouble(x);
+    fail("IllegalAccessException expected but not thrown");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("IllegalAccessException expected but not thrown" + ex.getMessage());
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("doubleField");
+    f.getDouble(null);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("doubleSFField");
+    double staticValue=f.getDouble(null);
+    assertEquals("Wrong value returned",Double.MAX_VALUE,staticValue);
+  }
+ catch (  Exception ex) {
+    fail("No exception expected " + ex.getMessage());
+  }
+}

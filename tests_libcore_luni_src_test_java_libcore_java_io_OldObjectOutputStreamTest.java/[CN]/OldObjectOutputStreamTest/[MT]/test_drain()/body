@@ -1,0 +1,11 @@
+{
+  NoFlushTestOutputStream target=new NoFlushTestOutputStream();
+  BasicObjectOutputStream boos=new BasicObjectOutputStream(target);
+  int initialSize=target.size();
+  boolean written=false;
+  boos.writeBytes("Lorem ipsum");
+  written=(target.size() > initialSize);
+  boos.drain();
+  assertTrue("Content has not been written to the target.",written || (target.size() > initialSize));
+  assertFalse("flush() has been called on the target.",target.flushCalled);
+}

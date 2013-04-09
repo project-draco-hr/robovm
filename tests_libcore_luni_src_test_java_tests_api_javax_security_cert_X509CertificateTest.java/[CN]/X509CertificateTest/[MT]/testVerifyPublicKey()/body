@@ -1,0 +1,28 @@
+{
+  assertNotNull(javaxCert.getPublicKey());
+  assertNotNull(javaxSSCert.getPublicKey());
+  try {
+    javaxCert.verify(javaxCert.getPublicKey());
+  }
+ catch (  SignatureException e) {
+  }
+  PublicKey k=javaxCert.getPublicKey();
+  MyModifiablePublicKey changedEncoding=new MyModifiablePublicKey(k);
+  changedEncoding.setEncoding(new byte[javaxCert.getEncoded().length - 1]);
+  try {
+    javaxCert.verify(tbt_cert.getPublicKey());
+  }
+ catch (  InvalidKeyException e) {
+  }
+  try {
+    javaxCert.verify(null);
+  }
+ catch (  Exception e) {
+  }
+  try {
+    javaxCert.verify(changedEncoding);
+    fail("Exception expected");
+  }
+ catch (  Exception e) {
+  }
+}

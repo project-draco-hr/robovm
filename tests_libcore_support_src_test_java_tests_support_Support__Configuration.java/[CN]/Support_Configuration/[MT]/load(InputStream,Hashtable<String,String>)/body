@@ -1,0 +1,117 @@
+{
+  int NONE=0, SLASH=1, UNICODE=2, CONTINUE=3, DONE=4, IGNORE=5;
+  int mode=NONE, unicode=0, count=0, nextChar;
+  StringBuffer key=new StringBuffer(), value=new StringBuffer(), buffer=key;
+  boolean firstChar=true;
+  while ((nextChar=in.read()) != -1) {
+    if (mode == UNICODE) {
+      int digit=Character.digit((char)nextChar,16);
+      if (digit >= 0) {
+        unicode=(unicode << 4) + digit;
+        if (++count < 4) {
+          continue;
+        }
+      }
+      mode=NONE;
+      buffer.append((char)unicode);
+      if (nextChar != '\n') {
+        continue;
+      }
+    }
+    if (mode == SLASH) {
+      mode=NONE;
+switch (nextChar) {
+case '\r':
+        mode=CONTINUE;
+      continue;
+case '\n':
+    mode=IGNORE;
+  continue;
+case 'b':
+nextChar='\b';
+break;
+case 'f':
+nextChar='\f';
+break;
+case 'n':
+nextChar='\n';
+break;
+case 'r':
+nextChar='\r';
+break;
+case 't':
+nextChar='\t';
+break;
+case 'u':
+mode=UNICODE;
+unicode=count=0;
+continue;
+}
+}
+ else {
+switch (nextChar) {
+case '#':
+case '!':
+if (firstChar) {
+while ((nextChar=in.read()) != -1) {
+if (nextChar == '\r' || nextChar == '\n') {
+break;
+}
+}
+continue;
+}
+break;
+case '\n':
+if (mode == CONTINUE) {
+mode=IGNORE;
+continue;
+}
+case '\r':
+mode=NONE;
+firstChar=true;
+if (key.length() > 0 || buffer == value) {
+result.put(key.toString(),value.toString());
+}
+key.setLength(0);
+value.setLength(0);
+buffer=key;
+continue;
+case '\\':
+mode=SLASH;
+continue;
+case ':':
+case '=':
+if (buffer == key) {
+buffer=value;
+continue;
+}
+break;
+}
+char c=(char)nextChar;
+if ((c >= 0x1c && c <= 0x20) || (c >= 0x9 && c <= 0xd)) {
+if (mode == CONTINUE) {
+mode=IGNORE;
+}
+if (buffer.length() == 0 || mode == IGNORE) {
+continue;
+}
+if (buffer == key) {
+mode=DONE;
+continue;
+}
+}
+if (mode == IGNORE || mode == CONTINUE) {
+mode=NONE;
+}
+}
+firstChar=false;
+if (mode == DONE) {
+buffer=value;
+mode=NONE;
+}
+buffer.append((char)nextChar);
+}
+if (key.length() > 0 || buffer == value) {
+result.put(key.toString(),value.toString());
+}
+}

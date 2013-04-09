@@ -1,0 +1,32 @@
+{
+  int startIndex=arraySize / 4;
+  int endIndex=3 * arraySize / 4;
+  int[] reversedArray=new int[arraySize];
+  int[] originalReversedArray=new int[arraySize];
+  for (int counter=0; counter < arraySize; counter++) {
+    reversedArray[counter]=arraySize - counter - 1;
+    originalReversedArray[counter]=reversedArray[counter];
+  }
+  Arrays.sort(reversedArray,startIndex,endIndex);
+  for (int counter=0; counter < startIndex; counter++)   assertTrue("Array modified outside of bounds",reversedArray[counter] == originalReversedArray[counter]);
+  for (int counter=startIndex; counter < endIndex - 1; counter++)   assertTrue("Array not sorted within bounds",reversedArray[counter] <= reversedArray[counter + 1]);
+  for (int counter=endIndex; counter < arraySize; counter++)   assertTrue("Array modified outside of bounds",reversedArray[counter] == originalReversedArray[counter]);
+  try {
+    Arrays.sort(reversedArray,startIndex + 1,startIndex);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException ignore) {
+  }
+  try {
+    Arrays.sort(reversedArray,-1,startIndex);
+    fail("ArrayIndexOutOfBoundsException expected (1)");
+  }
+ catch (  ArrayIndexOutOfBoundsException ignore) {
+  }
+  try {
+    Arrays.sort(reversedArray,startIndex,reversedArray.length + 1);
+    fail("ArrayIndexOutOfBoundsException expected (2)");
+  }
+ catch (  ArrayIndexOutOfBoundsException ignore) {
+  }
+}

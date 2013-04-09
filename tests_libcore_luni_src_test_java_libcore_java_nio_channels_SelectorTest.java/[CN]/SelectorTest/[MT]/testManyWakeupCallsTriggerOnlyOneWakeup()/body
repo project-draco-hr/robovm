@@ -1,0 +1,26 @@
+{
+  final Selector selector=Selector.open();
+  try {
+    selector.wakeup();
+    selector.wakeup();
+    selector.wakeup();
+    selector.select();
+    final CountDownLatch selectReturned=new CountDownLatch(1);
+    Thread thread=new Thread(new Runnable(){
+      @Override public void run(){
+        try {
+          selector.select();
+          selectReturned.countDown();
+        }
+ catch (        IOException ignored) {
+        }
+      }
+    }
+);
+    thread.start();
+    assertFalse(selectReturned.await(500,TimeUnit.MILLISECONDS));
+  }
+  finally {
+    selector.close();
+  }
+}

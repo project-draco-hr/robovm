@@ -1,0 +1,31 @@
+{
+  Support_TestWebData params=Support_TestWebData.testParams[1];
+  try {
+    uc2.getInputStream();
+  }
+ catch (  IOException e) {
+    fail("Error in test setup: " + e.getMessage());
+  }
+  Map<String,List<String>> headers=uc2.getHeaderFields();
+  assertNotNull(headers);
+  List<String> list=headers.get("content-type");
+  if (list == null) {
+    list=headers.get("Content-Type");
+  }
+  if (list == null) {
+    list=headers.get("Content-type");
+  }
+  assertNotNull(list);
+  String contentType=(String)list.get(0);
+  assertEquals(params.testType,contentType);
+  assertTrue("Not more than one header in URL connection",headers.size() > 1);
+  headers=jarURLCon.getHeaderFields();
+  assertNotNull(headers);
+  assertEquals(0,headers.size());
+  try {
+    headers.put("hi",Arrays.asList(new String[]{"bye"}));
+    fail("The map should be unmodifiable");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+}

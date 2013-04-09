@@ -1,0 +1,33 @@
+{
+  try {
+    X509Certificate found=null;
+    for (    String alias : Collections.list(keyStore.aliases())) {
+      if (!keyStore.entryInstanceOf(alias,TrustedCertificateEntry.class)) {
+        continue;
+      }
+      TrustedCertificateEntry certificateEntry=(TrustedCertificateEntry)keyStore.getEntry(alias,null);
+      Certificate certificate=certificateEntry.getTrustedCertificate();
+      if (!certificate.getPublicKey().getAlgorithm().equals(algorithm)) {
+        continue;
+      }
+      if (!(certificate instanceof X509Certificate)) {
+        continue;
+      }
+      X509Certificate x=(X509Certificate)certificate;
+      if (!x.getIssuerDN().equals(x.getSubjectDN())) {
+        continue;
+      }
+      if (found != null) {
+        throw new IllegalStateException("KeyStore has more than one root CA for " + algorithm + "\nfirst: "+ found+ "\nsecond: "+ certificate);
+      }
+      found=x;
+    }
+    if (found == null) {
+      throw new IllegalStateException("KeyStore contained no root CA for " + algorithm);
+    }
+    return found;
+  }
+ catch (  Exception e) {
+    throw new RuntimeException(e);
+  }
+}

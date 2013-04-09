@@ -1,0 +1,40 @@
+{
+  JSONTokener tokener=new JSONTokener("ABCDEF");
+  tokener.skipPast("ABC");
+  assertEquals('D',tokener.next());
+  tokener.skipPast("EF");
+  assertEquals('\0',tokener.next());
+  tokener=new JSONTokener("ABCDEF");
+  tokener.skipPast("ABCDEF");
+  assertEquals('\0',tokener.next());
+  tokener=new JSONTokener("ABCDEF");
+  tokener.skipPast("G");
+  assertEquals('\0',tokener.next());
+  tokener=new JSONTokener("ABC\0ABC");
+  tokener.skipPast("ABC");
+  assertEquals('\0',tokener.next());
+  assertEquals('A',tokener.next());
+  tokener=new JSONTokener("\0ABC");
+  tokener.skipPast("ABC");
+  assertEquals('\0',tokener.next());
+  tokener=new JSONTokener("ABC\nDEF");
+  tokener.skipPast("DEF");
+  assertEquals('\0',tokener.next());
+  tokener=new JSONTokener("ABC");
+  tokener.skipPast("ABCDEF");
+  assertEquals('\0',tokener.next());
+  tokener=new JSONTokener("ABCDABCDABCD");
+  tokener.skipPast("ABC");
+  assertEquals('D',tokener.next());
+  tokener.skipPast("ABC");
+  assertEquals('D',tokener.next());
+  tokener.skipPast("ABC");
+  assertEquals('D',tokener.next());
+  tokener=new JSONTokener("");
+  try {
+    tokener.skipPast(null);
+    fail();
+  }
+ catch (  NullPointerException e) {
+  }
+}

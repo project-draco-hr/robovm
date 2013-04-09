@@ -1,0 +1,73 @@
+{
+  AbstractList abstr=new AbstractList(){
+    @Override public Object get(    int arg0){
+      return null;
+    }
+    @Override public int size(){
+      return 0;
+    }
+  }
+;
+  try {
+    abstr.add(1,null);
+    fail("UnsupportedOperationException expected");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  abstr=new AbstractList<Double>(){
+    @Override public void add(    int index,    Double value){
+    }
+    @Override public Double get(    int index){
+      return null;
+    }
+    @Override public int size(){
+      return 0;
+    }
+  }
+;
+  try {
+    abstr.add(1,1);
+    fail("ClassCastException expected");
+  }
+ catch (  ClassCastException ee) {
+  }
+  abstr=new AbstractList<Integer>(){
+    final int forbiddenValue=33;
+    @Override public void add(    int index,    Integer value){
+      if (value == forbiddenValue) {
+        throw new IllegalArgumentException();
+      }
+    }
+    @Override public Integer get(    int index){
+      return null;
+    }
+    @Override public int size(){
+      return 0;
+    }
+  }
+;
+  abstr.add(1,1);
+  try {
+    abstr.add(1,33);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException ee) {
+  }
+  abstr=new ArrayList();
+  abstr.add(0,"element");
+  abstr.add(1,null);
+  abstr.add(2,1);
+  abstr.add(3,new Double(33));
+  try {
+    abstr.add(-3,new Double(33));
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException ee) {
+  }
+  try {
+    abstr.add(abstr.size() + 1,new Double(33));
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException ee) {
+  }
+}

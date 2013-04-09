@@ -1,0 +1,18 @@
+{
+  byte[] name1=new byte[]{48,21,49,19,48,17,6,3,85,4,10,19,10,70,105,114,115,116,32,79,114,103,46};
+  byte[] name2=new byte[]{48,22,49,20,48,18,6,3,85,4,10,19,11,83,101,99,111,110,100,32,79,114,103,46};
+  X500Principal sub1=new X500Principal(name1);
+  X500Principal sub2=new X500Principal(name2);
+  X509CertSelector selector=new X509CertSelector();
+  try {
+    assertNull("Selector should return null",selector.getSubjectAsBytes());
+    selector.setSubject(sub1);
+    assertTrue("The returned issuer should be equal to specified",Arrays.equals(name1,selector.getSubjectAsBytes()));
+    assertFalse("The returned issuer should differ",name2.equals(selector.getSubjectAsBytes()));
+    selector.setSubject(sub2);
+    assertTrue("The returned issuer should be equal to specified",Arrays.equals(name2,selector.getSubjectAsBytes()));
+  }
+ catch (  IOException e) {
+    fail("Unexpected IOException was thrown.");
+  }
+}

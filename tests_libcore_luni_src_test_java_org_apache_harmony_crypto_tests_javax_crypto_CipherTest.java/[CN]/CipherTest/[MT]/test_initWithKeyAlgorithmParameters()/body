@@ -1,0 +1,21 @@
+{
+  SecureRandom sr=new SecureRandom();
+  byte[] iv=new byte[8];
+  sr.nextBytes(iv);
+  AlgorithmParameterSpec ap=new IvParameterSpec(iv);
+  Cipher c=Cipher.getInstance("DES/CBC/PKCS5Padding");
+  c.init(Cipher.DECRYPT_MODE,cipherKeyDES,ap);
+  assertNotNull(c.getParameters());
+  try {
+    c.init(Cipher.DECRYPT_MODE,cipherKey,ap);
+    fail();
+  }
+ catch (  InvalidKeyException expected) {
+  }
+  try {
+    c.init(Cipher.DECRYPT_MODE,cipherKeyDES,(AlgorithmParameters)null);
+    fail();
+  }
+ catch (  InvalidAlgorithmParameterException expected) {
+  }
+}

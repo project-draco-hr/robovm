@@ -1,0 +1,27 @@
+{
+  Timer t=null;
+  try {
+    TimerTestTask testTask=new TimerTestTask();
+    try {
+      Thread.sleep(200);
+    }
+ catch (    InterruptedException e) {
+    }
+    assertEquals("TimerTask.run() method should not have been called",0,testTask.wasRun());
+    t=new Timer();
+    testTask=new TimerTestTask();
+    t.schedule(testTask,200);
+    while (testTask.wasRun() < 1) {
+      try {
+        Thread.sleep(400);
+      }
+ catch (      InterruptedException e) {
+      }
+    }
+    assertFalse(testTask.cancel());
+    t.cancel();
+  }
+  finally {
+    if (t != null)     t.cancel();
+  }
+}

@@ -1,0 +1,41 @@
+{
+  String[] tablesName={VIEW_NAME,DatabaseCreator.TEST_TABLE1,DatabaseCreator.TEST_TABLE3};
+  String[] tablesType={"TABLE","VIEW"};
+  Arrays.sort(tablesName);
+  Arrays.sort(tablesType);
+  ResultSet rs=meta.getTables(null,null,null,null);
+  while (rs.next()) {
+    assertTrue("Wrong table name",Arrays.binarySearch(tablesName,rs.getString("TABLE_NAME")) > -1);
+    assertNull("Wrong table schema: " + rs.getString("TABLE_SCHEM"),rs.getString("TABLE_SCHEM"));
+    assertTrue("Wrong table type",Arrays.binarySearch(tablesType,rs.getString("TABLE_TYPE")) > -1);
+    assertEquals("Wrong parameter REMARKS","",rs.getString("REMARKS"));
+  }
+  rs.close();
+  rs=meta.getTables(conn.getCatalog(),null,null,new String[]{"SYSTEM TABLE","LOCAL TEMPORARY"});
+  assertFalse("Some tables exist",rs.next());
+  rs.close();
+  rs=meta.getTables(conn.getCatalog(),null,null,new String[]{"VIEW","LOCAL TEMPORARY"});
+  assertTrue("No tables exist",rs.next());
+  assertEquals("Wrong table name",VIEW_NAME,rs.getString("TABLE_NAME"));
+  assertNull("Wrong table schema: " + rs.getString("TABLE_SCHEM"),rs.getString("TABLE_SCHEM"));
+  assertEquals("Wrong table type","VIEW",rs.getString("TABLE_TYPE"));
+  assertEquals("Wrong parameter REMARKS","",rs.getString("REMARKS"));
+  assertFalse("Wrong size of result set",rs.next());
+  assertFalse("Some tables exist",rs.next());
+  rs.close();
+  rs=meta.getTables(null,null,"%",null);
+  while (rs.next()) {
+    assertTrue("Wrong table name",Arrays.binarySearch(tablesName,rs.getString("TABLE_NAME")) > -1);
+    assertNull("Wrong table schema ",rs.getString("TABLE_SCHEM"));
+    assertTrue("Wrong table type",Arrays.binarySearch(tablesType,rs.getString("TABLE_TYPE")) > -1);
+    assertEquals("Wrong parameter REMARKS","",rs.getString("REMARKS"));
+  }
+  rs.close();
+  conn.close();
+  try {
+    meta.getTables(null,null,null,null);
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

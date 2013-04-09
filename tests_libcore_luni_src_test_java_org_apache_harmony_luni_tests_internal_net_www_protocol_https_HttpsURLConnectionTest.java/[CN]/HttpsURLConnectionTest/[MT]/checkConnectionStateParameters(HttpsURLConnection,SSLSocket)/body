@@ -1,0 +1,12 @@
+{
+  SSLSession session=serverPeer.getSession();
+  assertEquals(session.getCipherSuite(),clientConnection.getCipherSuite());
+  assertEquals(session.getLocalPrincipal(),clientConnection.getPeerPrincipal());
+  assertEquals(session.getPeerPrincipal(),clientConnection.getLocalPrincipal());
+  Certificate[] serverCertificates=clientConnection.getServerCertificates();
+  Certificate[] localCertificates=session.getLocalCertificates();
+  assertTrue("Server certificates differ from expected",Arrays.equals(serverCertificates,localCertificates));
+  localCertificates=clientConnection.getLocalCertificates();
+  serverCertificates=session.getPeerCertificates();
+  assertTrue("Local certificates differ from expected",Arrays.equals(serverCertificates,localCertificates));
+}

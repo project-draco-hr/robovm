@@ -1,0 +1,19 @@
+{
+  XmlSerializer serializer=newSerializer();
+  serializer.startTag(NAMESPACE,"root");
+  for (int ch=0; ch <= 0xffff; ++ch) {
+    final String s=Character.toString((char)ch);
+    if (isValidXmlCodePoint(ch)) {
+      serializer.cdsect("a" + s + "b");
+    }
+ else {
+      try {
+        serializer.cdsect("a" + s + "b");
+        fail(s);
+      }
+ catch (      IllegalArgumentException expected) {
+      }
+    }
+  }
+  serializer.endTag(NAMESPACE,"root");
+}

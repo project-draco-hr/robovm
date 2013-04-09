@@ -1,0 +1,33 @@
+{
+  byte[] rbuf=new byte[4000];
+  RandomAccessFile raf=new java.io.RandomAccessFile(fileName,"rw");
+  byte[] nullByteArray=null;
+  try {
+    raf.write(nullByteArray);
+    fail("Test 1: NullPointerException expected.");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    raf.write(testString.getBytes());
+  }
+ catch (  Exception e) {
+    fail("Test 2: Unexpected exception: " + e.getMessage());
+  }
+  raf.close();
+  try {
+    raf.write(new byte[0]);
+  }
+ catch (  IOException e) {
+    fail("Test 3: Unexpected IOException: " + e.getMessage());
+  }
+  try {
+    raf.write(testString.getBytes());
+    fail("Test 4: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  FileInputStream fis=new java.io.FileInputStream(fileName);
+  fis.read(rbuf,0,testLength);
+  assertEquals("Incorrect bytes written",testString,new String(rbuf,0,testLength));
+}

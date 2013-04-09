@@ -1,0 +1,33 @@
+{
+  InputStream source=new ByteArrayInputStream("<a>&foo;</a>".getBytes());
+  InputStream entity=new ByteArrayInputStream("bar".getBytes());
+  MockResolver resolver=new MockResolver();
+  resolver.addEntity("foo","foo",new InputSource(entity));
+  Document d;
+  try {
+    db=dbf.newDocumentBuilder();
+    db.setEntityResolver(resolver);
+    db.reset();
+    d=db.parse(source);
+  }
+ catch (  Exception e) {
+    throw new RuntimeException("Unexpected exception",e);
+  }
+  Element root=(Element)d.getElementsByTagName("a").item(0);
+  assertEquals("foo",((EntityReference)root.getFirstChild()).getNodeName());
+  source=new ByteArrayInputStream("</a>".getBytes());
+  MethodLogger logger=new MethodLogger();
+  ErrorHandler handler=new MockHandler(logger);
+  try {
+    db=dbf.newDocumentBuilder();
+    db.setErrorHandler(handler);
+    db.reset();
+    d=db.parse(source);
+  }
+ catch (  SAXParseException e) {
+  }
+catch (  Exception e) {
+    throw new RuntimeException("Unexpected exception",e);
+  }
+  assertEquals(0,logger.size());
+}

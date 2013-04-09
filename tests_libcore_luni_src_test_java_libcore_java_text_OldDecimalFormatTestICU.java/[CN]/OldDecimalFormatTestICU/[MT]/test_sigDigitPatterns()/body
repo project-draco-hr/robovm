@@ -1,0 +1,25 @@
+{
+  DecimalFormat format=(DecimalFormat)NumberFormat.getInstance(Locale.US);
+  format.applyPattern("@@@");
+  assertEquals("sigDigit doesn't work","12300",format.format(12345));
+  assertEquals("sigDigit doesn't work","0.123",format.format(0.12345));
+  format.applyPattern("@@##");
+  assertEquals("sigDigit doesn't work","3.142",format.format(3.14159));
+  assertEquals("sigDigit doesn't work","1.23",format.format(1.23004));
+  format.applyPattern("@@###E0");
+  assertEquals("1.23E1",format.format(12.3));
+  format.applyPattern("0.0###E0");
+  assertEquals("1.23E1",format.format(12.3));
+  try {
+    format.applyPattern("@00");
+    fail("expected IllegalArgumentException was not thrown for " + "pattern \"@00\".");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    format.applyPattern("@.###");
+    fail("expected IllegalArgumentException was not thrown for " + "pattern \"@.###\".");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

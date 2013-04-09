@@ -1,0 +1,27 @@
+{
+  if (!initParams()) {
+    return;
+  }
+  MyCertStoreParameters pp=new MyCertStoreParameters();
+  CertStoreSpi spi=new MyCertStoreSpi(pp);
+  CertStore certS=new myCertStore(spi,dProv,dType,pp);
+  assertEquals("Incorrect algorithm",certS.getType(),dType);
+  assertEquals("Incorrect provider",certS.getProvider(),dProv);
+  assertTrue("Incorrect parameters",certS.getCertStoreParameters() instanceof MyCertStoreParameters);
+  try {
+    certS.getCertificates(null);
+    fail("CertStoreException must be thrown");
+  }
+ catch (  CertStoreException e) {
+  }
+  certS=new myCertStore(null,null,null,null);
+  assertNull("Incorrect algorithm",certS.getType());
+  assertNull("Incorrect provider",certS.getProvider());
+  assertNull("Incorrect parameters",certS.getCertStoreParameters());
+  try {
+    certS.getCertificates(null);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+}

@@ -1,0 +1,31 @@
+{
+  ThreadPool threadPool=new ThreadPool(numThreads);
+  ResultSet userTabs;
+  userTabs=conn.getMetaData().getTables(null,null,null,null);
+  while (userTabs.next()) {
+    String tableName=userTabs.getString("TABLE_NAME");
+    if (tableName.equals(DatabaseCreator.TEST_TABLE1)) {
+      statement.execute(DatabaseCreator.DROP_TABLE1);
+    }
+  }
+  db.exec(DatabaseCreator.CREATE_TABLE3,null);
+  db.exec(DatabaseCreator.CREATE_TABLE1,null);
+  int id1=numOfRecords - 3;
+  threadPool.runTask(createTask1(id1,dbFile.getPath(),tracker));
+  int id2=numOfRecords + 3;
+  threadPool.runTask(createTask2Interrupt(id2,dbFile.getPath(),tracker));
+  threadPool.join();
+  List<String> errors=tracker.getErrors();
+  System.out.println("Last error: " + db.error_message());
+  if (errors.size() > 0) {
+    assertEquals(errors.get(0),db.error_string(Constants.SQLITE_LOCKED));
+    for (    String s : errors) {
+      Logger.global.info("INTERRUPT Error: " + s);
+    }
+  }
+ else {
+    fail("Should have one exception: database should be locked.");
+  }
+  db.exec("delete from " + DatabaseCreator.TEST_TABLE1 + " where 1",null);
+  db.exec("delete from " + DatabaseCreator.TEST_TABLE3 + " where 1",null);
+}

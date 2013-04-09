@@ -1,0 +1,24 @@
+{
+  pref.put("Value","String");
+  pref.putDouble("DoubleValue",new Double(9.10938188e-31));
+  pref.putLong("LongValue",new Long(Long.MIN_VALUE));
+  pref.putInt("IntValue",299792458);
+  pref.flush();
+  assertEquals(1L,pref.getLong("Value",new Long(1)));
+  assertEquals(Long.MIN_VALUE,pref.getLong("LongValue",new Long(1)));
+  assertEquals(1L,pref.getLong("DoubleValue",new Long(1)));
+  assertEquals(299792458L,pref.getLong("IntValue",new Long(1)));
+  try {
+    pref.getLong(null,new Long(1));
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  pref.removeNode();
+  try {
+    pref.getLong("LongValue",new Long(1));
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+}

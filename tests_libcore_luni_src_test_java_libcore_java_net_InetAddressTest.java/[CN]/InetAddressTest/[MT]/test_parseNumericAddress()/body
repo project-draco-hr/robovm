@@ -1,0 +1,22 @@
+{
+  assertEquals("/1.2.3.4",InetAddress.parseNumericAddress("1.2.3.4").toString());
+  assertEquals("/2001:4860:800d::68",InetAddress.parseNumericAddress("2001:4860:800d::68").toString());
+  assertEquals("/2001:4860:800d::68",InetAddress.parseNumericAddress("[2001:4860:800d::68]").toString());
+  assertEquals("/127.0.0.1",InetAddress.parseNumericAddress("[::ffff:127.0.0.1]").toString());
+  try {
+    InetAddress.parseNumericAddress("example.com");
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  for (  String invalid : INVALID_IPv4_NUMERIC_ADDRESSES) {
+    try {
+      InetAddress.parseNumericAddress(invalid);
+      fail(invalid);
+    }
+ catch (    IllegalArgumentException expected) {
+    }
+  }
+  assertTrue(InetAddress.parseNumericAddress(null).isLoopbackAddress());
+  assertTrue(InetAddress.parseNumericAddress("").isLoopbackAddress());
+}

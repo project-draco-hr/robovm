@@ -1,0 +1,20 @@
+{
+  SSLServerSocket sss=getSSLServerSocket();
+  try {
+    sss.setEnabledProtocols(null);
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  String[] unsupportedProtocols={"unsupported"};
+  try {
+    sss.setEnabledProtocols(unsupportedProtocols);
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  int count=sss.getSupportedProtocols().length;
+  assertTrue("No supported protocols",count > 0);
+  sss.setEnabledProtocols(sss.getSupportedProtocols());
+  String[] res=sss.getEnabledProtocols();
+  assertNotNull("NULL result",res);
+  assertTrue("no enabled protocols.",res.length == count);
+}

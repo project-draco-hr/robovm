@@ -1,0 +1,14 @@
+{
+  HttpURLConnection httpConnection=(HttpURLConnection)connection;
+  InputStream in=httpConnection.getResponseCode() < HttpURLConnection.HTTP_BAD_REQUEST ? connection.getInputStream() : httpConnection.getErrorStream();
+  StringBuilder result=new StringBuilder();
+  for (int i=0; i < count; i++) {
+    int value=in.read();
+    if (value == -1) {
+      in.close();
+      break;
+    }
+    result.append((char)value);
+  }
+  return result.toString();
+}

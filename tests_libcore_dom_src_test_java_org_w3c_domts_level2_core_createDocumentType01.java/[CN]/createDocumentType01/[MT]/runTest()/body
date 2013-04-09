@@ -1,0 +1,20 @@
+{
+  String publicId="STAFF";
+  String systemId="staff.xml";
+  String malformedName="prefix::local";
+  Document doc;
+  DOMImplementation domImpl;
+  DocumentType newType;
+  doc=(Document)load("staffNS",false);
+  domImpl=doc.getImplementation();
+{
+    boolean success=false;
+    try {
+      newType=domImpl.createDocumentType(malformedName,publicId,systemId);
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.NAMESPACE_ERR);
+    }
+    assertTrue("throw_NAMESPACE_ERR",success);
+  }
+}

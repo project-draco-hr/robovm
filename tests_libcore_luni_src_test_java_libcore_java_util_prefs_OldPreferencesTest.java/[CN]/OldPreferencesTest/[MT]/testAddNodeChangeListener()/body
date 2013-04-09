@@ -1,0 +1,100 @@
+{
+  Preferences pref=Preferences.userNodeForPackage(Preferences.class);
+  try {
+    pref.addNodeChangeListener(null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  Preferences child1=null;
+  MockNodeChangeListener nl=null;
+  try {
+    nl=new MockNodeChangeListener();
+    pref.addNodeChangeListener(nl);
+    child1=pref.node("mock1");
+    nl.waitForEvent();
+    assertEquals(1,nl.getAdded());
+    nl.reset();
+    pref.node("mock1");
+    nl.waitForEvent();
+    assertEquals(0,nl.getAdded());
+    nl.reset();
+  }
+  finally {
+    pref.removeNodeChangeListener(nl);
+    child1.removeNode();
+  }
+  try {
+    nl=new MockNodeChangeListener();
+    pref.addNodeChangeListener(nl);
+    pref.addNodeChangeListener(nl);
+    child1=pref.node("mock2");
+    nl.waitForEvent();
+    assertEquals(2,nl.getAdded());
+    nl.reset();
+  }
+  finally {
+    pref.removeNodeChangeListener(nl);
+    pref.removeNodeChangeListener(nl);
+    child1.removeNode();
+  }
+  try {
+    nl=new MockNodeChangeListener();
+    pref.addNodeChangeListener(nl);
+    child1=pref.node("mock3");
+    child1.removeNode();
+    nl.waitForEvent();
+    assertEquals(1,nl.getRemoved());
+    nl.reset();
+  }
+  finally {
+    pref.removeNodeChangeListener(nl);
+  }
+  try {
+    nl=new MockNodeChangeListener();
+    pref.addNodeChangeListener(nl);
+    pref.addNodeChangeListener(nl);
+    child1=pref.node("mock6");
+    child1.removeNode();
+    nl.waitForEvent();
+    assertEquals(2,nl.getRemoved());
+    nl.reset();
+  }
+  finally {
+    pref.removeNodeChangeListener(nl);
+    pref.removeNodeChangeListener(nl);
+  }
+  Preferences child3;
+  try {
+    nl=new MockNodeChangeListener();
+    child1=pref.node("mock4");
+    child1.addNodeChangeListener(nl);
+    pref.node("mock4/mock5");
+    nl.waitForEvent();
+    assertEquals(1,nl.getAdded());
+    nl.reset();
+    child3=pref.node("mock4/mock5/mock6");
+    nl.waitForEvent();
+    assertEquals(0,nl.getAdded());
+    nl.reset();
+    child3.removeNode();
+    nl.waitForEvent();
+    assertEquals(0,nl.getRemoved());
+    nl.reset();
+    pref.node("mock4/mock7");
+    nl.waitForEvent();
+    assertEquals(1,nl.getAdded());
+    nl.reset();
+    child1.removeNode();
+    nl.waitForEvent();
+    assertEquals(2,nl.getRemoved());
+    nl.reset();
+  }
+  finally {
+    try {
+      child1.removeNode();
+    }
+ catch (    Exception ignored) {
+    }
+  }
+}

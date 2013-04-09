@@ -1,0 +1,27 @@
+{
+  for (int i=0; i < dst.capacity(); ++i) {
+    dst.put(i,(byte)i);
+  }
+  dst.position(1);
+  for (int i=0; i < src.capacity(); ++i) {
+    src.put(i,(byte)(16 + i));
+  }
+  if (readOnly) {
+    src=src.asReadOnlyBuffer();
+  }
+  ByteBuffer dst2=dst.put(src);
+  assertSame(dst,dst2);
+  assertEquals(0,src.remaining());
+  assertEquals(src.position(),src.capacity());
+  assertEquals(dst.position(),src.capacity() + 1);
+  for (int i=0; i < src.capacity(); ++i) {
+    assertEquals(src.get(i),dst.get(i + 1));
+  }
+  src.position(0);
+  try {
+    dst.put(src);
+    fail();
+  }
+ catch (  BufferOverflowException expected) {
+  }
+}

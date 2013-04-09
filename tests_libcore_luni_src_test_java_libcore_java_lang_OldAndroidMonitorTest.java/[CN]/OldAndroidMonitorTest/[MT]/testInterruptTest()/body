@@ -1,0 +1,17 @@
+{
+  testThread=Thread.currentThread();
+  errorException=null;
+  Waiter waiter=new Waiter("InterruptTest Waiter");
+  Interrupter interrupter=new Interrupter("InterruptTest Interrupter",waiter);
+  interrupter.start();
+  try {
+    interrupter.join();
+    waiter.join();
+  }
+ catch (  InterruptedException ex) {
+    throw new RuntimeException("Test join interrupted.",ex);
+  }
+  if (errorException != null) {
+    throw new RuntimeException("InterruptTest failed",errorException);
+  }
+}

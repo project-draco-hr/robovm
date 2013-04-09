@@ -1,0 +1,22 @@
+{
+  final ServerSocket ss=new ServerSocket(0);
+  ss.setReuseAddress(true);
+  ss.setSoTimeout(1234);
+  final Socket[] result=new Socket[1];
+  Thread t=new Thread(new Runnable(){
+    public void run(){
+      try {
+        result[0]=ss.accept();
+      }
+ catch (      IOException ex) {
+        ex.printStackTrace();
+        fail();
+      }
+    }
+  }
+);
+  t.start();
+  new Socket(ss.getInetAddress(),ss.getLocalPort());
+  t.join();
+  assertEquals(0,result[0].getSoTimeout());
+}

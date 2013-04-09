@@ -1,0 +1,23 @@
+{
+  String secret="secret string";
+  try {
+    new SealedObject(secret,null);
+    fail("NullPointerException should be thrown in the case " + "of null cipher.");
+  }
+ catch (  NullPointerException e) {
+  }
+  KeyGenerator kg=KeyGenerator.getInstance("DES");
+  Key key=kg.generateKey();
+  IvParameterSpec ips=new IvParameterSpec(new byte[]{1,2,3,4,5,6,7,8});
+  Cipher cipher=Cipher.getInstance("DES/CBC/PKCS5Padding");
+  cipher.init(Cipher.ENCRYPT_MODE,key,ips);
+  SealedObject so=new SealedObject(secret,cipher);
+  cipher=Cipher.getInstance("DES/CBC/NoPadding");
+  cipher.init(Cipher.ENCRYPT_MODE,key,ips);
+  try {
+    new SealedObject(secret,cipher);
+    fail("IllegalBlockSizeException expected");
+  }
+ catch (  IllegalBlockSizeException e) {
+  }
+}

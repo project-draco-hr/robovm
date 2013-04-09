@@ -1,0 +1,23 @@
+{
+  BasicObjectOutputStream boos;
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  short s;
+  byte[] buffer;
+  boos=new BasicObjectOutputStream(baos);
+  try {
+    assertTrue("Test 1: writeStreamHeader() has not been called.",boos.writeStreamHeaderCalled);
+    buffer=baos.toByteArray();
+    assertTrue("Test 2: At least four bytes should have been written",buffer.length >= 4);
+    s=buffer[0];
+    s<<=8;
+    s+=((short)buffer[1] & 0x00ff);
+    assertEquals("Test 3: Invalid magic number written.",java.io.ObjectStreamConstants.STREAM_MAGIC,s);
+    s=buffer[2];
+    s<<=8;
+    s+=((short)buffer[3] & 0x00ff);
+    assertEquals("Invalid stream version number written.",java.io.ObjectStreamConstants.STREAM_VERSION,s);
+  }
+  finally {
+    boos.close();
+  }
+}

@@ -1,0 +1,40 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      keyStore.aliases();
+      fail();
+    }
+ catch (    KeyStoreException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    keyStore.load(null,null);
+    if (hasDefaultContents(keyStore)) {
+      assertTrue(keyStore.size() > 0);
+    }
+ else {
+      assertEquals(0,keyStore.size());
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    populate(keyStore);
+    if (hasDefaultContents(keyStore)) {
+      assertTrue(keyStore.size() > 0);
+      continue;
+    }
+    int expected=1;
+    if (isNullPasswordAllowed(keyStore)) {
+      expected++;
+    }
+    if (isSecretKeyEnabled(keyStore)) {
+      expected++;
+      if (isNullPasswordAllowed(keyStore)) {
+        expected++;
+      }
+    }
+    if (isCertificateEnabled(keyStore)) {
+      expected++;
+    }
+    assertEquals(expected,keyStore.size());
+  }
+}

@@ -1,0 +1,38 @@
+{
+  MyProvider myProvider=new MyProvider(null,1,null);
+  Provider.Service s[]=new Provider.Service[3];
+  s[0]=new Provider.Service(p,"type1","algorithm1","className1",null,null);
+  s[1]=new Provider.Service(p,"type2","algorithm2","className2",null,null);
+  s[2]=new Provider.Service(p,"type3","algorithm3","className3",null,null);
+  myProvider.putService(s[0]);
+  myProvider.putService(s[1]);
+  assertEquals(2,myProvider.getNumServices());
+  Set<Service> actual=myProvider.getServices();
+  assertTrue(actual.contains(s[0]));
+  assertTrue(actual.contains(s[1]));
+  assertTrue(!actual.contains(s[2]));
+  myProvider.removeService(s[1]);
+  assertEquals(1,myProvider.getNumServices());
+  actual=myProvider.getServices();
+  assertTrue(actual.contains(s[0]));
+  assertTrue(!actual.contains(s[1]));
+  assertTrue(!actual.contains(s[2]));
+  myProvider.putService(s[2]);
+  actual=myProvider.getServices();
+  assertEquals(2,myProvider.getNumServices());
+  assertTrue(actual.contains(s[0]));
+  assertTrue(!actual.contains(s[1]));
+  assertTrue(actual.contains(s[2]));
+  myProvider.putService(s[2]);
+  actual=myProvider.getServices();
+  assertEquals(2,myProvider.getNumServices());
+  assertTrue(actual.contains(s[0]));
+  assertTrue(!actual.contains(s[1]));
+  assertTrue(actual.contains(s[2]));
+  try {
+    myProvider.putService(null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+}

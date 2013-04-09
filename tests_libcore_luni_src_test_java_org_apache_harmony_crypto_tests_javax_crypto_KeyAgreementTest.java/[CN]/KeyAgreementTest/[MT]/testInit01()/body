@@ -1,0 +1,49 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  createKeys();
+  KeyAgreement[] kAgs=createKAs();
+  SecureRandom random=null;
+  AlgorithmParameterSpec aps=null;
+  DHParameterSpec dhPs=new DHParameterSpec(new BigInteger("56"),new BigInteger("56"));
+  for (int i=0; i < kAgs.length; i++) {
+    try {
+      kAgs[i].init(publKey);
+      fail("InvalidKeyException must be throw");
+    }
+ catch (    InvalidKeyException e) {
+    }
+    try {
+      kAgs[i].init(publKey,new SecureRandom());
+      fail("InvalidKeyException must be throw");
+    }
+ catch (    InvalidKeyException e) {
+    }
+    try {
+      kAgs[i].init(publKey,random);
+      fail("InvalidKeyException must be throw");
+    }
+ catch (    InvalidKeyException e) {
+    }
+    try {
+      kAgs[i].init(publKey,dhPs);
+      fail("InvalidKeyException must be throw");
+    }
+ catch (    InvalidKeyException e) {
+    }
+    try {
+      kAgs[i].init(publKey,aps);
+      fail("InvalidKeyException must be throw");
+    }
+ catch (    InvalidKeyException e) {
+    }
+    try {
+      kAgs[i].init(publKey,dhPs,new SecureRandom());
+      fail("InvalidKeyException must be throw");
+    }
+ catch (    InvalidKeyException e) {
+    }
+  }
+}

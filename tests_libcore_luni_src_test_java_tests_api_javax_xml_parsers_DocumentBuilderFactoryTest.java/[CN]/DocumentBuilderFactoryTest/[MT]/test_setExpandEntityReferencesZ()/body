@@ -1,0 +1,38 @@
+{
+  dbf.setExpandEntityReferences(true);
+  assertTrue(dbf.isExpandEntityReferences());
+  Exception parseException=null;
+  DocumentBuilder parser=null;
+  try {
+    parser=dbf.newDocumentBuilder();
+    ValidationErrorHandler errorHandler=new ValidationErrorHandler();
+    parser.setErrorHandler(errorHandler);
+    Document document=parser.parse(getClass().getResourceAsStream("/recipt.xml"));
+    parseException=errorHandler.getFirstException();
+    assertNotNull(document);
+  }
+ catch (  Exception ex) {
+    parseException=ex;
+  }
+  parser.setErrorHandler(null);
+  if (parseException != null) {
+    fail("Unexpected exception " + parseException.getMessage());
+  }
+  dbf.setExpandEntityReferences(false);
+  assertFalse(dbf.isExpandEntityReferences());
+  try {
+    parser=dbf.newDocumentBuilder();
+    ValidationErrorHandler errorHandler=new ValidationErrorHandler();
+    parser.setErrorHandler(errorHandler);
+    Document document=parser.parse(getClass().getResourceAsStream("/recipt.xml"));
+    parseException=errorHandler.getFirstException();
+    assertNotNull(document);
+  }
+ catch (  Exception ex) {
+    parseException=ex;
+  }
+  parser.setErrorHandler(null);
+  if (parseException != null) {
+    fail("Unexpected exception " + parseException.getMessage());
+  }
+}

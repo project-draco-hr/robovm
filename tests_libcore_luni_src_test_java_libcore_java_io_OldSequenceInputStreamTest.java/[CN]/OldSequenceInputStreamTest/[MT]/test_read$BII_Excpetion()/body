@@ -1,0 +1,37 @@
+{
+  byte[] buf=new byte[4];
+  si.read(buf,0,2);
+  si.read(buf,2,1);
+  simple2.throwExceptionOnNextUse=true;
+  si.read(buf,3,1);
+  assertEquals("Wrong stuff read!","Hell",new String(buf));
+  simple1.throwExceptionOnNextUse=true;
+  try {
+    si.read(buf,3,1);
+    fail("IOException not thrown!");
+  }
+ catch (  IOException e) {
+  }
+  buf=new byte[10];
+  simple1=new Support_ASimpleInputStream(s1);
+  simple2=new Support_ASimpleInputStream(s2);
+  si=new SequenceInputStream(simple1,simple2);
+  try {
+    si.read(buf,-1,1);
+    fail("IndexOutOfBoundsException was not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    si.read(buf,0,-1);
+    fail("IndexOutOfBoundsException was not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    si.read(buf,1,10);
+    fail("IndexOutOfBoundsException was not thrown");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+}

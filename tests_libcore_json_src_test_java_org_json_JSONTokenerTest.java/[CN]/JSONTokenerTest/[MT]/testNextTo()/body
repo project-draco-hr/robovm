@@ -1,0 +1,36 @@
+{
+  assertEquals("ABC",new JSONTokener("ABCDEFG").nextTo("DHI"));
+  assertEquals("ABCDEF",new JSONTokener("ABCDEF").nextTo(""));
+  JSONTokener tokener=new JSONTokener("ABC\rDEF\nGHI\r\nJKL");
+  assertEquals("ABC",tokener.nextTo("M"));
+  assertEquals('\r',tokener.next());
+  assertEquals("DEF",tokener.nextTo("M"));
+  assertEquals('\n',tokener.next());
+  assertEquals("GHI",tokener.nextTo("M"));
+  assertEquals('\r',tokener.next());
+  assertEquals('\n',tokener.next());
+  assertEquals("JKL",tokener.nextTo("M"));
+  tokener=new JSONTokener("ABCDEFGHI");
+  assertEquals("ABC",tokener.nextTo("DEF"));
+  assertEquals("",tokener.nextTo("DEF"));
+  assertEquals('D',tokener.next());
+  assertEquals("",tokener.nextTo("DEF"));
+  assertEquals('E',tokener.next());
+  assertEquals("",tokener.nextTo("DEF"));
+  assertEquals('F',tokener.next());
+  assertEquals("GHI",tokener.nextTo("DEF"));
+  assertEquals("",tokener.nextTo("DEF"));
+  tokener=new JSONTokener(" \t \fABC \t DEF");
+  assertEquals("ABC",tokener.nextTo("DEF"));
+  assertEquals('D',tokener.next());
+  tokener=new JSONTokener(" \t \fABC \n DEF");
+  assertEquals("ABC",tokener.nextTo("\n"));
+  assertEquals("",tokener.nextTo("\n"));
+  tokener=new JSONTokener("");
+  try {
+    tokener.nextTo(null);
+    fail();
+  }
+ catch (  NullPointerException e) {
+  }
+}

@@ -1,0 +1,22 @@
+{
+  ListIterator<String> colNameIt=colNames.listIterator();
+  for (int i=1; i <= typeMap.length; i++) {
+    String name=colNameIt.next();
+    if (supported[i - 1]) {
+      Object value=res.getObject(name);
+      assertTrue("value " + value.getClass().getName() + " for "+ name+ " does not correspond "+ typeMap[i - 1]+ "at "+ i,value.getClass().equals(typeMap[i - 1]));
+    }
+  }
+  try {
+    res.getObject("bla");
+    fail("Exception expected");
+  }
+ catch (  SQLException e) {
+  }
+  colNameIt=colNames.listIterator();
+  res.next();
+  for (int i=1; i <= typeMap.length; i++) {
+    Object value=res.getObject(colNameIt.next());
+    assertNull(value);
+  }
+}

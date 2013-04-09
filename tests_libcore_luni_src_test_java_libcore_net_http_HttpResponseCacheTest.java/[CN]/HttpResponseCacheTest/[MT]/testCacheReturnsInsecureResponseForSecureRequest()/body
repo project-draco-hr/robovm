@@ -1,0 +1,14 @@
+{
+  TestSSLContext testSSLContext=TestSSLContext.create();
+  server.useHttps(testSSLContext.serverContext.getSocketFactory(),false);
+  server.enqueue(new MockResponse().setBody("ABC"));
+  server.enqueue(new MockResponse().setBody("DEF"));
+  server.play();
+  ResponseCache.setDefault(new InsecureResponseCache());
+  HttpsURLConnection connection=(HttpsURLConnection)server.getUrl("/").openConnection();
+  connection.setSSLSocketFactory(testSSLContext.clientContext.getSocketFactory());
+  assertEquals("ABC",readAscii(connection));
+  connection=(HttpsURLConnection)server.getUrl("/").openConnection();
+  connection.setSSLSocketFactory(testSSLContext.clientContext.getSocketFactory());
+  assertEquals("DEF",readAscii(connection));
+}

@@ -1,0 +1,18 @@
+{
+  char[] chars=new char[65535 - 1 - 2];
+  Arrays.fill(chars,0,chars.length,'a');
+  chars[0]='\u0666';
+  chars[1]='\u2603';
+  String maxLength=new String(chars);
+  os.writeUTF(maxLength);
+  byte[] expected=new byte[2 + 65535];
+  expected[0]=(byte)0xff;
+  expected[1]=(byte)0xff;
+  expected[2]=(byte)0xd9;
+  expected[3]=(byte)0xa6;
+  expected[4]=(byte)0xe2;
+  expected[5]=(byte)0x98;
+  expected[6]=(byte)0x83;
+  Arrays.fill(expected,7,expected.length,(byte)'a');
+  assertEquals(Arrays.toString(expected),Arrays.toString(bytes.toByteArray()));
+}

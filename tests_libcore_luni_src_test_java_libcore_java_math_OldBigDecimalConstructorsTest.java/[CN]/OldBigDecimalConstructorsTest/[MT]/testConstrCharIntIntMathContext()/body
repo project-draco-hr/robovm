@@ -1,0 +1,72 @@
+{
+  char value[]={'-','1','2','3','8','0','.','4','7','3','8','E','-','4','2','3'};
+  int offset=3;
+  int len=12;
+  int precision=4;
+  RoundingMode rm=RoundingMode.CEILING;
+  MathContext mc=new MathContext(precision,rm);
+  BigDecimal result=new BigDecimal(value,offset,len,mc);
+  String res="3.805E-40";
+  int resScale=43;
+  assertEquals("incorrect value",res,result.toString());
+  assertEquals("incorrect scale",resScale,result.scale());
+  try {
+    new BigDecimal(new char[]{},0,0,MathContext.DECIMAL32);
+    fail("NumberFormatException has not been thrown");
+  }
+ catch (  NumberFormatException e) {
+  }
+  char[] biCA="bla: 12345678901234567890123456789012345.0E+10, and more bla".toCharArray();
+  char[] nbiCA="bla: -12345678901234567890123456789012345.E+10, and more bla".toCharArray();
+  BigDecimal bd;
+  mc=new MathContext(31,RoundingMode.UP);
+  bd=new BigDecimal(biCA,5,41,mc);
+  assertEquals("incorrect value","1.234567890123456789012345678902E+44",bd.toString());
+  bd=new BigDecimal(nbiCA,5,41,mc);
+  assertEquals("incorrect value","-1.234567890123456789012345678902E+44",bd.toString());
+  mc=new MathContext(28,RoundingMode.DOWN);
+  bd=new BigDecimal(biCA,5,41,mc);
+  assertEquals("incorrect value","1.234567890123456789012345678E+44",bd.toString());
+  bd=new BigDecimal(nbiCA,5,41,mc);
+  assertEquals("incorrect value","-1.234567890123456789012345678E+44",bd.toString());
+  mc=new MathContext(33,RoundingMode.CEILING);
+  bd=new BigDecimal(biCA,5,41,mc);
+  assertEquals("incorrect value","1.23456789012345678901234567890124E+44",bd.toString());
+  bd=new BigDecimal(nbiCA,5,41,mc);
+  assertEquals("incorrect value","-1.23456789012345678901234567890123E+44",bd.toString());
+  mc=new MathContext(34,RoundingMode.FLOOR);
+  bd=new BigDecimal(biCA,5,41,mc);
+  assertEquals("incorrect value","1.234567890123456789012345678901234E+44",bd.toString());
+  bd=new BigDecimal(nbiCA,5,41,mc);
+  assertEquals("incorrect value","-1.234567890123456789012345678901235E+44",bd.toString());
+  mc=new MathContext(34,RoundingMode.HALF_EVEN);
+  bd=new BigDecimal(biCA,5,41,mc);
+  assertEquals("incorrect value","1.234567890123456789012345678901234E+44",bd.toString());
+  bd=new BigDecimal(nbiCA,5,41,mc);
+  assertEquals("incorrect value","-1.234567890123456789012345678901234E+44",bd.toString());
+  bd=new BigDecimal("-123456789012345678901234567890123350000000000".toCharArray(),0,46,mc);
+  assertEquals("incorrect value","-1.234567890123456789012345678901234E+44",bd.toString());
+  mc=new MathContext(34,RoundingMode.HALF_UP);
+  bd=new BigDecimal(biCA,5,41,mc);
+  assertEquals("incorrect value","1.234567890123456789012345678901235E+44",bd.toString());
+  bd=new BigDecimal(nbiCA,5,41,mc);
+  assertEquals("incorrect value","-1.234567890123456789012345678901235E+44",bd.toString());
+  mc=new MathContext(34,RoundingMode.HALF_DOWN);
+  bd=new BigDecimal(biCA,5,41,mc);
+  assertEquals("incorrect value","1.234567890123456789012345678901234E+44",bd.toString());
+  bd=new BigDecimal(nbiCA,5,41,mc);
+  assertEquals("incorrect value","-1.234567890123456789012345678901234E+44",bd.toString());
+  mc=new MathContext(34,RoundingMode.UNNECESSARY);
+  try {
+    bd=new BigDecimal(biCA,5,41,mc);
+    fail("No ArithmeticException for RoundingMode.UNNECESSARY");
+  }
+ catch (  ArithmeticException e) {
+  }
+  try {
+    bd=new BigDecimal(nbiCA,5,41,mc);
+    fail("No ArithmeticException for RoundingMode.UNNECESSARY");
+  }
+ catch (  ArithmeticException e) {
+  }
+}

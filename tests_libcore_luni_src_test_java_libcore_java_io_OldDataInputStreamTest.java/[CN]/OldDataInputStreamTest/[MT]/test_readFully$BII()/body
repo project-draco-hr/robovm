@@ -1,0 +1,23 @@
+{
+  byte rbytes[]=new byte[testLength];
+  os.write(fileString.getBytes());
+  os.close();
+  openDataInputStream();
+  dis.readFully(rbytes,2,testLength - 4);
+  assertTrue("Test 1: Incorrect data written or read.",new String(rbytes,2,testLength - 4).equals(fileString.substring(0,testLength - 4)));
+  dis.close();
+  try {
+    dis.readFully(rbytes,0,testLength);
+    fail("Test 2: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  openDataInputStream();
+  dis.readByte();
+  try {
+    dis.readFully(rbytes,0,testLength);
+    fail("Test 3: EOFException expected.");
+  }
+ catch (  EOFException e) {
+  }
+}

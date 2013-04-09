@@ -1,0 +1,69 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      keyStore.entryInstanceOf(null,null);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    keyStore.load(null,null);
+    try {
+      keyStore.entryInstanceOf(null,null);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+    try {
+      keyStore.entryInstanceOf(null,Entry.class);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+    try {
+      keyStore.entryInstanceOf("",null);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+    assertFalse(keyStore.entryInstanceOf("",Entry.class));
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    populate(keyStore);
+    assertFalse(keyStore.entryInstanceOf("",Entry.class));
+    assertFalse(keyStore.entryInstanceOf("",PrivateKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf("",SecretKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf("",TrustedCertificateEntry.class));
+    if (isReadOnly(keyStore)) {
+      assertFalse(keyStore.entryInstanceOf(ALIAS_PRIVATE,PrivateKeyEntry.class));
+      assertFalse(keyStore.entryInstanceOf(ALIAS_PRIVATE,SecretKeyEntry.class));
+      assertFalse(keyStore.entryInstanceOf(ALIAS_PRIVATE,TrustedCertificateEntry.class));
+      assertFalse(keyStore.entryInstanceOf(ALIAS_SECRET,SecretKeyEntry.class));
+      assertFalse(keyStore.entryInstanceOf(ALIAS_SECRET,PrivateKeyEntry.class));
+      assertFalse(keyStore.entryInstanceOf(ALIAS_SECRET,TrustedCertificateEntry.class));
+      assertFalse(keyStore.entryInstanceOf(ALIAS_CERTIFICATE,TrustedCertificateEntry.class));
+      assertFalse(keyStore.entryInstanceOf(ALIAS_CERTIFICATE,PrivateKeyEntry.class));
+      assertFalse(keyStore.entryInstanceOf(ALIAS_CERTIFICATE,SecretKeyEntry.class));
+      continue;
+    }
+    assertTrue(keyStore.entryInstanceOf(ALIAS_PRIVATE,PrivateKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_PRIVATE,SecretKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_PRIVATE,TrustedCertificateEntry.class));
+    assertEquals(isSecretKeyEnabled(keyStore),keyStore.entryInstanceOf(ALIAS_SECRET,SecretKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_SECRET,PrivateKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_SECRET,TrustedCertificateEntry.class));
+    assertEquals(isCertificateEnabled(keyStore),keyStore.entryInstanceOf(ALIAS_CERTIFICATE,TrustedCertificateEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_CERTIFICATE,PrivateKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_CERTIFICATE,SecretKeyEntry.class));
+    assertEquals(!isCaseSensitive(keyStore),keyStore.entryInstanceOf(ALIAS_ALT_CASE_PRIVATE,PrivateKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_ALT_CASE_PRIVATE,SecretKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_ALT_CASE_PRIVATE,TrustedCertificateEntry.class));
+    assertEquals(!isCaseSensitive(keyStore) && isSecretKeyEnabled(keyStore),keyStore.entryInstanceOf(ALIAS_ALT_CASE_SECRET,SecretKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_ALT_CASE_SECRET,PrivateKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_ALT_CASE_SECRET,TrustedCertificateEntry.class));
+    assertEquals(!isCaseSensitive(keyStore) && isCertificateEnabled(keyStore),keyStore.entryInstanceOf(ALIAS_ALT_CASE_CERTIFICATE,TrustedCertificateEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_ALT_CASE_CERTIFICATE,PrivateKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_ALT_CASE_CERTIFICATE,SecretKeyEntry.class));
+  }
+}

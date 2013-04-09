@@ -1,0 +1,46 @@
+{
+  transformer=TransformerFactory.newInstance().newTransformer();
+  transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION,"yes");
+  DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+  factory.setNamespaceAware(true);
+  builder=factory.newDocumentBuilder();
+  domImplementation=builder.getDOMImplementation();
+  document=builder.parse(new InputSource(new StringReader(xml)));
+  doctype=document.getDoctype();
+  if (doctype.getEntities() != null) {
+    sp=(Entity)doctype.getEntities().item(0);
+  }
+  if (doctype.getNotations() != null) {
+    png=(Notation)doctype.getNotations().item(0);
+  }
+  menu=document.getDocumentElement();
+  item=(Element)menu.getChildNodes().item(1);
+  itemXmlns=item.getAttributeNode("xmlns");
+  itemXmlnsA=item.getAttributeNode("xmlns:a");
+  name=(Element)item.getChildNodes().item(1);
+  standard=name.getAttributeNode("a:standard");
+  deluxe=name.getAttributeNode("deluxe");
+  waffles=(Text)name.getChildNodes().item(0);
+  description=(Element)item.getChildNodes().item(3);
+  descriptionText1=(Text)description.getChildNodes().item(0);
+  descriptionText2=(CDATASection)description.getChildNodes().item(1);
+  descriptionText3=(Text)description.getChildNodes().item(2);
+  option1=(Element)item.getChildNodes().item(5);
+  option2=(Element)item.getChildNodes().item(7);
+  option2Reference=option2.getChildNodes().item(0);
+  wafflemaker=(ProcessingInstruction)item.getChildNodes().item(9);
+  nutrition=(Element)item.getChildNodes().item(11);
+  vitamins=(Element)nutrition.getChildNodes().item(1);
+  vitaminsXmlnsA=vitamins.getAttributeNode("xmlns:a");
+  comment=(Comment)vitamins.getChildNodes().item(1);
+  vitaminc=(Element)vitamins.getChildNodes().item(3);
+  vitamincText=(Text)vitaminc.getChildNodes().item(0);
+  allNodes=new ArrayList<Node>();
+  if (sp != null) {
+    allNodes.add(sp);
+  }
+  if (png != null) {
+    allNodes.add(png);
+  }
+  allNodes.addAll(Arrays.asList(document,doctype,menu,item,itemXmlns,itemXmlnsA,name,standard,deluxe,waffles,description,descriptionText1,descriptionText2,descriptionText3,option1,option2,option2Reference,wafflemaker,nutrition,vitamins,vitaminsXmlnsA,comment,vitaminc,vitamincText));
+}

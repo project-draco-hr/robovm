@@ -1,0 +1,35 @@
+{
+  boolean performed=false;
+  for (int i=0; i < EncryptedPrivateKeyInfoData.algName0.length; i++) {
+    try {
+      EncryptedPrivateKeyInfo epki=new EncryptedPrivateKeyInfo(EncryptedPrivateKeyInfoData.algName0[i][0],EncryptedPrivateKeyInfoData.encryptedData);
+      try {
+        epki.getKeySpec((Key)null,(Provider)null);
+        fail(getName() + "NullPointerException has not been thrown");
+      }
+ catch (      NullPointerException ok) {
+      }
+      try {
+        epki.getKeySpec(new Key(){
+          public String getAlgorithm(){
+            return "alg";
+          }
+          public String getFormat(){
+            return "fmt";
+          }
+          public byte[] getEncoded(){
+            return new byte[]{};
+          }
+        }
+,(Provider)null);
+        fail(getName() + "NullPointerException has not been thrown");
+      }
+ catch (      NullPointerException ok) {
+      }
+      performed=true;
+    }
+ catch (    NoSuchAlgorithmException allowedFailure) {
+    }
+  }
+  assertTrue("Test not performed",performed);
+}

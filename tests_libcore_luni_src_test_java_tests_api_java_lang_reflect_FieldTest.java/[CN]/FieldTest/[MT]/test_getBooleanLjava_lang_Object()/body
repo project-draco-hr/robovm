@@ -1,0 +1,61 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  boolean val=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    val=f.getBoolean(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during getBoolean test: " + e.toString());
+  }
+  assertTrue("Returned incorrect boolean field value",val);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("doubleField");
+    f.getBoolean(x);
+    fail("IllegalArgumentException expected but not thrown");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("IllegalArgumentException expected but not thrown");
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanPFField");
+    f.getBoolean(x);
+    fail("IllegalAccessException expected but not thrown");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("IllegalAccessException expected but not thrown" + ex.getMessage());
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    f.getBoolean(null);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanSField");
+    boolean staticValue=f.getBoolean(null);
+    assertTrue("Wrong value returned",staticValue);
+  }
+ catch (  Exception ex) {
+    fail("No exception expected");
+  }
+}

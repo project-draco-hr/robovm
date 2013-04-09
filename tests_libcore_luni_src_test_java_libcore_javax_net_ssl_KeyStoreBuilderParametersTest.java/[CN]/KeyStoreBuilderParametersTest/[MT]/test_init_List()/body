@@ -1,0 +1,22 @@
+{
+  TestKeyStore testKeyStore1=TestKeyStore.getClient();
+  TestKeyStore testKeyStore2=TestKeyStore.getServer();
+  Builder builder1=Builder.newInstance(testKeyStore1.keyStore,new PasswordProtection(testKeyStore1.storePassword));
+  Builder builder2=Builder.newInstance(testKeyStore2.keyStore,new PasswordProtection(testKeyStore2.storePassword));
+  List list=Arrays.asList(builder1,builder2);
+  KeyStoreBuilderParameters ksbp=new KeyStoreBuilderParameters(list);
+  assertNotNull(ksbp);
+  assertNotNull(ksbp.getParameters());
+  assertNotSame(list,ksbp.getParameters());
+  assertEquals(2,ksbp.getParameters().size());
+  assertSame(builder1,ksbp.getParameters().get(0));
+  assertSame(builder2,ksbp.getParameters().get(1));
+  try {
+    ksbp.getParameters().set(0,builder2);
+    fail();
+  }
+ catch (  UnsupportedOperationException expected) {
+  }
+  list.set(0,builder2);
+  assertSame(builder1,ksbp.getParameters().get(0));
+}

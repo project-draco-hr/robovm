@@ -1,0 +1,13 @@
+{
+  X509CertSelector selector=new X509CertSelector();
+  assertFalse(selector.match(null));
+  CertificateFactory certFact=CertificateFactory.getInstance("X509");
+  X509Certificate cert1=(X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(TestUtils.getX509Certificate_v3()));
+  X509Certificate cert2=(X509Certificate)certFact.generateCertificate(new ByteArrayInputStream(TestUtils.getX509Certificate_v1()));
+  selector.setCertificate(cert1);
+  assertTrue(selector.match(cert1));
+  assertFalse(selector.match(cert2));
+  selector.setCertificate(cert2);
+  assertFalse(selector.match(cert1));
+  assertTrue(selector.match(cert2));
+}

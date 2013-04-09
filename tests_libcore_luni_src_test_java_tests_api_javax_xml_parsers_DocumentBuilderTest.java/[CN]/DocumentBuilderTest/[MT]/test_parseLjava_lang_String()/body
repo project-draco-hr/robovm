@@ -1,0 +1,27 @@
+{
+  URL resource=getClass().getResource("/simple.xml");
+  Document d=db.parse(resource.toString());
+  assertNotNull(d);
+  assertEquals(2,d.getChildNodes().getLength());
+  assertEquals("#comment",d.getChildNodes().item(0).getNodeName());
+  assertEquals("breakfast_menu",d.getChildNodes().item(1).getNodeName());
+  try {
+    db.parse((String)null);
+    fail("Expected IllegalArgumentException was not thrown");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  try {
+    db.parse("_");
+    fail("Expected IOException was not thrown");
+  }
+ catch (  IOException ioe) {
+  }
+  try {
+    resource=getClass().getResource("/wrong.xml");
+    db.parse(resource.toString());
+    fail("Expected SAXException was not thrown");
+  }
+ catch (  SAXException sax) {
+  }
+}

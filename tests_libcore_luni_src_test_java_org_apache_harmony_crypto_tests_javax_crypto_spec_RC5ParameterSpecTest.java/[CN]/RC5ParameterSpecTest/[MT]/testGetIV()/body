@@ -1,0 +1,15 @@
+{
+  int version=1;
+  int rounds=5;
+  int wordSize=16;
+  byte[] iv={1,2,3,4};
+  RC5ParameterSpec ps=new RC5ParameterSpec(version,rounds,wordSize,iv);
+  byte[] result=ps.getIV();
+  if (!Arrays.equals(iv,result)) {
+    fail("The returned iv is not equal to the specified " + "in the constructor.");
+  }
+  result[0]++;
+  assertFalse("The change of returned by getIV() method iv " + "should not cause the change of internal array.",result[0] == ps.getIV()[0]);
+  ps=new RC5ParameterSpec(version,rounds,wordSize);
+  assertNull("The getIV() method should return null if the parameter " + "set does not contain IV.",ps.getIV());
+}

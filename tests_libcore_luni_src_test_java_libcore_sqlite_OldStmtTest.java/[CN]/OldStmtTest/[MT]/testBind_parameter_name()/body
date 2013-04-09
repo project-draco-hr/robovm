@@ -1,0 +1,20 @@
+{
+  try {
+    st.bind_parameter_name(1);
+    fail("Exception expected");
+  }
+ catch (  SQLite.Exception expected) {
+    assertEquals("stmt already closed",expected.getMessage());
+  }
+  try {
+    st=db.prepare("insert into " + DatabaseCreator.SIMPLE_TABLE1 + " values (:one,:two,:three)");
+    assertEquals(":one",st.bind_parameter_name(1));
+    assertEquals(":two",st.bind_parameter_name(2));
+    assertEquals(":three",st.bind_parameter_name(3));
+    st.bind_parameter_name(4);
+    fail();
+  }
+ catch (  SQLite.Exception expected) {
+    assertEquals("parameter position out of bounds",expected.getMessage());
+  }
+}

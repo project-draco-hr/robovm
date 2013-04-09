@@ -1,0 +1,28 @@
+{
+  int sport=startServer("SServer getTcpNoDelay");
+  try {
+    int portNumber=Support_PortManager.getNextPort();
+    s=new Socket(InetAddress.getLocalHost(),sport,null,portNumber);
+    boolean bool=!s.getTcpNoDelay();
+    s.setTcpNoDelay(bool);
+    assertTrue("Failed to get no delay setting: " + s.getTcpNoDelay(),s.getTcpNoDelay() == bool);
+    ensureExceptionThrownIfOptionIsUnsupportedOnOS(TCP_NODELAY);
+  }
+ catch (  Exception e) {
+    handleException(e,TCP_NODELAY);
+  }
+  try {
+    int portNumber=Support_PortManager.getNextPort();
+    s=new Socket(InetAddress.getLocalHost(),sport,null,portNumber);
+    s.close();
+    try {
+      s.getTcpNoDelay();
+      fail("SocketException was not thrown.");
+    }
+ catch (    SocketException ioe) {
+    }
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception was thrown: " + e.toString());
+  }
+}

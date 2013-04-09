@@ -1,0 +1,30 @@
+{
+  final Permission permission=new RuntimePermission("do stuff");
+  final DomainCombiner union=new DomainCombiner(){
+    public ProtectionDomain[] combine(    ProtectionDomain[] a,    ProtectionDomain[] b){
+      throw new AssertionFailedError("Expected combiner to be unused");
+    }
+  }
+;
+  ProtectionDomain protectionDomain=new ProtectionDomain(null,new Permissions());
+  AccessControlContext accessControlContext=new AccessControlContext(new AccessControlContext(new ProtectionDomain[]{protectionDomain}),union);
+  final AtomicInteger actionCount=new AtomicInteger();
+  AccessController.doPrivileged(new PrivilegedAction<Void>(){
+    public Void run(){
+      assertEquals(null,AccessController.getContext().getDomainCombiner());
+      AccessController.getContext().checkPermission(permission);
+      AccessController.doPrivileged(new PrivilegedAction<Void>(){
+        public Void run(){
+          actionCount.incrementAndGet();
+          assertEquals(null,AccessController.getContext().getDomainCombiner());
+          AccessController.getContext().checkPermission(permission);
+          return null;
+        }
+      }
+);
+      return null;
+    }
+  }
+,accessControlContext);
+  assertEquals(1,actionCount.get());
+}

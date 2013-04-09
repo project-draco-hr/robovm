@@ -1,0 +1,34 @@
+{
+  Document doc;
+  NodeList genderList;
+  Node gender;
+  NodeList genList;
+  Node gen;
+  NodeList gList;
+  int nodeType;
+  Element genElement;
+  doc=(Document)load("staff",true);
+  genderList=doc.getElementsByTagName("gender");
+  gender=genderList.item(2);
+  genList=gender.getChildNodes();
+  gen=genList.item(0);
+  assertNotNull("genNotNull",gen);
+  nodeType=(int)gen.getNodeType();
+  if (equals(1,nodeType)) {
+    gen=doc.createEntityReference("ent4");
+    assertNotNull("createdEntRefNotNull",gen);
+  }
+  gList=gen.getChildNodes();
+  genElement=(Element)gList.item(0);
+  assertNotNull("genElementNotNull",genElement);
+{
+    boolean success=false;
+    try {
+      genElement.removeAttribute("domestic");
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.NO_MODIFICATION_ALLOWED_ERR);
+    }
+    assertTrue("throw_NO_MODIFICATION_ALLOWED_ERR",success);
+  }
+}

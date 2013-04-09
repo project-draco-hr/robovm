@@ -1,0 +1,21 @@
+{
+  SSLSocket ssl=getSSLSocket();
+  try {
+    ssl.setEnabledCipherSuites(null);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  ssl.setEnabledCipherSuites(new String[]{});
+  try {
+    ssl.setEnabledCipherSuites(new String[]{"blubb"});
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  ssl.setEnabledCipherSuites(ssl.getSupportedCipherSuites());
+  String[] res=ssl.getEnabledCipherSuites();
+  assertNotNull("NULL result",res);
+  assertEquals("not all supported cipher suites were enabled",Arrays.asList(ssl.getSupportedCipherSuites()),Arrays.asList(res));
+  ssl.close();
+}

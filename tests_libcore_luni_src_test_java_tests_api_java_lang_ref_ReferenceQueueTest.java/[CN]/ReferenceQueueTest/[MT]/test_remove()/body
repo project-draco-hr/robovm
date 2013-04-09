@@ -1,0 +1,38 @@
+{
+  b=new Boolean(true);
+  SoftReference sr=new SoftReference(b,rq);
+  sr.enqueue();
+  try {
+    assertTrue("Remove failed.",((Boolean)rq.remove().get()).booleanValue());
+  }
+ catch (  Exception e) {
+    fail("Exception during the test : " + e.getMessage());
+  }
+  assertNull(rq.poll());
+  sr.enqueue();
+class RemoveThread extends Thread {
+    public void run(){
+      try {
+        rq.remove();
+      }
+ catch (      InterruptedException ie) {
+        isThrown=true;
+      }
+    }
+  }
+  RemoveThread rt=new RemoveThread();
+  rt.start();
+  try {
+    Thread.sleep(100);
+  }
+ catch (  InterruptedException ie) {
+  }
+  rt.interrupt();
+  try {
+    Thread.sleep(100);
+  }
+ catch (  InterruptedException ie) {
+  }
+  assertTrue(isThrown);
+  assertNull(rq.poll());
+}

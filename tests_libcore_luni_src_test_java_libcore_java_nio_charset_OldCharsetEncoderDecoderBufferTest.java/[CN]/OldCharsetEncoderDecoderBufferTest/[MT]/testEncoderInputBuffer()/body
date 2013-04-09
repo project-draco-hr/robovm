@@ -1,0 +1,15 @@
+{
+  CharsetEncoder encoder=Charset.forName("UTF-8").newEncoder();
+  ByteBuffer out=ByteBuffer.wrap(new byte[10]);
+  char[] inArray={'a','b'};
+  CharBuffer inWithArray=CharBuffer.wrap(inArray);
+  assertTrue(inWithArray.hasArray());
+  encoder.encode(inWithArray,out,false);
+  assertEquals('a',inArray[0]);
+  assertEquals('b',inArray[1]);
+  CharBuffer inWithoutArray=CharBuffer.wrap("x");
+  assertFalse(inWithoutArray.hasArray());
+  encoder.encode(inWithoutArray,out,true);
+  assertEquals('a',inArray[0]);
+  assertEquals('b',inArray[1]);
+}

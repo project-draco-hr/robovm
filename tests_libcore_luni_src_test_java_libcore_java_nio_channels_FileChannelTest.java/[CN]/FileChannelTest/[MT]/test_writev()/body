@@ -1,0 +1,11 @@
+{
+  File tmp=File.createTempFile("FileChannelTest","tmp");
+  FileChannel fc=new FileOutputStream(tmp).getChannel();
+  ByteBuffer[] buffers=new ByteBuffer[]{ByteBuffer.allocateDirect(4),ByteBuffer.allocate(4)};
+  buffers[0].put("abcd".getBytes("US-ASCII")).flip();
+  buffers[1].put("ABCD".getBytes("US-ASCII")).flip();
+  assertEquals(8,fc.write(buffers));
+  fc.close();
+  assertEquals(8,tmp.length());
+  assertEquals("abcdABCD",new String(IoUtils.readFileAsString(tmp.getPath())));
+}

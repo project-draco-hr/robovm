@@ -1,0 +1,17 @@
+{
+  new SerializationTester<Collection<?>>(collection,s){
+    @SuppressWarnings("unchecked") @Override protected void verify(    Collection<?> deserialized) throws Exception {
+      try {
+        ((Collection)deserialized).add(Boolean.TRUE);
+        fail();
+      }
+ catch (      ClassCastException expected) {
+      }
+    }
+    @Override protected boolean equals(    Collection<?> a,    Collection<?> b){
+      boolean equal=definesEquals ? a.equals(b) : Arrays.equals(a.toArray(),b.toArray());
+      return equal && (a instanceof SortedSet == b instanceof SortedSet) && (a instanceof RandomAccess == b instanceof RandomAccess);
+    }
+  }
+.test();
+}

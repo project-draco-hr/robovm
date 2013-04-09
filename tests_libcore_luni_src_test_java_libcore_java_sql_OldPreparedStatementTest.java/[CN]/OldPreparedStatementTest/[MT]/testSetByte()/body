@@ -1,0 +1,64 @@
+{
+  PreparedStatement ps=null;
+  PreparedStatement ps1=null;
+  try {
+    String query="insert into type (Tint) values (?);";
+    ps=conn.prepareStatement(query);
+    Statement st=null;
+    try {
+      ps.setByte(1,Byte.MAX_VALUE);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where Tint=" + Byte.MAX_VALUE);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+    try {
+      ps.setByte(1,Byte.MIN_VALUE);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where Tint=" + Byte.MIN_VALUE);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+    try {
+      ps.setByte(2,Byte.MAX_VALUE);
+      fail("SQLException is not thrown");
+    }
+ catch (    Exception sqle) {
+    }
+    ps.close();
+    try {
+      ps.setByte(1,Byte.MIN_VALUE);
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+    String query1="insert into type (IntVal) values (?);";
+    ps1=conn.prepareStatement(query1);
+    ps1.setByte(1,Byte.MAX_VALUE);
+    ps1.execute();
+  }
+  finally {
+    try {
+      ps.close();
+      ps1.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+}

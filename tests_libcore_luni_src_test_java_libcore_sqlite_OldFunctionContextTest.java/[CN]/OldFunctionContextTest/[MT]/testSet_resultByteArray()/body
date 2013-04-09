@@ -1,0 +1,21 @@
+{
+  Stmt st=null;
+  TestFCByteArray testBinArrayFnc=new TestFCByteArray();
+  String expected="";
+  expected="X'" + getHexString(testBinArrayFnc.byteVal) + "'";
+  db.exec("create table testBinaryData (binVal BINARY) ;",null);
+  try {
+    st=db.prepare("insert into testBinaryData values (?)");
+    st.bind(1,testBinArrayFnc.byteVal);
+    st.step();
+    db.create_function("testBinArray",1,testBinArrayFnc);
+    TableResult res=db.get_table("select testBinArray(binVal) from testBinaryData");
+    String row[]=(String[])res.rows.elementAt(0);
+    String val=row[0];
+    assertTrue(expected.equalsIgnoreCase(val));
+    assertTrue(testBinArrayFnc.functionCalled);
+  }
+  finally {
+    db.exec("drop table testBinaryData;",null);
+  }
+}

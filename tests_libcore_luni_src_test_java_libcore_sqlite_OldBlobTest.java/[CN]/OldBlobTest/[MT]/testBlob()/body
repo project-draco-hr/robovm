@@ -1,0 +1,20 @@
+{
+  byte[] b=new byte[4];
+  byte[] b128=new byte[128];
+  for (int i=0; i < b128.length; i++) {
+    b128[i]=(byte)i;
+  }
+  Blob blob=db.open_blob(dbFile.getPath(),"B","val",1,true);
+  try {
+    OutputStream os=blob.getOutputStream();
+    os.write(b128);
+    os.close();
+    InputStream is=blob.getInputStream();
+    is.skip(96);
+    assertEquals(4,is.read(b));
+    is.close();
+  }
+  finally {
+    blob.close();
+  }
+}

@@ -1,0 +1,26 @@
+{
+  MockResponse response=new MockResponse().addHeader("Last-Modified: " + formatDate(-1,TimeUnit.HOURS)).addHeader("Expires: " + formatDate(1,TimeUnit.HOURS)).setStatus("HTTP/1.1 200 Fantastic");
+  transferKind.setBody(response,"I love puppies but hate spiders",1);
+  server.enqueue(response);
+  server.play();
+  HttpURLConnection urlConnection=(HttpURLConnection)server.getUrl("/").openConnection();
+  InputStream in=urlConnection.getInputStream();
+  assertEquals("I love ",readAscii(urlConnection,"I love ".length()));
+  reliableSkip(in,"puppies but hate ".length());
+  assertEquals("spiders",readAscii(urlConnection,"spiders".length()));
+  assertEquals(-1,in.read());
+  in.close();
+  assertEquals(1,cache.getWriteSuccessCount());
+  assertEquals(0,cache.getWriteAbortCount());
+  urlConnection=(HttpURLConnection)server.getUrl("/").openConnection();
+  in=urlConnection.getInputStream();
+  assertEquals("I love puppies but hate spiders",readAscii(urlConnection,"I love puppies but hate spiders".length()));
+  assertEquals(200,urlConnection.getResponseCode());
+  assertEquals("Fantastic",urlConnection.getResponseMessage());
+  assertEquals(-1,in.read());
+  in.close();
+  assertEquals(1,cache.getWriteSuccessCount());
+  assertEquals(0,cache.getWriteAbortCount());
+  assertEquals(2,cache.getRequestCount());
+  assertEquals(1,cache.getHitCount());
+}

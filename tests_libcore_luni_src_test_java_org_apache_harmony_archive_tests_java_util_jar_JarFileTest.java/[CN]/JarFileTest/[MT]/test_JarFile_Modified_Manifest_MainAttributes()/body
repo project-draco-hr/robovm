@@ -1,0 +1,15 @@
+{
+  String modifiedJarName="Modified_Manifest_MainAttributes.jar";
+  Support_Resources.copyFile(resources,null,modifiedJarName);
+  JarFile jarFile=new JarFile(new File(resources,modifiedJarName),true);
+  Enumeration<JarEntry> entries=jarFile.entries();
+  while (entries.hasMoreElements()) {
+    ZipEntry zipEntry=entries.nextElement();
+    try {
+      jarFile.getInputStream(zipEntry);
+      fail("SecurityException expected");
+    }
+ catch (    SecurityException e) {
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  CertificateFactory[] certFs=initCertFs();
+  assertNotNull("CertificateFactory objects were not created",certFs);
+  Certificate cert=certFs[0].generateCertificate(new ByteArrayInputStream(TestUtils.getEncodedX509Certificate()));
+  for (int i=0; i < certFs.length; i++) {
+    Collection<? extends Certificate> col=null;
+    col=certFs[i].generateCertificates(new ByteArrayInputStream(TestUtils.getEncodedX509Certificate()));
+    Iterator<? extends Certificate> it=col.iterator();
+    assertEquals("Incorrect Collection size",col.size(),1);
+    assertEquals("Incorrect Certificate in Collection",cert,it.next());
+  }
+}

@@ -1,0 +1,41 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      keyStore.getCreationDate(null);
+      fail();
+    }
+ catch (    KeyStoreException expected) {
+    }
+  }
+  long before=System.currentTimeMillis();
+  for (  KeyStore keyStore : keyStores()) {
+    long after=System.currentTimeMillis() + 1000;
+    populate(keyStore);
+    try {
+      keyStore.getCreationDate(null);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+    assertNull(keyStore.getCreationDate(""));
+    if (!isReadOnly(keyStore) && isCertificateEnabled(keyStore)) {
+      Date date=keyStore.getCreationDate(ALIAS_CERTIFICATE);
+      assertNotNull(date);
+      assertTrue(before <= date.getTime());
+      assertTrue(date.getTime() <= after);
+    }
+ else {
+      assertNull(keyStore.getCreationDate(ALIAS_CERTIFICATE));
+    }
+    if (isReadOnly(keyStore) || isCaseSensitive(keyStore)) {
+      assertNull(keyStore.getCreationDate(ALIAS_ALT_CASE_CERTIFICATE));
+    }
+ else {
+      if (isCertificateEnabled(keyStore)) {
+        Date date=keyStore.getCreationDate(ALIAS_ALT_CASE_CERTIFICATE);
+        assertTrue(before <= date.getTime());
+        assertTrue(date.getTime() <= after);
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  CertStore certStore=null;
+  try {
+    certStore=CertStore.getInstance(CERT_STORE_NAME,null);
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+  assertNotNull(certStore);
+  try {
+    Collection<? extends Certificate> certificates=certStore.getCertificates(null);
+    assertNull(certificates);
+  }
+ catch (  CertStoreException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    Collection<? extends Certificate> certificates=certStore.getCertificates(new MyCertSelector());
+    assertNotNull(certificates);
+    assertTrue(certificates.isEmpty());
+  }
+ catch (  CertStoreException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    certStore.getCertificates(new MyOtherCertSelector());
+    fail("expected CertStoreException");
+  }
+ catch (  CertStoreException e) {
+  }
+}

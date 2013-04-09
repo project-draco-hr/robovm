@@ -1,0 +1,12 @@
+{
+  for (  Field field : URL.class.getDeclaredFields()) {
+    if (URLStreamHandlerFactory.class.equals(field.getType())) {
+      assertNull("URL declares multiple URLStreamHandlerFactory fields",factoryField);
+      factoryField=field;
+      factoryField.setAccessible(true);
+      oldFactory=(URLStreamHandlerFactory)factoryField.get(null);
+      return;
+    }
+  }
+  fail("URL does not declare a URLStreamHandlerFactory field");
+}

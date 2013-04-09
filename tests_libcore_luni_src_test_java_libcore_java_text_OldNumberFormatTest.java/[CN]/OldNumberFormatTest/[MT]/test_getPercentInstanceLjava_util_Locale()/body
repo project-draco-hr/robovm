@@ -1,0 +1,18 @@
+{
+  Locale csLocale=new Locale("cs","CZ");
+  Locale.setDefault(Locale.US);
+  if (Support_Locale.isLocaleAvailable(csLocale)) {
+    NumberFormat format=NumberFormat.getPercentInstance(csLocale);
+    assertNotSame("Instance is null",null,format);
+    assertTrue("Object is not instance of NumberFormat",format instanceof NumberFormat);
+    assertEquals("123\u00a0456\u00a0789\u00a0010\u00a0%",format.format(1234567890.0987654321));
+    assertEquals("#,##0\u00a0%",((DecimalFormat)format).toPattern());
+    assertEquals("12\u00a0345\u00a0678\u00a0900\u00a0%",format.format(123456789));
+  }
+  try {
+    NumberFormat.getInstance(null);
+    fail("java.lang.NullPointerException is not thrown");
+  }
+ catch (  java.lang.NullPointerException expected) {
+  }
+}

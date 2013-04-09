@@ -1,0 +1,44 @@
+{
+  dbf.setCoalescing(true);
+  assertTrue(dbf.isCoalescing());
+  textElements.clear();
+  cdataElements.clear();
+  Exception parseException=null;
+  DocumentBuilder parser=null;
+  try {
+    parser=dbf.newDocumentBuilder();
+    ValidationErrorHandler errorHandler=new ValidationErrorHandler();
+    parser.setErrorHandler(errorHandler);
+    Document document=parser.parse(getClass().getResourceAsStream("/recipt.xml"));
+    parseException=errorHandler.getFirstException();
+    goThroughDocument((Node)document,"");
+    assertTrue(textElements.contains("BeefParmesan<title>withGarlicAngelHairPasta</title>"));
+  }
+ catch (  Exception ex) {
+    parseException=ex;
+  }
+  parser.setErrorHandler(null);
+  if (parseException != null) {
+    fail("Unexpected exception " + parseException.getMessage());
+  }
+  dbf.setCoalescing(false);
+  assertFalse(dbf.isCoalescing());
+  textElements.clear();
+  cdataElements.clear();
+  try {
+    parser=dbf.newDocumentBuilder();
+    ValidationErrorHandler errorHandler=new ValidationErrorHandler();
+    parser.setErrorHandler(errorHandler);
+    Document document=parser.parse(getClass().getResourceAsStream("/recipt.xml"));
+    parseException=errorHandler.getFirstException();
+    goThroughDocument((Node)document,"");
+    assertFalse(textElements.contains("BeefParmesan<title>withGarlicAngelHairPasta</title>"));
+  }
+ catch (  Exception ex) {
+    parseException=ex;
+  }
+  parser.setErrorHandler(null);
+  if (parseException != null) {
+    fail("Unexpected exception " + parseException.getMessage());
+  }
+}

@@ -1,0 +1,30 @@
+{
+  Provider[] providers=Security.getProviders("Signature.DSA");
+  for (int i=0; i < providers.length; i++) {
+    Signature.getInstance("DSA",providers[i].getName());
+  }
+  try {
+    Signature.getInstance("bogus",providers[0].getName());
+    fail();
+  }
+ catch (  NoSuchAlgorithmException expected) {
+  }
+  Provider[] pp=Security.getProviders();
+  for (int i=0; i < pp.length; i++) {
+    try {
+      Signature.getInstance("DSA",pp[i].toString());
+      fail(pp[i].toString());
+    }
+ catch (    NoSuchProviderException expected) {
+    }
+  }
+  String[] sp={null,""};
+  for (int i=0; i < sp.length; i++) {
+    try {
+      Signature.getInstance("DSA",sp[i]);
+      fail(sp[i]);
+    }
+ catch (    IllegalArgumentException expected) {
+    }
+  }
+}

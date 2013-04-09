@@ -1,0 +1,30 @@
+{
+  TestSSLContext c=TestSSLContext.create(testKeyStore,testKeyStore);
+  String[] cipherSuites=c.clientContext.createSSLEngine().getSupportedCipherSuites();
+  for (  String cipherSuite : cipherSuites) {
+    boolean errorExpected=StandardNames.IS_RI && cipherSuite.endsWith("_SHA256");
+    try {
+      if (cipherSuite.equals(StandardNames.CIPHER_SUITE_SECURE_RENEGOTIATION)) {
+        continue;
+      }
+      if (cipherSuite.startsWith("TLS_KRB5_")) {
+        continue;
+      }
+      final String[] cipherSuiteArray=(secureRenegotiation ? new String[]{cipherSuite,StandardNames.CIPHER_SUITE_SECURE_RENEGOTIATION} : new String[]{cipherSuite});
+      assertConnected(TestSSLEnginePair.create(c,new TestSSLEnginePair.Hooks(){
+        @Override void beforeBeginHandshake(        SSLEngine client,        SSLEngine server){
+          client.setEnabledCipherSuites(cipherSuiteArray);
+          server.setEnabledCipherSuites(cipherSuiteArray);
+        }
+      }
+));
+      assertFalse(errorExpected);
+    }
+ catch (    Exception maybeExpected) {
+      if (!errorExpected) {
+        throw new Exception("Problem trying to connect cipher suite " + cipherSuite,maybeExpected);
+      }
+    }
+  }
+  c.close();
+}

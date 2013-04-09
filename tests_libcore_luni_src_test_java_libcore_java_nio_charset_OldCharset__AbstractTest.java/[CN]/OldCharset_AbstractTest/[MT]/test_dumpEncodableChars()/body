@@ -1,0 +1,24 @@
+{
+  if (testChars == null)   return;
+  if (testChars.length > 0)   return;
+  System.out.format("\ntest_dumpEncodableChars() for name %s => %s (class = %s)\n",charsetName,charset.name(),getClass().getName());
+  Charset_TestGenerator.Dumper out=new Charset_TestGenerator.Dumper1(16);
+  int code=0;
+  while (code < 256) {
+    while (!encoder.canEncode((char)code))     code++;
+    if (code < 65536) {
+      out.consume(code);
+      code+=1;
+    }
+  }
+  while (code < 65536) {
+    while (!encoder.canEncode((char)code))     code++;
+    if (code < 65536) {
+      out.consume(code);
+      code+=20;
+    }
+  }
+  System.out.println();
+  System.out.println("Encodable Chars dumped for Test Class " + getClass().getName());
+  fail("Encodable Chars dumped for Test Class " + getClass().getName());
+}

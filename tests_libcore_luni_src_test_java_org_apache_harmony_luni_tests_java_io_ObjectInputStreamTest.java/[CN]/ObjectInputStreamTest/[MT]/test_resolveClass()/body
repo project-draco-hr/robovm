@@ -1,0 +1,15 @@
+{
+  org.apache.harmony.luni.tests.pkg1.TestClass to1=new org.apache.harmony.luni.tests.pkg1.TestClass();
+  to1.i=555;
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  ObjectOutputStream oos=new ObjectOutputStream(baos);
+  oos.writeObject(to1);
+  oos.flush();
+  byte[] bytes=baos.toByteArray();
+  ByteArrayInputStream bais=new ByteArrayInputStream(bytes);
+  ObjectInputStream ois=new ObjectInputStreamWithResolve(bais);
+  org.apache.harmony.luni.tests.pkg2.TestClass to2=(org.apache.harmony.luni.tests.pkg2.TestClass)ois.readObject();
+  if (to2.i != to1.i) {
+    fail("Wrong object read. Expected val: " + to1.i + ", got: "+ to2.i);
+  }
+}

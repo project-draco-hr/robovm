@@ -1,0 +1,53 @@
+{
+  ListIterator i1=ll.listIterator();
+  ListIterator i2=ll.listIterator(0);
+  Object elm;
+  int n=0;
+  while (i2.hasNext()) {
+    if (n == 0 || n == objArray.length - 1) {
+      if (n == 0)       assertTrue("First element claimed to have a previous",!i2.hasPrevious());
+      if (n == objArray.length)       assertTrue("Last element claimed to have next",!i2.hasNext());
+    }
+    elm=i2.next();
+    assertTrue("Iterator returned elements in wrong order",elm == objArray[n]);
+    if (n > 0 && n < objArray.length - 1) {
+      assertTrue("Next index returned incorrect value",i2.nextIndex() == n + 1);
+      assertTrue("previousIndex returned incorrect value : " + i2.previousIndex() + ", n val: "+ n,i2.previousIndex() == n);
+    }
+    elm=i1.next();
+    assertTrue("Iterator returned elements in wrong order",elm == objArray[n]);
+    ++n;
+  }
+  i2=ll.listIterator(ll.size() / 2);
+  assertTrue((Integer)i2.next() == ll.size() / 2);
+  List myList=new LinkedList();
+  myList.add(null);
+  myList.add("Blah");
+  myList.add(null);
+  myList.add("Booga");
+  myList.add(null);
+  ListIterator li=myList.listIterator();
+  assertTrue("li.hasPrevious() should be false",!li.hasPrevious());
+  assertNull("li.next() should be null",li.next());
+  assertTrue("li.hasPrevious() should be true",li.hasPrevious());
+  assertNull("li.prev() should be null",li.previous());
+  assertNull("li.next() should be null",li.next());
+  assertEquals("li.next() should be Blah","Blah",li.next());
+  assertNull("li.next() should be null",li.next());
+  assertEquals("li.next() should be Booga","Booga",li.next());
+  assertTrue("li.hasNext() should be true",li.hasNext());
+  assertNull("li.next() should be null",li.next());
+  assertTrue("li.hasNext() should be false",!li.hasNext());
+  try {
+    ll.listIterator(-1);
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    ll.listIterator(ll.size() + 1);
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+}

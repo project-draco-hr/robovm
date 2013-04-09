@@ -1,0 +1,55 @@
+{
+  Thread.State state=Thread.currentThread().getState();
+  assertNotNull(state);
+  assertEquals(Thread.State.RUNNABLE,state);
+  final Semaphore sem=new Semaphore(0);
+  final Object lock=new Object();
+  Thread th=new Thread(){
+    @Override public void run(){
+      while (!sem.hasQueuedThreads()) {
+      }
+      sem.release();
+      while (run) {
+      }
+      try {
+        sem.acquire();
+      }
+ catch (      InterruptedException e) {
+        fail("InterruptedException was thrown.");
+      }
+synchronized (lock) {
+        lock.equals(new Object());
+      }
+synchronized (lock) {
+        try {
+          sem.release();
+          lock.wait(Long.MAX_VALUE);
+        }
+ catch (        InterruptedException e) {
+        }
+      }
+    }
+  }
+;
+  assertEquals(Thread.State.NEW,th.getState());
+  th.start();
+  sem.acquire();
+  assertEquals(Thread.State.RUNNABLE,th.getState());
+  run=false;
+  Thread.sleep(200);
+  assertEquals(Thread.State.WAITING,th.getState());
+synchronized (lock) {
+    sem.release();
+    long start=System.currentTimeMillis();
+    while (start + 1000 > System.currentTimeMillis()) {
+    }
+    assertEquals(Thread.State.BLOCKED,th.getState());
+  }
+  sem.acquire();
+synchronized (lock) {
+    assertEquals(Thread.State.TIMED_WAITING,th.getState());
+    th.interrupt();
+  }
+  th.join(1000);
+  assertEquals(Thread.State.TERMINATED,th.getState());
+}

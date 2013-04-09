@@ -1,0 +1,83 @@
+{
+  InputStream is=new BufferedInputStream(s.getInputStream());
+  PrintStream ps=new PrintStream(s.getOutputStream());
+  int nread=0;
+  s.setSoTimeout(mTimeout);
+  s.setTcpNoDelay(true);
+  do {
+    nread=parseStatusLine(is);
+    if (requestMethod != UNKNOWN_METHOD) {
+      nread=readHeaders(is);
+      pathToRequest().put(path,new Request(path,headers));
+      if (headers.get(requestHeaders[REQ_CONTENT_LENGTH]) != null) {
+        nread=readContent(is);
+      }
+    }
+ else {
+      if (nread > 0) {
+        ps.print(HTTP_VERSION_STRING + " " + HTTP_BAD_METHOD+ " unsupported method type: ");
+        ps.write(buf,0,5);
+        ps.write(EOL);
+        ps.flush();
+      }
+ else {
+      }
+      if (!keepAlive || nread <= 0) {
+        headers.clear();
+        readStarted=false;
+        log("SOCKET CLOSED");
+        s.close();
+        return;
+      }
+    }
+    testNum=-1;
+    printStatus(ps);
+    printHeaders(ps);
+    psWriteEOL(ps);
+    if (redirectCode == -1) {
+switch (requestMethod) {
+case GET_METHOD:
+        if ((testNum < -1) || (testNum > Support_TestWebData.tests.length - 1)) {
+          send404(ps);
+        }
+ else {
+          sendFile(ps);
+        }
+      break;
+case HEAD_METHOD:
+    break;
+case POST_METHOD:
+  if ((testNum > 0) || (testNum < Support_TestWebData.tests.length - 1)) {
+    sendFile(ps);
+  }
+break;
+default :
+break;
+}
+}
+ else {
+switch (redirectCode) {
+case 301:
+psPrint(ps,Support_TestWebData.testServerResponse[Support_TestWebData.REDIRECT_301]);
+break;
+case 302:
+psPrint(ps,Support_TestWebData.testServerResponse[Support_TestWebData.REDIRECT_302]);
+break;
+case 303:
+psPrint(ps,Support_TestWebData.testServerResponse[Support_TestWebData.REDIRECT_303]);
+break;
+case 307:
+psPrint(ps,Support_TestWebData.testServerResponse[Support_TestWebData.REDIRECT_307]);
+break;
+default :
+break;
+}
+}
+ps.flush();
+readStarted=false;
+headers.clear();
+}
+ while (keepAlive);
+log("SOCKET CLOSED");
+s.close();
+}

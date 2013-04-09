@@ -1,0 +1,53 @@
+{
+  int counter=0;
+  ThreadPool threadPool=new ThreadPool(numThreads);
+  ResultSet userTabs=conn.getMetaData().getTables(null,null,null,null);
+  while (userTabs.next()) {
+    String tableName=userTabs.getString("TABLE_NAME");
+    if (tableName.equals(DatabaseCreator.TEST_TABLE1)) {
+      statement.execute(DatabaseCreator.DROP_TABLE1);
+    }
+  }
+  db.exec(DatabaseCreator.CREATE_TABLE3,null);
+  db.exec(DatabaseCreator.CREATE_TABLE1,null);
+  try {
+    conn.setAutoCommit(false);
+    db.busy_handler(null);
+    db.busy_timeout(0);
+    int id1=numOfRecords - 3;
+    threadPool.runTask(createTask2(id1,dbFile.getPath(),tracker));
+    int id2=numOfRecords + 3;
+    threadPool.runTask(createTask1(id2,dbFile.getPath(),tracker));
+    int oldID=5;
+    int newID=100;
+    threadPool.runTask(createTask3(oldID,dbFile.getPath(),newID,tracker));
+    threadPool.join();
+    List<String> errors=tracker.getErrors();
+    assertTrue("No error occurred on DB but should have",errors.size() > 0);
+    assertEquals(errors.get(0),db.error_string(Constants.SQLITE_LOCKED));
+    assertEquals(errors.get(0),"database is locked");
+    db.exec("delete from " + DatabaseCreator.TEST_TABLE1 + " where 1",null);
+    db.exec("delete from " + DatabaseCreator.TEST_TABLE3 + " where 1",null);
+    db.busy_timeout(10000);
+    db.busy_handler(null);
+    tracker.reset();
+    threadPool=new ThreadPool(numThreads);
+    threadPool.runTask(createTask1(id1,dbFile.getPath(),tracker));
+    threadPool.runTask(createTask2(id2,dbFile.getPath(),tracker));
+    threadPool.join();
+    errors=tracker.getErrors();
+    if (errors.size() > 0) {
+      fail("busy timeout should prevent from lock exception!");
+      for (      String s : errors) {
+        System.out.println("Round 2 Error" + s);
+      }
+    }
+ else {
+    }
+  }
+  finally {
+    conn.setAutoCommit(true);
+    db.exec(DatabaseCreator.DROP_TABLE1,null);
+    db.exec(DatabaseCreator.DROP_TABLE3,null);
+  }
+}

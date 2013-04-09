@@ -1,0 +1,28 @@
+{
+  try {
+    Support_Resources.copyFile(resources,null,jarName);
+    JarFile jarFile=new JarFile(new File(resources,jarName));
+    assertEquals("Error in returned entry",311,jarFile.getJarEntry(entryName).getSize());
+    jarFile.close();
+  }
+ catch (  Exception e) {
+    fail("Exception during test: " + e.toString());
+  }
+  Support_Resources.copyFile(resources,null,jarName);
+  JarFile jarFile=new JarFile(new File(resources,jarName));
+  Enumeration<JarEntry> enumeration=jarFile.entries();
+  assertTrue(enumeration.hasMoreElements());
+  while (enumeration.hasMoreElements()) {
+    JarEntry je=enumeration.nextElement();
+    jarFile.getJarEntry(je.getName());
+  }
+  enumeration=jarFile.entries();
+  assertTrue(enumeration.hasMoreElements());
+  JarEntry je=enumeration.nextElement();
+  try {
+    jarFile.close();
+    jarFile.getJarEntry(je.getName());
+  }
+ catch (  IllegalStateException ee) {
+  }
+}

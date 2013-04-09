@@ -1,0 +1,16 @@
+{
+  ArrayList<Certificate> validCerts=new ArrayList<Certificate>();
+  for (Iterator i=certs.iterator(); i.hasNext(); ) {
+    Certificate c=(Certificate)i.next();
+    if (!(c instanceof X509Certificate)) {
+      throw new CertificateException("Not X509: " + c);
+    }
+    if (c instanceof TestInvalidX509Certificate) {
+      throw new CertificateException("Invalid (test) X509: " + c);
+    }
+    validCerts.add(c);
+  }
+  Certificate[] acerts=new Certificate[validCerts.size()];
+  validCerts.toArray(acerts);
+  return new TestCertPath(acerts);
+}

@@ -1,0 +1,85 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    keyStore.load(null,null);
+    try {
+      Builder.newInstance(keyStore,null);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      Builder.newInstance(keyStore.getType(),keyStore.getProvider(),null);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      Builder.newInstance(null,null,null,null);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+    try {
+      Builder.newInstance(keyStore.getType(),keyStore.getProvider(),null,null);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    keyStore.load(null,null);
+    Builder builder=Builder.newInstance(keyStore,PARAM_STORE);
+    try {
+      builder.getProtectionParameter(null);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+    assertEquals(keyStore,builder.getKeyStore());
+    try {
+      builder.getProtectionParameter(null);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+    assertEquals(PARAM_STORE,builder.getProtectionParameter(""));
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    populate(keyStore);
+    File file=File.createTempFile("keystore",keyStore.getProvider().getName());
+    OutputStream os=null;
+    try {
+      os=new FileOutputStream(file);
+      if (isReadOnly(keyStore)) {
+        try {
+          keyStore.store(os,PASSWORD_STORE);
+          fail();
+        }
+ catch (        UnsupportedOperationException expected) {
+        }
+        continue;
+      }
+      keyStore.store(os,PASSWORD_STORE);
+      os.close();
+      Builder builder=Builder.newInstance(keyStore.getType(),keyStore.getProvider(),file,PARAM_STORE);
+      assertEquals(keyStore.getType(),builder.getKeyStore().getType());
+      assertEquals(keyStore.getProvider(),builder.getKeyStore().getProvider());
+      assertEquals(PARAM_STORE,builder.getProtectionParameter(""));
+      assertEqualsKeyStores(file,PASSWORD_STORE,keyStore);
+    }
+  finally {
+      IoUtils.closeQuietly(os);
+      file.delete();
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    Builder builder=Builder.newInstance(keyStore.getType(),keyStore.getProvider(),PARAM_STORE);
+    assertEquals(keyStore.getType(),builder.getKeyStore().getType());
+    assertEquals(keyStore.getProvider(),builder.getKeyStore().getProvider());
+    assertEquals(PARAM_STORE,builder.getProtectionParameter(""));
+  }
+}

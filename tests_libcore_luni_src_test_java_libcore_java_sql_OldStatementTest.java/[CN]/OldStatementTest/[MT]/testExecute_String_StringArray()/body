@@ -1,0 +1,27 @@
+{
+  Statement st=null;
+  try {
+    String[] queries={"update zoo set name='Masha', family='cat' where id=2;","insert zoo(id, name, family) values (3, 'Vorobey', 'sparrow');","insert zoo(id, name, family) values (4, 'Slon', 'elephant');","select * from zoo"};
+    Vector<String[]> array=new Vector<String[]>();
+    array.addElement(null);
+    array.addElement(new String[]{"","","","","","","",""});
+    array.addElement(new String[]{"field 1","","field2"});
+    array.addElement(new String[]{"id","family","name"});
+    st=conn.createStatement();
+    for (int i=0; i < queries.length; i++) {
+      st.execute(queries[i],(String[])array.elementAt(i));
+      fail("Exception expected: not supported");
+    }
+    fail("Revise test implemenation for feature impl. has changed");
+    assertNotNull(st.getResultSet());
+    st.close();
+    assertNull(st.getResultSet());
+  }
+ catch (  SQLException e) {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+}

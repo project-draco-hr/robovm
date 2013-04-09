@@ -1,0 +1,25 @@
+{
+  ks.load(null,null);
+  if (isReadOnly(ks)) {
+    try {
+      setPrivateKey(ks);
+      fail();
+    }
+ catch (    UnsupportedOperationException e) {
+    }
+    return;
+  }
+  setPrivateKey(ks);
+  if (isNullPasswordAllowed(ks)) {
+    ks.setKeyEntry(ALIAS_NO_PASSWORD_PRIVATE,getPrivateKey().getPrivateKey(),null,getPrivateKey().getCertificateChain());
+  }
+  if (isCertificateEnabled(ks)) {
+    ks.setCertificateEntry(ALIAS_CERTIFICATE,getPrivateKey().getCertificate());
+  }
+  if (isSecretKeyEnabled(ks)) {
+    setSecretKey(ks);
+    if (isNullPasswordAllowed(ks)) {
+      ks.setKeyEntry(ALIAS_NO_PASSWORD_SECRET,getSecretKey(),null,null);
+    }
+  }
+}

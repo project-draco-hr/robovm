@@ -1,0 +1,32 @@
+{
+  ResultSet rs=meta.getImportedKeys(conn.getCatalog(),null,DatabaseCreator.TEST_TABLE1);
+  ResultSetMetaData rsmd=rs.getMetaData();
+  assertTrue("Rows do not obtained",rs.next());
+  int col=rsmd.getColumnCount();
+  assertEquals("Incorrect number of columns",14,col);
+  String[] columnNames={"PKTABLE_CAT","PKTABLE_SCHEM","PKTABLE_NAME","PKCOLUMN_NAME","FKTABLE_CAT","FKTABLE_SCHEM","FKTABLE_NAME","FKCOLUMN_NAME","KEY_SEQ","UPDATE_RULE","DELETE_RULE","FK_NAME","PK_NAME","DEFERRABILITY"};
+  for (int c=1; c <= col; ++c) {
+    assertEquals("Incorrect column name",columnNames[c - 1],rsmd.getColumnName(c));
+  }
+  assertEquals("Incorrect primary key table catalog",conn.getCatalog(),rs.getString("PKTABLE_CAT"));
+  assertEquals("Incorrect primary key table schema","",rs.getString("PKTABLE_SCHEM"));
+  assertEquals("Incorrect primary key table name",DatabaseCreator.TEST_TABLE3,rs.getString("PKTABLE_NAME"));
+  assertEquals("Incorrect primary key column name","fkey",rs.getString("PKCOLUMN_NAME"));
+  assertEquals("Incorrect foreign key table catalog",conn.getCatalog(),rs.getString("FKTABLE_CAT"));
+  assertEquals("Incorrect foreign key table schema","",rs.getString("FKTABLE_SCHEM"));
+  assertEquals("Incorrect foreign key table name",DatabaseCreator.TEST_TABLE1,rs.getString("FKTABLE_NAME"));
+  assertEquals("Incorrect foreign key column name","fk",rs.getString("FKCOLUMN_NAME"));
+  assertEquals("Incorrect sequence number within foreign key",1,rs.getShort("KEY_SEQ"));
+  assertEquals("Incorrect update rule value",DatabaseMetaData.importedKeyNoAction,rs.getShort("UPDATE_RULE"));
+  assertEquals("Incorrect delete rule value",DatabaseMetaData.importedKeyNoAction,rs.getShort("DELETE_RULE"));
+  assertEquals("Incorrect primary key name",null,rs.getString("PK_NAME"));
+  assertEquals("Incorrect deferrability",DatabaseMetaData.importedKeyNotDeferrable,rs.getShort("DEFERRABILITY"));
+  rs.close();
+  conn.close();
+  try {
+    meta.getImportedKeys(conn.getCatalog(),null,DatabaseCreator.TEST_TABLE1);
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

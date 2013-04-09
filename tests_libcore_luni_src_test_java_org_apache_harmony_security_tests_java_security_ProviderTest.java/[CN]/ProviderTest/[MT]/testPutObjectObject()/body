@@ -1,0 +1,20 @@
+{
+  p.put("MessageDigest.SHA-1","aaa.bbb.ccc.ddd");
+  p.put("Type.Algorithm","className");
+  assertEquals("aaa.bbb.ccc.ddd",p.getProperty("MessageDigest.SHA-1").trim());
+  Set services=p.getServices();
+  assertEquals(3,services.size());
+  for (Iterator it=services.iterator(); it.hasNext(); ) {
+    Provider.Service s=(Provider.Service)it.next();
+    if ("Type".equals(s.getType()) && "Algorithm".equals(s.getAlgorithm()) && "className".equals(s.getClassName())) {
+      continue;
+    }
+    if ("MessageDigest".equals(s.getType()) && "SHA-1".equals(s.getAlgorithm()) && "aaa.bbb.ccc.ddd".equals(s.getClassName())) {
+      continue;
+    }
+    if ("MessageDigest".equals(s.getType()) && "abc".equals(s.getAlgorithm()) && "SomeClassName".equals(s.getClassName())) {
+      continue;
+    }
+    fail("Incorrect service");
+  }
+}

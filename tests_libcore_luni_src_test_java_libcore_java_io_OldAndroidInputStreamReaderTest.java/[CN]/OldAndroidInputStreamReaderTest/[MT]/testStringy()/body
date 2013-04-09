@@ -1,0 +1,19 @@
+{
+  String src="The quick brown fox\u00A0\u00FF" + "\uFFFC\uD7C5\uDC03bloof";
+  String[] enc=new String[]{"utf-8","us-ascii","iso-8859-1","utf-16be","utf-16le","utf-16"};
+  for (int i=0; i < enc.length; i++) {
+    byte[] ba=src.getBytes(enc[i]);
+    String s1=new String(ba,enc[i]);
+    ByteArrayInputStream bais=new ByteArrayInputStream(ba);
+    InputStreamReader r=new InputStreamReader(bais,enc[i]);
+    try {
+      char[] ca=new char[600];
+      int n=r.read(ca,0,600);
+      String s2=new String(ca,0,n);
+      assertEquals(s1,s2);
+    }
+  finally {
+      r.close();
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  String nameNull=null;
+  String[] str={"test","","!@#$%^&*()","identity name"};
+  IdentityScope is;
+  IdentityScope iss=new IdentityScopeSubclass("test scope");
+  for (int i=0; i < str.length; i++) {
+    try {
+      is=new IdentityScopeSubclass(str[i],new IdentityScopeSubclass());
+      assertNotNull(is);
+      assertTrue(is instanceof IdentityScope);
+    }
+ catch (    Exception e) {
+      fail("Unexpected exception for parameter " + str[i]);
+    }
+  }
+  try {
+    is=new IdentityScopeSubclass(nameNull,new IdentityScopeSubclass());
+  }
+ catch (  NullPointerException npe) {
+  }
+catch (  Exception e) {
+    fail("Incorrect exception " + e + " was thrown");
+  }
+  try {
+    is=new IdentityScopeSubclass("test",iss);
+    is=new IdentityScopeSubclass("test",iss);
+    fail("KeyManagementException was not thrown");
+  }
+ catch (  KeyManagementException npe) {
+  }
+catch (  Exception e) {
+    fail("Incorrect exception " + e + " was thrown instead of KeyManagementException");
+  }
+}

@@ -1,0 +1,42 @@
+{
+  int[] keys={-1,-250,1,63,-512,-1024};
+  SecureRandom random=new SecureRandom();
+  KeyPairGenerator mKPG=new MyKeyPairGenerator2(null);
+  assertEquals("Algorithm must be null",mKPG.getAlgorithm(),MyKeyPairGenerator2.getResAlgorithm());
+  assertNull("genKeyPair() must return null",mKPG.genKeyPair());
+  assertNull("generateKeyPair() mut return null",mKPG.generateKeyPair());
+  for (int i=0; i < keys.length; i++) {
+    try {
+      mKPG.initialize(keys[i]);
+      fail("InvalidParameterException must be thrown (key: " + Integer.toString(keys[i]) + ")");
+    }
+ catch (    InvalidParameterException e) {
+    }
+    try {
+      mKPG.initialize(keys[i],random);
+      fail("InvalidParameterException must be thrown (key: " + Integer.toString(keys[i]) + ")");
+    }
+ catch (    InvalidParameterException e) {
+    }
+  }
+  try {
+    mKPG.initialize(64);
+  }
+ catch (  InvalidParameterException e) {
+    fail("Unexpected InvalidParameterException was thrown");
+  }
+  try {
+    mKPG.initialize(64,null);
+  }
+ catch (  InvalidParameterException e) {
+    fail("Unexpected InvalidParameterException was thrown");
+  }
+  try {
+    mKPG.initialize(null,random);
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+catch (  InvalidAlgorithmParameterException e) {
+    fail("Unexpected InvalidAlgorithmParameterException was thrown");
+  }
+}

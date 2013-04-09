@@ -1,0 +1,16 @@
+{
+  NetworkInterface lo=NetworkInterface.getByName("lo");
+  assertNull(lo.getHardwareAddress());
+  for (  InterfaceAddress ia : lo.getInterfaceAddresses()) {
+    assertNull(ia.getBroadcast());
+  }
+  NetworkInterface eth0=NetworkInterface.getByName("eth0");
+  if (eth0 != null) {
+    assertEquals(6,eth0.getHardwareAddress().length);
+    for (    InterfaceAddress ia : eth0.getInterfaceAddresses()) {
+      if (ia.getAddress() instanceof Inet4Address) {
+        assertNotNull(ia.getBroadcast());
+      }
+    }
+  }
+}

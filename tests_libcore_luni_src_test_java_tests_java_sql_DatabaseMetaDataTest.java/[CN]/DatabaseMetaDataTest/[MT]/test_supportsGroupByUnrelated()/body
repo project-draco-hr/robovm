@@ -1,0 +1,22 @@
+{
+  insertNewRecord();
+  String selectQuery="SELECT field1, field2 FROM " + DatabaseCreator.TEST_TABLE1 + " GROUP BY field3";
+  try {
+    statement.executeQuery(selectQuery);
+    if (!meta.supportsGroupByUnrelated()) {
+      fail("unrelated columns in group by are supported");
+    }
+  }
+ catch (  SQLException e) {
+    if (meta.supportsGroupByUnrelated()) {
+      fail("unrelated columns in group by are not supported");
+    }
+  }
+  conn.close();
+  try {
+    meta.supportsGroupByUnrelated();
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

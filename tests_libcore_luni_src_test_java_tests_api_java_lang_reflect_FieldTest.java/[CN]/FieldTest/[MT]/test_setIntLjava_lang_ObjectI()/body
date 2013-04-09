@@ -1,0 +1,52 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  int val=0;
+  try {
+    f=x.getClass().getDeclaredField("intField");
+    f.setInt(x,Integer.MIN_VALUE);
+    val=f.getInt(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during setInteger test: " + e.toString());
+  }
+  assertEquals("Returned incorrect int field value",Integer.MIN_VALUE,val);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    f.setInt(x,Integer.MIN_VALUE);
+    fail("Accessed field of invalid type");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("intPFField");
+    assertFalse(f.isAccessible());
+    f.setInt(x,Integer.MIN_VALUE);
+    fail("Accessed inaccessible field");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("intField");
+    f.setInt(null,Integer.MIN_VALUE);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  f=x.getClass().getDeclaredField("intSField");
+  f.setInt(null,Integer.MIN_VALUE);
+  val=f.getInt(x);
+  assertEquals("Returned incorrect int field value",Integer.MIN_VALUE,val);
+}

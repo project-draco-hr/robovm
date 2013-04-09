@@ -1,0 +1,39 @@
+{
+  String input="\u00bfMa\u00f1ana\u003f";
+  TableResult res=new TableResult();
+  String refOutput=null;
+  Stmt stat=null;
+  db.exec("create table encodingTest (encoded text DEFAULT NULL);",null);
+  stat=db.prepare("insert into encodingTest(encoded) values(:one);");
+  stat.bind(1,input);
+  stat.step();
+  db.exec("select * from encodingTest;",res);
+  String[] encInput=(String[])res.rows.elementAt(0);
+  String output=encInput[0];
+  assertEquals(input,output);
+  String[] charsetNames={"UTF-8","UTF-16","UTF-16BE","UTF-16LE"};
+  for (int i=0; i < charsetNames.length; i++) {
+    byte[] encInputBytes=input.getBytes(charsetNames[i]);
+    db.set_encoding(charsetNames[i]);
+    db.exec("select * from encodingTest;",res);
+    String[] encOutput=(String[])res.rows.elementAt(0);
+    String inputAsString=new String(encInputBytes,charsetNames[i]);
+    assertEquals(inputAsString,encOutput[0]);
+  }
+  db.set_encoding("UTF-16");
+  db.exec("select * from encodingTest;",res);
+  String[] encOutput1=(String[])res.rows.elementAt(0);
+  assertEquals("Got " + encOutput1[0] + " as UTF-16",input,encOutput1[0]);
+  db.set_encoding("US-ASCII");
+  db.exec("select * from encodingTest;",res);
+  String[] encOutput2=(String[])res.rows.elementAt(0);
+  assertEquals(new String(input.getBytes(),"US-ASCII"),encOutput2[0]);
+  stat.close();
+  db.exec("delete from encodingTest",null);
+  try {
+    db.set_encoding("");
+    fail("invalid input should fail");
+  }
+ catch (  Exception e) {
+  }
+}

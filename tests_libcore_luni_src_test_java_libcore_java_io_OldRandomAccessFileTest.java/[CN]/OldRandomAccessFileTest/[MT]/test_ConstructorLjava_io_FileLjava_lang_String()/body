@@ -1,0 +1,47 @@
+{
+  RandomAccessFile raf=null;
+  File tmpFile=new File(fileName);
+  try {
+    raf=new java.io.RandomAccessFile(tmpFile,"r");
+    fail("Test 1: FileNotFoundException expected.");
+  }
+ catch (  FileNotFoundException e) {
+  }
+catch (  IllegalArgumentException e) {
+    fail("Test 2: Unexpected IllegalArgumentException: " + e.getMessage());
+  }
+  tmpFile.createNewFile();
+  try {
+    try {
+      raf=new java.io.RandomAccessFile(tmpFile,"rwd");
+    }
+ catch (    IllegalArgumentException e) {
+      fail("Test 3: Unexpected IllegalArgumentException: " + e.getMessage());
+    }
+    raf.close();
+    try {
+      raf=new java.io.RandomAccessFile(tmpFile,"rws");
+    }
+ catch (    IllegalArgumentException e) {
+      fail("Test 4: Unexpected IllegalArgumentException: " + e.getMessage());
+    }
+    raf.close();
+    try {
+      raf=new java.io.RandomAccessFile(tmpFile,"rw");
+    }
+ catch (    IllegalArgumentException e) {
+      fail("Test 5: Unexpected IllegalArgumentException: " + e.getMessage());
+    }
+    raf.close();
+    try {
+      raf=new java.io.RandomAccessFile(tmpFile,"i");
+      fail("Test 6: IllegalArgumentException expected.");
+    }
+ catch (    IllegalArgumentException e) {
+    }
+  }
+  finally {
+    if (raf != null)     raf.close();
+    tmpFile.delete();
+  }
+}

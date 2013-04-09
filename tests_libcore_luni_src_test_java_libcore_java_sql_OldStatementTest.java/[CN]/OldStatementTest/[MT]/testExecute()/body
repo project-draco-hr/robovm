@@ -1,0 +1,40 @@
+{
+  String[] queries={"update zoo set name='Masha', family='cat' where id=2;","drop table if exists hutch","create table hutch (id integer not null, animal_id integer, address char(20), primary key (id));","insert into hutch (id, animal_id, address) values (1, 2, 'Birds-house, 1');","insert into hutch (id, animal_id, address) values (2, 1, 'Horse-house, 5');","select animal_id, address from hutch where animal_id=1;","create view address as select address from hutch where animal_id=2","drop view address;","drop table hutch;"};
+  boolean[] results={false,false,false,false,false,true,false,false,false};
+  for (int i=0; i < queries.length; i++) {
+    Statement st=null;
+    try {
+      st=conn.createStatement();
+      boolean res=st.execute(queries[i]);
+      assertEquals("different result for statement no. " + i,results[i],res);
+    }
+ catch (    SQLException e) {
+      fail("SQLException is thrown: " + e.getMessage());
+    }
+ finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+  }
+  String[] inc_queries={"update zoo_zoo set name='Masha', family='cat' where id=5;","drop table hutchNO","insert into hutch (id, animal_id, address) values (1, 2, 10);","select animal_id, from hutch where animal_id=1;","drop view address;","drop table hutch;","",null};
+  for (int i=0; i < inc_queries.length; i++) {
+    Statement st=null;
+    try {
+      st=conn.createStatement();
+      st.execute(inc_queries[i]);
+      fail("SQLException is not thrown for query: " + inc_queries[i]);
+    }
+ catch (    SQLException e) {
+    }
+ finally {
+      try {
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+  }
+}

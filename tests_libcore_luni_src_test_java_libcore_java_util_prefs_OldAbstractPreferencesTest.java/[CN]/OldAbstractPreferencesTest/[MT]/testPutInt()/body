@@ -1,0 +1,29 @@
+{
+  pref.putInt("IntValue",299792458);
+  pref.flush();
+  assertEquals(299792458,pref.getInt("IntValue",new Integer(1)));
+  try {
+    pref.putInt(null,new Integer(1));
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  int i;
+  StringBuffer sb=new StringBuffer();
+  for (i=0; i < Preferences.MAX_KEY_LENGTH + 1; i++) {
+    sb.append('c');
+  }
+  try {
+    pref.putInt(new String(sb),new Integer(1));
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  pref.removeNode();
+  try {
+    pref.putInt("IntValue",new Integer(1));
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+}

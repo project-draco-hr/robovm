@@ -1,0 +1,23 @@
+{
+  Field[] fields=URLConnection.class.getDeclaredFields();
+  int counter=0;
+  for (  Field field : fields) {
+    if (ContentHandlerFactory.class.equals(field.getType())) {
+      counter++;
+      factoryField=field;
+    }
+  }
+  if (counter == 1) {
+    isTestable=true;
+    factoryField.setAccessible(true);
+    try {
+      oldFactory=(ContentHandlerFactory)factoryField.get(null);
+    }
+ catch (    IllegalArgumentException e) {
+      fail("IllegalArgumentException was thrown during setUp: " + e.getMessage());
+    }
+catch (    IllegalAccessException e) {
+      fail("IllegalAccessException was thrown during setUp: " + e.getMessage());
+    }
+  }
+}

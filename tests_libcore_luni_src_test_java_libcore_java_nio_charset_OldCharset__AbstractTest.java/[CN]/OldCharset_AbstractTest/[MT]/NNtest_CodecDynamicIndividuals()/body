@@ -1,0 +1,26 @@
+{
+  encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+  decoder.onMalformedInput(CodingErrorAction.REPORT);
+  for (int code=32; code <= 65533; code++) {
+    if (encoder.canEncode((char)code)) {
+      CharBuffer inputCB=CharBuffer.allocate(1);
+      inputCB.put((char)code);
+      inputCB.rewind();
+      ByteBuffer intermediateBB=encoder.encode(inputCB);
+      inputCB.rewind();
+      intermediateBB.rewind();
+      try {
+        CharBuffer outputCB=decoder.decode(intermediateBB);
+        outputCB.rewind();
+        assertEqualCBs("decode(encode(A)) must be identical with A = " + code,inputCB,outputCB);
+        if (code == 165) {
+          outputCB.rewind();
+          System.out.println("WOW:" + outputCB.get());
+        }
+      }
+ catch (      CharacterCodingException e) {
+        fail("failed to decode(encode(" + code + "))");
+      }
+    }
+  }
+}

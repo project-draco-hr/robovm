@@ -1,0 +1,9 @@
+{
+  TestFCInt testInt=new TestFCInt();
+  db.exec("insert into " + DatabaseCreator.SIMPLE_TABLE1 + "  values (1,'"+ testInt.intVal+ "',3)",null);
+  db.create_function("testInt",1,testInt);
+  TableResult res=db.get_table("select testInt(speed) from " + DatabaseCreator.SIMPLE_TABLE1);
+  String row[]=(String[])res.rows.elementAt(0);
+  String val=row[0];
+  assertEquals(testInt.intVal,Integer.parseInt(val));
+}

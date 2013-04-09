@@ -1,0 +1,22 @@
+{
+  insertNewRecord();
+  String selectQuery="SELECT field1, field2 FROM " + DatabaseCreator.TEST_TABLE1 + " ORDER BY id + field3";
+  try {
+    statement.executeQuery(selectQuery);
+    if (!meta.supportsOrderByUnrelated()) {
+      fail("unrelated columns in order by are supported");
+    }
+  }
+ catch (  SQLException e) {
+    if (meta.supportsOrderByUnrelated()) {
+      fail("unrelated columns in order by are not supported");
+    }
+  }
+  conn.close();
+  try {
+    meta.supportsOrderByUnrelated();
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

@@ -1,0 +1,16 @@
+{
+  TestTrace t=new TestTrace();
+  assertEquals(db.last_error(),Constants.SQLITE_OK);
+  String errorString=db.error_string(Constants.SQLITE_ERROR);
+  try {
+    db.trace((Trace)t);
+    db.exec("create table TEST (res double)",t);
+    db.exec("create table TEST (res double)",t);
+  }
+ catch (  Exception e) {
+    assertEquals(db.last_error(),Constants.SQLITE_ERROR);
+    if (db.is3()) {
+      assertEquals("Unsupported Method (sqlite 3): error_string",db.error_string(db.last_error()),errorString);
+    }
+  }
+}

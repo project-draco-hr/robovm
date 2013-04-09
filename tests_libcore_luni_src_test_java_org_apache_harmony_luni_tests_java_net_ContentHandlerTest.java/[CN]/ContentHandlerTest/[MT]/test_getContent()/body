@@ -1,0 +1,15 @@
+{
+  URLConnection conn=new URL("http://www.apache.org").openConnection();
+  Class[] classes={Foo.class,String.class};
+  ContentHandler handler=new ContentHandlerImpl();
+  ((ContentHandlerImpl)handler).setContent(new Foo());
+  Object content=handler.getContent(conn,classes);
+  assertEquals("Foo",((Foo)content).getFoo());
+  ((ContentHandlerImpl)handler).setContent(new FooSub());
+  content=handler.getContent(conn,classes);
+  assertEquals("FooSub",((Foo)content).getFoo());
+  Class[] classes2={FooSub.class,String.class};
+  ((ContentHandlerImpl)handler).setContent(new Foo());
+  content=handler.getContent(conn,classes2);
+  assertNull(content);
+}

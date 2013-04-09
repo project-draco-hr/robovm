@@ -1,0 +1,48 @@
+{
+  DateFormat df=DateFormat.getInstance();
+  try {
+    Date current=new Date();
+    ParsePosition pp=new ParsePosition(0);
+    int parseIndex=pp.getIndex();
+    Date result=(Date)df.parseObject(df.format(current),pp);
+    assertEquals("Dates are different.",current.getDate(),result.getDate());
+    assertEquals("Days are different.",current.getDay(),result.getDay());
+    assertEquals("Months are different.",current.getMonth(),result.getMonth());
+    assertEquals("Years are different.",current.getYear(),result.getYear());
+    assertEquals("Hours are different",current.getHours(),result.getHours());
+    assertEquals("Minutes are diffetrent,",current.getMinutes(),result.getMinutes());
+    assertTrue("Parse operation return null",result != null);
+    assertTrue("ParseIndex is incorrect",pp.getIndex() != parseIndex);
+    pp.setIndex(0);
+    char[] cur=df.format(current).toCharArray();
+    cur[cur.length / 2]='Z';
+    String partialCorrect=new String(cur);
+    result=(Date)df.parseObject(partialCorrect,pp);
+    assertTrue("Parse operation return not-null",result == null);
+    assertTrue("ParseIndex is incorrect",pp.getIndex() == 0);
+    assertTrue("ParseErrorIndex is incorrect",pp.getErrorIndex() == cur.length / 2);
+    pp.setIndex(2);
+    char[] curDate=df.format(current).toCharArray();
+    char[] newArray=new char[curDate.length + pp.getIndex()];
+    for (int i=0; i < curDate.length; i++) {
+      newArray[i + pp.getIndex()]=curDate[i];
+    }
+    result=(Date)df.parseObject(new String(newArray),pp);
+    assertEquals("Dates are different.",current.getDate(),result.getDate());
+    assertEquals("Days are different.",current.getDay(),result.getDay());
+    assertEquals("Months are different.",current.getMonth(),result.getMonth());
+    assertEquals("Years are different.",current.getYear(),result.getYear());
+    assertEquals("Hours are different",current.getHours(),result.getHours());
+    assertEquals("Minutes are diffetrent,",current.getMinutes(),result.getMinutes());
+    try {
+      df.parseObject(df.format(current),null);
+      fail("Expected NullPointerException was not thrown");
+    }
+ catch (    NullPointerException e) {
+    }
+    assertNull(df.parseObject("test",pp));
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception " + e.toString());
+  }
+}

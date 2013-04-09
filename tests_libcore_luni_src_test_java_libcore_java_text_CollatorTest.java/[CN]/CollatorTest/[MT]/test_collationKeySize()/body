@@ -1,0 +1,22 @@
+{
+  StringBuilder b=new StringBuilder();
+  for (int i=0; i < 1024; i++) {
+    b.append("0123456789ABCDEF");
+  }
+  String sixteen=b.toString();
+  b.append("_THE_END");
+  String sixteenplus=b.toString();
+  Collator mColl=Collator.getInstance();
+  mColl.setStrength(Collator.PRIMARY);
+  byte[] arr=mColl.getCollationKey(sixteen).toByteArray();
+  int len=arr.length;
+  assertTrue("Collation key not 0 terminated",arr[arr.length - 1] == 0);
+  len--;
+  String foo=new String(arr,0,len,"iso8859-1");
+  arr=mColl.getCollationKey(sixteen).toByteArray();
+  len=arr.length;
+  assertTrue("Collation key not 0 terminated",arr[arr.length - 1] == 0);
+  len--;
+  String bar=new String(arr,0,len,"iso8859-1");
+  assertTrue("Collation keys should differ",foo.equals(bar));
+}

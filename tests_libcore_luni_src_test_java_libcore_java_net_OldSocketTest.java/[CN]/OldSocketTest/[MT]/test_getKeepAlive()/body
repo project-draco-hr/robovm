@@ -1,0 +1,28 @@
+{
+  try {
+    int sport=startServer("SServer getKeepAlive");
+    int portNumber=Support_PortManager.getNextPort();
+    Socket theSocket=new Socket(InetAddress.getLocalHost(),sport,null,portNumber);
+    theSocket.setKeepAlive(true);
+    assertTrue("getKeepAlive false when it should be true",theSocket.getKeepAlive());
+    theSocket.setKeepAlive(false);
+    assertFalse("getKeepAlive true when it should be False",theSocket.getKeepAlive());
+    theSocket.close();
+    try {
+      theSocket.setKeepAlive(false);
+      fail("IOException was not thrown after calling setKeepAlive " + "method.");
+    }
+ catch (    IOException ioe) {
+    }
+    try {
+      theSocket.getKeepAlive();
+      fail("IOException was not thrown after calling getKeepAlive +" + "method.");
+    }
+ catch (    IOException ioe) {
+    }
+    ensureExceptionThrownIfOptionIsUnsupportedOnOS(SO_KEEPALIVE);
+  }
+ catch (  Exception e) {
+    handleException(e,SO_KEEPALIVE);
+  }
+}

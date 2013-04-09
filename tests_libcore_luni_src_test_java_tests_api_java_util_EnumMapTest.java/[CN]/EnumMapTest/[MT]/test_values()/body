@@ -1,0 +1,120 @@
+{
+  EnumMap enumColorMap=new EnumMap<Color,Double>(Color.class);
+  enumColorMap.put(Color.Red,1);
+  enumColorMap.put(Color.Blue,null);
+  Collection collection=enumColorMap.values();
+  Collection collection1=enumColorMap.values();
+  assertSame("Should be same",collection1,collection);
+  try {
+    collection.add(new Integer(1));
+    fail("Should throw UnsupportedOperationException");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  assertTrue("Returned false for contained object",collection.contains(1));
+  assertTrue("Returned false for contained object",collection.contains(null));
+  assertFalse("Returned true for uncontained object",collection.contains(2));
+  assertTrue("Returned false when the object can be removed",collection.remove(null));
+  assertFalse("Returned true for uncontained object",collection.contains(null));
+  assertFalse("Returned true when the object can not be removed",collection.remove(null));
+  enumColorMap.put(Color.Blue,3);
+  assertTrue("Returned false for contained object",collection.contains(3));
+  enumColorMap.remove(Color.Blue);
+  assertFalse("Returned true for uncontained object",collection.contains(3));
+  assertEquals("Wrong size",1,collection.size());
+  collection.clear();
+  assertEquals("Wrong size",0,collection.size());
+  enumColorMap=new EnumMap<Color,Double>(Color.class);
+  enumColorMap.put(Color.Red,1);
+  enumColorMap.put(Color.Blue,null);
+  collection=enumColorMap.values();
+  Collection c=new ArrayList();
+  c.add(new Integer(1));
+  assertTrue("Should return true",collection.containsAll(c));
+  c.add(new Double(3.4));
+  assertFalse("Should return false",collection.containsAll(c));
+  assertTrue("Should return true",collection.removeAll(c));
+  assertEquals("Wrong size",1,collection.size());
+  assertFalse("Should return false",collection.removeAll(c));
+  assertEquals("Wrong size",1,collection.size());
+  try {
+    collection.addAll(c);
+    fail("Should throw UnsupportedOperationException");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  enumColorMap.put(Color.Red,1);
+  assertEquals("Wrong size",2,collection.size());
+  assertTrue("Should return true",collection.retainAll(c));
+  assertEquals("Wrong size",1,collection.size());
+  assertFalse("Should return false",collection.retainAll(c));
+  assertEquals(1,collection.size());
+  Object[] array=collection.toArray();
+  assertEquals("Wrong length",1,array.length);
+  assertEquals("Wrong key",1,array[0]);
+  enumColorMap=new EnumMap<Color,Double>(Color.class);
+  enumColorMap.put(Color.Red,1);
+  enumColorMap.put(Color.Blue,null);
+  collection=enumColorMap.values();
+  assertEquals("Wrong size",2,collection.size());
+  assertFalse("Returned true when the object can not be removed",collection.remove(new Integer("10")));
+  Iterator iter=enumColorMap.values().iterator();
+  Object value=iter.next();
+  assertTrue("Returned false for contained object",collection.contains(value));
+  value=iter.next();
+  assertTrue("Returned false for contained object",collection.contains(value));
+  enumColorMap.put(Color.Green,1);
+  enumColorMap.remove(Color.Blue);
+  assertFalse("Returned true for uncontained object",collection.contains(value));
+  iter.remove();
+  try {
+    iter.remove();
+    fail("Should throw IllegalStateException");
+  }
+ catch (  IllegalStateException e) {
+  }
+  assertFalse("Returned true for uncontained object",collection.contains(value));
+  iter=enumColorMap.values().iterator();
+  value=iter.next();
+  assertTrue("Returned false for contained object",collection.contains(value));
+  enumColorMap.put(Color.Green,3);
+  assertTrue("Returned false for contained object",collection.contains(value));
+  assertTrue("Returned false for contained object",collection.remove(new Integer("1")));
+  assertEquals("Wrong size",1,collection.size());
+  collection.clear();
+  assertEquals("Wrong size",0,collection.size());
+  enumColorMap=new EnumMap<Color,Double>(Color.class);
+  Integer integer1=new Integer(1);
+  enumColorMap.put(Color.Green,integer1);
+  enumColorMap.put(Color.Blue,null);
+  collection=enumColorMap.values();
+  iter=enumColorMap.values().iterator();
+  try {
+    iter.remove();
+    fail("Should throw IllegalStateException");
+  }
+ catch (  IllegalStateException e) {
+  }
+  value=iter.next();
+  assertEquals("Wrong value",integer1,value);
+  assertSame("Wrong value",integer1,value);
+  assertFalse("Returned true for unequal object",iter.equals(value));
+  iter.remove();
+  assertFalse("Returned true for unequal object",iter.equals(value));
+  try {
+    iter.remove();
+    fail("Should throw IllegalStateException");
+  }
+ catch (  IllegalStateException e) {
+  }
+  assertEquals("Wrong size",1,collection.size());
+  value=iter.next();
+  assertFalse("Returned true for unequal object",iter.equals(value));
+  iter.remove();
+  try {
+    iter.next();
+    fail("Should throw NoSuchElementException");
+  }
+ catch (  NoSuchElementException e) {
+  }
+}

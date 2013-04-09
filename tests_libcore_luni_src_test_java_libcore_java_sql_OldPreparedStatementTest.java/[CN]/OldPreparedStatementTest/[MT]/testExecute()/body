@@ -1,0 +1,98 @@
+{
+  Statement st=null;
+  PreparedStatement ps=null;
+  try {
+    String query="insert into zoo(id, family, name) values(?, ?, 'unknown animal')";
+    ps=conn.prepareStatement(query);
+    ps.setInt(1,3);
+    ps.setString(2,"No name");
+    assertFalse(ps.execute());
+    assertEquals(1,ps.getUpdateCount());
+    ps=conn.prepareStatement("select * from zoo");
+    assertTrue(ps.execute());
+    assertEquals(3,getCount(ps.getResultSet()));
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    String query="update zoo set name='Masha', family=? where id=?;";
+    ps=conn.prepareStatement(query);
+    ps.setString(1,"cat");
+    ps.setInt(2,2);
+    assertFalse(ps.execute());
+    assertEquals(1,ps.getUpdateCount());
+    st=conn.createStatement();
+    st.execute("select family from zoo where id=2");
+    ResultSet rs=st.getResultSet();
+    rs.next();
+    assertEquals("cat",rs.getString(1));
+  }
+  finally {
+    try {
+      ps.close();
+      st.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    conn.createStatement().execute("drop table if exists hutch");
+    String query="create table hutch (id integer not null, animal_id integer, address char(20), primary key (id));";
+    ps=conn.prepareStatement(query);
+    assertFalse(ps.execute());
+    assertTrue(ps.getUpdateCount() > 0);
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    String query="select name, family from zoo where id = ?";
+    ps=conn.prepareStatement(query);
+    ps.setInt(1,1);
+    assertTrue(ps.execute());
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    String query="select name, family from zoo where id = ?";
+    ps=conn.prepareStatement(query);
+    ps.execute();
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    String query="update zoo set name='Masha', family=? where id=?;";
+    ps=conn.prepareStatement(query);
+    ps.setString(1,"cat");
+    ps.setInt(2,2);
+    assertTrue(ps.execute("update zoo set name='Masha', family='cat' where id=2;"));
+  }
+ catch (  SQLException e) {
+  }
+ finally {
+    try {
+      ps.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+}

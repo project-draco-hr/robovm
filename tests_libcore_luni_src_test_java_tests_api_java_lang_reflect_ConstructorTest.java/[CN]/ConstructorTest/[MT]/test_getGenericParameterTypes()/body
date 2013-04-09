@@ -1,0 +1,31 @@
+{
+  Type[] types=null;
+  try {
+    Constructor<? extends ConstructorTestHelper> ctor=new ConstructorTestHelper().getClass().getConstructor(new Class[0]);
+    types=ctor.getGenericParameterTypes();
+  }
+ catch (  Exception e) {
+    fail("Exception during getParameterTypes test:" + e.toString());
+  }
+  assertEquals("Incorrect parameter returned",0,types.length);
+  Class<?>[] parms=null;
+  try {
+    parms=new Class[]{Object.class};
+    Constructor<? extends ConstructorTestHelper> ctor=new ConstructorTestHelper().getClass().getConstructor(parms);
+    types=ctor.getGenericParameterTypes();
+  }
+ catch (  Exception e) {
+    fail("Exception during getParameterTypes test:" + e.toString());
+  }
+  assertTrue("Incorrect parameter returned",types[0].equals(parms[0]));
+  try {
+    Constructor<GenericConstructorTestHelper> constructor=GenericConstructorTestHelper.class.getConstructor(Object.class,Object.class);
+    types=constructor.getGenericParameterTypes();
+  }
+ catch (  Exception e) {
+    fail("Exception during getParameterTypes test:" + e.toString());
+  }
+  assertEquals("Wrong number of parameter types returned",2,types.length);
+  assertEquals("Wrong number of parameter types returned","T",((TypeVariable)types[0]).getName());
+  assertEquals("Wrong number of parameter types returned","S",((TypeVariable)types[1]).getName());
+}

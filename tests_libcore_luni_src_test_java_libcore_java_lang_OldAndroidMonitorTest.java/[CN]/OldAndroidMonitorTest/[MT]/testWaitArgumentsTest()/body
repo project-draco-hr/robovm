@@ -1,0 +1,72 @@
+{
+  try {
+synchronized (this) {
+      wait(1);
+      wait(10);
+      wait(0,1);
+      wait(0,999999);
+      wait(1,1);
+      wait(1,999999);
+    }
+  }
+ catch (  InterruptedException ex) {
+    throw new RuntimeException("good Object.wait() interrupted",ex);
+  }
+catch (  Exception ex) {
+    throw new RuntimeException("Unexpected exception when calling" + "Object.wait() with good arguments",ex);
+  }
+  boolean sawException=false;
+  try {
+synchronized (this) {
+      wait(-1);
+    }
+  }
+ catch (  InterruptedException ex) {
+    throw new RuntimeException("bad Object.wait() interrupted",ex);
+  }
+catch (  IllegalArgumentException ex) {
+    sawException=true;
+  }
+catch (  Exception ex) {
+    throw new RuntimeException("Unexpected exception when calling" + "Object.wait() with bad arguments",ex);
+  }
+  if (!sawException) {
+    throw new RuntimeException("bad call to Object.wait() should " + "have thrown IllegalArgumentException");
+  }
+  sawException=false;
+  try {
+synchronized (this) {
+      wait(0,-1);
+    }
+  }
+ catch (  InterruptedException ex) {
+    throw new RuntimeException("bad Object.wait() interrupted",ex);
+  }
+catch (  IllegalArgumentException ex) {
+    sawException=true;
+  }
+catch (  Exception ex) {
+    throw new RuntimeException("Unexpected exception when calling" + "Object.wait() with bad arguments",ex);
+  }
+  if (!sawException) {
+    throw new RuntimeException("bad call to Object.wait() should " + "have thrown IllegalArgumentException");
+  }
+  sawException=false;
+  try {
+synchronized (this) {
+      wait(0,1000000);
+    }
+  }
+ catch (  InterruptedException ex) {
+    throw new RuntimeException("bad Object.wait() interrupted",ex);
+  }
+catch (  IllegalArgumentException ex) {
+    sawException=true;
+  }
+catch (  Exception ex) {
+    throw new RuntimeException("Unexpected exception when calling" + "Object.wait() with bad arguments",ex);
+  }
+  if (!sawException) {
+    throw new RuntimeException("bad call to Object.wait() should " + "have thrown IllegalArgumentException");
+  }
+}

@@ -1,0 +1,30 @@
+{
+  Provider[] providers=Security.getProviders();
+  for (  Provider provider : providers) {
+    Set<Provider.Service> services=provider.getServices();
+    for (    Provider.Service service : services) {
+      String type=service.getType();
+      if (!type.equals("Signature")) {
+        continue;
+      }
+      String algorithm=service.getAlgorithm();
+      try {
+        KeyPair kp=keyPair(algorithm);
+        Signature sig1=Signature.getInstance(algorithm);
+        assertEquals(algorithm,sig1.getAlgorithm());
+        test_Signature(sig1,kp);
+        Signature sig2=Signature.getInstance(algorithm,provider);
+        assertEquals(algorithm,sig2.getAlgorithm());
+        assertEquals(provider,sig2.getProvider());
+        test_Signature(sig2,kp);
+        Signature sig3=Signature.getInstance(algorithm,provider.getName());
+        assertEquals(algorithm,sig3.getAlgorithm());
+        assertEquals(provider,sig3.getProvider());
+        test_Signature(sig3,kp);
+      }
+ catch (      Exception e) {
+        throw new Exception("Problem testing Signature." + algorithm,e);
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  SortedMap subMap=tm.subMap(objArray[100].toString(),objArray[109].toString());
+  assertEquals("subMap is of incorrect size",9,subMap.size());
+  for (int counter=100; counter < 109; counter++) {
+    assertTrue("SubMap contains incorrect elements",subMap.get(objArray[counter].toString()).equals(objArray[counter]));
+  }
+  try {
+    tm.subMap(objArray[9].toString(),objArray[1].toString());
+    fail("end key less than start key should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  TreeMap<String,String> treeMapWithNull=new TreeMap<String,String>(new MockComparatorNullTolerable());
+  treeMapWithNull.put("key1","value1");
+  treeMapWithNull.put(null,"value2");
+  SortedMap<String,String> subMapWithNull=treeMapWithNull.subMap(null,"key1");
+  assertEquals("Size of subMap should be 1:",1,subMapWithNull.size());
+  SortedMap<String,String> map=new TreeMap<String,String>();
+  map.put("1","one");
+  map.put("2","two");
+  map.put("3","three");
+  assertEquals("3",map.lastKey());
+  SortedMap<String,String> sub=map.subMap("1","3");
+  assertEquals("2",sub.lastKey());
+  try {
+    tm.subMap(this,this);
+    fail("ClassCastException expected");
+  }
+ catch (  ClassCastException e) {
+  }
+  try {
+    tm.subMap(objArray[9].toString(),null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    tm.subMap(null,objArray[9].toString());
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+}

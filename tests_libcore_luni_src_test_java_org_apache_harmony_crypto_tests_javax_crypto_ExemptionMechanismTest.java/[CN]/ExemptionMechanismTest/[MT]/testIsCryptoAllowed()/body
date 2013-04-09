@@ -1,0 +1,16 @@
+{
+  Provider mProv=(new SpiEngUtils()).new MyProvider("MyExMechProvider","Provider for ExemptionMechanism testing",srvExemptionMechanism.concat(".").concat(defaultAlg),ExemptionMechanismProviderClass);
+  ExemptionMechanism em=new ExemptionMechanism(new MyExemptionMechanismSpi(),mProv,defaultAlg){
+  }
+;
+  Key key=new MyExemptionMechanismSpi().new tmpKey("Proba",new byte[0]);
+  assertFalse(em.isCryptoAllowed(key));
+  em.init(key);
+  assertFalse(em.isCryptoAllowed(key));
+  em.genExemptionBlob();
+  assertTrue(em.isCryptoAllowed(key));
+  Key key1=new MyExemptionMechanismSpi().new tmpKey("Proba",new byte[]{1});
+  assertFalse(em.isCryptoAllowed(key1));
+  em.init(key1);
+  assertFalse(em.isCryptoAllowed(key));
+}

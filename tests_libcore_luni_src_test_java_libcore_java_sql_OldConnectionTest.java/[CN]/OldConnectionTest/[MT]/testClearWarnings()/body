@@ -1,0 +1,47 @@
+{
+  SQLWarning w=conn.getWarnings();
+  assertNull(w);
+  Statement st=null;
+  try {
+    st=conn.createStatement();
+    st.execute("select animals from zoo");
+    fail("SQLException was not thrown");
+  }
+ catch (  SQLException e) {
+    assertNotNull(conn.getWarnings());
+  }
+ finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  conn.clearWarnings();
+  w=conn.getWarnings();
+  assertNull(w);
+  try {
+    st=conn.createStatement();
+    st.execute("select monkey from zoo");
+    fail("SQLException was not thrown");
+  }
+ catch (  SQLException e) {
+    assertEquals("SQLite.Exception: error in prepare/compile",e.getMessage());
+  }
+ finally {
+    try {
+      st.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  w=conn.getWarnings();
+  assertNotNull(w);
+  conn.close();
+  try {
+    conn.clearWarnings();
+    fail("Exception expected");
+  }
+ catch (  SQLException e) {
+  }
+}

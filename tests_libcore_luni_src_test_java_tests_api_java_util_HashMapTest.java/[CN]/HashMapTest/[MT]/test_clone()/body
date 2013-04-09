@@ -1,0 +1,30 @@
+{
+  HashMap hm2=(HashMap)hm.clone();
+  assertTrue("Clone answered equivalent HashMap",hm2 != hm);
+  for (int counter=0; counter < hmSize; counter++)   assertTrue("Clone answered unequal HashMap",hm.get(objArray2[counter]) == hm2.get(objArray2[counter]));
+  HashMap map=new HashMap();
+  map.put("key","value");
+  Set keys=map.keySet();
+  Collection values=map.values();
+  assertEquals("values() does not work","value",values.iterator().next());
+  assertEquals("keySet() does not work","key",keys.iterator().next());
+  AbstractMap map2=(AbstractMap)map.clone();
+  map2.put("key","value2");
+  Collection values2=map2.values();
+  assertTrue("values() is identical",values2 != values);
+  assertEquals("values() was not cloned","value2",values2.iterator().next());
+  map2.clear();
+  map2.put("key2","value3");
+  Set key2=map2.keySet();
+  assertTrue("keySet() is identical",key2 != keys);
+  assertEquals("keySet() was not cloned","key2",key2.iterator().next());
+  HashMap hashmap=new HashMap();
+  MockClonable mock=new MockClonable(1);
+  hashmap.put(1,mock);
+  assertEquals(1,((MockClonable)hashmap.get(1)).i);
+  HashMap hm3=(HashMap)hashmap.clone();
+  assertEquals(1,((MockClonable)hm3.get(1)).i);
+  mock.i=0;
+  assertEquals(0,((MockClonable)hashmap.get(1)).i);
+  assertEquals(0,((MockClonable)hm3.get(1)).i);
+}

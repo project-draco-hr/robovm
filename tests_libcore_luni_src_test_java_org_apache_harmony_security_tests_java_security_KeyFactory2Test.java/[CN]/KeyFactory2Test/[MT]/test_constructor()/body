@@ -1,0 +1,20 @@
+{
+  KeyFactorySpi kfs=new KeyFactorySpiStub();
+  try {
+    new KeyFactoryStub(null,null,null);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception " + e.getMessage());
+  }
+  Provider[] providers=Security.getProviders("KeyFactory.DSA");
+  if (providers != null) {
+    for (int i=0; i < providers.length; i++) {
+      KeyFactoryStub kf=new KeyFactoryStub(kfs,providers[i],"algorithm name");
+      assertEquals("algorithm name",kf.getAlgorithm());
+      assertEquals(providers[i],kf.getProvider());
+    }
+  }
+ else {
+    fail("No providers support KeyFactory.DSA");
+  }
+}

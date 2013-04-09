@@ -1,0 +1,16 @@
+{
+  Provider provider=new MyProvider();
+  Map<String,String> m=new HashMap<String,String>();
+  m.clear();
+  m.put("Alg.propName.algName","value");
+  provider.putAll(m);
+  try {
+    Security.addProvider(provider);
+    assertNotNull(Security.getAlgorithmProperty("algName","propName"));
+    assertNull(Security.getAlgorithmProperty("DSA",null));
+    assertNull(Security.getAlgorithmProperty("DSA","propName"));
+  }
+  finally {
+    Security.removeProvider(provider.getName());
+  }
+}

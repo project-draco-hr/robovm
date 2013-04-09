@@ -1,0 +1,21 @@
+{
+  List<Socket> backlog=new ArrayList<Socket>();
+  int peak=0;
+  try {
+    int max=100;
+    for (int i=0; i < max; i++) {
+      Socket socket=new Socket();
+      backlog.add(socket);
+      socket.connect(serverAddress,500);
+      peak++;
+    }
+    fail("Failed to exhaust backlog after " + max + " connections!");
+  }
+ catch (  IOException expected) {
+  }
+  System.out.println("backlog peaked at " + peak);
+  for (  Socket socket : backlog) {
+    socket.close();
+  }
+  assertTrue(peak >= specifiedBacklog && peak <= (specifiedBacklog + 3) * 1.5);
+}

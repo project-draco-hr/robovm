@@ -1,0 +1,23 @@
+{
+  byte[] rbuf;
+  File resources=Support_Resources.createTempFolder();
+  Support_Resources.copyFile(resources,null,"Broken_manifest.jar");
+  FileInputStream fis=new FileInputStream(new File(resources,"Broken_manifest.jar"));
+  ZipInputStream zis1=new ZipInputStream(fis);
+  zis1.getNextEntry();
+  zis1.getNextEntry();
+  rbuf=new byte[100];
+  try {
+    zis1.read(rbuf,10,90);
+    fail("ZipException expected");
+  }
+ catch (  ZipException ee) {
+  }
+  try {
+    zis1.close();
+    zis1.read(rbuf,10,90);
+    fail("IOException expected");
+  }
+ catch (  IOException ee) {
+  }
+}

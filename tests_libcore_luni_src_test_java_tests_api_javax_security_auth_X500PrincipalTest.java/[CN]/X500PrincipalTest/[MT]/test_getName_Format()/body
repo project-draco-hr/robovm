@@ -1,0 +1,39 @@
+{
+  String name="CN=Duke,OU=JavaSoft,O=Sun Microsystems,C=US";
+  String expectedName="cn=duke,ou=javasoft,o=sun microsystems,c=us";
+  X500Principal xpr=new X500Principal(name);
+  try {
+    String resName=xpr.getName(X500Principal.CANONICAL);
+    assertEquals(expectedName,resName);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception: " + e);
+  }
+  expectedName="CN=Duke, OU=JavaSoft, O=Sun Microsystems, C=US";
+  try {
+    String resName=xpr.getName(X500Principal.RFC1779);
+    assertEquals(expectedName,resName);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception: " + e);
+  }
+  try {
+    String resName=xpr.getName(X500Principal.RFC2253);
+    assertEquals(name,resName);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception: " + e);
+  }
+  try {
+    String resName=xpr.getName(null);
+    fail("IllegalArgumentException  wasn't thrown");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  try {
+    String resName=xpr.getName("RFC2254");
+    fail("IllegalArgumentException  wasn't thrown");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+}

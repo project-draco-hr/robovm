@@ -1,0 +1,18 @@
+{
+  server.enqueue(new MockResponse().setResponseCode(redirectCode).addHeader("Location: /page2").setBody("This page has moved!"));
+  server.enqueue(new MockResponse().setBody("Page 2"));
+  server.play();
+  HttpURLConnection connection=(HttpURLConnection)server.getUrl("/page1").openConnection();
+  connection.setDoOutput(true);
+  byte[] requestBody={'A','B','C','D'};
+  OutputStream outputStream=connection.getOutputStream();
+  outputStream.write(requestBody);
+  outputStream.close();
+  assertEquals("Page 2",readAscii(connection.getInputStream(),Integer.MAX_VALUE));
+  assertTrue(connection.getDoOutput());
+  RecordedRequest page1=server.takeRequest();
+  assertEquals("POST /page1 HTTP/1.1",page1.getRequestLine());
+  assertEquals(Arrays.toString(requestBody),Arrays.toString(page1.getBody()));
+  RecordedRequest page2=server.takeRequest();
+  assertEquals("GET /page2 HTTP/1.1",page2.getRequestLine());
+}

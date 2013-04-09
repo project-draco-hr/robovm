@@ -1,0 +1,20 @@
+{
+  String sql="SELECT onum, " + DatabaseCreator.ORDERS_TABLE + ".cnum"+ " FROM "+ DatabaseCreator.SALESPEOPLE_TABLE+ ", "+ DatabaseCreator.CUSTOMERS_TABLE+ ", "+ DatabaseCreator.ORDERS_TABLE+ " WHERE "+ DatabaseCreator.CUSTOMERS_TABLE+ ".city <> "+ DatabaseCreator.SALESPEOPLE_TABLE+ ".city"+ " AND "+ DatabaseCreator.ORDERS_TABLE+ ".cnum = "+ DatabaseCreator.CUSTOMERS_TABLE+ ".cnum"+ " AND "+ DatabaseCreator.ORDERS_TABLE+ ".snum = "+ DatabaseCreator.SALESPEOPLE_TABLE+ ".snum";
+  ResultSet result=statement.executeQuery(sql);
+  HashMap<Integer,Integer> value=new HashMap<Integer,Integer>();
+  value.put(3001,2008);
+  value.put(3002,2007);
+  value.put(3006,2008);
+  value.put(3009,2002);
+  value.put(3007,2004);
+  value.put(3010,2004);
+  while (result.next()) {
+    int key=result.getInt("onum");
+    int val=result.getInt("cnum");
+    assertTrue("wrong value of onum field",value.containsKey(key));
+    assertEquals("wrong value of cnum field",value.get(key),(Integer)val);
+    value.remove(key);
+  }
+  assertTrue("expected rows number doesn't equal actual rows number",value.isEmpty());
+  result.close();
+}

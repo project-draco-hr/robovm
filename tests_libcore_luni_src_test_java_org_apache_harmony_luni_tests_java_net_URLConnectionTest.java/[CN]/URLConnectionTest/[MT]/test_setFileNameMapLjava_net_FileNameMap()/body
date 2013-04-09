@@ -1,0 +1,29 @@
+{
+  FileNameMap mapOld=URLConnection.getFileNameMap();
+  URLConnection.setFileNameMap(null);
+  assertNotNull(URLConnection.getFileNameMap());
+  try {
+    URLConnection.setFileNameMap(new java.net.FileNameMap(){
+      public String getContentTypeFor(      String fileName){
+        if (fileName == null || fileName.length() < 1)         return null;
+        String name=fileName.toLowerCase();
+        String type=null;
+        if (name.endsWith(".xml"))         type="text/xml";
+ else         if (name.endsWith(".dtd"))         type="text/dtd";
+ else         if (name.endsWith(".pdf"))         type="application/pdf";
+ else         if (name.endsWith(".zip"))         type="application/zip";
+ else         if (name.endsWith(".gif"))         type="image/gif";
+ else         type="application/unknown";
+        return type;
+      }
+    }
+);
+    FileNameMap mapNew=URLConnection.getFileNameMap();
+    assertEquals("application/pdf",mapNew.getContentTypeFor(".pdf"));
+    assertEquals("application/zip",mapNew.getContentTypeFor(".zip"));
+    assertEquals("image/gif",mapNew.getContentTypeFor(".gif"));
+  }
+  finally {
+    URLConnection.setFileNameMap(mapOld);
+  }
+}

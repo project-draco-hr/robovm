@@ -1,0 +1,24 @@
+{
+  if (num <= 0) {
+    throw new IllegalArgumentException("Invalid ports number: " + num);
+  }
+  DatagramSocket[] dss=new DatagramSocket[num];
+  int[] ports=new int[num];
+  try {
+    for (int i=0; i < num; ++i) {
+      dss[i]=new DatagramSocket(0);
+      ports[i]=dss[i].getLocalPort();
+    }
+  }
+ catch (  Exception ex) {
+    throw new Error("Unable to get " + num + " ports for UDP: "+ ex);
+  }
+ finally {
+    for (int i=0; i < num; ++i) {
+      if (dss[i] != null) {
+        dss[i].close();
+      }
+    }
+  }
+  return ports;
+}

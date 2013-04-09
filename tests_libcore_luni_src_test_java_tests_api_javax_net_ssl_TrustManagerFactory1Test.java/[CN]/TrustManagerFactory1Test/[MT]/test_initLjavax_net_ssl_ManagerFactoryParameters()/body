@@ -1,0 +1,36 @@
+{
+  ManagerFactoryParameters par=null;
+  TrustManagerFactory[] trustMF=createTMFac();
+  assertNotNull("TrustManagerFactory objects were not created",trustMF);
+  for (int i=0; i < trustMF.length; i++) {
+    try {
+      trustMF[i].init(par);
+      fail("InvalidAlgorithmParameterException must be thrown");
+    }
+ catch (    InvalidAlgorithmParameterException e) {
+    }
+  }
+  String keyAlg="DSA";
+  String validCaNameRfc2253=("CN=Test CA," + "OU=Testing Division," + "O=Test It All,"+ "L=Test Town,"+ "ST=Testifornia,"+ "C=Testland");
+  try {
+    KeyStore kStore=KeyStore.getInstance(KeyStore.getDefaultType());
+    kStore.load(null,null);
+    PublicKey pk=new TestKeyPair(keyAlg).getPublic();
+    TrustAnchor ta=new TrustAnchor(validCaNameRfc2253,pk,getFullEncoding());
+    Set<TrustAnchor> trustAnchors=new HashSet<TrustAnchor>();
+    trustAnchors.add(ta);
+    X509CertSelector xcs=new X509CertSelector();
+    PKIXBuilderParameters pkixBP=new PKIXBuilderParameters(trustAnchors,xcs);
+    CertPathTrustManagerParameters cptmp=new CertPathTrustManagerParameters(pkixBP);
+    TrustManagerFactory tmf=TrustManagerFactory.getInstance(getDefaultAlgorithm());
+    try {
+      tmf.init(cptmp);
+    }
+ catch (    Exception ex) {
+      fail(ex + " was thrown for init(ManagerFactoryParameters spec)");
+    }
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception for configuration: " + e);
+  }
+}

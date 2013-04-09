@@ -1,0 +1,29 @@
+{
+  TableResult resPriv=null;
+  TableResult resPub=null;
+  TableResult emptyTable=new TableResult();
+  String insertPublic="insert into public_table values(1,2)";
+  String insertPrivate="insert into private_table values(1,2)";
+  db.exec("create table public_table(c1 integer, c2 integer);",null);
+  db.exec("create table private_table(c1 integer, c2 integer);",null);
+  db.exec(insertPublic,null);
+  db.exec(insertPrivate,null);
+  resPriv=db.get_table("select * from private_table");
+  resPub=db.get_table("select * from public_table");
+  AuthorizerCallback cb=new AuthorizerCallback();
+  db.set_authorizer(cb);
+  db.exec("select * from private_table",cb);
+  assertTrue(cb.wasCalled());
+  try {
+    db.exec(insertPublic,null);
+    fail("authorization failed");
+  }
+ catch (  Exception e) {
+  }
+  try {
+    db.exec(insertPrivate,null);
+    fail("authorization failed");
+  }
+ catch (  Exception e1) {
+  }
+}

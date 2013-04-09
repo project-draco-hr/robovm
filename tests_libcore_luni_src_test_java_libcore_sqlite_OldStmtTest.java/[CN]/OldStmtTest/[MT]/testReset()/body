@@ -1,0 +1,12 @@
+{
+  db.exec("create table TEST (res integer not null)",null);
+  st=db.prepare("insert into TEST values (:one);");
+  st.bind(1,1);
+  st.step();
+  st.reset();
+  assertEquals(1,st.bind_parameter_count());
+  st.step();
+  TableResult count=db.get_table("select count(*) from TEST where res=1",null);
+  String[] row0=(String[])count.rows.elementAt(0);
+  assertEquals(2,Integer.parseInt(row0[0]));
+}

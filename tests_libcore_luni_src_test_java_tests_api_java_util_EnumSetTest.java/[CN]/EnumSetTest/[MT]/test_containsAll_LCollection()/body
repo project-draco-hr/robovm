@@ -1,0 +1,117 @@
+{
+  EnumSet<EnumFoo> set=EnumSet.noneOf(EnumFoo.class);
+  Enum[] elements=EnumFoo.class.getEnumConstants();
+  for (int i=0; i < elements.length; i++) {
+    set.add((EnumFoo)elements[i]);
+  }
+  try {
+    set.containsAll(null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  EnumSet<EmptyEnum> emptySet=EnumSet.noneOf(EmptyEnum.class);
+  elements=EmptyEnum.class.getEnumConstants();
+  for (int i=0; i < elements.length; i++) {
+    emptySet.add((EmptyEnum)elements[i]);
+  }
+  boolean result=set.containsAll(emptySet);
+  assertTrue("Should return true",result);
+  Collection rawCollection=new ArrayList();
+  result=set.containsAll(rawCollection);
+  assertTrue("Should contain empty collection:",result);
+  rawCollection.add(1);
+  result=set.containsAll(rawCollection);
+  assertFalse("Should return false",result);
+  rawCollection.add(EnumWithInnerClass.a);
+  result=set.containsAll(rawCollection);
+  assertFalse("Should return false",result);
+  EnumSet rawSet=EnumSet.noneOf(EnumFoo.class);
+  result=set.containsAll(rawSet);
+  assertTrue("Should contain empty set",result);
+  emptySet=EnumSet.noneOf(EmptyEnum.class);
+  result=set.containsAll(emptySet);
+  assertTrue("No class cast should be performed on empty set",result);
+  Collection<EnumFoo> collection=new ArrayList<EnumFoo>();
+  collection.add(EnumFoo.a);
+  result=set.containsAll(collection);
+  assertTrue("Should contain all elements in collection",result);
+  EnumSet<EnumFoo> fooSet=EnumSet.noneOf(EnumFoo.class);
+  fooSet.add(EnumFoo.a);
+  result=set.containsAll(fooSet);
+  assertTrue("Should return true",result);
+  set.clear();
+  try {
+    set.containsAll(null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  Collection<EnumWithInnerClass> collectionWithSubclass=new ArrayList<EnumWithInnerClass>();
+  collectionWithSubclass.add(EnumWithInnerClass.a);
+  result=set.containsAll(collectionWithSubclass);
+  assertFalse("Should return false",result);
+  EnumSet<EnumWithInnerClass> setWithSubclass=EnumSet.noneOf(EnumWithInnerClass.class);
+  setWithSubclass.add(EnumWithInnerClass.a);
+  result=set.containsAll(setWithSubclass);
+  assertFalse("Should return false",result);
+  Set<HugeEnum> hugeSet=EnumSet.noneOf(HugeEnum.class);
+  hugeSet.add(HugeEnum.a);
+  hugeSet.add(HugeEnum.b);
+  hugeSet.add(HugeEnum.aa);
+  hugeSet.add(HugeEnum.bb);
+  hugeSet.add(HugeEnum.cc);
+  hugeSet.add(HugeEnum.dd);
+  Set<HugeEnum> anotherHugeSet=EnumSet.noneOf(HugeEnum.class);
+  hugeSet.add(HugeEnum.b);
+  hugeSet.add(HugeEnum.cc);
+  result=hugeSet.containsAll(anotherHugeSet);
+  assertTrue(result);
+  try {
+    hugeSet.containsAll(null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  Set<HugeEnumWithInnerClass> hugeSetWithInnerClass=EnumSet.noneOf(HugeEnumWithInnerClass.class);
+  hugeSetWithInnerClass.add(HugeEnumWithInnerClass.a);
+  hugeSetWithInnerClass.add(HugeEnumWithInnerClass.b);
+  result=hugeSetWithInnerClass.containsAll(hugeSetWithInnerClass);
+  assertTrue(result);
+  result=hugeSet.containsAll(hugeSetWithInnerClass);
+  assertFalse(result);
+  rawCollection=new ArrayList();
+  result=hugeSet.containsAll(rawCollection);
+  assertTrue("Should contain empty collection:",result);
+  rawCollection.add(1);
+  result=hugeSet.containsAll(rawCollection);
+  assertFalse("Should return false",result);
+  rawCollection.add(EnumWithInnerClass.a);
+  result=set.containsAll(rawCollection);
+  assertFalse("Should return false",result);
+  rawSet=EnumSet.noneOf(HugeEnum.class);
+  result=hugeSet.containsAll(rawSet);
+  assertTrue("Should contain empty set",result);
+  EnumSet<HugeEnumWithInnerClass> emptyHugeSet=EnumSet.noneOf(HugeEnumWithInnerClass.class);
+  result=hugeSet.containsAll(emptyHugeSet);
+  assertTrue("No class cast should be performed on empty set",result);
+  Collection<HugeEnum> hugeCollection=new ArrayList<HugeEnum>();
+  hugeCollection.add(HugeEnum.a);
+  result=hugeSet.containsAll(hugeCollection);
+  assertTrue("Should contain all elements in collection",result);
+  hugeSet.clear();
+  try {
+    hugeSet.containsAll(null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  Collection<HugeEnumWithInnerClass> hugeCollectionWithSubclass=new ArrayList<HugeEnumWithInnerClass>();
+  hugeCollectionWithSubclass.add(HugeEnumWithInnerClass.a);
+  result=hugeSet.containsAll(hugeCollectionWithSubclass);
+  assertFalse("Should return false",result);
+  EnumSet<HugeEnumWithInnerClass> hugeSetWithSubclass=EnumSet.noneOf(HugeEnumWithInnerClass.class);
+  hugeSetWithSubclass.add(HugeEnumWithInnerClass.a);
+  result=hugeSet.containsAll(hugeSetWithSubclass);
+  assertFalse("Should return false",result);
+}

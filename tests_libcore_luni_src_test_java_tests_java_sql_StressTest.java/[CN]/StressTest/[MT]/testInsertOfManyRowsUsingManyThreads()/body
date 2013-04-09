@@ -1,0 +1,22 @@
+{
+  Logger.global.info("java.sql stress test: multiple threads and many operations.");
+  int numConnections=getConnectionNum();
+  int tasksPerConnection=Support_SQL.sqlMaxTasks / numConnections;
+  Logger.global.info("Opening " + numConnections + " to database "+ Support_SQL.getFilename());
+  ThreadPool threadPool=new ThreadPool(numConnections);
+  for (int i=0; i < numConnections; ++i) {
+    Logger.global.info(" creating " + tasksPerConnection + " tasks for Connection "+ i);
+    threadPool.runTask(insertTask(numConnections,i));
+  }
+  threadPool.join();
+  assertEquals("Unable to create a connection",numConnections,vc.size());
+  try {
+    ResultSet rs=statement.executeQuery("SELECT COUNT(*) as counter FROM " + DatabaseCreator.TEST_TABLE2);
+    assertTrue("RecordSet is empty",rs.next());
+    assertEquals("Incorrect number of records",tasksPerConnection * numConnections,rs.getInt("counter"));
+    rs.close();
+  }
+ catch (  SQLException sql) {
+    fail("Unexpected SQLException " + sql.toString());
+  }
+}

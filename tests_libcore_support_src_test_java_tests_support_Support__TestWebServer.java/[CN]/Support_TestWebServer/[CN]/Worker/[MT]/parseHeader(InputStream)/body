@@ -1,0 +1,25 @@
+{
+  int index=0;
+  int nread=0;
+  log("Parse a header");
+  nread=readOneLine(is);
+  if (nread == -1) {
+    requestMethod=UNKNOWN_METHOD;
+    return -1;
+  }
+  int i=index;
+  while (buf[i] != (byte)':') {
+    if ((buf[i] == (byte)'\n') || (buf[i] == (byte)'\r')) {
+      return UNKNOWN_METHOD;
+    }
+    i++;
+  }
+  String headerName=new String(buf,0,i);
+  i++;
+  while (buf[i] == ' ') {
+    i++;
+  }
+  String headerValue=new String(buf,i,nread - i - 2);
+  headers.put(headerName,headerValue);
+  return nread;
+}

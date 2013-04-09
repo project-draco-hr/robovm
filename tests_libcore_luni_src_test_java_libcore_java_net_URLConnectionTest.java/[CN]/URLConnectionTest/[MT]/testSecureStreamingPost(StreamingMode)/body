@@ -1,0 +1,29 @@
+{
+  TestSSLContext testSSLContext=TestSSLContext.create();
+  server.useHttps(testSSLContext.serverContext.getSocketFactory(),false);
+  server.enqueue(new MockResponse().setBody("Success!"));
+  server.play();
+  HttpsURLConnection connection=(HttpsURLConnection)server.getUrl("/").openConnection();
+  connection.setSSLSocketFactory(testSSLContext.clientContext.getSocketFactory());
+  connection.setDoOutput(true);
+  byte[] requestBody={'A','B','C','D'};
+  if (streamingMode == StreamingMode.FIXED_LENGTH) {
+    connection.setFixedLengthStreamingMode(requestBody.length);
+  }
+ else   if (streamingMode == StreamingMode.CHUNKED) {
+    connection.setChunkedStreamingMode(0);
+  }
+  OutputStream outputStream=connection.getOutputStream();
+  outputStream.write(requestBody);
+  outputStream.close();
+  assertEquals("Success!",readAscii(connection.getInputStream(),Integer.MAX_VALUE));
+  RecordedRequest request=server.takeRequest();
+  assertEquals("POST / HTTP/1.1",request.getRequestLine());
+  if (streamingMode == StreamingMode.FIXED_LENGTH) {
+    assertEquals(Collections.<Integer>emptyList(),request.getChunkSizes());
+  }
+ else   if (streamingMode == StreamingMode.CHUNKED) {
+    assertEquals(Arrays.asList(4),request.getChunkSizes());
+  }
+  assertEquals(Arrays.toString(requestBody),Arrays.toString(request.getBody()));
+}

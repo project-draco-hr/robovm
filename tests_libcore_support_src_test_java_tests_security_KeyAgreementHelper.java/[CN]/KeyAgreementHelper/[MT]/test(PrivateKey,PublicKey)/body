@@ -1,0 +1,25 @@
+{
+  KeyAgreement keyAgreement=null;
+  try {
+    keyAgreement=KeyAgreement.getInstance(algorithmName);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    Assert.fail(e.getMessage());
+  }
+  try {
+    keyAgreement.init(encryptKey);
+  }
+ catch (  InvalidKeyException e) {
+    Assert.fail(e.getMessage());
+  }
+  try {
+    keyAgreement.doPhase(decryptKey,true);
+  }
+ catch (  InvalidKeyException e) {
+    Assert.fail(e.getMessage());
+  }
+catch (  IllegalStateException e) {
+    Assert.fail(e.getMessage());
+  }
+  Assert.assertNotNull("generated secret is null",keyAgreement.generateSecret());
+}

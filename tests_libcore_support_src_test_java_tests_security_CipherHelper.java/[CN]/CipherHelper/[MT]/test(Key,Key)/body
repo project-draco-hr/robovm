@@ -1,0 +1,28 @@
+{
+  Cipher cipher=null;
+  try {
+    cipher=Cipher.getInstance(algorithmName);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    Assert.fail(e.getMessage());
+  }
+catch (  NoSuchPaddingException e) {
+    Assert.fail(e.getMessage());
+  }
+  try {
+    cipher.init(mode1,encryptKey);
+  }
+ catch (  InvalidKeyException e) {
+    Assert.fail(e.getMessage());
+  }
+  byte[] encrypted=crypt(cipher,plainData.getBytes());
+  try {
+    cipher.init(mode2,decryptKey);
+  }
+ catch (  InvalidKeyException e) {
+    Assert.fail(e.getMessage());
+  }
+  byte[] decrypted=crypt(cipher,encrypted);
+  String decryptedString=new String(decrypted);
+  Assert.assertEquals("transformed data does not match",plainData,decryptedString);
+}

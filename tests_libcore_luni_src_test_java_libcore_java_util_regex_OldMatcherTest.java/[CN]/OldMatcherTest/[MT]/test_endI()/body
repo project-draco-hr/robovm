@@ -1,0 +1,19 @@
+{
+  String testPattern="(((abb)a)(bb))";
+  String testString="cccabbabbabbabbabb";
+  Pattern pat=Pattern.compile(testPattern);
+  Matcher mat=pat.matcher(testString);
+  int start=3;
+  int end=6;
+  int i, j;
+  for (j=0; j < 3; j++) {
+    while (mat.find(start + j - 2)) {
+      for (i=0; i < 4; i++) {
+        assertEquals("End is wrong for group " + i + " :"+ mat.group(i),start + mat.group(i).length(),mat.end(i));
+      }
+      assertEquals("End is wrong for group " + i + " :"+ mat.group(i),start + 4 + mat.group(i).length(),mat.end(i));
+      start=end;
+      end+=3;
+    }
+  }
+}

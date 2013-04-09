@@ -1,0 +1,11 @@
+{
+  ErrorRecorder errorRecorder=new ErrorRecorder();
+  domConfiguration.setParameter("split-cdata-sections",false);
+  domConfiguration.setParameter("error-handler",errorRecorder);
+  domConfiguration.setParameter("namespaces",false);
+  Element root=document.createElement("foo");
+  document.appendChild(root);
+  root.appendChild(document.createCDATASection("ABC]]>DEF"));
+  document.normalizeDocument();
+  errorRecorder.assertAllErrors(DOMError.SEVERITY_ERROR,"wf-invalid-character");
+}

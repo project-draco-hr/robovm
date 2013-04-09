@@ -1,0 +1,48 @@
+{
+  String type="DSA";
+  KeyStore keyTest=KeyStore.getInstance(KeyStore.getDefaultType());
+  keyTest.load(null,pssWord);
+  Certificate[] chain={new MyCertificate(type,testEncoding),new MyCertificate(type,testEncoding)};
+  DSAPrivateKey privateKey1=(DSAPrivateKey)KeyFactory.getInstance(type).generatePrivate(new DSAPrivateKeySpec(new BigInteger("1"),new BigInteger("2"),new BigInteger("3"),new BigInteger("4")));
+  KeyStore.PasswordProtection pp=new KeyStore.PasswordProtection(pssWord);
+  KeyStore.PrivateKeyEntry pke=new KeyStore.PrivateKeyEntry(getPrivateKey(),chain);
+  KeyStore.PrivateKeyEntry pke1=new KeyStore.PrivateKeyEntry(privateKey1,chain);
+  try {
+    keyTest.setEntry("alias",pke,null);
+    fail();
+  }
+ catch (  Exception expected) {
+  }
+  keyTest.setEntry("alias",pke,pp);
+  KeyStore.PrivateKeyEntry pkeActual=(KeyStore.PrivateKeyEntry)keyTest.getEntry("alias",pp);
+  assertTrue(Arrays.equals(chain,pkeActual.getCertificateChain()));
+  assertEquals(getPrivateKey(),pkeActual.getPrivateKey());
+  assertEquals(new MyCertificate(type,testEncoding),pkeActual.getCertificate());
+  assertTrue(keyTest.entryInstanceOf("alias",KeyStore.PrivateKeyEntry.class));
+  keyTest.setEntry("alias",pke1,pp);
+  pkeActual=(KeyStore.PrivateKeyEntry)keyTest.getEntry("alias",pp);
+  assertTrue(Arrays.equals(chain,pkeActual.getCertificateChain()));
+  DSAPrivateKey actualPrivateKey=(DSAPrivateKey)pkeActual.getPrivateKey();
+  assertEquals(privateKey1.getX(),actualPrivateKey.getX());
+  assertEquals(privateKey1.getParams().getG(),actualPrivateKey.getParams().getG());
+  assertEquals(privateKey1.getParams().getP(),actualPrivateKey.getParams().getP());
+  assertEquals(privateKey1.getParams().getQ(),actualPrivateKey.getParams().getQ());
+  assertEquals(new MyCertificate(type,testEncoding),pkeActual.getCertificate());
+  assertTrue(keyTest.entryInstanceOf("alias",KeyStore.PrivateKeyEntry.class));
+  keyTest.setEntry("alias2",pke1,pp);
+  pkeActual=(KeyStore.PrivateKeyEntry)keyTest.getEntry("alias2",pp);
+  assertTrue(Arrays.equals(chain,pkeActual.getCertificateChain()));
+  actualPrivateKey=(DSAPrivateKey)pkeActual.getPrivateKey();
+  assertEquals(privateKey1.getX(),actualPrivateKey.getX());
+  assertEquals(privateKey1.getParams().getG(),actualPrivateKey.getParams().getG());
+  assertEquals(privateKey1.getParams().getP(),actualPrivateKey.getParams().getP());
+  assertEquals(privateKey1.getParams().getQ(),actualPrivateKey.getParams().getQ());
+  assertEquals(new MyCertificate(type,testEncoding),pkeActual.getCertificate());
+  assertTrue(keyTest.entryInstanceOf("alias2",KeyStore.PrivateKeyEntry.class));
+  try {
+    keyTest.setEntry(null,null,null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+}

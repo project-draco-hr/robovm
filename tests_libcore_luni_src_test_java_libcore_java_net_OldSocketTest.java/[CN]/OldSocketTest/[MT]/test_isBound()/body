@@ -1,0 +1,27 @@
+{
+  InetAddress addr=InetAddress.getLocalHost();
+  int port=Support_PortManager.getNextPort();
+  ServerSocket serverSocket=new ServerSocket(port,5,addr);
+  Socket theSocket=new Socket(addr,port);
+  Socket servSock=serverSocket.accept();
+  assertTrue("Socket indicated  not bound when it should be (1)",theSocket.isBound());
+  theSocket.close();
+  serverSocket.close();
+  InetSocketAddress theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+  theSocket=new Socket();
+  assertFalse("Socket indicated bound when it was not (2)",theSocket.isBound());
+  serverSocket=new ServerSocket();
+  serverSocket.bind(theAddress);
+  theSocket.connect(theAddress);
+  servSock=serverSocket.accept();
+  assertTrue("Socket indicated not bound when it should be (2)",theSocket.isBound());
+  theSocket.close();
+  serverSocket.close();
+  InetSocketAddress theLocalAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+  theSocket=new Socket();
+  assertFalse("Socket indicated bound when it was not (3)",theSocket.isBound());
+  theSocket.bind(theLocalAddress);
+  assertTrue("Socket indicated not bound when it should be (3a)",theSocket.isBound());
+  theSocket.close();
+  assertTrue("Socket indicated not bound when it should be (3b)",theSocket.isBound());
+}

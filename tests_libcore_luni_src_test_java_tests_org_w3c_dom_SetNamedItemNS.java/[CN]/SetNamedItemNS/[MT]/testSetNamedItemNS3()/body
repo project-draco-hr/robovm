@@ -1,0 +1,21 @@
+{
+  String namespaceURI="http://www.nist.gov";
+  String qualifiedName="prefix:newAttr";
+  Document doc;
+  Node arg;
+  NodeList elementList;
+  Node testAddress;
+  NamedNodeMap attributes;
+  Node retnode;
+  String value;
+  doc=(Document)load("staffNS",builder);
+  arg=doc.createAttributeNS(namespaceURI,qualifiedName);
+  arg.setNodeValue("newValue");
+  elementList=doc.getElementsByTagName("address");
+  testAddress=elementList.item(0);
+  attributes=testAddress.getAttributes();
+  attributes.setNamedItemNS(arg);
+  retnode=attributes.getNamedItemNS(namespaceURI,"newAttr");
+  value=retnode.getNodeValue();
+  assertEquals("throw_Equals","newValue",value);
+}

@@ -1,0 +1,28 @@
+{
+  KeyFactory kf=KeyFactory.getInstance("RSA");
+  RSAPrivateCrtKeySpec keySpec=new RSAPrivateCrtKeySpec(RSA_2048_modulus,RSA_2048_publicExponent,RSA_2048_privateExponent,null,null,null,null,null);
+  final PrivateKey privKey;
+  try {
+    privKey=kf.generatePrivate(keySpec);
+  }
+ catch (  NullPointerException e) {
+    if (StandardNames.IS_RI) {
+      return;
+    }
+ else {
+      fail("Private key should be created");
+      return;
+    }
+  }
+  Signature sig=Signature.getInstance("SHA1withRSA");
+  sig.initSign(privKey);
+  sig.update(Vector1Data);
+  byte[] signature=sig.sign();
+  assertNotNull("Signature must not be null",signature);
+  assertTrue("Signature should match expected",Arrays.equals(signature,SHA1withRSA_Vector1Signature));
+  RSAPublicKeySpec pubKeySpec=new RSAPublicKeySpec(RSA_2048_modulus,RSA_2048_publicExponent);
+  PublicKey pubKey=kf.generatePublic(pubKeySpec);
+  sig.initVerify(pubKey);
+  sig.update(Vector1Data);
+  assertTrue("Signature must verify correctly",sig.verify(signature));
+}

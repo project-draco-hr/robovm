@@ -1,0 +1,19 @@
+{
+  String[] expected=new String[BUILTIN_SCHEMAS.length + userExpected.length];
+  System.arraycopy(BUILTIN_SCHEMAS,0,expected,0,BUILTIN_SCHEMAS.length);
+  System.arraycopy(userExpected,0,expected,BUILTIN_SCHEMAS.length,userExpected.length);
+  for (int i=BUILTIN_SCHEMAS.length; i < expected.length; i++) {
+    expected[i]=getStoredIdentifier(expected[i]);
+  }
+  Arrays.sort(expected);
+  int nextMatch=0;
+  while (rs.next()) {
+    String schema=rs.getString("TABLE_SCHEM");
+    assertNotNull(schema);
+    if (nextMatch < expected.length) {
+      if (expected[nextMatch].equals(schema))       nextMatch++;
+    }
+  }
+  rs.close();
+  assertEquals("Schemas missing ",expected.length,nextMatch);
+}

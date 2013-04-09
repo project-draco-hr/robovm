@@ -1,0 +1,12 @@
+{
+  server.enqueue(new MockResponse());
+  server.enqueue(new MockResponse());
+  server.play();
+  HttpURLConnection a=(HttpURLConnection)server.getUrl("/").openConnection();
+  a.setRequestProperty("Connection","close");
+  assertEquals(200,a.getResponseCode());
+  HttpURLConnection b=(HttpURLConnection)server.getUrl("/").openConnection();
+  assertEquals(200,b.getResponseCode());
+  assertEquals(0,server.takeRequest().getSequenceNumber());
+  assertEquals("When connection: close is used, each request should get its own connection",0,server.takeRequest().getSequenceNumber());
+}

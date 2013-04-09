@@ -1,0 +1,18 @@
+{
+  boolean absolute=this.absolute;
+  long amount=this.amount;
+  long start=System.currentTimeMillis();
+  if (absolute) {
+    UNSAFE.park(true,start + amount);
+  }
+ else {
+    UNSAFE.park(false,amount);
+  }
+  long end=System.currentTimeMillis();
+synchronized (this) {
+    startMillis=start;
+    endMillis=end;
+    completed=true;
+    notifyAll();
+  }
+}

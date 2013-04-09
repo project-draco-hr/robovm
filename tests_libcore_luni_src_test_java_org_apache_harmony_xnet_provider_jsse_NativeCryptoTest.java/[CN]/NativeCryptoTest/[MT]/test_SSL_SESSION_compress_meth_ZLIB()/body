@@ -1,0 +1,27 @@
+{
+  final ServerSocket listener=new ServerSocket(0);
+  Hooks cHooks=new Hooks(){
+    @Override public int beforeHandshake(    int c) throws SSLException {
+      int s=super.beforeHandshake(c);
+      NativeCrypto.SSL_clear_options(s,NativeCrypto.SSL_OP_NO_COMPRESSION);
+      return s;
+    }
+    @Override public void afterHandshake(    int session,    int s,    int c,    Socket sock,    FileDescriptor fd,    SSLHandshakeCallbacks callback) throws Exception {
+      assertEquals("ZLIB",NativeCrypto.SSL_SESSION_compress_meth(c,session));
+      super.afterHandshake(session,s,c,sock,fd,callback);
+    }
+  }
+;
+  Hooks sHooks=new ServerHooks(getServerPrivateKey(),getServerCertificates()){
+    @Override public int beforeHandshake(    int c) throws SSLException {
+      int s=super.beforeHandshake(c);
+      NativeCrypto.SSL_clear_options(s,NativeCrypto.SSL_OP_NO_COMPRESSION);
+      return s;
+    }
+  }
+;
+  Future<TestSSLHandshakeCallbacks> client=handshake(listener,0,true,cHooks,null);
+  Future<TestSSLHandshakeCallbacks> server=handshake(listener,0,false,sHooks,null);
+  client.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+  server.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+}

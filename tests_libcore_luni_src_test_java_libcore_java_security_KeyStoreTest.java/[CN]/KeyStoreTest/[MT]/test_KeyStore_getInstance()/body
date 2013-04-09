@@ -1,0 +1,53 @@
+{
+  String type=KeyStore.getDefaultType();
+  try {
+    KeyStore.getInstance(null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  assertNotNull(KeyStore.getInstance(type));
+  String providerName=StandardNames.SECURITY_PROVIDER_NAME;
+  try {
+    KeyStore.getInstance(null,(String)null);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    KeyStore.getInstance(null,providerName);
+    fail();
+  }
+ catch (  Exception e) {
+    if (e.getClass() != NullPointerException.class && e.getClass() != KeyStoreException.class) {
+      throw e;
+    }
+  }
+  try {
+    KeyStore.getInstance(type,(String)null);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  assertNotNull(KeyStore.getInstance(type,providerName));
+  Provider provider=Security.getProvider(providerName);
+  try {
+    KeyStore.getInstance(null,(Provider)null);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    KeyStore.getInstance(null,provider);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    KeyStore.getInstance(type,(Provider)null);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  assertNotNull(KeyStore.getInstance(type,provider));
+}

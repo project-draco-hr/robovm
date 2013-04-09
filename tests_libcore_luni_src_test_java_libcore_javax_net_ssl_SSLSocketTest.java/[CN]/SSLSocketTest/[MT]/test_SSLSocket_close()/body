@@ -1,0 +1,94 @@
+{
+  TestSSLSocketPair pair=TestSSLSocketPair.create();
+  SSLSocket server=pair.server;
+  SSLSocket client=pair.client;
+  assertFalse(server.isClosed());
+  assertFalse(client.isClosed());
+  InputStream input=client.getInputStream();
+  OutputStream output=client.getOutputStream();
+  server.close();
+  client.close();
+  assertTrue(server.isClosed());
+  assertTrue(client.isClosed());
+  server.close();
+  client.close();
+  HandshakeCompletedListener l=new HandshakeCompletedListener(){
+    public void handshakeCompleted(    HandshakeCompletedEvent e){
+    }
+  }
+;
+  client.addHandshakeCompletedListener(l);
+  assertNotNull(client.getEnabledCipherSuites());
+  assertNotNull(client.getEnabledProtocols());
+  client.getEnableSessionCreation();
+  client.getNeedClientAuth();
+  assertNotNull(client.getSession());
+  assertNotNull(client.getSSLParameters());
+  assertNotNull(client.getSupportedProtocols());
+  client.getUseClientMode();
+  client.getWantClientAuth();
+  client.removeHandshakeCompletedListener(l);
+  client.setEnabledCipherSuites(new String[0]);
+  client.setEnabledProtocols(new String[0]);
+  client.setEnableSessionCreation(false);
+  client.setNeedClientAuth(false);
+  client.setSSLParameters(client.getSSLParameters());
+  client.setWantClientAuth(false);
+  try {
+    client.startHandshake();
+    fail();
+  }
+ catch (  SocketException expected) {
+  }
+  try {
+    client.getInputStream();
+    fail();
+  }
+ catch (  SocketException expected) {
+  }
+  try {
+    client.getOutputStream();
+    fail();
+  }
+ catch (  SocketException expected) {
+  }
+  try {
+    input.read();
+    fail();
+  }
+ catch (  SocketException expected) {
+  }
+  try {
+    input.read(null,-1,-1);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+    assertTrue(StandardNames.IS_RI);
+  }
+catch (  SocketException expected) {
+    assertFalse(StandardNames.IS_RI);
+  }
+  try {
+    output.write(-1);
+    fail();
+  }
+ catch (  SocketException expected) {
+  }
+  try {
+    output.write(null,-1,-1);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+    assertTrue(StandardNames.IS_RI);
+  }
+catch (  SocketException expected) {
+    assertFalse(StandardNames.IS_RI);
+  }
+  try {
+    client.setUseClientMode(false);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  pair.close();
+}

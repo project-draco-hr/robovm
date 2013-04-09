@@ -1,0 +1,60 @@
+{
+  File signedFile=null;
+  try {
+    Support_Resources.copyFile(resources,null,jarName4);
+    signedFile=new File(resources,jarName4);
+  }
+ catch (  Exception e) {
+    fail("Failed to create local file 2: " + e);
+  }
+  try {
+    JarFile jar=new JarFile(signedFile);
+    JarEntry entry=new JarEntry(entryName3);
+    InputStream in=jar.getInputStream(entry);
+    in.read();
+  }
+ catch (  Exception e) {
+    fail("Exception during test 3: " + e);
+  }
+  try {
+    JarFile jar=new JarFile(signedFile);
+    JarEntry entry=new JarEntry(entryName3);
+    InputStream in=jar.getInputStream(entry);
+    byte[] dummy=getAllBytesFromStream(in);
+    assertNull("found certificates",entry.getCertificates());
+  }
+ catch (  Exception e) {
+    fail("Exception during test 4: " + e);
+  }
+  try {
+    JarFile jar=new JarFile(signedFile);
+    JarEntry entry=new JarEntry(entryName3);
+    entry.setSize(1076);
+    InputStream in=jar.getInputStream(entry);
+    byte[] dummy=getAllBytesFromStream(in);
+    fail("SecurityException should be thrown.");
+  }
+ catch (  SecurityException e) {
+  }
+catch (  Exception e) {
+    fail("Exception during test 5: " + e);
+  }
+  try {
+    Support_Resources.copyFile(resources,null,jarName5);
+    signedFile=new File(resources,jarName5);
+  }
+ catch (  Exception e) {
+    fail("Failed to create local file 5: " + e);
+  }
+  try {
+    JarFile jar=new JarFile(signedFile);
+    JarEntry entry=new JarEntry(entryName3);
+    InputStream in=jar.getInputStream(entry);
+    fail("SecurityException should be thrown.");
+  }
+ catch (  SecurityException e) {
+  }
+catch (  Exception e) {
+    fail("Exception during test 5: " + e);
+  }
+}

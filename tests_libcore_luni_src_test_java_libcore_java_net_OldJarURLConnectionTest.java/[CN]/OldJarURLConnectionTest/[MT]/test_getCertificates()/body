@@ -1,0 +1,19 @@
+{
+  URL u=createContent("TestCodeSigners.jar","Test.class");
+  juc=(JarURLConnection)u.openConnection();
+  assertNull(juc.getCertificates());
+  JarEntry je=juc.getJarEntry();
+  JarFile jf=juc.getJarFile();
+  InputStream is=jf.getInputStream(je);
+  is.skip(je.getSize());
+  Certificate[] certs=juc.getCertificates();
+  assertEquals(3,certs.length);
+  URL invURL=createContent("InvalidJar.jar","Test.class");
+  JarURLConnection juConn=(JarURLConnection)invURL.openConnection();
+  try {
+    juConn.getCertificates();
+    fail("IOException was not thrown.");
+  }
+ catch (  java.io.IOException io) {
+  }
+}

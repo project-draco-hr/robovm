@@ -1,0 +1,29 @@
+{
+  String str="AbCdEfGhIjKlM\nOpQrStUvWxYz";
+  ByteArrayInputStream aa=new ByteArrayInputStream(str.getBytes());
+  ByteArrayInputStream ba=new ByteArrayInputStream(str.getBytes());
+  ByteArrayInputStream ca=new ByteArrayInputStream(str.getBytes());
+  PushbackInputStream a=new PushbackInputStream(aa,7);
+  try {
+    a.unread("push".getBytes());
+    Assert.assertEquals("pushAbCdEfGhIjKlM\nOpQrStUvWxYz",read(a));
+  }
+  finally {
+    a.close();
+  }
+  PushbackInputStream b=new PushbackInputStream(ba,9);
+  try {
+    b.unread('X');
+    Assert.assertEquals("XAbCdEfGhI",read(b,10));
+  }
+  finally {
+    b.close();
+  }
+  PushbackInputStream c=new PushbackInputStream(ca);
+  try {
+    Assert.assertEquals("bdfhjl\nprtvxz",skipRead(c));
+  }
+  finally {
+    c.close();
+  }
+}

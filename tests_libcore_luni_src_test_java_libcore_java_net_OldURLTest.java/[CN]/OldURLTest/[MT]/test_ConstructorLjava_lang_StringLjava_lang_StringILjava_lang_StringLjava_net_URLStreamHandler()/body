@@ -1,0 +1,24 @@
+{
+  u=new URL("http","www.yahoo.com",8080,"test.html#foo",null);
+  assertEquals("SSISH1 returns a wrong protocol","http",u.getProtocol());
+  assertEquals("SSISH1 returns a wrong host","www.yahoo.com",u.getHost());
+  assertEquals("SSISH1 returns a wrong port",8080,u.getPort());
+  assertEquals("SSISH1 returns a wrong file","/test.html",u.getFile());
+  assertTrue("SSISH1 returns a wrong anchor: " + u.getRef(),u.getRef().equals("foo"));
+  u=new URL("http","www.yahoo.com",8080,"test.html#foo",new MyHandler());
+  assertEquals("SSISH2 returns a wrong protocol","http",u.getProtocol());
+  assertEquals("SSISH2 returns a wrong host","www.yahoo.com",u.getHost());
+  assertEquals("SSISH2 returns a wrong port",8080,u.getPort());
+  assertEquals("SSISH2 returns a wrong file","/test.html",u.getFile());
+  assertTrue("SSISH2 returns a wrong anchor: " + u.getRef(),u.getRef().equals("foo"));
+  TestURLStreamHandler lh=new TestURLStreamHandler();
+  u=new URL("http","www.yahoo.com",8080,"test.html#foo",lh);
+  try {
+    new URL(null,"1",0,"file",lh);
+    fail("Exception expected, but nothing was thrown!");
+  }
+ catch (  MalformedURLException e) {
+  }
+catch (  NullPointerException e) {
+  }
+}

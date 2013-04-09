@@ -1,0 +1,18 @@
+{
+  CertificateFactory certFactBC=CertificateFactory.getInstance("X.509","BC");
+  CertificateFactory certFactDRL=CertificateFactory.getInstance("X.509","DRLCertFactory");
+  X509Certificate certBC=(X509Certificate)certFactBC.generateCertificate(new ByteArrayInputStream(T61STRING_CERT));
+  X509Certificate certDRL=(X509Certificate)certFactDRL.generateCertificate(new ByteArrayInputStream(T61STRING_CERT));
+  assertEquals(certBC,certDRL);
+  assertEquals(certBC.getSubjectX500Principal(),certBC.getSubjectX500Principal());
+  assertEquals(certDRL.getIssuerX500Principal(),certDRL.getIssuerX500Principal());
+  assertEquals(certBC.getSubjectX500Principal(),certDRL.getSubjectX500Principal());
+  assertEquals(certBC.getIssuerX500Principal(),certDRL.getIssuerX500Principal());
+  String[] formats={X500Principal.CANONICAL,X500Principal.RFC1779,X500Principal.RFC2253};
+  for (  String format : formats) {
+    assertEquals(certBC.getSubjectX500Principal().getName(format),certDRL.getSubjectX500Principal().getName(format));
+    assertEquals(certBC.getIssuerX500Principal().getName(format),certDRL.getIssuerX500Principal().getName(format));
+  }
+  String expected="" + "cn=entrust.net certification authority (2048)," + "ou=(c) 1999 entrust.net limited,"+ "ou=www.entrust.net/cps_2048 incorp. by ref. (limits liab.),"+ "o=entrust.net";
+  assertEquals(expected,certBC.getSubjectX500Principal().getName(X500Principal.CANONICAL));
+}

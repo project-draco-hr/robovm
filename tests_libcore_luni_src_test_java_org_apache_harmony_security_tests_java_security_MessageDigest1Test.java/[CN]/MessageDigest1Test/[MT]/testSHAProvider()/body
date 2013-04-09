@@ -1,0 +1,46 @@
+{
+  MessageDigest md=null;
+  try {
+    md=MessageDigest.getInstance("SHA");
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+  byte[] bytes=new byte[]{1,1,1,1,1};
+  try {
+    md.update(bytes,-1,1);
+    fail("No expected IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    md.update(bytes,1,-1);
+    fail("No expected IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    md=MessageDigest.getInstance("SHA");
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    md.digest(bytes,0,-1);
+    fail("No expected DigestException");
+  }
+ catch (  DigestException e) {
+  }
+  try {
+    md.digest(bytes,-1,0);
+    fail("No expected DigestException");
+  }
+ catch (  DigestException e) {
+  }
+  try {
+    md=MessageDigest.getInstance("UnknownDigest");
+    fail("expected NoSuchAlgorithmException");
+  }
+ catch (  NoSuchAlgorithmException e) {
+  }
+}

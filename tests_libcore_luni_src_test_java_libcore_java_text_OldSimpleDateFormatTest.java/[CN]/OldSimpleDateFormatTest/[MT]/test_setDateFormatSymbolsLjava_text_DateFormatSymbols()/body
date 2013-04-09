@@ -1,0 +1,19 @@
+{
+  SimpleDateFormat f1=new SimpleDateFormat("a");
+  DateFormatSymbols symbols=new DateFormatSymbols();
+  symbols.setAmPmStrings(new String[]{"morning","night"});
+  f1.setDateFormatSymbols(symbols);
+  DateFormatSymbols newSym=f1.getDateFormatSymbols();
+  assertTrue("Set incorrectly",newSym.equals(symbols));
+  assertTrue("Not a clone",f1.getDateFormatSymbols() != symbols);
+  String result=f1.format(new GregorianCalendar(1999,Calendar.JUNE,12,3,0).getTime());
+  assertEquals("Incorrect symbols used","morning",result);
+  symbols.setEras(new String[]{"before","after"});
+  assertTrue("Identical symbols",!f1.getDateFormatSymbols().equals(symbols));
+  try {
+    f1.setDateFormatSymbols(null);
+    fail("NullPointerException was not thrown.");
+  }
+ catch (  NullPointerException npe) {
+  }
+}

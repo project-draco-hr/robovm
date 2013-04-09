@@ -1,0 +1,19 @@
+{
+  FileOutputStream fos=new java.io.FileOutputStream(fileName);
+  fos.write(testString.getBytes(),0,testLength);
+  fos.close();
+  RandomAccessFile raf=new java.io.RandomAccessFile(fileName,"r");
+  byte[] rbuf=new byte[testLength + 10];
+  int bytesRead=raf.read(rbuf);
+  assertEquals("Test 1: Incorrect number of bytes read. ",testLength,bytesRead);
+  assertEquals("Test 2: Incorrect bytes read. ",testString,new String(rbuf,0,testLength));
+  bytesRead=raf.read(rbuf);
+  assertTrue("Test 3: EOF (-1) expected. ",bytesRead == -1);
+  raf.close();
+  try {
+    bytesRead=raf.read(rbuf);
+    fail("Test 4: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+}

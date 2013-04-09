@@ -1,0 +1,11 @@
+{
+  server.enqueue(new MockResponse().setBody("5").clearHeaders().addHeader("Transfer-encoding: chunked").setSocketPolicy(DISCONNECT_AT_END));
+  server.play();
+  URLConnection connection=server.getUrl("/").openConnection();
+  try {
+    readAscii(connection.getInputStream(),Integer.MAX_VALUE);
+    fail();
+  }
+ catch (  IOException e) {
+  }
+}

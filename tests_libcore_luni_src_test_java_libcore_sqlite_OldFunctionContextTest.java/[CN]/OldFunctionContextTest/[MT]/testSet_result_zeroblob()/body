@@ -1,0 +1,22 @@
+{
+  Stmt st=null;
+  TestFCZeroBlob testZeroBlobFnc=new TestFCZeroBlob();
+  byte[] byteVal={(byte)1,(byte)2,(byte)3};
+  db.exec("create table testBinaryData (binVal BINARY) ;",null);
+  try {
+    st=db.prepare("insert into testBinaryData values (?)");
+    st.bind(1,byteVal);
+    st.step();
+    db.create_function("testZeroBlob",0,testZeroBlobFnc);
+    TableResult res=db.get_table("select testZeroBlob() from testBinaryData");
+    TableResult res2=db.get_table("select zeroblob(" + testZeroBlobFnc.numBytes + ") from testBinaryData");
+    String row[]=(String[])res.rows.elementAt(0);
+    String val=row[0];
+    assertNotNull(val);
+    assertEquals(((String[])res2.rows.elementAt(0))[0],val);
+    assertTrue(testZeroBlobFnc.functionCalled);
+  }
+  finally {
+    db.exec("drop table if exists testBinaryData;",null);
+  }
+}

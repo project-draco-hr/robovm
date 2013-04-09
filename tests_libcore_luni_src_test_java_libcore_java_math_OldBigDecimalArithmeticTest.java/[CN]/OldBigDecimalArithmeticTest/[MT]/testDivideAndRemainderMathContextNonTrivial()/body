@@ -1,0 +1,25 @@
+{
+  MathContext mc;
+  BigDecimal a, b, res[];
+  mc=new MathContext(13,RoundingMode.FLOOR);
+  a=new BigDecimal("12345678901234567.1");
+  b=new BigDecimal("12345678901234567.9");
+  assertEquals("incorrect value","0E+4",a.round(mc).divideAndRemainder(b.round(mc))[1].toString());
+  res=a.divideAndRemainder(b,mc);
+  assertEquals("incorrect value","12345678901234567.1",res[1].toString());
+  mc=new MathContext(1,RoundingMode.UNNECESSARY);
+  a=new BigDecimal("6172839450617283945061728394.5061976");
+  b=new BigDecimal("1234567890123456789012345678.9012395");
+  res=a.divideAndRemainder(b,mc);
+  assertEquals("incorrect value","1E-7",res[1].toString());
+  mc=new MathContext(3,RoundingMode.UNNECESSARY);
+  a=new BigDecimal("6172839450617283945061728394.6000000");
+  b=new BigDecimal("1234567890123456789012345678.9012395");
+  try {
+    res=a.divideAndRemainder(b,mc);
+    assertEquals("incorrect value","0.0938025",res[1].toString());
+    assertEquals("incorrect value","0.09",res[1].round(mc).toString());
+  }
+ catch (  ArithmeticException e) {
+  }
+}

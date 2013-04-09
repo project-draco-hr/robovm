@@ -1,0 +1,32 @@
+{
+  if (StandardNames.IS_RI) {
+    return;
+  }
+  KeyStore ks=KeyStore.getInstance("AndroidCAStore");
+  assertEquals("AndroidCAStore",ks.getType());
+  assertEquals("HarmonyJSSE",ks.getProvider().getName());
+  ks.load(null,null);
+  for (  String alias : Collections.list(ks.aliases())) {
+    Certificate c=null;
+    try {
+      c=ks.getCertificate(alias);
+      assertNotNull(c);
+      assertTrue(ks.isCertificateEntry(alias));
+      assertTrue(ks.entryInstanceOf(alias,TrustedCertificateEntry.class));
+      assertEquals(alias,ks.getCertificateAlias(c));
+      assertTrue(c instanceof X509Certificate);
+      X509Certificate cert=(X509Certificate)c;
+      assertEquals(cert.getSubjectUniqueID(),cert.getIssuerUniqueID());
+      assertNotNull(cert.getPublicKey());
+      assertTrue(ks.containsAlias(alias));
+      assertNotNull(ks.getCreationDate(alias));
+      assertNotNull(ks.getEntry(alias,null));
+      assertFalse(ks.isKeyEntry(alias));
+      assertNull(ks.getKey(alias,null));
+      assertNull(ks.getCertificateChain(alias));
+    }
+ catch (    Throwable t) {
+      throw new Exception("alias=" + alias + " cert="+ c,t);
+    }
+  }
+}

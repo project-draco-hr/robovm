@@ -1,0 +1,43 @@
+{
+  String pattern="A {3, number, currency} B {2, time} C {0, number, percent} D {4}  E {1,choice,0#off|1#on} F {0, date}";
+  MessageFormat mf=new MessageFormat(pattern);
+  String sToParse="A $12,345.00 B 9:56:07 AM C 3,200% D 1/15/70 9:56 AM  E on F Jan 1, 1970";
+  Object[] result;
+  try {
+    result=mf.parse(sToParse);
+    assertTrue("No result: " + result.length,result.length == 5);
+    assertTrue("Object 0 is not date",result[0] instanceof Date);
+    assertEquals("Object 1 is not stringr",result[1].toString(),"1.0");
+    assertTrue("Object 2 is not date",result[2] instanceof Date);
+    assertEquals("Object 3 is not number",result[3].toString(),"12345");
+    assertEquals("Object 4 is not string",result[4].toString(),"1/15/70 9:56 AM");
+  }
+ catch (  java.text.ParseException pe) {
+    fail("ParseException is thrown for incorrect string " + sToParse);
+  }
+  sToParse="xxdate is Feb 28, 1999";
+  try {
+    result=format1.parse(sToParse);
+    fail("ParseException is thrown for incorrect string " + sToParse);
+  }
+ catch (  java.text.ParseException pe) {
+  }
+  sToParse="vm=Test, @3 4 6, 3   ";
+  mf=new MessageFormat("vm={0},{1},{2}");
+  try {
+    result=mf.parse(sToParse);
+    assertTrue("No result: " + result.length,result.length == 3);
+    assertEquals("Object 0 is not string",result[0].toString(),"Test");
+    assertEquals("Object 1 is not string",result[1].toString()," @3 4 6");
+    assertEquals("Object 2 is not string",result[2].toString()," 3   ");
+  }
+ catch (  java.text.ParseException pe) {
+    fail("ParseException is thrown for correct string " + sToParse);
+  }
+  try {
+    result=mf.parse(null);
+    fail("ParseException is not thrown for null " + sToParse);
+  }
+ catch (  java.text.ParseException pe) {
+  }
+}

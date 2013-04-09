@@ -1,0 +1,26 @@
+{
+  try {
+    String[] commands={"sleep","1"};
+    Process proc=Runtime.getRuntime().exec(commands,null,null);
+    OutputStream os=proc.getOutputStream();
+    os.write("10 5 abcde".getBytes());
+    os.close();
+    InputStream is=proc.getInputStream();
+    StringBuffer msg=new StringBuffer("");
+    while (true) {
+      int c=is.read();
+      if (c == -1)       break;
+      msg.append((char)c);
+    }
+    is.close();
+    proc.waitFor();
+    proc.destroy();
+    assertEquals("true",msg.toString(),msg.toString());
+  }
+ catch (  IOException e) {
+    fail("IOException executing avail test: " + e);
+  }
+catch (  InterruptedException e) {
+    fail("InterruptedException executing avail test: " + e);
+  }
+}

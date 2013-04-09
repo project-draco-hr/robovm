@@ -1,0 +1,19 @@
+{
+  String sql="SELECT finteger," + " (SELECT ftext FROM " + DatabaseCreator.TEST_TABLE2 + " WHERE finteger = 1) as ftext"+ " FROM "+ DatabaseCreator.TEST_TABLE2;
+  ResultSet result=statement.executeQuery(sql);
+  HashMap<Integer,String> value=new HashMap<Integer,String>();
+  value.put(1,DatabaseCreator.defaultString + "1");
+  value.put(2,DatabaseCreator.defaultString + "1");
+  value.put(3,DatabaseCreator.defaultString + "1");
+  value.put(4,DatabaseCreator.defaultString + "1");
+  value.put(5,DatabaseCreator.defaultString + "1");
+  while (result.next()) {
+    int key=result.getInt("finteger");
+    String val=result.getString("ftext");
+    assertTrue("wrong value of finteger field",value.containsKey(key));
+    assertEquals("wrong value of ftext field",value.get(key),val);
+    value.remove(key);
+  }
+  assertTrue("expected rows number doesn't equal actual rows number",value.isEmpty());
+  result.close();
+}

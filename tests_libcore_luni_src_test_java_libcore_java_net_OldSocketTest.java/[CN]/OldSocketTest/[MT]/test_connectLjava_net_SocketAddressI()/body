@@ -1,0 +1,222 @@
+{
+class mySocketAddress extends SocketAddress {
+    public mySocketAddress(){
+    }
+  }
+class SocketCloser extends Thread {
+    int timeout=0;
+    Socket theSocket=null;
+    public void run(){
+      try {
+        Thread.sleep(timeout);
+        theSocket.close();
+      }
+ catch (      Exception e) {
+      }
+      return;
+    }
+    public SocketCloser(    int timeout,    Socket theSocket){
+      this.timeout=timeout;
+      this.theSocket=theSocket;
+    }
+  }
+class SocketConnector extends Thread {
+    int timeout=0;
+    Socket theSocket=null;
+    SocketAddress address=null;
+    public void run(){
+      try {
+        theSocket.connect(address,timeout);
+      }
+ catch (      Exception e) {
+      }
+      return;
+    }
+    public SocketConnector(    int timeout,    Socket theSocket,    SocketAddress address){
+      this.timeout=timeout;
+      this.theSocket=theSocket;
+      this.address=address;
+    }
+  }
+  int portNumber=Support_PortManager.getNextPort();
+  Socket theSocket=null;
+  ServerSocket serverSocket=null;
+  SocketAddress theAddress=null;
+  SocketAddress nonConnectableAddress=null;
+  SocketAddress nonReachableAddress=null;
+  SocketAddress nonListeningAddress=null;
+  SocketAddress invalidType=null;
+  byte[] theBytes={0,0,0,0};
+  theAddress=new InetSocketAddress(InetAddress.getLocalHost(),portNumber);
+  nonConnectableAddress=new InetSocketAddress(InetAddress.getByAddress(theBytes),portNumber);
+  nonReachableAddress=new InetSocketAddress(InetAddress.getByName(Support_Configuration.ResolvedNotExistingHost),portNumber);
+  Thread.sleep(7000);
+  nonListeningAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+  invalidType=new mySocketAddress();
+  try {
+    theSocket=new Socket();
+    theSocket.connect(theAddress,-100);
+    fail("No exception after negative timeout passed in");
+  }
+ catch (  Exception e) {
+    assertTrue("Wrong exception when negative timeout passed in: " + e.toString(),(e instanceof IllegalArgumentException));
+  }
+  try {
+    theSocket=new Socket();
+    theSocket.connect(null,0);
+    fail("No exception after null address passed in");
+  }
+ catch (  Exception e) {
+    assertTrue("Wrong exception null address passed in: " + e.toString(),(e instanceof IllegalArgumentException));
+  }
+  try {
+    theSocket=new Socket();
+    theSocket.connect(invalidType,100000);
+    fail("No exception when invalid socket address type passed in: ");
+  }
+ catch (  Exception e) {
+    assertTrue("Wrong exception when when invalid socket address type passed in: " + e.toString(),(e instanceof IllegalArgumentException));
+  }
+  try {
+    theSocket=new Socket();
+    theSocket.connect(nonConnectableAddress,100000);
+    fail("No exception when non Connectable Address passed in: ");
+  }
+ catch (  Exception e) {
+    assertTrue("Wrong exception when non Connectable Address passed in: " + e.toString(),(e instanceof SocketException));
+  }
+  try {
+    theSocket=new Socket();
+    theSocket.connect(theAddress,0);
+    theSocket.close();
+    fail("No timeout:No exception when connecting to address nobody listening on: ");
+  }
+ catch (  Exception e) {
+    assertTrue("No timeout:Wrong exception when connecting to address nobody listening on: " + e.toString(),(e instanceof ConnectException));
+  }
+  theSocket=new Socket();
+  serverSocket=new ServerSocket();
+  serverSocket.bind(theAddress);
+  theSocket.connect(theAddress,0);
+  theSocket.close();
+  serverSocket.close();
+  try {
+    theSocket=new Socket();
+    theSocket.connect(nonListeningAddress,100000);
+    theSocket.close();
+    fail("No exception when connecting to address nobody listening on: ");
+  }
+ catch (  Exception e) {
+    assertTrue("Wrong exception when connecting to address nobody listening on: " + e.toString(),(e instanceof ConnectException));
+  }
+  try {
+    theSocket=new Socket();
+    theSocket.connect(nonReachableAddress,200);
+    theSocket.close();
+    fail("No interrupted exception when connecting to address nobody listening on with short timeout 200: ");
+  }
+ catch (  Exception e) {
+    assertTrue("Wrong exception when connecting to address nobody listening on with short timeout 200: " + e.toString(),(e instanceof SocketTimeoutException));
+  }
+  try {
+    theSocket=new Socket();
+    theSocket.connect(nonReachableAddress,40);
+    theSocket.close();
+    fail("No interrupted exception when connecting to address nobody listening on with short timeout 40: ");
+  }
+ catch (  Exception e) {
+    assertTrue("Wrong exception when connecting to address nobody listening on with short timeout 40: " + e.toString(),(e instanceof SocketTimeoutException));
+  }
+  new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+  theSocket=new Socket();
+  serverSocket=new ServerSocket();
+  serverSocket.bind(theAddress);
+  theSocket.connect(theAddress,100000);
+  assertTrue("Socket did not returned connected when it is: ",theSocket.isConnected());
+  assertFalse("Socket returned closed when it should be connected ",theSocket.isClosed());
+  assertTrue("Socket returned not bound when it should be: ",theSocket.isBound());
+  assertFalse("Socket returned input Shutdown when it should be connected ",theSocket.isInputShutdown());
+  assertFalse("Socket returned output Shutdown when it should be connected ",theSocket.isOutputShutdown());
+  assertTrue("Local port on connected socket was 0",theSocket.getLocalPort() != 0);
+  theSocket.close();
+  serverSocket.close();
+  try {
+    new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+    theSocket=new Socket();
+    serverSocket=new ServerSocket();
+    serverSocket.bind(theAddress);
+    theSocket.connect(theAddress,100000);
+    theSocket.connect(theAddress,100000);
+    theSocket.close();
+    serverSocket.close();
+    fail("No exception when we try to connect on a connected socket: ");
+  }
+ catch (  Exception e) {
+    assertTrue("Wrong exception when connecting on socket that is already connected" + e.toString(),(e instanceof SocketException));
+    assertFalse("Wrong exception when connecting on socket that is already connected" + e.toString(),(e instanceof SocketTimeoutException));
+    try {
+      theSocket.close();
+      serverSocket.close();
+    }
+ catch (    Exception e2) {
+    }
+  }
+  new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+  theSocket=new Socket();
+  serverSocket=new ServerSocket();
+  serverSocket.bind(theAddress);
+  theSocket.connect(theAddress,100000);
+  Socket servSock=serverSocket.accept();
+  InputStream theInput=theSocket.getInputStream();
+  OutputStream theOutput=servSock.getOutputStream();
+  InputStream theInput2=servSock.getInputStream();
+  OutputStream theOutput2=theSocket.getOutputStream();
+  String sendString=new String("Test");
+  theOutput.write(sendString.getBytes());
+  theOutput.flush();
+  Thread.sleep(1000);
+  int totalBytesRead=0;
+  byte[] myBytes=new byte[100];
+  while (theInput.available() > 0) {
+    int bytesRead=theInput.read(myBytes,totalBytesRead,myBytes.length - totalBytesRead);
+    totalBytesRead=totalBytesRead + bytesRead;
+  }
+  String receivedString=new String(myBytes,0,totalBytesRead);
+  assertTrue("Could not recv on socket connected with timeout:" + receivedString + ":"+ sendString,receivedString.equals(sendString));
+  sendString=new String("SEND - Test");
+  theOutput2.write(sendString.getBytes());
+  theOutput2.flush();
+  totalBytesRead=0;
+  myBytes=new byte[100];
+  Thread.sleep(1000);
+  while (theInput2.available() > 0) {
+    int bytesRead=theInput2.read(myBytes,totalBytesRead,myBytes.length - totalBytesRead);
+    totalBytesRead=totalBytesRead + bytesRead;
+  }
+  receivedString=new String(myBytes,0,totalBytesRead);
+  assertTrue("Could not send on socket connected with timeout:" + receivedString + ":"+ sendString,receivedString.equals(sendString));
+  theSocket.close();
+  serverSocket.close();
+  theSocket=new Socket();
+  SocketConnector connector=new SocketConnector(5000,theSocket,nonReachableAddress);
+  connector.start();
+  theSocket.setSoTimeout(1000);
+  Thread.sleep(10);
+  assertEquals("Socket option not set during connect: 10 ",1000,theSocket.getSoTimeout());
+  Thread.sleep(50);
+  theSocket.setSoTimeout(2000);
+  assertEquals("Socket option not set during connect: 50 ",2000,theSocket.getSoTimeout());
+  Thread.sleep(5000);
+  theSocket.close();
+  SocketChannel channel=SocketChannel.open();
+  channel.configureBlocking(false);
+  Socket socket=channel.socket();
+  int port=Support_PortManager.getNextPort();
+  try {
+    socket.connect(new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort()),port);
+    fail("IllegalBlockingModeException was not thrown.");
+  }
+ catch (  IllegalBlockingModeException expected) {
+  }
+  channel.close();
+}

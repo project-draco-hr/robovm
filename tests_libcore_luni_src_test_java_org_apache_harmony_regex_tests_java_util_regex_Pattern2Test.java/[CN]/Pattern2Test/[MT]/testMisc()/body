@@ -1,0 +1,27 @@
+{
+  Pattern p;
+  Matcher m;
+  p=Pattern.compile("[a-z]+;\\Q[a-z]+;\\Q(foo.*);\\E[0-9]+");
+  m=p.matcher("abc;[a-z]+;\\Q(foo.*);411");
+  assertTrue(m.matches());
+  m=p.matcher("abc;def;foo42;555");
+  assertFalse(m.matches());
+  m=p.matcher("abc;\\Qdef;\\Qfoo99;\\E123");
+  assertFalse(m.matches());
+  p=Pattern.compile("[a-z]+;(foo[0-9]-\\Q(...)\\E);[0-9]+");
+  m=p.matcher("abc;foo5-(...);123");
+  assertTrue(m.matches());
+  assertEquals("foo5-(...)",m.group(1));
+  m=p.matcher("abc;foo9-(xxx);789");
+  assertFalse(m.matches());
+  p=Pattern.compile("[a-z]+;(bar[0-9]-[a-z\\Q$-\\E]+);[0-9]+");
+  m=p.matcher("abc;bar0-def$-;123");
+  assertTrue(m.matches());
+  p=Pattern.compile("[a-z]+;(bar[0-9]-[a-z\\Q-$\\E]+);[0-9]+");
+  m=p.matcher("abc;bar0-def$-;123");
+  p=Pattern.compile("[a-z]+;(bar[0-9]-[a-z\\Q[0-9]\\E]+);[0-9]+");
+  m=p.matcher("abc;bar0-def[99]-]0x[;123");
+  p=Pattern.compile("[a-z]+;(bar[0-9]-[a-z\\[0\\-9\\]]+);[0-9]+");
+  m=p.matcher("abc;bar0-def[99]-]0x[;123");
+  assertTrue(m.matches());
+}

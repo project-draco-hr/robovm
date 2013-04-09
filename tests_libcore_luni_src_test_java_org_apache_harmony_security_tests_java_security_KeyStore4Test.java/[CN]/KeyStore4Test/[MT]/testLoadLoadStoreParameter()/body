@@ -1,0 +1,67 @@
+{
+  try {
+    keyStore.load(null);
+    fail("expected NoSuchAlgorithmException");
+  }
+ catch (  NoSuchAlgorithmException e) {
+  }
+catch (  CertificateException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  IOException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    keyStore.load(new KeyStore.LoadStoreParameter(){
+      public ProtectionParameter getProtectionParameter(){
+        return new KeyStore.PasswordProtection("PASSWORD".toCharArray());
+      }
+    }
+);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  CertificateException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  IOException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    keyStore.load(new KeyStore.LoadStoreParameter(){
+      public ProtectionParameter getProtectionParameter(){
+        return null;
+      }
+    }
+);
+    fail("expected NoSuchAlgorithmException");
+  }
+ catch (  NoSuchAlgorithmException e) {
+  }
+catch (  CertificateException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  IOException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    keyStore.load(new KeyStore.LoadStoreParameter(){
+      public ProtectionParameter getProtectionParameter(){
+        return new KeyStore.ProtectionParameter(){
+        }
+;
+      }
+    }
+);
+    fail("expected CertificateException");
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  CertificateException e) {
+  }
+catch (  IOException e) {
+    fail("unexpected exception: " + e);
+  }
+}

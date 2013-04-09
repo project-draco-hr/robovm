@@ -1,0 +1,56 @@
+{
+  Map head=tm.headMap("100");
+  assertEquals("Returned map of incorrect size",3,head.size());
+  assertTrue("Returned incorrect elements",head.containsKey("0") && head.containsValue(new Integer("1")) && head.containsKey("10"));
+  SortedMap sort=tm.headMap("100");
+  try {
+    sort.headMap("50");
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    tm.headMap(this);
+    fail("ClassCastException expected");
+  }
+ catch (  ClassCastException e) {
+  }
+  try {
+    tm.headMap(null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  TreeMap<Integer,Double> map=new TreeMap<Integer,Double>(new MockComparator());
+  map.put(1,2.1);
+  map.put(2,3.1);
+  map.put(3,4.5);
+  map.put(7,21.3);
+  map.put(null,null);
+  SortedMap<Integer,Double> smap=map.headMap(null);
+  assertEquals(0,smap.size());
+  Set<Integer> keySet=smap.keySet();
+  assertEquals(0,keySet.size());
+  Set<Map.Entry<Integer,Double>> entrySet=smap.entrySet();
+  assertEquals(0,entrySet.size());
+  Collection<Double> valueCollection=smap.values();
+  assertEquals(0,valueCollection.size());
+  assertTrue(head instanceof Serializable);
+  Collator c=new Collator(){
+    @Override public int compare(    String o1,    String o2){
+      if (o1 == null) {
+        return 0;
+      }
+      return o1.compareTo(o2);
+    }
+    @Override public CollationKey getCollationKey(    String string){
+      return null;
+    }
+    @Override public int hashCode(){
+      return 0;
+    }
+  }
+;
+  TreeMap<String,String> treemap=new TreeMap<String,String>(c);
+  assertEquals(0,treemap.headMap(null).size());
+}

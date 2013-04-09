@@ -1,0 +1,17 @@
+{
+  String sql="SELECT b.cnum, b.cname" + " FROM " + DatabaseCreator.CUSTOMERS_TABLE + " a, "+ DatabaseCreator.CUSTOMERS_TABLE+ " b"+ " WHERE a.snum = 1002"+ " AND b.city = a.city";
+  ResultSet result=statement.executeQuery(sql);
+  HashMap<Integer,String> value=new HashMap<Integer,String>();
+  value.put(2003,"Liu");
+  value.put(2004,"Grass");
+  value.put(2008,"Cisneros");
+  while (result.next()) {
+    int key=result.getInt("cnum");
+    String val=result.getString("cname");
+    assertTrue("wrong value of cnum field",value.containsKey(key));
+    assertEquals("wrong value of cname field",value.get(key),val);
+    value.remove(key);
+  }
+  assertTrue("expected rows number doesn't equal actual rows number",value.isEmpty());
+  result.close();
+}

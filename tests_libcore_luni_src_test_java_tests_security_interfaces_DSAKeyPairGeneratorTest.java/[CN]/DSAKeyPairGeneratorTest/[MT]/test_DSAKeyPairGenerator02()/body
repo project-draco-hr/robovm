@@ -1,0 +1,53 @@
+{
+  int[] invalidLen={-1,0,511,513,650,1023,1025};
+  DSAParams dsaParams=new DSAParameterSpec(p,q,g);
+  SecureRandom random=null;
+  MyDSA dsa=new MyDSA(null);
+  try {
+    random=SecureRandom.getInstance("SHA1PRNG");
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception for SecureRandom: " + e);
+  }
+  try {
+    dsa.initialize(520,false,random);
+    fail("InvalidParameterException was not thrown");
+  }
+ catch (  InvalidParameterException ipe) {
+    String str=ipe.getMessage();
+    if (!str.equals("there are not precomputed parameters")) {
+      fail("Incorrect exception's message: " + str);
+    }
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of InvalidParameterException");
+  }
+  for (int i=0; i < invalidLen.length; i++) {
+    try {
+      dsa.initialize(invalidLen[i],true,random);
+      fail("InvalidParameterException was not thrown");
+    }
+ catch (    InvalidParameterException ipe) {
+      String str=ipe.getMessage();
+      if (!str.equals("Incorrect modlen")) {
+        fail("Incorrect exception's message: " + str);
+      }
+    }
+catch (    Exception e) {
+      fail(e + " was thrown instead of InvalidParameterException");
+    }
+  }
+  dsa=new MyDSA(dsaParams);
+  try {
+    dsa.initialize(520,true,random);
+  }
+ catch (  Exception e) {
+    fail(e + " was thrown for subcase 1");
+  }
+  try {
+    dsa.initialize(520,false,random);
+  }
+ catch (  Exception e) {
+    fail(e + " was thrown for subcase 1");
+  }
+}

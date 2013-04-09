@@ -1,0 +1,23 @@
+{
+  MockWebServer server2=new MockWebServer();
+  try {
+    server2.enqueue(new MockResponse().setBody("This is the 2nd server!"));
+    server2.play();
+    server.enqueue(new MockResponse().setResponseCode(HttpURLConnection.HTTP_MOVED_TEMP).addHeader("Location: " + server2.getUrl("/").toString()).setBody("This page has moved!"));
+    server.enqueue(new MockResponse().setBody("This is the first server again!"));
+    server.play();
+    URLConnection connection=server.getUrl("/").openConnection();
+    assertEquals("This is the 2nd server!",readAscii(connection.getInputStream(),Integer.MAX_VALUE));
+    assertEquals(server2.getUrl("/"),connection.getURL());
+    assertEquals("This is the first server again!",readAscii(server.getUrl("/").openStream(),Integer.MAX_VALUE));
+    RecordedRequest first=server.takeRequest();
+    assertContains(first.getHeaders(),"Host: " + hostName + ":"+ server.getPort());
+    RecordedRequest second=server2.takeRequest();
+    assertContains(second.getHeaders(),"Host: " + hostName + ":"+ server2.getPort());
+    RecordedRequest third=server.takeRequest();
+    assertEquals("Expected connection reuse",1,third.getSequenceNumber());
+  }
+  finally {
+    server2.shutdown();
+  }
+}

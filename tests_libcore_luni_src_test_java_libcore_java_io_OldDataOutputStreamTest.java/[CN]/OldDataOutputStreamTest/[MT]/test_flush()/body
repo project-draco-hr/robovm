@@ -1,0 +1,20 @@
+{
+  BufferedOutputStream buf=new BufferedOutputStream(bos);
+  os=new DataOutputStream(buf);
+  os.writeInt(9087589);
+  assertTrue("Test 1: Written data should not be available.",bos.toByteArray().length == 0);
+  os.flush();
+  assertTrue("Test 2: Written data should be available.",bos.toByteArray().length > 0);
+  os.close();
+  openDataInputStream();
+  int c=dis.readInt();
+  assertEquals("Test 3: Failed to flush correctly;",9087589,c);
+  dis.close();
+  os=new DataOutputStream(sos);
+  try {
+    os.flush();
+    fail("Test 4: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+}

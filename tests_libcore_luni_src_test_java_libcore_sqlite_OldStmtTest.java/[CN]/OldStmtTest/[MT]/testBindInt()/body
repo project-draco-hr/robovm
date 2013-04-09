@@ -1,0 +1,30 @@
+{
+  try {
+    st=db.prepare("insert into " + DatabaseCreator.SIMPLE_TABLE1 + " values (:one,:two,:three)");
+    st.bind(4);
+    st.bind(1,4);
+    st.bind(2,10);
+    st.bind(3,30);
+    st.step();
+    fail();
+  }
+ catch (  SQLite.Exception expected) {
+    assertEquals("parameter position out of bounds",expected.getMessage());
+  }
+  try {
+    st.reset();
+    st.bind(1);
+    st.bind(2,10);
+    st.bind(3,30);
+    st.step();
+    fail();
+  }
+ catch (  SQLite.Exception expected) {
+    assertEquals("SQL logic error or missing database",expected.getMessage());
+  }
+  st.reset();
+  st.bind(1,3);
+  st.bind(2);
+  st.bind(3,30);
+  st.step();
+}

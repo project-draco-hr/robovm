@@ -1,0 +1,26 @@
+{
+  String type=KeyStore.getDefaultType();
+  String keyStore=getKeyStoreFileName();
+  File keyStoreFile=new File(keyStore);
+  FileInputStream fis=new FileInputStream(keyStoreFile);
+  KeyStore ks=KeyStore.getInstance(type);
+  ks.load(fis,KS_PASSWORD.toCharArray());
+  fis.close();
+  if (DO_LOG && false) {
+    TestKeyStore.dump("HttpsURLConnection.getContext",ks,KS_PASSWORD.toCharArray());
+  }
+  String kmfAlgorithm=KeyManagerFactory.getDefaultAlgorithm();
+  KeyManagerFactory kmf=KeyManagerFactory.getInstance(kmfAlgorithm);
+  kmf.init(ks,KS_PASSWORD.toCharArray());
+  KeyManager[] keyManagers=kmf.getKeyManagers();
+  String tmfAlgorthm=TrustManagerFactory.getDefaultAlgorithm();
+  TrustManagerFactory tmf=TrustManagerFactory.getInstance(tmfAlgorthm);
+  tmf.init(ks);
+  TrustManager[] trustManagers=tmf.getTrustManagers();
+  if (DO_LOG) {
+    trustManagers=TestTrustManager.wrap(trustManagers);
+  }
+  SSLContext ctx=SSLContext.getInstance("TLSv1");
+  ctx.init(keyManagers,trustManagers,null);
+  return ctx;
+}

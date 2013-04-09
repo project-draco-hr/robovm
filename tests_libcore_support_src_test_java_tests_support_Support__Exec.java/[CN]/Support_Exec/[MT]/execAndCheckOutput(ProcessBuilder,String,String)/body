@@ -1,0 +1,14 @@
+{
+  Process process=builder.start();
+  ExecutorService executorService=Executors.newFixedThreadPool(2);
+  try {
+    Future<String> errFuture=executorService.submit(streamToStringCallable(process.getErrorStream()));
+    Future<String> outFuture=executorService.submit(streamToStringCallable(process.getInputStream()));
+    assertEquals(expectedOut,outFuture.get(10,TimeUnit.SECONDS));
+    assertEquals(expectedErr,errFuture.get(10,TimeUnit.SECONDS));
+  }
+  finally {
+    executorService.shutdown();
+    process.waitFor();
+  }
+}

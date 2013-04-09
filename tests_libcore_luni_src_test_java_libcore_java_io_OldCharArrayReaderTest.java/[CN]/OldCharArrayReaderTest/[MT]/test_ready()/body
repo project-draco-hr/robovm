@@ -1,0 +1,24 @@
+{
+  cr=new CharArrayReader(hw);
+  boolean expectException=false;
+  try {
+    assertTrue("ready returned false",cr.ready());
+    cr.skip(1000);
+    assertTrue("ready returned true",!cr.ready());
+    cr.close();
+    expectException=true;
+    cr.ready();
+    fail("No exception 1");
+  }
+ catch (  IOException e) {
+    if (!expectException)     fail("Unexpected: " + e);
+  }
+  try {
+    cr=new CharArrayReader(hw);
+    cr.close();
+    cr.ready();
+    fail("No exception 2");
+  }
+ catch (  IOException e) {
+  }
+}

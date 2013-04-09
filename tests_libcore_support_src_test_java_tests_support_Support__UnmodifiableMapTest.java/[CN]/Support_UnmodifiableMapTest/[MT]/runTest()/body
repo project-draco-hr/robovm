@@ -1,0 +1,25 @@
+{
+  assertTrue("UnmodifiableMapTest - Should contain the key \"0\"",map.containsKey("0"));
+  assertTrue("UnmodifiableMapTest - Should contain the key \"50\"",map.containsKey("50"));
+  assertTrue("UnmodifiableMapTest - Should not contain the key \"100\"",!map.containsKey("100"));
+  assertTrue("UnmodifiableMapTest - Should contain the value 0",map.containsValue(new Integer(0)));
+  assertTrue("UnmodifiableMapTest - Should contain the value 50",map.containsValue(new Integer(50)));
+  assertTrue("UnmodifiableMapTest - Should not contain value 100",!map.containsValue(new Integer(100)));
+  Set<?> entrySet=map.entrySet();
+  Iterator<?> entrySetIterator=entrySet.iterator();
+  int myCounter=0;
+  while (entrySetIterator.hasNext()) {
+    Map.Entry<?,?> me=(Map.Entry<?,?>)entrySetIterator.next();
+    assertTrue("UnmodifiableMapTest - Incorrect Map.Entry returned",map.get(me.getKey()).equals(me.getValue()));
+    myCounter++;
+  }
+  assertEquals("UnmodifiableMapTest - Incorrect number of map entries returned",100,myCounter);
+  assertTrue("UnmodifiableMapTest - getting \"0\" didn't return 0",map.get("0").intValue() == 0);
+  assertTrue("UnmodifiableMapTest - getting \"50\" didn't return 0",map.get("0").intValue() == 0);
+  assertNull("UnmodifiableMapTest - getting \"100\" didn't return null",map.get("100"));
+  assertTrue("UnmodifiableMapTest - should have returned false to isEmpty",!map.isEmpty());
+  Set<?> keySet=map.keySet();
+  t_KeySet(keySet);
+  assertTrue("Size should return 100, returned: " + map.size(),map.size() == 100);
+  new Support_UnmodifiableCollectionTest("Unmod--from map test",map.values());
+}

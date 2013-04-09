@@ -1,0 +1,24 @@
+{
+  Pattern p;
+  Matcher m;
+  p=Pattern.compile("a*b");
+  m=p.matcher("aabfooaabfooabfoob");
+  assertTrue(m.replaceAll("-").equals("-foo-foo-foo-"));
+  assertTrue(m.replaceFirst("-").equals("-fooaabfooabfoob"));
+  p=Pattern.compile("([bB])yte");
+  m=p.matcher("Byte for byte");
+  assertTrue(m.replaceFirst("$1ite").equals("Bite for byte"));
+  assertTrue(m.replaceAll("$1ite").equals("Bite for bite"));
+  p=Pattern.compile("\\d\\d\\d\\d([- ])");
+  m=p.matcher("card #1234-5678-1234");
+  assertTrue(m.replaceFirst("xxxx$1").equals("card #xxxx-5678-1234"));
+  assertTrue(m.replaceAll("xxxx$1").equals("card #xxxx-xxxx-1234"));
+  p=Pattern.compile("(up|left)( *)(right|down)");
+  m=p.matcher("left right, up down");
+  assertTrue(m.replaceFirst("$3$2$1").equals("right left, up down"));
+  assertTrue(m.replaceAll("$3$2$1").equals("right left, down up"));
+  p=Pattern.compile("([CcPp][hl]e[ea]se)");
+  m=p.matcher("I want cheese. Please.");
+  assertTrue(m.replaceFirst("<b> $1 </b>").equals("I want <b> cheese </b>. Please."));
+  assertTrue(m.replaceAll("<b> $1 </b>").equals("I want <b> cheese </b>. <b> Please </b>."));
+}

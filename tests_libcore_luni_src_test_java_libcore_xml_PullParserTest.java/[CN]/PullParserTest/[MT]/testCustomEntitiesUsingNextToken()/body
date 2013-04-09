@@ -1,0 +1,14 @@
+{
+  XmlPullParser parser=newPullParser();
+  parser.setInput(new StringReader("<foo a='cd&aaaaaaaaaa;ef'>wx&aaaaaaaaaa;yz</foo>"));
+  parser.defineEntityReplacementText("aaaaaaaaaa","b");
+  assertEquals(XmlPullParser.START_TAG,parser.nextToken());
+  assertEquals("cdbef",parser.getAttributeValue(0));
+  assertEquals(XmlPullParser.TEXT,parser.nextToken());
+  assertEquals("wx",parser.getText());
+  assertEquals(XmlPullParser.ENTITY_REF,parser.nextToken());
+  assertEquals("aaaaaaaaaa",parser.getName());
+  assertEquals("b",parser.getText());
+  assertEquals(XmlPullParser.TEXT,parser.nextToken());
+  assertEquals("yz",parser.getText());
+}

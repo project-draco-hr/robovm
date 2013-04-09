@@ -1,0 +1,30 @@
+{
+  Class<? extends WildcardUnEquality> clazz=WildcardUnEquality.class;
+  Method method=clazz.getDeclaredMethod("wildcardUnEquality",Pair.class);
+  TypeVariable<?>[] typeParameters=clazz.getTypeParameters();
+  assertLenghtOne(typeParameters);
+  TypeVariable<?> typeParameter=typeParameters[0];
+  Type[] parameterTypes=method.getGenericParameterTypes();
+  assertLenghtOne(parameterTypes);
+  Type parameter=parameterTypes[0];
+  assertInstanceOf(ParameterizedType.class,parameter);
+  ParameterizedType paramType=(ParameterizedType)parameter;
+  Type[] actualTypeArguments=paramType.getActualTypeArguments();
+  assertEquals(2,actualTypeArguments.length);
+  Type firstArgument=actualTypeArguments[0];
+  assertInstanceOf(WildcardType.class,firstArgument);
+  WildcardType firstWildcardArgument=(WildcardType)firstArgument;
+  Type secondArgument=actualTypeArguments[1];
+  assertInstanceOf(WildcardType.class,secondArgument);
+  WildcardType secondWildcardArgument=(WildcardType)secondArgument;
+  assertNotEquals(firstWildcardArgument,secondWildcardArgument);
+  Type[] firstWildcardArgumentUpperBounds=firstWildcardArgument.getUpperBounds();
+  assertLenghtOne(firstWildcardArgumentUpperBounds);
+  Type firstWildcardArgumentUpperBoundsType=firstWildcardArgumentUpperBounds[0];
+  Type[] secondWildcardArgumentLowerBounds=secondWildcardArgument.getLowerBounds();
+  assertLenghtOne(secondWildcardArgumentLowerBounds);
+  Type secondWildcardArgumentLoweroundsType=secondWildcardArgumentLowerBounds[0];
+  assertEquals(firstWildcardArgumentUpperBoundsType,secondWildcardArgumentLoweroundsType);
+  assertEquals(typeParameter,firstWildcardArgumentUpperBoundsType);
+  assertEquals(typeParameter,secondWildcardArgumentLoweroundsType);
+}

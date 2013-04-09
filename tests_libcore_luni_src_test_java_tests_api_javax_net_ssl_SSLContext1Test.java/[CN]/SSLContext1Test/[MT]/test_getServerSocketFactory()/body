@@ -1,0 +1,36 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  SSLContext[] sslC=createSSLCon();
+  assertNotNull("SSLContext objects were not created",sslC);
+  String tAlg=TrustManagerFactory.getDefaultAlgorithm();
+  String kAlg=KeyManagerFactory.getDefaultAlgorithm();
+  if (tAlg == null) {
+    fail("TrustManagerFactory default algorithm is not defined");
+    return;
+  }
+  if (kAlg == null) {
+    fail("KeyManagerFactory default algorithm is not defined");
+    return;
+  }
+  KeyManagerFactory kmf=KeyManagerFactory.getInstance(kAlg);
+  KeyStore ks=KeyStore.getInstance(KeyStore.getDefaultType());
+  try {
+    ks.load(null,null);
+  }
+ catch (  Exception e) {
+    fail(e + " was thrown for method load(null, null)");
+  }
+  kmf.init(ks,new char[10]);
+  KeyManager[] kms=kmf.getKeyManagers();
+  TrustManagerFactory tmf=TrustManagerFactory.getInstance(tAlg);
+  tmf.init(ks);
+  TrustManager[] tms=tmf.getTrustManagers();
+  for (int i=0; i < sslC.length; i++) {
+    sslC[i].init(kms,tms,new SecureRandom());
+    assertNotNull("No SSLServerSocketFactory available",sslC[i].getServerSocketFactory());
+    assertNotNull("No SSLSocketFactory available",sslC[i].getSocketFactory());
+  }
+}

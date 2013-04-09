@@ -1,0 +1,30 @@
+{
+  final int NUM_WORKERS=5;
+  Worker w[]=new Worker[NUM_WORKERS];
+  int i;
+  for (i=0; i < NUM_WORKERS; i++) {
+    w[i]=new Worker(i * 2 - 1,new Object());
+  }
+  running=true;
+  for (i=0; i < NUM_WORKERS; i++) {
+    w[i].start();
+  }
+  try {
+    Thread.currentThread().sleep(1000);
+  }
+ catch (  InterruptedException ex) {
+  }
+  for (i=0; i < 100; i++) {
+    for (int j=0; j < NUM_WORKERS; j++) {
+synchronized (w[j].lock) {
+        w[j].lock.notify();
+      }
+    }
+  }
+  running=false;
+  for (i=0; i < NUM_WORKERS; i++) {
+synchronized (w[i].lock) {
+      w[i].lock.notifyAll();
+    }
+  }
+}

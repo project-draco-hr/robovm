@@ -1,0 +1,35 @@
+{
+  if (empty || (!many && (keyType == null || keyType.isEmpty()))) {
+    assertNull(keyType,alias);
+    assertNull(keyType,km.getCertificateChain(alias));
+    assertNull(keyType,km.getPrivateKey(alias));
+    return;
+  }
+  assertNotNull(keyType,alias);
+  X509Certificate[] certificateChain=km.getCertificateChain(alias);
+  PrivateKey privateKey=km.getPrivateKey(alias);
+  String keyAlgName;
+  String sigAlgName;
+  if (keyType == null) {
+    keyAlgName=privateKey.getAlgorithm();
+    sigAlgName=keyAlgName;
+  }
+ else {
+    keyAlgName=TestKeyStore.keyAlgorithm(keyType);
+    sigAlgName=TestKeyStore.signatureAlgorithm(keyType);
+    X509Certificate certificate=certificateChain[0];
+    assertEquals(keyType,keyAlgName,certificate.getPublicKey().getAlgorithm());
+    assertEquals(keyType,keyAlgName,privateKey.getAlgorithm());
+    if (!keyType.equals("EC")) {
+      String expectedSigAlgName=sigAlgName.toUpperCase();
+      String actualSigAlgName=certificate.getSigAlgName().toUpperCase();
+      String expected=actualSigAlgName + " contains " + expectedSigAlgName;
+      assertTrue(expected,actualSigAlgName.contains(expectedSigAlgName));
+    }
+  }
+  PrivateKeyEntry privateKeyEntry=getTestKeyStore().getPrivateKey(keyAlgName,sigAlgName);
+  if (!"EC".equals(keyAlgName)) {
+    assertEquals(keyType,Arrays.<Certificate>asList(privateKeyEntry.getCertificateChain()),Arrays.<Certificate>asList(certificateChain));
+    assertEquals(keyType,privateKeyEntry.getPrivateKey(),privateKey);
+  }
+}

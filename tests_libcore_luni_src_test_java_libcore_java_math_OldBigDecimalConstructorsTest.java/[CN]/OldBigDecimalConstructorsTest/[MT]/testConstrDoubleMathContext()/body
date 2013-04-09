@@ -1,0 +1,56 @@
+{
+  double a=732546982374982347892379283571094797.287346782359284756;
+  int precision=21;
+  RoundingMode rm=RoundingMode.CEILING;
+  MathContext mc=new MathContext(precision,rm);
+  String res="732546982374982285074";
+  int resScale=-15;
+  BigDecimal result=new BigDecimal(a,mc);
+  assertEquals("incorrect value",res,result.unscaledValue().toString());
+  assertEquals("incorrect scale",resScale,result.scale());
+  BigDecimal bd;
+  mc=new MathContext(9,RoundingMode.UP);
+  bd=new BigDecimal(123456789.125,mc);
+  assertEquals("incorrect value","123456790",bd.toString());
+  bd=new BigDecimal(-123456789.125,mc);
+  assertEquals("incorrect value","-123456790",bd.toString());
+  mc=new MathContext(8,RoundingMode.DOWN);
+  bd=new BigDecimal(123456789.125,mc);
+  assertEquals("incorrect value","1.2345678E+8",bd.toString());
+  bd=new BigDecimal(-123456789.125,mc);
+  assertEquals("incorrect value","-1.2345678E+8",bd.toString());
+  mc=new MathContext(10,RoundingMode.CEILING);
+  bd=new BigDecimal(123456789.125,mc);
+  assertEquals("incorrect value","123456789.2",bd.toString());
+  bd=new BigDecimal(-123456789.125,mc);
+  assertEquals("incorrect value","-123456789.1",bd.toString());
+  mc=new MathContext(8,RoundingMode.FLOOR);
+  bd=new BigDecimal(123456789.125,mc);
+  assertEquals("incorrect value","1.2345678E+8",bd.toString());
+  bd=new BigDecimal(-123456789.125,mc);
+  assertEquals("incorrect value","-1.2345679E+8",bd.toString());
+  mc=new MathContext(11,RoundingMode.HALF_EVEN);
+  bd=new BigDecimal("123456789.125",mc);
+  assertEquals("incorrect value","123456789.12",bd.toString());
+  bd=new BigDecimal(-123456789.135,mc);
+  assertEquals("incorrect value","-123456789.14",bd.toString());
+  mc=new MathContext(11,RoundingMode.HALF_UP);
+  bd=new BigDecimal("123456789.125",mc);
+  assertEquals("incorrect value","123456789.13",bd.toString());
+  mc=new MathContext(11,RoundingMode.HALF_DOWN);
+  bd=new BigDecimal("123456789.125",mc);
+  assertEquals("incorrect value","123456789.12",bd.toString());
+  mc=new MathContext(8,RoundingMode.UNNECESSARY);
+  try {
+    bd=new BigDecimal(123456789.125,mc);
+    fail("No ArithmeticException for RoundingMode.UNNECESSARY");
+  }
+ catch (  ArithmeticException e) {
+  }
+  try {
+    bd=new BigDecimal(-123456789.125,mc);
+    fail("No ArithmeticException for RoundingMode.UNNECESSARY");
+  }
+ catch (  ArithmeticException e) {
+  }
+}

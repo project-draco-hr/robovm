@@ -1,0 +1,25 @@
+{
+  String newValue="newValue";
+  String updateQuery="UPDATE " + DatabaseCreator.TEST_TABLE1 + " SET field1='"+ newValue+ "' WHERE (id > 2) and (id < 10)";
+  try {
+    int num=statement.executeUpdate(updateQuery);
+    int expectedUpdated=7;
+    assertEquals("Not all records in the database were updated",expectedUpdated,num);
+    String selectQuery="SELECT * FROM " + DatabaseCreator.TEST_TABLE1;
+    ResultSet result=statement.executeQuery(selectQuery);
+    while (result.next()) {
+      int id=result.getInt("id");
+      String field1=result.getString("field1");
+      if ((id > 2) && (id < 10)) {
+        assertEquals("The field field1 was not updated",newValue,field1);
+      }
+ else {
+        assertEquals("The field field1 was not updated",DatabaseCreator.defaultString + id,field1);
+      }
+    }
+    result.close();
+  }
+ catch (  SQLException e) {
+    fail("Unexpected exception" + e.getMessage());
+  }
+}

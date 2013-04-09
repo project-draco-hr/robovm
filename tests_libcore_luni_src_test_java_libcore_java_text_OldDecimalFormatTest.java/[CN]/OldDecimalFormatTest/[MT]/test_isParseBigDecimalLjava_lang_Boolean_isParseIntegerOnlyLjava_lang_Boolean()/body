@@ -1,0 +1,23 @@
+{
+  DecimalFormat form=(DecimalFormat)DecimalFormat.getInstance(Locale.US);
+  assertFalse(form.isParseBigDecimal());
+  form.setParseBigDecimal(true);
+  assertTrue(form.isParseBigDecimal());
+  try {
+    Number result=form.parse("123.123");
+    assertEquals(new BigDecimal("123.123"),result);
+  }
+ catch (  ParseException e) {
+    fail("ParseException was thrown.");
+  }
+  form.setParseBigDecimal(false);
+  assertFalse(form.isParseBigDecimal());
+  try {
+    Number result=form.parse("123.123");
+    assertFalse(result instanceof BigDecimal);
+  }
+ catch (  ParseException e) {
+    fail("ParseException was thrown.");
+  }
+  assertFalse(form.isParseIntegerOnly());
+}

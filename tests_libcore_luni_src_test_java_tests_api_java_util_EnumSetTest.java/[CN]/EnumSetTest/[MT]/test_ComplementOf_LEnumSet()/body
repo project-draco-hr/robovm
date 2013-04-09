@@ -1,0 +1,33 @@
+{
+  try {
+    EnumSet.complementOf((EnumSet<EnumFoo>)null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException npe) {
+  }
+  EnumSet<EnumWithInnerClass> set=EnumSet.noneOf(EnumWithInnerClass.class);
+  set.add(EnumWithInnerClass.d);
+  set.add(EnumWithInnerClass.e);
+  set.add(EnumWithInnerClass.f);
+  assertEquals("Size should be 3:",3,set.size());
+  EnumSet<EnumWithInnerClass> complementOfE=EnumSet.complementOf(set);
+  assertTrue(set.contains(EnumWithInnerClass.d));
+  assertEquals("complementOfE should have size 3",3,complementOfE.size());
+  assertTrue("complementOfE should contain EnumWithSubclass.a:",complementOfE.contains(EnumWithInnerClass.a));
+  assertTrue("complementOfE should contain EnumWithSubclass.b:",complementOfE.contains(EnumWithInnerClass.b));
+  assertTrue("complementOfE should contain EnumWithSubclass.c:",complementOfE.contains(EnumWithInnerClass.c));
+  EnumSet<HugeEnum> hugeSet=EnumSet.noneOf(HugeEnum.class);
+  assertEquals(0,hugeSet.size());
+  Set<HugeEnum> complementHugeSet=EnumSet.complementOf(hugeSet);
+  assertEquals(65,complementHugeSet.size());
+  hugeSet.add(HugeEnum.A);
+  hugeSet.add(HugeEnum.mm);
+  complementHugeSet=EnumSet.complementOf(hugeSet);
+  assertEquals(63,complementHugeSet.size());
+  try {
+    EnumSet.complementOf((EnumSet<HugeEnum>)null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException npe) {
+  }
+}

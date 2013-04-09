@@ -1,0 +1,29 @@
+{
+  byte[] data=new byte[]{-127,-100,-50,-10,-1,0,1,10,50,127};
+  TestInputStream tis=new TestInputStream(data);
+  CipherInputStream cis=new CipherInputStream(tis,new NullCipher());
+  int expected=data.length;
+  byte[] result=new byte[expected];
+  int skip=2;
+  int ind=skip;
+  cis.read(null,0,skip);
+  int got=skip + cis.read(result,0,1);
+  while (true) {
+    for (int j=0; j < got - ind; j++) {
+      assertEquals("read(byte[] b, int off, int len) " + "returned incorrect data.",result[j],data[ind + j]);
+    }
+    if (got == expected) {
+      break;
+    }
+ else     if (got > expected) {
+      fail("The data returned by " + "read(byte[] b, int off, int len) " + "is larger than expected.");
+    }
+ else {
+      ind=got;
+      got+=cis.read(result,0,3);
+    }
+  }
+  if (cis.read(result,0,1) != -1) {
+    fail("read() should return -1 at the end of the stream.");
+  }
+}

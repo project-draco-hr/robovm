@@ -1,0 +1,63 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportedMsg);
+    return;
+  }
+  Mac[] macs=createMacs();
+  assertNotNull("Mac objects were not created",macs);
+  byte[] buf=new byte[10];
+  ByteBuffer bBuf=ByteBuffer.wrap(buf,0,10);
+  byte[] bb={(byte)1,(byte)2,(byte)3,(byte)4,(byte)5};
+  SecretKeySpec sks=new SecretKeySpec(bb,"SHA1");
+  for (int i=0; i < macs.length; i++) {
+    try {
+      macs[i].update((byte)0);
+      fail("IllegalStateException must be thrown");
+    }
+ catch (    IllegalStateException e) {
+    }
+    try {
+      macs[i].update(buf);
+      fail("IllegalStateException must be thrown");
+    }
+ catch (    IllegalStateException e) {
+    }
+    try {
+      macs[i].update(buf,0,3);
+      fail("IllegalStateException must be thrown");
+    }
+ catch (    IllegalStateException e) {
+    }
+    try {
+      macs[i].update(bBuf);
+      fail("IllegalStateException must be thrown");
+    }
+ catch (    IllegalStateException e) {
+    }
+    try {
+      macs[i].doFinal();
+      fail("IllegalStateException must be thrown");
+    }
+ catch (    IllegalStateException e) {
+    }
+    try {
+      macs[i].doFinal(new byte[10]);
+      fail("IllegalStateException must be thrown");
+    }
+ catch (    IllegalStateException e) {
+    }
+    try {
+      macs[i].doFinal(new byte[10],0);
+      fail("IllegalStateException must be thrown");
+    }
+ catch (    IllegalStateException e) {
+    }
+    macs[i].init(sks);
+    try {
+      macs[i].doFinal(new byte[1],0);
+      fail("ShortBufferException expected");
+    }
+ catch (    ShortBufferException e) {
+    }
+  }
+}

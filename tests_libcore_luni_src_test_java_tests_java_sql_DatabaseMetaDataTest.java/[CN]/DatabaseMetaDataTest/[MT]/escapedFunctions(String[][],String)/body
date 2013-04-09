@@ -1,0 +1,35 @@
+{
+  boolean[] seenFunction=new boolean[specList.length];
+  StringTokenizer st=new StringTokenizer(metaDataList,",");
+  int counter=0;
+  while (st.hasMoreTokens()) {
+    counter++;
+    String function=st.nextToken();
+    boolean isSpecFunction=false;
+    for (int f=0; f < specList.length; f++) {
+      String[] specDetails=specList[f];
+      if (function.equals(specDetails[0])) {
+        if (seenFunction[f])         fail("Function in list twice: " + function);
+        seenFunction[f]=true;
+        isSpecFunction=true;
+        executeEscaped(specDetails);
+        break;
+      }
+    }
+    if (!isSpecFunction) {
+      fail("Non-JDBC spec function in list: " + function);
+    }
+  }
+  assertSame("Function missing in metadata impl",specList.length,counter);
+  for (int f=0; f < specList.length; f++) {
+    if (seenFunction[f])     continue;
+    String[] specDetails=specList[f];
+    if ("CHAR".equals(specDetails[0]))     continue;
+    try {
+      executeEscaped(specDetails);
+      fail("function works but not declared in list: " + specDetails[0]);
+    }
+ catch (    SQLException e) {
+    }
+  }
+}

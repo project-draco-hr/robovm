@@ -1,0 +1,23 @@
+{
+  TestUtils.initCertPathSSCertChain();
+  setupEnvironment();
+  byte[] bytes, bytesName;
+  bytes=new byte[]{-127,8,56,50,50,46,78,97,109,101};
+  bytesName=new byte[]{22,8,56,50,50,46,78,97,109,101};
+  bytes[bytes.length - 3]=(byte)200;
+  try {
+    theCertSelector.addPathToName(1,bytes);
+  }
+ catch (  IOException e) {
+  }
+  theCertSelector.setPathToNames(null);
+  theCertSelector.addPathToName(1,bytesName);
+  assertNotNull(theCertSelector.getPathToNames());
+  CertPath p=buildCertPath();
+  assertNull(p);
+  theCertSelector.setPathToNames(null);
+  theCertSelector.addPathToName(4,TestUtils.rootCertificateSS.getIssuerX500Principal().getEncoded());
+  assertNotNull(theCertSelector.getPathToNames());
+  p=TestUtils.buildCertPathSSCertChain();
+  assertNotNull(p);
+}

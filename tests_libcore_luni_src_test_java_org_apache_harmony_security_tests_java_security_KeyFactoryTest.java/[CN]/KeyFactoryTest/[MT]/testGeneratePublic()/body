@@ -1,0 +1,36 @@
+{
+  KeyFactory factory=null;
+  try {
+    factory=KeyFactory.getInstance(TEST_KEYFACTORY_NAME);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+  assertNotNull(factory);
+  try {
+    TestPublicKey key=new TestPublicKey();
+    TestPublicKeySpec keySpec=new TestPublicKeySpec(key);
+    PublicKey publicKey=factory.generatePublic(keySpec);
+    assertNotNull(publicKey);
+    assertTrue(Arrays.equals(key.encoded,publicKey.getEncoded()));
+  }
+ catch (  InvalidKeySpecException e) {
+    fail("unexpected exception: " + e);
+  }
+  KeySpec[] keySpecs={new TestPrivateKeySpec(new TestPrivateKey()),null,new DSAPublicKeySpec(null,null,null,null)};
+  Class[] exceptions={InvalidKeySpecException.class,NullPointerException.class,InvalidKeySpecException.class};
+  for (int i=0; i < keySpecs.length; i++) {
+    KeySpec keySpec=keySpecs[i];
+    String message="generatePublic(" + (keySpec == null ? "null" : keySpec.toString()) + ")";
+    try {
+      PublicKey generatePublic=factory.generatePublic(keySpec);
+      assertNotNull(generatePublic);
+    }
+ catch (    Exception e) {
+      checkException(message,e,exceptions[i]);
+    }
+ finally {
+      checkException(message,null,exceptions[i]);
+    }
+  }
+}

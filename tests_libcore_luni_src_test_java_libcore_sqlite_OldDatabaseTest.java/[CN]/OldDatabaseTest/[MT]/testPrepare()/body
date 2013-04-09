@@ -1,0 +1,40 @@
+{
+  Stmt st=null;
+  Stmt st2=null;
+  try {
+    st=db.prepare("");
+    assertEquals(0,st.bind_parameter_count());
+    st.step();
+    fail("stmt should not be prepared");
+  }
+ catch (  Exception e) {
+    assertEquals("stmt already closed",e.getMessage());
+  }
+  try {
+    st2=db.prepare("insert into " + DatabaseCreator.SIMPLE_TABLE1 + " values (:one,:two,:three)");
+    assertEquals(3,st2.bind_parameter_count());
+    assertEquals(3,st2.bind_parameter_index(":three"));
+    assertEquals(":two",st2.bind_parameter_name(2));
+  }
+  finally {
+    st2.close();
+  }
+  try {
+    db.prepare("insert into " + DatabaseCreator.SIMPLE_TABLE1 + " values(:one,:two,:three,:four);");
+  }
+ catch (  Exception e) {
+    assertEquals("table " + DatabaseCreator.SIMPLE_TABLE1 + " has 3 columns but 4 values were supplied",e.getMessage());
+  }
+  try {
+    db.prepare("insert into " + DatabaseCreator.SIMPLE_TABLE1 + " values(5, '10, 20);");
+  }
+ catch (  Exception e) {
+    assertEquals("unrecognized token: \"'10, 20);\"",e.getMessage());
+  }
+  try {
+    db.prepare("insert into " + DatabaseCreator.SIMPLE_TABLE1 + " values(5, 10 20);");
+  }
+ catch (  Exception e) {
+    assertEquals("near \"20\": syntax error",e.getMessage());
+  }
+}

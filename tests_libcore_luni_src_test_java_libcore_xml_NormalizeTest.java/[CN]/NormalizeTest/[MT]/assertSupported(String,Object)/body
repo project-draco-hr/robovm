@@ -1,0 +1,19 @@
+{
+  String message="This implementation's canSetParameter() disagrees" + " with its setParameter() for " + name + "="+ value;
+  try {
+    domConfiguration.setParameter(name,value);
+  }
+ catch (  DOMException e) {
+    if (domConfiguration.canSetParameter(name,value)) {
+      fail(message);
+    }
+ else {
+      fail("This implementation's setParameter() doesn't support: " + name + "="+ value);
+    }
+  }
+  assertTrue(message,domConfiguration.canSetParameter(name.toUpperCase(),value));
+  assertTrue(message,domConfiguration.canSetParameter(name,value));
+  assertEquals(value,domConfiguration.getParameter(name));
+  domConfiguration.setParameter(name.toUpperCase(),value);
+  assertEquals(value,domConfiguration.getParameter(name.toUpperCase()));
+}

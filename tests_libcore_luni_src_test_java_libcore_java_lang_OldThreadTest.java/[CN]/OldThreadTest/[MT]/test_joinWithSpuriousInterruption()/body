@@ -1,0 +1,29 @@
+{
+  final Thread parker=new Thread(){
+    @Override public void run(){
+      for (int i=0; i < 10; i++) {
+        LockSupport.park();
+      }
+    }
+  }
+;
+  Thread unparker=new Thread(){
+    @Override public void run(){
+      for (int i=0; i < 10; i++) {
+        try {
+          Thread.sleep(100);
+          LockSupport.unpark(parker);
+        }
+ catch (        InterruptedException expected) {
+        }
+      }
+    }
+  }
+;
+  long startNanos=System.nanoTime();
+  parker.start();
+  unparker.start();
+  parker.join(500,500000);
+  long netWaitTime=System.nanoTime() - startNanos;
+  assertTrue("Expected to wait at least 500000000ns, but was " + netWaitTime + "ns",netWaitTime > 500000000);
+}

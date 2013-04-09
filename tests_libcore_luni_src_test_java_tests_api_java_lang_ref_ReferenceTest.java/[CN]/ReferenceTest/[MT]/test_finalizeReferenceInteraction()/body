@@ -1,0 +1,40 @@
+{
+  error=null;
+  testObjectFinalized=false;
+class TestObject {
+    WeakReference<String> stringRef;
+    public TestObject(    String referent){
+      stringRef=new WeakReference<String>(referent);
+    }
+    protected void finalize(){
+      try {
+        String s=stringRef.get();
+        System.gc();
+        testObjectFinalized=true;
+      }
+ catch (      Throwable t) {
+        error=new AssertionFailedError("something threw '" + t + "' in finalize()");
+      }
+    }
+  }
+class TestThread extends Thread {
+    public void run(){
+      TestObject testObj=new TestObject(new String("sup /b/"));
+    }
+  }
+  try {
+    Thread t=new TestThread();
+    t.start();
+    t.join();
+    System.gc();
+    System.runFinalization();
+    Thread.sleep(1000);
+    if (error != null) {
+      throw error;
+    }
+    assertTrue("finalize() should have been called.",testObjectFinalized);
+  }
+ catch (  InterruptedException e) {
+    fail("InterruptedException : " + e.getMessage());
+  }
+}

@@ -1,0 +1,16 @@
+{
+  TestSSLSessions s=TestSSLSessions.create();
+  assertNotNull(s.invalid.getId());
+  assertNotNull(s.server.getId());
+  assertNotNull(s.client.getId());
+  assertEquals(0,s.invalid.getId().length);
+  if (TestSSLContext.sslServerSocketSupportsSessionTickets()) {
+    assertEquals(0,s.server.getId().length);
+  }
+ else {
+    assertEquals(32,s.server.getId().length);
+    assertTrue(Arrays.equals(s.server.getId(),s.client.getId()));
+  }
+  assertEquals(32,s.client.getId().length);
+  s.close();
+}

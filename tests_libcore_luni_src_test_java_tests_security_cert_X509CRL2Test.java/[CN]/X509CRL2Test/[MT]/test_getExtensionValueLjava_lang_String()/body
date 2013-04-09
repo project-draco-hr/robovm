@@ -1,0 +1,25 @@
+{
+  try {
+    setUp();
+  }
+ catch (  Exception e) {
+    fail("Exception " + e + " was thrown during configaration");
+  }
+  if (pemCert != null) {
+    Vector<String> extensionOids=new Vector<String>();
+    extensionOids.addAll(pemCert.getCriticalExtensionOIDs());
+    extensionOids.addAll(pemCert.getNonCriticalExtensionOIDs());
+    assertFalse(pemCert.hasUnsupportedCriticalExtension());
+    Iterator<String> i=extensionOids.iterator();
+    while (i.hasNext()) {
+      String oid=i.next();
+      byte[] value=pemCert.getExtensionValue(oid);
+      if (value != null && value.length > 0) {
+        assertTrue("The extension value for the oid " + oid + " was not encoded as an OCTET STRING",value[0] == 0x04);
+      }
+    }
+  }
+ else {
+    fail("Unable to obtain X509Certificate");
+  }
+}

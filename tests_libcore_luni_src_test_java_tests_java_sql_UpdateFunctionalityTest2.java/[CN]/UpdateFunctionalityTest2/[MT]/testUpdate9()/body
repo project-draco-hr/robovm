@@ -1,0 +1,16 @@
+{
+  DatabaseCreator.fillTestTable5(conn);
+  PreparedStatement stat=conn.prepareStatement("UPDATE " + DatabaseCreator.TEST_TABLE5 + " SET testValue = ? WHERE testID = ?");
+  stat.setString(1,"1");
+  stat.setInt(2,1);
+  stat.execute();
+  stat.setString(1,"2");
+  stat.setInt(2,2);
+  stat.execute();
+  ResultSet r=statement.executeQuery("SELECT testId, testValue FROM " + DatabaseCreator.TEST_TABLE5 + " WHERE testID < 3 ORDER BY testID");
+  while (r.next()) {
+    assertEquals("Incorrect value was returned",new Integer(r.getInt(1)).toString(),r.getString(2));
+  }
+  r.close();
+  stat.close();
+}

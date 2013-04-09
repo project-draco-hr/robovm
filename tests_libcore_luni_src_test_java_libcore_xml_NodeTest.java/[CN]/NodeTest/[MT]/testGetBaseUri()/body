@@ -1,0 +1,15 @@
+{
+  DocumentBuilder builder=DocumentBuilderFactory.newInstance().newDocumentBuilder();
+  File file=Support_Resources.resourceToTempFile("/simple.xml");
+  Document document=builder.parse(file);
+  assertFileUriEquals(file,document.getBaseURI());
+  Element documentElement=document.getDocumentElement();
+  for (  Node node : flattenSubtree(documentElement)) {
+    if (node.getNodeType() == Node.ELEMENT_NODE || node.getNodeType() == Node.DOCUMENT_NODE) {
+      assertFileUriEquals(file,node.getBaseURI());
+    }
+ else {
+      assertNull("Unexpected base URI for " + node,node.getBaseURI());
+    }
+  }
+}

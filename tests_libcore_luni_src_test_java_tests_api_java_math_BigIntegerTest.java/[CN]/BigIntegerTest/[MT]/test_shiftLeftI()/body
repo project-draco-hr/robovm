@@ -1,0 +1,29 @@
+{
+  assertTrue("1 << 0",one.shiftLeft(0).equals(one));
+  assertTrue("1 << 1",one.shiftLeft(1).equals(two));
+  assertTrue("1 << 63",one.shiftLeft(63).equals(new BigInteger("8000000000000000",16)));
+  assertTrue("1 << 64",one.shiftLeft(64).equals(new BigInteger("10000000000000000",16)));
+  assertTrue("1 << 65",one.shiftLeft(65).equals(new BigInteger("20000000000000000",16)));
+  assertTrue("-1 << 0",minusOne.shiftLeft(0).equals(minusOne));
+  assertTrue("-1 << 1",minusOne.shiftLeft(1).equals(minusTwo));
+  assertTrue("-1 << 63",minusOne.shiftLeft(63).equals(new BigInteger("-9223372036854775808")));
+  assertTrue("-1 << 64",minusOne.shiftLeft(64).equals(new BigInteger("-18446744073709551616")));
+  assertTrue("-1 << 65",minusOne.shiftLeft(65).equals(new BigInteger("-36893488147419103232")));
+  BigInteger a=bi3;
+  BigInteger c=minusOne;
+  for (int i=0; i < 200; i++) {
+    BigInteger b=bi3.shiftLeft(i);
+    assertTrue("a==b",a.equals(b));
+    assertTrue("a >> i == bi3",a.shiftRight(i).equals(bi3));
+    a=a.shiftLeft(1);
+    assertTrue("<<1 == *2",b.multiply(two).equals(a));
+    assertTrue("a non-neg",a.signum() >= 0);
+    assertTrue("a.bitCount==b.bitCount",a.bitCount() == b.bitCount());
+    BigInteger d=minusOne.shiftLeft(i);
+    assertTrue("c==d",c.equals(d));
+    c=c.shiftLeft(1);
+    assertTrue("<<1 == *2 negative",d.multiply(two).equals(c));
+    assertTrue("c negative",c.signum() == -1);
+    assertTrue("d >> i == minusOne",d.shiftRight(i).equals(minusOne));
+  }
+}

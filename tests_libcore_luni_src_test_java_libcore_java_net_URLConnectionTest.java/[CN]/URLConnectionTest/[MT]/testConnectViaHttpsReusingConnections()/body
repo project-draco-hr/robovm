@@ -1,0 +1,16 @@
+{
+  TestSSLContext testSSLContext=TestSSLContext.create();
+  SSLSocketFactory clientSocketFactory=testSSLContext.clientContext.getSocketFactory();
+  server.useHttps(testSSLContext.serverContext.getSocketFactory(),false);
+  server.enqueue(new MockResponse().setBody("this response comes via HTTPS"));
+  server.enqueue(new MockResponse().setBody("another response via HTTPS"));
+  server.play();
+  HttpsURLConnection connection=(HttpsURLConnection)server.getUrl("/").openConnection();
+  connection.setSSLSocketFactory(clientSocketFactory);
+  assertContent("this response comes via HTTPS",connection);
+  connection=(HttpsURLConnection)server.getUrl("/").openConnection();
+  connection.setSSLSocketFactory(clientSocketFactory);
+  assertContent("another response via HTTPS",connection);
+  assertEquals(0,server.takeRequest().getSequenceNumber());
+  assertEquals(1,server.takeRequest().getSequenceNumber());
+}

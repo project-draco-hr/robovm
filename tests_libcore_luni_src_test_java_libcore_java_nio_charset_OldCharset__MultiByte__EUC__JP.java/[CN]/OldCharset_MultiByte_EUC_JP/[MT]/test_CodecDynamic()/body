@@ -1,0 +1,17 @@
+{
+  encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+  decoder.onMalformedInput(CodingErrorAction.REPORT);
+  CharBuffer inputCB=CharBuffer.allocate(65536);
+  for (int code=32; code <= 65533; code++) {
+    if ((encoder.canEncode((char)code)) && (code != 165) && (code != 8254)) {
+      inputCB.put((char)code);
+    }
+  }
+  inputCB.rewind();
+  ByteBuffer intermediateBB=encoder.encode(inputCB);
+  inputCB.rewind();
+  intermediateBB.rewind();
+  CharBuffer outputCB=decoder.decode(intermediateBB);
+  outputCB.rewind();
+  assertEqualCBs("decode(encode(A)) must be identical with A!",inputCB,outputCB);
+}

@@ -1,0 +1,30 @@
+{
+  Set<EnumFoo> set=EnumSet.noneOf(EnumFoo.class);
+  Enum[] elements=EnumFoo.class.getEnumConstants();
+  for (int i=0; i < elements.length; i++) {
+    set.add((EnumFoo)elements[i]);
+  }
+  boolean result=set.remove(null);
+  assertFalse("'set' does not contain null",result);
+  result=set.remove(EnumFoo.a);
+  assertTrue("Should return true",result);
+  result=set.remove(EnumFoo.a);
+  assertFalse("Should return false",result);
+  assertEquals("Size of set should be 63:",63,set.size());
+  result=set.remove(EnumWithInnerClass.a);
+  assertFalse("Should return false",result);
+  result=set.remove(EnumWithInnerClass.f);
+  assertFalse("Should return false",result);
+  Set<HugeEnum> hugeSet=EnumSet.allOf(HugeEnum.class);
+  result=hugeSet.remove(null);
+  assertFalse("'set' does not contain null",result);
+  result=hugeSet.remove(HugeEnum.a);
+  assertTrue("Should return true",result);
+  result=hugeSet.remove(HugeEnum.a);
+  assertFalse("Should return false",result);
+  assertEquals("Size of set should be 64:",64,hugeSet.size());
+  result=hugeSet.remove(HugeEnumWithInnerClass.a);
+  assertFalse("Should return false",result);
+  result=hugeSet.remove(HugeEnumWithInnerClass.f);
+  assertFalse("Should return false",result);
+}

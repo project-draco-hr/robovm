@@ -1,0 +1,11 @@
+{
+  PublicKey pk=new TestKeyPair(keyAlg).getPublic();
+  TrustAnchor ta=new TrustAnchor(validCaNameRfc2253,pk,null);
+  assertNull("null1",ta.getTrustedCert());
+  X500Principal x500p=new X500Principal(validCaNameRfc2253);
+  ta=new TrustAnchor(x500p,pk,null);
+  assertNull("null2",ta.getTrustedCert());
+  X509Certificate cert=new TestCertUtils.TestX509Certificate(x500p,x500p);
+  TrustAnchor ta2=new TrustAnchor(cert,null);
+  assertSame(cert,ta2.getTrustedCert());
+}

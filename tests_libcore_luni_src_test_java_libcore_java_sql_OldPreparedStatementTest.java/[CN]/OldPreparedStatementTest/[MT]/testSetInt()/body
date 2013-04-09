@@ -1,0 +1,56 @@
+{
+  PreparedStatement ps=null;
+  Statement st=null;
+  try {
+    String query="insert into type (IntVal) values (?);";
+    ps=conn.prepareStatement(query);
+    try {
+      ps.setInt(1,Integer.MAX_VALUE);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where IntVal=" + Integer.MAX_VALUE);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        ps.close();
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    ps=conn.prepareStatement(query);
+    try {
+      ps.setInt(1,Integer.MIN_VALUE);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where IntVal=" + Integer.MAX_VALUE);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        ps.close();
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+    ps=conn.prepareStatement(query);
+    ps.close();
+    try {
+      ps.setInt(1,Integer.MIN_VALUE);
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+}

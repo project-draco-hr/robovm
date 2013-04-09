@@ -1,0 +1,16 @@
+{
+  SecureRandom sr1=new SecureRandom();
+  assertNotNull(sr1.getProvider());
+  SecureRandom sr2=new SecureRandom(SEED_BYTES);
+  assertNotNull(sr2.getProvider());
+  MyProvider p=new MyProvider();
+  MySecureRandom sr3=new MySecureRandom(new MySecureRandomSpi(),p);
+  assertEquals(p,sr3.getProvider());
+  try {
+    SecureRandom random=SecureRandom.getInstance("SHA1PRNG");
+    assertNotNull(random.getProvider());
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("Unexpected NoSuchAlgorithmException");
+  }
+}

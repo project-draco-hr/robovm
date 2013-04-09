@@ -1,0 +1,38 @@
+{
+  if (!X509Support) {
+    fail(NotSupportMsg);
+    return;
+  }
+  CertificateFactory[] certFs=initCertFs();
+  assertNotNull("CertificateFactory objects were not created",certFs);
+  Iterator<String> it1=certFs[0].getCertPathEncodings();
+  Iterator<String> it2=certFs[1].getCertPathEncodings();
+  assertEquals("Incorrect encodings",it1.hasNext(),it2.hasNext());
+  while (it1.hasNext()) {
+    it2=certFs[1].getCertPathEncodings();
+    String s1=it1.next();
+    boolean yesNo=false;
+    while (it2.hasNext()) {
+      if (s1.equals(it2.next())) {
+        yesNo=true;
+        break;
+      }
+    }
+    assertTrue("Encoding: ".concat(s1).concat(" does not define for certF2 CertificateFactory"),yesNo);
+  }
+  it1=certFs[0].getCertPathEncodings();
+  it2=certFs[2].getCertPathEncodings();
+  assertEquals("Incorrect encodings",it1.hasNext(),it2.hasNext());
+  while (it1.hasNext()) {
+    it2=certFs[2].getCertPathEncodings();
+    String s1=it1.next();
+    boolean yesNo=false;
+    while (it2.hasNext()) {
+      if (s1.equals(it2.next())) {
+        yesNo=true;
+        break;
+      }
+    }
+    assertTrue("Encoding: ".concat(s1).concat(" does not define for certF3 CertificateFactory"),yesNo);
+  }
+}

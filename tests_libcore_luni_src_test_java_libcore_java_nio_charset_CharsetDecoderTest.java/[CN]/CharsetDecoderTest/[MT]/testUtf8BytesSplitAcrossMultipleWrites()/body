@@ -1,0 +1,17 @@
+{
+  CharsetDecoder decoder=Charset.forName("UTF-8").newDecoder();
+  CharBuffer cb=CharBuffer.allocate(128);
+  CoderResult cr;
+  cr=decoder.decode(ByteBuffer.wrap(new byte[]{(byte)0xe2}),cb,false);
+  assertEquals(CoderResult.UNDERFLOW,cr);
+  cr=decoder.decode(ByteBuffer.wrap(new byte[]{(byte)0x98}),cb,false);
+  assertEquals(CoderResult.UNDERFLOW,cr);
+  cr=decoder.decode(ByteBuffer.wrap(new byte[]{(byte)0x83}),cb,false);
+  assertEquals(CoderResult.UNDERFLOW,cr);
+  cr=decoder.decode(ByteBuffer.wrap(new byte[0]),cb,true);
+  assertEquals(CoderResult.UNDERFLOW,cr);
+  cr=decoder.flush(cb);
+  assertEquals(CoderResult.UNDERFLOW,cr);
+  assertEquals(1,cb.position());
+  assertEquals('\u2603',cb.get(0));
+}

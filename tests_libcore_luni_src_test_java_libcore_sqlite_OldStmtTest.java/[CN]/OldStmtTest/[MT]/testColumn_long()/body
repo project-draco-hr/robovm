@@ -1,0 +1,28 @@
+{
+  Object columnObject;
+  long longColumn;
+  String selectStmt="select * from " + DatabaseCreator.SIMPLE_TABLE1;
+  st=db.prepare(selectStmt);
+  st.step();
+  columnObject=st.column(1);
+  longColumn=st.column_long(1);
+  assertNotNull(longColumn);
+  assertTrue("Integer".equalsIgnoreCase(st.column_decltype(1)));
+  int stSpeed=Integer.parseInt(columnObject.toString());
+  assertNotNull(stSpeed);
+  assertEquals(longColumn,stSpeed);
+  try {
+    st.column_long(4);
+    fail("Exception expected");
+  }
+ catch (  SQLite.Exception expected) {
+    assertEquals("column out of bounds",expected.getMessage());
+  }
+  try {
+    st.column_long(-1);
+    fail("Exception expected");
+  }
+ catch (  SQLite.Exception expected) {
+    assertEquals("column out of bounds",expected.getMessage());
+  }
+}

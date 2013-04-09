@@ -1,0 +1,32 @@
+{
+  TestTrace t=new TestTrace();
+  MockFunction aggFunction=new MockFunction();
+  db.exec("create table TEST(id integer, firstname text, lastname text)",null);
+  db.exec("insert into TEST values(3, 'James', 'Bond'); ",null);
+  db.exec("insert into TEST values(4, 'Fiona', 'Apple'); ",null);
+  db.trace((Trace)t);
+  db.create_aggregate("myaggfunc",1,aggFunction);
+  db.function_type("myaggfunc",Constants.SQLITE3_TEXT);
+  db.exec("PRAGMA show_datatypes = on",null);
+  assertFalse(aggFunction.functionCalled);
+  assertFalse(aggFunction.stepCalled);
+  assertFalse(aggFunction.lastStepCalled);
+  db.exec("select myaggfunc(TEST.firstname) from TEST",t);
+  assertTrue(aggFunction.stepCalled);
+  assertTrue(aggFunction.lastStepCalled);
+  assertTrue(aggFunction.functionCalled);
+  assertEquals("James Fiona ",aggFunction.getAggValue());
+  db.exec("drop table TEST",null);
+  try {
+    db.create_aggregate("myaggfunc",0,null);
+  }
+ catch (  Throwable e) {
+    assertEquals("null SQLite.Function not allowed",e.getMessage());
+  }
+  try {
+    db.create_aggregate("myaggfunc",0,aggFunction);
+  }
+ catch (  Throwable e) {
+    assertEquals("wrong number of arguments to function myaggfunc()",e.getMessage());
+  }
+}

@@ -1,0 +1,31 @@
+{
+  assertEquals("abc def",new JSONTokener("abc\\u0020def\"ghi").nextString('"'));
+  assertEquals("abcU0020def",new JSONTokener("abc\\U0020def\"ghi").nextString('"'));
+  try {
+    new JSONTokener("abc\\u002\"").nextString('"');
+    fail();
+  }
+ catch (  NumberFormatException e) {
+  }
+catch (  JSONException e) {
+  }
+  try {
+    new JSONTokener("abc\\u").nextString('"');
+    fail();
+  }
+ catch (  JSONException e) {
+  }
+  try {
+    new JSONTokener("abc\\u    \"").nextString('"');
+    fail();
+  }
+ catch (  NumberFormatException e) {
+  }
+  assertEquals("abc\"def",new JSONTokener("abc\\u0022def\"ghi").nextString('"'));
+  try {
+    new JSONTokener("abc\\u000G\"").nextString('"');
+    fail();
+  }
+ catch (  NumberFormatException e) {
+  }
+}

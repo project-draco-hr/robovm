@@ -1,0 +1,18 @@
+{
+  File tmp=File.createTempFile("FileChannelTest","tmp");
+  FileChannel fc=new FileOutputStream(tmp).getChannel();
+  fc.write(ByteBuffer.wrap("abcdABCD".getBytes("US-ASCII")));
+  fc.close();
+  fc=new FileInputStream(tmp).getChannel();
+  ByteBuffer[] buffers=new ByteBuffer[]{ByteBuffer.allocateDirect(4),ByteBuffer.allocate(4)};
+  assertEquals(8,fc.read(buffers));
+  fc.close();
+  assertEquals(8,buffers[0].limit() + buffers[1].limit());
+  byte[] bytes=new byte[4];
+  buffers[0].flip();
+  buffers[0].get(bytes);
+  assertEquals("abcd",new String(bytes,"US-ASCII"));
+  buffers[1].flip();
+  buffers[1].get(bytes);
+  assertEquals("ABCD",new String(bytes,"US-ASCII"));
+}

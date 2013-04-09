@@ -1,0 +1,29 @@
+{
+  Document doc;
+  ProcessingInstruction badPI;
+  doc=(Document)load("hc_staff",true);
+  if (("text/html".equals(getContentType()))) {
+{
+      boolean success=false;
+      try {
+        badPI=doc.createProcessingInstruction("foo","data");
+      }
+ catch (      DOMException ex) {
+        success=(ex.code == DOMException.NOT_SUPPORTED_ERR);
+      }
+      assertTrue("throw_NOT_SUPPORTED_ERR",success);
+    }
+  }
+ else {
+{
+      boolean success=false;
+      try {
+        badPI=doc.createProcessingInstruction("","data");
+      }
+ catch (      DOMException ex) {
+        success=(ex.code == DOMException.INVALID_CHARACTER_ERR);
+      }
+      assertTrue("throw_INVALID_CHARACTER_ERR",success);
+    }
+  }
+}

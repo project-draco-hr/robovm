@@ -1,0 +1,16 @@
+{
+  SSLSocketFactory sf=(SSLSocketFactory)SSLSocketFactory.getDefault();
+  SSLSocket ssl=(SSLSocket)sf.createSocket();
+  SSLParameters p=ssl.getSSLParameters();
+  assertNotNull(p);
+  String[] cipherSuites=p.getCipherSuites();
+  StandardNames.assertValidCipherSuites(StandardNames.CIPHER_SUITES,cipherSuites);
+  assertNotSame(cipherSuites,ssl.getEnabledCipherSuites());
+  assertEquals(Arrays.asList(cipherSuites),Arrays.asList(ssl.getEnabledCipherSuites()));
+  String[] protocols=p.getProtocols();
+  StandardNames.assertValidProtocols(StandardNames.SSL_SOCKET_PROTOCOLS,protocols);
+  assertNotSame(protocols,ssl.getEnabledProtocols());
+  assertEquals(Arrays.asList(protocols),Arrays.asList(ssl.getEnabledProtocols()));
+  assertEquals(p.getWantClientAuth(),ssl.getWantClientAuth());
+  assertEquals(p.getNeedClientAuth(),ssl.getNeedClientAuth());
+}

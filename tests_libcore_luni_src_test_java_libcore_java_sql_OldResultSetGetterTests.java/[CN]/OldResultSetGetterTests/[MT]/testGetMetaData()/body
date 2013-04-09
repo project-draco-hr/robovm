@@ -1,0 +1,16 @@
+{
+  List<String> types=Arrays.asList("VARCHAR","INTEGER","INTEGER","BIGINT","SMALLINT","SHORT","INTEGER","INTEGER","FLOAT","DOUBLE","DOUBLE","DECIMAL","NUMERIC","VARCHAR","DATE","TIME","TIMESTAMP","DATETIME","BLOB","BLOB","BLOB","BLOB","VARCHAR","VARCHAR","VARCHAR","VARCHAR","BIGINT","BIGINT","URL","URL");
+  ListIterator<String> it=types.listIterator();
+  ListIterator<String> colNameIt=colNames.listIterator();
+  ResultSetMetaData meta=res.getMetaData();
+  assertNotNull(meta);
+  assertEquals("Error in test setup. Columns do not match",types.size(),meta.getColumnCount());
+  for (int i=1; i < 31; i++) {
+    String colName=colNameIt.next();
+    String type=it.next();
+    if (supported[i - 1]) {
+      assertTrue("Wrong column name at " + i,colName.equalsIgnoreCase(meta.getColumnName(i)));
+      assertTrue("Wrong type at " + i + " required"+ type+ " but is "+ meta.getColumnTypeName(i),type.equalsIgnoreCase(meta.getColumnTypeName(i)));
+    }
+  }
+}

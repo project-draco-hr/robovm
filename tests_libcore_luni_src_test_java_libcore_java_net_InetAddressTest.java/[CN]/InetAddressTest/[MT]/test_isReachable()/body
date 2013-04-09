@@ -1,0 +1,16 @@
+{
+  String s="aced0005737200146a6176612e6e65742e496e6574416464726573732d9b57af" + "9fe3ebdb0200034900076164647265737349000666616d696c794c0008686f737" + "44e616d657400124c6a6176612f6c616e672f537472696e673b78704a7d9d6300"+ "00000274000e7777772e676f6f676c652e636f6d";
+  InetAddress inetAddress=InetAddress.getByName("www.google.com");
+  new SerializationTester<InetAddress>(inetAddress,s){
+    @Override protected void verify(    InetAddress deserialized) throws Exception {
+      deserialized.isReachable(500);
+      for (      NetworkInterface nif : Collections.list(NetworkInterface.getNetworkInterfaces())) {
+        deserialized.isReachable(nif,20,500);
+      }
+    }
+    @Override protected boolean equals(    InetAddress a,    InetAddress b){
+      return a.getHostName().equals(b.getHostName());
+    }
+  }
+.test();
+}

@@ -1,0 +1,127 @@
+{
+  int[] ports=Support_PortManager.getNextPortsForUDP(2);
+  final int portNumber=ports[0];
+class TestDGSend implements Runnable {
+    Thread pThread;
+    public TestDGSend(    Thread t){
+      pThread=t;
+    }
+    public void run(){
+      try {
+        byte[] rbuf=new byte[1000];
+        sds=new DatagramSocket(portNumber);
+        DatagramPacket sdp=new DatagramPacket(rbuf,rbuf.length);
+        sds.setSoTimeout(6000);
+        sds.receive(sdp);
+        retval=new String(rbuf,0,testString.length());
+        pThread.interrupt();
+      }
+ catch (      java.io.InterruptedIOException e) {
+        System.out.println("Recv operation timed out");
+        pThread.interrupt();
+        ds.close();
+      }
+catch (      Exception e) {
+        System.out.println("Failed to establish Dgram server: " + e);
+      }
+    }
+  }
+  try {
+    new Thread(new TestDGSend(Thread.currentThread()),"DGServer").start();
+    ds=new java.net.DatagramSocket(ports[1]);
+    dp=new DatagramPacket(testString.getBytes(),testString.length(),InetAddress.getLocalHost(),portNumber);
+    try {
+      Thread.sleep(500);
+      ds.send(dp);
+      Thread.sleep(5000);
+    }
+ catch (    InterruptedException e) {
+      ds.close();
+      assertTrue("Incorrect data sent: " + retval,retval.equals(testString));
+    }
+  }
+ catch (  Exception e) {
+    fail("Exception during send test : " + e.getMessage());
+  }
+ finally {
+    ds.close();
+  }
+  DatagramSocket socket=null;
+  try {
+    byte rbuf[]=new byte[1000];
+    DatagramPacket rdp=new DatagramPacket(rbuf,rbuf.length);
+    SocketAddress address=new InetSocketAddress(portNumber);
+    DatagramChannel channel=DatagramChannel.open();
+    channel.configureBlocking(false);
+    socket=channel.socket();
+    socket.send(rdp);
+    fail("IllegalBlockingModeException was not thrown.");
+  }
+ catch (  IllegalBlockingModeException ibme) {
+  }
+catch (  IOException ioe) {
+    fail("IOException was thrown: " + ioe.getMessage());
+  }
+ finally {
+    socket.close();
+  }
+class testDatagramSocket extends DatagramSocket {
+    public testDatagramSocket(    DatagramSocketImpl impl){
+      super(impl);
+    }
+  }
+class testDatagramSocketImpl extends DatagramSocketImpl {
+    protected void create() throws SocketException {
+    }
+    protected void bind(    int arg0,    InetAddress arg1) throws SocketException {
+    }
+    protected void send(    DatagramPacket arg0) throws IOException {
+    }
+    protected int peek(    InetAddress arg0) throws IOException {
+      return 0;
+    }
+    protected int peekData(    DatagramPacket arg0) throws IOException {
+      return 0;
+    }
+    protected void receive(    DatagramPacket arg0) throws IOException {
+    }
+    protected void setTTL(    byte arg0) throws IOException {
+    }
+    protected byte getTTL() throws IOException {
+      return 0;
+    }
+    protected void setTimeToLive(    int arg0) throws IOException {
+    }
+    protected int getTimeToLive() throws IOException {
+      return 0;
+    }
+    protected void join(    InetAddress arg0) throws IOException {
+    }
+    protected void leave(    InetAddress arg0) throws IOException {
+    }
+    protected void joinGroup(    SocketAddress arg0,    NetworkInterface arg1) throws IOException {
+    }
+    protected void leaveGroup(    SocketAddress arg0,    NetworkInterface arg1) throws IOException {
+    }
+    protected void close(){
+    }
+    public void setOption(    int arg0,    Object arg1) throws SocketException {
+    }
+    public Object getOption(    int arg0) throws SocketException {
+      return null;
+    }
+  }
+  InetSocketAddress sa=new InetSocketAddress(InetAddress.getLocalHost(),0);
+  new testDatagramSocket(new testDatagramSocketImpl()).send(new DatagramPacket(new byte[272],3,sa));
+  InetAddress i=InetAddress.getByName("127.0.0.1");
+  DatagramSocket d=new DatagramSocket(0,i);
+  try {
+    d.send(new DatagramPacket(new byte[]{1},1));
+    fail("should throw NPE.");
+  }
+ catch (  NullPointerException e) {
+  }
+ finally {
+    d.close();
+  }
+}

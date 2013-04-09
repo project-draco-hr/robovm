@@ -1,0 +1,59 @@
+{
+  int[] keys={-1,-250,1,64,512,1024};
+  SecureRandom random=new SecureRandom();
+  AlgorithmParameterSpec aps;
+  KeyPairGenerator mKPG=new MyKeyPairGenerator1("");
+  assertEquals("Incorrect algorithm",mKPG.getAlgorithm(),MyKeyPairGenerator1.getResAlgorithm());
+  mKPG.generateKeyPair();
+  mKPG.genKeyPair();
+  for (int i=0; i < keys.length; i++) {
+    try {
+      mKPG.initialize(keys[i]);
+      fail("InvalidParameterException must be thrown (key: " + Integer.toString(keys[i]) + ")");
+    }
+ catch (    InvalidParameterException e) {
+    }
+    try {
+      mKPG.initialize(keys[i],random);
+      fail("InvalidParameterException must be thrown (key: " + Integer.toString(keys[i]) + ")");
+    }
+ catch (    InvalidParameterException e) {
+    }
+  }
+  try {
+    mKPG.initialize(100,null);
+    fail("InvalidParameterException must be thrown when random is null");
+  }
+ catch (  InvalidParameterException e) {
+  }
+  mKPG.initialize(100,random);
+  assertEquals("Incorrect random",random,((MyKeyPairGenerator1)mKPG).secureRandom);
+  assertEquals("Incorrect keysize",100,((MyKeyPairGenerator1)mKPG).keySize);
+  try {
+    mKPG.initialize(null,random);
+    fail("InvalidAlgorithmParameterException must be thrown when param is null");
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+  }
+  if (DSASupported) {
+    BigInteger bInt=new BigInteger("1");
+    aps=new java.security.spec.DSAParameterSpec(bInt,bInt,bInt);
+    try {
+      mKPG.initialize(aps,null);
+      fail("InvalidParameterException must be thrown when random is null");
+    }
+ catch (    InvalidParameterException e) {
+    }
+catch (    InvalidAlgorithmParameterException e) {
+      fail("Unexpected InvalidAlgorithmParameterException was thrown");
+    }
+    try {
+      mKPG.initialize(aps,random);
+      assertEquals("Incorrect random",random,((MyKeyPairGenerator1)mKPG).secureRandom);
+      assertEquals("Incorrect params",aps,((MyKeyPairGenerator1)mKPG).paramSpec);
+    }
+ catch (    InvalidAlgorithmParameterException e) {
+      fail("Unexpected InvalidAlgorithmParameterException was thrown");
+    }
+  }
+}

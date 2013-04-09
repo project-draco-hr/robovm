@@ -1,0 +1,33 @@
+{
+  Date d=new Date(Date.parse("13 October 1998"));
+  GregorianCalendar cal=new GregorianCalendar();
+  cal.setTime(d);
+  assertEquals("Parsed incorrect month",9,cal.get(Calendar.MONTH));
+  assertEquals("Parsed incorrect year",1998,cal.get(Calendar.YEAR));
+  assertEquals("Parsed incorrect date",13,cal.get(Calendar.DATE));
+  d=new Date(Date.parse("Jan-12 1999"));
+  assertTrue("Wrong parsed date 1",d.equals(new GregorianCalendar(1999,0,12).getTime()));
+  d=new Date(Date.parse("Jan12-1999"));
+  assertTrue("Wrong parsed date 2",d.equals(new GregorianCalendar(1999,0,12).getTime()));
+  d=new Date(Date.parse("Jan12 69-1"));
+  cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+  cal.clear();
+  cal.set(1969,Calendar.JANUARY,12,1,0);
+  assertTrue("Wrong parsed date 3",d.equals(cal.getTime()));
+  d=new Date(Date.parse("6:45:13 3/2/1200 MST"));
+  cal.setTimeZone(TimeZone.getTimeZone("MST"));
+  cal.clear();
+  cal.set(1200,2,2,6,45,13);
+  assertTrue("Wrong parsed date 4",d.equals(cal.getTime()));
+  d=new Date(Date.parse("Mon, 22 Nov 1999 12:52:06 GMT"));
+  cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+  cal.clear();
+  cal.set(1999,Calendar.NOVEMBER,22,12,52,06);
+  assertTrue("Wrong parsed date 5",d.equals(cal.getTime()));
+  try {
+    Date.parse(null);
+    fail("Date.parse(null) should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

@@ -1,0 +1,54 @@
+{
+  while (spin) {
+  }
+  if (interrupted()) {
+  }
+ else {
+    throw new RuntimeException("Thread not interrupted " + "during spin");
+  }
+synchronized (this) {
+    Boolean sawEx=false;
+    try {
+synchronized (interrupterLock) {
+        interrupterLock.notify();
+      }
+      this.wait();
+    }
+ catch (    InterruptedException ex) {
+      sawEx=true;
+    }
+    if (!sawEx) {
+      throw new RuntimeException("Thread not interrupted " + "during wait()");
+    }
+  }
+synchronized (this) {
+    Boolean sawEx=false;
+    try {
+synchronized (interrupterLock) {
+        interrupterLock.notify();
+      }
+      this.wait(1000);
+    }
+ catch (    InterruptedException ex) {
+      sawEx=true;
+    }
+    if (!sawEx) {
+      throw new RuntimeException("Thread not interrupted " + "during wait(1000)");
+    }
+  }
+synchronized (this) {
+    Boolean sawEx=false;
+    try {
+synchronized (interrupterLock) {
+        interrupterLock.notify();
+      }
+      this.wait(1000,5000);
+    }
+ catch (    InterruptedException ex) {
+      sawEx=true;
+    }
+    if (!sawEx) {
+      throw new RuntimeException("Thread not interrupted " + "during wait(1000, 5000)");
+    }
+  }
+}

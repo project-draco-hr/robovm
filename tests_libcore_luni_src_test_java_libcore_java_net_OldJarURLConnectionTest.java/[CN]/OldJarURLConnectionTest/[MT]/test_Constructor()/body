@@ -1,0 +1,26 @@
+{
+  try {
+    String jarFileName="file.jar";
+    String entry="text.txt";
+    URL url=new URL("jar:file:" + jarFileName + "!/"+ entry);
+    TestJarURLConnection jarConn=new TestJarURLConnection(url);
+    assertEquals(new URL("file:file.jar"),jarConn.getJarFileURL());
+  }
+ catch (  MalformedURLException me) {
+    fail("MalformedURLException was thrown.");
+  }
+  try {
+    URL[] urls={new URL("file:file.jar"),new URL("http://foo.com/foo/foo.jar")};
+    for (    URL url : urls) {
+      try {
+        new TestJarURLConnection(url);
+        fail("MalformedURLException was not thrown.");
+      }
+ catch (      MalformedURLException me) {
+      }
+    }
+  }
+ catch (  MalformedURLException me) {
+    fail("MalformedURLException was thrown.");
+  }
+}

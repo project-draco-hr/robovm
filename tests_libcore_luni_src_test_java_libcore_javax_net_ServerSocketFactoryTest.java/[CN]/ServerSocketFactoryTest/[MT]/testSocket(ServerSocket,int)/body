@@ -1,0 +1,23 @@
+{
+  final byte[] data="abc".getBytes();
+  new Thread(new Runnable(){
+    public void run(){
+      try {
+        Socket s=serverSocket.accept();
+        s.getOutputStream().write(data);
+        s.close();
+      }
+ catch (      IOException e) {
+      }
+    }
+  }
+).start();
+  Socket socket=new Socket(InetAddress.getLocalHost(),serverSocket.getLocalPort());
+  assertBacklog(specifiedBacklog,new InetSocketAddress(InetAddress.getLocalHost(),serverSocket.getLocalPort()));
+  InputStream in=socket.getInputStream();
+  ByteArrayOutputStream out=new ByteArrayOutputStream();
+  transfer(in,out);
+  assertEquals(Arrays.toString(data),Arrays.toString(out.toByteArray()));
+  socket.close();
+  serverSocket.close();
+}

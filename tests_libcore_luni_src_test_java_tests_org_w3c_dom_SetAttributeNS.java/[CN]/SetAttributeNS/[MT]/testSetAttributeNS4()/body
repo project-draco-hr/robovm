@@ -1,0 +1,24 @@
+{
+  Document doc;
+  NodeList elementList;
+  Node testAddr;
+  Attr addrAttr;
+  String resultAttr;
+  String resultNamespaceURI;
+  String resultLocalName;
+  String resultPrefix;
+  doc=(Document)load("staffNS",builder);
+  elementList=doc.getElementsByTagName("emp:address");
+  testAddr=elementList.item(0);
+  assertNotNull("empAddrNotNull",testAddr);
+  ((Element)testAddr).setAttributeNS("http://www.nist.gov","newprefix:zone","newValue");
+  addrAttr=((Element)testAddr).getAttributeNodeNS("http://www.nist.gov","zone");
+  resultAttr=((Element)testAddr).getAttributeNS("http://www.nist.gov","zone");
+  assertEquals("attrValue","newValue",resultAttr);
+  resultNamespaceURI=addrAttr.getNamespaceURI();
+  assertEquals("nsuri","http://www.nist.gov",resultNamespaceURI);
+  resultLocalName=addrAttr.getLocalName();
+  assertEquals("lname","zone",resultLocalName);
+  resultPrefix=addrAttr.getPrefix();
+  assertEquals("prefix","newprefix",resultPrefix);
+}

@@ -1,0 +1,15 @@
+{
+  PushbackInputStream tobj;
+  byte[] buf=("01234567890123456789").getBytes();
+  tobj=new PushbackInputStream(underlying);
+  tobj.read(buf,6,5);
+  assertEquals("Wrong value read!","BEGIN",new String(buf,6,5));
+  assertEquals("Too much read!","012345BEGIN123456789",new String(buf));
+  underlying.throwExceptionOnNextUse=true;
+  try {
+    tobj.read(buf,6,5);
+    fail("IOException not thrown.");
+  }
+ catch (  IOException e) {
+  }
+}

@@ -1,0 +1,26 @@
+{
+  Document doc;
+  Document newDoc;
+  DocumentType docType=null;
+  DOMImplementation domImpl;
+  Element element;
+  Attr attr;
+  NodeList childList;
+  Node importedAttr;
+  String nodeName;
+  int nodeType;
+  String nodeValue;
+  doc=(Document)load("staffNS",true);
+  domImpl=doc.getImplementation();
+  newDoc=domImpl.createDocument("http://www.w3.org/DOM/Test","l2:root",docType);
+  childList=doc.getElementsByTagNameNS("http://www.nist.gov","employee");
+  element=(Element)childList.item(1);
+  attr=element.getAttributeNode("defaultAttr");
+  importedAttr=newDoc.importNode(attr,true);
+  nodeName=importedAttr.getNodeName();
+  nodeValue=importedAttr.getNodeValue();
+  nodeType=(int)importedAttr.getNodeType();
+  assertEquals("documentimportnode04_nodeName","defaultAttr",nodeName);
+  assertEquals("documentimportnode04_nodeType",2,nodeType);
+  assertEquals("documentimportnode04_nodeValue","defaultVal",nodeValue);
+}

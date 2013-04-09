@@ -1,0 +1,15 @@
+{
+  String selectQuery="SELECT DISTINCT rating FROM " + DatabaseCreator.CUSTOMERS_TABLE;
+  ResultSet result=statement.executeQuery(selectQuery);
+  HashSet<Integer> values=new HashSet<Integer>();
+  values.add(Integer.valueOf(100));
+  values.add(Integer.valueOf(200));
+  values.add(Integer.valueOf(300));
+  while (result.next()) {
+    Integer rating=result.getInt("rating");
+    assertTrue("result set doesn't contain value",values.contains(rating));
+    assertTrue("wrong value in the result set",values.remove(rating));
+  }
+  result.close();
+  assertTrue("Result set has wrong size",values.isEmpty());
+}

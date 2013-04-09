@@ -1,0 +1,21 @@
+{
+  Provider p=new MyProvider();
+  p.put("DSA","tests.java.security.support.cert.MyCertificate$1");
+  Provider myProvider=new MyProvider();
+  Security.addProvider(myProvider);
+  try {
+    Provider[] pp=Security.getProviders();
+    if (pp == null) {
+      return;
+    }
+    try {
+      Signature.getInstance("DSA").initVerify((Certificate)null);
+      fail();
+    }
+ catch (    NullPointerException expected) {
+    }
+  }
+  finally {
+    Security.removeProvider(myProvider.getName());
+  }
+}

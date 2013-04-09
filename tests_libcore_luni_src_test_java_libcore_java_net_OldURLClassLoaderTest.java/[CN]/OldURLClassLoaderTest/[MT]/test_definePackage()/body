@@ -1,0 +1,20 @@
+{
+  Manifest manifest=new Manifest();
+  URL[] u=new URL[0];
+  TestURLClassLoader tucl=new TestURLClassLoader(u);
+  URL[] urls={new URL("http://foo.com/foo"),new URL("jar:file://foo.jar!/foo.c"),new URL("ftp://foo1/foo2/foo.c"),new URL("file://new/package/name/"),null};
+  String packageName="new.package.name";
+  for (int i=0; i < urls.length; i++) {
+    Package pack=tucl.definePackage(packageName + i,manifest,urls[i]);
+    assertEquals(packageName + i,pack.getName());
+    assertNull("Implementation Title is not null",pack.getImplementationTitle());
+    assertNull("Implementation Vendor is not null",pack.getImplementationVendor());
+    assertNull("Implementation Version is not null.",pack.getImplementationVersion());
+  }
+  try {
+    tucl.definePackage(packageName + "0",manifest,null);
+    fail("IllegalArgumentException was not thrown.");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+}

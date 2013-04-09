@@ -1,0 +1,15 @@
+{
+  String s="aced0005737200356c6962636f72652e6a6176612e6c616e672e5468726f7761626c65546573742" + "45375707072657373696f6e735468726f7761626c6502cff43b5390d137020000787200136a61766" + "12e6c616e672e5468726f7761626c65d5c635273977b8cb0300044c000563617573657400154c6a6"+ "176612f6c616e672f5468726f7761626c653b4c000d64657461696c4d6573736167657400124c6a6"+ "176612f6c616e672f537472696e673b5b000a737461636b547261636574001e5b4c6a6176612f6c6"+ "16e672f537461636b5472616365456c656d656e743b4c00147375707072657373656445786365707"+ "4696f6e737400104c6a6176612f7574696c2f4c6973743b787070740003666f6f7572001e5b4c6a6"+ "176612e6c616e672e537461636b5472616365456c656d656e743b02462a3c3cfd223902000078700"+ "00000007078";
+  Throwable throwable=new SuppressionsThrowable("foo",null,false);
+  throwable.setStackTrace(new StackTraceElement[0]);
+  new SerializationTester<Throwable>(throwable,s){
+    @Override protected boolean equals(    Throwable a,    Throwable b){
+      return printStackTraceToString(a).equals(printStackTraceToString(b));
+    }
+    @Override protected void verify(    Throwable deserialized){
+      deserialized.addSuppressed(newThrowable("Suppressed"));
+      assertSuppressed(deserialized);
+    }
+  }
+.test();
+}

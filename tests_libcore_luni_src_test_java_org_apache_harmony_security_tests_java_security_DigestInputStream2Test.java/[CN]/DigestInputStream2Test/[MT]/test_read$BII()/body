@@ -1,0 +1,18 @@
+{
+  DigestInputStream dis=new DigestInputStream(inStream,digest);
+  int bytesToRead=inStream.available();
+  byte buf1[]=new byte[bytesToRead + 5];
+  byte buf2[]=new byte[bytesToRead + 5];
+  assertTrue("No data to read for this test",bytesToRead > 0);
+  int bytesRead1=dis.read(buf1,5,bytesToRead);
+  int bytesRead2=inStream1.read(buf2,5,bytesToRead);
+  assertEquals("Didn't read the same from each stream",bytesRead1,bytesRead2);
+  assertEquals("Didn't read the entire",bytesRead1,bytesToRead);
+  boolean same=true;
+  for (int i=0; i < bytesToRead + 5; i++) {
+    if (buf1[i] != buf2[i]) {
+      same=false;
+    }
+  }
+  assertTrue("Didn't get the same data",same);
+}

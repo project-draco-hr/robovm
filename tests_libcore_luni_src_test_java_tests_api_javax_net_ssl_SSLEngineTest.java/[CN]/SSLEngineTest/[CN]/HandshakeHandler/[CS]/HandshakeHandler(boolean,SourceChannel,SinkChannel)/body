@@ -1,0 +1,26 @@
+{
+  this.in=in;
+  this.out=out;
+  engine=getEngine();
+  engine.setUseClientMode(clientMode);
+  String[] cipherSuites=engine.getSupportedCipherSuites();
+  Set<String> enabledSuites=new HashSet<String>();
+  for (  String cipherSuite : cipherSuites) {
+    if (cipherSuite.contains("anon")) {
+      enabledSuites.add(cipherSuite);
+    }
+  }
+  engine.setEnabledCipherSuites((String[])enabledSuites.toArray(new String[enabledSuites.size()]));
+  engine.beginHandshake();
+  status=engine.getHandshakeStatus();
+  if (clientMode) {
+    LOGTAG="CLIENT: ";
+  }
+ else {
+    LOGTAG="SERVER: ";
+  }
+  log("CipherSuites: " + Arrays.toString(engine.getEnabledCipherSuites()));
+  log(status);
+  readBuffer=ByteBuffer.allocate(200000);
+  writeBuffer=ByteBuffer.allocate(20000);
+}

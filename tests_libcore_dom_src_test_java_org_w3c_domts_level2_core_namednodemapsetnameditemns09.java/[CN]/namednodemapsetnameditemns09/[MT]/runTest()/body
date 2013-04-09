@@ -1,0 +1,33 @@
+{
+  Document doc;
+  DocumentType docType;
+  NamedNodeMap entities;
+  NamedNodeMap notations;
+  Attr attr;
+  Node newNode;
+  doc=(Document)load("staffNS",true);
+  docType=doc.getDoctype();
+  entities=docType.getEntities();
+  notations=docType.getNotations();
+  attr=doc.createAttributeNS("http://www.w3.org/DOM/Test","test");
+{
+    boolean success=false;
+    try {
+      newNode=entities.setNamedItemNS(attr);
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.NO_MODIFICATION_ALLOWED_ERR);
+    }
+    assertTrue("throw_NO_MODIFICATION_ALLOWED_ERR_entities",success);
+  }
+{
+    boolean success=false;
+    try {
+      newNode=notations.setNamedItemNS(attr);
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.NO_MODIFICATION_ALLOWED_ERR);
+    }
+    assertTrue("throw_NO_MODIFICATION_ALLOWED_ERR_notations",success);
+  }
+}

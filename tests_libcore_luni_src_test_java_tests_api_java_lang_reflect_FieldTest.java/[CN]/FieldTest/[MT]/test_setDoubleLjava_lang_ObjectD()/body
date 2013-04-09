@@ -1,0 +1,52 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  double val=0.0;
+  try {
+    f=x.getClass().getDeclaredField("doubleField");
+    f.setDouble(x,Double.MIN_VALUE);
+    val=f.getDouble(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during setDouble test: " + e.toString());
+  }
+  assertEquals("Returned incorrect double field value",Double.MIN_VALUE,val);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    f.setDouble(x,Double.MIN_VALUE);
+    fail("Accessed field of invalid type");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("doublePFField");
+    assertFalse(f.isAccessible());
+    f.setDouble(x,Double.MIN_VALUE);
+    fail("Accessed inaccessible field");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("doubleField");
+    f.setDouble(null,Double.MIN_VALUE);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  f=x.getClass().getDeclaredField("doubleSField");
+  f.setDouble(null,Double.MIN_VALUE);
+  val=f.getDouble(x);
+  assertEquals("Returned incorrect double field value",Double.MIN_VALUE,val);
+}

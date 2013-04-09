@@ -1,0 +1,25 @@
+{
+  Preferences sroot=Preferences.systemRoot().node("test");
+  Preferences child1=sroot.node("child1");
+  Preferences child2=sroot.node("child2");
+  Preferences grandchild=child1.node("grand");
+  String[] childNames=sroot.childrenNames();
+  assertContains(childNames,"child1");
+  assertContains(childNames,"child2");
+  assertNotContains(childNames,"grand");
+  childNames=child1.childrenNames();
+  assertEquals(1,childNames.length);
+  childNames=child2.childrenNames();
+  assertEquals(0,childNames.length);
+  child1.removeNode();
+  childNames=sroot.childrenNames();
+  assertNotContains(childNames,"child1");
+  assertContains(childNames,"child2");
+  assertNotContains(childNames,"grand");
+  child2.removeNode();
+  childNames=sroot.childrenNames();
+  assertNotContains(childNames,"child1");
+  assertNotContains(childNames,"child2");
+  assertNotContains(childNames,"grand");
+  sroot.removeNode();
+}

@@ -1,0 +1,20 @@
+{
+  if (scheme == null) {
+    throw new NullPointerException("scheme");
+  }
+  if ("file".equals(scheme)) {
+    return resolveURI(href).toString();
+  }
+  if ("http".equals(scheme)) {
+    StringBuffer httpURL=new StringBuffer(System.getProperty("org.w3c.domts.httpbase","http://localhost:8080/webdav/"));
+    httpURL.append(href);
+    if ("application/pdf".equals(contentType)) {
+      httpURL.append(".pdf");
+    }
+ else {
+      httpURL.append(".xml");
+    }
+    return httpURL.toString();
+  }
+  throw new DOMTestLoadException(new Exception("Unrecognized URI scheme " + scheme));
+}

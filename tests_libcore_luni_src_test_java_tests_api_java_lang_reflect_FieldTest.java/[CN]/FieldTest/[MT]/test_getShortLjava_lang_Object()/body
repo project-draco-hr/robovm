@@ -1,0 +1,62 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  short val=0;
+  ;
+  try {
+    f=x.getClass().getDeclaredField("shortField");
+    val=f.getShort(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during getShort test : " + e.getMessage());
+  }
+  assertTrue("Returned incorrect short field value",val == Short.MAX_VALUE);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    f.getShort(x);
+    fail("IllegalArgumentException expected but not thrown");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("IllegalArgumentException expected but not thrown " + ex.getMessage());
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("shortPFField");
+    f.getShort(x);
+    fail("IllegalAccessException expected but not thrown");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("IllegalAccessException expected but not thrown" + ex.getMessage());
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("shortField");
+    f.getShort(null);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("shortSField");
+    short staticValue=f.getShort(null);
+    assertEquals("Wrong value returned",Short.MAX_VALUE,staticValue);
+  }
+ catch (  Exception ex) {
+    fail("No exception expected " + ex.getMessage());
+  }
+}

@@ -1,0 +1,26 @@
+{
+  GeneralName san0=new GeneralName(new OtherName("1.2.3.4.5",new byte[]{1,2,0,1}));
+  GeneralName san1=new GeneralName(1,"rfc@822.Name");
+  GeneralName san2=new GeneralName(2,"dNSName");
+  GeneralNames sans1=new GeneralNames();
+  sans1.addName(san0);
+  sans1.addName(san1);
+  sans1.addName(san2);
+  X509CertSelector selector=new X509CertSelector();
+  selector.addSubjectAlternativeName(0,san0.getEncodedName());
+  selector.addSubjectAlternativeName(1,san1.getEncodedName());
+  selector.addSubjectAlternativeName(2,san2.getEncodedName());
+  GeneralNames sans2=new GeneralNames();
+  sans2.addName(san0);
+  TestCert cert1=new TestCert(sans1);
+  TestCert cert2=new TestCert(sans2);
+  assertTrue(selector.match(cert1));
+  assertFalse(selector.match(cert2));
+  selector.setSubjectAlternativeNames(null);
+  GeneralName name=new GeneralName(new Name("O=Android"));
+  try {
+    selector.addSubjectAlternativeName(0,name.getEncodedName());
+  }
+ catch (  IOException e) {
+  }
+}

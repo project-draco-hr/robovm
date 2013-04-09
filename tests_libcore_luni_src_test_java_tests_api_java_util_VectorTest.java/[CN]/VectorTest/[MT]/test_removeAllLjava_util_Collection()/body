@@ -1,0 +1,29 @@
+{
+  Vector v=new Vector();
+  Collection l=new LinkedList();
+  for (int i=0; i < 5; i++)   l.add("Test " + i);
+  v.addElement(l);
+  Collection s=new HashSet();
+  Object o;
+  s.add(o=v.firstElement());
+  v.removeAll(s);
+  assertTrue("Failed to remove items in collection",!v.contains(o));
+  v.removeAll(l);
+  assertTrue("Failed to remove all elements",v.isEmpty());
+  v.add(null);
+  v.add(null);
+  v.add("Boom");
+  v.removeAll(s);
+  assertEquals("Should not have removed any elements",3,v.size());
+  l=new LinkedList();
+  l.add(null);
+  v.removeAll(l);
+  assertEquals("Should only have one element",1,v.size());
+  assertEquals("Element should be 'Boom'","Boom",v.firstElement());
+  try {
+    v.removeAll(null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+}

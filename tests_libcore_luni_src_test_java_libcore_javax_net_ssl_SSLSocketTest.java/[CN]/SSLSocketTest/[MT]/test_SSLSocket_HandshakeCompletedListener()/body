@@ -1,0 +1,93 @@
+{
+  final TestSSLContext c=TestSSLContext.create();
+  final SSLSocket client=(SSLSocket)c.clientContext.getSocketFactory().createSocket(c.host,c.port);
+  final SSLSocket server=(SSLSocket)c.serverSocket.accept();
+  Thread thread=new Thread(new Runnable(){
+    public void run(){
+      try {
+        server.startHandshake();
+      }
+ catch (      RuntimeException e) {
+        throw e;
+      }
+catch (      Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+);
+  thread.start();
+  final boolean[] handshakeCompletedListenerCalled=new boolean[1];
+  client.addHandshakeCompletedListener(new HandshakeCompletedListener(){
+    public void handshakeCompleted(    HandshakeCompletedEvent event){
+      try {
+        SSLSession session=event.getSession();
+        String cipherSuite=event.getCipherSuite();
+        Certificate[] localCertificates=event.getLocalCertificates();
+        Certificate[] peerCertificates=event.getPeerCertificates();
+        javax.security.cert.X509Certificate[] peerCertificateChain=event.getPeerCertificateChain();
+        Principal peerPrincipal=event.getPeerPrincipal();
+        Principal localPrincipal=event.getLocalPrincipal();
+        Socket socket=event.getSocket();
+        if (false) {
+          System.out.println("Session=" + session);
+          System.out.println("CipherSuite=" + cipherSuite);
+          System.out.println("LocalCertificates=" + Arrays.toString(localCertificates));
+          System.out.println("PeerCertificates=" + Arrays.toString(peerCertificates));
+          System.out.println("PeerCertificateChain=" + Arrays.toString(peerCertificateChain));
+          System.out.println("PeerPrincipal=" + peerPrincipal);
+          System.out.println("LocalPrincipal=" + localPrincipal);
+          System.out.println("Socket=" + socket);
+        }
+        assertNotNull(session);
+        byte[] id=session.getId();
+        assertNotNull(id);
+        assertEquals(32,id.length);
+        assertNotNull(c.clientContext.getClientSessionContext().getSession(id));
+        assertNotNull(cipherSuite);
+        assertTrue(Arrays.asList(client.getEnabledCipherSuites()).contains(cipherSuite));
+        assertTrue(Arrays.asList(c.serverSocket.getEnabledCipherSuites()).contains(cipherSuite));
+        assertNull(localCertificates);
+        assertNotNull(peerCertificates);
+        TestKeyStore.assertChainLength(peerCertificates);
+        assertNotNull(peerCertificates[0]);
+        TestSSLContext.assertServerCertificateChain(c.clientTrustManager,peerCertificates);
+        TestSSLContext.assertCertificateInKeyStore(peerCertificates[0],c.serverKeyStore);
+        assertNotNull(peerCertificateChain);
+        TestKeyStore.assertChainLength(peerCertificateChain);
+        assertNotNull(peerCertificateChain[0]);
+        TestSSLContext.assertCertificateInKeyStore(peerCertificateChain[0].getSubjectDN(),c.serverKeyStore);
+        assertNotNull(peerPrincipal);
+        TestSSLContext.assertCertificateInKeyStore(peerPrincipal,c.serverKeyStore);
+        assertNull(localPrincipal);
+        assertNotNull(socket);
+        assertSame(client,socket);
+synchronized (handshakeCompletedListenerCalled) {
+          handshakeCompletedListenerCalled[0]=true;
+          handshakeCompletedListenerCalled.notify();
+        }
+        handshakeCompletedListenerCalled[0]=true;
+      }
+ catch (      RuntimeException e) {
+        throw e;
+      }
+catch (      Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+);
+  client.startHandshake();
+  thread.join();
+  if (!TestSSLContext.sslServerSocketSupportsSessionTickets()) {
+    assertNotNull(c.serverContext.getServerSessionContext().getSession(client.getSession().getId()));
+  }
+synchronized (handshakeCompletedListenerCalled) {
+    while (!handshakeCompletedListenerCalled[0]) {
+      handshakeCompletedListenerCalled.wait();
+    }
+  }
+  client.close();
+  server.close();
+  c.close();
+}

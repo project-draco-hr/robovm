@@ -1,0 +1,16 @@
+{
+  SAXParser parser=SAXParserFactory.newInstance().newSAXParser();
+  XMLReader reader=parser.getXMLReader();
+  reader.setFeature(feature,false);
+  assertFalse(reader.getFeature(feature));
+  reader.setContentHandler(new ThrowingHandler(){
+    @Override public void startElement(    String uri,    String localName,    String qName,    Attributes attributes){
+      assertEquals("foo",qName);
+    }
+    @Override public void endElement(    String uri,    String localName,    String qName){
+      assertEquals("foo",qName);
+    }
+  }
+);
+  reader.parse(new InputSource(new StringReader(xml)));
+}

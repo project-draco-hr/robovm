@@ -1,0 +1,17 @@
+{
+  headers.remove(EMPTY_BODY_HEADER);
+  headers.add(CHUNKED_BODY_HEADER);
+  ByteArrayOutputStream bytesOut=new ByteArrayOutputStream();
+  int pos=0;
+  while (pos < body.length) {
+    int chunkSize=Math.min(body.length - pos,maxChunkSize);
+    bytesOut.write(Integer.toHexString(chunkSize).getBytes(ASCII));
+    bytesOut.write("\r\n".getBytes(ASCII));
+    bytesOut.write(body,pos,chunkSize);
+    bytesOut.write("\r\n".getBytes(ASCII));
+    pos+=chunkSize;
+  }
+  bytesOut.write("0\r\n\r\n".getBytes(ASCII));
+  this.body=bytesOut.toByteArray();
+  return this;
+}

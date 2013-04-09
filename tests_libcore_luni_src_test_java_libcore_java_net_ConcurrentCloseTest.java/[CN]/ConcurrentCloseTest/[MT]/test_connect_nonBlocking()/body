@@ -1,0 +1,23 @@
+{
+  StuckServer ss=new StuckServer();
+  SocketChannel s=SocketChannel.open();
+  new Killer(s.socket()).start();
+  try {
+    System.err.println("connect (non-blocking)...");
+    s.configureBlocking(false);
+    s.connect(ss.getLocalSocketAddress());
+    while (!s.finishConnect()) {
+    }
+    fail("connect returned!");
+  }
+ catch (  SocketException expected) {
+    assertEquals("Socket closed",expected.getMessage());
+  }
+catch (  AsynchronousCloseException alsoOkay) {
+  }
+catch (  ClosedChannelException alsoOkay) {
+  }
+ finally {
+    ss.close();
+  }
+}

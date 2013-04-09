@@ -1,0 +1,13 @@
+{
+  final AtomicInteger visibleTraces=new AtomicInteger();
+  ThreadGroup group=new ThreadGroup("1");
+  Thread t2=new Thread(group,"t2"){
+    @Override public void run(){
+      visibleTraces.set(Thread.getAllStackTraces().size());
+    }
+  }
+;
+  t2.start();
+  t2.join();
+  assertTrue("Must have traces for all threads",visibleTraces.get() > 1);
+}

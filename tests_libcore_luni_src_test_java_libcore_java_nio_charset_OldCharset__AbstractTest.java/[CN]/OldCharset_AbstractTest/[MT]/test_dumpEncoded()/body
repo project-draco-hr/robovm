@@ -1,0 +1,18 @@
+{
+  if (testChars == null)   return;
+  if (testChars.length == 0)   return;
+  if (testBytes.length > 0)   return;
+  System.out.format("\ntest_dumpEncoded() for name %s => %s (class = %s)\n",charsetName,charset.name(),getClass().getName());
+  Charset_TestGenerator.Dumper out=new Charset_TestGenerator.Dumper1();
+  CharBuffer inputCB=CharBuffer.wrap(testChars);
+  ByteBuffer outputBB;
+  encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+  outputBB=encoder.encode(inputCB);
+  outputBB.rewind();
+  while (outputBB.hasRemaining()) {
+    out.consume(outputBB.get() & 0xff);
+  }
+  System.out.println();
+  System.out.println("Encoded Bytes dumped for Test Class " + getClass().getName());
+  fail("Encoded Bytes dumped for Test Class " + getClass().getName());
+}

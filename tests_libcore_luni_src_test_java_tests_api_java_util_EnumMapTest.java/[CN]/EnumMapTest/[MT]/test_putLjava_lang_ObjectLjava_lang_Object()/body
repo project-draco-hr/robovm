@@ -1,0 +1,31 @@
+{
+  EnumMap enumSizeMap=new EnumMap(Size.class);
+  try {
+    enumSizeMap.put(Color.Red,2);
+    fail("Expected ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  assertNull("Return non-null for non mapped key",enumSizeMap.put(Size.Small,1));
+  EnumMap enumColorMap=new EnumMap<Color,Double>(Color.class);
+  try {
+    enumColorMap.put(Size.Big,2);
+    fail("Expected ClassCastException");
+  }
+ catch (  ClassCastException e) {
+  }
+  try {
+    enumColorMap.put(null,2);
+    fail("Expected NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  assertNull("Return non-null for non mapped key",enumColorMap.put(Color.Green,2));
+  assertEquals("Return wrong value",2,enumColorMap.put(Color.Green,new Double(4)));
+  assertEquals("Return wrong value",new Double(4),enumColorMap.put(Color.Green,new Integer("3")));
+  assertEquals("Return wrong value",new Integer("3"),enumColorMap.put(Color.Green,null));
+  Float f=new Float("3.4");
+  assertNull("Return non-null for non mapped key",enumColorMap.put(Color.Green,f));
+  assertNull("Return non-null for non mapped key",enumColorMap.put(Color.Blue,2));
+  assertEquals("Return wrong value",2,enumColorMap.put(Color.Blue,new Double(4)));
+}

@@ -1,0 +1,15 @@
+{
+  Locale pl=new Locale("pl");
+  DateFormatSymbols originalDfs=new DateFormatSymbols(pl);
+  ByteArrayOutputStream out=new ByteArrayOutputStream();
+  new ObjectOutputStream(out).writeObject(originalDfs);
+  byte[] bytes=out.toByteArray();
+  ObjectInputStream in=new ObjectInputStream(new ByteArrayInputStream(bytes));
+  DateFormatSymbols deserializedDfs=(DateFormatSymbols)in.readObject();
+  assertEquals(-1,in.read());
+  assertEquals(originalDfs,deserializedDfs);
+  assertEquals("stycznia",formatDate(pl,"MMMM",originalDfs));
+  assertEquals("stycze\u0144",formatDate(pl,"LLLL",originalDfs));
+  assertEquals("stycznia",formatDate(pl,"MMMM",deserializedDfs));
+  assertEquals("stycznia",formatDate(pl,"LLLL",deserializedDfs));
+}

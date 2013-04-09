@@ -1,0 +1,33 @@
+{
+  final List<String> result=new ArrayList<String>();
+  XMLReader reader=SAXParserFactory.newInstance().newSAXParser().getXMLReader();
+  reader.setFeature(SAX_PROPERTY_NS,namespace);
+  reader.setFeature(SAX_PROPERTY_NS_PREFIXES,namespacePrefixes);
+  reader.setContentHandler(new DefaultHandler(){
+    @Override public final void startElement(    String uri,    String localName,    String qName,    Attributes attributes){
+      StringBuilder serialized=new StringBuilder();
+      if (namespace) {
+        serialized.append(uri).append(",");
+        serialized.append(localName);
+      }
+ else {
+        serialized.append(qName);
+      }
+      for (int i=0; i < attributes.getLength(); i++) {
+        serialized.append("\n  ");
+        if (namespace) {
+          serialized.append(attributes.getURI(i)).append(",");
+          serialized.append(attributes.getLocalName(i));
+        }
+ else {
+          serialized.append(attributes.getQName(i));
+        }
+      }
+      serialized.append("\n  http://bar+c=").append(attributes.getValue("http://bar","c")).append(",").append("\n  bar:c=").append(attributes.getValue("bar:c")).append("\n");
+      result.add(serialized.toString());
+    }
+  }
+);
+  reader.parse(new InputSource(new StringReader(xml)));
+  return result;
+}

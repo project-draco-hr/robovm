@@ -1,0 +1,39 @@
+{
+  if (node == null) {
+    throw new UnsupportedOperationException("Cannot emit null nodes");
+  }
+ else   if (node.getNodeType() == Node.ELEMENT_NODE) {
+    Element element=(Element)node;
+    serializer.startTag(element.getNamespaceURI(),element.getLocalName());
+    emitAttributes(serializer,element);
+    emitChildren(serializer,element);
+    serializer.endTag(element.getNamespaceURI(),element.getLocalName());
+  }
+ else   if (node.getNodeType() == Node.TEXT_NODE || node.getNodeType() == Node.CDATA_SECTION_NODE) {
+    String trimmed=node.getTextContent().trim();
+    if (trimmed.length() > 0) {
+      serializer.text(trimmed);
+    }
+  }
+ else   if (node.getNodeType() == Node.DOCUMENT_NODE) {
+    Document document=(Document)node;
+    serializer.startDocument("UTF-8",true);
+    emitNode(serializer,document.getDocumentElement());
+    serializer.endDocument();
+  }
+ else   if (node.getNodeType() == Node.PROCESSING_INSTRUCTION_NODE) {
+    ProcessingInstruction processingInstruction=(ProcessingInstruction)node;
+    String data=processingInstruction.getData();
+    String target=processingInstruction.getTarget();
+    serializer.processingInstruction(target + " " + data);
+  }
+ else   if (node.getNodeType() == Node.COMMENT_NODE) {
+  }
+ else   if (node.getNodeType() == Node.ENTITY_REFERENCE_NODE) {
+    EntityReference entityReference=(EntityReference)node;
+    serializer.entityRef(entityReference.getNodeName());
+  }
+ else {
+    throw new UnsupportedOperationException("Cannot emit " + node + " of type "+ node.getNodeType());
+  }
+}

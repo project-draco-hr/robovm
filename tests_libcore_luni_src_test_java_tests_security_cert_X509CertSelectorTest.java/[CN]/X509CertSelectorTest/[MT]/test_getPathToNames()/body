@@ -1,0 +1,36 @@
+{
+  try {
+    GeneralName san0=new GeneralName(new OtherName("1.2.3.4.5",new byte[]{1,2,0,1}));
+    GeneralName san1=new GeneralName(1,"rfc@822.Name");
+    GeneralName san2=new GeneralName(2,"dNSName");
+    GeneralName san3=new GeneralName(new ORAddress());
+    GeneralName san4=new GeneralName(new Name("O=Organization"));
+    GeneralName san6=new GeneralName(6,"http://uniform.Resource.Id");
+    GeneralName san7=new GeneralName(7,"1.1.1.1");
+    GeneralName san8=new GeneralName(8,"1.2.3.4444.55555");
+    GeneralNames sans1=new GeneralNames();
+    sans1.addName(san0);
+    sans1.addName(san1);
+    sans1.addName(san2);
+    sans1.addName(san3);
+    sans1.addName(san4);
+    sans1.addName(san6);
+    sans1.addName(san7);
+    sans1.addName(san8);
+    GeneralNames sans2=new GeneralNames();
+    sans2.addName(san0);
+    TestCert cert1=new TestCert(sans1);
+    TestCert cert2=new TestCert(sans2);
+    X509CertSelector selector=new X509CertSelector();
+    selector.setMatchAllSubjectAltNames(true);
+    selector.setPathToNames(null);
+    assertTrue("Any certificate should match in the case of null " + "subjectAlternativeNames criteria.",selector.match(cert1) && selector.match(cert2));
+    Collection<List<?>> sans=sans1.getPairsList();
+    selector.setPathToNames(sans);
+    selector.getPathToNames();
+  }
+ catch (  IOException e) {
+    e.printStackTrace();
+    fail("Unexpected IOException was thrown.");
+  }
+}

@@ -1,0 +1,41 @@
+{
+  for (int index=1; index < 4; index++) {
+    Cipher c=Cipher.getInstance("DESEDE/CBC/PKCS5Padding");
+    byte[] keyMaterial=loadBytes("hyts_" + "des-ede3-cbc.test" + index + ".key");
+    DESedeKeySpec keySpec=new DESedeKeySpec(keyMaterial);
+    SecretKeyFactory skf=SecretKeyFactory.getInstance("DESEDE");
+    Key k=skf.generateSecret(keySpec);
+    byte[] ivMaterial=loadBytes("hyts_" + "des-ede3-cbc.test" + index + ".iv");
+    IvParameterSpec iv=new IvParameterSpec(ivMaterial);
+    c.init(Cipher.DECRYPT_MODE,k,iv);
+    ByteArrayOutputStream baos=new ByteArrayOutputStream();
+    byte[] input=new byte[256];
+    String resPath="hyts_" + "des-ede3-cbc.test" + index + ".ciphertext";
+    File resources=Support_Resources.createTempFolder();
+    Support_Resources.copyFile(resources,null,resPath);
+    InputStream is=Support_Resources.getStream(resPath);
+    int bytesRead=is.read(input,0,256);
+    while (bytesRead > 0) {
+      byte[] output=c.update(input,0,bytesRead);
+      if (output != null) {
+        baos.write(output);
+      }
+      bytesRead=is.read(input,0,256);
+    }
+    byte[] output=c.doFinal();
+    if (output != null) {
+      baos.write(output);
+    }
+    byte[] decipheredCipherText=baos.toByteArray();
+    is.close();
+    byte[] plaintextBytes=loadBytes("hyts_" + "des-ede3-cbc.test" + index + ".plaintext");
+    assertTrue("Operation produced incorrect results",Arrays.equals(plaintextBytes,decipheredCipherText));
+  }
+  Cipher cipher=Cipher.getInstance("DESEDE/CBC/PKCS5Padding");
+  try {
+    cipher.update(new byte[64],0,32);
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+}

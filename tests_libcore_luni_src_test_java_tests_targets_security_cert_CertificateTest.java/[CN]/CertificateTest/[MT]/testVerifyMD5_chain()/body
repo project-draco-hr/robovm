@@ -1,0 +1,17 @@
+{
+  CertificateFactory certificateFactory=CertificateFactory.getInstance("X509");
+  CertPath path=certificateFactory.generateCertPath(getCertList(false,false));
+  CertPathValidator certPathValidator=CertPathValidator.getInstance("PKIX");
+  PKIXParameters params=createPKIXParams();
+  CertPathValidatorResult res=certPathValidator.validate(path,params);
+  assertTrue("wrong result type",res instanceof PKIXCertPathValidatorResult);
+  PKIXCertPathValidatorResult r=(PKIXCertPathValidatorResult)res;
+  assertTrue("Wrong trust anchor returned",params.getTrustAnchors().contains(r.getTrustAnchor()));
+  path=certificateFactory.generateCertPath(getCertList(false,true));
+  certPathValidator=CertPathValidator.getInstance("PKIX");
+  params=createPKIXParams();
+  res=certPathValidator.validate(path,params);
+  assertTrue("wrong result type",res instanceof PKIXCertPathValidatorResult);
+  r=(PKIXCertPathValidatorResult)res;
+  assertTrue("Wrong trust anchor returned",params.getTrustAnchors().contains(r.getTrustAnchor()));
+}

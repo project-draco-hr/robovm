@@ -1,0 +1,52 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  char val=0;
+  try {
+    f=x.getClass().getDeclaredField("charField");
+    f.setChar(x,(char)1);
+    val=f.getChar(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during setChar test : " + e.getMessage());
+  }
+  assertEquals("Returned incorrect float field value",1,val);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    f.setChar(x,Character.MIN_VALUE);
+    fail("Accessed field of invalid type");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("charPFField");
+    assertFalse(f.isAccessible());
+    f.setChar(x,Character.MIN_VALUE);
+    fail("Accessed inaccessible field");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("charField");
+    f.setChar(null,Character.MIN_VALUE);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  f=x.getClass().getDeclaredField("charSField");
+  f.setChar(null,Character.MIN_VALUE);
+  val=f.getChar(x);
+  assertEquals("Returned incorrect char field value",Character.MIN_VALUE,val);
+}

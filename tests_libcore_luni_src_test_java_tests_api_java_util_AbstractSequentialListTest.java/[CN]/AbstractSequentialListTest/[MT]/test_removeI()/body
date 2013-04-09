@@ -1,0 +1,58 @@
+{
+  AbstractSequentialList asl=new AbstractSequentialList(){
+    String buff[]={"0","1","2","3","4","5"};
+    int currPos=0;
+    @Override public int size(){
+      return buff.length;
+    }
+    @Override public ListIterator listIterator(    int index){
+      currPos=index;
+      return new ListIterator(){
+        public void add(        Object o){
+        }
+        public boolean hasNext(){
+          return true;
+        }
+        public boolean hasPrevious(){
+          return false;
+        }
+        public Object next(){
+          return buff[currPos];
+        }
+        public int nextIndex(){
+          return 0;
+        }
+        public Object previous(){
+          return null;
+        }
+        public int previousIndex(){
+          return 0;
+        }
+        public void remove(){
+          buff[currPos]="removed element";
+        }
+        public void set(        Object o){
+        }
+      }
+;
+    }
+  }
+;
+  try {
+    asl.remove(asl.size() + 1);
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    asl.remove(-1);
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  for (int i=0; i < asl.size(); i++) {
+    assertFalse(asl.get(i).toString().contains("removed element"));
+    asl.remove(i);
+    assertTrue(asl.get(i).toString().contains("removed element"));
+  }
+}

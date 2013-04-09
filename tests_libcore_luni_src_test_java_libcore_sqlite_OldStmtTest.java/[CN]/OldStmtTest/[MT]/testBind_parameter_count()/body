@@ -1,0 +1,22 @@
+{
+  try {
+    st.bind_parameter_count();
+    fail();
+  }
+ catch (  SQLite.Exception expected) {
+    assertEquals("stmt already closed",expected.getMessage());
+  }
+  st=db.prepare("insert into " + DatabaseCreator.SIMPLE_TABLE1 + " values (:one,:two,:three)");
+  assertEquals(3,st.bind_parameter_count());
+  st=db.prepare("insert into " + DatabaseCreator.SIMPLE_TABLE1 + " values (?, ?, ?)");
+  assertEquals(3,st.bind_parameter_count());
+  st=db.prepare("select * from " + DatabaseCreator.SIMPLE_TABLE1);
+  assertEquals(0,st.bind_parameter_count());
+  try {
+    st.close();
+    st.bind_parameter_count();
+    fail("Exception expected");
+  }
+ catch (  SQLite.Exception expected) {
+  }
+}

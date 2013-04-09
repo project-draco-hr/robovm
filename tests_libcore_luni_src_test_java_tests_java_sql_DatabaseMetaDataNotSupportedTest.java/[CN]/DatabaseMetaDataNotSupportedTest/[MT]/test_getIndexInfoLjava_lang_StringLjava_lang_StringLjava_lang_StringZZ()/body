@@ -1,0 +1,26 @@
+{
+  boolean unique=false;
+  ResultSet rs=meta.getIndexInfo(conn.getCatalog(),null,DatabaseCreator.TEST_TABLE1,unique,true);
+  ResultSetMetaData rsmd=rs.getMetaData();
+  assertTrue("Rows do not obtained",rs.next());
+  int col=rsmd.getColumnCount();
+  assertEquals("Incorrect number of columns",13,col);
+  String[] columnNames={"TABLE_CAT","TABLE_SCHEM","TABLE_NAME","NON_UNIQUE","INDEX_QUALIFIER","INDEX_NAME","TYPE","ORDINAL_POSITION","COLUMN_NAME","ASC_OR_DESC","CARDINALITY","PAGES","FILTER_CONDITION"};
+  for (int c=1; c <= col; ++c) {
+    assertEquals("Incorrect column name",columnNames[c - 1],rsmd.getColumnName(c));
+  }
+  assertEquals("Incorrect table catalog",conn.getCatalog(),rs.getString("TABLE_CAT"));
+  assertEquals("Incorrect table schema",null,rs.getString("TABLE_SCHEM"));
+  assertEquals("Incorrect table name",DatabaseCreator.TEST_TABLE1,rs.getString("TABLE_NAME"));
+  assertEquals("Incorrect state of uniquess",unique,rs.getBoolean("NON_UNIQUE"));
+  assertEquals("Incorrect index catalog","",rs.getString("INDEX_QUALIFIER"));
+  assertEquals("Incorrect index name","primary",rs.getString("INDEX_NAME").toLowerCase());
+  assertEquals("Incorrect index type",DatabaseMetaData.tableIndexOther,rs.getShort("TYPE"));
+  assertEquals("Incorrect column sequence number within index",1,rs.getShort("ORDINAL_POSITION"));
+  assertEquals("Incorrect column name","id",rs.getString("COLUMN_NAME"));
+  assertEquals("Incorrect column sort sequence","a",rs.getString("ASC_OR_DESC").toLowerCase());
+  assertEquals("Incorrect cardinality",1,rs.getInt("CARDINALITY"));
+  assertEquals("Incorrect value of pages",0,rs.getInt("PAGES"));
+  assertEquals("Incorrect filter condition",null,rs.getString("FILTER_CONDITION"));
+  rs.close();
+}

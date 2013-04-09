@@ -1,0 +1,116 @@
+{
+  Timer t=null;
+  try {
+    t=new Timer();
+    TimerTestTask testTask=new TimerTestTask();
+    t.cancel();
+    boolean exception=false;
+    try {
+      t.schedule(testTask,100,100);
+    }
+ catch (    IllegalStateException e) {
+      exception=true;
+    }
+    assertTrue("Scheduling a task after Timer.cancel() should throw exception",exception);
+    t=new Timer();
+    testTask=new TimerTestTask();
+    testTask.cancel();
+    exception=false;
+    try {
+      t.schedule(testTask,100,100);
+    }
+ catch (    IllegalStateException e) {
+      exception=true;
+    }
+    assertTrue("Scheduling a task after cancelling it should throw exception",exception);
+    t.cancel();
+    t=new Timer();
+    testTask=new TimerTestTask();
+    exception=false;
+    try {
+      t.schedule(testTask,-100,100);
+    }
+ catch (    IllegalArgumentException e) {
+      exception=true;
+    }
+    assertTrue("Scheduling a task with negative delay should throw IllegalArgumentException",exception);
+    t.cancel();
+    t=new Timer();
+    testTask=new TimerTestTask();
+    exception=false;
+    try {
+      t.schedule(testTask,100,-100);
+    }
+ catch (    IllegalArgumentException e) {
+      exception=true;
+    }
+    assertTrue("Scheduling a task with negative period should throw IllegalArgumentException",exception);
+    t.cancel();
+    t=new Timer();
+    testTask=new TimerTestTask();
+    exception=false;
+    try {
+      t.schedule(testTask,100,0);
+    }
+ catch (    IllegalArgumentException e) {
+      exception=true;
+    }
+    assertTrue("Scheduling a task with 0 period should throw IllegalArgumentException",exception);
+    t.cancel();
+    t=new Timer();
+    exception=false;
+    try {
+      t.schedule(null,10,10);
+    }
+ catch (    NullPointerException e) {
+      exception=true;
+    }
+    assertTrue("Scheduling a null task should throw NullPointerException",exception);
+    t.cancel();
+    t=new Timer();
+    exception=false;
+    try {
+      t.schedule(null,-10,-10);
+    }
+ catch (    NullPointerException e) {
+    }
+catch (    IllegalArgumentException e) {
+      exception=true;
+    }
+    assertTrue("Scheduling a null task with negative delays should throw IllegalArgumentException first",exception);
+    t.cancel();
+    t=new Timer();
+    testTask=new TimerTestTask();
+    t.schedule(testTask,100,100);
+    try {
+      Thread.sleep(400);
+    }
+ catch (    InterruptedException e) {
+    }
+    assertTrue("TimerTask.run() method should have been called at least twice (" + testTask.wasRun() + ")",testTask.wasRun() >= 2);
+    t.cancel();
+    t=new Timer();
+    testTask=new TimerTestTask();
+    testTask.incrementCount(true);
+    t.schedule(testTask,100,100);
+    testTask=new TimerTestTask();
+    testTask.incrementCount(true);
+    t.schedule(testTask,200,100);
+    testTask=new TimerTestTask();
+    testTask.incrementCount(true);
+    t.schedule(testTask,300,200);
+    testTask=new TimerTestTask();
+    testTask.incrementCount(true);
+    t.schedule(testTask,100,200);
+    try {
+      Thread.sleep(1200);
+    }
+ catch (    InterruptedException e) {
+    }
+    assertTrue("Multiple tasks should have incremented counter 24 times not " + timerCounter,timerCounter >= 24);
+    t.cancel();
+  }
+  finally {
+    if (t != null)     t.cancel();
+  }
+}

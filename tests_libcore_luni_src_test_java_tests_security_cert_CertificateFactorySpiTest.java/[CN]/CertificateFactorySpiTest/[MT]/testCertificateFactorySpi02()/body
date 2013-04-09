@@ -1,0 +1,67 @@
+{
+  CertificateFactorySpi certFactorySpi=new MyCertificateFactorySpi();
+  MyCertificateFactorySpi.putMode(true);
+  ByteArrayInputStream bais=new ByteArrayInputStream(new byte[0]);
+  DataInputStream dis=new DataInputStream(bais);
+  try {
+    certFactorySpi.engineGenerateCertPath(bais);
+    fail("CertificateException must be thrown");
+  }
+ catch (  CertificateException e) {
+  }
+  certFactorySpi.engineGenerateCertPath(dis);
+  try {
+    certFactorySpi.engineGenerateCertPath(bais,"aa");
+    fail("CertificateException must be thrown");
+  }
+ catch (  CertificateException e) {
+  }
+  try {
+    certFactorySpi.engineGenerateCertPath(dis,"");
+    fail("IllegalArgumentException must be thrown");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  certFactorySpi.engineGenerateCertPath(dis,"ss");
+  try {
+    certFactorySpi.engineGenerateCertificate(bais);
+    fail("CertificateException must be thrown");
+  }
+ catch (  CertificateException e) {
+  }
+  try {
+    certFactorySpi.engineGenerateCertificates(null);
+    fail("CertificateException must be thrown");
+  }
+ catch (  CertificateException e) {
+  }
+  Certificate cert=certFactorySpi.engineGenerateCertificate(dis);
+  assertNull("Result must be null",cert);
+  Collection<? extends Certificate> col=certFactorySpi.engineGenerateCertificates(dis);
+  assertNull("Result must be null",col);
+  try {
+    certFactorySpi.engineGenerateCRL(bais);
+    fail("CRLException must be thrown");
+  }
+ catch (  CRLException e) {
+  }
+  try {
+    certFactorySpi.engineGenerateCRLs(null);
+    fail("CRLException must be thrown");
+  }
+ catch (  CRLException e) {
+  }
+  CRL crl=certFactorySpi.engineGenerateCRL(dis);
+  assertNull("Result must be null",crl);
+  Collection<? extends CRL> colcrl=certFactorySpi.engineGenerateCRLs(dis);
+  assertNull("Result must be null",colcrl);
+  List<Certificate> list=null;
+  try {
+    certFactorySpi.engineGenerateCertPath(list);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+  Iterator<String> enc=certFactorySpi.engineGetCertPathEncodings();
+  assertTrue("Incorrect Iterator",enc.hasNext());
+}

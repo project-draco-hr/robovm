@@ -1,0 +1,17 @@
+{
+  X509CRLSelector selector=new X509CRLSelector();
+  X500Principal iss1=new X500Principal("O=First Org.");
+  X500Principal iss2=new X500Principal("O=Second Org.");
+  X500Principal iss3=new X500Principal("O=Third Org.");
+  assertNull("The collection should be null.",selector.getIssuers());
+  selector.addIssuer(iss1);
+  selector.addIssuer(iss2);
+  Collection<X500Principal> result=selector.getIssuers();
+  try {
+    result.add(iss3);
+    fail("The returned collection should be unmodifiable.");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  assertTrue("The collection should contain the specified DN.",result.contains(iss2));
+}

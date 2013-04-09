@@ -1,0 +1,18 @@
+{
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  ByteArrayInputStream bi=new ByteArrayInputStream(rootCert.getBytes());
+  rootCertificateSS=(X509Certificate)cf.generateCertificate(bi);
+  bi=new ByteArrayInputStream(endCert.getBytes());
+  endCertificate=(X509Certificate)cf.generateCertificate(bi);
+  BigInteger revokedSerialNumber=BigInteger.valueOf(1);
+  crl=new MyCRL("X.509");
+  List<Object> list=new ArrayList<Object>();
+  list.add(rootCertificateSS);
+  list.add(endCertificate);
+  CollectionCertStoreParameters params=new CollectionCertStoreParameters(list);
+  store=CertStore.getInstance("Collection",params);
+  theCertSelector=new X509CertSelector();
+  theCertSelector.setCertificate(endCertificate);
+  theCertSelector.setIssuer(endCertificate.getIssuerX500Principal().getEncoded());
+  builder=CertPathBuilder.getInstance("PKIX");
+}

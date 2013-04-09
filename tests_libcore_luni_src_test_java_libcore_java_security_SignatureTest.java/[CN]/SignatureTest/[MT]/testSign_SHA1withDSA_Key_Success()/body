@@ -1,0 +1,15 @@
+{
+  KeyFactory kf=KeyFactory.getInstance("DSA");
+  DSAPrivateKeySpec keySpec=new DSAPrivateKeySpec(DSA_priv,DSA_P,DSA_Q,DSA_G);
+  PrivateKey privKey=kf.generatePrivate(keySpec);
+  Signature sig=Signature.getInstance("SHA1withDSA");
+  sig.initSign(privKey);
+  sig.update(Vector2Data);
+  byte[] signature=sig.sign();
+  assertNotNull("Signature must not be null",signature);
+  DSAPublicKeySpec pubKeySpec=new DSAPublicKeySpec(DSA_pub,DSA_P,DSA_Q,DSA_G);
+  PublicKey pubKey=kf.generatePublic(pubKeySpec);
+  sig.initVerify(pubKey);
+  sig.update(Vector2Data);
+  assertTrue("Signature must verify correctly",sig.verify(signature));
+}

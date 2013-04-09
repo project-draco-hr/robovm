@@ -1,0 +1,16 @@
+{
+  CertificateFactory fact=CertificateFactory.getInstance("X.509");
+  for (int i=0; i < CERTIFICATE_URLS.length; i++) {
+    URL certUrl=new URL(BASE_URL + CERTIFICATE_URLS[i]);
+    try {
+      InputStream is=certUrl.openStream();
+      Collection<? extends Certificate> certs=fact.generateCertificates(is);
+      assertNotNull("The certificates in \"" + certUrl.toExternalForm() + "\" were not parsed correctly",certs);
+    }
+ catch (    IOException e) {
+    }
+catch (    CertificateException e) {
+      fail("An exception was thrown while parsing \"" + certUrl.toExternalForm() + "\": "+ e.getMessage());
+    }
+  }
+}

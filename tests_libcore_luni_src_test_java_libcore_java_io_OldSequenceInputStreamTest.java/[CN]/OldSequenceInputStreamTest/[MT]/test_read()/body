@@ -1,0 +1,36 @@
+{
+  si.read();
+  assertEquals("Test 1: Incorrect char read;",s1.charAt(1),(char)si.read());
+  simple2.throwExceptionOnNextUse=true;
+  try {
+    assertEquals("Test 2: Incorrect char read;",s1.charAt(2),(char)si.read());
+  }
+ catch (  IOException e) {
+    fail("Test 3: Unexpected IOException.");
+  }
+  simple1.throwExceptionOnNextUse=true;
+  try {
+    si.read();
+    fail("Test 4: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  simple1.throwExceptionOnNextUse=false;
+  si.read();
+  si.read();
+  try {
+    si.read();
+    fail("Test 5: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  simple2.throwExceptionOnNextUse=false;
+  try {
+    assertEquals("Test 6: Incorrect char read;",s2.charAt(0),(char)si.read());
+  }
+ catch (  IOException e) {
+    fail("Test 7: Unexpected IOException.");
+  }
+  si.close();
+  assertTrue("Test 8: -1 expected when reading from a closed " + "sequence input stream.",si.read() == -1);
+}

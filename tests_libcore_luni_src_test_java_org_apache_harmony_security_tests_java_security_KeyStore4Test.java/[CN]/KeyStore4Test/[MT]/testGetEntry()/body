@@ -1,0 +1,78 @@
+{
+  try {
+    Entry entry=keyStore.getEntry("certalias",null);
+    assertNotNull("entry is null",entry);
+    assertTrue("entry is not cert entry",entry instanceof KeyStore.TrustedCertificateEntry);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  UnrecoverableEntryException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  KeyStoreException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    Entry entry=keyStore.getEntry("certalias",new KeyStore.ProtectionParameter(){
+    }
+);
+    assertNotNull(entry);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  UnrecoverableEntryException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  KeyStoreException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  UnsupportedOperationException e) {
+  }
+  try {
+    Entry entry=keyStore.getEntry("keyalias",new KeyStore.PasswordProtection(new char[]{}));
+    assertNotNull(entry);
+    assertTrue(entry instanceof KeyStore.SecretKeyEntry);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  UnrecoverableEntryException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  KeyStoreException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    keyStore.getEntry("unknownalias",new KeyStore.PasswordProtection(new char[]{}));
+    fail("expected NoSuchAlgorithmException");
+  }
+ catch (  NoSuchAlgorithmException e) {
+  }
+catch (  UnrecoverableEntryException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  KeyStoreException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  UnsupportedOperationException e) {
+  }
+  try {
+    keyStore.getEntry(null,new KeyStore.ProtectionParameter(){
+    }
+);
+    fail("expected NullPointerException");
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  UnrecoverableEntryException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  KeyStoreException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  NullPointerException e) {
+  }
+}

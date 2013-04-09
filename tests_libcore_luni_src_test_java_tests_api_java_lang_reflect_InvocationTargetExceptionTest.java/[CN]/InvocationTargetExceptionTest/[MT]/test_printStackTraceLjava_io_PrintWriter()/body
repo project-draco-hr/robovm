@@ -1,0 +1,24 @@
+{
+  try {
+    PrintWriter pw;
+    InvocationTargetException ite;
+    String s;
+    CharArrayWriter caw=new CharArrayWriter();
+    pw=new PrintWriter(caw);
+    ite=new InvocationTargetException(new InvocationTargetException(null));
+    ite.printStackTrace(pw);
+    s=caw.toString();
+    assertTrue("printStackTrace failed." + s.length(),s != null && s.length() > 400);
+    pw.close();
+    ByteArrayOutputStream bao=new ByteArrayOutputStream();
+    pw=new PrintWriter(bao);
+    ite=new InvocationTargetException(new InvocationTargetException(null));
+    ite.printStackTrace(pw);
+    pw.flush();
+    s=bao.toString();
+    assertTrue("printStackTrace failed." + s.length(),s != null && s.length() > 400);
+  }
+ catch (  Exception e) {
+    fail("Exception during test : " + e.getMessage());
+  }
+}

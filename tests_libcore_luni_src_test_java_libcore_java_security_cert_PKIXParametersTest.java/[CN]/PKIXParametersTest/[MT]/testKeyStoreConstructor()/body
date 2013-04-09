@@ -1,0 +1,24 @@
+{
+  TestKeyStore server=TestKeyStore.getServer();
+  KeyStore.PrivateKeyEntry pke=server.getPrivateKey("RSA","RSA");
+  char[] password="password".toCharArray();
+  assertEquals(2,new PKIXParameters(server.keyStore).getTrustAnchors().size());
+  KeyStore ks=TestKeyStore.createKeyStore();
+  ks.setKeyEntry("key",pke.getPrivateKey(),password,pke.getCertificateChain());
+  ks.setCertificateEntry("cert",pke.getCertificateChain()[0]);
+  assertEquals(1,new PKIXParameters(ks).getTrustAnchors().size());
+  try {
+    KeyStore keyOnly=TestKeyStore.createKeyStore();
+    keyOnly.setKeyEntry("key",pke.getPrivateKey(),password,pke.getCertificateChain());
+    new PKIXParameters(keyOnly);
+    fail();
+  }
+ catch (  InvalidAlgorithmParameterException expected) {
+  }
+  try {
+    new PKIXParameters(TestKeyStore.createKeyStore());
+    fail();
+  }
+ catch (  InvalidAlgorithmParameterException expected) {
+  }
+}

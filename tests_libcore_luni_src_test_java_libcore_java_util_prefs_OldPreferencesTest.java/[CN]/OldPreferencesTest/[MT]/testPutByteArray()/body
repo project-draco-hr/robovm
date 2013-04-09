@@ -1,0 +1,37 @@
+{
+  Preferences pref=Preferences.userNodeForPackage(Preferences.class);
+  try {
+    pref.putByteArray(null,new byte[0]);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    pref.putByteArray("testPutByteArrayKey4",null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  pref.putByteArray(longKey,new byte[0]);
+  try {
+    pref.putByteArray(longKey + "a",new byte[0]);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  byte[] longArray=new byte[(int)(Preferences.MAX_VALUE_LENGTH * 0.74)];
+  byte[] longerArray=new byte[(int)(Preferences.MAX_VALUE_LENGTH * 0.75) + 1];
+  pref.putByteArray(longKey,longArray);
+  try {
+    pref.putByteArray(longKey,longerArray);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  pref.putByteArray("testPutByteArrayKey",new byte[0]);
+  assertEquals("",pref.get("testPutByteArrayKey",null));
+  assertTrue(Arrays.equals(new byte[0],pref.getByteArray("testPutByteArrayKey",null)));
+  pref.putByteArray("testPutByteArrayKey3",new byte[]{'a','b','c'});
+  assertEquals("YWJj",pref.get("testPutByteArrayKey3",null));
+  assertTrue(Arrays.equals(new byte[]{'a','b','c'},pref.getByteArray("testPutByteArrayKey3",null)));
+}

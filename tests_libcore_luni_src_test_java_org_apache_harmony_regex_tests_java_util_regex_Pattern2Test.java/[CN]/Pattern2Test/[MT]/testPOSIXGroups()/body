@@ -1,0 +1,80 @@
+{
+  Pattern p;
+  Matcher m;
+  p=Pattern.compile("\\p{Lower}+");
+  m=p.matcher("abcdefghijklmnopqrstuvwxyz");
+  assertTrue(m.matches());
+  try {
+    p=Pattern.compile("\\p");
+    fail("PatternSyntaxException expected");
+  }
+ catch (  PatternSyntaxException e) {
+  }
+  try {
+    p=Pattern.compile("\\p;");
+    fail("PatternSyntaxException expected");
+  }
+ catch (  PatternSyntaxException e) {
+  }
+  try {
+    p=Pattern.compile("\\p{");
+    fail("PatternSyntaxException expected");
+  }
+ catch (  PatternSyntaxException e) {
+  }
+  try {
+    p=Pattern.compile("\\p{;");
+    fail("PatternSyntaxException expected");
+  }
+ catch (  PatternSyntaxException e) {
+  }
+  try {
+    p=Pattern.compile("\\p{Lower");
+    fail("PatternSyntaxException expected");
+  }
+ catch (  PatternSyntaxException e) {
+  }
+  try {
+    p=Pattern.compile("\\p{Lower;");
+    fail("PatternSyntaxException expected");
+  }
+ catch (  PatternSyntaxException e) {
+  }
+  p=Pattern.compile("\\p{Upper}+");
+  m=p.matcher("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+  assertTrue(m.matches());
+  try {
+    p=Pattern.compile("\\p{Upper");
+    fail("PatternSyntaxException expected");
+  }
+ catch (  PatternSyntaxException e) {
+  }
+  try {
+    p=Pattern.compile("\\p{Upper;");
+    fail("PatternSyntaxException expected");
+  }
+ catch (  PatternSyntaxException e) {
+  }
+  int i;
+  p=Pattern.compile("\\p{ASCII}");
+  for (i=0; i < 0x80; i++) {
+    m=p.matcher(Character.toString((char)i));
+    assertTrue(m.matches());
+  }
+  for (; i < 0xff; i++) {
+    m=p.matcher(Character.toString((char)i));
+    assertFalse(m.matches());
+  }
+  try {
+    p=Pattern.compile("\\p{ASCII");
+    fail("PatternSyntaxException expected");
+  }
+ catch (  PatternSyntaxException e) {
+  }
+  try {
+    p=Pattern.compile("\\p{ASCII;");
+    fail("PatternSyntaxException expected");
+  }
+ catch (  PatternSyntaxException e) {
+  }
+}

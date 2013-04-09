@@ -1,0 +1,20 @@
+{
+  String pa="{" + cat + "}";
+  String pat="\\p" + pa;
+  String npat="\\P" + pa;
+  Pattern p=Pattern.compile(pat);
+  Pattern pn=Pattern.compile(npat);
+  for (int j=0; j < matches.length; j++) {
+    String t=matches[j];
+    boolean invert=t.startsWith("-");
+    if (invert) {
+      t=t.substring(1);
+      assertFalse("expected '" + t + "' to not be matched "+ "by pattern '"+ pat,p.matcher(t).matches());
+      assertTrue("expected '" + t + "' to  "+ "be matched by pattern '"+ npat,pn.matcher(t).matches());
+    }
+ else {
+      assertTrue("expected '" + t + "' to be matched "+ "by pattern '"+ pat,p.matcher(t).matches());
+      assertFalse("expected '" + t + "' to  "+ "not be matched by pattern '"+ npat,pn.matcher(t).matches());
+    }
+  }
+}

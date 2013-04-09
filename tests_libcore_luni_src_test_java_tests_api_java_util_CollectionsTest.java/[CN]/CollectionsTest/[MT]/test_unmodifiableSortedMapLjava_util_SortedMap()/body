@@ -1,0 +1,28 @@
+{
+  boolean exception=false;
+  TreeMap tm=new TreeMap();
+  tm.putAll(hm);
+  Map c=Collections.unmodifiableSortedMap(tm);
+  assertTrue("Returned map is of incorrect size",c.size() == tm.size());
+  Iterator i=hm.keySet().iterator();
+  while (i.hasNext()) {
+    Object x=i.next();
+    assertTrue("Returned map missing elements",c.get(x).equals(tm.get(x)));
+  }
+  try {
+    c.put(new Object(),"");
+  }
+ catch (  UnsupportedOperationException e) {
+    exception=true;
+  }
+  if (!exception) {
+    fail("Allowed modification of map");
+  }
+  try {
+    c.remove(new Object());
+  }
+ catch (  UnsupportedOperationException e) {
+    return;
+  }
+  fail("Allowed modification of map");
+}

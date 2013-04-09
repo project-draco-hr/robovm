@@ -1,0 +1,23 @@
+{
+  log("Opening the connection to " + connection.getURL());
+  connection.connect();
+  log("Connection has been ESTABLISHED, using proxy: " + connection.usingProxy());
+  if (connection.getDoOutput()) {
+    log("Posting data");
+    connection.getOutputStream().write(clientsData.getBytes());
+  }
+  InputStream is=connection.getInputStream();
+  log("Input Stream obtained");
+  byte[] buff=new byte[2048];
+  int num=0;
+  int byt=0;
+  while ((num < buff.length) && ((byt=is.read()) != -1)) {
+    buff[num++]=(byte)byt;
+  }
+  String message=new String(buff,0,num);
+  log("Got content:\n" + message);
+  log("------------------");
+  log("Response code: " + connection.getResponseCode());
+  assertEquals(httpsResponseContent,message);
+  return null;
+}

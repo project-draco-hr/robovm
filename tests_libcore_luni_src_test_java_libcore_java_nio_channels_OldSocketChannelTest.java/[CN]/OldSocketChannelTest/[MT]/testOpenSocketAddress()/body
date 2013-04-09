@@ -1,0 +1,26 @@
+{
+  this.channel1=SocketChannel.open(localAddr1);
+  assertTrue(this.channel1.isConnected());
+  SocketAddress newTypeAddress=new SubSocketAddress();
+  try {
+    this.channel1=SocketChannel.open(newTypeAddress);
+    fail("Should throw UnexpectedAddressTypeException");
+  }
+ catch (  UnsupportedAddressTypeException e) {
+  }
+  SocketAddress unresolvedAddress=InetSocketAddress.createUnresolved("127.0.0.1",8080);
+  try {
+    this.channel1=SocketChannel.open(unresolvedAddress);
+    fail("Should throw UnresolvedAddressException");
+  }
+ catch (  UnresolvedAddressException e) {
+  }
+  SocketChannel channel1IP=null;
+  try {
+    channel1IP=SocketChannel.open(null);
+    fail("Should throw an IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  assertNull(channel1IP);
+}

@@ -1,0 +1,41 @@
+{
+  String xml="<one xmlns='ns:default' xmlns:n1='ns:1' a='b'>\n" + "  <n1:two c='d' n1:e='f' xmlns:n2='ns:2'>text</n1:two>\n" + "</one>";
+  XmlPullParser parser=newPullParser();
+  parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES,true);
+  parser.setInput(new StringReader(xml));
+  assertEquals(0,parser.getDepth());
+  assertEquals(0,parser.getNamespaceCount(0));
+  try {
+    parser.getNamespaceCount(1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  assertEquals(XmlPullParser.START_TAG,parser.next());
+  assertEquals(1,parser.getDepth());
+  checkNamespacesInOne(parser);
+  assertEquals(XmlPullParser.START_TAG,parser.nextTag());
+  assertEquals(2,parser.getDepth());
+  checkNamespacesInTwo(parser);
+  assertEquals(XmlPullParser.TEXT,parser.next());
+  assertEquals(XmlPullParser.END_TAG,parser.nextTag());
+  assertEquals(2,parser.getDepth());
+  checkNamespacesInTwo(parser);
+  assertEquals(XmlPullParser.END_TAG,parser.nextTag());
+  assertEquals(1,parser.getDepth());
+  checkNamespacesInOne(parser);
+  try {
+    parser.getNamespaceCount(2);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  assertEquals(XmlPullParser.END_DOCUMENT,parser.next());
+  try {
+    parser.getNamespaceCount(1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  assertEquals(0,parser.getNamespaceCount(0));
+}

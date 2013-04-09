@@ -1,0 +1,24 @@
+{
+  Class<? extends InnerClassTest> clazz=InnerClassTest.class;
+  TypeVariable<Class> typeVariable=getTypeParameter(clazz);
+  Class<?>[] declaredClasses=clazz.getDeclaredClasses();
+  assertLenghtOne(declaredClasses);
+  Class<?> innerClazz=declaredClasses[0];
+  assertEquals(InnerClassTest.InnerClass.class,innerClazz);
+  Constructor<?>[] declaredConstructors=innerClazz.getDeclaredConstructors();
+  assertLenghtOne(declaredConstructors);
+  Constructor<?> declaredConstructor=declaredConstructors[0];
+  Type[] genericParameterTypes=declaredConstructor.getGenericParameterTypes();
+  assertLenghtOne(genericParameterTypes);
+  assertEquals(typeVariable,genericParameterTypes[0]);
+  assertInstanceOf(TypeVariable.class,genericParameterTypes[0]);
+  TypeVariable<?> constructorTypeVariable=(TypeVariable<?>)genericParameterTypes[0];
+  assertEquals(clazz,constructorTypeVariable.getGenericDeclaration());
+  Method declaredMethods=innerClazz.getDeclaredMethod("innerMethod",Object.class);
+  Type[] methodParameterTypes=declaredMethods.getGenericParameterTypes();
+  assertLenghtOne(methodParameterTypes);
+  assertEquals(typeVariable,methodParameterTypes[0]);
+  assertInstanceOf(TypeVariable.class,methodParameterTypes[0]);
+  TypeVariable<?> methodTypeVariable=(TypeVariable<?>)methodParameterTypes[0];
+  assertEquals(clazz,methodTypeVariable.getGenericDeclaration());
+}

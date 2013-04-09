@@ -1,0 +1,16 @@
+{
+  TestSSLContext c;
+  if (!clientClientMode && serverClientMode) {
+    c=TestSSLContext.create(TestKeyStore.getServer(),TestKeyStore.getClient());
+  }
+ else {
+    c=TestSSLContext.create();
+  }
+  return TestSSLEnginePair.create(c,new TestSSLEnginePair.Hooks(){
+    @Override void beforeBeginHandshake(    SSLEngine client,    SSLEngine server){
+      client.setUseClientMode(clientClientMode);
+      server.setUseClientMode(serverClientMode);
+    }
+  }
+);
+}

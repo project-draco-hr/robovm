@@ -1,0 +1,29 @@
+{
+  try {
+    MessageFormat f1=(MessageFormat)format1.clone();
+    f1.setFormat(0,DateFormat.getTimeInstance());
+    f1.setFormat(1,DateFormat.getTimeInstance());
+    f1.setFormat(2,NumberFormat.getInstance());
+    f1.setFormat(3,new ChoiceFormat("0#off|1#on"));
+    f1.setFormat(4,new ChoiceFormat("1#few|2#ok|3#a lot"));
+    f1.setFormat(5,DateFormat.getTimeInstance());
+    Format[] formats=f1.getFormats();
+    formats=f1.getFormats();
+    Format[] correctFormats=new Format[]{DateFormat.getTimeInstance(),DateFormat.getTimeInstance(),NumberFormat.getInstance(),new ChoiceFormat("0#off|1#on"),new ChoiceFormat("1#few|2#ok|3#a lot"),DateFormat.getTimeInstance()};
+    assertEquals("Test1A:Returned wrong number of formats:",correctFormats.length,formats.length);
+    for (int i=0; i < correctFormats.length; i++) {
+      assertEquals("Test1B:wrong format for pattern index " + i + ":",correctFormats[i],formats[i]);
+    }
+    try {
+      f1.setFormat(-1,DateFormat.getDateInstance());
+      fail("Expected ArrayIndexOutOfBoundsException was not thrown");
+      f1.setFormat(f1.getFormats().length,DateFormat.getDateInstance());
+      fail("Expected ArrayIndexOutOfBoundsException was not thrown");
+    }
+ catch (    ArrayIndexOutOfBoundsException e) {
+    }
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception " + e.toString());
+  }
+}

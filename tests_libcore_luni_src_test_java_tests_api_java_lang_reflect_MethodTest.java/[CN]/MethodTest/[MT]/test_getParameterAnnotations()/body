@@ -1,0 +1,16 @@
+{
+  Method method=TestMethod.class.getDeclaredMethod("annotatedParameter",new Class[]{int.class,int.class,int.class});
+  Annotation[][] annotations=method.getParameterAnnotations();
+  assertEquals(3,annotations.length);
+  assertEquals("Wrong number of annotations returned for first parameter",2,annotations[0].length);
+  Set<Class<?>> annotationSet=new HashSet<Class<?>>();
+  annotationSet.add(annotations[0][0].annotationType());
+  annotationSet.add(annotations[0][1].annotationType());
+  assertTrue("Missing TestAnno annotation",annotationSet.contains(TestAnno.class));
+  assertTrue("Missing Deprecated annotation",annotationSet.contains(Deprecated.class));
+  assertEquals("Wrong number of annotations returned for second parameter",1,annotations[1].length);
+  annotationSet=new HashSet<Class<?>>();
+  annotationSet.add(annotations[1][0].annotationType());
+  assertTrue("Missing Deprecated annotation",annotationSet.contains(Deprecated.class));
+  assertEquals("Wrong number of annotations returned for third parameter",0,annotations[2].length);
+}

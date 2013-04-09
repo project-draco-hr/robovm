@@ -1,0 +1,29 @@
+{
+  Provider[] providers=Security.getProviders();
+  for (  Provider provider : providers) {
+    Set<Provider.Service> services=provider.getServices();
+    for (    Provider.Service service : services) {
+      String type=service.getType();
+      if (!type.equals("MessageDigest")) {
+        continue;
+      }
+      String algorithm=service.getAlgorithm();
+      try {
+        MessageDigest md1=MessageDigest.getInstance(algorithm);
+        assertEquals(algorithm,md1.getAlgorithm());
+        test_MessageDigest(md1);
+        MessageDigest md2=MessageDigest.getInstance(algorithm,provider);
+        assertEquals(algorithm,md2.getAlgorithm());
+        assertEquals(provider,md2.getProvider());
+        test_MessageDigest(md2);
+        MessageDigest md3=MessageDigest.getInstance(algorithm,provider.getName());
+        assertEquals(algorithm,md3.getAlgorithm());
+        assertEquals(provider,md3.getProvider());
+        test_MessageDigest(md3);
+      }
+ catch (      Exception e) {
+        throw new Exception("Problem testing MessageDigest." + algorithm,e);
+      }
+    }
+  }
+}

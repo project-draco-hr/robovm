@@ -1,0 +1,59 @@
+{
+  TestSSLContext c=TestSSLContext.create();
+  SSLSessionContext client=c.clientContext.getClientSessionContext();
+  SSLSessionContext server=c.serverContext.getServerSessionContext();
+  String[] supportedCipherSuites=c.serverSocket.getSupportedCipherSuites();
+  c.serverSocket.setEnabledCipherSuites(supportedCipherSuites);
+  LinkedList<String> uniqueCipherSuites=new LinkedList(Arrays.asList(supportedCipherSuites));
+  Iterator<String> i=uniqueCipherSuites.iterator();
+  while (i.hasNext()) {
+    String cipherSuite=i.next();
+    if (cipherSuite.startsWith("SSL_RSA_EXPORT_")) {
+      i.remove();
+      continue;
+    }
+    if (cipherSuite.startsWith("SSL_RSA_")) {
+      continue;
+    }
+    if (cipherSuite.startsWith("TLS_RSA_")) {
+      continue;
+    }
+    if (cipherSuite.startsWith("TLS_DHE_RSA_")) {
+      continue;
+    }
+    if (cipherSuite.startsWith("SSL_DHE_RSA_")) {
+      continue;
+    }
+    i.remove();
+  }
+  assertTrue(uniqueCipherSuites.size() >= 3);
+  String cipherSuite1=uniqueCipherSuites.get(0);
+  String cipherSuite2=uniqueCipherSuites.get(1);
+  String cipherSuite3=uniqueCipherSuites.get(2);
+  List<SSLSocket[]> toClose=new ArrayList<SSLSocket[]>();
+  toClose.add(TestSSLSocketPair.connect(c,new String[]{cipherSuite1},null));
+  assertSSLSessionContextSize(1,c);
+  toClose.add(TestSSLSocketPair.connect(c,new String[]{cipherSuite2},null));
+  assertSSLSessionContextSize(2,c);
+  toClose.add(TestSSLSocketPair.connect(c,new String[]{cipherSuite3},null));
+  assertSSLSessionContextSize(3,c);
+  client.setSessionCacheSize(1);
+  server.setSessionCacheSize(1);
+  assertEquals(1,client.getSessionCacheSize());
+  assertEquals(1,server.getSessionCacheSize());
+  assertSSLSessionContextSize(1,c);
+  toClose.add(TestSSLSocketPair.connect(c,new String[]{cipherSuite1},null));
+  assertSSLSessionContextSize(1,c);
+  client.setSessionCacheSize(2);
+  server.setSessionCacheSize(2);
+  toClose.add(TestSSLSocketPair.connect(c,new String[]{cipherSuite2},null));
+  assertSSLSessionContextSize(2,c);
+  toClose.add(TestSSLSocketPair.connect(c,new String[]{cipherSuite3},null));
+  assertSSLSessionContextSize(2,c);
+  for (  SSLSocket[] pair : toClose) {
+    for (    SSLSocket s : pair) {
+      s.close();
+    }
+  }
+  c.close();
+}

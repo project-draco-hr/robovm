@@ -1,0 +1,14 @@
+{
+  new Object(){
+    @Override protected void finalize() throws Throwable {
+      int count=counter.incrementAndGet();
+      System.out.println(count);
+      if (keepGoing.get()) {
+        createChainedFinalizer(counter,keepGoing);
+      }
+      System.gc();
+      FinalizationTester.enqueueReferences();
+    }
+  }
+;
+}

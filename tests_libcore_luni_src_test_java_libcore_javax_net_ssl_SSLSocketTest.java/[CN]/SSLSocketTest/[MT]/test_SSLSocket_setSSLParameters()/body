@@ -1,0 +1,41 @@
+{
+  SSLSocketFactory sf=(SSLSocketFactory)SSLSocketFactory.getDefault();
+  SSLSocket ssl=(SSLSocket)sf.createSocket();
+  String[] defaultCipherSuites=ssl.getEnabledCipherSuites();
+  String[] defaultProtocols=ssl.getEnabledProtocols();
+  String[] supportedCipherSuites=ssl.getSupportedCipherSuites();
+  String[] supportedProtocols=ssl.getSupportedProtocols();
+{
+    SSLParameters p=new SSLParameters();
+    ssl.setSSLParameters(p);
+    assertEquals(Arrays.asList(defaultCipherSuites),Arrays.asList(ssl.getEnabledCipherSuites()));
+    assertEquals(Arrays.asList(defaultProtocols),Arrays.asList(ssl.getEnabledProtocols()));
+  }
+{
+    SSLParameters p=new SSLParameters(supportedCipherSuites,supportedProtocols);
+    ssl.setSSLParameters(p);
+    assertEquals(Arrays.asList(supportedCipherSuites),Arrays.asList(ssl.getEnabledCipherSuites()));
+    assertEquals(Arrays.asList(supportedProtocols),Arrays.asList(ssl.getEnabledProtocols()));
+  }
+{
+    SSLParameters p=new SSLParameters();
+    p.setNeedClientAuth(true);
+    assertFalse(ssl.getNeedClientAuth());
+    assertFalse(ssl.getWantClientAuth());
+    ssl.setSSLParameters(p);
+    assertTrue(ssl.getNeedClientAuth());
+    assertFalse(ssl.getWantClientAuth());
+    p.setWantClientAuth(true);
+    assertTrue(ssl.getNeedClientAuth());
+    assertFalse(ssl.getWantClientAuth());
+    ssl.setSSLParameters(p);
+    assertFalse(ssl.getNeedClientAuth());
+    assertTrue(ssl.getWantClientAuth());
+    p.setWantClientAuth(false);
+    assertFalse(ssl.getNeedClientAuth());
+    assertTrue(ssl.getWantClientAuth());
+    ssl.setSSLParameters(p);
+    assertFalse(ssl.getNeedClientAuth());
+    assertFalse(ssl.getWantClientAuth());
+  }
+}

@@ -1,0 +1,38 @@
+{
+  for (int i=0; i < list_wf.length; i++) {
+    HashMap<String,String> hm=sp.readFile(list_out_hb[i].getPath());
+    MyHandler dh=new MyHandler();
+    InputStream is=new FileInputStream(list_wf[i]);
+    parser.parse(is,dh,SAXParserTestSupport.XML_SYSTEM_ID);
+    assertTrue(SAXParserTestSupport.equalsMaps(hm,dh.createData()));
+  }
+  for (  File file : list_nwf) {
+    try {
+      MyHandler dh=new MyHandler();
+      InputStream is=new FileInputStream(file);
+      parser.parse(is,dh,SAXParserTestSupport.XML_SYSTEM_ID);
+      fail("SAXException is not thrown");
+    }
+ catch (    SAXException expected) {
+    }
+  }
+  try {
+    MyHandler dh=new MyHandler();
+    parser.parse(null,dh,SAXParserTestSupport.XML_SYSTEM_ID);
+    fail("java.lang.IllegalArgumentException is not thrown");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  InputStream is=new FileInputStream(list_wf[0]);
+  parser.parse(is,(HandlerBase)null,SAXParserTestSupport.XML_SYSTEM_ID);
+  try {
+    is=new BrokenInputStream(new FileInputStream(list_wf[0]),10);
+    parser.parse(is,(HandlerBase)null,SAXParserTestSupport.XML_SYSTEM_ID);
+    fail("IOException expected");
+  }
+ catch (  IOException expected) {
+  }
+ finally {
+    is.close();
+  }
+}

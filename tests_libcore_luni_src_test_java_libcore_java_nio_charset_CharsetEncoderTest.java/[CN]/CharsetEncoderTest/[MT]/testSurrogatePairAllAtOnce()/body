@@ -1,0 +1,12 @@
+{
+  Charset cs=Charset.forName("UTF-32BE");
+  CharsetEncoder e=cs.newEncoder();
+  ByteBuffer bb=ByteBuffer.allocate(128);
+  CoderResult cr=e.encode(CharBuffer.wrap(new char[]{'\ud842','\udf9f'}),bb,false);
+  assertEquals(CoderResult.UNDERFLOW,cr);
+  assertEquals(4,bb.position());
+  assertEquals((byte)0x00,bb.get(0));
+  assertEquals((byte)0x02,bb.get(1));
+  assertEquals((byte)0x0b,bb.get(2));
+  assertEquals((byte)0x9f,bb.get(3));
+}

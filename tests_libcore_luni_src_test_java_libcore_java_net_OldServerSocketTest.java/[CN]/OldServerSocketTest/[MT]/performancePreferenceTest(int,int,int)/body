@@ -1,0 +1,17 @@
+{
+  ServerSocket theSocket=new ServerSocket();
+  theSocket.setPerformancePreferences(connectionTime,latency,bandwidth);
+  InetSocketAddress theAddress=new InetSocketAddress(InetAddress.getLocalHost(),0);
+  theSocket.bind(theAddress);
+  int portNumber=theSocket.getLocalPort();
+  assertTrue("Returned incorrect InetSocketAddress(2):" + theSocket.getLocalSocketAddress().toString() + "Expected: "+ (new InetSocketAddress(InetAddress.getLocalHost(),portNumber)).toString(),theSocket.getLocalSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),portNumber)));
+  assertTrue("Server socket not bound when it should be:",theSocket.isBound());
+  Socket clientSocket=new Socket();
+  InetSocketAddress clAddress=new InetSocketAddress(InetAddress.getLocalHost(),portNumber);
+  clientSocket.connect(clAddress);
+  Socket servSock=theSocket.accept();
+  assertEquals(clAddress,clientSocket.getRemoteSocketAddress());
+  theSocket.close();
+  servSock.close();
+  clientSocket.close();
+}

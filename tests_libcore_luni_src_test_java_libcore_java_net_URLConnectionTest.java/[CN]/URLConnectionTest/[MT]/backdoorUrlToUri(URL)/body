@@ -1,0 +1,20 @@
+{
+  final AtomicReference<URI> uriReference=new AtomicReference<URI>();
+  ResponseCache.setDefault(new ResponseCache(){
+    @Override public CacheRequest put(    URI uri,    URLConnection connection) throws IOException {
+      return null;
+    }
+    @Override public CacheResponse get(    URI uri,    String requestMethod,    Map<String,List<String>> requestHeaders) throws IOException {
+      uriReference.set(uri);
+      throw new UnsupportedOperationException();
+    }
+  }
+);
+  try {
+    HttpURLConnection connection=(HttpURLConnection)url.openConnection();
+    connection.getResponseCode();
+  }
+ catch (  Exception expected) {
+  }
+  return uriReference.get();
+}

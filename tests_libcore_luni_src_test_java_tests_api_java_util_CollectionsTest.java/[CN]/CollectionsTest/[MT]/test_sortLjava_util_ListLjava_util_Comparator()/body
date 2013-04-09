@@ -1,0 +1,34 @@
+{
+  Comparator comp=new ReversedMyIntComparator();
+  try {
+    Collections.sort(null,comp);
+    fail("Expected NullPointerException for null list parameter");
+  }
+ catch (  NullPointerException e) {
+  }
+  Collections.shuffle(myll);
+  Collections.sort(myll,comp);
+  final int llSize=myll.size();
+  for (int counter=0; counter < llSize - 1; counter++) {
+    assertTrue("Sorting shuffled list with custom comparator resulted in unsorted list",((MyInt)myll.get(counter)).compareTo((MyInt)myll.get(counter + 1)) >= 0);
+  }
+  ArrayList al=new ArrayList();
+  al.add("String");
+  al.add(new Integer(1));
+  al.add(new Double(3.14));
+  try {
+    Collections.sort(al,comp);
+    fail("ClassCastException expected");
+  }
+ catch (  ClassCastException e) {
+  }
+  Mock_ArrayList mal=new Mock_ArrayList();
+  mal.add(new MyInt(1));
+  mal.add(new MyInt(2));
+  try {
+    Collections.sort(mal,comp);
+    fail("UnsupportedOperationException expected");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+}

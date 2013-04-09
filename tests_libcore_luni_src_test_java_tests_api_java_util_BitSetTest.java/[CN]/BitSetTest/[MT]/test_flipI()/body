@@ -1,0 +1,57 @@
+{
+  BitSet bs=new BitSet();
+  bs.clear(8);
+  bs.clear(9);
+  bs.set(10);
+  bs.flip(9);
+  assertFalse("Failed to flip bit",bs.get(8));
+  assertTrue("Failed to flip bit",bs.get(9));
+  assertTrue("Failed to flip bit",bs.get(10));
+  bs.set(8);
+  bs.set(9);
+  bs.clear(10);
+  bs.flip(9);
+  assertTrue("Failed to flip bit",bs.get(8));
+  assertFalse("Failed to flip bit",bs.get(9));
+  assertFalse("Failed to flip bit",bs.get(10));
+  try {
+    bs.flip(-1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  bs.flip(128);
+  assertEquals("Failed to grow BitSet",192,bs.size());
+  assertTrue("Failed to flip bit",bs.get(128));
+  bs=new BitSet(64);
+  for (int i=bs.size(); --i >= 0; ) {
+    bs.flip(i);
+    assertTrue("Test1: Incorrectly flipped bit" + i,bs.get(i));
+    assertEquals("Incorrect length",i + 1,bs.length());
+    for (int j=bs.size(); --j > i; ) {
+      assertTrue("Test2: Incorrectly flipped bit" + j,!bs.get(j));
+    }
+    for (int j=i; --j >= 0; ) {
+      assertTrue("Test3: Incorrectly flipped bit" + j,!bs.get(j));
+    }
+    bs.flip(i);
+  }
+  BitSet bs0=new BitSet(0);
+  assertEquals("Test1: Wrong size",0,bs0.size());
+  assertEquals("Test1: Wrong length",0,bs0.length());
+  bs0.flip(0);
+  assertEquals("Test2: Wrong size",64,bs0.size());
+  assertEquals("Test2: Wrong length",1,bs0.length());
+  bs0.flip(63);
+  assertEquals("Test3: Wrong size",64,bs0.size());
+  assertEquals("Test3: Wrong length",64,bs0.length());
+  eightbs.flip(7);
+  assertTrue("Failed to flip bit 7",!eightbs.get(7));
+  for (int i=0; i < 7; i++) {
+    assertTrue("Flip flipped incorrect bits",eightbs.get(i));
+  }
+  eightbs.flip(127);
+  assertTrue("Failed to flip bit 127",eightbs.get(127));
+  eightbs.flip(127);
+  assertTrue("Failed to flip bit 127",!eightbs.get(127));
+}

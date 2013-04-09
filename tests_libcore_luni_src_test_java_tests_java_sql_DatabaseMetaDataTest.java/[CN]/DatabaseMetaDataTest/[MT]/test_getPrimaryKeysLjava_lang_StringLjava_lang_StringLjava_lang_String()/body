@@ -1,0 +1,25 @@
+{
+  ResultSet rs=meta.getPrimaryKeys(conn.getCatalog(),null,DatabaseCreator.TEST_TABLE1);
+  ResultSetMetaData rsmd=rs.getMetaData();
+  assertTrue("Rows not obtained",rs.next());
+  int col=rsmd.getColumnCount();
+  assertEquals("Incorrect number of columns",6,col);
+  String[] columnNames={"TABLE_CAT","TABLE_SCHEM","TABLE_NAME","COLUMN_NAME","KEY_SEQ","PK_NAME"};
+  for (int c=1; c <= col; ++c) {
+    assertEquals("Incorrect column name",columnNames[c - 1],rsmd.getColumnName(c));
+  }
+  assertEquals("Incorrect table catalogue",conn.getCatalog(),rs.getString("TABLE_CAT").toLowerCase());
+  assertEquals("Incorrect table schema","",rs.getString("TABLE_SCHEM"));
+  assertEquals("Incorrect table name",DatabaseCreator.TEST_TABLE1,rs.getString("TABLE_NAME").toLowerCase());
+  assertEquals("Incorrect column name","id",rs.getString("COLUMN_NAME").toLowerCase());
+  assertEquals("Incorrect sequence number",1,rs.getShort("KEY_SEQ"));
+  assertEquals("Incorrect primary key name","primary",rs.getString("PK_NAME").toLowerCase());
+  rs.close();
+  conn.close();
+  try {
+    meta.getPrimaryKeys(conn.getCatalog(),null,DatabaseCreator.TEST_TABLE1);
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

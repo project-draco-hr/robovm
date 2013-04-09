@@ -1,0 +1,42 @@
+{
+  ServerThread server=new ServerThread();
+  try {
+    server.start();
+    Thread.currentThread().sleep(1000);
+    InetSocketAddress address=new InetSocketAddress(InetAddress.getByName("localhost"),port);
+    ByteBuffer buf=null;
+    SocketChannel sc=SocketChannel.open();
+    try {
+      sc.connect(address);
+      buf=ByteBuffer.allocate(data.length);
+      buf.limit(data.length / 2);
+      sc.read(buf);
+      buf.limit(buf.capacity());
+      sc.read(buf);
+    }
+  finally {
+      sc.close();
+    }
+    buf.rewind();
+    assertSameContent(data,buf);
+    sc=SocketChannel.open();
+    try {
+      sc.connect(address);
+      buf=ByteBuffer.allocateDirect(data.length);
+      buf.limit(data.length / 2);
+      sc.read(buf);
+      buf.limit(buf.capacity());
+      sc.read(buf);
+    }
+  finally {
+      sc.close();
+    }
+    buf.rewind();
+    assertSameContent(data,buf);
+  }
+  finally {
+    done=true;
+    server.interrupt();
+    server.join(2000);
+  }
+}

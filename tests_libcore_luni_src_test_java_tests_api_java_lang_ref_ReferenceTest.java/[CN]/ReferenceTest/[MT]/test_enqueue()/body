@@ -1,0 +1,21 @@
+{
+  ReferenceQueue rq=new ReferenceQueue();
+  obj=new Object();
+  Reference ref=new SoftReference(obj,rq);
+  assertTrue("Enqueue failed.",(!ref.isEnqueued()) && ((ref.enqueue()) && (ref.isEnqueued())));
+  assertTrue("Not properly enqueued.",rq.poll().get() == obj);
+  assertTrue("Should remain enqueued.",!ref.isEnqueued());
+  assertTrue("Can not enqueue twice.",(!ref.enqueue()) && (rq.poll() == null));
+  rq=new ReferenceQueue();
+  obj=new Object();
+  ref=new WeakReference(obj,rq);
+  assertTrue("Enqueue failed2.",(!ref.isEnqueued()) && ((ref.enqueue()) && (ref.isEnqueued())));
+  assertTrue("Not properly enqueued2.",rq.poll().get() == obj);
+  assertTrue("Should remain enqueued2.",!ref.isEnqueued());
+  assertTrue("Can not enqueue twice2.",(!ref.enqueue()) && (rq.poll() == null));
+  ref=new PhantomReference(obj,rq);
+  assertTrue("Enqueue failed3.",(!ref.isEnqueued()) && ((ref.enqueue()) && (ref.isEnqueued())));
+  assertNull("Not properly enqueued3.",rq.poll().get());
+  assertTrue("Should remain enqueued3.",!ref.isEnqueued());
+  assertTrue("Can not enqueue twice3.",(!ref.enqueue()) && (rq.poll() == null));
+}

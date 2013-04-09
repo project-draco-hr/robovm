@@ -1,0 +1,27 @@
+{
+  String patString="abcd\uD8D3";
+  String testString="abcd\uD8D3\uDFFC";
+  Pattern pat=Pattern.compile(patString);
+  Matcher mat=pat.matcher(testString);
+  testString="abcd\uD8D3abc";
+  mat=pat.matcher(testString);
+  assertTrue(mat.find());
+  patString="ab\uDBEFcd";
+  testString="ab\uDBEFcd";
+  pat=Pattern.compile(patString);
+  mat=pat.matcher(testString);
+  assertTrue(mat.matches());
+  patString="\uDFFCabcd";
+  testString="\uD8D3\uDFFCabcd";
+  pat=Pattern.compile(patString);
+  mat=pat.matcher(testString);
+  assertFalse(mat.find());
+  testString="abc\uDFFCabcdecd";
+  mat=pat.matcher(testString);
+  assertTrue(mat.find());
+  patString="\uD8D3\uDFFCabcd";
+  testString="abc\uD8D3\uD8D3\uDFFCabcd";
+  pat=Pattern.compile(patString);
+  mat=pat.matcher(testString);
+  assertTrue(mat.find());
+}

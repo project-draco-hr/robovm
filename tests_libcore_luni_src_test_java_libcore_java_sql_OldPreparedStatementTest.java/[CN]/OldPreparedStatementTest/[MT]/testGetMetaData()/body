@@ -1,0 +1,38 @@
+{
+  PreparedStatement ps=null;
+  try {
+    String query="update zoo set name='Masha', family='cat' where id=?;";
+    ps=conn.prepareStatement(query);
+    assertNotNull(ps);
+    ResultSetMetaData meta=ps.getMetaData();
+    assertNotNull(meta);
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    String query="select * from zoo where id = ?";
+    ps=conn.prepareStatement(query);
+    ResultSetMetaData rsmd=ps.getMetaData();
+    assertNotNull(rsmd);
+    assertEquals(3,rsmd.getColumnCount());
+    assertEquals("id",rsmd.getColumnName(1));
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    ps.getMetaData();
+    fail("SQLException expected");
+  }
+ catch (  SQLException e) {
+  }
+}

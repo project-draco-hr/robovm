@@ -1,0 +1,61 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  char val=0;
+  try {
+    f=x.getClass().getDeclaredField("charField");
+    val=f.getChar(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during getCharacter test: " + e.toString());
+  }
+  assertEquals("Returned incorrect char field value",'T',val);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("doubleField");
+    f.getChar(x);
+    fail("IllegalArgumentException expected but not thrown");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("IllegalArgumentException expected but not thrown");
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("charPFField");
+    f.getChar(x);
+    fail("IllegalAccessException expected but not thrown");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("IllegalAccessException expected but not thrown" + ex.getMessage());
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("charField");
+    f.getChar(null);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("charSField");
+    char staticValue=f.getChar(null);
+    assertEquals("Wrong value returned",'T',staticValue);
+  }
+ catch (  Exception ex) {
+    fail("No exception expected " + ex.getMessage());
+  }
+}

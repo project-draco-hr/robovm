@@ -1,0 +1,17 @@
+{
+  Collection myCollection=new LinkedList();
+  Iterator myIterator=myCollection.iterator();
+  for (int counter=0; counter < 50; counter++)   myCollection.add(new Integer(counter));
+  CollectionModifier cm=new CollectionModifier(myCollection);
+  Thread collectionSlapper=new Thread(cm);
+  try {
+    collectionSlapper.start();
+    while (myIterator.hasNext())     myIterator.next();
+  }
+ catch (  ConcurrentModificationException e) {
+    cm.stopNow();
+    return;
+  }
+  cm.stopNow();
+  fail("Failed to throw expected ConcurrentModificationException");
+}

@@ -1,0 +1,26 @@
+{
+  if (!PKIXSupport) {
+    fail(NotSupportMsg);
+    return;
+  }
+  CertPathValidatorSpi spi=new MyCertPathValidatorSpi();
+  CertPathValidator certPV=new myCertPathValidator(spi,defaultProvider,defaultType);
+  assertEquals("Incorrect algorithm",certPV.getAlgorithm(),defaultType);
+  assertEquals("Incorrect provider",certPV.getProvider(),defaultProvider);
+  certPV.validate(null,null);
+  try {
+    certPV.validate(null,null);
+    fail("CertPathValidatorException must be thrown");
+  }
+ catch (  CertPathValidatorException e) {
+  }
+  certPV=new myCertPathValidator(null,null,null);
+  assertNull("Incorrect algorithm",certPV.getAlgorithm());
+  assertNull("Incorrect provider",certPV.getProvider());
+  try {
+    certPV.validate(null,null);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+}

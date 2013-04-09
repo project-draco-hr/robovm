@@ -1,0 +1,17 @@
+{
+  setUpStoreProperties();
+  ServerSocket ss=new ServerSocket(0);
+  TestHostnameVerifier hnv=new TestHostnameVerifier();
+  HttpsURLConnection.setDefaultHostnameVerifier(hnv);
+  URL url=new URL("https://requested.host:55555/requested.data");
+  HttpsURLConnection connection=(HttpsURLConnection)url.openConnection(new Proxy(Proxy.Type.HTTP,new InetSocketAddress("localhost",ss.getLocalPort())));
+  connection.setSSLSocketFactory(getContext().getSocketFactory());
+  try {
+    doInteraction(connection,ss,AUTHENTICATION_REQUIRED_CODE,true);
+  }
+ catch (  IOException e) {
+    if (DO_LOG) {
+      System.out.println("Got expected IOException: " + e.getMessage());
+    }
+  }
+}

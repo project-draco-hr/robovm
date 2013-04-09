@@ -1,0 +1,16 @@
+{
+  if (test instanceof SerializableAssert) {
+    return (SerializableAssert)test;
+  }
+  Method m=object.getClass().getMethod("equals",new Class[]{Object.class});
+  if (m.getDeclaringClass() != Object.class) {
+    return DEFAULT_COMPARATOR;
+  }
+  if (object instanceof Throwable) {
+    return THROWABLE_COMPARATOR;
+  }
+  if (object instanceof PermissionCollection) {
+    return PERMISSION_COLLECTION_COMPARATOR;
+  }
+  throw new RuntimeException("Failed to detect comparator");
+}

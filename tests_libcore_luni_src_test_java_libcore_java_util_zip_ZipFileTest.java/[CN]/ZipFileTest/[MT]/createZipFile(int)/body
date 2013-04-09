@@ -1,0 +1,16 @@
+{
+  File result=File.createTempFile("ZipFileTest","zip");
+  result.deleteOnExit();
+  ZipOutputStream out=new ZipOutputStream(new FileOutputStream(result));
+  ZipEntry entry=new ZipEntry("random");
+  out.putNextEntry(entry);
+  byte[] writeBuffer=new byte[8192];
+  Random random=new Random();
+  for (int i=0; i < uncompressedSize; i+=writeBuffer.length) {
+    random.nextBytes(writeBuffer);
+    out.write(writeBuffer,0,Math.min(writeBuffer.length,uncompressedSize - i));
+  }
+  out.closeEntry();
+  out.close();
+  return result;
+}

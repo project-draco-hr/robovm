@@ -1,0 +1,27 @@
+{
+  SSLSession ses=new MySSLSession();
+  try {
+    SSLSessionBindingEvent event=new SSLSessionBindingEvent(ses,"test");
+    if (!"test".equals(event.getName())) {
+      fail("incorrect name");
+    }
+    if (!event.getSession().equals(ses)) {
+      fail("incorrect session");
+    }
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception " + e);
+  }
+  try {
+    SSLSessionBindingEvent event=new SSLSessionBindingEvent(null,"test");
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    SSLSessionBindingEvent event=new SSLSessionBindingEvent(ses,null);
+  }
+ catch (  IllegalArgumentException e) {
+    fail("Unexpected IllegalArgumentException: " + e);
+  }
+}

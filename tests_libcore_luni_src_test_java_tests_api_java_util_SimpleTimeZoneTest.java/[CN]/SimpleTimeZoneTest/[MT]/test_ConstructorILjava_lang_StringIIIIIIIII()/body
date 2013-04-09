@@ -1,0 +1,33 @@
+{
+  SimpleTimeZone st=new SimpleTimeZone(1000,"TEST",Calendar.NOVEMBER,1,Calendar.SUNDAY,0,Calendar.NOVEMBER,-1,Calendar.SUNDAY,0,1000 * 60 * 60);
+  assertTrue("Incorrect TZ constructed",st.inDaylightTime(new GregorianCalendar(1998,Calendar.NOVEMBER,13).getTime()));
+  assertTrue("Incorrect TZ constructed",!(st.inDaylightTime(new GregorianCalendar(1998,Calendar.OCTOBER,13).getTime())));
+  assertEquals("Incorrect TZ constructed","TEST",st.getID());
+  assertEquals("Incorrect TZ constructed",1000,st.getRawOffset());
+  assertTrue("Incorrect TZ constructed",st.useDaylightTime());
+  assertTrue("Incorrect TZ constructed",st.getDSTSavings() == 1000 * 60 * 60);
+  try {
+    new SimpleTimeZone(1000,"TEST",12,1,Calendar.SUNDAY,0,Calendar.NOVEMBER,-1,Calendar.SUNDAY,0,1000 * 60 * 60);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new SimpleTimeZone(1000,"TEST",Calendar.NOVEMBER,10,Calendar.SUNDAY,0,Calendar.NOVEMBER,-1,Calendar.SUNDAY,0,1000 * 60 * 60);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new SimpleTimeZone(1000,"TEST",Calendar.NOVEMBER,1,10,0,Calendar.NOVEMBER,-1,Calendar.SUNDAY,0,1000 * 60 * 60);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new SimpleTimeZone(1000,"TEST",Calendar.DECEMBER,1,Calendar.SUNDAY,0,Calendar.NOVEMBER,-10,Calendar.SUNDAY,0,1000 * 60 * 60);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

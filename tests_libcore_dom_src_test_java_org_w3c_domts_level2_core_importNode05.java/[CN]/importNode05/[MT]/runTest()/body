@@ -1,0 +1,26 @@
+{
+  Document doc;
+  Document aNewDoc;
+  Element element;
+  Node aNode;
+  boolean hasChild;
+  Document ownerDocument;
+  DocumentType docType;
+  String system;
+  String name;
+  NodeList addresses;
+  doc=(Document)load("staffNS",true);
+  aNewDoc=(Document)load("staffNS",true);
+  addresses=aNewDoc.getElementsByTagName("emp:address");
+  element=(Element)addresses.item(0);
+  assertNotNull("empAddressNotNull",element);
+  aNode=doc.importNode(element,false);
+  hasChild=aNode.hasChildNodes();
+  assertFalse("hasChild",hasChild);
+  ownerDocument=aNode.getOwnerDocument();
+  docType=ownerDocument.getDoctype();
+  system=docType.getSystemId();
+  assertURIEquals("dtdSystemId",null,null,null,"staffNS.dtd",null,null,null,null,system);
+  name=aNode.getNodeName();
+  assertEquals("nodeName","emp:address",name);
+}

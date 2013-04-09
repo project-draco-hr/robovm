@@ -1,0 +1,35 @@
+{
+  String[] envp=getEnv();
+  File workFolder=Support_Resources.createTempFolder();
+  checkExec(2,envp,workFolder);
+  checkExec(2,null,null);
+  try {
+    Runtime.getRuntime().exec((String)null,null,workFolder);
+    fail("NullPointerException should be thrown.");
+  }
+ catch (  IOException ioe) {
+    fail("IOException was thrown.");
+  }
+catch (  NullPointerException npe) {
+  }
+  SecurityManager sm=new SecurityManager(){
+    public void checkPermission(    Permission perm){
+      if (perm.getName().equals("checkExec")) {
+        throw new SecurityException();
+      }
+    }
+    public void checkExec(    String cmd){
+      throw new SecurityException();
+    }
+  }
+;
+  try {
+    Runtime.getRuntime().exec("",envp,workFolder);
+    fail("SecurityException should be thrown.");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+catch (  IOException e) {
+    fail("IOException was thrown.");
+  }
+}

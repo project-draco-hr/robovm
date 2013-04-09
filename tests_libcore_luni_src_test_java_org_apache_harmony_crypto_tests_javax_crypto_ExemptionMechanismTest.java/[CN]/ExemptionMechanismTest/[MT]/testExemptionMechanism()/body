@@ -1,0 +1,38 @@
+{
+  Provider mProv=(new SpiEngUtils()).new MyProvider("MyExMechProvider","Provider for ExemptionMechanism testing",srvExemptionMechanism.concat(".").concat(defaultAlg),ExemptionMechanismProviderClass);
+  ExemptionMechanismSpi spi=new MyExemptionMechanismSpi();
+  ExemptionMechanism em=new ExemptionMechanism(spi,mProv,defaultAlg){
+  }
+;
+  assertEquals("Incorrect provider",em.getProvider(),mProv);
+  assertEquals("Incorrect algorithm",em.getName(),defaultAlg);
+  try {
+    em.init(null);
+    fail("InvalidKeyException must be thrown");
+  }
+ catch (  InvalidKeyException e) {
+  }
+  try {
+    em.getOutputSize(100);
+    fail("IllegalStateException must be thrown");
+  }
+ catch (  IllegalStateException e) {
+  }
+  em=new ExemptionMechanism(null,null,null){
+  }
+;
+  assertNull("Incorrect mechanism",em.getName());
+  assertNull("Incorrect provider",em.getProvider());
+  try {
+    em.init(null);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    em.getOutputSize(100);
+    fail("IllegalStateException must be thrown");
+  }
+ catch (  IllegalStateException e) {
+  }
+}

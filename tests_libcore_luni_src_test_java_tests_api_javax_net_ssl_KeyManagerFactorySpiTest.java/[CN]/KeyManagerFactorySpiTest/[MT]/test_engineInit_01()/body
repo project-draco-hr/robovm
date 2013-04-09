@@ -1,0 +1,41 @@
+{
+  KeyManagerFactorySpiImpl kmf=new KeyManagerFactorySpiImpl();
+  KeyStore ks;
+  char[] psw="password".toCharArray();
+  try {
+    kmf.engineInit(null,null);
+    fail("NoSuchAlgorithmException wasn't thrown");
+  }
+ catch (  NoSuchAlgorithmException kse) {
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of NoSuchAlgorithmException");
+  }
+  try {
+    kmf.engineInit(null,psw);
+    fail("KeyStoreException wasn't thrown");
+  }
+ catch (  KeyStoreException uke) {
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of KeyStoreException");
+  }
+  try {
+    ks=KeyStore.getInstance(KeyStore.getDefaultType());
+    kmf.engineInit(ks,null);
+    fail("UnrecoverableKeyException wasn't thrown");
+  }
+ catch (  UnrecoverableKeyException uke) {
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of UnrecoverableKeyException");
+  }
+  try {
+    KeyStore kst=KeyStore.getInstance(KeyStore.getDefaultType());
+    kst.load(null,null);
+    kmf.engineInit(kst,psw);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception " + e);
+  }
+}

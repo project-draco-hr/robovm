@@ -1,0 +1,38 @@
+{
+  long stime=System.currentTimeMillis();
+  try {
+    Thread.sleep(1000,99999);
+  }
+ catch (  InterruptedException e) {
+    fail("Unexpected InterruptedException was thrown");
+  }
+  long ftime=System.currentTimeMillis();
+  assertTrue("Failed to sleep long enough",(ftime - stime) >= 500);
+  assertTrue("Failed to wake up early enough",(ftime - stime) <= 1500);
+  st=new Thread(){
+    public void run(){
+      try {
+        sleep(10000,99999);
+      }
+ catch (      InterruptedException ie) {
+        wasInterrupted=true;
+      }
+    }
+  }
+;
+  st.start();
+  try {
+    Thread.sleep(5000,99999);
+  }
+ catch (  InterruptedException e) {
+    fail("Unexpected InterruptedException was thrown");
+  }
+  st.interrupt();
+  try {
+    Thread.sleep(5000);
+  }
+ catch (  InterruptedException e) {
+    fail("Unexpected InterruptedException was thrown");
+  }
+  assertTrue(wasInterrupted);
+}

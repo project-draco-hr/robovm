@@ -1,0 +1,61 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  float val=0;
+  try {
+    f=x.getClass().getDeclaredField("floatField");
+    val=f.getFloat(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during getFloat test : " + e.getMessage());
+  }
+  assertTrue("Returned incorrect float field value",val == Float.MAX_VALUE);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    f.getFloat(x);
+    fail("IllegalArgumentException expected but not thrown");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("IllegalArgumentException expected but not thrown " + ex.getMessage());
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("floatPFField");
+    f.getFloat(x);
+    fail("IllegalAccessException expected but not thrown");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("IllegalAccessException expected but not thrown" + ex.getMessage());
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("floatField");
+    f.getFloat(null);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("floatSField");
+    float staticValue=f.getFloat(null);
+    assertEquals("Wrong value returned",Float.MAX_VALUE,staticValue);
+  }
+ catch (  Exception ex) {
+    fail("No exception expected " + ex.getMessage());
+  }
+}

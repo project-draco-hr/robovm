@@ -1,0 +1,27 @@
+{
+  Statement st=null;
+  try {
+    st=conn.createStatement();
+    st.getResultSetConcurrency();
+    assertEquals(ResultSet.CONCUR_READ_ONLY,st.getResultSetConcurrency());
+  }
+ catch (  SQLException e) {
+    assertEquals("not supported",e.getMessage());
+  }
+  try {
+    st=conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
+    st.getResultSetConcurrency();
+    assertEquals(ResultSet.CONCUR_UPDATABLE,st.getResultSetConcurrency());
+    fail("Exception expected: not supported");
+  }
+ catch (  SQLException e) {
+  }
+  try {
+    st=conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
+    st.getResultSetConcurrency();
+    assertEquals(ResultSet.CONCUR_READ_ONLY,st.getResultSetConcurrency());
+    fail("Exception expected: not supported");
+  }
+ catch (  SQLException e) {
+  }
+}

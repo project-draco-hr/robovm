@@ -1,0 +1,28 @@
+{
+  AlgorithmParameters params=AlgorithmParameters.getInstance("DSA");
+  assertEquals("Algorithm","DSA",params.getAlgorithm());
+  BigInteger p=BigInteger.ONE;
+  BigInteger q=BigInteger.TEN;
+  BigInteger g=BigInteger.ZERO;
+  params.init(new DSAParameterSpec(p,q,g));
+  byte[] enc=params.getEncoded();
+  assertNotNull(enc);
+  assertNotNull(params.getEncoded("ASN.1"));
+  DSAParameterSpec spec=params.getParameterSpec(DSAParameterSpec.class);
+  assertEquals("p is wrong ",p,spec.getP());
+  assertEquals("q is wrong ",q,spec.getQ());
+  assertEquals("g is wrong ",g,spec.getG());
+  params=AlgorithmParameters.getInstance("DSA");
+  params.init(enc);
+  assertTrue("param encoded is different",Arrays.equals(enc,params.getEncoded()));
+  params=AlgorithmParameters.getInstance("DSA");
+  params.init(enc,"ASN.1");
+  assertTrue("param encoded is different",Arrays.equals(enc,params.getEncoded()));
+  params=AlgorithmParameters.getInstance("DSA");
+  try {
+    params.init(enc,"DOUGLASMAWSON");
+    fail("unsupported format should have raised IOException");
+  }
+ catch (  IOException e) {
+  }
+}

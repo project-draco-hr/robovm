@@ -1,0 +1,15 @@
+{
+  mySSLSession session=new mySSLSession("localhost",1080,null);
+  SSLSocket socket=(SSLSocket)SSLSocketFactory.getDefault().createSocket();
+  HandshakeCompletedEvent event=new HandshakeCompletedEvent(socket,session);
+  try {
+    event.getPeerCertificates();
+    fail("SSLPeerUnverifiedException wasn't thrown");
+  }
+ catch (  SSLPeerUnverifiedException expected) {
+  }
+  session=new mySSLSession((X509Certificate[])null);
+  event=new HandshakeCompletedEvent(socket,session);
+  Certificate[] res=event.getPeerCertificates();
+  assertEquals(3,res.length);
+}

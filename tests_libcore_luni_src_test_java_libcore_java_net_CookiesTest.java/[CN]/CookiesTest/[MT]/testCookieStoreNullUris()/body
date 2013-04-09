@@ -1,0 +1,34 @@
+{
+  CookieStore cookieStore=new CookieManager().getCookieStore();
+  HttpCookie cookieA=new HttpCookie("a","android");
+  cookieA.setDomain(".android.com");
+  cookieA.setPath("/source");
+  HttpCookie cookieB=new HttpCookie("b","banana");
+  cookieA.setDomain("code.google.com");
+  cookieA.setPath("/p/android");
+  try {
+    cookieStore.add(null,cookieA);
+  }
+ catch (  NullPointerException expected) {
+    expected.printStackTrace();
+  }
+  assertEquals(Arrays.asList(cookieA),cookieStore.getCookies());
+  try {
+    cookieStore.add(null,cookieB);
+  }
+ catch (  NullPointerException expected) {
+  }
+  assertEquals(Arrays.asList(cookieA,cookieB),cookieStore.getCookies());
+  try {
+    cookieStore.get(null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  assertEquals(Collections.<URI>emptyList(),cookieStore.getURIs());
+  assertTrue(cookieStore.remove(null,cookieA));
+  assertEquals(Arrays.asList(cookieB),cookieStore.getCookies());
+  assertTrue(cookieStore.removeAll());
+  assertEquals(Collections.<URI>emptyList(),cookieStore.getURIs());
+  assertEquals(Collections.<HttpCookie>emptyList(),cookieStore.getCookies());
+}

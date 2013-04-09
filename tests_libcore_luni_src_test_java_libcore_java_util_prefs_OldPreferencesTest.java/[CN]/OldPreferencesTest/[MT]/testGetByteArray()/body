@@ -1,0 +1,20 @@
+{
+  Preferences pref=Preferences.userNodeForPackage(Preferences.class);
+  try {
+    pref.getByteArray(null,new byte[0]);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  byte[] b64Array=new byte[]{0x59,0x57,0x4a,0x6a};
+  pref.put("testGetByteArrayKey","abc=");
+  pref.put("testGetByteArrayKey2",new String(b64Array));
+  pref.put("invalidKey","<>?");
+  assertTrue(Arrays.equals(new byte[]{105,-73},pref.getByteArray("testGetByteArrayKey",new byte[0])));
+  assertTrue(Arrays.equals(new byte[]{'a','b','c'},pref.getByteArray("testGetByteArrayKey2",new byte[0])));
+  assertTrue(Arrays.equals(new byte[0],pref.getByteArray("invalidKey",new byte[0])));
+  pref.putByteArray("testGetByteArrayKey3",b64Array);
+  pref.putByteArray("testGetByteArrayKey4","abc".getBytes());
+  assertTrue(Arrays.equals(b64Array,pref.getByteArray("testGetByteArrayKey3",new byte[0])));
+  assertTrue(Arrays.equals("abc".getBytes(),pref.getByteArray("testGetByteArrayKey4",new byte[0])));
+}

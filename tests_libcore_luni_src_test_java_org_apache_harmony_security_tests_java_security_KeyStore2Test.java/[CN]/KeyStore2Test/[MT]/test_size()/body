@@ -1,0 +1,18 @@
+{
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  X509Certificate cert[]=new X509Certificate[2];
+  cert[0]=(X509Certificate)cf.generateCertificate(certArray);
+  cert[1]=(X509Certificate)cf.generateCertificate(certArray2);
+  KeyStore keyTest=KeyStore.getInstance(KeyStore.getDefaultType());
+  try {
+    keyTest.size();
+    fail();
+  }
+ catch (  KeyStoreException expected) {
+  }
+  keyTest.load(null,null);
+  keyTest.setCertificateEntry("alias1",cert[0]);
+  keyTest.setKeyEntry("alias2",getPrivateKey(),pssWord,cert);
+  keyTest.setCertificateEntry("alias3",cert[1]);
+  assertEquals("the size of the keyStore is not 3",3,keyTest.size());
+}

@@ -1,0 +1,48 @@
+{
+  String type="DSA";
+  KeyStore keyTest=KeyStore.getInstance(KeyStore.getDefaultType());
+  try {
+    keyTest.getEntry("anAlias",new KeyStore.PasswordProtection(new char[]{}));
+    fail();
+  }
+ catch (  KeyStoreException expected) {
+  }
+  keyTest.load(null,pssWord);
+  try {
+    keyTest.getEntry(null,new KeyStore.PasswordProtection(new char[]{}));
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  keyTest.getEntry("anAlias",null);
+  try {
+    keyTest.getEntry(null,null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  assertNull(keyTest.getEntry("alias",null));
+  Certificate[] chain={new MyCertificate(type,testEncoding),new MyCertificate(type,testEncoding)};
+  DSAPrivateKey privateKey1=(DSAPrivateKey)KeyFactory.getInstance(type).generatePrivate(new DSAPrivateKeySpec(new BigInteger("1"),new BigInteger("2"),new BigInteger("3"),new BigInteger("4")));
+  KeyStore.PasswordProtection pp=new KeyStore.PasswordProtection(pssWord);
+  assertNull(keyTest.getEntry("alias",pp));
+  KeyStore.PrivateKeyEntry pke1=new KeyStore.PrivateKeyEntry(getPrivateKey(),chain);
+  KeyStore.PrivateKeyEntry pke2=new KeyStore.PrivateKeyEntry(privateKey1,chain);
+  keyTest.setEntry("alias1",pke1,pp);
+  keyTest.setEntry("alias2",pke2,pp);
+  assertNull(keyTest.getEntry("alias",pp));
+  KeyStore.PrivateKeyEntry pkeActual1=(KeyStore.PrivateKeyEntry)keyTest.getEntry("alias1",pp);
+  KeyStore.PrivateKeyEntry pkeActual2=(KeyStore.PrivateKeyEntry)keyTest.getEntry("alias2",pp);
+  assertTrue(Arrays.equals(chain,pkeActual1.getCertificateChain()));
+  assertEquals(getPrivateKey(),pkeActual1.getPrivateKey());
+  assertEquals(new MyCertificate(type,testEncoding),pkeActual1.getCertificate());
+  assertTrue(keyTest.entryInstanceOf("alias1",KeyStore.PrivateKeyEntry.class));
+  assertTrue(Arrays.equals(chain,pkeActual2.getCertificateChain()));
+  DSAPrivateKey entryPrivateKey=(DSAPrivateKey)pkeActual2.getPrivateKey();
+  assertEquals(privateKey1.getX(),entryPrivateKey.getX());
+  assertEquals(privateKey1.getParams().getG(),entryPrivateKey.getParams().getG());
+  assertEquals(privateKey1.getParams().getP(),entryPrivateKey.getParams().getP());
+  assertEquals(privateKey1.getParams().getQ(),entryPrivateKey.getParams().getQ());
+  assertEquals(new MyCertificate(type,testEncoding),pkeActual2.getCertificate());
+  assertTrue(keyTest.entryInstanceOf("alias2",KeyStore.PrivateKeyEntry.class));
+}

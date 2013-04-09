@@ -1,0 +1,22 @@
+{
+  int testPort=Support_PortManager.getNextPort();
+  Socket s1=new Socket("www.google.com",80,null,testPort);
+  try {
+    Socket s2=new Socket("www.google.com",80,null,testPort);
+    try {
+      s2.close();
+    }
+ catch (    IOException ignored) {
+    }
+    fail("second connect should have failed with EADDRINUSE");
+  }
+ catch (  BindException expected) {
+  }
+ finally {
+    try {
+      s1.close();
+    }
+ catch (    IOException ignored) {
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  boolean exception=false;
+  Set c=Collections.unmodifiableSet(s);
+  assertTrue("Returned set is of incorrect size",c.size() == s.size());
+  Iterator i=ll.iterator();
+  while (i.hasNext())   assertTrue("Returned set missing elements",c.contains(i.next()));
+  try {
+    c.add(new Object());
+  }
+ catch (  UnsupportedOperationException e) {
+    exception=true;
+  }
+  if (!exception) {
+    fail("Allowed modification of set");
+  }
+  try {
+    c.remove(new Object());
+    fail("Allowed modification of set");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  Set mySet=Collections.unmodifiableSet(new HashSet());
+  assertTrue("Should not contain null",!mySet.contains(null));
+  mySet=Collections.unmodifiableSet(Collections.singleton(null));
+  assertTrue("Should contain null",mySet.contains(null));
+  mySet=new TreeSet();
+  for (int counter=0; counter < 100; counter++) {
+    mySet.add(objArray[counter]);
+  }
+  new Support_UnmodifiableCollectionTest("",Collections.unmodifiableSet(mySet)).runTest();
+}

@@ -1,0 +1,24 @@
+{
+  insertNewRecord();
+  assertFalse(conn.isClosed());
+  String corelationName="TABLE_NAME";
+  String selectQuery="SELECT * FROM " + DatabaseCreator.TEST_TABLE1 + " AS "+ corelationName;
+  ResultSet rs=statementForward.executeQuery(selectQuery);
+  ResultSetMetaData rsmd=rs.getMetaData();
+  int numOfColumn=rsmd.getColumnCount();
+  for (int i=0; i < numOfColumn; i++) {
+    if (meta.supportsTableCorrelationNames()) {
+      assertEquals("Corelation names is now supported",corelationName,rsmd.getTableName(i + 1));
+    }
+ else {
+      assertEquals("Corelation names is supported",DatabaseCreator.TEST_TABLE1,rsmd.getTableName(i + 1));
+    }
+  }
+  conn.close();
+  try {
+    meta.supportsTableCorrelationNames();
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

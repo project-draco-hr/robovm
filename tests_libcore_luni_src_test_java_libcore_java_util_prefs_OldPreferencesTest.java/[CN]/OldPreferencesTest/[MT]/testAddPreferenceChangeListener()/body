@@ -1,0 +1,85 @@
+{
+  Preferences pref=Preferences.userNodeForPackage(Preferences.class);
+  MockPreferenceChangeListener pl=null;
+  try {
+    pref.addPreferenceChangeListener(null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    pl=new MockPreferenceChangeListener();
+    pref.addPreferenceChangeListener(pl);
+    pref.putInt("mock1",123);
+    pl.waitForEvent(1);
+    assertEquals(1,pl.getChanged());
+    pref.putLong("long_key",Long.MAX_VALUE);
+    pl.waitForEvent(2);
+    assertEquals(2,pl.getChanged());
+    pl.reset();
+    try {
+      pref.clear();
+      pl.waitForEvent(2);
+      assertEquals(2,pl.getChanged());
+    }
+ catch (    BackingStoreException bse) {
+      pl.reset();
+      fail("BackingStoreException is thrown");
+    }
+    pl.reset();
+  }
+  finally {
+    pref.removePreferenceChangeListener(pl);
+  }
+  try {
+    pl=new MockPreferenceChangeListener();
+    pref.addPreferenceChangeListener(pl);
+    pref.addPreferenceChangeListener(pl);
+    pref.putFloat("float_key",Float.MIN_VALUE);
+    pl.waitForEvent(2);
+    assertEquals(2,pl.getChanged());
+    pl.reset();
+  }
+  finally {
+    pref.removePreferenceChangeListener(pl);
+    pref.removePreferenceChangeListener(pl);
+  }
+  try {
+    pl=new MockPreferenceChangeListener();
+    pref.addPreferenceChangeListener(pl);
+    pref.putDouble("double_key",Double.MAX_VALUE);
+    pl.waitForEvent(1);
+    assertEquals(1,pl.getChanged());
+    try {
+      pref.clear();
+      pl.waitForEvent(3);
+      assertEquals(3,pl.getChanged());
+    }
+ catch (    BackingStoreException bse) {
+      fail("BackingStoreException is thrown");
+    }
+    pl.reset();
+  }
+  finally {
+    pref.removePreferenceChangeListener(pl);
+  }
+  try {
+    pl=new MockPreferenceChangeListener();
+    pref.addPreferenceChangeListener(pl);
+    pref.addPreferenceChangeListener(pl);
+    pref.putByteArray("byte_array_key",new byte[]{1,2,3});
+    try {
+      pref.clear();
+      pl.waitForEvent(4);
+      assertEquals(4,pl.getChanged());
+    }
+ catch (    BackingStoreException bse) {
+      fail("BackingStoreException is thrown");
+    }
+    pl.reset();
+  }
+  finally {
+    pref.removePreferenceChangeListener(pl);
+    pref.removePreferenceChangeListener(pl);
+  }
+}

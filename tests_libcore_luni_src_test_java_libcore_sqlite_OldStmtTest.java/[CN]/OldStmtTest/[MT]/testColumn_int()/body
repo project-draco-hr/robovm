@@ -1,0 +1,21 @@
+{
+  db.exec(CREATE_ALL_TYPES,null);
+  db.exec(INSERT_ALL_TYPES,null);
+  Object columnObject;
+  int intColumn;
+  String selectStmt="select * from " + DatabaseCreator.SIMPLE_TABLE1;
+  st=db.prepare(selectStmt);
+  st.step();
+  columnObject=st.column(1);
+  intColumn=st.column_int(1);
+  assertNotNull(intColumn);
+  assertTrue("Integer".equalsIgnoreCase(st.column_decltype(1)));
+  int stSpeed=Integer.parseInt(columnObject.toString());
+  assertNotNull(stSpeed);
+  assertEquals(intColumn,stSpeed);
+  assertEquals(10,stSpeed);
+  selectStmt="select TextVal from " + ALL_TYPES_TABLE;
+  st=db.prepare(selectStmt);
+  st.step();
+  st.column_int(0);
+}

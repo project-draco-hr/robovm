@@ -1,0 +1,11 @@
+{
+  server.enqueue(new MockResponse().setBody("Output shutdown after this response").setSocketPolicy(SHUTDOWN_OUTPUT_AT_END));
+  server.enqueue(new MockResponse().setBody("This response will fail to write"));
+  server.enqueue(new MockResponse().setBody("This comes after a busted connection"));
+  server.play();
+  assertContent("Output shutdown after this response",server.getUrl("/a").openConnection());
+  assertEquals(0,server.takeRequest().getSequenceNumber());
+  assertContent("This comes after a busted connection",server.getUrl("/b").openConnection());
+  assertEquals(1,server.takeRequest().getSequenceNumber());
+  assertEquals(0,server.takeRequest().getSequenceNumber());
+}

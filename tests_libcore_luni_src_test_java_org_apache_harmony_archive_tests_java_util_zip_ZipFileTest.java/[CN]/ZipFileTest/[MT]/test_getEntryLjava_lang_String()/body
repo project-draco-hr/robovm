@@ -1,0 +1,22 @@
+{
+  java.util.zip.ZipEntry zentry=zfile.getEntry("File1.txt");
+  assertNotNull("Could not obtain ZipEntry",zentry);
+  int r;
+  InputStream in;
+  zentry=zfile.getEntry("testdir1/File1.txt");
+  assertNotNull("Could not obtain ZipEntry: testdir1/File1.txt",zentry);
+  zentry=zfile.getEntry("testdir1/");
+  assertNotNull("Could not obtain ZipEntry: testdir1/",zentry);
+  in=zfile.getInputStream(zentry);
+  assertNotNull("testdir1/ should not have null input stream",in);
+  r=in.read();
+  in.close();
+  assertEquals("testdir1/ should not contain data",-1,r);
+  zentry=zfile.getEntry("testdir1/testdir1");
+  assertNotNull("Could not obtain ZipEntry: testdir1/testdir1",zentry);
+  in=zfile.getInputStream(zentry);
+  byte[] buf=new byte[256];
+  r=in.read(buf);
+  in.close();
+  assertEquals("incorrect contents","This is also text",new String(buf,0,r));
+}

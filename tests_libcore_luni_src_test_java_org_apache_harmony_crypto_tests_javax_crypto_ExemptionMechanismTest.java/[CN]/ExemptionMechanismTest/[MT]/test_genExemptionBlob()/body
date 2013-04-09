@@ -1,0 +1,26 @@
+{
+  Provider mProv=(new SpiEngUtils()).new MyProvider("MyExMechProvider","Provider for ExemptionMechanism testing",srvExemptionMechanism.concat(".").concat(defaultAlg),ExemptionMechanismProviderClass);
+  ExemptionMechanism em=new ExemptionMechanism(new MyExemptionMechanismSpi(),mProv,defaultAlg){
+  }
+;
+  Key key=new MyExemptionMechanismSpi().new tmpKey("Proba",new byte[0]);
+  try {
+    em.genExemptionBlob();
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+  em.init(key);
+  assertNotNull(em.genExemptionBlob());
+  em=new ExemptionMechanism(new Mock_ExemptionMechanismSpi(),mProv,defaultAlg){
+  }
+;
+  key=new Mock_ExemptionMechanismSpi().new tmpKey("Proba",new byte[0]);
+  em.init(key);
+  try {
+    em.genExemptionBlob();
+    fail("ExemptionMechanismException expected");
+  }
+ catch (  ExemptionMechanismException e) {
+  }
+}

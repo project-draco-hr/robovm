@@ -1,0 +1,46 @@
+{
+  Signature signature=null;
+  try {
+    signature=Signature.getInstance(algorithmName);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    Assert.fail(e.getMessage());
+  }
+  try {
+    signature.initSign(encryptKey);
+  }
+ catch (  InvalidKeyException e) {
+    Assert.fail(e.getMessage());
+  }
+  try {
+    signature.update(plainData.getBytes());
+  }
+ catch (  SignatureException e) {
+    Assert.fail(e.getMessage());
+  }
+  byte[] signed=null;
+  try {
+    signed=signature.sign();
+  }
+ catch (  SignatureException e) {
+    Assert.fail(e.getMessage());
+  }
+  try {
+    signature.initVerify(decryptKey);
+  }
+ catch (  InvalidKeyException e) {
+    Assert.fail(e.getMessage());
+  }
+  try {
+    signature.update(plainData.getBytes());
+  }
+ catch (  SignatureException e) {
+    Assert.fail(e.getMessage());
+  }
+  try {
+    Assert.assertTrue("signature could not be verified",signature.verify(signed));
+  }
+ catch (  SignatureException e) {
+    Assert.fail(e.getMessage());
+  }
+}

@@ -1,0 +1,22 @@
+{
+  try {
+    Socket socket=serverSocket.accept();
+    socket.setSoTimeout(1000);
+    byte[] buff=new byte[1024];
+    int num=socket.getInputStream().read(buff);
+    socket.getOutputStream().write(("HTTP/1.0 407 Proxy authentication required\n" + "Proxy-authenticate: Basic realm=\"remotehost\"\n\n").getBytes());
+    num=socket.getInputStream().read(buff);
+    if (num == -1) {
+      socket=serverSocket.accept();
+      socket.setSoTimeout(1000);
+      num=socket.getInputStream().read(buff);
+    }
+    String request=new String(buff,0,num);
+    acceptedAuthorizedRequest=request.toLowerCase().indexOf("proxy-authorization:") > 0;
+    if (acceptedAuthorizedRequest) {
+      socket.getOutputStream().write(("HTTP/1.1 200 OK\n\n").getBytes());
+    }
+  }
+ catch (  IOException e) {
+  }
+}

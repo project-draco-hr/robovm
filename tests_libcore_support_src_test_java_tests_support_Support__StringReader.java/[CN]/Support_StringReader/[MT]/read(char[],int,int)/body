@@ -1,0 +1,18 @@
+{
+  if (0 <= offset && offset <= buf.length && 0 <= count && count <= buf.length - offset) {
+synchronized (lock) {
+      if (isOpen()) {
+        if (pos == this.count) {
+          return -1;
+        }
+        int end=pos + count > this.count ? this.count : pos + count;
+        str.getChars(pos,end,buf,offset);
+        int read=end - pos;
+        pos=end;
+        return read;
+      }
+      throw new IOException("StringReader is closed");
+    }
+  }
+  throw new ArrayIndexOutOfBoundsException();
+}

@@ -1,0 +1,47 @@
+{
+  out=new PipedOutputStream();
+  try {
+    out.write(testString.getBytes(),0,5);
+    fail("Test 1: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  out=new PipedOutputStream(new PipedInputStream());
+  try {
+    out.write(testString.getBytes(),-1,10);
+    fail("Test 2: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    out.write(testString.getBytes(),0,-1);
+    fail("Test 3: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    out.write(testString.getBytes(),5,testString.length());
+    fail("Test 4: IndexOutOfBoundsException expected.");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  out.close();
+  out=new PipedOutputStream();
+  try {
+    rt=new Thread(reader=new PReader(out));
+    rt.start();
+    out.write(testString.getBytes(),0,testString.length());
+    out.flush();
+    assertEquals("Test 5: Bytes read do not match the bytes written. ",testString,reader.read(testString.length()));
+  }
+ catch (  IOException e) {
+    fail("Test 5: Unexpected IOException: " + e.getMessage());
+  }
+  reader.getReader().close();
+  try {
+    out.write(testString.getBytes(),0,5);
+    fail("Test 7: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+}

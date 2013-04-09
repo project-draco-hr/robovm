@@ -1,0 +1,53 @@
+{
+  int col=rs.getInt("ORDINAL_POSITION");
+  assertEquals("RSMD.getCatalogName",rsmdt.getCatalogName(col),rs.getString("TABLE_CAT"));
+  assertEquals("RSMD.getSchemaName",rsmdt.getSchemaName(col),rs.getString("TABLE_SCHEM"));
+  assertEquals("RSMD.getTableName",rsmdt.getTableName(col),rs.getString("TABLE_NAME"));
+  assertEquals("COLUMN_NAME",rsmdt.getColumnName(col),rs.getString("COLUMN_NAME"));
+  int metaColumnType=rs.getInt("DATA_TYPE");
+  if (metaColumnType == Types.BOOLEAN) {
+    assertEquals("TYPE_NAME","BOOLEAN",rs.getString("TYPE_NAME"));
+    assertEquals("TYPE_NAME","SMALLINT",rsmdt.getColumnTypeName(col));
+    assertEquals("DATA_TYPE",Types.SMALLINT,rsmdt.getColumnType(col));
+  }
+ else   if (metaColumnType == Types.JAVA_OBJECT) {
+    assertEquals("DATA_TYPE",Types.LONGVARBINARY,rsmdt.getColumnType(col));
+  }
+ else   if (metaColumnType == Types.VARBINARY) {
+    assertEquals("DATA_TYPE",Types.VARBINARY,rsmdt.getColumnType(col));
+  }
+ else   if (metaColumnType == Types.BINARY) {
+    assertEquals("DATA_TYPE",Types.BINARY,rsmdt.getColumnType(col));
+  }
+ else   if (metaColumnType == Types.NUMERIC) {
+    assertEquals("DATA_TYPE",Types.DECIMAL,rsmdt.getColumnType(col));
+    assertEquals("TYPE_NAME","DECIMAL",rsmdt.getColumnTypeName(col));
+    assertEquals("TYPE_NAME","NUMERIC",rs.getString("TYPE_NAME"));
+  }
+ else {
+    assertEquals("DATA_TYPE",rsmdt.getColumnType(col),rs.getInt("DATA_TYPE"));
+    assertEquals("TYPE_NAME",rsmdt.getColumnTypeName(col),rs.getString("TYPE_NAME"));
+  }
+  assertEquals("NULLABLE",rsmdt.isNullable(col),rs.getInt("NULLABLE"));
+  assertEquals("REMARKS","",rs.getString("REMARKS"));
+switch (rsmdt.isNullable(col)) {
+case ResultSetMetaData.columnNoNulls:
+    assertEquals("IS_NULLABLE","NO",rs.getString("IS_NULLABLE"));
+  break;
+case ResultSetMetaData.columnNullable:
+assertEquals("IS_NULLABLE","YES",rs.getString("IS_NULLABLE"));
+break;
+case ResultSetMetaData.columnNullableUnknown:
+assertEquals("IS_NULLABLE","",rs.getString("IS_NULLABLE"));
+break;
+default :
+fail("invalid return from rsmdt.isNullable(col)");
+}
+assertNull("SCOPE_CATLOG",rs.getString("SCOPE_CATLOG"));
+assertNull("SCOPE_SCHEMA",rs.getString("SCOPE_SCHEMA"));
+assertNull("SCOPE_TABLE",rs.getString("SCOPE_TABLE"));
+assertEquals("SOURCE_DATA_TYPE",0,rs.getShort("SOURCE_DATA_TYPE"));
+assertTrue(rs.wasNull());
+assertEquals("IS_AUTOINCREMENT",rsmdt.isAutoIncrement(col) ? "YES" : "NO",rs.getString("IS_AUTOINCREMENT"));
+assertFalse(rs.wasNull());
+}

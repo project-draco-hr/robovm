@@ -1,0 +1,122 @@
+{
+  Class fieldClass=new Support_Field().getClass();
+  String fieldName=null;
+  Field objectField=null;
+  Field booleanField=null;
+  Field byteField=null;
+  Field charField=null;
+  Field shortField=null;
+  Field intField=null;
+  Field longField=null;
+  Field floatField=null;
+  Field doubleField=null;
+  try {
+    fieldName="objectField";
+    objectField=fieldClass.getDeclaredField(fieldName);
+    fieldName="booleanField";
+    booleanField=fieldClass.getDeclaredField(fieldName);
+    fieldName="byteField";
+    byteField=fieldClass.getDeclaredField(fieldName);
+    fieldName="charField";
+    charField=fieldClass.getDeclaredField(fieldName);
+    fieldName="shortField";
+    shortField=fieldClass.getDeclaredField(fieldName);
+    fieldName="intField";
+    intField=fieldClass.getDeclaredField(fieldName);
+    fieldName="longField";
+    longField=fieldClass.getDeclaredField(fieldName);
+    fieldName="floatField";
+    floatField=fieldClass.getDeclaredField(fieldName);
+    fieldName="doubleField";
+    doubleField=fieldClass.getDeclaredField(fieldName);
+  }
+ catch (  NoSuchFieldException e) {
+    fail("missing field " + fieldName + " in test support class "+ fieldClass.getName());
+  }
+  Support_Field parentClass=new Support_Field();
+  SupportSubClass subclass=new SupportSubClass();
+  SupportSubClass otherSubclass=new SupportSubClass();
+  Object plainObject=new Object();
+  Class illegalAccessExceptionClass=new IllegalAccessException().getClass();
+  Class illegalArgumentExceptionClass=new IllegalArgumentException().getClass();
+  char types[]={'L','B','S','C','I','J','F','D'};
+  Field fields[]={objectField,byteField,shortField,charField,intField,longField,floatField,doubleField};
+  Object values[]={new Byte((byte)1),new Byte((byte)1),new Short((short)1),new Character((char)1),new Integer(1),new Long(1),new Float(1),new Double(1)};
+  for (int i=0; i < types.length; i++) {
+    char type=types[i];
+    Object value=values[i];
+    for (int j=i; j < fields.length; j++) {
+      Field field=fields[j];
+      fieldName=field.getName();
+      if (field == charField && type != 'C') {
+        subclass.setField(type,subclass,field,illegalArgumentExceptionClass,value);
+      }
+ else {
+        subclass.setField(type,subclass,field,null,value);
+        subclass.setField(type,otherSubclass,field,null,value);
+        subclass.setField(type,parentClass,field,illegalAccessExceptionClass,value);
+        subclass.setField(type,plainObject,field,illegalAccessExceptionClass,value);
+      }
+    }
+    for (int j=0; j < i; j++) {
+      Field field=fields[j];
+      fieldName=field.getName();
+      subclass.setField(type,subclass,field,illegalArgumentExceptionClass,value);
+    }
+  }
+  Boolean booleanValue=Boolean.TRUE;
+  subclass.setField('Z',subclass,booleanField,null,booleanValue);
+  subclass.setField('Z',otherSubclass,booleanField,null,booleanValue);
+  subclass.setField('Z',parentClass,booleanField,illegalAccessExceptionClass,booleanValue);
+  subclass.setField('Z',plainObject,booleanField,illegalAccessExceptionClass,booleanValue);
+  for (int j=0; j < fields.length; j++) {
+    Field listedField=fields[j];
+    fieldName=listedField.getName();
+    subclass.setField('Z',subclass,listedField,illegalArgumentExceptionClass,booleanValue);
+  }
+  for (int i=0; i < types.length; i++) {
+    char type=types[i];
+    Object value=values[i];
+    subclass.setField(type,subclass,booleanField,illegalArgumentExceptionClass,value);
+  }
+  char newTypes[]=new char[]{'B','S','C','I','J','F','D','L'};
+  Field newFields[]={byteField,shortField,charField,intField,longField,floatField,doubleField,objectField};
+  fields=newFields;
+  types=newTypes;
+  for (int i=0; i < types.length; i++) {
+    char type=types[i];
+    for (int j=0; j <= i; j++) {
+      Field field=fields[j];
+      fieldName=field.getName();
+      if (type == 'C' && field != charField) {
+        subclass.getField(type,subclass,field,illegalArgumentExceptionClass);
+      }
+ else {
+        subclass.getField(type,subclass,field,null);
+        subclass.getField(type,otherSubclass,field,null);
+        subclass.getField(type,parentClass,field,illegalAccessExceptionClass);
+        subclass.getField(type,plainObject,field,illegalAccessExceptionClass);
+      }
+    }
+    for (int j=i + 1; j < fields.length; j++) {
+      Field field=fields[j];
+      fieldName=field.getName();
+      subclass.getField(type,subclass,field,illegalArgumentExceptionClass);
+    }
+  }
+  subclass.getField('Z',subclass,booleanField,null);
+  subclass.getField('Z',otherSubclass,booleanField,null);
+  subclass.getField('Z',parentClass,booleanField,illegalAccessExceptionClass);
+  subclass.getField('Z',plainObject,booleanField,illegalAccessExceptionClass);
+  for (int j=0; j < fields.length; j++) {
+    Field listedField=fields[j];
+    fieldName=listedField.getName();
+    subclass.getField('Z',subclass,listedField,illegalArgumentExceptionClass);
+  }
+  for (int i=0; i < types.length - 1; i++) {
+    char type=types[i];
+    subclass.getField(type,subclass,booleanField,illegalArgumentExceptionClass);
+  }
+  Object res=subclass.getField('L',subclass,booleanField,null);
+  assertTrue("unexpected object " + res,res instanceof Boolean);
+}

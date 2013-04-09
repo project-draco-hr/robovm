@@ -1,0 +1,16 @@
+{
+  Support_OutputStream sos=new Support_OutputStream(testLength);
+  os=new FilterOutputStream(sos);
+  os.write(fileString.getBytes(),10,testLength - 10);
+  bis=new ByteArrayInputStream(sos.toByteArray());
+  assertTrue("Test 1: Bytes have not been written.",bis.available() == testLength - 10);
+  byte[] wbytes=new byte[testLength - 10];
+  bis.read(wbytes);
+  assertTrue("Test 2: Incorrect bytes written or read.",fileString.substring(10).equals(new String(wbytes)));
+  try {
+    os.write(fileString.getBytes());
+    fail("Test 2: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+}

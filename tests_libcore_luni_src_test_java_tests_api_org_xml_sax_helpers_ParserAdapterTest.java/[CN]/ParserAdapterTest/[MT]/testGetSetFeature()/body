@@ -1,0 +1,23 @@
+{
+  String[] features=new String[]{NAMESPACES,NAMESPACE_PREFIXES,XMLNS_URIs};
+  for (  String s : features) {
+    try {
+      adapter.setFeature(s,true);
+      assertEquals(true,adapter.getFeature(s));
+      adapter.setFeature(s,false);
+      assertEquals(false,adapter.getFeature(s));
+    }
+ catch (    SAXException e) {
+      throw new RuntimeException("Unexpected exception",e);
+    }
+  }
+  try {
+    adapter.setFeature("http://argle.bargle",true);
+    fail("SAXNotRecognizedException expected");
+  }
+ catch (  SAXNotRecognizedException e) {
+  }
+catch (  SAXNotSupportedException e) {
+    throw new RuntimeException("Unexpected exception",e);
+  }
+}

@@ -1,0 +1,27 @@
+{
+  KeyStore keyStore=KeyStore.getInstance(KeyStore.getDefaultType());
+  try {
+    keyStore.entryInstanceOf("anAlias",KeyStore.SecretKeyEntry.class);
+    fail();
+  }
+ catch (  KeyStoreException expected) {
+  }
+  keyStore.load(null,"pwd".toCharArray());
+  String alias="alias";
+  Certificate[] chain={new MyCertificate("DSA",testEncoding),new MyCertificate("DSA",testEncoding)};
+  keyStore.setKeyEntry(alias,getPrivateKey(),"pwd".toCharArray(),chain);
+  assertTrue(keyStore.entryInstanceOf(alias,KeyStore.PrivateKeyEntry.class));
+  assertFalse(keyStore.entryInstanceOf(alias,KeyStore.SecretKeyEntry.class));
+  assertFalse(keyStore.entryInstanceOf(alias,KeyStore.TrustedCertificateEntry.class));
+  try {
+    keyStore.entryInstanceOf(null,KeyStore.SecretKeyEntry.class);
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    keyStore.entryInstanceOf("anAlias",null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+}

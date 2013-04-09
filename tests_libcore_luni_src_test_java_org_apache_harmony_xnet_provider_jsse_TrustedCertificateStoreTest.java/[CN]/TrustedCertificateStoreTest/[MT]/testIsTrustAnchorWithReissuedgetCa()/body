@@ -1,0 +1,21 @@
+{
+  PublicKey publicKey=getPrivate().getCertificate().getPublicKey();
+  PrivateKey privateKey=getPrivate().getPrivateKey();
+  String name="CN=CA4";
+  X509Certificate ca1=TestKeyStore.createCa(publicKey,privateKey,name);
+  Thread.sleep(1 * 1000);
+  X509Certificate ca2=TestKeyStore.createCa(publicKey,privateKey,name);
+  assertFalse(ca1.equals(ca2));
+  String systemAlias=alias(false,ca1,0);
+  install(ca1,systemAlias);
+  assertRootCa(ca1,systemAlias);
+  assertTrue(store.isTrustAnchor(ca2));
+  assertEquals(ca1,store.findIssuer(ca2));
+  resetStore();
+  String userAlias=alias(true,ca1,0);
+  store.installCertificate(ca1);
+  assertRootCa(ca1,userAlias);
+  assertTrue(store.isTrustAnchor(ca2));
+  assertEquals(ca1,store.findIssuer(ca2));
+  resetStore();
+}

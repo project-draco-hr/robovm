@@ -1,0 +1,33 @@
+{
+  assertEquals(0,uc.getReadTimeout());
+  uc.setReadTimeout(0);
+  assertEquals(0,uc.getReadTimeout());
+  try {
+    uc.setReadTimeout(-100);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  assertEquals(0,uc.getReadTimeout());
+  uc.setReadTimeout(100);
+  assertEquals(100,uc.getReadTimeout());
+  try {
+    uc.setReadTimeout(-1);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  assertEquals(100,uc.getReadTimeout());
+  byte[] ba=new byte[600];
+  uc2.setReadTimeout(5);
+  uc2.setDoInput(true);
+  uc2.connect();
+  try {
+    ((InputStream)uc2.getInputStream()).read(ba,0,600);
+  }
+ catch (  SocketTimeoutException e) {
+  }
+catch (  UnknownServiceException e) {
+    fail("" + e.getMessage());
+  }
+}

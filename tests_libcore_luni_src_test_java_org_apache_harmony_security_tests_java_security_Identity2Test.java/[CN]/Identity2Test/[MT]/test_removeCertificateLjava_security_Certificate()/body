@@ -1,0 +1,24 @@
+{
+  IdentitySubclass sub=new IdentitySubclass("test",new IdentityScopeSubclass());
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  X509Certificate cert[]=new X509Certificate[1];
+  cert[0]=(X509Certificate)cf.generateCertificate(certArray);
+  sub.setPublicKey(cert[0].getPublicKey());
+  CertificateImpl certImpl=new CertificateImpl(cert[0]);
+  sub.addCertificate(certImpl);
+  try {
+    sub.removeCertificate(null);
+    fail("Test 1: KeyManagementException expected.");
+  }
+ catch (  KeyManagementException expected) {
+  }
+  assertEquals("Test 2: Certificate should not have been removed.",1,sub.certificates().length);
+  sub.removeCertificate(certImpl);
+  assertEquals("Test 3: Certificate has not been removed.",0,sub.certificates().length);
+  try {
+    sub.removeCertificate(certImpl);
+    fail("Test 4: KeyManagementException expected.");
+  }
+ catch (  KeyManagementException expected) {
+  }
+}

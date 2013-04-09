@@ -1,0 +1,32 @@
+{
+  Enumeration<URL> res=null;
+  String[] resValues={"This is a test resource file.","This is a resource from a subdir"};
+  String tmp=System.getProperty("java.io.tmpdir") + "/";
+  File tmpDir=new File(tmp);
+  File test1=new File(tmp + "test0");
+  test1.deleteOnExit();
+  FileOutputStream out=new FileOutputStream(test1);
+  out.write(resValues[0].getBytes());
+  out.flush();
+  out.close();
+  File subDir=new File(tmp + "subdir/");
+  subDir.mkdir();
+  File test2=new File(tmp + "subdir/test0");
+  test2.deleteOnExit();
+  out=new FileOutputStream(test2);
+  out.write(resValues[1].getBytes());
+  out.flush();
+  out.close();
+  URL[] urls=new URL[2];
+  urls[0]=new URL("file://" + tmpDir.getAbsolutePath() + "/");
+  urls[1]=new URL("file://" + subDir.getAbsolutePath() + "/");
+  ucl=new URLClassLoader(urls);
+  res=ucl.findResources("test0");
+  assertNotNull("Failed to locate resources",res);
+  int i=0;
+  while (res.hasMoreElements()) {
+    StringBuffer sb=getResContent(res.nextElement());
+    assertEquals("Returned incorrect resource/or in wrong order",resValues[i++],sb.toString());
+  }
+  assertEquals("Incorrect number of resources returned",2,i);
+}

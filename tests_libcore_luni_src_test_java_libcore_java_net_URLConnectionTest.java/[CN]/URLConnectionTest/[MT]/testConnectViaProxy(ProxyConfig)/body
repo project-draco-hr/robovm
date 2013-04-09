@@ -1,0 +1,11 @@
+{
+  MockResponse mockResponse=new MockResponse().setBody("this response comes via a proxy");
+  server.enqueue(mockResponse);
+  server.play();
+  URL url=new URL("http://android.com/foo");
+  HttpURLConnection connection=proxyConfig.connect(server,url);
+  assertContent("this response comes via a proxy",connection);
+  RecordedRequest request=server.takeRequest();
+  assertEquals("GET http://android.com/foo HTTP/1.1",request.getRequestLine());
+  assertContains(request.getHeaders(),"Host: android.com");
+}

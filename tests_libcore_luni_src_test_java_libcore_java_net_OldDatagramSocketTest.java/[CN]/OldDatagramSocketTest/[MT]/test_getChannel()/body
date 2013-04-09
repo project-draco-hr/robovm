@@ -1,0 +1,25 @@
+{
+  assertNull(new DatagramSocket().getChannel());
+  int portNumber=Support_PortManager.getNextPortForUDP();
+  DatagramSocket ds=null;
+  try {
+    InetAddress ia=InetAddress.getByName(Support_Configuration.IPv6GlobalAddressJcl4);
+    ds=new DatagramSocket();
+    assertNull(ds.getChannel());
+    ds.connect(ia,portNumber);
+    assertNull(ds.getChannel());
+  }
+ catch (  SocketException e) {
+    fail("SocketException was thrown.");
+  }
+ finally {
+    ds.disconnect();
+    ds.close();
+  }
+  portNumber=Support_PortManager.getNextPortForUDP();
+  SocketAddress address=new InetSocketAddress(portNumber);
+  DatagramChannel channel=DatagramChannel.open();
+  DatagramSocket socket=channel.socket();
+  assertEquals(channel,socket.getChannel());
+  socket.close();
+}

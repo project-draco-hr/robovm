@@ -1,0 +1,31 @@
+{
+  Cipher cipher=Cipher.getInstance("RSA");
+  if (allowMode) {
+    cipher.init(mode,certificate);
+  }
+ else {
+    try {
+      cipher.init(mode,certificate);
+      String modeString;
+switch (mode) {
+case Cipher.ENCRYPT_MODE:
+        modeString="ENCRYPT_MODE";
+      break;
+case Cipher.DECRYPT_MODE:
+    modeString="DECRYPT_MODE";
+  break;
+case Cipher.WRAP_MODE:
+modeString="WRAP_MODE";
+break;
+case Cipher.UNWRAP_MODE:
+modeString="UNWRAP_MODE";
+break;
+default :
+throw new AssertionError("Unknown Cipher.*_MODE " + mode);
+}
+fail("Should have had InvalidKeyException for " + modeString + " for "+ certificate);
+}
+ catch (InvalidKeyException expected) {
+}
+}
+}

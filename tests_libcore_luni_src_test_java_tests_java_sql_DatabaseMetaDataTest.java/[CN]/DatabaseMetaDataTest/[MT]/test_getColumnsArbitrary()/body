@@ -1,0 +1,30 @@
+{
+  ResultSet setAllNull=null;
+  ResultSet setMixed=null;
+  ResultSet allArbitrary=null;
+  String[] tablesName={DatabaseCreator.TEST_TABLE1,DatabaseCreator.TEST_TABLE3};
+  Arrays.sort(tablesName);
+  int setSize=0;
+  try {
+    allArbitrary=meta.getColumns("%","%","%","%");
+    assertNotNull(allArbitrary);
+    checkColumnsShape(allArbitrary);
+    setSize=crossCheckGetColumnsAndResultSetMetaData(allArbitrary,false);
+    assertEquals(6,setSize);
+    setMixed=meta.getColumns(null,null,"%","%");
+    assertNotNull(setMixed);
+    checkColumnsShape(setMixed);
+    setSize=crossCheckGetColumnsAndResultSetMetaData(setMixed,false);
+    assertEquals(6,setSize);
+  }
+ catch (  SQLException e) {
+    fail("Unexpected exception: " + e.getMessage());
+  }
+  conn.close();
+  try {
+    meta.getColumns(null,null,DatabaseCreator.TEST_TABLE1,"%");
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

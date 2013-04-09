@@ -1,0 +1,12 @@
+{
+  StringWriter writer=new StringWriter();
+  transformer.transform(new DOMSource(document),new StreamResult(writer));
+  String result=writer.toString();
+  Matcher attributeMatcher=Pattern.compile(" a:standard=\"[^\"]+\"").matcher(result);
+  if (attributeMatcher.find()) {
+    result=result.substring(0,attributeMatcher.start()) + result.substring(attributeMatcher.end());
+    int insertionPoint=result.indexOf(" deluxe=\"");
+    result=result.substring(0,insertionPoint) + attributeMatcher.group() + result.substring(insertionPoint);
+  }
+  return result;
+}

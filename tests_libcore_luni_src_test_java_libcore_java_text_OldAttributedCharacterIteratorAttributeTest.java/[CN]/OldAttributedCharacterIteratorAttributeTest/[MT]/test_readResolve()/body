@@ -1,0 +1,40 @@
+{
+  MockAttributedCharacterIteratorAttribute mac1=new MockAttributedCharacterIteratorAttribute("test");
+  try {
+    mac1.readResolve();
+    fail("InvalidObjectException has not been thrown");
+  }
+ catch (  InvalidObjectException e) {
+  }
+  ObjectOutputStream out=null;
+  ObjectInputStream in=null;
+  try {
+    ByteArrayOutputStream bytes=new ByteArrayOutputStream();
+    out=new ObjectOutputStream(bytes);
+    AttributedCharacterIterator.Attribute attr1, attr2;
+    attr1=AttributedCharacterIterator.Attribute.LANGUAGE;
+    out.writeObject(attr1);
+    in=new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()));
+    try {
+      attr2=(AttributedCharacterIterator.Attribute)in.readObject();
+      assertSame("resolved incorrectly",attr1,attr2);
+    }
+ catch (    IllegalArgumentException e) {
+      fail("Unexpected IllegalArgumentException: " + e);
+    }
+  }
+ catch (  IOException e) {
+    fail("unexpected IOException" + e);
+  }
+catch (  ClassNotFoundException e) {
+    fail("unexpected ClassNotFoundException" + e);
+  }
+ finally {
+    try {
+      if (out != null)       out.close();
+      if (in != null)       in.close();
+    }
+ catch (    IOException e) {
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  String typeCreationStmtUDT="CREATE TYPE addressType AS " + "( street INTEGER, zip TEXT);";
+  String personTableCreateUDT="CREATE TABLE person (name TEXT, address addressType);";
+  Statement st=null;
+  PreparedStatement ps=null;
+  try {
+    st=conn.createStatement();
+    st.execute(typeCreationStmtUDT);
+    st.execute(personTableCreateUDT);
+    fail("UDTs and Ref Types not supported");
+    String query="insert into person (name, address) values ('Hans', ?);";
+    ps=conn.prepareStatement(query);
+    try {
+      ps.setNull(1,Types.DATALINK);
+      ps.execute();
+    }
+ catch (    SQLException sqle) {
+      fail("SQLException is thrown: " + sqle.getMessage());
+      sqle.printStackTrace();
+    }
+ finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+  }
+ catch (  SQLException e) {
+  }
+ finally {
+    try {
+      st.execute("drop table if exists person");
+      ps.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  String personTableCreate="create table person (name TEXT, Address TEXT)";
+  try {
+    st=conn.createStatement();
+    st.execute(personTableCreate);
+    String insert="insert into person (name, address) values (?, '1600 Amphitheatre Mountain View');";
+    ps=conn.prepareStatement(insert);
+    try {
+      ps.setNull(1,1,"");
+      ps.execute();
+    }
+ catch (    SQLException sqle) {
+      assertEquals("SQLite.Exception: error in step",sqle.getMessage());
+    }
+ finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+  }
+  finally {
+    try {
+      st.execute("drop table if exists person");
+      ps.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  personTableCreate="create table person (name TEXT, Address TEXT)";
+  try {
+    st=conn.createStatement();
+    st.execute("drop table if exists person");
+    st.execute(personTableCreate);
+    String insert="insert into person (name, address) values (?, '1600 Amphitheatre Mountain View');";
+    ps=conn.prepareStatement(insert);
+    try {
+      ps.setNull(1,1,"");
+      ps.execute();
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+  }
+  finally {
+    try {
+      st.execute("drop table if exists person");
+      ps.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+}

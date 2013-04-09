@@ -1,0 +1,20 @@
+{
+  SSLServerSocket sss=getSSLServerSocket();
+  try {
+    sss.setEnabledCipherSuites(null);
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  String[] unsupportedCipherSuites={"unsupported"};
+  try {
+    sss.setEnabledCipherSuites(unsupportedCipherSuites);
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  int count=sss.getSupportedCipherSuites().length;
+  assertTrue("No supported cipher suites",count > 0);
+  sss.setEnabledCipherSuites(sss.getSupportedCipherSuites());
+  String[] res=sss.getEnabledCipherSuites();
+  assertNotNull("NULL result",res);
+  assertEquals("not all supported cipher suites were enabled",Arrays.asList(sss.getSupportedCipherSuites()),Arrays.asList(res));
+}

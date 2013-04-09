@@ -1,0 +1,24 @@
+{
+  MockResponse response=new MockResponse();
+  transferKind.setBody(response,"ABCDE\nFGHIJKLMNOPQRSTUVWXYZ",16);
+  server.enqueue(truncateViolently(response,16));
+  server.enqueue(new MockResponse().setBody("Request #2"));
+  server.play();
+  BufferedReader reader=new BufferedReader(new InputStreamReader(server.getUrl("/").openConnection().getInputStream()));
+  assertEquals("ABCDE",reader.readLine());
+  try {
+    reader.readLine();
+    fail("This implementation silently ignored a truncated HTTP body.");
+  }
+ catch (  IOException expected) {
+  }
+ finally {
+    reader.close();
+  }
+  assertEquals(1,cache.getWriteAbortCount());
+  assertEquals(0,cache.getWriteSuccessCount());
+  URLConnection connection=server.getUrl("/").openConnection();
+  assertEquals("Request #2",readAscii(connection));
+  assertEquals(1,cache.getWriteAbortCount());
+  assertEquals(1,cache.getWriteSuccessCount());
+}

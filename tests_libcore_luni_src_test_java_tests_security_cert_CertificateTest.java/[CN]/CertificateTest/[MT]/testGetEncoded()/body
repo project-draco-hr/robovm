@@ -1,0 +1,18 @@
+{
+  Certificate c1=new MyCertificate("TEST_TYPE",testEncoding);
+  assertNotNull(c1.getEncoded());
+  assertTrue(Arrays.equals(testEncoding,c1.getEncoded()));
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  byte[] expectedEncoding=cert.getEncoded();
+  Certificate actual=cf.generateCertificate(new ByteArrayInputStream(expectedEncoding));
+  byte[] actualEncoding=actual.getEncoded();
+  assertTrue(Arrays.equals(expectedEncoding,actualEncoding));
+  assertFalse(expectedEncoding[4] == 200);
+  expectedEncoding[4]=(byte)200;
+  try {
+    cf.generateCertificate(new ByteArrayInputStream(expectedEncoding));
+    fail();
+  }
+ catch (  CertificateException expected) {
+  }
+}

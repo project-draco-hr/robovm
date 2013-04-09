@@ -1,0 +1,24 @@
+{
+  if (!DSASupported) {
+    fail(validAlgName + " algorithm is not supported");
+    return;
+  }
+  SecureRandom random=new SecureRandom();
+  AlgorithmParameterSpec aps=null;
+  AlgorithmParameterGenerator[] apgs=createAPGen();
+  assertNotNull("AlgorithmParameterGenerator objects were not created",apgs);
+  for (int i=0; i < apgs.length; i++) {
+    try {
+      apgs[i].init(aps);
+      fail("InvalidAlgorithmParameterException expected for null argument.");
+    }
+ catch (    InvalidAlgorithmParameterException e) {
+    }
+    try {
+      apgs[i].init(aps,random);
+      fail("InvalidAlgorithmParameterException expected for null argument.");
+    }
+ catch (    InvalidAlgorithmParameterException e) {
+    }
+  }
+}

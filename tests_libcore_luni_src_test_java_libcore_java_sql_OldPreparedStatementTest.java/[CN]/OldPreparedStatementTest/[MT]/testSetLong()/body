@@ -1,0 +1,52 @@
+{
+  PreparedStatement ps=null;
+  try {
+    String query="insert into type (LongVal) values (?);";
+    ps=conn.prepareStatement(query);
+    Statement st=null;
+    try {
+      ps.setLong(1,Long.MAX_VALUE);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where LongVal=" + Long.MAX_VALUE);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    try {
+      ps.setLong(1,Long.MIN_VALUE);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where LongVal=" + Long.MAX_VALUE);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+    ps.close();
+    try {
+      ps.setLong(1,Long.MIN_VALUE);
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+}

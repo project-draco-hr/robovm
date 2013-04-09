@@ -1,0 +1,24 @@
+{
+  double input=1.0;
+  TableResult res=new TableResult();
+  Function sinFunc=(Function)new SinFunc();
+  db.exec("PRAGMA show_datatypes = on",null);
+  db.exec("create table TEST (res double)",null);
+  db.exec("insert into TEST values (" + Double.toString(input) + ")",null);
+  db.create_function("sin",1,sinFunc);
+  db.function_type("sin",Constants.SQLITE_FLOAT);
+  res=db.get_table("select sin(res) from TEST WHERE res = " + Double.toString(input));
+  String row[]=(String[])res.rows.elementAt(0);
+  String val=row[0];
+  assertTrue("double".equalsIgnoreCase(res.types[0]));
+  assertSame(Math.round(Math.sin(input)),Math.round(Double.parseDouble(val)));
+  db.function_type("sin",Constants.SQLITE_BLOB);
+  Stmt s=db.prepare("select sin(res) from TEST WHERE res = ?");
+  s.bind(1,input);
+  s.step();
+  res=db.get_table("select sin(res) from TEST WHERE res = " + Double.toString(input));
+  assertTrue("double".equalsIgnoreCase(res.types[0]));
+  row=(String[])res.rows.elementAt(0);
+  val=row[0];
+  assertSame(Math.round(Math.sin(input)),Math.round(Double.parseDouble(val)));
+}

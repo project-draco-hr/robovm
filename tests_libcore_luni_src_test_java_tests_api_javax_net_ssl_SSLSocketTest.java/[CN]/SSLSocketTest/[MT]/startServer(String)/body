@@ -1,0 +1,19 @@
+{
+  String keys=useBKS ? SERVER_KEYS_BKS : SERVER_KEYS_JKS;
+  TestServer server=new TestServer(true,keys);
+  Thread serverThread=new Thread(server);
+  serverThread.start();
+  try {
+    while (!serverReady) {
+      Exception e=server.getException();
+      if (e != null) {
+        throw new AssertionError(e);
+      }
+      Thread.currentThread().sleep(50);
+    }
+    Thread.currentThread().sleep(100);
+  }
+ catch (  InterruptedException ignore) {
+  }
+  return server.sport;
+}

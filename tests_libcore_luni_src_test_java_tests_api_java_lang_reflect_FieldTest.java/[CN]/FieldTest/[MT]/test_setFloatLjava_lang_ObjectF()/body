@@ -1,0 +1,52 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  float val=0.0F;
+  try {
+    f=x.getClass().getDeclaredField("floatField");
+    f.setFloat(x,Float.MIN_VALUE);
+    val=f.getFloat(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during setFloat test : " + e.getMessage());
+  }
+  assertEquals("Returned incorrect float field value",Float.MIN_VALUE,val,0.0);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    f.setFloat(x,Float.MIN_VALUE);
+    fail("Accessed field of invalid type");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("floatPFField");
+    assertFalse(f.isAccessible());
+    f.setFloat(x,Float.MIN_VALUE);
+    fail("Accessed inaccessible field");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("floatField");
+    f.setFloat(null,Float.MIN_VALUE);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  f=x.getClass().getDeclaredField("floatSField");
+  f.setFloat(null,Float.MIN_VALUE);
+  val=f.getFloat(x);
+  assertEquals("Returned incorrect float field value",Float.MIN_VALUE,val);
+}

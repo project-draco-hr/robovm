@@ -1,0 +1,12 @@
+{
+  char[] doctypeChars=new char[READ_BUFFER_SIZE + 1];
+  Arrays.fill(doctypeChars,'x');
+  String doctypeBody=" foo [<!--" + new String(doctypeChars) + "-->]";
+  String xml="<!DOCTYPE" + doctypeBody + "><foo/>";
+  XmlPullParser parser=newPullParser(xml);
+  assertEquals(XmlPullParser.DOCDECL,parser.nextToken());
+  assertEquals(doctypeBody,parser.getText());
+  assertEquals(XmlPullParser.START_TAG,parser.next());
+  assertEquals(XmlPullParser.END_TAG,parser.next());
+  assertEquals(XmlPullParser.END_DOCUMENT,parser.next());
+}

@@ -1,0 +1,16 @@
+{
+  if (!DSASupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  KeyPairGenerator[] kpg=createKPGen();
+  assertNotNull("KeyPairGenerator objects were not created",kpg);
+  KeyPair kp, kp1;
+  for (int i=0; i < kpg.length; i++) {
+    kpg[i].initialize(512);
+    kp=kpg[i].generateKeyPair();
+    kp1=kpg[i].genKeyPair();
+    assertFalse("Incorrect private key",kp.getPrivate().equals(kp1.getPrivate()));
+    assertFalse("Incorrect public key",kp.getPublic().equals(kp1.getPublic()));
+  }
+}

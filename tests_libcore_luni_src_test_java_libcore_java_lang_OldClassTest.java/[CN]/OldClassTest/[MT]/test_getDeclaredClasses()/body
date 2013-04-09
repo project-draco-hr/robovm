@@ -1,0 +1,22 @@
+{
+  Class[] declClasses=Object.class.getDeclaredClasses();
+  assertEquals("Incorrect length of declared classes array is returned " + "for Object.",0,declClasses.length);
+  declClasses=PublicTestClass.class.getDeclaredClasses();
+  assertEquals(2,declClasses.length);
+  assertEquals(0,int.class.getDeclaredClasses().length);
+  assertEquals(0,void.class.getDeclaredClasses().length);
+  for (int i=0; i < declClasses.length; i++) {
+    Constructor<?> constr=declClasses[i].getDeclaredConstructors()[0];
+    constr.setAccessible(true);
+    PublicTestClass publicClazz=new PublicTestClass();
+    try {
+      Object o=constr.newInstance(publicClazz);
+      assertTrue("Returned incorrect class: " + o.toString(),o.toString().startsWith("PrivateClass"));
+    }
+ catch (    Exception e) {
+      fail("Unexpected exception was thrown: " + e.toString());
+    }
+  }
+  declClasses=TestInterface.class.getDeclaredClasses();
+  assertEquals(0,declClasses.length);
+}

@@ -1,0 +1,28 @@
+{
+  oos.writeBytes("HelloWorld");
+  oos.close();
+  ois=new ObjectInputStream(new ByteArrayInputStream(bao.toByteArray()));
+  MockObjectInputStream mockIn=new MockObjectInputStream(new ByteArrayInputStream(bao.toByteArray()));
+  Class[] clazzs={java.io.ObjectInputStream.class,java.io.Reader.class};
+  for (int i=0; i < clazzs.length; i++) {
+    Class clazz=clazzs[i];
+    Class[] interfaceNames=clazz.getInterfaces();
+    String[] interfaces=new String[interfaceNames.length];
+    int index=0;
+    for (    Class c : interfaceNames) {
+      interfaces[index]=c.getName();
+      index++;
+    }
+    Class<?> s=mockIn.resolveProxyClass(interfaces);
+    if (Proxy.isProxyClass(s)) {
+      Class[] implementedInterfaces=s.getInterfaces();
+      for (index=0; index < implementedInterfaces.length; index++) {
+        assertEquals(interfaceNames[index],implementedInterfaces[index]);
+      }
+    }
+ else {
+      fail("Should return a proxy class that implements the interfaces named in a proxy class descriptor");
+    }
+  }
+  mockIn.close();
+}

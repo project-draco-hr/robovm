@@ -1,0 +1,34 @@
+{
+  if (scheme == null) {
+    throw new NullPointerException("scheme");
+  }
+  if ("file".equals(scheme)) {
+    try {
+      File tempFile=File.createTempFile("domts",".xml");
+      try {
+        Method method=File.class.getMethod("toURI",(Class<?>)null);
+        Object uri=method.invoke(tempFile,(Class<?>)null);
+        return uri.toString();
+      }
+ catch (      NoSuchMethodException ex) {
+        URL url=tempFile.toURL();
+        return url.toString();
+      }
+    }
+ catch (    Exception ex) {
+      throw new DOMTestLoadException(ex);
+    }
+  }
+  if ("http".equals(scheme)) {
+    String httpBase=System.getProperty("org.w3c.domts.httpbase","http://localhost:8080/webdav/");
+    java.lang.StringBuffer buf=new StringBuffer(httpBase);
+    if (!httpBase.endsWith("/")) {
+      buf.append("/");
+    }
+    buf.append("tmp");
+    buf.append((new java.util.Random()).nextInt(Integer.MAX_VALUE));
+    buf.append(".xml");
+    return buf.toString();
+  }
+  throw new DOMTestLoadException(new Exception("Unrecognized URI scheme " + scheme));
+}

@@ -1,0 +1,39 @@
+{
+  Thread thrException=new Thread(){
+    public void run(){
+      try {
+        Runtime.getRuntime().addShutdownHook(this);
+        fail("IllegalStateException was not thrown.");
+      }
+ catch (      IllegalStateException ise) {
+      }
+    }
+  }
+;
+  try {
+    Runtime.getRuntime().addShutdownHook(thrException);
+  }
+ catch (  Throwable t) {
+    fail(t.getMessage());
+  }
+  try {
+    Runtime.getRuntime().addShutdownHook(thrException);
+    fail("IllegalArgumentException was not thrown.");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  SecurityManager sm=new SecurityManager(){
+    public void checkPermission(    Permission perm){
+      if (perm.getName().equals("shutdownHooks")) {
+        throw new SecurityException();
+      }
+    }
+  }
+;
+  Runtime.getRuntime().removeShutdownHook(thrException);
+  try {
+    Thread.currentThread().sleep(1000);
+  }
+ catch (  InterruptedException ie) {
+  }
+}

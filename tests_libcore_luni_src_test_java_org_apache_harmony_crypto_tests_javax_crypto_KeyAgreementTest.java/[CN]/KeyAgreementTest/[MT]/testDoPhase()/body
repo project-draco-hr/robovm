@@ -1,0 +1,36 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  createKeys();
+  KeyAgreement[] kAgs=createKAs();
+  DHParameterSpec dhPs=((DHPrivateKey)privKey).getParams();
+  SecureRandom randomNull=null;
+  SecureRandom random=new SecureRandom();
+  for (int i=0; i < kAgs.length; i++) {
+    try {
+      kAgs[i].doPhase(publKey,true);
+      fail("IllegalStateException expected");
+    }
+ catch (    IllegalStateException e) {
+    }
+    kAgs[i].init(privKey);
+    try {
+      kAgs[i].doPhase(privKey,false);
+      fail("InvalidKeyException must be throw");
+    }
+ catch (    InvalidKeyException e) {
+    }
+    try {
+      kAgs[i].doPhase(privKey,true);
+      fail("InvalidKeyException must be throw");
+    }
+ catch (    InvalidKeyException e) {
+    }
+    kAgs[i].init(privKey,dhPs);
+    kAgs[i].doPhase(publKey,true);
+    kAgs[i].init(privKey,dhPs,random);
+    kAgs[i].doPhase(publKey,true);
+  }
+}

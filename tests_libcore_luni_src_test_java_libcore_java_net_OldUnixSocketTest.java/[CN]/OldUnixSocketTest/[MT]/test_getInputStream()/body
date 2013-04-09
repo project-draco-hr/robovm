@@ -1,0 +1,41 @@
+{
+  final ServerSocket pingServer=new ServerSocket(0);
+  Socket pingClient=new Socket();
+  try {
+    pingClient.connect(new InetSocketAddress(InetAddress.getLocalHost(),pingServer.getLocalPort()));
+    Socket worker=pingServer.accept();
+    pingServer.close();
+    OutputStream clientOut=pingClient.getOutputStream();
+    clientOut.write(new byte[256]);
+    InputStream in=worker.getInputStream();
+    in.read();
+    OutputStream out=worker.getOutputStream();
+    out.write(new byte[42]);
+    worker.close();
+    InputStream clientIn=pingClient.getInputStream();
+    clientIn.read(new byte[42]);
+    try {
+      int i=clientIn.read();
+      fail("Should throw SocketException; got i=" + i);
+    }
+ catch (    SocketException e) {
+    }
+    clientIn.close();
+    try {
+      clientIn.read();
+      fail("Should throw SocketException");
+    }
+ catch (    SocketException e) {
+    }
+    try {
+      clientIn.read(new byte[5]);
+      fail("Should throw SocketException");
+    }
+ catch (    SocketException e) {
+    }
+  }
+  finally {
+    pingClient.close();
+    pingServer.close();
+  }
+}

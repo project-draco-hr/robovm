@@ -1,0 +1,24 @@
+{
+  Logger log=new MockLogger(FOO,null);
+  Logger foo=mockManager.getLogger(FOO);
+  assertNull("Logger should be null",foo);
+  assertTrue("logger wasn't registered successfully",mockManager.addLogger(log));
+  foo=mockManager.getLogger(FOO);
+  assertSame("two loggers not refer to the same object",foo,log);
+  assertNull("logger foo should not haven parent",foo.getParent());
+  try {
+    mockManager.getLogger(null);
+    fail("get null should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  assertNull("LogManager should not have logger with unforeseen name",mockManager.getLogger("bad name"));
+  Enumeration<String> enumar=mockManager.getLoggerNames();
+  int i=0;
+  while (enumar.hasMoreElements()) {
+    String name=enumar.nextElement();
+    i++;
+    assertEquals("name logger should be equal to foreseen name",FOO,name);
+  }
+  assertEquals("LogManager should contain one element",1,i);
+}

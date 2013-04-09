@@ -1,0 +1,27 @@
+{
+  super.setUp();
+  if (DO_LOG) {
+    System.out.println();
+    System.out.println("------------------------");
+    System.out.println("------ " + getName());
+    System.out.println("------------------------");
+  }
+  if (store != null) {
+    String ksFileName=("org/apache/harmony/luni/tests/key_store." + KeyStore.getDefaultType().toLowerCase());
+    InputStream in=getClass().getClassLoader().getResourceAsStream(ksFileName);
+    FileOutputStream out=new FileOutputStream(store);
+    BufferedInputStream bufIn=new BufferedInputStream(in,8192);
+    while (bufIn.available() > 0) {
+      byte[] buf=new byte[128];
+      int read=bufIn.read(buf);
+      out.write(buf,0,read);
+    }
+    bufIn.close();
+    out.close();
+  }
+ else {
+    fail("couldn't set up key store");
+  }
+  defaultHostnameVerifier=HttpsURLConnection.getDefaultHostnameVerifier();
+  defaultSSLSocketFactory=HttpsURLConnection.getDefaultSSLSocketFactory();
+}

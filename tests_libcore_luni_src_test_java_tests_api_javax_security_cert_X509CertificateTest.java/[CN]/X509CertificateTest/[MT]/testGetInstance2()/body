@@ -1,0 +1,31 @@
+{
+  boolean certificateException=false;
+  X509Certificate c=null;
+  if (this.cert == null) {
+    return;
+  }
+  try {
+    c=X509Certificate.getInstance(cert.getEncoded());
+  }
+ catch (  java.security.cert.CertificateEncodingException e) {
+    fail("Unexpected CertificateEncodingException was thrown.");
+  }
+catch (  CertificateException e) {
+    certificateException=true;
+  }
+  if (!certificateException) {
+    assertNotNull(c);
+    assertTrue(Arrays.equals(c.getEncoded(),cert.getEncoded()));
+  }
+  try {
+    X509Certificate.getInstance(new byte[]{(byte)1});
+  }
+ catch (  CertificateException e) {
+  }
+  try {
+    X509Certificate.getInstance((byte[])null);
+    fail("No expected CertificateException");
+  }
+ catch (  CertificateException e) {
+  }
+}

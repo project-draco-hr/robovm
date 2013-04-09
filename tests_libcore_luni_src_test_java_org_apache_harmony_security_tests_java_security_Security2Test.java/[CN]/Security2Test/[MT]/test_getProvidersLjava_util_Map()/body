@@ -1,0 +1,62 @@
+{
+  Map<String,String> filter=new Hashtable<String,String>();
+  filter.put("KeyStore.BKS","");
+  filter.put("Signature.SHA1withDSA","");
+  Provider provTest[]=Security.getProviders(filter);
+  if (provTest == null) {
+    assertEquals("Filter : <KeyStore.BKS>,<Signature.SHA1withDSA>",0,getProvidersCount(filter));
+  }
+ else {
+    assertEquals("Filter : <KeyStore.BKS>,<Signature.SHA1withDSA>",getProvidersCount(filter),provTest.length);
+  }
+  filter=new Hashtable<String,String>();
+  filter.put("MessageDigest.SHA-384","");
+  filter.put("CertificateFactory.X.509","");
+  filter.put("KeyFactory.RSA","");
+  provTest=Security.getProviders(filter);
+  if (provTest == null) {
+    assertEquals("Filter : <MessageDigest.SHA-384>,<CertificateFactory.X.509>,<KeyFactory.RSA>",0,getProvidersCount(filter));
+  }
+ else {
+    assertEquals("Filter : <MessageDigest.SHA-384>,<CertificateFactory.X.509>,<KeyFactory.RSA>",getProvidersCount(filter),provTest.length);
+  }
+  filter=new Hashtable<String,String>();
+  filter.put("MessageDigest.SHA1","");
+  filter.put("TrustManagerFactory.X509","");
+  provTest=Security.getProviders(filter);
+  if (provTest == null) {
+    assertEquals("Filter : <MessageDigest.SHA1><TrustManagerFactory.X509>",0,getProvidersCount(filter));
+  }
+ else {
+    assertEquals("Filter : <MessageDigest.SHA1><TrustManagerFactory.X509>",getProvidersCount(filter),provTest.length);
+  }
+  filter=new Hashtable<String,String>();
+  filter.put("CertificateFactory.X509","");
+  provTest=Security.getProviders(filter);
+  if (provTest == null) {
+    assertEquals("Filter : <CertificateFactory.X509>",0,getProvidersCount(filter));
+  }
+ else {
+    assertEquals("Filter : <CertificateFactory.X509>",getProvidersCount(filter),provTest.length);
+  }
+  filter=new Hashtable<String,String>();
+  filter.put("Provider.id name","DRLCertFactory");
+  provTest=Security.getProviders(filter);
+  assertNull("Filter : <Provider.id name, DRLCertFactory >",provTest);
+  try {
+    filter=new Hashtable<String,String>();
+    filter.put("Signature.SHA1withDSA","512");
+    provTest=Security.getProviders(filter);
+    fail("InvalidParameterException should be thrown <Signature.SHA1withDSA><512>");
+  }
+ catch (  InvalidParameterException e) {
+  }
+  try {
+    filter=new Hashtable<String,String>();
+    filter.put("Signature. KeySize","512");
+    provTest=Security.getProviders(filter);
+    fail("InvalidParameterException should be thrown <Signature. KeySize><512>");
+  }
+ catch (  InvalidParameterException e) {
+  }
+}

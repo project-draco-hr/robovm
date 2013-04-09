@@ -1,0 +1,46 @@
+{
+  int i;
+  int sz=100;
+  LinkedHashMap lhm=new LinkedHashMap();
+  for (i=0; i < sz; i++) {
+    Integer ii=new Integer(i);
+    lhm.put(ii,ii.toString());
+  }
+  Set s1=lhm.keySet();
+  Iterator it1=s1.iterator();
+  assertTrue("Returned set of incorrect size",lhm.size() == s1.size());
+  for (i=0; it1.hasNext(); i++) {
+    Integer jj=(Integer)it1.next();
+    assertTrue("Returned incorrect entry set",jj.intValue() == i);
+  }
+  LinkedHashMap lruhm=new LinkedHashMap(200,.75f,true);
+  for (i=0; i < sz; i++) {
+    Integer ii=new Integer(i);
+    lruhm.put(ii,ii.toString());
+  }
+  Set s3=lruhm.keySet();
+  Iterator it3=s3.iterator();
+  assertTrue("Returned set of incorrect size",lruhm.size() == s3.size());
+  for (i=0; i < sz && it3.hasNext(); i++) {
+    Integer jj=(Integer)it3.next();
+    assertTrue("Returned incorrect entry set",jj.intValue() == i);
+  }
+  int p=0;
+  for (i=0; i < sz; i+=2) {
+    String ii=(String)lruhm.get(new Integer(i));
+    p=p + Integer.parseInt(ii);
+  }
+  assertEquals("invalid sum of even numbers",2450,p);
+  Set s2=lruhm.keySet();
+  Iterator it2=s2.iterator();
+  assertTrue("Returned set of incorrect size",lruhm.size() == s2.size());
+  for (i=1; i < sz && it2.hasNext(); i+=2) {
+    Integer jj=(Integer)it2.next();
+    assertTrue("Returned incorrect entry set",jj.intValue() == i);
+  }
+  for (i=0; i < sz && it2.hasNext(); i+=2) {
+    Integer jj=(Integer)it2.next();
+    assertTrue("Returned incorrect entry set",jj.intValue() == i);
+  }
+  assertTrue("Entries left to iterate on",!it2.hasNext());
+}

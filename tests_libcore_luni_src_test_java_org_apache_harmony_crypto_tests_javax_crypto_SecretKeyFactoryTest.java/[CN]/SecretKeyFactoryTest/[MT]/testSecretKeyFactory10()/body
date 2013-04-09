@@ -1,0 +1,69 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  byte[] bb=new byte[24];
+  KeySpec ks=(defaultAlgorithm.equals(defaultAlgorithm2) ? (KeySpec)new DESKeySpec(bb) : (KeySpec)new DESedeKeySpec(bb));
+  KeySpec rks=null;
+  SecretKeySpec secKeySpec=new SecretKeySpec(bb,defaultAlgorithm);
+  SecretKey secKey=null;
+  SecretKeyFactory[] skF=createSKFac();
+  assertNotNull("SecretKeyFactory object were not created",skF);
+  for (int i=0; i < skF.length; i++) {
+    try {
+      skF[i].generateSecret(null);
+      fail("generateSecret(null): InvalidKeySpecException must be thrown");
+    }
+ catch (    InvalidKeySpecException e) {
+    }
+    secKey=skF[i].generateSecret(ks);
+    try {
+      skF[i].getKeySpec(null,null);
+      fail("getKeySpec(null,null): InvalidKeySpecException must be thrown");
+    }
+ catch (    InvalidKeySpecException e) {
+    }
+    try {
+      skF[i].getKeySpec(null,ks.getClass());
+      fail("getKeySpec(null, Class): InvalidKeySpecException must be thrown");
+    }
+ catch (    InvalidKeySpecException e) {
+    }
+    try {
+      skF[i].getKeySpec(secKey,null);
+      fail("getKeySpec(secKey, null): NullPointerException or InvalidKeySpecException must be thrown");
+    }
+ catch (    InvalidKeySpecException e) {
+    }
+catch (    NullPointerException e) {
+    }
+    try {
+      Class c;
+      if (defaultAlgorithm.equals(defaultAlgorithm2)) {
+        c=DESedeKeySpec.class;
+      }
+ else {
+        c=DESKeySpec.class;
+      }
+      skF[i].getKeySpec(secKeySpec,c);
+      fail("getKeySpec(secKey, Class): InvalidKeySpecException must be thrown");
+    }
+ catch (    InvalidKeySpecException e) {
+    }
+    rks=skF[i].getKeySpec(secKeySpec,ks.getClass());
+    if (defaultAlgorithm.equals(defaultAlgorithm1)) {
+      assertTrue("Incorrect getKeySpec() result 1",rks instanceof DESedeKeySpec);
+    }
+ else {
+      assertTrue("Incorrect getKeySpec() result 1",rks instanceof DESKeySpec);
+    }
+    rks=skF[i].getKeySpec(secKey,ks.getClass());
+    if (defaultAlgorithm.equals(defaultAlgorithm1)) {
+      assertTrue("Incorrect getKeySpec() result 2",rks instanceof DESedeKeySpec);
+    }
+ else {
+      assertTrue("Incorrect getKeySpec() result 2",rks instanceof DESKeySpec);
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  InputStream in=new BufferedInputStream(new FileInputStream(file),1024);
+  Reader reader;
+  in.mark(3);
+  int byte1=in.read();
+  int byte2=in.read();
+  if (byte1 == 0xFF && byte2 == 0xFE) {
+    reader=new InputStreamReader(in,"UTF-16LE");
+  }
+ else   if (byte1 == 0xFF && byte2 == 0xFF) {
+    reader=new InputStreamReader(in,"UTF-16BE");
+  }
+ else {
+    int byte3=in.read();
+    if (byte1 == 0xEF && byte2 == 0xBB && byte3 == 0xBF) {
+      reader=new InputStreamReader(in,"UTF-8");
+    }
+ else {
+      in.reset();
+      reader=new InputStreamReader(in);
+    }
+  }
+  StringWriter out=new StringWriter();
+  char[] buffer=new char[1024];
+  int count;
+  while ((count=reader.read(buffer)) != -1) {
+    out.write(buffer,0,count);
+  }
+  in.close();
+  return out.toString();
+}

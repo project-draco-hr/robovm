@@ -1,0 +1,174 @@
+{
+  String platform=System.getProperty("os.name");
+  if (!platform.equals("Dummy")) {
+    String urgentData="U";
+    try {
+      InetSocketAddress theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+      Socket theSocket=new Socket();
+      ServerSocket serverSocket=new ServerSocket();
+      serverSocket.bind(theAddress);
+      theSocket.connect(theAddress);
+      Socket servSock=serverSocket.accept();
+      InputStream theInput=theSocket.getInputStream();
+      OutputStream theOutput=servSock.getOutputStream();
+      String sendString=new String("Test");
+      theOutput.write(sendString.getBytes());
+      theOutput.flush();
+      theSocket.setOOBInline(false);
+      servSock.sendUrgentData(urgentData.getBytes()[0]);
+      theOutput.write(sendString.getBytes());
+      theOutput.flush();
+      Thread.sleep(1000);
+      int totalBytesRead=0;
+      byte[] myBytes=new byte[100];
+      while (theInput.available() > 0) {
+        int bytesRead=theInput.read(myBytes,totalBytesRead,myBytes.length - totalBytesRead);
+        totalBytesRead=totalBytesRead + bytesRead;
+      }
+      String receivedString=new String(myBytes,0,totalBytesRead);
+      theSocket.close();
+      serverSocket.close();
+      theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+      theSocket=new Socket();
+      serverSocket=new ServerSocket();
+      serverSocket.bind(theAddress);
+      theSocket.connect(theAddress);
+      servSock=serverSocket.accept();
+      theInput=theSocket.getInputStream();
+      theOutput=servSock.getOutputStream();
+      sendString=new String("Test - Urgent Data");
+      theOutput.write(sendString.getBytes());
+      theOutput.flush();
+      theSocket.setOOBInline(true);
+      servSock.sendUrgentData(urgentData.getBytes()[0]);
+      theOutput.write(sendString.getBytes());
+      theOutput.flush();
+      Thread.sleep(1000);
+      totalBytesRead=0;
+      myBytes=new byte[100];
+      while (theInput.available() > 0) {
+        int bytesRead=theInput.read(myBytes,totalBytesRead,myBytes.length - totalBytesRead);
+        totalBytesRead=totalBytesRead + bytesRead;
+      }
+      receivedString=new String(myBytes,0,totalBytesRead);
+      assertTrue("Urgent Data was not received with one urgent byte:" + receivedString + ":"+ sendString+ urgentData+ sendString,receivedString.equals(sendString + urgentData + sendString));
+      theSocket.close();
+      serverSocket.close();
+      theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+      theSocket=new Socket();
+      serverSocket=new ServerSocket();
+      serverSocket.bind(theAddress);
+      theSocket.connect(theAddress);
+      servSock=serverSocket.accept();
+      theInput=theSocket.getInputStream();
+      theOutput=servSock.getOutputStream();
+      sendString=new String("Test - Urgent Data");
+      theOutput.write(sendString.getBytes());
+      theOutput.flush();
+      theSocket.setOOBInline(true);
+      servSock.sendUrgentData(urgentData.getBytes()[0]);
+      servSock.sendUrgentData(urgentData.getBytes()[0]);
+      theOutput.write(sendString.getBytes());
+      theOutput.flush();
+      Thread.sleep(1000);
+      totalBytesRead=0;
+      myBytes=new byte[100];
+      while (theInput.available() > 0) {
+        int bytesRead=theInput.read(myBytes,totalBytesRead,myBytes.length - totalBytesRead);
+        totalBytesRead=totalBytesRead + bytesRead;
+      }
+      receivedString=new String(myBytes,0,totalBytesRead);
+      assertTrue("Did not get right byte of urgent data when two sent:" + receivedString + ":"+ sendString+ urgentData+ urgentData+ sendString,receivedString.equals(sendString + urgentData + urgentData+ sendString));
+      theSocket.close();
+      serverSocket.close();
+      if (!platform.startsWith("Windows")) {
+        theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+        theSocket=new Socket();
+        serverSocket=new ServerSocket();
+        serverSocket.bind(theAddress);
+        theSocket.connect(theAddress);
+        servSock=serverSocket.accept();
+        theInput=theSocket.getInputStream();
+        theOutput=servSock.getOutputStream();
+        sendString=new String("Test - Urgent Data");
+        theOutput.write(sendString.getBytes());
+        theOutput.flush();
+        theSocket.setOOBInline(true);
+        servSock.sendUrgentData(urgentData.getBytes()[0]);
+        theOutput.write(sendString.getBytes());
+        theOutput.flush();
+        Thread.sleep(1000);
+        totalBytesRead=0;
+        myBytes=new byte[100];
+        while (theInput.available() > 0) {
+          int bytesRead=theInput.read(myBytes,totalBytesRead,myBytes.length - totalBytesRead);
+          totalBytesRead=totalBytesRead + bytesRead;
+        }
+        receivedString=new String(myBytes,0,totalBytesRead);
+        assertTrue("Did not get urgent data when turning on/off(1):" + receivedString + ":"+ sendString+ urgentData+ sendString,receivedString.equals(sendString + urgentData + sendString));
+        sendString=new String("Test - Urgent Data");
+        theOutput.write(sendString.getBytes());
+        theOutput.flush();
+        theSocket.setOOBInline(false);
+        servSock.sendUrgentData(urgentData.getBytes()[0]);
+        theOutput.write(sendString.getBytes());
+        theOutput.flush();
+        Thread.sleep(1000);
+        totalBytesRead=0;
+        myBytes=new byte[100];
+        while (theInput.available() > 0) {
+          int bytesRead=theInput.read(myBytes,totalBytesRead,myBytes.length - totalBytesRead);
+          totalBytesRead=totalBytesRead + bytesRead;
+        }
+        receivedString=new String(myBytes,0,totalBytesRead);
+        sendString=new String("Test - Urgent Data");
+        theOutput.write(sendString.getBytes());
+        theOutput.flush();
+        theSocket.setOOBInline(true);
+        servSock.sendUrgentData(urgentData.getBytes()[0]);
+        theOutput.write(sendString.getBytes());
+        theOutput.flush();
+        Thread.sleep(1000);
+        totalBytesRead=0;
+        myBytes=new byte[100];
+        while (theInput.available() > 0) {
+          int bytesRead=theInput.read(myBytes,totalBytesRead,myBytes.length - totalBytesRead);
+          totalBytesRead=totalBytesRead + bytesRead;
+        }
+        receivedString=new String(myBytes,0,totalBytesRead);
+        theSocket.close();
+        serverSocket.close();
+      }
+      theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+      theSocket=new Socket();
+      serverSocket=new ServerSocket();
+      serverSocket.bind(theAddress);
+      theSocket.connect(theAddress);
+      servSock=serverSocket.accept();
+      theInput=theSocket.getInputStream();
+      theOutput=servSock.getOutputStream();
+      theSocket.setOOBInline(true);
+      servSock.sendUrgentData(urgentData.getBytes()[0]);
+      Thread.sleep(1000);
+      totalBytesRead=0;
+      myBytes=new byte[100];
+      while (theInput.available() > 0) {
+        int bytesRead=theInput.read(myBytes,totalBytesRead,myBytes.length - totalBytesRead);
+        totalBytesRead=totalBytesRead + bytesRead;
+      }
+      receivedString=new String(myBytes,0,totalBytesRead);
+      assertTrue("Did not get urgent data only urgent data sent:" + receivedString + ":"+ urgentData,receivedString.equals(urgentData));
+    }
+ catch (    Exception e) {
+      fail("Platform:" + platform + ": Got exception during sendUrgent data tests"+ e.toString());
+    }
+  }
+  try {
+    Socket theSocket=new Socket();
+    theSocket.close();
+    theSocket.sendUrgentData(0);
+    fail("IOException was not thrown.");
+  }
+ catch (  IOException ioe) {
+  }
+}

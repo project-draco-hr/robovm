@@ -1,0 +1,19 @@
+{
+  if (isUnsupported(kg)) {
+    return;
+  }
+  kg.init((SecureRandom)null);
+  test_SecretKey(kg,kg.generateKey());
+  kg.init(new SecureRandom());
+  test_SecretKey(kg,kg.generateKey());
+  String algorithm=kg.getAlgorithm();
+  List<Integer> keySizes=getKeySizes(algorithm);
+  for (  int keySize : keySizes) {
+    kg.init(keySize);
+    test_SecretKey(kg,kg.generateKey());
+    kg.init(keySize,(SecureRandom)null);
+    test_SecretKey(kg,kg.generateKey());
+    kg.init(keySize,new SecureRandom());
+    test_SecretKey(kg,kg.generateKey());
+  }
+}

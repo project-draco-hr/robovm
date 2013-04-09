@@ -1,0 +1,39 @@
+{
+  final String select=element.getAttribute("select");
+  if (element.getAttribute("exception").equals("true")) {
+    return new XPathTest(context,select){
+      @Override void test(      Node contextNode){
+        try {
+          xpath.evaluate(select,contextNode);
+          fail("Expected exception!");
+        }
+ catch (        XPathExpressionException expected) {
+        }
+      }
+    }
+;
+  }
+  NodeList valueOfElements=element.getElementsByTagName("valueOf");
+  if (valueOfElements.getLength() == 1) {
+    final Element valueOf=(Element)valueOfElements.item(0);
+    final String valueOfSelect=valueOf.getAttribute("select");
+    return new XPathTest(context,select){
+      @Override void test(      Node contextNode) throws XPathExpressionException {
+        Node newContext=(Node)xpath.evaluate(select,contextNode,XPathConstants.NODE);
+        assertEquals(valueOf.getTextContent(),xpath.evaluate(valueOfSelect,newContext,XPathConstants.STRING));
+      }
+    }
+;
+  }
+  final String count=element.getAttribute("count");
+  if (count.length() > 0) {
+    return new XPathTest(context,select){
+      @Override void test(      Node contextNode) throws XPathExpressionException {
+        NodeList result=(NodeList)xpath.evaluate(select,contextNode,XPathConstants.NODESET);
+        assertEquals(Integer.parseInt(count),result.getLength());
+      }
+    }
+;
+  }
+  throw new UnsupportedOperationException("Unsupported test: " + context);
+}

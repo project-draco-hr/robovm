@@ -1,0 +1,11 @@
+{
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  InputStream in=new ByteArrayInputStream(X509_MULTIPLE_SUBJECT_ALT);
+  X509Certificate x509=(X509Certificate)cf.generateCertificate(in);
+  mySSLSession session=new mySSLSession(new X509Certificate[]{x509});
+  HostnameVerifier verifier=HttpsURLConnection.getDefaultHostnameVerifier();
+  assertEquals(new X500Principal("CN=localhost"),x509.getSubjectX500Principal());
+  assertTrue(verifier.verify("localhost",session));
+  assertTrue(verifier.verify("localhost.localdomain",session));
+  assertFalse(verifier.verify("local.host",session));
+}

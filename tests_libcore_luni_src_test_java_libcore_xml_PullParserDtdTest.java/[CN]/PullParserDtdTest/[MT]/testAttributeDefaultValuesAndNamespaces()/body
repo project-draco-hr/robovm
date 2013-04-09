@@ -1,0 +1,14 @@
+{
+  String xml="<!DOCTYPE foo [\n" + "  <!ATTLIST foo\n" + "    bar:a CDATA \"android\">"+ "]>"+ "<foo xmlns:bar='http://bar'></foo>";
+  XmlPullParser parser=newPullParser(xml);
+  parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES,true);
+  assertEquals(XmlPullParser.START_TAG,parser.next());
+  assertEquals("foo",parser.getName());
+  int index=indexOfAttributeWithName(parser,"bar:a");
+  assertEquals("",parser.getAttributeNamespace(index));
+  assertEquals("bar:a",parser.getAttributeName(index));
+  assertEquals("android",parser.getAttributeValue(index));
+  assertEquals("CDATA",parser.getAttributeType(index));
+  assertEquals(XmlPullParser.END_TAG,parser.next());
+  assertEquals(XmlPullParser.END_DOCUMENT,parser.next());
+}

@@ -1,0 +1,20 @@
+{
+  String testHTTPURLString="http://www.gamelan.com/pages/";
+  String testFTPURLString="ftp://myname@host.dom/etc/motd";
+  URL testHTTPURL=new URL(testHTTPURLString);
+  URL testFTPURL=new URL(testFTPURLString);
+  URI testHTTPURI=testHTTPURL.toURI();
+  URI testFTPURI=testFTPURL.toURI();
+  assertEquals(testHTTPURI.toString(),testHTTPURLString);
+  assertEquals(testFTPURI.toString(),testFTPURLString);
+  String[] constructorTestsInvalid=new String[]{"http:///a path#frag","http://host/a[path#frag","http://host/a%path#frag","http://host/a%#frag","http://host#a frag","http://host/a#fr#ag","http:///path#fr%ag","http://host/path#frag%","http://host/path?a query#frag","http://host?query%ag","http:///path?query%","mailto:user^name@fklkf.com"};
+  for (  String malformedURI : Arrays.asList(constructorTestsInvalid)) {
+    try {
+      URL urlQuery=new URL("http://host/a%path#frag");
+      urlQuery.toURI();
+      fail("Exception expected");
+    }
+ catch (    URISyntaxException e) {
+    }
+  }
+}

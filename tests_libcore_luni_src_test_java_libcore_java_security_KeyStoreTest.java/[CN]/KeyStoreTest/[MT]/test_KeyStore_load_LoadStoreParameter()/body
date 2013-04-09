@@ -1,0 +1,24 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    keyStore.load(null);
+    if (hasDefaultContents(keyStore)) {
+      assertTrue(keyStore.size() > 0);
+    }
+ else {
+      assertEquals(0,keyStore.size());
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      keyStore.load(new LoadStoreParameter(){
+        public ProtectionParameter getProtectionParameter(){
+          return null;
+        }
+      }
+);
+      fail();
+    }
+ catch (    UnsupportedOperationException expected) {
+    }
+  }
+}

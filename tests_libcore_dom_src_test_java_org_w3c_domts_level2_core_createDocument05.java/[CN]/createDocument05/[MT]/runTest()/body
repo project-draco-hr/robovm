@@ -1,0 +1,52 @@
+{
+  String namespaceURI="http://www.ecommerce.org/schema";
+  String qualifiedName;
+  Document doc;
+  DocumentType docType=null;
+  DOMImplementation domImpl;
+  Document aNewDoc;
+  String charact;
+  java.util.List illegalQNames=new java.util.ArrayList();
+  illegalQNames.add("namespaceURI:{");
+  illegalQNames.add("namespaceURI:}");
+  illegalQNames.add("namespaceURI:~");
+  illegalQNames.add("namespaceURI:'");
+  illegalQNames.add("namespaceURI:!");
+  illegalQNames.add("namespaceURI:@");
+  illegalQNames.add("namespaceURI:#");
+  illegalQNames.add("namespaceURI:$");
+  illegalQNames.add("namespaceURI:%");
+  illegalQNames.add("namespaceURI:^");
+  illegalQNames.add("namespaceURI:&");
+  illegalQNames.add("namespaceURI:*");
+  illegalQNames.add("namespaceURI:(");
+  illegalQNames.add("namespaceURI:)");
+  illegalQNames.add("namespaceURI:+");
+  illegalQNames.add("namespaceURI:=");
+  illegalQNames.add("namespaceURI:[");
+  illegalQNames.add("namespaceURI:]");
+  illegalQNames.add("namespaceURI:\\");
+  illegalQNames.add("namespaceURI:/");
+  illegalQNames.add("namespaceURI:;");
+  illegalQNames.add("namespaceURI:`");
+  illegalQNames.add("namespaceURI:<");
+  illegalQNames.add("namespaceURI:>");
+  illegalQNames.add("namespaceURI:,");
+  illegalQNames.add("namespaceURI:a ");
+  illegalQNames.add("namespaceURI:\"");
+  doc=(Document)load("staffNS",false);
+  for (int indexN1009A=0; indexN1009A < illegalQNames.size(); indexN1009A++) {
+    qualifiedName=(String)illegalQNames.get(indexN1009A);
+    domImpl=doc.getImplementation();
+{
+      boolean success=false;
+      try {
+        aNewDoc=domImpl.createDocument(namespaceURI,qualifiedName,docType);
+      }
+ catch (      DOMException ex) {
+        success=(ex.code == DOMException.INVALID_CHARACTER_ERR);
+      }
+      assertTrue("throw_INVALID_CHARACTER_ERR",success);
+    }
+  }
+}

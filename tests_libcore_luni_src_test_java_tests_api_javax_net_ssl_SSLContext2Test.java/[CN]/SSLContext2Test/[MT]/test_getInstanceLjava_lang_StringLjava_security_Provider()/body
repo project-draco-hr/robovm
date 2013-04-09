@@ -1,0 +1,35 @@
+{
+  try {
+    SSLContext.getInstance(null,mProv);
+    fail("NoSuchAlgorithmException or NullPointerException should be thrown " + "(protocol is null)");
+  }
+ catch (  NoSuchAlgorithmException e) {
+  }
+catch (  NullPointerException e) {
+  }
+  for (int i=0; i < invalidValues.length; i++) {
+    try {
+      SSLContext.getInstance(invalidValues[i],mProv);
+      fail("NoSuchAlgorithmException must be thrown (protocol: ".concat(invalidValues[i]).concat(")"));
+    }
+ catch (    NoSuchAlgorithmException e) {
+    }
+  }
+  Provider prov=null;
+  for (int i=0; i < validValues.length; i++) {
+    try {
+      SSLContext.getInstance(validValues[i],prov);
+      fail("IllegalArgumentException must be thrown when provider is null (protocol: ".concat(invalidValues[i]).concat(")"));
+    }
+ catch (    IllegalArgumentException e) {
+    }
+  }
+  SSLContext sslC;
+  for (int i=0; i < validValues.length; i++) {
+    sslC=SSLContext.getInstance(validValues[i],mProv);
+    assertTrue("Not instanceof SSLContext object",sslC instanceof SSLContext);
+    assertEquals("Incorrect protocol",sslC.getProtocol(),validValues[i]);
+    assertEquals("Incorrect provider",sslC.getProvider(),mProv);
+    checkSSLContext(sslC);
+  }
+}

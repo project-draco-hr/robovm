@@ -1,0 +1,25 @@
+{
+  try {
+    URL url=getClass().getClassLoader().getResource(packageName.replace(".","/") + "/" + sourceJARfile);
+    ClassLoader loader=new URLClassLoader(new URL[]{url},getClass().getClassLoader());
+    try {
+      Class.forName(classNameLinkageError,true,loader);
+      fail("LinkageError or ClassNotFoundException expected.");
+    }
+ catch (    java.lang.LinkageError le) {
+    }
+catch (    java.lang.ClassNotFoundException ce) {
+    }
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception was thrown: " + e.toString());
+  }
+  try {
+    Class.forName(classNameInitError2,true,getClass().getClassLoader());
+    fail("ExceptionInInitializerError or ClassNotFoundException " + "should be thrown.");
+  }
+ catch (  java.lang.ExceptionInInitializerError ie) {
+  }
+catch (  java.lang.ClassNotFoundException ce) {
+  }
+}

@@ -1,0 +1,8 @@
+{
+  server.enqueue(new MockResponse().setBody("A"));
+  server.play();
+  assertEquals("A",readAscii(server.getUrl("/").openConnection()));
+  HttpURLConnection connection=(HttpURLConnection)server.getUrl("/").openConnection();
+  connection.addRequestProperty("Cache-Control","only-if-cached");
+  assertBadGateway(connection);
+}

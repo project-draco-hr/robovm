@@ -1,0 +1,41 @@
+{
+  JSONArray array=new JSONArray();
+  array.put("true");
+  array.put("5.5");
+  array.put("9223372036854775806");
+  array.put("null");
+  array.put("5\"8' tall");
+  assertEquals(5,array.length());
+  assertEquals("[\"true\",\"5.5\",\"9223372036854775806\",\"null\",\"5\\\"8' tall\"]",array.toString());
+  assertEquals("\"true\" \"5.5\" \"9223372036854775806\" \"null\" \"5\\\"8' tall\"",array.join(" "));
+  assertEquals("true",array.get(0));
+  assertEquals("null",array.getString(3));
+  assertEquals("5\"8' tall",array.getString(4));
+  assertEquals("true",array.opt(0));
+  assertEquals("5.5",array.optString(1));
+  assertEquals("9223372036854775806",array.optString(2,null));
+  assertEquals("null",array.optString(3,"-1"));
+  assertFalse(array.isNull(0));
+  assertFalse(array.isNull(3));
+  assertEquals(true,array.getBoolean(0));
+  assertEquals(true,array.optBoolean(0));
+  assertEquals(true,array.optBoolean(0,false));
+  assertEquals(0,array.optInt(0));
+  assertEquals(-2,array.optInt(0,-2));
+  assertEquals(5.5d,array.getDouble(1));
+  assertEquals(5L,array.getLong(1));
+  assertEquals(5,array.getInt(1));
+  assertEquals(5,array.optInt(1,3));
+  assertEquals(9223372036854775807L,array.getLong(2));
+  assertEquals(9.223372036854776E18,array.getDouble(2));
+  assertEquals(Integer.MAX_VALUE,array.getInt(2));
+  assertFalse(array.isNull(3));
+  try {
+    array.getDouble(3);
+    fail();
+  }
+ catch (  JSONException e) {
+  }
+  assertEquals(Double.NaN,array.optDouble(3));
+  assertEquals(-1.0d,array.optDouble(3,-1.0d));
+}

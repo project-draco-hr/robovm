@@ -1,0 +1,33 @@
+{
+  boolean exception=false;
+  Collection c=Collections.unmodifiableCollection(ll);
+  assertTrue("Returned collection is of incorrect size",c.size() == ll.size());
+  Iterator i=ll.iterator();
+  while (i.hasNext())   assertTrue("Returned list missing elements",c.contains(i.next()));
+  try {
+    c.add(new Object());
+  }
+ catch (  UnsupportedOperationException e) {
+    exception=true;
+  }
+  if (!exception) {
+    fail("Allowed modification of collection");
+  }
+  try {
+    c.remove(new Object());
+    fail("Allowed modification of collection");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  Collection myCollection=new ArrayList();
+  myCollection.add(new Integer(20));
+  myCollection.add(null);
+  c=Collections.unmodifiableCollection(myCollection);
+  assertTrue("Collection should contain null",c.contains(null));
+  assertTrue("Collection should contain Integer(20)",c.contains(new Integer(20)));
+  myCollection=new ArrayList();
+  for (int counter=0; counter < 100; counter++) {
+    myCollection.add(objArray[counter]);
+  }
+  new Support_UnmodifiableCollectionTest("",Collections.unmodifiableCollection(myCollection)).runTest();
+}

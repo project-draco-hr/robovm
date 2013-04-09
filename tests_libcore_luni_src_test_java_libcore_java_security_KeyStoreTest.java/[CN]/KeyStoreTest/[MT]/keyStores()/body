@@ -1,0 +1,21 @@
+{
+  List<KeyStore> keyStores=new ArrayList<KeyStore>();
+  Provider[] providers=Security.getProviders();
+  for (  Provider provider : providers) {
+    Set<Provider.Service> services=provider.getServices();
+    for (    Provider.Service service : services) {
+      String type=service.getType();
+      if (!type.equals("KeyStore")) {
+        continue;
+      }
+      String algorithm=service.getAlgorithm();
+      KeyStore ks=KeyStore.getInstance(algorithm,provider);
+      assertEquals(provider,ks.getProvider());
+      assertEquals(algorithm,ks.getType());
+      if (!isUnsupported(ks)) {
+        keyStores.add(ks);
+      }
+    }
+  }
+  return keyStores;
+}

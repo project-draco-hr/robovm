@@ -1,0 +1,34 @@
+{
+  try {
+    EnumSet.allOf((Class)null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    EnumSet.allOf(Enum.class);
+    fail("Should throw ClassCastException");
+  }
+ catch (  ClassCastException cce) {
+  }
+  EnumSet<EnumFoo> enumSet=EnumSet.allOf(EnumFoo.class);
+  assertEquals("Size of enumSet should be 64",64,enumSet.size());
+  assertFalse("enumSet should not contain null value",enumSet.contains(null));
+  assertTrue("enumSet should contain EnumFoo.a",enumSet.contains(EnumFoo.a));
+  assertTrue("enumSet should contain EnumFoo.b",enumSet.contains(EnumFoo.b));
+  enumSet.add(EnumFoo.a);
+  assertEquals("Should be equal",64,enumSet.size());
+  EnumSet<EnumFoo> anotherSet=EnumSet.allOf(EnumFoo.class);
+  assertEquals("Should be equal",enumSet,anotherSet);
+  assertNotSame("Should not be identical",enumSet,anotherSet);
+  EnumSet<HugeEnum> hugeEnumSet=EnumSet.allOf(HugeEnum.class);
+  assertEquals(65,hugeEnumSet.size());
+  assertFalse(hugeEnumSet.contains(null));
+  assertTrue(hugeEnumSet.contains(HugeEnum.a));
+  assertTrue(hugeEnumSet.contains(HugeEnum.b));
+  hugeEnumSet.add(HugeEnum.a);
+  assertEquals(65,hugeEnumSet.size());
+  EnumSet<HugeEnum> anotherHugeSet=EnumSet.allOf(HugeEnum.class);
+  assertEquals(hugeEnumSet,anotherHugeSet);
+  assertNotSame(hugeEnumSet,anotherHugeSet);
+}

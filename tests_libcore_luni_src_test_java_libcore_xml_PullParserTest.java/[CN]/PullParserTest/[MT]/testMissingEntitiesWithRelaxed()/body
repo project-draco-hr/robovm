@@ -1,0 +1,10 @@
+{
+  XmlPullParser parser=newPullParser();
+  parser.setFeature("http://xmlpull.org/v1/doc/features.html#relaxed",true);
+  parser.setInput(new StringReader("<foo>&aaa;</foo>"));
+  assertEquals(XmlPullParser.START_TAG,parser.next());
+  assertEquals(XmlPullParser.TEXT,parser.next());
+  assertEquals(null,parser.getName());
+  assertEquals("Expected unresolved entities to be left in-place. The old parser " + "would resolve these to the empty string.","&aaa;",parser.getText());
+  assertEquals(XmlPullParser.END_TAG,parser.next());
+}

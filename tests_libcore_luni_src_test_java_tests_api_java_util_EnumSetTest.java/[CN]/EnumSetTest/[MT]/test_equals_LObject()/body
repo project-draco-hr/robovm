@@ -1,0 +1,39 @@
+{
+  Set<EnumFoo> set=EnumSet.noneOf(EnumFoo.class);
+  Enum[] elements=EnumFoo.class.getEnumConstants();
+  for (int i=0; i < elements.length; i++) {
+    set.add((EnumFoo)elements[i]);
+  }
+  assertFalse("Should return false",set.equals(null));
+  assertFalse("Should return false",set.equals(new Object()));
+  Set<EnumFoo> anotherSet=EnumSet.noneOf(EnumFoo.class);
+  elements=EnumFoo.class.getEnumConstants();
+  for (int i=0; i < elements.length; i++) {
+    anotherSet.add((EnumFoo)elements[i]);
+  }
+  assertTrue("Should return true",set.equals(anotherSet));
+  anotherSet.remove(EnumFoo.a);
+  assertFalse("Should return false",set.equals(anotherSet));
+  Set<EnumWithInnerClass> setWithInnerClass=EnumSet.noneOf(EnumWithInnerClass.class);
+  elements=EnumWithInnerClass.class.getEnumConstants();
+  for (int i=0; i < elements.length; i++) {
+    setWithInnerClass.add((EnumWithInnerClass)elements[i]);
+  }
+  assertFalse("Should return false",set.equals(setWithInnerClass));
+  setWithInnerClass.clear();
+  set.clear();
+  assertTrue("Should be equal",set.equals(setWithInnerClass));
+  Set<HugeEnum> hugeSet=EnumSet.noneOf(HugeEnum.class);
+  assertTrue(hugeSet.equals(set));
+  hugeSet=EnumSet.allOf(HugeEnum.class);
+  assertFalse(hugeSet.equals(null));
+  assertFalse(hugeSet.equals(new Object()));
+  Set<HugeEnum> anotherHugeSet=EnumSet.allOf(HugeEnum.class);
+  anotherHugeSet.remove(HugeEnum.a);
+  assertFalse(hugeSet.equals(anotherHugeSet));
+  Set<HugeEnumWithInnerClass> hugeSetWithInnerClass=EnumSet.allOf(HugeEnumWithInnerClass.class);
+  assertFalse(hugeSet.equals(hugeSetWithInnerClass));
+  hugeSetWithInnerClass.clear();
+  hugeSet.clear();
+  assertTrue(hugeSet.equals(hugeSetWithInnerClass));
+}

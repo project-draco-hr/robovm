@@ -1,0 +1,45 @@
+{
+  Calendar cal=new GregorianCalendar(1799,5,26);
+  Date[] dates={new Date(cal.getTimeInMillis()),new Date(Integer.MAX_VALUE),new Date(123456789)};
+  PreparedStatement ps=null;
+  PreparedStatement ps1=null;
+  try {
+    String query="insert into type (dateVal) values (?);";
+    ps=conn.prepareStatement(query);
+    for (int i=0; i < dates.length; i++) {
+      ps.setDate(1,dates[i]);
+      assertFalse(ps.execute());
+      assertTrue(ps.getUpdateCount() > 0);
+    }
+    try {
+      ps.setDate(2,dates[0]);
+      fail("SQLException is not thrown");
+    }
+ catch (    Exception sqle) {
+    }
+    ps.close();
+    try {
+      ps.setDate(1,dates[0]);
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+    String query1="insert into type (Tint) values (?);";
+    ps1=conn.prepareStatement(query1);
+    try {
+      ps1.setDate(1,dates[0]);
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException sqle) {
+      assertEquals("SQLite.Exception: error in prepare",sqle.getMessage());
+    }
+  }
+  finally {
+    try {
+      if (ps != null)       ps.close();
+      if (ps1 != null)       ps1.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  Calendar cal=new GregorianCalendar();
+  cal.clear();
+  cal.set(Calendar.HOUR_OF_DAY,12);
+  cal.set(Calendar.MINUTE,35);
+  cal.set(Calendar.SECOND,45);
+  cal.set(Calendar.MILLISECOND,0);
+  long millis=cal.getTime().getTime();
+  Time t1=new java.sql.Time(millis);
+  assertNotNull("t1",t1);
+  Calendar cal2=new GregorianCalendar();
+  cal2.set(Calendar.YEAR,2007);
+  cal2.set(Calendar.MONTH,Calendar.OCTOBER);
+  cal2.set(Calendar.DATE,9);
+  cal2.set(Calendar.HOUR_OF_DAY,14);
+  cal2.set(Calendar.MINUTE,28);
+  cal2.set(Calendar.SECOND,02);
+  cal2.set(Calendar.MILLISECOND,0);
+  long millis2=cal2.getTime().getTime();
+  Time t2=new java.sql.Time(millis2);
+  int i=16;
+  Time resTime=res.getTime(i);
+  assertNotNull("Pos " + i + " null",resTime);
+  assertEquals(t1.toString(),resTime.toString());
+  assertEquals(t1.getTime(),resTime.getTime());
+  assertEquals(t1,resTime);
+  i=17;
+  resTime=res.getTime(i);
+  assertNotNull("Pos " + i + " null",resTime);
+  assertEquals(t2.toString(),resTime.toString());
+  assertEquals(t2.getTime(),resTime.getTime());
+  assertEquals(t2,resTime);
+  i=16;
+  res.next();
+  assertNull(res.getTime(i));
+  try {
+    res.getTime(500);
+    fail("Exception expected");
+  }
+ catch (  SQLException e) {
+  }
+}

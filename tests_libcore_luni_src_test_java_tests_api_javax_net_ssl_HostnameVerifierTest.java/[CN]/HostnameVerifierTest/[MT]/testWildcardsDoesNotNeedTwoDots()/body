@@ -1,0 +1,9 @@
+{
+  String cert="-----BEGIN CERTIFICATE-----\n" + "MIIBjDCCATagAwIBAgIJAOVulXCSu6HuMA0GCSqGSIb3DQEBBQUAMBAxDjAMBgNV\n" + "BAMUBSouY29tMCAXDTEwMTIyMDE2NDkzOFoYDzIxMTAxMTI2MTY0OTM4WjAQMQ4w\n"+ "DAYDVQQDFAUqLmNvbTBcMA0GCSqGSIb3DQEBAQUAA0sAMEgCQQDJd8xqni+h7Iaz\n"+ "ypItivs9kPuiJUqVz+SuJ1C05SFc3PmlRCvwSIfhyD67fHcbMdl+A/LrIjhhKZJe\n"+ "1joO0+pFAgMBAAGjcTBvMB0GA1UdDgQWBBS4Iuzf5w8JdCp+EtBfdFNudf6+YzBA\n"+ "BgNVHSMEOTA3gBS4Iuzf5w8JdCp+EtBfdFNudf6+Y6EUpBIwEDEOMAwGA1UEAxQF\n"+ "Ki5jb22CCQDlbpVwkruh7jAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA0EA\n"+ "U6LFxmZr31lFyis2/T68PpjAppc0DpNQuA2m/Y7oTHBDi55Fw6HVHCw3lucuWZ5d\n"+ "qUYo4ES548JdpQtcLrW2sA==\n"+ "-----END CERTIFICATE-----";
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  InputStream in=new ByteArrayInputStream(cert.getBytes("UTF-8"));
+  X509Certificate x509=(X509Certificate)cf.generateCertificate(in);
+  mySSLSession session=new mySSLSession(new X509Certificate[]{x509});
+  HostnameVerifier verifier=HttpsURLConnection.getDefaultHostnameVerifier();
+  assertTrue(verifier.verify("google.com",session));
+}

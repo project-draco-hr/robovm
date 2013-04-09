@@ -1,0 +1,11 @@
+{
+  server.enqueue(new MockResponse().setBody("ABC"));
+  server.enqueue(new MockResponse().setBody("DEF"));
+  server.play();
+  URLConnection connection1=server.getUrl("/").openConnection();
+  assertEquals("ABC",readAscii(connection1.getInputStream(),Integer.MAX_VALUE));
+  assertEquals(0,server.takeRequest().getSequenceNumber());
+  URLConnection connection2=server.getUrl("/").openConnection();
+  assertEquals("DEF",readAscii(connection2.getInputStream(),Integer.MAX_VALUE));
+  assertEquals(1,server.takeRequest().getSequenceNumber());
+}

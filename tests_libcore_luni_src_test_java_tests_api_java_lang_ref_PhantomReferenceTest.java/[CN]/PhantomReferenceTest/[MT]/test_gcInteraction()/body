@@ -1,0 +1,44 @@
+{
+class TestPhantomReference<T> extends PhantomReference<T> {
+    public TestPhantomReference(    T referent,    ReferenceQueue<? super T> q){
+      super(referent,q);
+    }
+    public boolean enqueue(){
+      Runtime.getRuntime().gc();
+      return super.enqueue();
+    }
+  }
+  final ReferenceQueue rq=new ReferenceQueue();
+  final PhantomReference[] tprs=new PhantomReference[4];
+class TestThread extends Thread {
+    public void run(){
+      Object obj=new Object();
+      tprs[0]=new TestPhantomReference(obj,rq);
+      tprs[1]=new TestPhantomReference(obj,rq);
+      tprs[2]=new TestPhantomReference(obj,rq);
+      tprs[3]=new TestPhantomReference(obj,rq);
+    }
+  }
+  try {
+    Thread t=new TestThread();
+    t.start();
+    t.join();
+    System.gc();
+    System.runFinalization();
+    assertNull("get() should return null.",tprs[0].get());
+    assertNull("get() should return null.",tprs[1].get());
+    assertNull("get() should return null.",tprs[2].get());
+    assertNull("get() should return null.",tprs[3].get());
+    for (int i=0; i < 4; i++) {
+      Reference r=rq.remove(100L);
+      assertNotNull("Reference should have been enqueued.",r);
+    }
+    assertNull("get() should return null.",tprs[0].get());
+    assertNull("get() should return null.",tprs[1].get());
+    assertNull("get() should return null.",tprs[2].get());
+    assertNull("get() should return null.",tprs[3].get());
+  }
+ catch (  InterruptedException e) {
+    fail("InterruptedException : " + e.getMessage());
+  }
+}

@@ -1,0 +1,107 @@
+{
+  try {
+    c=(provider == null) ? Cipher.getInstance(transformation != null ? transformation : algName) : Cipher.getInstance(transformation != null ? transformation : algName,provider);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    throw new AllowedFailure(e.getMessage());
+  }
+catch (  NoSuchPaddingException e) {
+    throw new AllowedFailure(e.getMessage());
+  }
+  try {
+    KeyGenerator kg=(provider == null) ? KeyGenerator.getInstance(algName) : KeyGenerator.getInstance(algName,provider);
+    k=kg.generateKey();
+  }
+ catch (  NoSuchAlgorithmException e) {
+  }
+  if (k == null) {
+    try {
+      KeyPairGenerator kpg=(provider == null) ? KeyPairGenerator.getInstance(algName) : KeyPairGenerator.getInstance(algName,provider);
+      KeyPair kp=kpg.genKeyPair();
+      k=kp.getPrivate();
+      pubK=kp.getPublic();
+    }
+ catch (    NoSuchAlgorithmException e) {
+    }
+  }
+  PBEParameterSpec pbeParamSpec=null;
+  if (k == null) {
+    try {
+      pbeParamSpec=new PBEParameterSpec(new byte[]{1,2,3,4,5,6,7,8},10);
+      SecretKeyFactory skf=(provider == null) ? SecretKeyFactory.getInstance(algName) : SecretKeyFactory.getInstance(algName,provider);
+      PBEKeySpec ks=new PBEKeySpec("12345678".toCharArray());
+      try {
+        k=skf.generateSecret(ks);
+      }
+ catch (      InvalidKeySpecException e) {
+        throw new AllowedFailure(e.getMessage());
+      }
+    }
+ catch (    NoSuchAlgorithmException e) {
+      throw new AllowedFailure(e.getMessage());
+    }
+  }
+  try {
+    if (pbeParamSpec == null) {
+      c.init(Cipher.ENCRYPT_MODE,k);
+    }
+ else {
+      c.init(Cipher.ENCRYPT_MODE,k,pbeParamSpec);
+    }
+  }
+ catch (  InvalidKeyException e) {
+    throw new AllowedFailure(e.getMessage());
+  }
+catch (  SecurityException e) {
+    throw new AllowedFailure(e.getMessage());
+  }
+catch (  InvalidAlgorithmParameterException e) {
+    throw new AllowedFailure(e.getMessage());
+  }
+  ap=c.getParameters();
+  try {
+    ct=c.doFinal(privateKeyInfo);
+  }
+ catch (  IllegalStateException e) {
+    throw new AllowedFailure(e.getMessage());
+  }
+catch (  IllegalBlockSizeException e) {
+    throw new AllowedFailure(e.getMessage());
+  }
+catch (  BadPaddingException e) {
+    throw new AllowedFailure(e.getMessage());
+  }
+catch (  RuntimeException e) {
+    throw new AllowedFailure(e.getMessage());
+  }
+  try {
+    if (pbeParamSpec != null) {
+      try {
+        ap=(provider == null) ? AlgorithmParameters.getInstance(algName) : AlgorithmParameters.getInstance(algName,provider);
+        ap.init(pbeParamSpec);
+        pbeParamSpec=null;
+      }
+ catch (      NoSuchAlgorithmException e) {
+        throw new AllowedFailure(e.getMessage());
+      }
+catch (      InvalidParameterSpecException e) {
+        throw new AllowedFailure(e.getMessage());
+      }
+    }
+    if (ap == null) {
+      c.init(Cipher.DECRYPT_MODE,pubK == null ? k : pubK);
+    }
+ else {
+      c.init(Cipher.DECRYPT_MODE,pubK == null ? k : pubK,ap);
+    }
+  }
+ catch (  InvalidKeyException e) {
+    throw new AllowedFailure(e.getMessage());
+  }
+catch (  SecurityException e) {
+    throw new AllowedFailure(e.getMessage());
+  }
+catch (  InvalidAlgorithmParameterException e) {
+    throw new AllowedFailure(e.getMessage());
+  }
+}

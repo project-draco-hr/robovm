@@ -1,0 +1,12 @@
+{
+  Throwable throwable=newThrowable("Throwable","A","B");
+  Throwable cause=newThrowable("Cause","A","B","C","D");
+  Throwable suppressed=newThrowable("Suppressed","A","B","E","F");
+  throwable.addSuppressed(suppressed);
+  suppressed.addSuppressed(newThrowable("Suppressed/Suppressed","A","B","E","G"));
+  suppressed.initCause(newThrowable("Suppressed/Cause","A","B","E","H"));
+  throwable.initCause(cause);
+  cause.addSuppressed(newThrowable("Cause/Suppressed","A","B","C","I"));
+  cause.initCause(newThrowable("Cause/Cause","A","B","C","J"));
+  assertEquals("java.lang.Throwable: Throwable\n" + "\tat ClassB.doB(ClassB.java:1)\n" + "\tat ClassA.doA(ClassA.java:0)\n"+ "\tSuppressed: java.lang.Throwable: Suppressed\n"+ "\t\tat ClassF.doF(ClassF.java:3)\n"+ "\t\tat ClassE.doE(ClassE.java:2)\n"+ "\t\t... 2 more\n"+ "\t\tSuppressed: java.lang.Throwable: Suppressed/Suppressed\n"+ "\t\t\tat ClassG.doG(ClassG.java:3)\n"+ "\t\t\t... 3 more\n"+ "\tCaused by: java.lang.Throwable: Suppressed/Cause\n"+ "\t\tat ClassH.doH(ClassH.java:3)\n"+ "\t\t... 3 more\n"+ "Caused by: java.lang.Throwable: Cause\n"+ "\tat ClassD.doD(ClassD.java:3)\n"+ "\tat ClassC.doC(ClassC.java:2)\n"+ "\t... 2 more\n"+ "\tSuppressed: java.lang.Throwable: Cause/Suppressed\n"+ "\t\tat ClassI.doI(ClassI.java:3)\n"+ "\t\t... 3 more\n"+ "Caused by: java.lang.Throwable: Cause/Cause\n"+ "\tat ClassJ.doJ(ClassJ.java:3)\n"+ "\t... 3 more\n",printStackTraceToString(throwable));
+}

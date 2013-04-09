@@ -1,0 +1,28 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportedMsg);
+    return;
+  }
+  Mac[] macs=createMacs();
+  assertNotNull("Mac objects were not created",macs);
+  byte[] bb={(byte)1,(byte)2,(byte)3,(byte)4,(byte)5};
+  SecretKeySpec sks=new SecretKeySpec(bb,"SHA1");
+  byte[] bbuf={(byte)5,(byte)4,(byte)3,(byte)2,(byte)1};
+  ByteBuffer byteBuf;
+  byte[] bb1;
+  byte[] bb2;
+  for (int i=0; i < macs.length; i++) {
+    byteBuf=ByteBuffer.allocate(5);
+    byteBuf.put(bbuf);
+    byteBuf.position(2);
+    macs[i].init(sks);
+    macs[i].update(byteBuf);
+    bb1=macs[i].doFinal();
+    macs[i].init(sks);
+    macs[i].update(bbuf,2,3);
+    bb2=macs[i].doFinal();
+    for (int t=0; t < bb1.length; t++) {
+      assertEquals("Incorrect doFinal result",bb1[t],bb2[t]);
+    }
+  }
+}

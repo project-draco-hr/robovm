@@ -1,0 +1,29 @@
+{
+  String str="AbCdEfGhIjKlMnOpQrStUvWxYz";
+  StringReader aa=new StringReader(str);
+  StringReader ba=new StringReader(str);
+  StringReader ca=new StringReader(str);
+  PushbackReader a=new PushbackReader(aa,5);
+  try {
+    a.unread("PUSH".toCharArray());
+    Assert.assertEquals("PUSHAbCdEfGhIjKlMnOpQrStUvWxYz",read(a));
+  }
+  finally {
+    a.close();
+  }
+  PushbackReader b=new PushbackReader(ba,15);
+  try {
+    b.unread('X');
+    Assert.assertEquals("XAbCdEfGhI",read(b,10));
+  }
+  finally {
+    b.close();
+  }
+  PushbackReader c=new PushbackReader(ca);
+  try {
+    Assert.assertEquals("bdfhjlnprtvxz",skipRead(c));
+  }
+  finally {
+    c.close();
+  }
+}

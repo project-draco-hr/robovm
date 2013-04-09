@@ -1,0 +1,32 @@
+{
+  MyCertPath mCP=new MyCertPath(new byte[0]);
+  CertPathParameters params=new PKIXParameters(TestUtils.getTrustAnchorSet());
+  CertPathValidator certPV=CertPathValidator.getInstance(defaultAlg);
+  try {
+    certPV.validate(mCP,params);
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  CertPathValidatorException e) {
+    fail("unexpected exception: " + e);
+  }
+  try {
+    certPV.validate(null,params);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+    fail("unexpected exception: " + e);
+  }
+catch (  CertPathValidatorException e) {
+  }
+  try {
+    certPV.validate(mCP,null);
+    fail("InvalidAlgorithmParameterException must be thrown");
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+  }
+catch (  CertPathValidatorException e) {
+    fail("unexpected exception");
+  }
+}

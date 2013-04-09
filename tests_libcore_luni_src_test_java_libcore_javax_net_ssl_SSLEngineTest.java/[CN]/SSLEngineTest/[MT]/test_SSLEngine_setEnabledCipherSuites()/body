@@ -1,0 +1,26 @@
+{
+  TestSSLContext c=TestSSLContext.create();
+  SSLEngine e=c.clientContext.createSSLEngine();
+  try {
+    e.setEnabledCipherSuites(null);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    e.setEnabledCipherSuites(new String[1]);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    e.setEnabledCipherSuites(new String[]{"Bogus"});
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  e.setEnabledCipherSuites(new String[0]);
+  e.setEnabledCipherSuites(e.getEnabledCipherSuites());
+  e.setEnabledCipherSuites(e.getSupportedCipherSuites());
+  c.close();
+}

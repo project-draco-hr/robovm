@@ -1,0 +1,34 @@
+{
+class Handler extends DefaultHandler {
+    List<String> elementNames=new ArrayList<String>();
+    StringBuilder text=new StringBuilder();
+    public InputSource resolveEntity(    String publicId,    String systemId) throws IOException, SAXException {
+      if (publicId.equals("publicA") && systemId.equals("systemA")) {
+        return new InputSource(new StringReader("<a/>"));
+      }
+ else       if (publicId.equals("publicB") && systemId.equals("systemB")) {
+        InputSource inputSource=new InputSource(new ByteArrayInputStream("bob".getBytes("utf-8")));
+        inputSource.setEncoding("utf-8");
+        return inputSource;
+      }
+      throw new AssertionError();
+    }
+    @Override public void startElement(    String uri,    String localName,    String qName,    Attributes attributes) throws SAXException {
+      elementNames.add(localName);
+    }
+    @Override public void endElement(    String uri,    String localName,    String qName) throws SAXException {
+      elementNames.add("/" + localName);
+    }
+    @Override public void characters(    char ch[],    int start,    int length) throws SAXException {
+      text.append(ch,start,length);
+    }
+  }
+  Reader in=new StringReader("<?xml version=\"1.0\"?>\n" + "<!DOCTYPE foo [\n" + "  <!ENTITY a PUBLIC 'publicA' 'systemA'>\n"+ "  <!ENTITY b PUBLIC 'publicB' 'systemB'>\n"+ "]>\n"+ "<foo>\n"+ "  &a;<b>&b;</b></foo>");
+  ExpatReader reader=new ExpatReader();
+  Handler handler=new Handler();
+  reader.setContentHandler(handler);
+  reader.setEntityResolver(handler);
+  reader.parse(new InputSource(in));
+  assertEquals(Arrays.asList("foo","a","/a","b","/b","/foo"),handler.elementNames);
+  assertEquals("bob",handler.text.toString().trim());
+}

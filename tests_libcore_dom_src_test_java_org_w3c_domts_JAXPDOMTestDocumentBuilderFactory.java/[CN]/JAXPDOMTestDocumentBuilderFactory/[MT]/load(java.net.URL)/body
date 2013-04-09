@@ -1,0 +1,20 @@
+{
+  Document doc=null;
+  Exception parseException=null;
+  try {
+    LoadErrorHandler errorHandler=new LoadErrorHandler();
+    builder.setErrorHandler(errorHandler);
+    InputStream stream=url.openStream();
+    doc=builder.parse(stream,url.toString());
+    stream.close();
+    parseException=errorHandler.getFirstException();
+  }
+ catch (  Exception ex) {
+    parseException=ex;
+  }
+  builder.setErrorHandler(null);
+  if (parseException != null) {
+    throw new DOMTestLoadException(parseException);
+  }
+  return doc;
+}

@@ -1,0 +1,59 @@
+{
+  String[] tablesName={DatabaseCreator.TEST_TABLE1,DatabaseCreator.TEST_TABLE3};
+  String[] fields={"id","field1","field2","field3","fkey"};
+  String[] nullable={"YES","NO",""};
+  int[] nullableInt={DatabaseMetaData.columnNoNulls,DatabaseMetaData.columnNullable,DatabaseMetaData.columnNullableUnknown};
+  Arrays.sort(tablesName);
+  Arrays.sort(fields);
+  Arrays.sort(nullableInt);
+  Arrays.sort(nullable);
+  int countSingle=0;
+  int countAll1=0;
+  int countAll2=0;
+  try {
+    ResultSet rs=meta.getColumns(null,null,DatabaseCreator.TEST_TABLE1,"%");
+    while (rs.next()) {
+      assertTrue("Invalid table name",Arrays.binarySearch(tablesName,rs.getString("TABLE_NAME")) > -1);
+      assertTrue("Invalid field name",Arrays.binarySearch(fields,rs.getString("COLUMN_NAME")) > -1);
+      assertTrue("Invalid nullable value",Arrays.binarySearch(nullable,rs.getString("IS_NULLABLE")) > -1);
+      assertTrue("Invalid nullable code",Arrays.binarySearch(nullableInt,rs.getInt("NULLABLE")) > -1);
+      countSingle++;
+    }
+    assertEquals("Not all results are found",5,countSingle);
+    rs.close();
+  }
+ catch (  SQLException e) {
+    fail("Unexpected exception: " + e.getMessage());
+  }
+  try {
+    ResultSet rs=meta.getColumns(null,null,"%" + DatabaseCreator.CREATE_TABLE1.substring(0,3) + "%","%");
+    while (rs.next()) {
+      assertTrue("Wrong table name",Arrays.binarySearch(tablesName,rs.getString("TABLE_NAME")) > -1);
+      countAll1++;
+    }
+    assertEquals("Not all results are found",6,countAll1);
+    rs.close();
+  }
+ catch (  SQLException e) {
+    fail("Unexpected exception: " + e.getMessage());
+  }
+  try {
+    ResultSet rs=meta.getColumns(null,null,"%TEST_%","%");
+    while (rs.next()) {
+      assertTrue("Wrong table name",Arrays.binarySearch(tablesName,rs.getString("TABLE_NAME")) > -1);
+      countAll2++;
+    }
+    assertEquals("Not all results are found",6,countAll2);
+    rs.close();
+  }
+ catch (  SQLException e) {
+    fail("Unexpected exception: " + e.getMessage());
+  }
+  conn.close();
+  try {
+    meta.getColumns(null,null,DatabaseCreator.TEST_TABLE1,"%");
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

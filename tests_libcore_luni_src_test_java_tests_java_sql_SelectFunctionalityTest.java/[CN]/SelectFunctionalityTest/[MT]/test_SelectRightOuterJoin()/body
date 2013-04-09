@@ -1,0 +1,20 @@
+{
+  String sql="SELECT distinct s.snum as ssnum, c.snum as ccnum FROM " + DatabaseCreator.CUSTOMERS_TABLE + " c right outer join "+ DatabaseCreator.SALESPEOPLE_TABLE+ " s on s.snum=c.snum";
+  ResultSet result=statement.executeQuery(sql);
+  HashMap<Integer,Integer> value=new HashMap<Integer,Integer>();
+  value.put(1001,1001);
+  value.put(1002,1002);
+  value.put(1003,1003);
+  value.put(1004,1004);
+  value.put(1007,1007);
+  value.put(1013,null);
+  while (result.next()) {
+    int key=result.getInt("ssnum");
+    Object val=result.getObject("ccnum");
+    assertTrue("wrong value of ssnum field",value.containsKey(key));
+    assertEquals("wrong value of ccnum field",value.get(key),(Integer)val);
+    value.remove(key);
+  }
+  assertTrue("expected rows number doesn't equal actual rows number",value.isEmpty());
+  result.close();
+}

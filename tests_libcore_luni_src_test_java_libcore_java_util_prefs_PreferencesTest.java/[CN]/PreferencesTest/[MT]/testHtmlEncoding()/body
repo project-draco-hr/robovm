@@ -1,0 +1,10 @@
+{
+  Preferences parent=Preferences.userNodeForPackage(this.getClass());
+  Preferences p=parent.node("testHtmlEncoding");
+  p.put("key","a<>&'\"\\b");
+  p.flush();
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  p.exportNode(baos);
+  String s=new String(baos.toByteArray(),"UTF-8");
+  assertTrue(s,s.contains("value=\"a&lt;&gt;&amp;'&quot;\\b\""));
+}

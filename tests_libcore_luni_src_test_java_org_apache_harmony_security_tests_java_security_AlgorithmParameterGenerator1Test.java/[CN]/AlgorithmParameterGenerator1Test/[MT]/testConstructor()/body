@@ -1,0 +1,25 @@
+{
+  if (!DSASupported) {
+    fail(validAlgName + " algorithm is not supported");
+    return;
+  }
+  AlgorithmParameterGeneratorSpi spi=new MyAlgorithmParameterGeneratorSpi();
+  AlgorithmParameterGenerator apg=new myAlgPG(spi,validProvider,validAlgName);
+  assertEquals("Incorrect algorithm",apg.getAlgorithm(),validAlgName);
+  assertEquals("Incorrect provider",apg.getProvider(),validProvider);
+  try {
+    apg.init(-10,null);
+    fail("IllegalArgumentException must be thrown");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  apg=new myAlgPG(null,null,null);
+  assertNull("Incorrect algorithm",apg.getAlgorithm());
+  assertNull("Incorrect provider",apg.getProvider());
+  try {
+    apg.init(-10,null);
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+}

@@ -1,0 +1,42 @@
+{
+  assertNotNull(kmf);
+  assertNotNull(kmf.getAlgorithm());
+  assertNotNull(kmf.getProvider());
+  try {
+    kmf.getKeyManagers();
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+  try {
+    kmf.init(null);
+    fail();
+  }
+ catch (  InvalidAlgorithmParameterException expected) {
+  }
+  try {
+    kmf.init(new UselessManagerFactoryParameters());
+    fail();
+  }
+ catch (  InvalidAlgorithmParameterException expected) {
+  }
+  PasswordProtection pp=new PasswordProtection(getTestKeyStore().storePassword);
+  Builder builder=Builder.newInstance(getTestKeyStore().keyStore,pp);
+  KeyStoreBuilderParameters ksbp=new KeyStoreBuilderParameters(builder);
+  if (supportsManagerFactoryParameters(kmf.getAlgorithm())) {
+    kmf.init(ksbp);
+    test_KeyManagerFactory_getKeyManagers(kmf,false);
+  }
+ else {
+    try {
+      kmf.init(ksbp);
+      fail();
+    }
+ catch (    InvalidAlgorithmParameterException expected) {
+    }
+  }
+  kmf.init(null,null);
+  test_KeyManagerFactory_getKeyManagers(kmf,true);
+  kmf.init(getTestKeyStore().keyStore,getTestKeyStore().storePassword);
+  test_KeyManagerFactory_getKeyManagers(kmf,false);
+}

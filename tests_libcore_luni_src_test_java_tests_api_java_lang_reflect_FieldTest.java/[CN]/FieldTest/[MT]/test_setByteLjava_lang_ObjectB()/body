@@ -1,0 +1,52 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  byte val=0;
+  try {
+    f=x.getClass().getDeclaredField("byteField");
+    f.setByte(x,(byte)1);
+    val=f.getByte(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during setByte test : " + e.getMessage());
+  }
+  assertEquals("Returned incorrect float field value",1,val);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    f.setByte(x,Byte.MIN_VALUE);
+    fail("Accessed field of invalid type");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("bytePFField");
+    assertFalse(f.isAccessible());
+    f.setByte(x,Byte.MIN_VALUE);
+    fail("Accessed inaccessible field");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("byteField");
+    f.setByte(null,Byte.MIN_VALUE);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  f=x.getClass().getDeclaredField("byteSField");
+  f.setByte(null,Byte.MIN_VALUE);
+  val=f.getByte(x);
+  assertEquals("Returned incorrect byte field value",Byte.MIN_VALUE,val);
+}

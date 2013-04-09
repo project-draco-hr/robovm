@@ -1,0 +1,19 @@
+{
+  ErrorRecorder errorRecorder=new ErrorRecorder();
+  domConfiguration.setParameter("error-handler",errorRecorder);
+  domConfiguration.setParameter("namespaces",false);
+  Element root=document.createElement("foo");
+  document.appendChild(root);
+  Text text=document.createTextNode("");
+  root.appendChild(text);
+  for (int c=0; c <= Character.MAX_VALUE; c++) {
+    text.setData(new String(new char[]{'A','B',(char)c}));
+    document.normalizeDocument();
+    if (isValid((char)c)) {
+      assertEquals(Collections.<DOMError>emptyList(),errorRecorder.errors);
+    }
+ else {
+      errorRecorder.assertAllErrors("For character " + c,DOMError.SEVERITY_ERROR,"wf-invalid-character");
+    }
+  }
+}

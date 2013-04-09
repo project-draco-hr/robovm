@@ -1,0 +1,20 @@
+{
+  URL[] u=new URL[0];
+  ucl=new URLClassLoader(u);
+  assertTrue("Failed to set parent",ucl != null && ucl.getParent() == URLClassLoader.getSystemClassLoader());
+  URL[] urls={new URL("http://foo.com/foo"),new URL("jar:file://foo.jar!/foo.c"),new URL("ftp://foo1/foo2/foo.c")};
+  URLClassLoader ucl1=new URLClassLoader(urls);
+  assertTrue(urls.length == ucl1.getURLs().length);
+  try {
+    Class.forName("test",false,ucl);
+    fail("Should throw ClassNotFoundException");
+  }
+ catch (  ClassNotFoundException e) {
+  }
+  try {
+    new URLClassLoader(new URL[]{null});
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception was thrown: " + e.getMessage());
+  }
+}

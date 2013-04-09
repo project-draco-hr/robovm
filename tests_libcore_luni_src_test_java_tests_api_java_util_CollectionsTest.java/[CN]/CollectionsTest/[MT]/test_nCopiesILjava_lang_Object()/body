@@ -1,0 +1,31 @@
+{
+  Object o=new Object();
+  List l=Collections.nCopies(100,o);
+  Iterator i=l.iterator();
+  Object first=i.next();
+  assertTrue("Returned list consists of copies not refs",first == o);
+  assertEquals("Returned list of incorrect size",100,l.size());
+  assertTrue("Contains",l.contains(o));
+  assertTrue("Contains null",!l.contains(null));
+  assertTrue("null nCopies contains",!Collections.nCopies(2,null).contains(o));
+  assertTrue("null nCopies contains null",Collections.nCopies(2,null).contains(null));
+  l=Collections.nCopies(20,null);
+  i=l.iterator();
+  for (int counter=0; i.hasNext(); counter++) {
+    assertTrue("List is too large",counter < 20);
+    assertNull("Element should be null: " + counter,i.next());
+  }
+  try {
+    l.add(o);
+    fail("Returned list is not immutable");
+  }
+ catch (  UnsupportedOperationException e) {
+    return;
+  }
+  try {
+    Collections.nCopies(-2,new HashSet());
+    fail("nCopies with negative arg didn't throw IAE");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

@@ -1,0 +1,18 @@
+{
+  TestSSLSessions s=TestSSLSessions.create();
+  try {
+    s.invalid.getPeerCertificateChain();
+    fail();
+  }
+ catch (  SSLPeerUnverifiedException expected) {
+  }
+  assertNotNull(s.client.getPeerCertificates());
+  TestKeyStore.assertChainLength(s.client.getPeerCertificateChain());
+  try {
+    assertNull(s.server.getPeerCertificateChain());
+    fail();
+  }
+ catch (  SSLPeerUnverifiedException expected) {
+  }
+  s.close();
+}

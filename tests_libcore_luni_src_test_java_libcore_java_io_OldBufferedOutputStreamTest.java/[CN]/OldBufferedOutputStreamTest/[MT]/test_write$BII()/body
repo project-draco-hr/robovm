@@ -1,0 +1,25 @@
+{
+  os=new java.io.BufferedOutputStream(baos=new java.io.ByteArrayOutputStream(),512);
+  os.write(fileString.getBytes(),0,500);
+  bais=new java.io.ByteArrayInputStream(baos.toByteArray());
+  assertEquals("Test 1: Bytes written, not buffered;",0,bais.available());
+  os.flush();
+  bais=new java.io.ByteArrayInputStream(baos.toByteArray());
+  assertEquals("Test 2: Bytes not written after flush;",500,bais.available());
+  os.write(fileString.getBytes(),500,513);
+  bais=new java.io.ByteArrayInputStream(baos.toByteArray());
+  assertTrue("Test 3: Bytes not written when buffer full.",bais.available() >= 1000);
+  byte[] wbytes=new byte[1013];
+  bais.read(wbytes,0,1013);
+  assertTrue("Test 4: Incorrect bytes written or read.",fileString.substring(0,1013).equals(new String(wbytes,0,wbytes.length)));
+  os.close();
+  sos=new Support_OutputStream(true);
+  os=new BufferedOutputStream(sos,10);
+  try {
+    os.write(fileString.getBytes(),0,500);
+    fail("Test 5: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  sos.setThrowsException(false);
+}

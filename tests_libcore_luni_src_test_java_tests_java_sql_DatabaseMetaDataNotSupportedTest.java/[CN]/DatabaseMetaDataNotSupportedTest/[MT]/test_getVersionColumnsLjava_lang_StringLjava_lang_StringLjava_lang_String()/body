@@ -1,0 +1,11 @@
+{
+  DatabaseMetaDataTest.insertNewRecord();
+  String triggerName="updateTrigger";
+  String triggerQuery="CREATE TRIGGER " + triggerName + " AFTER UPDATE ON "+ DatabaseCreator.TEST_TABLE1+ " FOR EACH ROW BEGIN INSERT INTO "+ DatabaseCreator.TEST_TABLE3+ " SET fk = 10; END;";
+  statementForward.execute(triggerQuery);
+  String updateQuery="UPDATE " + DatabaseCreator.TEST_TABLE1 + " SET field1='fffff' WHERE id=1";
+  statementForward.execute(updateQuery);
+  ResultSet rs=meta.getVersionColumns(conn.getCatalog(),null,DatabaseCreator.TEST_TABLE1);
+  assertTrue("Result set is empty",rs.next());
+  rs.close();
+}

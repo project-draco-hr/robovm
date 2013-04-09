@@ -1,0 +1,18 @@
+{
+  try {
+    new SealedObject(null){
+    }
+;
+    fail("NullPointerException should be thrown in the case " + "of null SealedObject.");
+  }
+ catch (  NullPointerException e) {
+  }
+  String secret="secret string";
+  Cipher cipher=new NullCipher();
+  SealedObject so1=new SealedObject(secret,cipher);
+  SealedObject so2=new SealedObject(so1){
+  }
+;
+  assertEquals("The secret content of the object should equals " + "to the secret content of initial object.",secret,so2.getObject(cipher));
+  assertEquals("The algorithm which was used to seal the object " + "should be the same as the algorithm used to seal the " + "initial object",so1.getAlgorithm(),so2.getAlgorithm());
+}

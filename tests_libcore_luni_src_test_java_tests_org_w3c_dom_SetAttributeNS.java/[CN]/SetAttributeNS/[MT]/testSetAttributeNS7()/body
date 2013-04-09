@@ -1,0 +1,20 @@
+{
+  String namespaceURI="http://www.nist.gov";
+  String qualifiedName="xmlns";
+  Document doc;
+  NodeList elementList;
+  Node testAddr;
+  doc=(Document)load("staffNS",builder);
+  elementList=doc.getElementsByTagName("employee");
+  testAddr=elementList.item(0);
+{
+    boolean success=false;
+    try {
+      ((Element)testAddr).setAttributeNS(namespaceURI,qualifiedName,"newValue");
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.NAMESPACE_ERR);
+    }
+    assertTrue("throw_NAMESPACE_ERR",success);
+  }
+}

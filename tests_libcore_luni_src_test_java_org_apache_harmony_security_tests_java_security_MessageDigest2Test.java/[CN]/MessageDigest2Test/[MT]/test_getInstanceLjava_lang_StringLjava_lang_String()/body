@@ -1,0 +1,40 @@
+{
+  for (  Entry<Provider,List<String>> e : digestAlgs.entrySet()) {
+    for (    String algorithm : e.getValue()) {
+      MessageDigest md=MessageDigest.getInstance(algorithm,e.getKey().getName());
+      assertNotNull(md);
+    }
+  }
+  for (  List<String> algorithms : digestAlgs.values()) {
+    for (    String algorithm : algorithms) {
+      try {
+        MessageDigest.getInstance(algorithm,"UnknownProvider");
+        fail("expected NoSuchProviderException");
+      }
+ catch (      NoSuchProviderException expected) {
+      }
+    }
+  }
+  for (  Provider provider : digestAlgs.keySet()) {
+    try {
+      MessageDigest.getInstance("UnknownDigest",provider.getName());
+      fail("expected NoSuchAlgorithmException");
+    }
+ catch (    NoSuchAlgorithmException expected) {
+    }
+  }
+  for (  Provider provider : digestAlgs.keySet()) {
+    try {
+      MessageDigest.getInstance(null,provider.getName());
+      fail("expected NullPointerException");
+    }
+ catch (    NullPointerException expected) {
+    }
+  }
+  try {
+    MessageDigest.getInstance("AnyDigest",(String)null);
+    fail("expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+}

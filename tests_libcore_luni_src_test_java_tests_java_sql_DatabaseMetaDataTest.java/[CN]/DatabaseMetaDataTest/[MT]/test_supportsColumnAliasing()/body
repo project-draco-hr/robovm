@@ -1,0 +1,22 @@
+{
+  insertNewRecord();
+  String alias="FIELD3";
+  String selectQuery="SELECT field1 AS " + alias + " FROM "+ DatabaseCreator.TEST_TABLE1;
+  ResultSet rs=statement.executeQuery(selectQuery);
+  ResultSetMetaData rsmd=rs.getMetaData();
+  if (meta.supportsColumnAliasing()) {
+    assertEquals("Wrong count of columns",1,rsmd.getColumnCount());
+    assertEquals("Aliasing is not supported",alias,rsmd.getColumnLabel(1));
+  }
+ else {
+    assertEquals("Aliasing is supported",0,rsmd.getColumnCount());
+  }
+  rs.close();
+  conn.close();
+  try {
+    meta.supportsColumnAliasing();
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

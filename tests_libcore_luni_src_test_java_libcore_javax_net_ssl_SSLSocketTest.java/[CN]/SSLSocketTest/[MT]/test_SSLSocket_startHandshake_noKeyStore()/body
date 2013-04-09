@@ -1,0 +1,42 @@
+{
+  TestSSLContext c=TestSSLContext.create(null,null,null,null,null,null,null,null,SSLContext.getDefault(),SSLContext.getDefault());
+  SSLSocket client=(SSLSocket)c.clientContext.getSocketFactory().createSocket(c.host,c.port);
+  if (StandardNames.IS_RI) {
+    final SSLSocket server=(SSLSocket)c.serverSocket.accept();
+    Thread thread=new Thread(new Runnable(){
+      public void run(){
+        try {
+          server.startHandshake();
+        }
+ catch (        SSLHandshakeException expected) {
+        }
+catch (        RuntimeException e) {
+          throw e;
+        }
+catch (        Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    }
+);
+    thread.start();
+    try {
+      client.startHandshake();
+      fail();
+    }
+ catch (    SSLHandshakeException expected) {
+    }
+    thread.join();
+    server.close();
+  }
+ else {
+    try {
+      c.serverSocket.accept();
+      fail();
+    }
+ catch (    SSLException expected) {
+    }
+  }
+  client.close();
+  c.close();
+}

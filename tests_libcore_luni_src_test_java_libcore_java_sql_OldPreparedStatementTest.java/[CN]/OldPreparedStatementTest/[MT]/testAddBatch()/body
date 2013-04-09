@@ -1,0 +1,66 @@
+{
+  PreparedStatement ps=null;
+  try {
+    ps=conn.prepareStatement("INSERT INTO zoo VALUES (3,'Tuzik', ?);");
+    ps.addBatch("INSERT INTO zoo VALUES (?,'Burenka', ?); ");
+    ps.addBatch("INSERT INTO zoo VALUES (?,'Mashka','cat')");
+    try {
+      ps.executeBatch();
+    }
+ catch (    SQLException sqle) {
+      fail("SQLException is thrown for executeBatch()");
+    }
+    ps.setString(1,"dog");
+    Statement st=null;
+    try {
+      ps.executeBatch();
+      st=conn.createStatement();
+      st.execute("select * from zoo");
+      ResultSet rs=st.getResultSet();
+      assertEquals(2,getCount(rs));
+    }
+ catch (    SQLException sqle) {
+      fail("SQLException is thrown for executeBatch()");
+    }
+ finally {
+      try {
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    ps=conn.prepareStatement("INSERT INTO zoo VALUES (3,'Tuzik', ?);");
+    ps.addBatch("");
+  }
+ catch (  SQLException e) {
+  }
+ finally {
+    try {
+      ps.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+  try {
+    ps=conn.prepareStatement("INSERT INTO zoo VALUES (3,'Tuzik', ?);");
+    ps.addBatch(null);
+  }
+ catch (  SQLException e) {
+  }
+ finally {
+    try {
+      ps.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+}

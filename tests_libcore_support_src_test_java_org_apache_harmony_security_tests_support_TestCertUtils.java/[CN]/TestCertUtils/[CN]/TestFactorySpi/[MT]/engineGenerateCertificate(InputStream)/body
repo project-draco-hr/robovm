@@ -1,0 +1,27 @@
+{
+  byte[] data=new byte[0];
+  byte[] chunk=new byte[1024];
+  int len;
+  try {
+    while ((len=is.read(chunk)) > 0) {
+      byte[] tmp=new byte[data.length + len];
+      System.arraycopy(data,0,tmp,0,data.length);
+      System.arraycopy(chunk,0,tmp,data.length,len);
+      data=tmp;
+    }
+  }
+ catch (  IOException ex) {
+    throw new CertificateException("IO problem",ex);
+  }
+  int pos=Arrays.binarySearch(data,(byte)0);
+  if (pos < 0) {
+    throw new CertificateException("invalid format");
+  }
+  byte[] subjNameData=new byte[pos];
+  System.arraycopy(data,0,subjNameData,0,subjNameData.length);
+  byte[] issNameData=new byte[data.length - pos - 1];
+  System.arraycopy(data,pos + 1,issNameData,0,issNameData.length);
+  X500Principal subjName=new X500Principal(subjNameData);
+  X500Principal issName=new X500Principal(issNameData);
+  return new TestX509Certificate(subjName,issName);
+}

@@ -1,0 +1,34 @@
+{
+  Set<TrustAnchor> taSet=TestUtils.getTrustAnchorSet();
+  if (taSet == null) {
+    fail(getName() + ": not performed (could not create test TrustAnchor set)");
+  }
+  PKIXParameters cpp=new PKIXParameters(taSet);
+  PKIXParameters cppc=(PKIXParameters)cpp.clone();
+  assertEquals(cpp.getPolicyQualifiersRejected(),cppc.getPolicyQualifiersRejected());
+  assertEquals(cpp.getCertPathCheckers(),cppc.getCertPathCheckers());
+  assertEquals(cpp.getCertStores(),cppc.getCertStores());
+  assertEquals(cpp.getDate(),cppc.getDate());
+  assertEquals(cpp.getInitialPolicies(),cppc.getInitialPolicies());
+  assertEquals(cpp.getSigProvider(),cppc.getSigProvider());
+  assertEquals(cpp.getTargetCertConstraints(),cppc.getTargetCertConstraints());
+  assertEquals(cpp.getTrustAnchors(),cppc.getTrustAnchors());
+  assertEquals(cpp.isAnyPolicyInhibited(),cppc.isAnyPolicyInhibited());
+  assertEquals(cpp.isExplicitPolicyRequired(),cppc.isExplicitPolicyRequired());
+  assertEquals(cpp.isPolicyMappingInhibited(),cppc.isPolicyMappingInhibited());
+  assertEquals(cpp.isRevocationEnabled(),cppc.isRevocationEnabled());
+  cpp.setDate(Calendar.getInstance().getTime());
+  cpp.setPolicyQualifiersRejected(!cppc.getPolicyQualifiersRejected());
+  assertFalse(cpp.getDate().equals(cppc.getDate()));
+  assertFalse(cpp.getPolicyQualifiersRejected() == cppc.getPolicyQualifiersRejected());
+  cppc.setExplicitPolicyRequired(!cpp.isExplicitPolicyRequired());
+  cppc.setRevocationEnabled(!cpp.isRevocationEnabled());
+  assertFalse(cpp.isExplicitPolicyRequired() == cppc.isExplicitPolicyRequired());
+  assertFalse(cpp.isRevocationEnabled() == cppc.isRevocationEnabled());
+  PKIXParameters cpp1=null;
+  try {
+    cpp1.clone();
+  }
+ catch (  NullPointerException e) {
+  }
+}

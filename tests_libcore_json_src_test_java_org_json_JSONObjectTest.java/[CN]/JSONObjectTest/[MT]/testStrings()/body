@@ -1,0 +1,43 @@
+{
+  JSONObject object=new JSONObject();
+  object.put("foo","true");
+  object.put("bar","5.5");
+  object.put("baz","9223372036854775806");
+  object.put("quux","null");
+  object.put("height","5\"8' tall");
+  assertTrue(object.toString().contains("\"foo\":\"true\""));
+  assertTrue(object.toString().contains("\"bar\":\"5.5\""));
+  assertTrue(object.toString().contains("\"baz\":\"9223372036854775806\""));
+  assertTrue(object.toString().contains("\"quux\":\"null\""));
+  assertTrue(object.toString().contains("\"height\":\"5\\\"8' tall\""));
+  assertEquals("true",object.get("foo"));
+  assertEquals("null",object.getString("quux"));
+  assertEquals("5\"8' tall",object.getString("height"));
+  assertEquals("true",object.opt("foo"));
+  assertEquals("5.5",object.optString("bar"));
+  assertEquals("true",object.optString("foo","x"));
+  assertFalse(object.isNull("foo"));
+  assertEquals(true,object.getBoolean("foo"));
+  assertEquals(true,object.optBoolean("foo"));
+  assertEquals(true,object.optBoolean("foo",false));
+  assertEquals(0,object.optInt("foo"));
+  assertEquals(-2,object.optInt("foo",-2));
+  assertEquals(5.5d,object.getDouble("bar"));
+  assertEquals(5L,object.getLong("bar"));
+  assertEquals(5,object.getInt("bar"));
+  assertEquals(5,object.optInt("bar",3));
+  assertEquals(9223372036854775807L,object.getLong("baz"));
+  assertEquals(9.223372036854776E18,object.getDouble("baz"));
+  assertEquals(Integer.MAX_VALUE,object.getInt("baz"));
+  assertFalse(object.isNull("quux"));
+  try {
+    object.getDouble("quux");
+    fail();
+  }
+ catch (  JSONException e) {
+  }
+  assertEquals(Double.NaN,object.optDouble("quux"));
+  assertEquals(-1.0d,object.optDouble("quux",-1.0d));
+  object.put("foo","TRUE");
+  assertEquals(true,object.getBoolean("foo"));
+}

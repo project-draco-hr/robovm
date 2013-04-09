@@ -1,0 +1,46 @@
+{
+  PreparedStatement ps=null;
+  try {
+    String query="select * from zoo where id = ? and family=?";
+    ps=conn.prepareStatement(query);
+    ps.clearParameters();
+    try {
+      ps.execute();
+      fail("SQLException is not thrown during execute method after calling clearParameters()");
+    }
+ catch (    SQLException sql) {
+    }
+    ps.setInt(1,2);
+    ps.setString(2,"dog");
+    ps.clearParameters();
+    try {
+      ps.execute();
+      fail("SQLException is not thrown during execute method after calling clearParameters()");
+    }
+ catch (    SQLException sqle) {
+    }
+    ps.setInt(1,2);
+    ps.clearParameters();
+    try {
+      ps.execute();
+      fail("SQLException is not thrown during execute method after calling clearParameters()");
+    }
+ catch (    SQLException sqle) {
+    }
+    ps.setInt(1,2);
+    ps.setString(2,"cat");
+    try {
+      ps.execute();
+    }
+ catch (    SQLException sqle) {
+      fail("SQLException is thrown during execute method after calling clearParameters() twice");
+    }
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    SQLException ee) {
+    }
+  }
+}

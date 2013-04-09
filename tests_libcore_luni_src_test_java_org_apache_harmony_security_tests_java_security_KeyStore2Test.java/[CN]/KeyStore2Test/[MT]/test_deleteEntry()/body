@@ -1,0 +1,17 @@
+{
+  try {
+    KeyStore keyTest=KeyStore.getInstance(KeyStore.getDefaultType());
+    keyTest.load(null,null);
+    keyTest.deleteEntry(null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  KeyStore keyTest=KeyStore.getInstance(KeyStore.getDefaultType());
+  keyTest.load(null,"password".toCharArray());
+  KeyStore.PasswordProtection pp=new KeyStore.PasswordProtection(pssWord);
+  Certificate[] chain={new MyCertificate("DSA",testEncoding),new MyCertificate("DSA",testEncoding)};
+  KeyStore.PrivateKeyEntry pkEntry=new KeyStore.PrivateKeyEntry(getPrivateKey(),chain);
+  keyTest.setEntry("symKey",pkEntry,pp);
+  keyTest.deleteEntry("symKey");
+}

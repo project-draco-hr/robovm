@@ -1,0 +1,33 @@
+{
+  SecureRandom sr=new SecureRandom();
+  byte[] iv=new byte[8];
+  sr.nextBytes(iv);
+  AlgorithmParameterSpec ap=new IvParameterSpec(iv);
+  Cipher c=Cipher.getInstance("DES/CBC/PKCS5Padding");
+  c.init(Cipher.WRAP_MODE,cipherKeyDES,ap,sr);
+  byte[] arDES=c.wrap(cipherKeyDES);
+  byte[] ar=c.wrap(cipherKey);
+  try {
+    c.unwrap(arDES,"DES",Cipher.SECRET_KEY);
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+  c.init(Cipher.UNWRAP_MODE,cipherKeyDES,ap,sr);
+  assertTrue(cipherKeyDES.equals(c.unwrap(arDES,"DES",Cipher.SECRET_KEY)));
+  assertFalse(cipherKeyDES.equals(c.unwrap(ar,"DES",Cipher.SECRET_KEY)));
+  try {
+    c.unwrap(arDES,"RSA38",Cipher.PUBLIC_KEY);
+    fail();
+  }
+ catch (  NoSuchAlgorithmException expected) {
+  }
+  c=Cipher.getInstance("DESede/CBC/PKCS5Padding");
+  c.init(Cipher.UNWRAP_MODE,cipherKey,ap,sr);
+  try {
+    c.unwrap(arDES,"DESede",Cipher.SECRET_KEY);
+    fail();
+  }
+ catch (  InvalidKeyException expected) {
+  }
+}

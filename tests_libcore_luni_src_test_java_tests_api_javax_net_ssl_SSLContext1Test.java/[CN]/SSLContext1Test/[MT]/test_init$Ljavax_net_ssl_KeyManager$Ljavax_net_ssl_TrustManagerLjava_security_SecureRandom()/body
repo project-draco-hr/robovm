@@ -1,0 +1,33 @@
+{
+  if (!DEFSupported)   fail(NotSupportMsg);
+  SSLContextSpi spi=new MySSLContextSpi();
+  SSLContext sslContext=new MySslContext(spi,defaultProvider,defaultProtocol);
+  try {
+    sslContext.createSSLEngine();
+    fail("Expected RuntimeException was not thrown");
+  }
+ catch (  RuntimeException rte) {
+  }
+  try {
+    sslContext.init(null,null,null);
+    fail("KeyManagementException wasn't thrown");
+  }
+ catch (  KeyManagementException kme) {
+  }
+  try {
+    String tAlg=TrustManagerFactory.getDefaultAlgorithm();
+    String kAlg=KeyManagerFactory.getDefaultAlgorithm();
+    if (tAlg == null)     fail("TrustManagerFactory default algorithm is not defined");
+    if (kAlg == null)     fail("KeyManagerFactory default algorithm is not defined");
+    KeyManagerFactory kmf=KeyManagerFactory.getInstance(kAlg);
+    kmf.init(null,new char[11]);
+    TrustManagerFactory tmf=TrustManagerFactory.getInstance(tAlg);
+    KeyStore ks=KeyStore.getInstance(KeyStore.getDefaultType());
+    tmf.init(ks);
+    TrustManager[] tms=tmf.getTrustManagers();
+    sslContext.init(kmf.getKeyManagers(),tms,new SecureRandom());
+  }
+ catch (  Exception e) {
+    System.out.println("EE = " + e);
+  }
+}

@@ -1,0 +1,15 @@
+{
+  AlgorithmParameterGenerator apg=AlgorithmParameterGenerator.getInstance("DH");
+  apg.init(1024,new SecureRandom());
+  AlgorithmParameters ap=apg.generateParameters();
+  DHParameterSpec ps=ap.getParameterSpec(DHParameterSpec.class);
+  KeyAgreementGen kag1=new KeyAgreementGen(ps);
+  KeyAgreementGen kag2=new KeyAgreementGen(ps);
+  byte[] bArray1=kag1.getPublicKeyBytes();
+  byte[] bArray2=kag2.getPublicKeyBytes();
+  byte[] sk1=kag1.getSecretKey(algName,bArray2);
+  byte[] sk2=kag2.getSecretKey(algName,bArray1);
+  if (Arrays.areEqual(sk1,sk2) == false) {
+    throw new Exception("Generated keys are not the same");
+  }
+}

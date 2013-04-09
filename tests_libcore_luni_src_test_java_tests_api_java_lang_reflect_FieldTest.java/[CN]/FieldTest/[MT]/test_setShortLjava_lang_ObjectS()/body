@@ -1,0 +1,52 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  short val=0;
+  try {
+    f=x.getClass().getDeclaredField("shortField");
+    f.setShort(x,Short.MIN_VALUE);
+    val=f.getShort(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during setShort test : " + e.getMessage());
+  }
+  assertEquals("Returned incorrect short field value",Short.MIN_VALUE,val);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    f.setShort(x,Short.MIN_VALUE);
+    fail("Accessed field of invalid type");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("shortPFField");
+    assertFalse(f.isAccessible());
+    f.setShort(x,Short.MIN_VALUE);
+    fail("Accessed inaccessible field");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("shortField");
+    f.setShort(null,Short.MIN_VALUE);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  f=x.getClass().getDeclaredField("shortSField");
+  f.setShort(null,Short.MIN_VALUE);
+  val=f.getShort(x);
+  assertEquals("Returned incorrect short field value",Short.MIN_VALUE,val);
+}

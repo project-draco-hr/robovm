@@ -1,0 +1,35 @@
+{
+  Statement st=null;
+  ResultSet res=null;
+  st=conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY,ResultSet.CLOSE_CURSORS_AT_COMMIT);
+  st.execute("create table test (c1);");
+  res=st.getResultSet();
+  assertNull(res);
+  st=conn.createStatement();
+  String select="select * from zoo where id == 4;";
+  String insert="insert into zoo (id, name, family) values (4, 'Vorobuy', 'bear');";
+  st.execute(insert);
+  st.execute(select);
+  assertEquals(-1,st.getUpdateCount());
+  res=st.getResultSet();
+  assertNotNull(res);
+  res.next();
+  assertEquals(4,res.getInt(1));
+  assertEquals("Vorobuy",res.getString(2));
+  assertEquals("bear",res.getString(3));
+  assertFalse(res.next());
+  st=conn.createStatement();
+  insert="insert into zoo (id, name, family) values (3, 'Vorobey', 'sparrow');";
+  st.execute(insert);
+  res=st.getResultSet();
+  if (st.getUpdateCount() > 0) {
+    assertNull(res);
+  }
+  try {
+    st.close();
+    st.getResultSet();
+    fail("Exception expected");
+  }
+ catch (  SQLException e) {
+  }
+}

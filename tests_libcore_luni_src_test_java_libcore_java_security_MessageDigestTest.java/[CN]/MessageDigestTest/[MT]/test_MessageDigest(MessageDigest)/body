@@ -1,0 +1,23 @@
+{
+  String algorithm=md.getAlgorithm();
+  for (  Map.Entry<String,byte[]> expectation : getExpectations(algorithm).entrySet()) {
+    String inputName=expectation.getKey();
+    byte[] expected=expectation.getValue();
+    byte[] actual;
+    if (inputName.equals(INPUT_EMPTY)) {
+      actual=md.digest();
+    }
+ else     if (inputName.equals(INPUT_256MB)) {
+      byte[] mb=new byte[1 * 1024 * 1024];
+      for (int i=0; i < 256; i++) {
+        md.update(mb);
+      }
+      actual=md.digest();
+    }
+ else {
+      throw new AssertionError(inputName);
+    }
+    assertDigest(algorithm,expected,actual);
+    assertEquals(algorithm,expected.length,md.getDigestLength());
+  }
+}

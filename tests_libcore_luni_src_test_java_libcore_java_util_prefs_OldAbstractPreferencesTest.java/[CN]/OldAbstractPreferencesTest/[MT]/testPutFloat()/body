@@ -1,0 +1,29 @@
+{
+  pref.putFloat("FloatValue",new Float(1.602e-19));
+  pref.flush();
+  assertEquals(new Float(1.602e-19),pref.getFloat("FloatValue",new Float(0.2)));
+  try {
+    pref.putFloat(null,new Float(0.1));
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  int i;
+  StringBuffer sb=new StringBuffer();
+  for (i=0; i < Preferences.MAX_KEY_LENGTH + 1; i++) {
+    sb.append('c');
+  }
+  try {
+    pref.putFloat(new String(sb),new Float(0.1));
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  pref.removeNode();
+  try {
+    pref.putFloat("FloatValue",new Float(0.1));
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+}

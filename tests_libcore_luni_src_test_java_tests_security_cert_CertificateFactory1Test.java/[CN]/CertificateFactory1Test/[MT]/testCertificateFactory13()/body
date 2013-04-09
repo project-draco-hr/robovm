@@ -1,0 +1,34 @@
+{
+  if (!X509Support) {
+    fail(NotSupportMsg);
+    return;
+  }
+  CertificateFactory[] certFs=initCertFs();
+  assertNotNull("CertificateFactory objects were not created",certFs);
+  byte[] enc={(byte)0,(byte)2,(byte)3,(byte)4,(byte)5};
+  MyCertPath mc=new MyCertPath(enc);
+  ByteArrayOutputStream os=new ByteArrayOutputStream();
+  ObjectOutputStream oos=new ObjectOutputStream(os);
+  oos.writeObject(mc);
+  oos.flush();
+  oos.close();
+  byte[] arr=os.toByteArray();
+  ByteArrayInputStream is=new ByteArrayInputStream(arr);
+  for (int i=0; i < certFs.length; i++) {
+    try {
+      certFs[i].generateCertPath(is);
+      fail("CertificateException must be thrown because input stream contains incorrect datas");
+    }
+ catch (    CertificateException e) {
+    }
+    Iterator<String> it=certFs[i].getCertPathEncodings();
+    while (it.hasNext()) {
+      try {
+        certFs[i].generateCertPath(is,it.next());
+        fail("CertificateException must be thrown because input stream contains incorrect datas");
+      }
+ catch (      CertificateException e) {
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  super(settings);
+  try {
+    Class domImplRegistryClass=Class.forName("org.w3c.dom.bootstrap.DOMImplementationRegistry");
+    Method newInstanceMethod=domImplRegistryClass.getMethod("newInstance",(Class<?>)null);
+    Object domRegistry=newInstanceMethod.invoke(null,(Class<?>)null);
+    Method getDOMImplementationMethod=domImplRegistryClass.getMethod("getDOMImplementation",new Class[]{String.class});
+    impl=(DOMImplementation)getDOMImplementationMethod.invoke(domRegistry,new Object[]{"LS"});
+    Method createLSParserMethod=impl.getClass().getMethod("createLSParser",new Class[]{short.class,String.class});
+    parser=createLSParserMethod.invoke(impl,new Object[]{new Short((short)1),null});
+    parseURIMethod=parser.getClass().getMethod("parseURI",new Class[]{String.class});
+  }
+ catch (  InvocationTargetException ex) {
+    throw new DOMTestIncompatibleException(ex.getTargetException(),null);
+  }
+catch (  Exception ex) {
+    throw new DOMTestIncompatibleException(ex,null);
+  }
+  if (settings != null) {
+    for (int i=0; i < settings.length; i++) {
+      Object strategy=strategies.get(settings[i].getProperty());
+      if (strategy == null) {
+        throw new DOMTestIncompatibleException(null,settings[i]);
+      }
+ else {
+        ((LSStrategy)strategy).applySetting(settings[i],parser);
+      }
+    }
+  }
+}

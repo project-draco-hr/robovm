@@ -1,0 +1,93 @@
+{
+  PreparedStatement ps=null;
+  try {
+    String query="insert into type (IntVal) values (?);";
+    ps=conn.prepareStatement(query);
+    Statement st=null;
+    try {
+      ps.setObject(1,Integer.MAX_VALUE);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where IntVal=" + Integer.MAX_VALUE);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    query="insert into type (LongVal) values (?);";
+    ps=conn.prepareStatement(query);
+    try {
+      ps.setObject(1,"test text");
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where LongVal='test text';");
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+    query="insert into type (DecVal) values (?);";
+    ps=conn.prepareStatement(query);
+    try {
+      ps.setObject(1,new Object());
+      ps.execute();
+    }
+ catch (    SQLException sqle) {
+      fail("SQLException is thrown");
+    }
+    query="insert into type (dateVal) values (?);";
+    ps=conn.prepareStatement(query);
+    Date d=new Date(123456789);
+    try {
+      ps.setObject(1,d);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where dateVal='" + d.getTime() + "';");
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    query="insert into type (BlobVal) values (?);";
+    ps=conn.prepareStatement(query);
+    try {
+      ps.setObject(1,null);
+      ps.execute();
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      SQLException ee) {
+      }
+    }
+  }
+  finally {
+    try {
+      ps.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    ps.setObject(1,"test text");
+    fail("Exception not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

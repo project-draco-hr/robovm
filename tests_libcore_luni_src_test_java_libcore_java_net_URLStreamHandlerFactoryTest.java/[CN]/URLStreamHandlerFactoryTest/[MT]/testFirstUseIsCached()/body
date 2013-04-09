@@ -1,0 +1,14 @@
+{
+  factoryField.set(null,null);
+  URL.setURLStreamHandlerFactory(oldFactory);
+  URLConnection connection1=new URL("http://android.com/").openConnection();
+  assertFalse(connection1 instanceof Handler.HandlerURLConnection);
+  try {
+    System.setProperty("java.protocol.handler.pkgs",getHandlerPackageName());
+    URLConnection connection2=new URL("http://android.com/").openConnection();
+    assertFalse(connection2 instanceof Handler.HandlerURLConnection);
+  }
+  finally {
+    System.clearProperty("java.protocol.handler.pkgs");
+  }
+}

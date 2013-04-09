@@ -1,0 +1,24 @@
+{
+  try {
+    ByteArrayInputStream bais=new ByteArrayInputStream(base64cert.getBytes());
+    CertificateFactory cf=CertificateFactory.getInstance("X.509");
+    this.cert=(java.security.cert.X509Certificate)cf.generateCertificate(bais);
+    this.tbt_cert=X509Certificate.getInstance(cert.getEncoded());
+    this.javaCert=(java.security.cert.X509Certificate)cf.generateCertificate(new ByteArrayInputStream(selfSignedCert.getBytes()));
+    this.javaxCert=X509Certificate.getInstance(javaCert.getEncoded());
+    myProvider=cf.getProvider();
+    Security.addProvider(myProvider);
+    this.javaSSCert=cf.generateCertificate(new ByteArrayInputStream(selfSignedCert.getBytes()));
+    this.javaxSSCert=X509Certificate.getInstance(javaCert.getEncoded());
+    mySSProvider=cf.getProvider();
+    Security.addProvider(mySSProvider);
+  }
+ catch (  java.security.cert.CertificateException e) {
+    this.cert=null;
+    Logger.global.warning("Error in test setup: Certificate type not supported");
+  }
+catch (  javax.security.cert.CertificateException e) {
+    this.cert=null;
+    Logger.global.warning("Error in test setup: Certificate type not supported");
+  }
+}

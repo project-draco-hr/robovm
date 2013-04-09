@@ -1,0 +1,46 @@
+{
+  MathContext mc;
+  BigDecimal a, b, res;
+  mc=new MathContext(7,RoundingMode.FLOOR);
+  a=new BigDecimal("1000000.9");
+  assertEquals("incorrect value","1.000000E+6000",a.round(mc).pow(1000).round(mc).toString());
+  res=a.pow(1000,mc);
+  assertEquals("incorrect value","1.000900E+6000",res.toString());
+  mc=new MathContext(4,RoundingMode.FLOOR);
+  a=new BigDecimal("1000.9");
+  assertEquals("incorrect value","1.000E+3000",a.round(mc).pow(1000).round(mc).toString());
+  res=a.pow(1000,mc);
+  assertEquals("incorrect value","2.458E+3000",res.toString());
+  mc=new MathContext(2,RoundingMode.UNNECESSARY);
+  a=new BigDecimal("1234");
+  try {
+    res=a.pow(-2,mc);
+    fail("ArithmeticException is not thrown");
+  }
+ catch (  ArithmeticException e) {
+  }
+  a=new BigDecimal("100");
+  mc=new MathContext(4,RoundingMode.UNNECESSARY);
+  res=a.pow(-2,mc);
+  assertEquals("incorrect value","0.0001",res.toString());
+  a=new BigDecimal("1000.9");
+  try {
+    mc=new MathContext(0,RoundingMode.FLOOR);
+    res=a.pow(-1,mc);
+    fail("ArithmeticException is not thrown for negative exponent and precision = 0");
+  }
+ catch (  ArithmeticException e) {
+  }
+  a=new BigDecimal("000.0001");
+  try {
+    mc=new MathContext(0,RoundingMode.FLOOR);
+    res=a.pow(-1,mc);
+    fail("ArithmeticException is not thrown for negative exponent and precision = 0");
+  }
+ catch (  ArithmeticException e) {
+  }
+  a=new BigDecimal("1E-400");
+  mc=new MathContext(4,RoundingMode.UNNECESSARY);
+  res=a.pow(-1,mc);
+  assertEquals("incorrect value","1E+400",res.toString());
+}

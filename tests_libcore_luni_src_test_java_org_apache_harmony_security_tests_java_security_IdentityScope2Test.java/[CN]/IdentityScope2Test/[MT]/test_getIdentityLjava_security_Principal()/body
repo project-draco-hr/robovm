@@ -1,0 +1,23 @@
+{
+  Identity id=new IdentitySubclass("principal name");
+  id.setPublicKey(getPubKey());
+  IdentityScopeSubclass sub=new IdentityScopeSubclass("test",new IdentityScopeSubclass());
+  try {
+    sub.getIdentity((java.security.Principal)null);
+    fail("Test 1: NullPointerException expected.");
+  }
+ catch (  NullPointerException expected) {
+  }
+  sub.addIdentity(id);
+  Identity returnedId=sub.getIdentity(id);
+  assertEquals("Test 2: Returned Identity not the same as the added one;",id,returnedId);
+  Identity id2=new IdentitySubclass("Another identity");
+  id2.setPublicKey(getPubKey());
+  assertNull("Test 3: Null value expected.",sub.getIdentity(id2));
+  try {
+    sub.getIdentity((java.security.Principal)null);
+    fail("Test 4: NullPointerException expected.");
+  }
+ catch (  NullPointerException expected) {
+  }
+}

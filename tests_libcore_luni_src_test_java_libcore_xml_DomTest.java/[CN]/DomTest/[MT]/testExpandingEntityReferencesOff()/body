@@ -1,0 +1,17 @@
+{
+  String xml="<!DOCTYPE foo [ <!ENTITY def \"DEF\"> ]>" + "<foo>abc&def;ghi</foo>";
+  DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+  factory.setExpandEntityReferences(false);
+  document=factory.newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
+  Element documentElement=document.getDocumentElement();
+  Text abc=(Text)documentElement.getFirstChild();
+  assertEquals("abc",abc.getTextContent());
+  EntityReference def=(EntityReference)abc.getNextSibling();
+  assertEquals("def",def.getNodeName());
+  Text ghi=(Text)def.getNextSibling();
+  assertNull(ghi.getNextSibling());
+  assertEquals("Expected text value only and no expanded entity data","ghi",ghi.getTextContent());
+  NodeList defChildren=def.getChildNodes();
+  assertEquals("This implementation doesn't include children in entity references",1,defChildren.getLength());
+  assertEquals("DEF",defChildren.item(0).getTextContent());
+}

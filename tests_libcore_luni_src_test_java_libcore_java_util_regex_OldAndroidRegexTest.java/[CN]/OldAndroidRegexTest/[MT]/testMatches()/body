@@ -1,0 +1,31 @@
+{
+  Pattern p=Pattern.compile("bcd");
+  Matcher m=p.matcher("bcd");
+  assertTrue("Should match.",m.matches());
+  p=Pattern.compile("bcd");
+  m=p.matcher("abcdefg");
+  assertFalse("Should not match.",m.matches());
+  m=p.matcher("bcdefg");
+  assertFalse("Should not match.",m.matches());
+  m=p.matcher("abcd");
+  assertFalse("Should not match.",m.matches());
+  p=Pattern.compile(".*");
+  m=p.matcher("abc");
+  assertTrue(m.matches());
+  assertTrue(m.find());
+  assertTrue(m.matches());
+  p=Pattern.compile(".");
+  m=p.matcher("abc");
+  assertFalse(m.matches());
+  assertTrue(m.find());
+  assertFalse(m.matches());
+  m.reset("z");
+  assertTrue(m.matches());
+  m.reset("xyz");
+  assertFalse(m.matches());
+  assertFalse("Erroneously matched partial string.  " + "See http://b/issue?id=754601",Pattern.matches("er","xer"));
+  assertFalse("Erroneously matched partial string.  " + "See http://b/issue?id=754601",Pattern.matches("xe","xer"));
+  assertTrue("Generic regex should match.",Pattern.matches(".*","bcd"));
+  assertTrue("Grouped regex should match.",Pattern.matches("(b(c(d)))","bcd"));
+  assertTrue("Grouped regex should match.",Pattern.matches("(b)(c)(d)","bcd"));
+}

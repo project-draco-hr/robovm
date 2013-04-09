@@ -1,0 +1,20 @@
+{
+  RuleBasedCollator coll=(RuleBasedCollator)Collator.getInstance(Locale.US);
+  String text="abc";
+  CollationElementIterator iterator=coll.getCollationElementIterator(text);
+  int[] orders=new int[text.length()];
+  int order=iterator.next();
+  int i=0;
+  while (order != CollationElementIterator.NULLORDER) {
+    orders[i++]=order;
+    order=iterator.next();
+  }
+  int offset=iterator.getOffset();
+  assertEquals(text.length(),offset);
+  order=iterator.previous();
+  while (order != CollationElementIterator.NULLORDER) {
+    assertEquals(orders[--i],order);
+    order=iterator.previous();
+  }
+  assertEquals(0,iterator.getOffset());
+}

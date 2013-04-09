@@ -1,0 +1,30 @@
+{
+  final String msg="error";
+  KeyStoreSpi ksSpi=new MyKeyStoreSpi(){
+    public void engineLoad(    InputStream stream,    char[] password){
+      assertNull(stream);
+      assertNull(password);
+      throw new RuntimeException(msg);
+    }
+  }
+;
+  try {
+    ksSpi.engineLoad(null);
+    fail("Should throw exception");
+  }
+ catch (  RuntimeException e) {
+    assertSame(msg,e.getMessage());
+  }
+  try {
+    ksSpi.engineLoad(new MyLoadStoreParams(null));
+    fail("No expected UnsupportedOperationException");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  try {
+    ksSpi.engineLoad(new MyLoadStoreParams(new tmpProtection()));
+    fail("No expected UnsupportedOperationException");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+}

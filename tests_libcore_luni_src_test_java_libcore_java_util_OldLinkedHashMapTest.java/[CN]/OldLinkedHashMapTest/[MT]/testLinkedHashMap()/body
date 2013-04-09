@@ -1,0 +1,32 @@
+{
+  LinkedHashMap map=new LinkedHashMap<String,String>(10,0.75f,true);
+  map.put("key1","value1");
+  map.put("key2","value2");
+  map.put("key3","value3");
+  Iterator iterator=map.keySet().iterator();
+  String id=(String)iterator.next();
+  map.get(id);
+  try {
+    iterator.next();
+    fail("expected ConcurrentModificationException was not thrown.");
+  }
+ catch (  ConcurrentModificationException expected) {
+  }
+  LinkedHashMap mapClone=(LinkedHashMap)map.clone();
+  iterator=map.keySet().iterator();
+  id=(String)iterator.next();
+  mapClone.get(id);
+  iterator.next();
+  try {
+    new LinkedHashMap<String,String>(-10,0.75f,true);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    new LinkedHashMap<String,String>(10,-0.75f,true);
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+}

@@ -1,0 +1,24 @@
+{
+  String xml="<!DOCTYPE foo [<!ENTITY bb \"<bar>baz<!--quux--></bar>\">]><foo>a&bb;c</foo>";
+  XmlPullParser parser=newPullParser(xml);
+  assertEquals(XmlPullParser.DOCDECL,parser.nextToken());
+  assertEquals(XmlPullParser.START_TAG,parser.nextToken());
+  assertEquals("foo",parser.getName());
+  assertEquals(XmlPullParser.TEXT,parser.nextToken());
+  assertEquals("a",parser.getText());
+  assertEquals(XmlPullParser.ENTITY_REF,parser.nextToken());
+  assertEquals("bb",parser.getName());
+  assertEquals("",parser.getText());
+  assertEquals(XmlPullParser.START_TAG,parser.nextToken());
+  assertEquals("bar",parser.getName());
+  assertEquals(XmlPullParser.TEXT,parser.nextToken());
+  assertEquals("baz",parser.getText());
+  assertEquals(XmlPullParser.COMMENT,parser.nextToken());
+  assertEquals("quux",parser.getText());
+  assertEquals(XmlPullParser.END_TAG,parser.nextToken());
+  assertEquals("bar",parser.getName());
+  assertEquals(XmlPullParser.TEXT,parser.nextToken());
+  assertEquals("c",parser.getText());
+  assertEquals(XmlPullParser.END_TAG,parser.next());
+  assertEquals(XmlPullParser.END_DOCUMENT,parser.next());
+}

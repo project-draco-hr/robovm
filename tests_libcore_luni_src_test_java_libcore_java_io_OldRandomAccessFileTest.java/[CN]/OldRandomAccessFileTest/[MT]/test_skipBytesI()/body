@@ -1,0 +1,19 @@
+{
+  byte[] buf=new byte[5];
+  RandomAccessFile raf=new java.io.RandomAccessFile(fileName,"rw");
+  raf.writeBytes("HelloWorld");
+  raf.seek(0);
+  assertTrue("Test 1: Nothing should be skipped if parameter is less than zero",raf.skipBytes(-1) == 0);
+  assertEquals("Test 4: Incorrect number of bytes skipped; ",5,raf.skipBytes(5));
+  raf.readFully(buf);
+  assertEquals("Test 3: Failed to skip bytes.","World",new String(buf,0,5));
+  raf.seek(0);
+  assertEquals("Test 4: Incorrect number of bytes skipped; ",10,raf.skipBytes(20));
+  raf.close();
+  try {
+    raf.skipBytes(1);
+    fail("Test 5: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+}

@@ -1,0 +1,21 @@
+{
+  File base=createTemporaryDirectory();
+  File target=new File(base,"target");
+  target.createNewFile();
+  File linkName=new File(base,"link");
+  ln_s(target,linkName);
+  assertEquals(target.getCanonicalPath(),linkName.getCanonicalPath());
+  File subdir=new File(base,"subdir");
+  assertTrue(subdir.mkdir());
+  linkName=new File(subdir,"shorter");
+  ln_s("../target",linkName.toString());
+  assertEquals(target.getCanonicalPath(),linkName.getCanonicalPath());
+  linkName=new File(base,"l");
+  ln_s("subdir/longer",linkName.toString());
+  File longer=new File(base,"subdir/longer");
+  longer.createNewFile();
+  assertEquals(longer.getCanonicalPath(),linkName.getCanonicalPath());
+  linkName=new File(base,"double");
+  ln_s("subdir/shorter",linkName.toString());
+  assertEquals(target.getCanonicalPath(),linkName.getCanonicalPath());
+}

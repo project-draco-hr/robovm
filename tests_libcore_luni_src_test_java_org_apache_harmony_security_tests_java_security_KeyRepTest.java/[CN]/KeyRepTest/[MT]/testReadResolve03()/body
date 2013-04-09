@@ -1,0 +1,23 @@
+{
+  KeyRepChild kr=new KeyRepChild(KeyRep.Type.PRIVATE,"","",new byte[]{});
+  try {
+    kr.readResolve();
+    fail("NotSerializableException has not been thrown (no format)");
+  }
+ catch (  NotSerializableException ok) {
+  }
+  kr=new KeyRepChild(KeyRep.Type.PRIVATE,"","RAW",new byte[]{});
+  try {
+    kr.readResolve();
+    fail("NotSerializableException has not been thrown (unacceptable format)");
+  }
+ catch (  NotSerializableException ok) {
+  }
+  kr=new KeyRepChild(KeyRep.Type.PRIVATE,"bla-bla","PKCS#8",new byte[]{});
+  try {
+    kr.readResolve();
+    fail("NotSerializableException has not been thrown (unknown KeyFactory algorithm)");
+  }
+ catch (  NotSerializableException ok) {
+  }
+}

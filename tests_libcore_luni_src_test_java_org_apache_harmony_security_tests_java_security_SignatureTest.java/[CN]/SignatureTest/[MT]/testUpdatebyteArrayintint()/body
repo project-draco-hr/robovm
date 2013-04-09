@@ -1,0 +1,34 @@
+{
+  MySignature1 s=new MySignature1("ABC");
+  byte[] b={1,2,3,4};
+  try {
+    s.update(b,0,3);
+    fail("No expected SignatureException");
+  }
+ catch (  SignatureException e) {
+  }
+  s.initVerify(new MyPublicKey());
+  s.update(b,0,3);
+  s.initSign(new MyPrivateKey());
+  s.update(b,0,3);
+  assertEquals("state",MySignature1.SIGN,s.getState());
+  assertTrue("update() failed",s.runEngineUpdate2);
+  try {
+    s.update(b,3,0);
+    fail("expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    s.update(b,0,b.length + 1);
+    fail("expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    s.update(b,-1,b.length);
+    fail("expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

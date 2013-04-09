@@ -1,0 +1,13 @@
+{
+  byte[] input=new byte[128 * 1024];
+  byte[] comp=new byte[128 * 1024 + 512];
+  byte[] output=new byte[128 * 1024 + 512];
+  Inflater inflater=new Inflater(false);
+  Deflater deflater=new Deflater(Deflater.BEST_COMPRESSION,false);
+  createSample(input,step);
+  compress(deflater,input,comp);
+  expand(inflater,comp,(int)deflater.getBytesWritten(),output);
+  assertEquals(inflater.getBytesWritten(),input.length);
+  assertEquals(deflater.getAdler(),inflater.getAdler());
+  assertEquals(deflater.getAdler(),expectedAdler);
+}

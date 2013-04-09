@@ -1,0 +1,36 @@
+{
+  Preferences parent=Preferences.userNodeForPackage(Preferences.class);
+  Preferences pref=parent.node("mock");
+  try {
+    pref.nodeExists(null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    pref.nodeExists("/java/util/prefs/");
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    pref.nodeExists("/java//util/prefs");
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  assertTrue(pref.nodeExists("/"));
+  assertTrue(pref.nodeExists("/java/util/prefs"));
+  assertTrue(pref.nodeExists(""));
+  assertFalse(pref.nodeExists("child"));
+  Preferences grandchild=pref.node("child/grandchild");
+  assertTrue(pref.nodeExists("child"));
+  assertTrue(pref.nodeExists("child/grandchild"));
+  grandchild.removeNode();
+  assertTrue(pref.nodeExists("child"));
+  assertFalse(pref.nodeExists("child/grandchild"));
+  assertFalse(grandchild.nodeExists(""));
+  assertFalse(pref.nodeExists("child2/grandchild"));
+  pref.node("child2/grandchild");
+  assertTrue(pref.nodeExists("child2/grandchild"));
+}

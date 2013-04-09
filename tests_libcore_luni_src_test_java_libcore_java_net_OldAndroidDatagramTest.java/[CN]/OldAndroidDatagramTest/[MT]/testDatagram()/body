@@ -1,0 +1,37 @@
+{
+  Reflector reflector=null;
+  DatagramSocket socket=null;
+  try {
+    reflector=new Reflector(1234,InetAddress.getLocalHost());
+    reflector.start();
+    byte[] buffer=new byte[256];
+    DatagramPacket packet=new DatagramPacket(buffer,buffer.length);
+    socket=new DatagramSocket(2345,InetAddress.getLocalHost());
+    for (int i=1; i <= 10; i++) {
+      String s="Hello, Android world #" + i + "!";
+      stringToPacket(s,packet);
+      packet.setAddress(InetAddress.getLocalHost());
+      packet.setPort(1234);
+      socket.send(packet);
+      try {
+        Thread.sleep(100);
+      }
+ catch (      InterruptedException ex) {
+      }
+      packet.setLength(buffer.length);
+      socket.receive(packet);
+      String t=stringFromPacket(packet);
+      assertEquals(s.toUpperCase(),t);
+    }
+  }
+  finally {
+    if (reflector != null) {
+      reflector.alive=false;
+      reflector.interrupt();
+      reflector.socket.close();
+    }
+    if (socket != null) {
+      socket.close();
+    }
+  }
+}

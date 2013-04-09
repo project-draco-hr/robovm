@@ -1,0 +1,26 @@
+{
+  CookieManager cookieManager=new CookieManager(null,ACCEPT_ORIGINAL_SERVER);
+  CookieHandler.setDefault(cookieManager);
+  MockWebServer server=new MockWebServer();
+  try {
+    server.play();
+    server.enqueue(new MockResponse().addHeader("Set-Cookie: a=android; " + "expires=Fri, 31-Dec-9999 23:59:59 GMT; " + "path=/path; "+ "domain=" + server.getCookieDomain() + "; "+ "secure"));
+    get(server,"/path/foo");
+    List<HttpCookie> cookies=cookieManager.getCookieStore().getCookies();
+    assertEquals(1,cookies.size());
+    HttpCookie cookie=cookies.get(0);
+    assertEquals("a",cookie.getName());
+    assertEquals("android",cookie.getValue());
+    assertEquals(null,cookie.getComment());
+    assertEquals(null,cookie.getCommentURL());
+    assertEquals(false,cookie.getDiscard());
+    assertEquals(server.getCookieDomain(),cookie.getDomain());
+    assertTrue(cookie.getMaxAge() > 100000000000L);
+    assertEquals("/path",cookie.getPath());
+    assertEquals(true,cookie.getSecure());
+    assertEquals(0,cookie.getVersion());
+  }
+  finally {
+    server.shutdown();
+  }
+}

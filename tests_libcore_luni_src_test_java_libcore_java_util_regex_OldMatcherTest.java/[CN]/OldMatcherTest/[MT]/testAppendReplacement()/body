@@ -1,0 +1,31 @@
+{
+  Pattern pat=Pattern.compile("XX");
+  Matcher m=pat.matcher("Today is XX-XX-XX ...");
+  StringBuffer sb=new StringBuffer();
+  for (int i=0; m.find(); i++) {
+    m.appendReplacement(sb,new Integer(i * 10 + i).toString());
+  }
+  m.appendTail(sb);
+  assertEquals("Today is 0-11-22 ...",sb.toString());
+  pat=Pattern.compile("cat");
+  m=pat.matcher("one-cat-two-cats-in-the-yard");
+  sb=new StringBuffer();
+  Throwable t=null;
+  m.find();
+  try {
+    m.appendReplacement(null,"dog");
+  }
+ catch (  NullPointerException e) {
+    t=e;
+  }
+  assertNotNull(t);
+  t=null;
+  m.find();
+  try {
+    m.appendReplacement(sb,null);
+  }
+ catch (  NullPointerException e) {
+    t=e;
+  }
+  assertNotNull(t);
+}

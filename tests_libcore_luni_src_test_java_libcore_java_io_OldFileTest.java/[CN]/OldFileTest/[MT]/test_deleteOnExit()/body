@@ -1,0 +1,23 @@
+{
+  String cts=System.getProperty("java.io.tmpdir");
+  File dir=new File(cts + "/hello");
+  dir.mkdir();
+  assertTrue(dir.exists());
+  File subDir=new File(cts + "/hello/world");
+  subDir.mkdir();
+  assertTrue(subDir.exists());
+  URL url=getClass().getResource("/HelloWorld.txt");
+  String classPath=url.toString();
+  int idx=classPath.indexOf("!");
+  assertTrue("could not find the path of the test jar/apk",idx > 0);
+  classPath=classPath.substring(9,idx);
+  ProcessBuilder builder=javaProcessBuilder();
+  builder.command().add("-cp");
+  builder.command().add(System.getProperty("java.class.path"));
+  builder.command().add("tests.support.Support_DeleteOnExitTest");
+  builder.command().add(dir.getAbsolutePath());
+  builder.command().add(subDir.getAbsolutePath());
+  execAndGetOutput(builder);
+  assertFalse(dir.exists());
+  assertFalse(subDir.exists());
+}

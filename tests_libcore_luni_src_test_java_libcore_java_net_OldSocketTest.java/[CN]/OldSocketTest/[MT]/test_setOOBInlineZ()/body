@@ -1,0 +1,23 @@
+{
+  try {
+    new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+    Socket theSocket=new Socket();
+    theSocket.setOOBInline(true);
+    assertTrue("expected OOBIline to be true",theSocket.getOOBInline());
+    ensureExceptionThrownIfOptionIsUnsupportedOnOS(SO_OOBINLINE);
+  }
+ catch (  Exception e) {
+    handleException(e,SO_OOBINLINE);
+  }
+  try {
+    Socket theSocket=new Socket();
+    theSocket.close();
+    theSocket.setOOBInline(true);
+    fail("SocketException was not thrown.");
+  }
+ catch (  SocketException ioe) {
+  }
+catch (  IOException ioe) {
+    fail("IOException was thrown.");
+  }
+}

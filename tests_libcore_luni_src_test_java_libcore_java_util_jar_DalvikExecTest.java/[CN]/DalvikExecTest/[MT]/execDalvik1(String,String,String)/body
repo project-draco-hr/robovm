@@ -1,0 +1,23 @@
+{
+  ProcessBuilder builder=new ProcessBuilder();
+  File dalvikvm=new File("/system/bin/dalvikvm");
+  if (dalvikvm.exists()) {
+    builder.command().add(dalvikvm.getPath());
+  }
+ else {
+    builder.command().add("dalvikvm");
+  }
+  builder.command().add("-Duser.language=en");
+  builder.command().add("-Duser.region=US");
+  builder.command().add("-Xbootclasspath:" + System.getProperty("java.boot.class.path"));
+  builder.command().add("-classpath");
+  builder.command().add(classpath);
+  builder.command().add(mainClass);
+  if (arg1 != null) {
+    builder.command().add(arg1);
+  }
+  String tmp=System.getProperty("java.io.tmpdir");
+  builder.environment().put("ANDROID_DATA",tmp);
+  new File(tmp,"dalvik-cache").mkdir();
+  return execAndGetOutput(builder);
+}

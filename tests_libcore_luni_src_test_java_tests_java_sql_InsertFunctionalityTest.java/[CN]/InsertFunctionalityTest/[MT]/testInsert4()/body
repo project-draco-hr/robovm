@@ -1,0 +1,8 @@
+{
+  DatabaseCreator.fillSimpleTable1(conn);
+  statement.execute("INSERT INTO " + DatabaseCreator.SIMPLE_TABLE2 + " SELECT id, speed*10 AS speed, size-1 AS size FROM "+ DatabaseCreator.SIMPLE_TABLE1);
+  ResultSet r=statement.executeQuery("SELECT COUNT(*) FROM " + DatabaseCreator.SIMPLE_TABLE2 + " AS a JOIN "+ DatabaseCreator.SIMPLE_TABLE1+ " AS b ON a.speed = 10*b.speed AND a.size = b.size-1");
+  r.next();
+  assertEquals("Should be 2 rows",2,r.getInt(1));
+  r.close();
+}

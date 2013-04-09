@@ -1,0 +1,28 @@
+{
+  EnumSet<EnumWithInnerClass> enumSet=EnumSet.noneOf(EnumWithInnerClass.class);
+  enumSet.add(EnumWithInnerClass.a);
+  enumSet.add(EnumWithInnerClass.f);
+  EnumSet<EnumWithInnerClass> copyOfE=EnumSet.copyOf(enumSet);
+  assertEquals("Size of enumSet and copyOfE should be equal",enumSet.size(),copyOfE.size());
+  assertTrue("EnumWithSubclass.a should be contained in copyOfE",copyOfE.contains(EnumWithInnerClass.a));
+  assertTrue("EnumWithSubclass.f should be contained in copyOfE",copyOfE.contains(EnumWithInnerClass.f));
+  Object[] enumValue=copyOfE.toArray();
+  assertSame("enumValue[0] should be identical with EnumWithSubclass.a",enumValue[0],EnumWithInnerClass.a);
+  assertSame("enumValue[1] should be identical with EnumWithSubclass.f",enumValue[1],EnumWithInnerClass.f);
+  try {
+    EnumSet.copyOf((EnumSet)null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException npe) {
+  }
+  EnumSet<HugeEnumWithInnerClass> hugeEnumSet=EnumSet.noneOf(HugeEnumWithInnerClass.class);
+  hugeEnumSet.add(HugeEnumWithInnerClass.a);
+  hugeEnumSet.add(HugeEnumWithInnerClass.f);
+  EnumSet<HugeEnumWithInnerClass> copyOfHugeEnum=EnumSet.copyOf(hugeEnumSet);
+  assertEquals(enumSet.size(),copyOfE.size());
+  assertTrue(copyOfHugeEnum.contains(HugeEnumWithInnerClass.a));
+  assertTrue(copyOfHugeEnum.contains(HugeEnumWithInnerClass.f));
+  Object[] hugeEnumValue=copyOfHugeEnum.toArray();
+  assertSame(hugeEnumValue[0],HugeEnumWithInnerClass.a);
+  assertSame(hugeEnumValue[1],HugeEnumWithInnerClass.f);
+}

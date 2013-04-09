@@ -1,0 +1,24 @@
+{
+  if (!initParams()) {
+    return;
+  }
+  CertStore certS;
+  for (int i=0; i < dValid.length; i++) {
+    certS=CertStore.getInstance(dValid[i],dParams);
+    assertEquals("Incorrect parameters",((CollectionCertStoreParameters)certS.getCertStoreParameters()).getCollection(),((CollectionCertStoreParameters)dParams).getCollection());
+    try {
+      certS=CertStore.getInstance(dValid[i],dParams,defaultProviderCol);
+      assertEquals("Incorrect parameters",((CollectionCertStoreParameters)certS.getCertStoreParameters()).getCollection(),((CollectionCertStoreParameters)dParams).getCollection());
+    }
+ catch (    IllegalArgumentException e) {
+      fail("Unexpected IllegalArgumentException " + e.getMessage());
+    }
+    try {
+      certS=CertStore.getInstance(dValid[i],dParams,defaultProviderColName);
+      assertEquals("Incorrect parameters",((CollectionCertStoreParameters)certS.getCertStoreParameters()).getCollection(),((CollectionCertStoreParameters)dParams).getCollection());
+    }
+ catch (    NoSuchProviderException e) {
+      fail("Unexpected IllegalArgumentException " + e.getMessage());
+    }
+  }
+}

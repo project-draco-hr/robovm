@@ -1,0 +1,50 @@
+{
+  DatagramSocket theSocket1=null;
+  DatagramSocket theSocket2=null;
+  try {
+    InetSocketAddress theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPortForUDP());
+    theSocket1=new DatagramSocket((SocketAddress)null);
+    theSocket2=new DatagramSocket((SocketAddress)null);
+    theSocket1.setReuseAddress(false);
+    theSocket2.setReuseAddress(false);
+    theSocket1.bind(theAddress);
+    theSocket2.bind(theAddress);
+    fail("No exception when trying to connect to do duplicate socket bind with re-useaddr set to false");
+  }
+ catch (  BindException e) {
+  }
+  if (theSocket1 != null)   theSocket1.close();
+  if (theSocket2 != null)   theSocket2.close();
+  try {
+    InetSocketAddress theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPortForUDP());
+    theSocket1=new DatagramSocket((SocketAddress)null);
+    theSocket2=new DatagramSocket((SocketAddress)null);
+    theSocket1.setReuseAddress(true);
+    theSocket2.setReuseAddress(true);
+    theSocket1.bind(theAddress);
+    theSocket2.bind(theAddress);
+  }
+ catch (  Exception e) {
+    fail("unexpected exception when trying to connect to do duplicate socket bind with re-useaddr set to true");
+  }
+  if (theSocket1 != null)   theSocket1.close();
+  if (theSocket2 != null)   theSocket2.close();
+  try {
+    InetSocketAddress theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPortForUDP());
+    theSocket1=new DatagramSocket((SocketAddress)null);
+    theSocket2=new DatagramSocket((SocketAddress)null);
+    theSocket1.bind(theAddress);
+    theSocket2.bind(theAddress);
+    fail("No exception when trying to connect to do duplicate socket bind with re-useaddr left as default");
+  }
+ catch (  BindException e) {
+  }
+  if (theSocket1 != null)   theSocket1.close();
+  if (theSocket2 != null)   theSocket2.close();
+  try {
+    theSocket1.setReuseAddress(true);
+    fail("SocketException was not thrown.");
+  }
+ catch (  SocketException se) {
+  }
+}

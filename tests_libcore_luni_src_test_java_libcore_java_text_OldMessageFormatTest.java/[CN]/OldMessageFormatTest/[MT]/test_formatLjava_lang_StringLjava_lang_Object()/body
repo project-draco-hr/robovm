@@ -1,0 +1,47 @@
+{
+  TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+  int iCurrency=123;
+  int iInteger=Integer.MIN_VALUE;
+  Date date=new Date(12345678);
+  Object[] args={date,iCurrency,iInteger};
+  String resStr="Date: Jan 1, 1970 Currency: $" + iCurrency + ".00 Integer: -2,147,483,648";
+  String pattern="Date: {0,date} Currency: {1, number, currency} Integer: {2, number, integer}";
+  String sFormat=MessageFormat.format(pattern,(Object[])args);
+  assertEquals("format(String, Object[]) with valid parameters returns incorrect string: case 1",sFormat,resStr);
+  pattern="abc {4, number, integer} def {3,date} ghi {2,number} jkl {1,choice,0#low|1#high} mnop {0}";
+  resStr="abc -2,147,483,648 def Jan 1, 1970 ghi -2,147,483,648 jkl high mnop -2,147,483,648";
+  Object[] args_={iInteger,1,iInteger,date,iInteger};
+  sFormat=MessageFormat.format(pattern,args_);
+  assertEquals("format(String, Object[]) with valid parameters returns incorrect string: case 1",sFormat,resStr);
+  try {
+    args=null;
+    MessageFormat.format(null,args);
+    fail("Doesn't throw IllegalArgumentException: null, null");
+  }
+ catch (  Exception e) {
+  }
+  try {
+    MessageFormat.format("Invalid {1,foobar} format descriptor!",new Object[]{iInteger});
+    fail("Doesn't throw IllegalArgumentException with invalid pattern as a parameter: case 1");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  try {
+    MessageFormat.format("Invalid {1,date,invalid-spec} format descriptor!",new Object[]{""});
+    fail("Doesn't throw IllegalArgumentException with invalid pattern as a parameter: case 2");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  try {
+    MessageFormat.format("{0,number,integer",new Object[]{iInteger});
+    fail("Doesn't throw IllegalArgumentException, doesn't detect unmatched brackets");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  try {
+    MessageFormat.format("Valid {1, date} format {0, number} descriptor!",new Object[]{""});
+    fail("Doesn't throw IllegalArgumentException with invalid Object array");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+}

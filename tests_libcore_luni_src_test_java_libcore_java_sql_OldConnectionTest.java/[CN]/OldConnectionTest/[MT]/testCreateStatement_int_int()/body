@@ -1,0 +1,122 @@
+{
+  Statement st=null;
+  ResultSet rs=null;
+  try {
+    st=conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+    st.execute("select id, name from zoo");
+    rs=st.getResultSet();
+    try {
+      rs.deleteRow();
+      fail("Could delete row for READ_ONLY ResultSet");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      rs.close();
+      st.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    st=conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+    st.execute("select id, name from zoo");
+    rs=st.getResultSet();
+    try {
+      rs.absolute(1);
+      rs.previous();
+      fail("Could scroll backwards");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      rs.close();
+      st.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    st=conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+    st.execute("select id, name from zoo");
+    rs=st.getResultSet();
+    try {
+      rs.last();
+      rs.first();
+      fail("Could scroll backwards");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      rs.close();
+      st.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    st=conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
+    st.execute("select name, family from zoo");
+    rs=st.getResultSet();
+    try {
+      rs.insertRow();
+      rs.updateObject("family","bird");
+      rs.next();
+      rs.previous();
+      assertEquals("parrot",(rs.getString(1)));
+      fail("SQLException was not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      rs.close();
+      st.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  try {
+    st=conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
+    st.execute("select name, family from zoo");
+    rs=st.getResultSet();
+    try {
+      rs.insertRow();
+      rs.updateObject("family","bird");
+      rs.next();
+      rs.previous();
+      assertEquals("bird",(rs.getString(1)));
+      fail("SQLException was not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+  }
+  finally {
+    try {
+      rs.close();
+      st.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  conn.close();
+  try {
+    conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,-1);
+    fail("Illigal arguments: should return exception.");
+  }
+ catch (  SQLException sqle) {
+  }
+  try {
+    conn.createStatement(Integer.MIN_VALUE,ResultSet.CONCUR_READ_ONLY);
+    fail("Illigal arguments: should return exception.");
+  }
+ catch (  SQLException sqle) {
+  }
+}

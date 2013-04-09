@@ -1,0 +1,52 @@
+{
+  TestField x=new TestField();
+  Field f=null;
+  boolean val=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    f.setBoolean(x,false);
+    val=f.getBoolean(x);
+  }
+ catch (  Exception e) {
+    fail("Exception during setboolean test: " + e.toString());
+  }
+  assertTrue("Returned incorrect float field value",!val);
+  boolean thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("doubleField");
+    f.setBoolean(x,false);
+    fail("Accessed field of invalid type");
+  }
+ catch (  IllegalArgumentException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalArgumentException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanPFField");
+    assertFalse(f.isAccessible());
+    f.setBoolean(x,true);
+    fail("Accessed inaccessible field");
+  }
+ catch (  IllegalAccessException ex) {
+    thrown=true;
+  }
+  assertTrue("IllegalAccessException expected but not thrown",thrown);
+  thrown=false;
+  try {
+    f=x.getClass().getDeclaredField("booleanField");
+    f.setBoolean(null,true);
+    fail("NullPointerException expected but not thrown");
+  }
+ catch (  NullPointerException ex) {
+    thrown=true;
+  }
+catch (  Exception ex) {
+    fail("NullPointerException expected but not thrown");
+  }
+  assertTrue("NullPointerException expected but not thrown",thrown);
+  f=x.getClass().getDeclaredField("booleanSField");
+  f.setBoolean(null,false);
+  val=f.getBoolean(x);
+  assertFalse("Returned incorrect boolean field value",val);
+}

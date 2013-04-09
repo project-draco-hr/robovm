@@ -1,0 +1,19 @@
+{
+  KeyGenerator kg=KeyGenerator.getInstance("DES");
+  Key key=kg.generateKey();
+  IvParameterSpec ips=new IvParameterSpec(new byte[]{1,2,3,4,5,6,7,8});
+  Cipher cipher=Cipher.getInstance("DES/CBC/PKCS5Padding");
+  cipher.init(Cipher.ENCRYPT_MODE,key,ips);
+  String secret="secret string";
+  Mock_SealedObject so=new Mock_SealedObject(secret,cipher);
+  assertEquals("The returned object does not equals to the " + "original object.",secret,so.getObject(key));
+  assertTrue("The encodedParams field of SealedObject object " + "should contain the encoded algorithm parameters.",Arrays.equals(so.get_encodedParams(),cipher.getParameters().getEncoded()));
+  try {
+    so.getObject((Key)null);
+    fail("InvalidKeyException expected");
+  }
+ catch (  InvalidKeyException e) {
+  }
+catch (  NullPointerException e) {
+  }
+}

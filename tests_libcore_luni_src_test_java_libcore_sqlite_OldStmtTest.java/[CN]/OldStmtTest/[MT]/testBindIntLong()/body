@@ -1,0 +1,29 @@
+{
+  long input=0;
+  long maxVal=Long.MAX_VALUE;
+  long minVal=Long.MIN_VALUE;
+  db.exec("create table TEST (res long)",null);
+  st=db.prepare("insert into TEST values (:one);");
+  st.bind(1,input);
+  st.step();
+  st.reset();
+  st.bind(1,maxVal);
+  st.step();
+  st.reset();
+  st.bind(1,minVal);
+  st.step();
+  TableResult r=db.get_table("select * from TEST");
+  String[] row0=(String[])r.rows.elementAt(0);
+  assertEquals(input,Long.parseLong(row0[0]));
+  String[] row1=(String[])r.rows.elementAt(1);
+  assertEquals(maxVal,Long.parseLong(row1[0]));
+  String[] row2=(String[])r.rows.elementAt(2);
+  assertEquals(minVal,Long.parseLong(row2[0]));
+  try {
+    st.close();
+    st.bind(1,Long.MIN_VALUE);
+    fail("Exception expected");
+  }
+ catch (  SQLite.Exception expected) {
+  }
+}

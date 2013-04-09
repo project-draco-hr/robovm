@@ -1,0 +1,30 @@
+{
+  String[] keyArray=new String[]{"Value","DoubleValue","BoolValue","IntValue"};
+  String nodeStr="New node";
+  pref.node(nodeStr);
+  pref.put(keyArray[0],"String");
+  pref.putDouble(keyArray[1],new Double(9.10938188e-31));
+  pref.putBoolean(keyArray[2],true);
+  pref.putInt(keyArray[3],299792458);
+  pref.flush();
+  String[] str=pref.keys();
+  assertEquals(keyArray.length,str.length);
+  for (int i=0; i < str.length; i++) {
+    boolean flag=false;
+    for (int j=0; j < keyArray.length; j++) {
+      if (str[i].compareTo(keyArray[j]) == 0) {
+        flag=true;
+        break;
+      }
+    }
+    assertTrue(str[i].compareTo(nodeStr) != 0);
+    assertTrue(flag);
+  }
+  pref.removeNode();
+  try {
+    pref.keys();
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+}

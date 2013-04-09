@@ -1,0 +1,24 @@
+{
+  String name="Hello World";
+  byte[] b=name.getBytes();
+  String stringInHex="";
+  db.exec(DatabaseCreator.CREATE_TABLE_PARENT,null);
+  st=db.prepare("insert into " + DatabaseCreator.PARENT_TABLE + " values (:one, :two);");
+  st.bind(1,2);
+  st.bind(2,b);
+  st.step();
+  TableResult r=db.get_table("select * from " + DatabaseCreator.PARENT_TABLE);
+  String[] row=(String[])r.rows.elementAt(0);
+  for (  byte aByte : b) {
+    stringInHex+=Integer.toHexString(aByte);
+  }
+  stringInHex="X'" + stringInHex + "'";
+  assertTrue(stringInHex.equalsIgnoreCase(row[1]));
+  try {
+    st.close();
+    st.bind(1,name.getBytes());
+    fail("Exception expected");
+  }
+ catch (  SQLite.Exception expected) {
+  }
+}

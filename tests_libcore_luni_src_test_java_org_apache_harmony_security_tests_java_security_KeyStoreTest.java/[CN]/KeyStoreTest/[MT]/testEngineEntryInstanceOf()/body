@@ -1,0 +1,11 @@
+{
+  KeyStore keyStore=KeyStore.getInstance(KeyStore.getDefaultType());
+  keyStore.load(null,"pwd".toCharArray());
+  KeyGenerator keyGen=KeyGenerator.getInstance("DES");
+  keyGen.init(56);
+  SecretKey secretKey=keyGen.generateKey();
+  String alias="alias";
+  keyStore.setKeyEntry(alias,secretKey,"pwd".toCharArray(),null);
+  assertTrue(keyStore.entryInstanceOf(alias,KeyStore.SecretKeyEntry.class));
+  assertFalse(keyStore.entryInstanceOf(alias,KeyStore.PrivateKeyEntry.class));
+}

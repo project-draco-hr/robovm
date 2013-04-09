@@ -1,0 +1,26 @@
+{
+  Thread.setDefaultUncaughtExceptionHandler(this);
+  ThreadGroup tg=new ThreadGroup("interrupt");
+  Thread t1=new Thread(tg,new Runnable(){
+    public void run(){
+      try {
+        Thread.sleep(5000);
+      }
+ catch (      InterruptedException e) {
+        fail("ok");
+      }
+    }
+  }
+);
+  assertFalse("Incorrect state of thread",interrupted);
+  t1.start();
+  assertFalse("Incorrect state of thread",interrupted);
+  t1.interrupt();
+  try {
+    t1.join();
+  }
+ catch (  InterruptedException e) {
+  }
+  assertTrue("Incorrect state of thread",interrupted);
+  tg.destroy();
+}

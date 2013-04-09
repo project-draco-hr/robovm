@@ -1,0 +1,35 @@
+{
+  String[] queries1={"update zoo set name='Masha', family='cat' where id=2;","drop table if exists hutch","create table hutch (id integer not null, animal_id integer, address char(20), primary key (id));","insert into hutch (id, animal_id, address) values (1, 2, 'Birds-house, 1');","insert into hutch (id, animal_id, address) values (2, 1, 'Horse-house, 5');","create view address as select address from hutch where animal_id=2;","drop view address;","drop table hutch;"};
+  String queries2="select * from zoo;";
+  Statement st=null;
+  try {
+    st=conn.createStatement();
+    for (int i=0; i < queries1.length; i++) {
+      int count=st.executeUpdate(queries1[i]);
+      assertTrue(count > 0);
+    }
+    assertEquals(0,st.executeUpdate(queries2));
+  }
+  finally {
+    try {
+      st.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+  Statement stat=conn.createStatement();
+  assertEquals(0,stat.executeUpdate("create table s1 (c1);"));
+  assertEquals(1,stat.executeUpdate("insert into s1 values (0);"));
+  assertEquals(1,stat.executeUpdate("insert into s1 values (1);"));
+  assertEquals(1,stat.executeUpdate("insert into s1 values (2);"));
+  assertEquals(1,stat.executeUpdate("delete from s1 where c1 = 1;"));
+  assertEquals(2,stat.executeUpdate("update s1 set c1 = 5;"));
+  assertEquals(2,stat.executeUpdate("delete from s1;"));
+  assertEquals(0,stat.executeUpdate("drop table s1;"));
+  stat.executeUpdate("create table s1 (c1);");
+  stat.executeUpdate("insert into s1 values (0);");
+  stat.executeUpdate("insert into s1 values (1);");
+  stat.executeUpdate("insert into s1 values (2);");
+  assertEquals(3,stat.executeUpdate("drop table s1;"));
+  stat.close();
+}

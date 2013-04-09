@@ -1,0 +1,17 @@
+{
+  String args[]=new String[1];
+  String argsFail[]=new String[1];
+  TableResult res=new TableResult();
+  TableResult defaultTableRes=new TableResult();
+  args[0]="table";
+  try {
+    db.get_table("select name from sqlite_master where type = '%q'",argsFail,res);
+    assertEquals(defaultTableRes.toString(),res.toString());
+  }
+ catch (  Exception e) {
+    db.get_table("select name from sqlite_master where type = '%q'",args,res);
+    String[] s=(String[])res.rows.elementAt(0);
+    assertEquals(s[0],DatabaseCreator.SIMPLE_TABLE1);
+    System.out.println("DatabaseTest.testGet_tableStringStringArrayTableResult() " + Arrays.toString(res.types));
+  }
+}

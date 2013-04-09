@@ -1,0 +1,67 @@
+{
+  PreparedStatement ps=null;
+  PreparedStatement ps1=null;
+  PreparedStatement ps2=null;
+  try {
+    String query="insert into type (Sint) values (?);";
+    ps=conn.prepareStatement(query);
+    Statement st=null;
+    try {
+      ps.setShort(1,Short.MAX_VALUE);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where Sint=" + Short.MAX_VALUE);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    try {
+      ps.setShort(1,Short.MIN_VALUE);
+      ps.execute();
+      st=conn.createStatement();
+      st.execute("select * from type where Sint=" + Short.MIN_VALUE);
+      ResultSet rs=st.getResultSet();
+      assertEquals(1,getCount(rs));
+    }
+  finally {
+      try {
+        st.close();
+      }
+ catch (      Exception ee) {
+      }
+    }
+    ps.close();
+    try {
+      ps.setShort(1,Short.MIN_VALUE);
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+    String query1="insert into type (Tint) values (?);";
+    ps1=conn.prepareStatement(query1);
+    ps1.setShort(1,Short.MAX_VALUE);
+    String query2="insert into type (IntVal) values (?);";
+    ps2=conn.prepareStatement(query2);
+    ps2.setShort(1,Short.MAX_VALUE);
+    ps2.execute();
+    st=conn.createStatement();
+    st.execute("select * from type where IntVal=" + Short.MAX_VALUE);
+    ResultSet rs=st.getResultSet();
+    assertEquals(1,getCount(rs));
+  }
+  finally {
+    try {
+      ps.close();
+      ps1.close();
+      ps2.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+}

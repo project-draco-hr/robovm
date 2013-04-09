@@ -1,0 +1,35 @@
+{
+  DSAParams dsaParams=new DSAParameterSpec(p,q,g);
+  SecureRandom random=null;
+  MyDSA dsa=new MyDSA(dsaParams);
+  try {
+    random=SecureRandom.getInstance("SHA1PRNG");
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception for SecureRandom: " + e);
+  }
+  try {
+    dsa.initialize(dsaParams,random);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception: " + e);
+  }
+  try {
+    dsa.initialize(dsaParams,null);
+    fail("InvalidParameterException was not thrown");
+  }
+ catch (  InvalidParameterException ipe) {
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of InvalidParameterException");
+  }
+  try {
+    dsa.initialize(null,random);
+    fail("InvalidParameterException was not thrown");
+  }
+ catch (  InvalidParameterException ipe) {
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of InvalidParameterException");
+  }
+}

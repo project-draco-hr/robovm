@@ -1,0 +1,16 @@
+{
+  CertificateFactory fact=CertificateFactory.getInstance("X.509");
+  for (int i=0; i < CRL_URLS.length; i++) {
+    URL certUrl=new URL(BASE_URL + CRL_URLS[i]);
+    try {
+      InputStream is=certUrl.openStream();
+      CRL crl=fact.generateCRL(is);
+      assertNotNull("The CRL in \"" + certUrl.toExternalForm() + "\" were not parsed correctly",crl);
+    }
+ catch (    IOException e) {
+    }
+catch (    CRLException e) {
+      fail("An exception was thrown while parsing \"" + certUrl.toExternalForm() + "\": "+ e.getMessage());
+    }
+  }
+}

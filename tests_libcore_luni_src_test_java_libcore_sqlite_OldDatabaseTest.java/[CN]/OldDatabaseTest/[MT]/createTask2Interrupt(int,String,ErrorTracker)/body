@@ -1,0 +1,24 @@
+{
+  return new Runnable(){
+    public void run(){
+      Database db=new Database();
+      try {
+        String value=DatabaseCreator.defaultString + id;
+        db.open(dbName,0);
+        String insertQuery="INSERT INTO " + DatabaseCreator.TEST_TABLE1 + " (id, field1, field2, field3) VALUES("+ id+ ", '"+ value+ "', "+ id+ ", "+ id+ ")";
+        db.exec(insertQuery,null);
+      }
+ catch (      Exception e) {
+        errorTracker.registerException(this,e);
+        try {
+          db.interrupt();
+          db.exec("DELETE FROM " + DatabaseCreator.SIMPLE_TABLE1 + " WHERE id="+ id,null);
+        }
+ catch (        Exception e1) {
+          errorTracker.registerException(this,e1);
+        }
+      }
+    }
+  }
+;
+}

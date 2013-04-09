@@ -1,0 +1,40 @@
+{
+  int[] neg={-1,-10,-1000,Integer.MIN_VALUE,(Integer.MIN_VALUE + 1)};
+  try {
+    new SSLEngineResult(null,SSLEngineResult.HandshakeStatus.FINISHED,1,1);
+    fail("IllegalArgumentException must be thrown");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new SSLEngineResult(SSLEngineResult.Status.BUFFER_OVERFLOW,null,1,1);
+    fail("IllegalArgumentException must be thrown");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  for (int i=0; i < neg.length; i++) {
+    try {
+      new SSLEngineResult(SSLEngineResult.Status.BUFFER_OVERFLOW,SSLEngineResult.HandshakeStatus.FINISHED,neg[i],1);
+      fail("IllegalArgumentException must be thrown");
+    }
+ catch (    IllegalArgumentException e) {
+    }
+  }
+  for (int i=0; i < neg.length; i++) {
+    try {
+      new SSLEngineResult(SSLEngineResult.Status.BUFFER_OVERFLOW,SSLEngineResult.HandshakeStatus.FINISHED,1,neg[i]);
+      fail("IllegalArgumentException must be thrown");
+    }
+ catch (    IllegalArgumentException e) {
+    }
+  }
+  try {
+    SSLEngineResult res=new SSLEngineResult(SSLEngineResult.Status.BUFFER_OVERFLOW,SSLEngineResult.HandshakeStatus.FINISHED,1,2);
+    assertNotNull("Null object",res);
+    assertEquals(1,res.bytesConsumed());
+    assertEquals(2,res.bytesProduced());
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception: " + e);
+  }
+}

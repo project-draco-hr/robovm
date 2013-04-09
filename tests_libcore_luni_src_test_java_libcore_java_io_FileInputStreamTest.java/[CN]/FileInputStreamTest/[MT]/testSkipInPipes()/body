@@ -1,0 +1,16 @@
+{
+  FileDescriptor[] pipe=Libcore.os.pipe();
+  DataFeeder feeder=new DataFeeder(pipe[1]);
+  try {
+    feeder.start();
+    FileInputStream fis=new FileInputStream(pipe[0]);
+    fis.skip(SKIP_SIZE);
+    verifyData(fis,SKIP_SIZE,TOTAL_SIZE - SKIP_SIZE);
+    assertEquals(-1,fis.read());
+    feeder.join(1000);
+    assertFalse(feeder.isAlive());
+  }
+  finally {
+    IoUtils.closeQuietly(pipe[0]);
+  }
+}

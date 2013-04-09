@@ -1,0 +1,32 @@
+{
+  ServerSocket ss=new ServerSocket(0);
+  Socket s=new Socket("127.0.0.1",ss.getLocalPort());
+  ss.accept();
+  s.shutdownOutput();
+  try {
+    s.getOutputStream();
+    fail("should throw SocketException");
+  }
+ catch (  IOException e) {
+  }
+ finally {
+    s.close();
+  }
+  SocketChannel channel=SocketChannel.open(new InetSocketAddress(ss.getInetAddress(),ss.getLocalPort()));
+  channel.configureBlocking(false);
+  ss.accept();
+  Socket socket=channel.socket();
+  OutputStream out=null;
+  try {
+    out=socket.getOutputStream();
+    out.write(1);
+    fail("IllegalBlockingModeException was not thrown.");
+  }
+ catch (  IllegalBlockingModeException ibme) {
+  }
+ finally {
+    if (out != null)     out.close();
+    socket.close();
+    channel.close();
+  }
+}

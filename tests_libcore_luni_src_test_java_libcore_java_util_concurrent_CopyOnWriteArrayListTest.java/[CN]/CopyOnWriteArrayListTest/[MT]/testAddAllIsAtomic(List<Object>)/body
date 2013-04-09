@@ -1,0 +1,23 @@
+{
+  final CountDownLatch done=new CountDownLatch(1);
+  ExecutorService executor=Executors.newSingleThreadExecutor();
+  Future<?> future=executor.submit(new Runnable(){
+    @Override public void run(){
+      while (done.getCount() > 0) {
+        int listSize=list.size();
+        assertEquals("addAll() not atomic; size=" + listSize,0,listSize % 1000);
+        Thread.yield();
+      }
+    }
+  }
+);
+  executor.shutdown();
+  List<Object> toAdd=Arrays.asList(new Object[1000]);
+  for (int i=0; i < 100; i++) {
+    list.addAll(toAdd);
+    list.clear();
+    Thread.yield();
+  }
+  done.countDown();
+  future.get();
+}

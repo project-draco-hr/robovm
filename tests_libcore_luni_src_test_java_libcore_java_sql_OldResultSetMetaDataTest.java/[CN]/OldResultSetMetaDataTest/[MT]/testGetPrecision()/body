@@ -1,0 +1,56 @@
+{
+  Statement st2=null;
+  Statement st3=null;
+  ResultSetMetaData rsmd2=null;
+  try {
+    int precisionNum=10;
+    int scale=3;
+    int precicisionReal=10;
+    String createTable="create table DecimalNumbers ( valueDouble DOUBLE," + "valueFloat FLOAT , scaleTest NUMERIC(" + precisionNum + ","+ scale+ "),"+ " valueReal REAL("+ precicisionReal+ ")  );";
+    String insert="insert into DecimalNumbers values (1.5, 20.55, 30.666, 100000);";
+    String select="select * from DecimalNumbers;";
+    st2=conn.createStatement();
+    st2.executeUpdate(createTable);
+    st2.executeUpdate(insert);
+    st2.close();
+    st3=conn.createStatement();
+    rs=st3.executeQuery(select);
+    assertTrue(rs.next());
+    rsmd2=rs.getMetaData();
+    assertNotNull(rsmd2);
+    assertEquals(precicisionReal,rsmd2.getPrecision(4));
+    assertEquals(precisionNum,rsmd2.getPrecision(3));
+    assertTrue(rsmd2.getPrecision(2) > 0);
+    assertTrue(rsmd2.getPrecision(1) > 0);
+    try {
+      rsmd.getPrecision(3);
+    }
+ catch (    SQLException e1) {
+      System.out.println("ResultSetMetaDataTest.testGetPrecision()" + e1.getMessage());
+      e1.printStackTrace();
+    }
+    try {
+      rsmd.getPrecision(0);
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException e) {
+    }
+    try {
+      rsmd.getPrecision(5);
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException e) {
+    }
+    try {
+      rs.close();
+      rsmd.getPrecision(1);
+      fail("Exception expected");
+    }
+ catch (    SQLException e) {
+    }
+  }
+  finally {
+    if (st2 != null)     st2.close();
+    if (st3 != null)     st3.close();
+  }
+}

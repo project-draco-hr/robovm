@@ -1,0 +1,22 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  SecretKey sKey;
+  String dAl=defaultAlgorithm.toUpperCase();
+  KeyGenerator[] kgs=createKGs();
+  for (int i=0; i < kgs.length; i++) {
+    sKey=kgs[i].generateKey();
+    assertEquals("Incorrect algorithm",sKey.getAlgorithm().toUpperCase(),dAl);
+    kgs[i].init(new SecureRandom());
+    sKey=kgs[i].generateKey();
+    assertEquals("Incorrect algorithm",sKey.getAlgorithm().toUpperCase(),dAl);
+    kgs[i].init(defaultKeySize);
+    sKey=kgs[i].generateKey();
+    assertEquals("Incorrect algorithm",sKey.getAlgorithm().toUpperCase(),dAl);
+    kgs[i].init(defaultKeySize,new SecureRandom());
+    sKey=kgs[i].generateKey();
+    assertEquals("Incorrect algorithm",sKey.getAlgorithm().toUpperCase(),dAl);
+  }
+}

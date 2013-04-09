@@ -1,0 +1,36 @@
+{
+  Vector<InetAddress> ias=new Vector<InetAddress>();
+  try {
+    ias.add(InetAddress.getLocalHost());
+    ias.add(InetAddress.getByName(Support_Configuration.IPv6GlobalAddressJcl4));
+    ias.add(InetAddress.getByName(Support_Configuration.InetTestAddress2));
+    ias.add(InetAddress.getByName(Support_Configuration.InetTestAddress2));
+    ias.add(InetAddress.getByName(Support_Configuration.InetTestIP));
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception was thrown: " + e.toString());
+  }
+  for (  InetAddress ia : ias) {
+    int portNumber=Support_PortManager.getNextPortForUDP();
+    DatagramSocket ds=null;
+    try {
+      ds=new DatagramSocket();
+      ds.connect(ia,portNumber);
+      assertEquals(ia,ds.getInetAddress());
+      assertEquals("" + ia,ia,ds.getInetAddress());
+    }
+ catch (    SocketException e) {
+      fail("SocketException was thrown.");
+    }
+ finally {
+      ds.disconnect();
+      ds.close();
+    }
+  }
+  try {
+    assertNull(new DatagramSocket().getInetAddress());
+  }
+ catch (  SocketException e) {
+    fail("SocketException was thrown.");
+  }
+}

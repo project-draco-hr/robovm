@@ -1,0 +1,42 @@
+{
+  Support_OutputStream out=new Support_OutputStream(500);
+  OutputStreamWriter writer;
+  out.setThrowsException(true);
+  writer=new OutputStreamWriter(out,"utf-8");
+  try {
+    for (int i=0; i < 200; i++) {
+      for (int j=0; j < testString.length(); j++) {
+        writer.write(testString.charAt(j));
+      }
+    }
+    fail("Test 1: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  out.setThrowsException(false);
+  writer.close();
+  writer=new OutputStreamWriter(out,"utf-8");
+  writer.write(1);
+  writer.flush();
+  String str=new String(out.toByteArray(),"utf-8");
+  assertEquals("Test 2: ","\u0001",str);
+  writer.write(2);
+  writer.flush();
+  str=new String(out.toByteArray(),"utf-8");
+  assertEquals("Test 3: ","\u0001\u0002",str);
+  writer.write(-1);
+  writer.flush();
+  str=new String(out.toByteArray(),"utf-8");
+  assertEquals("Test 4: ","\u0001\u0002\uffff",str);
+  writer.write(0xfedcb);
+  writer.flush();
+  str=new String(out.toByteArray(),"utf-8");
+  assertEquals("Test 5: ","\u0001\u0002\uffff\uedcb",str);
+  writer.close();
+  try {
+    writer.write(1);
+    fail("Test 6: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+}

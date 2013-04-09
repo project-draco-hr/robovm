@@ -1,0 +1,21 @@
+{
+  byte[] b={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+  byte[] b1=new byte[30];
+  Cipher c=Cipher.getInstance("DES/CBC/NoPadding");
+  try {
+    c.update(b,0,10,b1);
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+  c=Cipher.getInstance("DES/CBC/NoPadding");
+  c.init(Cipher.ENCRYPT_MODE,cipherKeyDES);
+  c.update(b,0,16,b1);
+  b1=new byte[3];
+  try {
+    c.update(b,3,15,b1);
+    fail();
+  }
+ catch (  ShortBufferException expected) {
+  }
+}

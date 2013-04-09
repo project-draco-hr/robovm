@@ -1,0 +1,24 @@
+{
+  pref.put("Value","String");
+  pref.putDouble("DoubleValue",new Double(9.10938188e-31));
+  pref.putBoolean("BoolValue",true);
+  pref.putInt("IntValue",299792458);
+  pref.flush();
+  assertEquals(new Double(0.1),pref.getDouble("Value",new Double(0.1)));
+  assertEquals(new Double(0.2),pref.getDouble("BoolValue",new Double(0.2)));
+  assertEquals(new Double(9.10938188e-31),pref.getDouble("DoubleValue",new Double(2.14)));
+  assertEquals(new Double(2.99792458e8),pref.getDouble("IntValue",new Double(5)));
+  try {
+    pref.getDouble(null,new Double(0.1));
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  pref.removeNode();
+  try {
+    pref.getDouble("DoubleValue",new Double(0.1));
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+}

@@ -1,0 +1,28 @@
+{
+  for (  KeyStore keyStore : keyStores()) {
+    try {
+      keyStore.getCertificateAlias(null);
+      fail();
+    }
+ catch (    KeyStoreException expected) {
+    }
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    keyStore.load(null,null);
+    assertNull(keyStore.getCertificateAlias(null));
+  }
+  for (  KeyStore keyStore : keyStores()) {
+    populate(keyStore);
+    Set<String> expected=new HashSet<String>();
+    expected.add(ALIAS_PRIVATE);
+    if (isNullPasswordAllowed(keyStore)) {
+      expected.add(ALIAS_NO_PASSWORD_PRIVATE);
+    }
+    if (isCertificateEnabled(keyStore)) {
+      expected.add(ALIAS_CERTIFICATE);
+    }
+    String actual=keyStore.getCertificateAlias(getPrivateKey().getCertificate());
+    assertEquals(!isReadOnly(keyStore),expected.contains(actual));
+    assertNull(keyStore.getCertificateAlias(getPrivateKey2().getCertificate()));
+  }
+}

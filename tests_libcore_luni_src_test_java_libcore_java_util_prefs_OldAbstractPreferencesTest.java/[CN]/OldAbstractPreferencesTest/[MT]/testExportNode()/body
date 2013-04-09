@@ -1,0 +1,35 @@
+{
+  AbstractPreferences ap=(AbstractPreferences)pref.node("New node");
+  pref.putInt("IntValue",33);
+  pref.putBoolean("BoolValue",true);
+  pref.flush();
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  pref.exportNode(baos);
+  ByteArrayInputStream bais=new ByteArrayInputStream(baos.toByteArray());
+  assertTrue(pref.getBoolean("BoolValue",false));
+  assertEquals(33,pref.getInt("IntValue",22));
+  assertEquals(1,pref.childrenNames().length);
+  String xmlData=new String(baos.toByteArray());
+  assertTrue(xmlData.contains("IntValue"));
+  assertTrue(xmlData.contains("BoolValue"));
+  assertTrue(xmlData.contains("33"));
+  assertTrue(xmlData.contains("true"));
+  pref.removeNode();
+  try {
+    pref.exportNode(new ByteArrayOutputStream());
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+  try {
+    pref.getBoolean("BoolValue",false);
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+  pref=(AbstractPreferences)parent.node(nodeName);
+  pref.importPreferences(bais);
+  assertTrue(pref.getBoolean("BoolValue",false));
+  assertEquals(33,pref.getInt("IntValue",22));
+  assertEquals(0,pref.childrenNames().length);
+}

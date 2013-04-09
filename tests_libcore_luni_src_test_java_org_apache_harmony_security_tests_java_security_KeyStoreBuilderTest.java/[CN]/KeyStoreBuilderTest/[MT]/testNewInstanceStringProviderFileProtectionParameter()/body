@@ -1,0 +1,133 @@
+{
+  File fl=File.createTempFile("KSBuilder_ImplTest","keystore");
+  fl.deleteOnExit();
+  KeyStore.Builder ksB;
+  KeyStore.Builder ksB1;
+  KeyStore ks=null;
+  KeyStore ks1=null;
+  MyProtectionParameter myPP=new MyProtectionParameter(new byte[5]);
+  try {
+    KeyStore.Builder.newInstance(null,defaultProvider,fl,protPass);
+    fail("NullPointerException must be thrown when type is null");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    KeyStore.Builder.newInstance(KeyStore.getDefaultType(),defaultProvider,null,protPass);
+    fail("NullPointerException must be thrown when file is null");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    KeyStore.Builder.newInstance(KeyStore.getDefaultType(),defaultProvider,fl,null);
+    fail("NullPointerException must be thrown when ProtectionParameter is null");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    KeyStore.Builder.newInstance(KeyStore.getDefaultType(),defaultProvider,fl,myPP);
+    fail("IllegalArgumentException must be thrown when ProtectionParameter is not correct");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    KeyStore.Builder.newInstance(KeyStore.getDefaultType(),defaultProvider,new File(fl.getAbsolutePath().concat("should_absent")),protPass);
+    fail("IllegalArgumentException must be thrown when file does not exist");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    KeyStore.Builder.newInstance(KeyStore.getDefaultType(),defaultProvider,fl.getParentFile(),protPass);
+    fail("IllegalArgumentException must be thrown when file does not exist");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  ksB=KeyStore.Builder.newInstance(KeyStore.getDefaultType(),defaultProvider,fl,protPass);
+  try {
+    ksB.getKeyStore();
+    fail("KeyStoreException must be throw because file is empty");
+  }
+ catch (  KeyStoreException e) {
+  }
+  fl=createKS();
+  try {
+    KeyStore.Builder.newInstance(KeyStore.getDefaultType(),null,fl,myPP);
+    fail("IllegalArgumentException must be " + "thrown for incorrect ProtectionParameter");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    KeyStore.Builder.newInstance(KeyStore.getDefaultType(),defaultProvider,fl,myPP);
+    fail("IllegalArgumentException must be " + "thrown for incorrect ProtectionParameter");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  ksB=KeyStore.Builder.newInstance(KeyStore.getDefaultType(),null,fl,protPass);
+  ksB1=KeyStore.Builder.newInstance(KeyStore.getDefaultType(),defaultProvider,fl,protPass);
+  try {
+    ks=ksB.getKeyStore();
+  }
+ catch (  KeyStoreException e) {
+    fail("Unexpected KeyException was thrown");
+  }
+  try {
+    ks1=ksB1.getKeyStore();
+  }
+ catch (  KeyStoreException e) {
+    fail("Unexpected KeyException was thrown: " + e.getMessage());
+  }
+  assertEquals("Incorrect KeyStore size",ks.size(),ks1.size());
+  ;
+  for (Enumeration<String> aliases=ks.aliases(); aliases.hasMoreElements(); ) {
+    String aName=aliases.nextElement();
+    try {
+      assertEquals("Incorrect ProtectionParameter",ksB.getProtectionParameter(aName),protPass);
+    }
+ catch (    Exception e) {
+      fail("Unexpected: " + e.toString() + " was thrown for alias: "+ aName);
+    }
+  }
+  ksB.getKeyStore();
+  try {
+    assertEquals(ksB.getProtectionParameter("Bad alias"),protPass);
+  }
+ catch (  KeyStoreException e) {
+  }
+  for (Enumeration<String> aliases=ks1.aliases(); aliases.hasMoreElements(); ) {
+    String aName=aliases.nextElement();
+    assertEquals("Incorrect ProtectionParameter",ksB1.getProtectionParameter(aName),protPass);
+  }
+  try {
+    assertEquals(ksB1.getProtectionParameter("Bad alias"),protPass);
+  }
+ catch (  KeyStoreException e) {
+  }
+  ksB=KeyStore.Builder.newInstance(KeyStore.getDefaultType(),null,fl,callbackHand);
+  ksB1=KeyStore.Builder.newInstance(KeyStore.getDefaultType(),defaultProvider,fl,callbackHand);
+  try {
+    ks=ksB.getKeyStore();
+    fail("KeyStoreException must be thrown for incorrect " + "ProtectionParameter");
+  }
+ catch (  KeyStoreException e) {
+  }
+  try {
+    ks1=ksB1.getKeyStore();
+    fail("KeyStoreException must be thrown for incorrect " + "ProtectionParameter");
+  }
+ catch (  KeyStoreException e) {
+  }
+  assertEquals("Incorrect KeyStore size",ks.size(),ks1.size());
+  for (Enumeration<String> aliases=ks.aliases(); aliases.hasMoreElements(); ) {
+    String aName=aliases.nextElement();
+    try {
+      assertEquals("Incorrect ProtectionParameter",ksB.getProtectionParameter(aName),callbackHand);
+    }
+ catch (    Exception e) {
+      fail("Unexpected: " + e.toString() + " was thrown for alias: "+ aName);
+    }
+  }
+  for (Enumeration<String> iter=ks1.aliases(); iter.hasMoreElements(); ) {
+    String aName=iter.nextElement();
+    assertEquals("Incorrect ProtectionParameter",ksB1.getProtectionParameter(aName),callbackHand);
+  }
+}

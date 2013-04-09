@@ -1,0 +1,17 @@
+{
+  try {
+    NativeCrypto.SSL_set_mode(NULL,0);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  int c=NativeCrypto.SSL_CTX_new();
+  int s=NativeCrypto.SSL_new(c);
+  assertEquals(0,NativeCrypto.SSL_get_mode(s) & SSL_MODE_HANDSHAKE_CUTTHROUGH);
+  NativeCrypto.SSL_set_mode(s,SSL_MODE_HANDSHAKE_CUTTHROUGH);
+  assertTrue((NativeCrypto.SSL_get_mode(s) & SSL_MODE_HANDSHAKE_CUTTHROUGH) != 0);
+  NativeCrypto.SSL_clear_mode(s,SSL_MODE_HANDSHAKE_CUTTHROUGH);
+  assertTrue((NativeCrypto.SSL_get_mode(s) & SSL_MODE_HANDSHAKE_CUTTHROUGH) == 0);
+  NativeCrypto.SSL_free(s);
+  NativeCrypto.SSL_CTX_free(c);
+}

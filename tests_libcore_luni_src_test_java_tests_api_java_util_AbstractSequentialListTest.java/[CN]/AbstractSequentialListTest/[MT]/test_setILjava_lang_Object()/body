@@ -1,0 +1,95 @@
+{
+  AbstractSequentialList asl=new AbstractSequentialList(){
+    String buff[]={"0","1","2","3","4","5"};
+    final String illegalStr="Illegal element";
+    int currPos=0;
+    @Override public int size(){
+      return buff.length;
+    }
+    @Override public ListIterator listIterator(    int index){
+      currPos=index;
+      return new ListIterator(){
+        public void add(        Object o){
+        }
+        public boolean hasNext(){
+          return true;
+        }
+        public boolean hasPrevious(){
+          return false;
+        }
+        public Object next(){
+          return buff[currPos];
+        }
+        public int nextIndex(){
+          return 0;
+        }
+        public Object previous(){
+          return null;
+        }
+        public int previousIndex(){
+          return 0;
+        }
+        public void remove(){
+          buff[currPos]="removed element";
+        }
+        public void set(        Object o){
+          if (o == null)           throw new NullPointerException();
+          if (o.equals(illegalStr))           throw new IllegalArgumentException();
+          buff[currPos]=(String)o;
+        }
+      }
+;
+    }
+  }
+;
+  try {
+    asl.set(asl.size() + 1,"new element");
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    asl.set(-1,"new element");
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  for (int i=0; i < asl.size(); i++) {
+    assertFalse(asl.get(i).toString().contains("new element"));
+    asl.set(i,"new element");
+    assertTrue(asl.get(i).toString().contains("new element"));
+  }
+  try {
+    asl.set(1,new Double(1));
+    fail("ClassCastException expected");
+  }
+ catch (  ClassCastException e) {
+  }
+  try {
+    asl.set(1,"Illegal element");
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException ee) {
+  }
+  try {
+    asl.set(1,null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException ee) {
+  }
+  asl=new AbstractSequentialList(){
+    @Override public int size(){
+      return 0;
+    }
+    @Override public ListIterator listIterator(    int index){
+      return new Mock_unsupportedListIterator();
+    }
+  }
+;
+  try {
+    asl.set(0,"New element");
+    fail("UnsupportedOperationException expected");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+}

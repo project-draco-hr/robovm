@@ -1,0 +1,47 @@
+{
+  InputStream is=getClass().getResourceAsStream("/simple.xml");
+  try {
+    Document d=db.parse(is);
+    assertNotNull(d);
+    assertEquals(2,d.getChildNodes().getLength());
+    assertEquals("#comment",d.getChildNodes().item(0).getNodeName());
+    assertEquals("breakfast_menu",d.getChildNodes().item(1).getNodeName());
+  }
+ catch (  IOException ioe) {
+    fail("Unexpected IOException " + ioe.toString());
+  }
+catch (  SAXException sax) {
+    fail("Unexpected SAXException " + sax.toString());
+  }
+  try {
+    db.parse((InputStream)null);
+    fail("Expected IllegalArgumentException was not thrown");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+catch (  IOException ioe) {
+    fail("Unexpected IOException " + ioe.toString());
+  }
+catch (  SAXException sax) {
+    fail("Unexpected SAXException " + sax.toString());
+  }
+  try {
+    db.parse(new FileInputStream("_"));
+    fail("Expected IOException was not thrown");
+  }
+ catch (  IOException ioe) {
+  }
+catch (  SAXException sax) {
+    fail("Unexpected SAXException " + sax.toString());
+  }
+  try {
+    is=getClass().getResourceAsStream("/wrong.xml");
+    db.parse(is);
+    fail("Expected SAXException was not thrown");
+  }
+ catch (  IOException ioe) {
+    fail("Unexpected IOException " + ioe.toString());
+  }
+catch (  SAXException sax) {
+  }
+}

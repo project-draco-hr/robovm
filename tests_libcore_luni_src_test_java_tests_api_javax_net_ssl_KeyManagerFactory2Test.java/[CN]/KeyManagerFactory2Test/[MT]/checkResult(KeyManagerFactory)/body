@@ -1,0 +1,42 @@
+{
+  KeyStore kStore=null;
+  ManagerFactoryParameters mfp=null;
+  char[] pass={'a','b','c'};
+  try {
+    keyMF.init(kStore,null);
+    fail("KeyStoreException must be thrown");
+  }
+ catch (  KeyStoreException e) {
+  }
+  try {
+    keyMF.init(kStore,pass);
+    fail("UnrecoverableKeyException must be thrown");
+  }
+ catch (  UnrecoverableKeyException e) {
+  }
+  try {
+    keyMF.init(mfp);
+    fail("InvalidAlgorithmParameterException must be thrown");
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+  }
+  assertNull("getKeyManagers() should return null object",keyMF.getKeyManagers());
+  try {
+    kStore=KeyStore.getInstance(KeyStore.getDefaultType());
+    kStore.load(null,null);
+  }
+ catch (  KeyStoreException e) {
+    fail("default keystore is not supported");
+    return;
+  }
+  keyMF.init(kStore,pass);
+  mfp=new MyKeyManagerFactorySpi.Parameters(kStore,null);
+  try {
+    keyMF.init(mfp);
+    fail("InvalidAlgorithmParameterException must be thrown");
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+  }
+  mfp=new MyKeyManagerFactorySpi.Parameters(kStore,pass);
+  keyMF.init(mfp);
+}

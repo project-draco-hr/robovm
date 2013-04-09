@@ -1,0 +1,15 @@
+{
+  Type genericParameterType=method.getGenericParameterTypes()[0];
+  assertInstanceOf(ParameterizedType.class,genericParameterType);
+  ParameterizedType parameterizedType=(ParameterizedType)genericParameterType;
+  Type[] actualTypeArguments=parameterizedType.getActualTypeArguments();
+  assertLenghtOne(actualTypeArguments);
+  assertInstanceOf(WildcardType.class,actualTypeArguments[0]);
+  WildcardType wildcardType=(WildcardType)actualTypeArguments[0];
+  Type[] lowerBounds=wildcardType.getLowerBounds();
+  assertLenghtOne(lowerBounds);
+  Type lowerBound=lowerBounds[0];
+  assertEquals(getTypeParameter(method),lowerBound);
+  Type[] upperBounds=wildcardType.getUpperBounds();
+  assertEquals(Object.class,upperBounds[0]);
+}

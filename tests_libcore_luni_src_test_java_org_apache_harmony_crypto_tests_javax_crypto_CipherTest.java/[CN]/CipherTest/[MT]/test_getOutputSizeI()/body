@@ -1,0 +1,15 @@
+{
+  SecureRandom sr=new SecureRandom();
+  Cipher cipher=Cipher.getInstance(algorithm + "/ECB/PKCS5Padding");
+  try {
+    cipher.getOutputSize(25);
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+  cipher.init(Cipher.ENCRYPT_MODE,cipherKey,sr);
+  int result=cipher.getOutputSize(25);
+  assertTrue("Output size too small",result > 31);
+  result=cipher.getOutputSize(8);
+  assertTrue("Output size too small",result > 15);
+}

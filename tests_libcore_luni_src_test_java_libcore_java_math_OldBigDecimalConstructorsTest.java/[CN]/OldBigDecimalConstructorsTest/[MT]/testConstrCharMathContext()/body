@@ -1,0 +1,34 @@
+{
+  char[] biCA="12345678901234567890123456789012345.0E+10".toCharArray();
+  char[] nbiCA="-12345678901234567890123456789012345.E+10".toCharArray();
+  BigDecimal bd;
+  MathContext mc;
+  mc=new MathContext(31,RoundingMode.UP);
+  bd=new BigDecimal(biCA,mc);
+  assertEquals("incorrect value","1.234567890123456789012345678902E+44",bd.toString());
+  bd=new BigDecimal(nbiCA,mc);
+  assertEquals("incorrect value","-1.234567890123456789012345678902E+44",bd.toString());
+  mc=new MathContext(28,RoundingMode.DOWN);
+  bd=new BigDecimal(biCA,mc);
+  assertEquals("incorrect value","1.234567890123456789012345678E+44",bd.toString());
+  bd=new BigDecimal(nbiCA,mc);
+  assertEquals("incorrect value","-1.234567890123456789012345678E+44",bd.toString());
+  mc=new MathContext(33,RoundingMode.CEILING);
+  bd=new BigDecimal(biCA,mc);
+  assertEquals("incorrect value","1.23456789012345678901234567890124E+44",bd.toString());
+  bd=new BigDecimal(nbiCA,mc);
+  assertEquals("incorrect value","-1.23456789012345678901234567890123E+44",bd.toString());
+  mc=new MathContext(34,RoundingMode.UNNECESSARY);
+  try {
+    bd=new BigDecimal(biCA,mc);
+    fail("No ArithmeticException for RoundingMode.UNNECESSARY");
+  }
+ catch (  ArithmeticException e) {
+  }
+  try {
+    bd=new BigDecimal(nbiCA,mc);
+    fail("No ArithmeticException for RoundingMode.UNNECESSARY");
+  }
+ catch (  ArithmeticException e) {
+  }
+}

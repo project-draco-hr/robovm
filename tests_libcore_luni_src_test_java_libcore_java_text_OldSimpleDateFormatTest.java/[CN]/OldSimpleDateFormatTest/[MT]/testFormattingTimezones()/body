@@ -1,0 +1,31 @@
+{
+  FormatTester test=new FormatTester();
+  Calendar cal=new GregorianCalendar(1999,Calendar.JUNE,2,15,3,6);
+  TimeZone tz0001=new SimpleTimeZone(60000,"ONE MINUTE");
+  TimeZone tz0130=new SimpleTimeZone(5400000,"ONE HOUR, THIRTY");
+  TimeZone tzMinus0130=new SimpleTimeZone(-5400000,"NEG ONE HOUR, THIRTY");
+  format.setTimeZone(tz0001);
+  test.test(" Z",cal," +0001",DateFormat.TIMEZONE_FIELD);
+  test.test(" ZZZZ",cal," +0001",DateFormat.TIMEZONE_FIELD);
+  format.setTimeZone(tz0130);
+  test.test(" Z",cal," +0130",DateFormat.TIMEZONE_FIELD);
+  format.setTimeZone(tzMinus0130);
+  test.test(" Z",cal," -0130",DateFormat.TIMEZONE_FIELD);
+  format.setTimeZone(tz0001);
+  test.test(" z",cal," GMT+00:01",DateFormat.TIMEZONE_FIELD);
+  test.test(" zzzz",cal," GMT+00:01",DateFormat.TIMEZONE_FIELD);
+  format.setTimeZone(tz0130);
+  test.test(" z",cal," GMT+01:30",DateFormat.TIMEZONE_FIELD);
+  format.setTimeZone(tzMinus0130);
+  test.test(" z",cal," GMT-01:30",DateFormat.TIMEZONE_FIELD);
+  format.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+  test.test(" z",cal," EDT",DateFormat.TIMEZONE_FIELD);
+  Calendar temp2=new GregorianCalendar(1999,Calendar.JANUARY,12);
+  test.test(" z",temp2," EST",DateFormat.TIMEZONE_FIELD);
+  test.test(" zz",cal," EDT",DateFormat.TIMEZONE_FIELD);
+  test.test(" zzz",cal," EDT",DateFormat.TIMEZONE_FIELD);
+  test.test(" zzzz",cal," Eastern Daylight Time",DateFormat.TIMEZONE_FIELD);
+  test.test(" zzzz",temp2," Eastern Standard Time",DateFormat.TIMEZONE_FIELD);
+  test.test(" zzzzz",cal," Eastern Daylight Time",DateFormat.TIMEZONE_FIELD);
+  assertFalse(test.testsFailed);
+}

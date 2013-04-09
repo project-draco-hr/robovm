@@ -1,0 +1,32 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportedMsg);
+    return;
+  }
+  MacSpi spi=new MyMacSpi();
+  Mac mac=new myMac(spi,defaultProvider,defaultAlgorithm);
+  assertEquals("Incorrect algorithm",mac.getAlgorithm(),defaultAlgorithm);
+  assertEquals("Incorrect provider",mac.getProvider(),defaultProvider);
+  try {
+    mac.init(null,null);
+    fail("Exception should be thrown because init(..) uses incorrect parameters");
+  }
+ catch (  Exception e) {
+  }
+  assertEquals("Invalid mac length",mac.getMacLength(),0);
+  mac=new myMac(null,null,null);
+  assertNull("Algorithm must be null",mac.getAlgorithm());
+  assertNull("Provider must be null",mac.getProvider());
+  try {
+    mac.init(null,null);
+    fail("Exception should be thrown because init(..) uses incorrect parameters");
+  }
+ catch (  Exception e) {
+  }
+  try {
+    mac.getMacLength();
+    fail("NullPointerException must be thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+}

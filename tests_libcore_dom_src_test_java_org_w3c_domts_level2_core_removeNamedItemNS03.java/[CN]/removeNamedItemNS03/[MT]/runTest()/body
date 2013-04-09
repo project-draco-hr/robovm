@@ -1,0 +1,38 @@
+{
+  String namespaceURI="http://www.w3.org/2000/xmlns/";
+  String localName="local1";
+  Document doc;
+  NodeList elementList;
+  Node testAddress;
+  NodeList nList;
+  Node child;
+  NodeList n2List;
+  Node child2;
+  NamedNodeMap attributes;
+  Node removedNode;
+  int nodeType;
+  doc=(Document)load("staffNS",true);
+  elementList=doc.getElementsByTagName("gender");
+  testAddress=elementList.item(2);
+  nList=testAddress.getChildNodes();
+  child=nList.item(0);
+  nodeType=(int)child.getNodeType();
+  if (equals(1,nodeType)) {
+    child=doc.createEntityReference("ent4");
+    assertNotNull("createdEntRefNotNull",child);
+  }
+  n2List=child.getChildNodes();
+  child2=n2List.item(0);
+  assertNotNull("notnull",child2);
+  attributes=child2.getAttributes();
+{
+    boolean success=false;
+    try {
+      removedNode=attributes.removeNamedItemNS(namespaceURI,localName);
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.NO_MODIFICATION_ALLOWED_ERR);
+    }
+    assertTrue("throw_NO_MODIFICATION_ALLOWED_ERR",success);
+  }
+}

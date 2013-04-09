@@ -1,0 +1,22 @@
+{
+  MySignature1 s=new MySignature1("ABC");
+  try {
+    s.update((byte)1);
+    fail("No expected SignatureException");
+  }
+ catch (  SignatureException e) {
+  }
+  s.initVerify(new MyPublicKey());
+  s.update((byte)1);
+  s.initSign(new MyPrivateKey());
+  s.update((byte)1);
+  assertEquals("state",MySignature1.SIGN,s.getState());
+  assertTrue("update() failed",s.runEngineUpdate1);
+  try {
+    Signature sig=getTestSignature();
+    sig.update((byte)42);
+    fail("expected SignatureException");
+  }
+ catch (  SignatureException e) {
+  }
+}

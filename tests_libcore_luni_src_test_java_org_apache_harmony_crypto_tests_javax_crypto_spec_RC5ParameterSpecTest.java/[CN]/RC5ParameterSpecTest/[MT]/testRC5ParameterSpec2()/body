@@ -1,0 +1,40 @@
+{
+  int version=1;
+  int rounds=5;
+  int wordSize=16;
+  byte[] iv={1,2,3,4,5,6};
+  int offset=2;
+  try {
+    new RC5ParameterSpec(version,rounds,wordSize,null,offset);
+    fail("An IllegalArgumentException should be thrown " + "in the case of null iv.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new RC5ParameterSpec(version,rounds,wordSize + 8,iv,offset);
+    fail("An IllegalArgumentException should be thrown " + "in the case of short iv.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new RC5ParameterSpec(version,rounds,wordSize,iv,offset + 1);
+    fail("An IllegalArgumentException should be thrown " + "in the case of short iv.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    new RC5ParameterSpec(version,rounds,wordSize,new byte[]{1,2,3,4},offset);
+    fail("An IllegalArgumentException should be thrown " + "in the case of short iv.");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  RC5ParameterSpec ps=new RC5ParameterSpec(version,rounds,wordSize,iv,offset);
+  iv[offset]++;
+  assertFalse("The change of iv specified in the constructor " + "should not cause the change of internal array.",iv[offset] == ps.getIV()[0]);
+  try {
+    new RC5ParameterSpec(0,9,77,new byte[]{2},-100);
+    fail("ArrayIndexOutOfBoundsException expected");
+  }
+ catch (  ArrayIndexOutOfBoundsException e) {
+  }
+}

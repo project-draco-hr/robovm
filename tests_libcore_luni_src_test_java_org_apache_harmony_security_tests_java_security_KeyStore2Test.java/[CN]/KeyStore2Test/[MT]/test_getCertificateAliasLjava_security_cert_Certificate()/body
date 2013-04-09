@@ -1,0 +1,17 @@
+{
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  X509Certificate cert[]=new X509Certificate[2];
+  cert[0]=(X509Certificate)cf.generateCertificate(certArray);
+  cert[1]=(X509Certificate)cf.generateCertificate(certArray2);
+  KeyStore keyTest=KeyStore.getInstance(KeyStore.getDefaultType());
+  keyTest.load(null,null);
+  keyTest.setCertificateEntry("alias1",cert[1]);
+  String alias=keyTest.getCertificateAlias(cert[1]);
+  assertEquals("certificate entry - the alias returned for this certificate was wrong","alias1",alias);
+  keyTest.setKeyEntry("alias2",getPrivateKey(),pssWord,cert);
+  alias=keyTest.getCertificateAlias(cert[0]);
+  assertEquals("key entry - the alias returned for this certificate was wrong","alias2",alias);
+  X509Certificate cert2=(X509Certificate)cf.generateCertificate(certArray3);
+  String aliasNull=keyTest.getCertificateAlias(cert2);
+  assertNull("the alias returned for the nonexist certificate was NOT null",aliasNull);
+}

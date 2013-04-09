@@ -1,0 +1,29 @@
+{
+  if (!(c instanceof X509Certificate)) {
+    throw new IllegalStateException("issuer requires an X509Certificate, found " + c);
+  }
+  X509Certificate cert=(X509Certificate)c;
+  Certificate found=null;
+  for (  String alias : Collections.list(keyStore.aliases())) {
+    if (!keyStore.entryInstanceOf(alias,TrustedCertificateEntry.class)) {
+      continue;
+    }
+    TrustedCertificateEntry certificateEntry=(TrustedCertificateEntry)keyStore.getEntry(alias,null);
+    Certificate certificate=certificateEntry.getTrustedCertificate();
+    if (!(certificate instanceof X509Certificate)) {
+      continue;
+    }
+    X509Certificate x=(X509Certificate)certificate;
+    if (!cert.getIssuerDN().equals(x.getSubjectDN())) {
+      continue;
+    }
+    if (found != null) {
+      throw new IllegalStateException("KeyStore has more than one issuing CA for " + cert + "\nfirst: "+ found+ "\nsecond: "+ certificate);
+    }
+    found=certificate;
+  }
+  if (found == null) {
+    throw new IllegalStateException("KeyStore contained no issuing CA for " + cert);
+  }
+  return found;
+}

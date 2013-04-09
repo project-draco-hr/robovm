@@ -1,0 +1,29 @@
+{
+  Provider mProv=(new SpiEngUtils()).new MyProvider("MyExMechProvider","Provider for ExemptionMechanism testing",srvExemptionMechanism.concat(".").concat(defaultAlg),ExemptionMechanismProviderClass);
+  ExemptionMechanism em=new ExemptionMechanism(new MyExemptionMechanismSpi(),mProv,defaultAlg){
+  }
+;
+  Key key=new MyExemptionMechanismSpi().new tmpKey("Proba",new byte[0]);
+  em.init(key,AlgorithmParameters.getInstance("DES"));
+  try {
+    em.init(key,(AlgorithmParameters)null);
+    fail("InvalidAlgorithmParameterException expected");
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+  }
+  KeyGenerator kg=KeyGenerator.getInstance("DES");
+  kg.init(56,new SecureRandom());
+  key=kg.generateKey();
+  try {
+    em.init(null,AlgorithmParameters.getInstance("DES"));
+    fail("InvalidKeyException expected");
+  }
+ catch (  InvalidKeyException e) {
+  }
+  try {
+    em.init(key,AlgorithmParameters.getInstance("DES"));
+    fail("ExemptionMechanismException expected");
+  }
+ catch (  ExemptionMechanismException e) {
+  }
+}

@@ -1,0 +1,37 @@
+{
+  MyMessageDigest1 md=new MyMessageDigest1("ABC");
+  final byte[] bytes={1,2,3,4,5};
+  md.update(bytes,1,2);
+  assertTrue(md.runEngineUpdate2);
+  try {
+    md.update(null,0,1);
+    fail("No expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    md.update(bytes,0,bytes.length + 1);
+    fail("No expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    md.update(bytes,Integer.MAX_VALUE,1);
+    fail("No expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  final int offset=-1;
+  final int len=-1;
+  md=new MyMessageDigest1("ABC"){
+    @Override public void engineUpdate(    byte[] arg0,    int arg1,    int arg2){
+      assertSame("buf",bytes,arg0);
+      assertEquals("offset",offset,arg1);
+      assertEquals("len",len,arg2);
+      runEngineUpdate2=true;
+    }
+  }
+;
+  md.update(bytes,offset,len);
+  assertTrue(md.runEngineUpdate2);
+}

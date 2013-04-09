@@ -1,0 +1,51 @@
+{
+class mySocketAddress extends SocketAddress {
+    public mySocketAddress(){
+    }
+  }
+  Socket theSocket=new Socket();
+  try {
+    theSocket.bind(new InetSocketAddress(InetAddress.getByAddress(Support_Configuration.nonLocalAddressBytes),Support_PortManager.getNextPort()));
+    fail("No exception when binding to bad address:" + theSocket.getLocalSocketAddress().toString());
+  }
+ catch (  IOException ex) {
+  }
+  theSocket.close();
+  theSocket=new Socket();
+  int portNumber=Support_PortManager.getNextPort();
+  theSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(),portNumber));
+  assertTrue("Local address not correct after bind:" + theSocket.getLocalSocketAddress().toString() + " Expected: "+ (new InetSocketAddress(InetAddress.getLocalHost(),portNumber)).toString(),theSocket.getLocalSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),portNumber)));
+  InetSocketAddress theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+  ServerSocket serverSocket=new ServerSocket();
+  serverSocket.bind(theAddress);
+  theSocket.connect(theAddress);
+  Socket servSock=serverSocket.accept();
+  assertTrue("Returned Remote address from server connected to does not match expected local address:" + servSock.getRemoteSocketAddress().toString() + " Expected: "+ (new InetSocketAddress(InetAddress.getLocalHost(),portNumber)).toString(),servSock.getRemoteSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),portNumber)));
+  theSocket.close();
+  servSock.close();
+  serverSocket.close();
+  theSocket=new Socket();
+  theSocket.bind(null);
+  assertNotNull("Bind with null did not work",theSocket.getLocalSocketAddress());
+  theSocket.close();
+  theSocket=new Socket();
+  Socket theSocket2=new Socket();
+  try {
+    theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
+    theSocket.bind(theAddress);
+    theSocket2.bind(theAddress);
+    fail("No exception binding to address that is not available");
+  }
+ catch (  IOException ex) {
+  }
+  theSocket.close();
+  theSocket2.close();
+  theSocket=new Socket();
+  try {
+    theSocket.bind(new mySocketAddress());
+    fail("No exception when binding using unsupported SocketAddress subclass");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  theSocket.close();
+}

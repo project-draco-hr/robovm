@@ -1,0 +1,35 @@
+{
+  uc.setAllowUserInteraction(false);
+  assertFalse("getAllowUserInteraction should have returned false",uc.getAllowUserInteraction());
+  uc.setAllowUserInteraction(true);
+  assertTrue("getAllowUserInteraction should have returned true",uc.getAllowUserInteraction());
+  uc.connect();
+  try {
+    uc.setAllowUserInteraction(false);
+    fail("Exception expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+  URL serverURL=new URL("http://onearth.jpl.nasa.gov/landsat.cgi");
+  URLConnection uc2=serverURL.openConnection();
+  HttpURLConnection conn=(HttpURLConnection)uc2;
+  uc2.setAllowUserInteraction(true);
+  uc2.setDoInput(true);
+  uc2.setDoOutput(true);
+  OutputStream os=uc2.getOutputStream();
+  InputStream in=uc2.getInputStream();
+  int contentLength=uc2.getContentLength();
+  String contentType=uc2.getContentType();
+  int numBytesRead=0;
+  int allBytesRead=0;
+  byte[] buffer=new byte[4096];
+  do {
+    numBytesRead=in.read(buffer);
+    allBytesRead+=allBytesRead + numBytesRead;
+  }
+ while (numBytesRead > 0);
+  assertTrue(allBytesRead > 0);
+  uc2.connect();
+  numBytesRead=in.read(buffer);
+  assertEquals(-1,numBytesRead);
+}

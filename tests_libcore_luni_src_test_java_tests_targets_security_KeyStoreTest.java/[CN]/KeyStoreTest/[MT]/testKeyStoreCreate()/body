@@ -1,0 +1,87 @@
+{
+  KeyStore keyStore=null;
+  try {
+    keyStore=KeyStore.getInstance(algorithmName);
+  }
+ catch (  KeyStoreException e) {
+    fail(e.getMessage());
+  }
+  try {
+    keyStore.load(null,"the secret password".toCharArray());
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail(e.getMessage());
+  }
+catch (  CertificateException e) {
+    fail(e.getMessage());
+  }
+catch (  IOException e) {
+    fail(e.getMessage());
+  }
+  CertificateFactory certificateFactory=null;
+  try {
+    certificateFactory=CertificateFactory.getInstance("X.509");
+  }
+ catch (  CertificateException e) {
+    fail(e.getMessage());
+  }
+  Certificate certificate=null;
+  try {
+    certificate=certificateFactory.generateCertificate(new ByteArrayInputStream(encodedCertificate.getBytes()));
+  }
+ catch (  CertificateException e) {
+    fail(e.getMessage());
+  }
+  KeyPairGenerator generator=null;
+  try {
+    generator=KeyPairGenerator.getInstance(certificate.getPublicKey().getAlgorithm());
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail(e.getMessage());
+  }
+  KeyPair keyPair=generator.generateKeyPair();
+  PrivateKeyEntry privateKeyEntry=new PrivateKeyEntry(keyPair.getPrivate(),new Certificate[]{certificate});
+  try {
+    keyStore.setEntry("aPrivateKey",privateKeyEntry,new PasswordProtection("the key password".toCharArray()));
+  }
+ catch (  KeyStoreException e) {
+    fail(e.getMessage());
+  }
+  try {
+    assertTrue(keyStore.containsAlias("aPrivateKey"));
+  }
+ catch (  KeyStoreException e) {
+    fail(e.getMessage());
+  }
+  try {
+    PrivateKeyEntry entry=(PrivateKeyEntry)keyStore.getEntry("aPrivateKey",new PasswordProtection("the key password".toCharArray()));
+    PrivateKey privateKey=entry.getPrivateKey();
+    assertEquals(keyPair.getPrivate(),privateKey);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail(e.getMessage());
+  }
+catch (  UnrecoverableEntryException e) {
+    fail(e.getMessage());
+  }
+catch (  KeyStoreException e) {
+    fail(e.getMessage());
+  }
+  try {
+    ByteArrayOutputStream stream=new ByteArrayOutputStream();
+    keyStore.store(stream,"the keystore password".toCharArray());
+    assertTrue("keystore not written",stream.size() > 0);
+  }
+ catch (  KeyStoreException e) {
+    fail(e.getMessage());
+  }
+catch (  NoSuchAlgorithmException e) {
+    fail(e.getMessage());
+  }
+catch (  CertificateException e) {
+    fail(e.getMessage());
+  }
+catch (  IOException e) {
+    fail(e.getMessage());
+  }
+}

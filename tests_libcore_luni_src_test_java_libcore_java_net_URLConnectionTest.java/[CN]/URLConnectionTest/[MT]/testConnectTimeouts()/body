@@ -1,0 +1,20 @@
+{
+  StuckServer ss=new StuckServer();
+  int serverPort=ss.getLocalPort();
+  URLConnection urlConnection=new URL("http://localhost:" + serverPort).openConnection();
+  int timeout=1000;
+  urlConnection.setConnectTimeout(timeout);
+  long start=System.currentTimeMillis();
+  try {
+    urlConnection.getInputStream();
+    fail();
+  }
+ catch (  SocketTimeoutException expected) {
+    long elapsed=System.currentTimeMillis() - start;
+    int attempts=InetAddress.getAllByName("localhost").length;
+    assertTrue("timeout=" + timeout + ", elapsed="+ elapsed+ ", attempts="+ attempts,Math.abs((attempts * timeout) - elapsed) < 500);
+  }
+ finally {
+    ss.close();
+  }
+}

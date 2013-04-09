@@ -1,0 +1,13 @@
+{
+  File testsXml=new File(jaxenHome + "/xml/test/tests.xml");
+  Element tests=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(testsXml).getDocumentElement();
+  TestSuite result=new TestSuite();
+  for (  Element document : elementsOf(tests.getElementsByTagName("document"))) {
+    String url=document.getAttribute("url");
+    InputSource inputSource=new InputSource("file:" + jaxenHome + "/"+ url);
+    for (    final Element context : elementsOf(document.getElementsByTagName("context"))) {
+      contextToTestSuite(result,url,inputSource,context);
+    }
+  }
+  return result;
+}

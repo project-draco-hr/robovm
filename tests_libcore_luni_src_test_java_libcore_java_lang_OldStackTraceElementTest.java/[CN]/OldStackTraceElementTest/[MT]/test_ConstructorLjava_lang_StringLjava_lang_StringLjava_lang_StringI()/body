@@ -1,0 +1,34 @@
+{
+  StackTraceElement ste2=null;
+  try {
+    original.pureJavaMethod(new Object());
+    fail();
+  }
+ catch (  Exception e) {
+    StackTraceElement ste1=e.getStackTrace()[0];
+    ste2=new StackTraceElement(ste1.getClassName(),ste1.getMethodName(),ste1.getFileName(),ste1.getLineNumber());
+    assertEquals("Incorrect value of class name",ste1.getClassName(),ste2.getClassName());
+    assertEquals("Incorrect value of method name",ste1.getMethodName(),ste2.getMethodName());
+    assertEquals("Incorrect value of file name",ste1.getFileName(),ste2.getFileName());
+    assertEquals("Incorrect value of line number",ste1.getLineNumber(),ste2.getLineNumber());
+  }
+  assertNotNull("Incorrect stack trace object",ste2);
+  try {
+    new StackTraceElement(null,ste2.getMethodName(),ste2.getFileName(),ste2.getLineNumber());
+    fail("Expected NullPointerException was not thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    new StackTraceElement(ste2.getClassName(),null,ste2.getFileName(),ste2.getLineNumber());
+    fail("Expected NullPointerException was not thrown");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    new StackTraceElement(ste2.getClassName(),ste2.getMethodName(),null,ste2.getLineNumber());
+  }
+ catch (  NullPointerException e) {
+    fail("Unexpected exception " + e.toString());
+  }
+}

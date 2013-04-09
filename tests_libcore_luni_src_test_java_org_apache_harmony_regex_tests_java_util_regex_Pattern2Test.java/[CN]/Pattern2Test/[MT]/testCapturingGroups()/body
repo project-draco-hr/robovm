@@ -1,0 +1,38 @@
+{
+  Pattern p;
+  Matcher m;
+  p=Pattern.compile("(a+)b");
+  m=p.matcher("aaaaaaaab");
+  assertTrue(m.matches());
+  assertEquals(1,m.groupCount());
+  assertEquals("aaaaaaaa",m.group(1));
+  p=Pattern.compile("((an)+)((as)+)");
+  m=p.matcher("ananas");
+  assertTrue(m.matches());
+  assertEquals(4,m.groupCount());
+  assertEquals("ananas",m.group(0));
+  assertEquals("anan",m.group(1));
+  assertEquals("an",m.group(2));
+  assertEquals("as",m.group(3));
+  assertEquals("as",m.group(4));
+  p=Pattern.compile("(?:(?:an)+)(as)");
+  m=p.matcher("ananas");
+  assertTrue(m.matches());
+  assertEquals(1,m.groupCount());
+  assertEquals("as",m.group(1));
+  try {
+    m.group(2);
+    fail("expected IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException ioobe) {
+  }
+  p=Pattern.compile("((an)+)as\\1");
+  m=p.matcher("ananasanan");
+  assertTrue(m.matches());
+  try {
+    p=Pattern.compile("((an)+)as\\4");
+    fail("expected PatternSyntaxException");
+  }
+ catch (  PatternSyntaxException pse) {
+  }
+}

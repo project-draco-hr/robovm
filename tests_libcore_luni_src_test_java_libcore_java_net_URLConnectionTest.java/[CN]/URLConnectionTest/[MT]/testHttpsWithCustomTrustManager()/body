@@ -1,0 +1,28 @@
+{
+  RecordingHostnameVerifier hostnameVerifier=new RecordingHostnameVerifier();
+  RecordingTrustManager trustManager=new RecordingTrustManager();
+  SSLContext sc=SSLContext.getInstance("TLS");
+  sc.init(null,new TrustManager[]{trustManager},new java.security.SecureRandom());
+  HostnameVerifier defaultHostnameVerifier=HttpsURLConnection.getDefaultHostnameVerifier();
+  HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+  SSLSocketFactory defaultSSLSocketFactory=HttpsURLConnection.getDefaultSSLSocketFactory();
+  HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+  try {
+    TestSSLContext testSSLContext=TestSSLContext.create();
+    server.useHttps(testSSLContext.serverContext.getSocketFactory(),false);
+    server.enqueue(new MockResponse().setBody("ABC"));
+    server.enqueue(new MockResponse().setBody("DEF"));
+    server.enqueue(new MockResponse().setBody("GHI"));
+    server.play();
+    URL url=server.getUrl("/");
+    assertEquals("ABC",readAscii(url.openStream(),Integer.MAX_VALUE));
+    assertEquals("DEF",readAscii(url.openStream(),Integer.MAX_VALUE));
+    assertEquals("GHI",readAscii(url.openStream(),Integer.MAX_VALUE));
+    assertEquals(Arrays.asList("verify " + hostName),hostnameVerifier.calls);
+    assertEquals(Arrays.asList("checkServerTrusted [" + "CN=" + hostName + " 1, "+ "CN=Test Intermediate Certificate Authority 1, "+ "CN=Test Root Certificate Authority 1"+ "] RSA"),trustManager.calls);
+  }
+  finally {
+    HttpsURLConnection.setDefaultHostnameVerifier(defaultHostnameVerifier);
+    HttpsURLConnection.setDefaultSSLSocketFactory(defaultSSLSocketFactory);
+  }
+}

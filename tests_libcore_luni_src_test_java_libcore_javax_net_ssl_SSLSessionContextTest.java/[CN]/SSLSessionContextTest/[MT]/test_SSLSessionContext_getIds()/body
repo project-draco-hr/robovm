@@ -1,0 +1,20 @@
+{
+  TestSSLContext c=TestSSLContext.create();
+  assertSSLSessionContextSize(0,c);
+  c.close();
+  TestSSLSocketPair s=TestSSLSocketPair.create();
+  assertSSLSessionContextSize(1,s.c);
+  Enumeration clientIds=s.c.clientContext.getClientSessionContext().getIds();
+  Enumeration serverIds=s.c.serverContext.getServerSessionContext().getIds();
+  byte[] clientId=(byte[])clientIds.nextElement();
+  assertEquals(32,clientId.length);
+  if (TestSSLContext.sslServerSocketSupportsSessionTickets()) {
+    assertFalse(serverIds.hasMoreElements());
+  }
+ else {
+    byte[] serverId=(byte[])serverIds.nextElement();
+    assertEquals(32,serverId.length);
+    assertTrue(Arrays.equals(clientId,serverId));
+  }
+  s.close();
+}

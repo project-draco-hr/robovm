@@ -1,0 +1,21 @@
+{
+  out=new PipedOutputStream();
+  try {
+    out.write(42);
+    fail("Test 1: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+  rt=new Thread(reader=new PReader(out));
+  rt.start();
+  out.write('c');
+  out.flush();
+  assertEquals("Test 2: The byte read does not match the byte written. ","c",reader.read(1));
+  reader.getReader().close();
+  try {
+    out.write(42);
+    fail("Test 4: IOException expected.");
+  }
+ catch (  IOException e) {
+  }
+}

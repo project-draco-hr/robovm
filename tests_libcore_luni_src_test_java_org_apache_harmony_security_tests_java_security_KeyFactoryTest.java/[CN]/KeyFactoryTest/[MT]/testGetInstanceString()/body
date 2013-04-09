@@ -1,0 +1,25 @@
+{
+  try {
+    KeyFactory factory=KeyFactory.getInstance(TEST_KEYFACTORY_NAME);
+    assertNotNull(factory);
+  }
+ catch (  NoSuchAlgorithmException e) {
+    fail("unexpected exception: " + e);
+  }
+  String[] parameters={"UnknownKeyFactory",null};
+  Class[] exceptions={NoSuchAlgorithmException.class,NullPointerException.class};
+  for (int i=0; i < parameters.length; i++) {
+    String algorithm=parameters[i];
+    exceptionThrown=false;
+    String message="getInstance(" + (algorithm == null ? "null" : "\"" + algorithm + "\"") + ")";
+    try {
+      KeyFactory.getInstance(algorithm);
+    }
+ catch (    Exception e) {
+      checkException(message,e,exceptions[i]);
+    }
+ finally {
+      checkException(message,null,exceptions[i]);
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  int[] ports=Support_PortManager.getNextPortsForUDP(3);
+  int serverPortNumber=ports[1];
+  InetAddress localHost=InetAddress.getLocalHost();
+  InetSocketAddress localAddress1=new InetSocketAddress(localHost,ports[0]);
+  DatagramSocket theSocket=new DatagramSocket(localAddress1);
+  assertEquals(localAddress1,theSocket.getLocalSocketAddress());
+  InetSocketAddress localAddress2=new InetSocketAddress(localHost,ports[2]);
+  DatagramSocket ds=new DatagramSocket((SocketAddress)null);
+  ds.bind(localAddress2);
+  DatagramServer server=new DatagramServer(serverPortNumber,localHost);
+  server.start();
+  Thread.sleep(1000);
+  ds.connect(new InetSocketAddress(localHost,serverPortNumber));
+  byte[] sendBytes={'T','e','s','t',0};
+  DatagramPacket send=new DatagramPacket(sendBytes,sendBytes.length);
+  ds.send(send);
+  Thread.sleep(1000);
+  ds.close();
+  assertEquals(localAddress2,server.rdp.getSocketAddress());
+  if (server != null) {
+    server.stopServer();
+  }
+}

@@ -1,0 +1,19 @@
+{
+  server.enqueue(new MockResponse().setBody("A"));
+  server.play();
+  HttpURLConnection connection=(HttpURLConnection)server.getUrl("/").openConnection();
+  try {
+    connection.getContent(null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    connection.getContent(new Class[]{null});
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  assertNull(connection.getContent(new Class[]{getClass()}));
+  connection.disconnect();
+}

@@ -1,0 +1,21 @@
+{
+  PublicKey pkey1=null;
+  PublicKey pkey2=null;
+  try {
+    pkey1=new TestKeyPair("RSA").getPublic();
+    pkey2=new TestKeyPair("DSA").getPublic();
+  }
+ catch (  Exception e) {
+    fail("Unexpected Exception was thrown: " + e.getMessage());
+  }
+  TestCert cert1=new TestCert(pkey1);
+  TestCert cert2=new TestCert(pkey2);
+  X509CertSelector selector=new X509CertSelector();
+  selector.setSubjectPublicKey((PublicKey)null);
+  assertTrue("Any certificate should match in the case of null " + "subjectPublicKey criteria.",selector.match(cert1) && selector.match(cert2));
+  selector.setSubjectPublicKey(pkey1);
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert1));
+  assertFalse("The certificate should not match the selection criteria.",selector.match(cert2));
+  selector.setSubjectPublicKey(pkey2);
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert2));
+}

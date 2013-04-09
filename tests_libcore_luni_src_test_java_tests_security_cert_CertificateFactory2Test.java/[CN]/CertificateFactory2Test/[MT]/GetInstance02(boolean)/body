@@ -1,0 +1,50 @@
+{
+  try {
+    CertificateFactory.getInstance(null,mProv.getName());
+    fail("NullPointerException or CertificateException must be thrown when type is null");
+  }
+ catch (  CertificateException e) {
+  }
+catch (  NullPointerException e) {
+  }
+  for (int i=0; i < invalidValues.length; i++) {
+    try {
+      CertificateFactory.getInstance(invalidValues[i],mProv.getName());
+      fail("CertificateException must be thrown (type: ".concat(invalidValues[i]).concat(")"));
+    }
+ catch (    CertificateException e) {
+    }
+  }
+  String prov=null;
+  for (int i=0; i < validValues.length; i++) {
+    try {
+      CertificateFactory.getInstance(validValues[i],prov);
+      fail("IllegalArgumentException must be thrown when provider is null (type: ".concat(validValues[i]).concat(")"));
+    }
+ catch (    IllegalArgumentException e) {
+    }
+    try {
+      CertificateFactory.getInstance(validValues[i],"");
+      fail("IllegalArgumentException must be thrown when provider is empty (type: ".concat(validValues[i]).concat(")"));
+    }
+ catch (    IllegalArgumentException e) {
+    }
+  }
+  for (int i=0; i < validValues.length; i++) {
+    for (int j=1; j < invalidValues.length; j++) {
+      try {
+        CertificateFactory.getInstance(validValues[i],invalidValues[j]);
+        fail("NoSuchProviderException must be thrown (type: ".concat(validValues[i]).concat(" provider: ").concat(invalidValues[j]).concat(")"));
+      }
+ catch (      NoSuchProviderException e) {
+      }
+    }
+  }
+  CertificateFactory cerF;
+  for (int i=0; i < validValues.length; i++) {
+    cerF=CertificateFactory.getInstance(validValues[i],mProv.getName());
+    assertEquals("Incorrect type",cerF.getType(),validValues[i]);
+    assertEquals("Incorrect provider",cerF.getProvider().getName(),mProv.getName());
+    checkResult(cerF,mode);
+  }
+}

@@ -1,0 +1,27 @@
+{
+  MockResponse pleaseAuthenticate=new MockResponse().setResponseCode(401).addHeader("WWW-Authenticate: Basic realm=\"protected area\"").setBody("Please authenticate.");
+  server.enqueue(pleaseAuthenticate);
+  server.play();
+  Authenticator.setDefault(new SimpleAuthenticator());
+  HttpURLConnection connection=(HttpURLConnection)server.getUrl("/").openConnection();
+  connection.setDoOutput(true);
+  byte[] requestBody={'A','B','C','D'};
+  if (streamingMode == StreamingMode.FIXED_LENGTH) {
+    connection.setFixedLengthStreamingMode(requestBody.length);
+  }
+ else   if (streamingMode == StreamingMode.CHUNKED) {
+    connection.setChunkedStreamingMode(0);
+  }
+  OutputStream outputStream=connection.getOutputStream();
+  outputStream.write(requestBody);
+  outputStream.close();
+  try {
+    connection.getInputStream();
+    fail();
+  }
+ catch (  HttpRetryException expected) {
+  }
+  RecordedRequest request=server.takeRequest();
+  assertContainsNoneMatching(request.getHeaders(),"Authorization: Basic .*");
+  assertEquals(Arrays.toString(requestBody),Arrays.toString(request.getBody()));
+}

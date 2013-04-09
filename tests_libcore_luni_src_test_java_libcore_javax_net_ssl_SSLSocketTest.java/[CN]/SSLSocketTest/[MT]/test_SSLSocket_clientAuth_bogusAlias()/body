@@ -1,0 +1,57 @@
+{
+  TestSSLContext c=TestSSLContext.create();
+  SSLContext clientContext=SSLContext.getInstance("TLS");
+  X509KeyManager keyManager=new X509KeyManager(){
+    @Override public String chooseClientAlias(    String[] keyType,    Principal[] issuers,    Socket socket){
+      return "bogus";
+    }
+    @Override public String chooseServerAlias(    String keyType,    Principal[] issuers,    Socket socket){
+      throw new AssertionError();
+    }
+    @Override public X509Certificate[] getCertificateChain(    String alias){
+      return null;
+    }
+    @Override public String[] getClientAliases(    String keyType,    Principal[] issuers){
+      throw new AssertionError();
+    }
+    @Override public String[] getServerAliases(    String keyType,    Principal[] issuers){
+      throw new AssertionError();
+    }
+    @Override public PrivateKey getPrivateKey(    String alias){
+      return null;
+    }
+  }
+;
+  clientContext.init(new KeyManager[]{keyManager},new TrustManager[]{c.clientTrustManager},null);
+  SSLSocket client=(SSLSocket)clientContext.getSocketFactory().createSocket(c.host,c.port);
+  final SSLSocket server=(SSLSocket)c.serverSocket.accept();
+  Thread thread=new Thread(new Runnable(){
+    public void run(){
+      try {
+        server.setNeedClientAuth(true);
+        server.startHandshake();
+        fail();
+      }
+ catch (      SSLHandshakeException expected) {
+      }
+catch (      RuntimeException e) {
+        throw e;
+      }
+catch (      Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+);
+  thread.start();
+  try {
+    client.startHandshake();
+    fail();
+  }
+ catch (  SSLHandshakeException expected) {
+  }
+  thread.join();
+  client.close();
+  server.close();
+  c.close();
+}

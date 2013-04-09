@@ -1,0 +1,24 @@
+{
+  ByteBuffer readOnly=ByteBuffer.allocate(1).asReadOnlyBuffer();
+  ServerSocket ss=new ServerSocket(0);
+  ss.setReuseAddress(true);
+  SocketChannel sc=SocketChannel.open(ss.getLocalSocketAddress());
+  try {
+    sc.read(readOnly);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    sc.read(new ByteBuffer[]{readOnly});
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    sc.read(new ByteBuffer[]{readOnly},0,1);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+}

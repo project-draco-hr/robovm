@@ -1,0 +1,26 @@
+{
+  for (  Entry<Provider,List<String>> e : digestAlgs.entrySet()) {
+    for (    String algorithm : e.getValue()) {
+      MessageDigest md=MessageDigest.getInstance(algorithm,e.getKey().getName());
+      assertNotNull(md);
+    }
+  }
+  try {
+    MessageDigest.getInstance(null,new TestProvider());
+    fail("expected NullPointerException");
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    MessageDigest.getInstance("UnknownDigest",new TestProvider());
+    fail("expected NoSuchAlgorithmException");
+  }
+ catch (  NoSuchAlgorithmException expected) {
+  }
+  try {
+    MessageDigest.getInstance("AnyDigest",(Provider)null);
+    fail("expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+}

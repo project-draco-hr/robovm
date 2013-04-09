@@ -1,0 +1,22 @@
+{
+  insertNewRecord();
+  String selectQuery="SELECT * FROM " + DatabaseCreator.TEST_TABLE1 + " ORDER BY id + field3";
+  try {
+    statement.executeQuery(selectQuery);
+    if (!meta.supportsExpressionsInOrderBy()) {
+      fail("Expressions in order by are supported");
+    }
+  }
+ catch (  SQLException e) {
+    if (meta.supportsExpressionsInOrderBy()) {
+      fail("Expressions in order by are not supported");
+    }
+  }
+  conn.close();
+  try {
+    meta.supportsExpressionsInOrderBy();
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

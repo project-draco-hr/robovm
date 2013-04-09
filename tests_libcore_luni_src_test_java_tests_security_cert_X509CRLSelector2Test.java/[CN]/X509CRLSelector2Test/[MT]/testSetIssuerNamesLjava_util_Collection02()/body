@@ -1,0 +1,31 @@
+{
+  X509CRLSelector selector=new X509CRLSelector();
+  String iss1="O=First Org.";
+  byte[] iss2=new byte[]{48,22,49,20,48,18,6,3,85,4,10,19,11,83,101,99,111,110,100,32,79,114,103,46};
+  String iss3="O=Third Org.";
+  TestCRL crl1=new TestCRL(new X500Principal(iss1));
+  TestCRL crl2=new TestCRL(new X500Principal(iss2));
+  TestCRL crl3=new TestCRL(new X500Principal(iss3));
+  try {
+    selector.setIssuerNames(null);
+  }
+ catch (  IOException e) {
+    e.printStackTrace();
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("Any CRL issuers should match in the case of null issuers.",selector.match(crl1) && selector.match(crl2));
+  ArrayList issuers=new ArrayList(2);
+  issuers.add(iss1);
+  issuers.add(iss2);
+  try {
+    selector.setIssuerNames(issuers);
+  }
+ catch (  IOException e) {
+    e.printStackTrace();
+    fail("Unexpected IOException was thrown.");
+  }
+  assertTrue("The CRL should match the selection criteria.",selector.match(crl1) && selector.match(crl2));
+  assertFalse("The CRL should not match the selection criteria.",selector.match(crl3));
+  issuers.add(iss3);
+  assertFalse("The internal issuer collection is not protected " + "against the modifications.",selector.match(crl3));
+}

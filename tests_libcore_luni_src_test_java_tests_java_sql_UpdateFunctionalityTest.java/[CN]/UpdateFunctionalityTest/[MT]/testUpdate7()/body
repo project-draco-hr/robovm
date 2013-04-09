@@ -1,0 +1,16 @@
+{
+  String updateQuery="UPDATE " + DatabaseCreator.TEST_TABLE1 + " SET field2='1' WHERE id < ( SELECT COUNT(*) FROM "+ DatabaseCreator.TEST_TABLE2+ " WHERE finteger > 15)";
+  try {
+    int num=statement.executeUpdate(updateQuery);
+    int expectedUpdated=4;
+    assertEquals("Not all records in the database were updated",expectedUpdated,num);
+    String selectQuery="SELECT id, field2 FROM " + DatabaseCreator.TEST_TABLE1;
+    ResultSet result=statement.executeQuery(selectQuery);
+    while (result.next()) {
+    }
+    result.close();
+  }
+ catch (  SQLException e) {
+    fail("Unexpected exception" + e.getMessage());
+  }
+}

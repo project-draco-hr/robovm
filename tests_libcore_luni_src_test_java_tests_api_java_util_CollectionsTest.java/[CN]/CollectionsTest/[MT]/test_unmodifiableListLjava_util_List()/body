@@ -1,0 +1,49 @@
+{
+  boolean exception=false;
+  List c=Collections.unmodifiableList(ll);
+  try {
+    Collections.unmodifiableList(null);
+    fail("Expected NullPointerException for null list parameter");
+  }
+ catch (  NullPointerException e) {
+  }
+  assertTrue("Returned list is of incorrect size",c.size() == ll.size());
+  assertTrue("Returned List should not implement Random Access interface",!(c instanceof RandomAccess));
+  Iterator i=ll.iterator();
+  while (i.hasNext())   assertTrue("Returned list missing elements",c.contains(i.next()));
+  try {
+    c.add(new Object());
+  }
+ catch (  UnsupportedOperationException e) {
+    exception=true;
+  }
+  if (!exception) {
+    fail("Allowed modification of list");
+  }
+  try {
+    c.remove(new Object());
+    fail("Allowed modification of list");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  List smallList=new ArrayList();
+  smallList.add(null);
+  smallList.add("yoink");
+  c=Collections.unmodifiableList(smallList);
+  assertNull("First element should be null",c.get(0));
+  assertTrue("List should contain null",c.contains(null));
+  assertTrue("T1. Returned List should implement Random Access interface",c instanceof RandomAccess);
+  smallList=new ArrayList();
+  for (int counter=0; counter < 100; counter++) {
+    smallList.add(objArray[counter]);
+  }
+  List myList=Collections.unmodifiableList(smallList);
+  assertTrue("List should not contain null",!myList.contains(null));
+  assertTrue("T2. Returned List should implement Random Access interface",myList instanceof RandomAccess);
+  assertTrue("get failed on unmodifiable list",myList.get(50).equals(new Integer(50)));
+  ListIterator listIterator=myList.listIterator();
+  for (int counter=0; listIterator.hasNext(); counter++) {
+    assertTrue("List has wrong elements",((Integer)listIterator.next()).intValue() == counter);
+  }
+  new Support_UnmodifiableCollectionTest("",smallList).runTest();
+}

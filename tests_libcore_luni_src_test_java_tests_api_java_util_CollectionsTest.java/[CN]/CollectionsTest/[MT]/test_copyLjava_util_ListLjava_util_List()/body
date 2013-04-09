@@ -1,0 +1,54 @@
+{
+  try {
+    Collections.copy(null,ll);
+    fail("Expected NullPointerException for null list first parameter");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    Collections.copy(ll,null);
+    fail("Expected NullPointerException for null list second parameter");
+  }
+ catch (  NullPointerException e) {
+  }
+  final int llSize=ll.size();
+  ll.set(25,null);
+  ArrayList al=new ArrayList();
+  Integer extraElement=new Integer(1);
+  Integer extraElement2=new Integer(2);
+  al.addAll(myReversedLinkedList);
+  al.add(extraElement);
+  al.add(extraElement2);
+  Collections.copy(al,ll);
+  for (int counter=0; counter < llSize; counter++) {
+    assertTrue("Elements do not match after copying collection",al.get(counter) == ll.get(counter));
+  }
+  assertTrue("Elements after copied elements affected by copy",extraElement == al.get(llSize) && extraElement2 == al.get(llSize + 1));
+  ArrayList ar1=new ArrayList();
+  ArrayList ar2=new ArrayList();
+  int i;
+  for (i=0; i < 5; i++) {
+    ar2.add(new Integer(i));
+  }
+  for (i=0; i < 10; i++) {
+    ar1.add(new Integer(i));
+  }
+  try {
+    Collections.copy(ar2,ar1);
+    fail("IndexOutOfBoundsException expected");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  Mock_ArrayList mal1=new Mock_ArrayList();
+  Mock_ArrayList mal2=new Mock_ArrayList();
+  for (i=0; i < 10; i++) {
+    mal1.add(new Integer(i));
+    mal2.add(new Integer(10 - i));
+  }
+  try {
+    Collections.copy(mal1,mal2);
+    fail("UnsupportedOperationException expected");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+}

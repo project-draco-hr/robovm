@@ -1,0 +1,22 @@
+{
+  Document doc;
+  Document aNewDoc;
+  EntityReference entRef;
+  Node aNode;
+  Document ownerDocument;
+  DocumentType docType;
+  String system;
+  String name;
+  doc=(Document)load("staffNS",builder);
+  aNewDoc=(Document)load("staffNS",builder);
+  entRef=aNewDoc.createEntityReference("entRef1");
+  assertNotNull("createdEntRefNotNull",entRef);
+  entRef.setNodeValue("entRef1Value");
+  aNode=doc.importNode(entRef,false);
+  ownerDocument=aNode.getOwnerDocument();
+  docType=ownerDocument.getDoctype();
+  system=docType.getSystemId();
+  assertURIEquals("systemId",null,null,null,"staffNS.dtd",null,null,null,null,system);
+  name=aNode.getNodeName();
+  assertEquals("nodeName","entRef1",name);
+}

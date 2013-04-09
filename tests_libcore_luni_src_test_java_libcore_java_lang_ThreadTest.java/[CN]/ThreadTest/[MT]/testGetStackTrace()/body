@@ -1,0 +1,22 @@
+{
+  Thread t1=new Thread("t1"){
+    @Override public void run(){
+      doSomething();
+    }
+    public void doSomething(){
+      for (int i=0; i < 20; i++) {
+        try {
+          Thread.sleep(100);
+        }
+ catch (        InterruptedException ignored) {
+        }
+      }
+    }
+  }
+;
+  t1.start();
+  Thread.sleep(1000);
+  StackTraceElement[] traces=t1.getStackTrace();
+  StackTraceElement trace=traces[traces.length - 2];
+  assertTrue(trace.getClassName().contains("ThreadTest") && trace.getMethodName().equals("doSomething"));
+}

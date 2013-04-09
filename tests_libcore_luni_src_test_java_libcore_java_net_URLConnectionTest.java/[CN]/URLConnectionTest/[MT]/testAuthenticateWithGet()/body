@@ -1,0 +1,25 @@
+{
+  MockResponse pleaseAuthenticate=new MockResponse().setResponseCode(401).addHeader("WWW-Authenticate: Basic realm=\"protected area\"").setBody("Please authenticate.");
+  server.enqueue(pleaseAuthenticate);
+  server.enqueue(pleaseAuthenticate);
+  server.enqueue(pleaseAuthenticate);
+  server.enqueue(new MockResponse().setBody("Successful auth!"));
+  server.play();
+  SimpleAuthenticator authenticator=new SimpleAuthenticator();
+  Authenticator.setDefault(authenticator);
+  HttpURLConnection connection=(HttpURLConnection)server.getUrl("/").openConnection();
+  assertEquals("Successful auth!",readAscii(connection.getInputStream(),Integer.MAX_VALUE));
+  assertEquals(Authenticator.RequestorType.SERVER,authenticator.requestorType);
+  assertEquals(server.getPort(),authenticator.requestingPort);
+  assertEquals(InetAddress.getByName(server.getHostName()),authenticator.requestingSite);
+  assertEquals("protected area",authenticator.requestingPrompt);
+  assertEquals("http",authenticator.requestingProtocol);
+  assertEquals("Basic",authenticator.requestingScheme);
+  RecordedRequest request=server.takeRequest();
+  assertContainsNoneMatching(request.getHeaders(),"Authorization: .*");
+  for (int i=0; i < 3; i++) {
+    request=server.takeRequest();
+    assertEquals("GET / HTTP/1.1",request.getRequestLine());
+    assertContains(request.getHeaders(),"Authorization: Basic " + SimpleAuthenticator.BASE_64_CREDENTIALS);
+  }
+}

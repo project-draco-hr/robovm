@@ -1,0 +1,22 @@
+{
+  AlgorithmParameters ap=null;
+  boolean performed=false;
+  for (int i=0; i < EncryptedPrivateKeyInfoData.algName0.length; i++) {
+    try {
+      ap=AlgorithmParameters.getInstance(EncryptedPrivateKeyInfoData.algName0[i][0]);
+      ap.init(EncryptedPrivateKeyInfoData.getParametersEncoding(EncryptedPrivateKeyInfoData.algName0[i][0]));
+      new EncryptedPrivateKeyInfo(ap,EncryptedPrivateKeyInfoData.encryptedData);
+      performed=true;
+    }
+ catch (    NoSuchAlgorithmException allowedFailure) {
+    }
+  }
+  assertTrue("Test not performed",performed);
+  ap=new Mock_AlgorithmParameters(null,null,"Wrong alg name");
+  try {
+    new EncryptedPrivateKeyInfo(ap,EncryptedPrivateKeyInfoData.encryptedData);
+    fail("NoSuchAlgorithmException expected");
+  }
+ catch (  NoSuchAlgorithmException e) {
+  }
+}

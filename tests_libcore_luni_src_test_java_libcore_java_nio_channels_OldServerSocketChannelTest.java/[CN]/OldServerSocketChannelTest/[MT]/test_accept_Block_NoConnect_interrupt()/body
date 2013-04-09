@@ -1,0 +1,31 @@
+{
+  assertTrue(this.serverChannel.isBlocking());
+  ServerSocket gotSocket=this.serverChannel.socket();
+  gotSocket.bind(localAddr1);
+class MyThread extends Thread {
+    public String errMsg=null;
+    public void run(){
+      try {
+        serverChannel.accept();
+        errMsg="should throw ClosedByInterruptException";
+      }
+ catch (      ClosedByInterruptException e) {
+      }
+catch (      Exception e) {
+        errMsg="caught wrong Exception: " + e.getClass() + ": "+ e.getMessage();
+      }
+    }
+  }
+  MyThread thread=new MyThread();
+  thread.start();
+  try {
+    Thread.currentThread().sleep(TIME_UNIT);
+    thread.interrupt();
+  }
+ catch (  InterruptedException e) {
+    fail("Should not throw a InterruptedException");
+  }
+  if (thread.errMsg != null) {
+    fail(thread.errMsg);
+  }
+}

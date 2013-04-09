@@ -1,0 +1,33 @@
+{
+  String[] alg={"","qwertyu","!@#$%^&*()"};
+  Provider pp=null;
+  try {
+    AlgorithmParameters ap=AlgorithmParameters.getInstance("ABC",p);
+    checkUnititialized(ap);
+    ap.init(new byte[6],"aaa");
+    checkAP(ap,p);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception");
+  }
+  for (int i=0; i < alg.length; i++) {
+    try {
+      AlgorithmParameters ap=AlgorithmParameters.getInstance(alg[i],p);
+      fail("NoSuchAlgorithmException was not thrown for parameter " + alg[i]);
+    }
+ catch (    NoSuchAlgorithmException nsae) {
+    }
+catch (    Exception e) {
+      fail("Incorrect exception " + e + " was thrown for "+ alg[i]);
+    }
+  }
+  try {
+    AlgorithmParameters ap=AlgorithmParameters.getInstance("ABC",pp);
+    fail("IllegalArgumentException was not thrown for NULL provider");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+catch (  Exception e) {
+    fail("Incorrect exception " + e + " was thrown");
+  }
+}

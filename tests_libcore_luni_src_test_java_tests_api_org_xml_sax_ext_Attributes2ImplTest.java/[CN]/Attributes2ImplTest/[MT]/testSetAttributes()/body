@@ -1,0 +1,39 @@
+{
+  Attributes2Impl attrs=new Attributes2Impl();
+  attrs.addAttribute("","","john","string","doe");
+  attrs.setAttributes(empty);
+  assertEquals(0,attrs.getLength());
+  attrs.setAttributes(multi);
+  for (int i=0; i < multi.getLength(); i++) {
+    assertEquals(multi.getURI(i),attrs.getURI(i));
+    assertEquals(multi.getLocalName(i),attrs.getLocalName(i));
+    assertEquals(multi.getQName(i),attrs.getQName(i));
+    assertEquals(multi.getType(i),attrs.getType(i));
+    assertEquals(multi.getValue(i),attrs.getValue(i));
+    assertEquals(multi.isDeclared(i),attrs.isDeclared(i));
+    assertEquals(multi.isSpecified(i),attrs.isSpecified(i));
+  }
+  attrs.setAttributes(empty);
+  assertEquals(0,attrs.getLength());
+  attrs.setAttributes(new AttributesImpl(multi));
+  assertEquals(multi.getLength(),attrs.getLength());
+  for (int i=0; i < multi.getLength(); i++) {
+    assertEquals(multi.getURI(i),attrs.getURI(i));
+    assertEquals(multi.getLocalName(i),attrs.getLocalName(i));
+    assertEquals(multi.getQName(i),attrs.getQName(i));
+    assertEquals(multi.getType(i),attrs.getType(i));
+    assertEquals(multi.getValue(i),attrs.getValue(i));
+    assertEquals(true,attrs.isDeclared(i));
+    assertEquals(true,attrs.isSpecified(i));
+  }
+  attrs.setAttributes(new AttributesImpl(cdata));
+  assertEquals(1,attrs.getLength());
+  assertEquals(false,attrs.isDeclared(0));
+  assertEquals(true,attrs.isSpecified(0));
+  try {
+    attrs.setAttributes(null);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+}

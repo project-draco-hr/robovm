@@ -1,0 +1,16 @@
+{
+  String updateQuery="UPDATE " + DatabaseCreator.TEST_TABLE1 + " SET field2=NULL";
+  try {
+    int num=statement.executeUpdate(updateQuery);
+    assertEquals("Not all records in the database were updated",numberOfRecords,num);
+    String selectQuery="SELECT field2 FROM " + DatabaseCreator.TEST_TABLE1;
+    ResultSet result=statement.executeQuery(selectQuery);
+    while (result.next()) {
+      assertNull("value of field2 should be NULL",result.getObject("field2"));
+    }
+    result.close();
+  }
+ catch (  SQLException e) {
+    fail("Unexpected exception" + e.getMessage());
+  }
+}

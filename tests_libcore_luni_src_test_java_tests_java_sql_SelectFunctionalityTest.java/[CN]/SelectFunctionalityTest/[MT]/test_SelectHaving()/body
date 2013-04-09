@@ -1,0 +1,14 @@
+{
+  String selectQuery="SELECT snum, max(amt) AS max FROM " + DatabaseCreator.ORDERS_TABLE + " GROUP BY snum HAVING max(amt) > 3000";
+  ResultSet result=statement.executeQuery(selectQuery);
+  HashSet<Double> values=new HashSet<Double>();
+  values.add(Double.valueOf(9891.88));
+  values.add(Double.valueOf(5160.45));
+  while (result.next()) {
+    Double max=result.getDouble("max");
+    assertTrue("result set doesn't contain value",values.contains(max));
+    assertTrue("wrong value in the result set",values.remove(max));
+  }
+  result.close();
+  assertTrue("Result set has wrong size",values.isEmpty());
+}

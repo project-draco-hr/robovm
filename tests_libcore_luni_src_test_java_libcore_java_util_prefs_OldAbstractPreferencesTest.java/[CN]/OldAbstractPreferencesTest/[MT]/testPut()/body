@@ -1,0 +1,39 @@
+{
+  pref.put("Value","String");
+  pref.flush();
+  assertEquals("String",pref.get("Value",":"));
+  try {
+    pref.put(null,"Exception");
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  int i;
+  StringBuffer sb=new StringBuffer();
+  for (i=0; i < Preferences.MAX_KEY_LENGTH + 1; i++) {
+    sb.append('c');
+  }
+  try {
+    pref.put(new String(sb),"Exception");
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  sb=new StringBuffer();
+  for (i=0; i < Preferences.MAX_VALUE_LENGTH + 1; i++) {
+    sb.append('c');
+  }
+  try {
+    pref.put("DoubleValue",new String(sb));
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  pref.removeNode();
+  try {
+    pref.put("DoubleValue","Exception");
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+}

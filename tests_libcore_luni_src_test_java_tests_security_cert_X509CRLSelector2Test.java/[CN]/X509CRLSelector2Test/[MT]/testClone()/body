@@ -1,0 +1,21 @@
+{
+  X509CRLSelector selector=new X509CRLSelector();
+  X500Principal iss1=new X500Principal("O=First Org.");
+  X500Principal iss2=new X500Principal("O=Second Org.");
+  X500Principal iss3=new X500Principal("O=Third Org.");
+  BigInteger minCRL=new BigInteger("10000");
+  BigInteger maxCRL=new BigInteger("10000");
+  Date date=new Date(200);
+  selector.addIssuer(iss1);
+  selector.addIssuer(iss2);
+  selector.setMinCRLNumber(minCRL);
+  selector.setMaxCRLNumber(maxCRL);
+  selector.setDateAndTime(date);
+  X509CRLSelector clone=(X509CRLSelector)selector.clone();
+  TestCRL crl=new TestCRL(iss1);
+  crl.setCrlNumber(minCRL);
+  crl.setUpdateDates(new Date(200),new Date(200));
+  assertTrue("The specified CRL should match the clone selector.",selector.match(crl));
+  clone.addIssuer(iss3);
+  assertFalse("The changes of the clone selector should not cause " + "the changes of initial object",selector.getIssuerNames().size() == 3);
+}

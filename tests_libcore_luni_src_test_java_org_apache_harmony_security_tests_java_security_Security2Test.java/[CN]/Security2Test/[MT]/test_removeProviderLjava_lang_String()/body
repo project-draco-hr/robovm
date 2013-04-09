@@ -1,0 +1,23 @@
+{
+  Provider test=new Support_TestProvider();
+  Provider entrust=new Support_ProviderTrust();
+  try {
+    Security.removeProvider(test.getName());
+    int addResult=Security.addProvider(test);
+    assertTrue("Failed to add provider",addResult != -1);
+    Security.removeProvider(test.getName());
+    assertNull("the provider TestProvider is found after it was removed",Security.getProvider(test.getName()));
+    Security.removeProvider(entrust.getName());
+    addResult=Security.addProvider(entrust);
+    assertTrue("Failed to add provider",addResult != -1);
+    Security.removeProvider(entrust.getName());
+    Provider provTest[]=Security.getProviders();
+    for (int i=0; i < provTest.length; i++) {
+      assertTrue("the provider entrust is found after it was removed",provTest[i].getName() != entrust.getName());
+    }
+  }
+  finally {
+    Security.removeProvider(test.getName());
+    Security.removeProvider(entrust.getName());
+  }
+}

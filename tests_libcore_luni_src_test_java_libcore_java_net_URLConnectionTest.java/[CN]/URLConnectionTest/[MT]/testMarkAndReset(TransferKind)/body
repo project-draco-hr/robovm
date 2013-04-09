@@ -1,0 +1,19 @@
+{
+  MockResponse response=new MockResponse();
+  transferKind.setBody(response,"ABCDEFGHIJKLMNOPQRSTUVWXYZ",1024);
+  server.enqueue(response);
+  server.enqueue(response);
+  server.play();
+  InputStream in=server.getUrl("/").openConnection().getInputStream();
+  assertFalse("This implementation claims to support mark().",in.markSupported());
+  in.mark(5);
+  assertEquals("ABCDE",readAscii(in,5));
+  try {
+    in.reset();
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+  assertEquals("FGHIJKLMNOPQRSTUVWXYZ",readAscii(in,Integer.MAX_VALUE));
+  assertContent("ABCDEFGHIJKLMNOPQRSTUVWXYZ",server.getUrl("/").openConnection());
+}

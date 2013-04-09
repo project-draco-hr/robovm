@@ -1,0 +1,16 @@
+{
+  ensureServerClosed();
+  this.channel1.configureBlocking(false);
+  assertFalse(this.channel1.isConnectionPending());
+  try {
+    this.channel1.finishConnect();
+    fail("Should throw NoConnectionPendingException");
+  }
+ catch (  NoConnectionPendingException e) {
+  }
+  assertFalse(this.channel1.isConnectionPending());
+  assertFalse(this.channel1.connect(localAddr1));
+  assertTrue(this.channel1.isConnectionPending());
+  this.channel1.close();
+  assertFalse(this.channel1.isConnectionPending());
+}

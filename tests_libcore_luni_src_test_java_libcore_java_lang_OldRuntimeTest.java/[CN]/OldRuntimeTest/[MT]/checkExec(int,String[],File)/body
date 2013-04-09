@@ -1,0 +1,47 @@
+{
+  String dirName="Test_Directory";
+  String dirParentName="Parent_Directory";
+  File resources=Support_Resources.createTempFolder();
+  String folder=resources.getAbsolutePath() + "/" + dirName;
+  String folderWithParent=resources.getAbsolutePath() + "/" + dirParentName+ "/"+ dirName;
+  String command="mkdir " + folder;
+  String[] commandArguments={"mkdir",folder};
+  try {
+    Process proc=null;
+switch (testCase) {
+case 0:
+      proc=Runtime.getRuntime().exec(command,envp);
+    break;
+case 1:
+  proc=Runtime.getRuntime().exec(command);
+break;
+case 2:
+proc=Runtime.getRuntime().exec(command,envp,file);
+break;
+case 3:
+proc=Runtime.getRuntime().exec(commandArguments);
+break;
+case 4:
+proc=Runtime.getRuntime().exec(commandArguments,envp);
+break;
+case 5:
+proc=Runtime.getRuntime().exec(commandArguments,envp,file);
+break;
+}
+assertNotNull(proc);
+try {
+Thread.sleep(3000);
+}
+ catch (InterruptedException ie) {
+fail("InterruptedException was thrown.");
+}
+File f=new File(folder);
+assertTrue(f.exists());
+if (f.exists()) {
+f.delete();
+}
+}
+ catch (IOException io) {
+fail("IOException was thrown.");
+}
+}

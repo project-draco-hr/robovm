@@ -1,0 +1,45 @@
+{
+  final byte[] enc=new byte[]{0x02,0x01,0x03};
+  MyAlgorithmParameters paramSpi=new MyAlgorithmParameters(){
+    protected void engineInit(    byte[] params) throws IOException {
+      runEngineInitB$=true;
+      assertSame(enc,params);
+    }
+  }
+;
+  AlgorithmParameters params=new DummyAlgorithmParameters(paramSpi,p,"algorithm");
+  params.init(enc);
+  assertTrue(paramSpi.runEngineInitB$);
+  try {
+    params.init(enc);
+    fail("No expected IOException");
+  }
+ catch (  IOException e) {
+  }
+  params=new DummyAlgorithmParameters(paramSpi,p,"algorithm");
+  params.init(new MyAlgorithmParameterSpec());
+  try {
+    params.init(enc);
+    fail("No expected IOException");
+  }
+ catch (  IOException e) {
+  }
+  params=new DummyAlgorithmParameters(paramSpi,p,"algorithm");
+  params.init(enc,"format");
+  try {
+    params.init(enc);
+    fail("No expected IOException");
+  }
+ catch (  IOException e) {
+  }
+  paramSpi=new MyAlgorithmParameters(){
+    protected void engineInit(    byte[] params) throws IOException {
+      runEngineInitB$=true;
+      assertNull(params);
+    }
+  }
+;
+  params=new DummyAlgorithmParameters(paramSpi,p,"algorithm");
+  params.init((byte[])null);
+  assertTrue(paramSpi.runEngineInitB$);
+}

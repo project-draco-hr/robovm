@@ -1,0 +1,40 @@
+{
+  CertPathValidatorException tE=new CertPathValidatorException();
+  assertNull("getCertPath() must return null.",tE.getCertPath());
+  for (int i=0; i < msgs.length; i++) {
+    tE=new CertPathValidatorException(msgs[i]);
+    assertNull("getCertPath() must return null ",tE.getCertPath());
+  }
+  Throwable cause=null;
+  tE=new CertPathValidatorException(cause);
+  assertNull("getCertPath() must return null.",tE.getCertPath());
+  tE=new CertPathValidatorException(tCause);
+  assertNull("getCertPath() must return null.",tE.getCertPath());
+  for (int i=0; i < msgs.length; i++) {
+    tE=new CertPathValidatorException(msgs[i],tCause);
+    assertNull("getCertPath() must return null",tE.getCertPath());
+  }
+  tE=new CertPathValidatorException(null,null,null,-1);
+  assertNull("getCertPath() must return null",tE.getCertPath());
+  for (int i=0; i < msgs.length; i++) {
+    try {
+      tE=new CertPathValidatorException(msgs[i],tCause,null,-1);
+      assertNull("getCertPath() must return null",tE.getCertPath());
+    }
+ catch (    IndexOutOfBoundsException e) {
+      fail("Unexpected exception: " + e.getMessage());
+    }
+  }
+  myCertPath mcp=new myCertPath("X.509","");
+  CertPath cp=mcp.get("X.509");
+  for (int i=0; i < msgs.length; i++) {
+    try {
+      tE=new CertPathValidatorException(msgs[i],tCause,cp,-1);
+      assertNotNull("getCertPath() must not return null",tE.getCertPath());
+      assertEquals("getCertPath() must return ".concat(cp.toString()),tE.getCertPath(),cp);
+    }
+ catch (    IndexOutOfBoundsException e) {
+      fail("Unexpected IndexOutOfBoundsException was thrown. " + e.toString());
+    }
+  }
+}

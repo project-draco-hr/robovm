@@ -1,0 +1,29 @@
+{
+  final int iterations=10000;
+  final Vector v=new Vector();
+  Thread t1=new Thread(){
+    public void run(){
+      for (int i=0; i < iterations; i++) {
+synchronized (v) {
+          v.addElement(String.valueOf(i));
+          v.removeElementAt(0);
+        }
+      }
+    }
+  }
+;
+  t1.start();
+  for (int i=0; i < iterations; i++) {
+    Enumeration en=v.elements();
+    try {
+      while (true) {
+        Object result=en.nextElement();
+        if (result == null) {
+          fail("Null result: " + i);
+        }
+      }
+    }
+ catch (    NoSuchElementException e) {
+    }
+  }
+}

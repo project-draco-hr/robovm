@@ -1,0 +1,28 @@
+{
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  X509Certificate cert[]=new X509Certificate[2];
+  cert[0]=(X509Certificate)cf.generateCertificate(certArray);
+  cert[1]=(X509Certificate)cf.generateCertificate(certArray2);
+  KeyStore keyTest=KeyStore.getInstance(KeyStore.getDefaultType());
+  try {
+    keyTest.aliases();
+    fail();
+  }
+ catch (  KeyStoreException expected) {
+  }
+  keyTest.load(null,null);
+  keyTest.setCertificateEntry("alias1",cert[0]);
+  keyTest.setCertificateEntry("alias2",cert[0]);
+  keyTest.setCertificateEntry("alias3",cert[0]);
+  Enumeration<String> aliase=keyTest.aliases();
+  Set<String> alia=new HashSet<String>();
+  int i=0;
+  while (aliase.hasMoreElements()) {
+    alia.add(aliase.nextElement());
+    i++;
+  }
+  assertEquals("the wrong aliases were returned",i,3);
+  assertTrue("the wrong aliases were returned",alia.contains("alias1"));
+  assertTrue("the wrong aliases were returned",alia.contains("alias2"));
+  assertTrue("the wrong aliases were returned",alia.contains("alias3"));
+}

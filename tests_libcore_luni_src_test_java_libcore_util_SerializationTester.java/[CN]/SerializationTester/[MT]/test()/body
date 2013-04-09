@@ -1,0 +1,19 @@
+{
+  try {
+    if (golden == null || golden.length() == 0) {
+      fail("No golden value supplied! Consider using this: " + hexEncode(serialize(value)));
+    }
+    @SuppressWarnings("unchecked") T deserialized=(T)deserialize(hexDecode(golden));
+    assertTrue("User-constructed value doesn't equal deserialized golden value",equals(value,deserialized));
+    @SuppressWarnings("unchecked") T reserialized=(T)deserialize(serialize(value));
+    assertTrue("User-constructed value doesn't equal itself, reserialized",equals(value,reserialized));
+    verify(value);
+    verify(deserialized);
+    verify(reserialized);
+  }
+ catch (  Exception e) {
+    Error failure=new AssertionFailedError();
+    failure.initCause(e);
+    throw failure;
+  }
+}

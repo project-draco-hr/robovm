@@ -1,0 +1,38 @@
+{
+  Subject subj=new Subject();
+  PrivilegedExceptionAction<Object> pea=new myPrivilegedExceptionAction();
+  PrivilegedExceptionAction<Object> peaNull=null;
+  AccessControlContext acc=AccessController.getContext();
+  try {
+    Object obj=Subject.doAsPrivileged(null,pea,acc);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception: " + e);
+  }
+  try {
+    Object obj=Subject.doAsPrivileged(subj,pea,acc);
+  }
+ catch (  Exception e) {
+    fail("Unexpected exception: " + e);
+  }
+  try {
+    Object obj=Subject.doAsPrivileged(subj,peaNull,acc);
+    fail("NullPointerException wasn't thrown");
+  }
+ catch (  NullPointerException npe) {
+  }
+catch (  Exception e) {
+    fail(e + " was thrown instead of NullPointerException");
+  }
+  try {
+    Subject.doAsPrivileged(subj,new PrivilegedExceptionAction<Object>(){
+      public Object run() throws PrivilegedActionException {
+        throw new PrivilegedActionException(null);
+      }
+    }
+,acc);
+    fail("PrivilegedActionException wasn't thrown");
+  }
+ catch (  PrivilegedActionException e) {
+  }
+}

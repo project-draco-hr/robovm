@@ -1,0 +1,50 @@
+{
+  String namespaceURI="http://www.wedding.com/";
+  String qualifiedName;
+  Document doc;
+  boolean done;
+  Element newElement;
+  String charact;
+  java.util.List illegalQNames=new java.util.ArrayList();
+  illegalQNames.add("person:{");
+  illegalQNames.add("person:}");
+  illegalQNames.add("person:~");
+  illegalQNames.add("person:'");
+  illegalQNames.add("person:!");
+  illegalQNames.add("person:@");
+  illegalQNames.add("person:#");
+  illegalQNames.add("person:$");
+  illegalQNames.add("person:%");
+  illegalQNames.add("person:^");
+  illegalQNames.add("person:&");
+  illegalQNames.add("person:*");
+  illegalQNames.add("person:(");
+  illegalQNames.add("person:)");
+  illegalQNames.add("person:+");
+  illegalQNames.add("person:=");
+  illegalQNames.add("person:[");
+  illegalQNames.add("person:]");
+  illegalQNames.add("person:\\");
+  illegalQNames.add("person:/");
+  illegalQNames.add("person:;");
+  illegalQNames.add("person:`");
+  illegalQNames.add("person:<");
+  illegalQNames.add("person:>");
+  illegalQNames.add("person:,");
+  illegalQNames.add("person:a ");
+  illegalQNames.add("person:\"");
+  doc=(Document)load("staffNS",false);
+  for (int indexN10098=0; indexN10098 < illegalQNames.size(); indexN10098++) {
+    qualifiedName=(String)illegalQNames.get(indexN10098);
+{
+      boolean success=false;
+      try {
+        newElement=doc.createElementNS(namespaceURI,qualifiedName);
+      }
+ catch (      DOMException ex) {
+        success=(ex.code == DOMException.INVALID_CHARACTER_ERR);
+      }
+      assertTrue("throw_INVALID_CHARACTER_ERR",success);
+    }
+  }
+}

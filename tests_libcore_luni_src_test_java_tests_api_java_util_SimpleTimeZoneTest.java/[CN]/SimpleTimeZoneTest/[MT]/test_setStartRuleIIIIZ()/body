@@ -1,0 +1,34 @@
+{
+  SimpleTimeZone st=new SimpleTimeZone(TimeZone.getTimeZone("EST").getRawOffset(),"EST");
+  st.setStartRule(Calendar.NOVEMBER,1,Calendar.SUNDAY,1,true);
+  st.setEndRule(Calendar.NOVEMBER,15,Calendar.SUNDAY,1,false);
+  assertTrue("StartRule improperly set1",st.useDaylightTime());
+  assertTrue("StartRule improperly set2",st.inDaylightTime((new GregorianCalendar(1999,Calendar.NOVEMBER,7,12,0).getTime())));
+  assertTrue("StartRule improperly set3",st.inDaylightTime((new GregorianCalendar(1999,Calendar.NOVEMBER,13,12,0).getTime())));
+  assertTrue("StartRule improperly set4",!(st.inDaylightTime(new GregorianCalendar(1999,Calendar.NOVEMBER,6,12,0).getTime())));
+  assertTrue("StartRule improperly set5",!(st.inDaylightTime(new GregorianCalendar(1999,Calendar.NOVEMBER,14,12,0).getTime())));
+  try {
+    st.setStartRule(20,15,Calendar.SUNDAY,1,true);
+    fail("IllegalArgumentException is not thrown.");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  try {
+    st.setStartRule(Calendar.NOVEMBER,35,Calendar.SUNDAY,1,true);
+    fail("IllegalArgumentException is not thrown.");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  try {
+    st.setStartRule(Calendar.NOVEMBER,15,12,1,true);
+    fail("IllegalArgumentException is not thrown.");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  try {
+    st.setStartRule(Calendar.NOVEMBER,15,Calendar.SUNDAY,-1,true);
+    fail("IllegalArgumentException is not thrown.");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+}

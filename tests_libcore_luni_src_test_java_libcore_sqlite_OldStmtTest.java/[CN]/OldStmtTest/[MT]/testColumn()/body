@@ -1,0 +1,36 @@
+{
+  Object columnObject;
+  int intColumn;
+  String selectStmt="select * from " + DatabaseCreator.SIMPLE_TABLE1;
+  db.get_table(selectStmt);
+  st=db.prepare(selectStmt);
+  st.step();
+  columnObject=st.column(1);
+  intColumn=st.column_int(1);
+  assertNotNull(intColumn);
+  assertTrue("Integer".equalsIgnoreCase(st.column_decltype(1)));
+  int stSpeed=Integer.parseInt(columnObject.toString());
+  assertNotNull(stSpeed);
+  assertEquals(intColumn,stSpeed);
+  try {
+    assertNotNull(columnObject);
+    ((Integer)columnObject).intValue();
+    fail("Cast to Integer should fail");
+  }
+ catch (  ClassCastException expected) {
+  }
+  try {
+    st.column(4);
+    fail("Exception expected");
+  }
+ catch (  SQLite.Exception expected) {
+    assertEquals("column out of bounds",expected.getMessage());
+  }
+  try {
+    st.column(-1);
+    fail("Exception expected");
+  }
+ catch (  SQLite.Exception expected) {
+    assertEquals("column out of bounds",expected.getMessage());
+  }
+}

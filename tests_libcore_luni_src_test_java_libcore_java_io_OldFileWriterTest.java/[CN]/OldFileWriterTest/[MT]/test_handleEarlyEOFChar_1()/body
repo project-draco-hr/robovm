@@ -1,0 +1,36 @@
+{
+  String str="All work and no play makes Jack a dull boy\n";
+  int NUMBER=2048;
+  int j=0;
+  int len=str.length() * NUMBER;
+  char[] strChars=new char[len];
+  for (int i=0; i < NUMBER; ++i) {
+    for (int k=0; k < str.length(); ++k) {
+      strChars[j++]=str.charAt(k);
+    }
+  }
+  File f=null;
+  FileWriter fw=null;
+  try {
+    f=File.createTempFile("ony","by_one");
+    fw=new FileWriter(f);
+    fw.write(strChars);
+    fw.close();
+    InputStreamReader in=null;
+    FileInputStream fis=new FileInputStream(f);
+    in=new InputStreamReader(fis);
+    int b;
+    int errors=0;
+    for (int offset=0; offset < strChars.length; ++offset) {
+      b=in.read();
+      if (b == -1) {
+        fail("Early EOF at offset " + offset + "\n");
+        return;
+      }
+    }
+    assertEquals(0,errors);
+  }
+ catch (  IOException e) {
+    e.printStackTrace();
+  }
+}

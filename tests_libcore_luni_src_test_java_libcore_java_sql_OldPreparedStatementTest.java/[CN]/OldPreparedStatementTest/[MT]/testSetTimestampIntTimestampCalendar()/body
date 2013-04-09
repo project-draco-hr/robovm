@@ -1,0 +1,52 @@
+{
+  Calendar[] cals={Calendar.getInstance(),Calendar.getInstance(Locale.GERMANY),Calendar.getInstance(TimeZone.getDefault())};
+  Timestamp[] timestamps={new Timestamp(2007,10,17,19,06,50,23),new Timestamp(123)};
+  PreparedStatement ps=null;
+  PreparedStatement ps1=null;
+  try {
+    String query="insert into type (timeVal) values (?);";
+    ps=conn.prepareStatement(query);
+    Statement st=null;
+    for (int i=0; i < timestamps.length; i++) {
+      try {
+        ps.setTimestamp(1,timestamps[i],cals[i]);
+        assertFalse(ps.execute());
+        assertTrue(ps.getUpdateCount() > 0);
+      }
+  finally {
+        try {
+          st.close();
+        }
+ catch (        Exception ee) {
+        }
+      }
+    }
+    try {
+      ps.setTimestamp(2,timestamps[0],cals[0]);
+      ps.execute();
+      fail("SQLException is not thrown");
+    }
+ catch (    Exception sqle) {
+    }
+    ps.close();
+    try {
+      ps.setTimestamp(1,timestamps[0],cals[1]);
+      ps.execute();
+      fail("SQLException is not thrown");
+    }
+ catch (    SQLException sqle) {
+    }
+    String query1="insert into type (Tint) values (?);";
+    ps1=conn.prepareStatement(query1);
+    ps1.setTimestamp(1,timestamps[0],cals[2]);
+    ps1.execute();
+  }
+  finally {
+    try {
+      ps.close();
+      ps1.close();
+    }
+ catch (    Exception ee) {
+    }
+  }
+}

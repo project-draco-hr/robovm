@@ -1,0 +1,14 @@
+{
+  URL u=createContent("lf.jar","swt.dll");
+  juc=(JarURLConnection)u.openConnection();
+  java.util.jar.Attributes a=juc.getAttributes();
+  assertEquals("Returned incorrect Attributes","SHA MD5",a.get(new java.util.jar.Attributes.Name("Digest-Algorithms")));
+  URL invURL=createContent("InvalidJar.jar","Test.class");
+  JarURLConnection juConn=(JarURLConnection)invURL.openConnection();
+  try {
+    juConn.getAttributes();
+    fail("IOException was not thrown.");
+  }
+ catch (  java.io.IOException io) {
+  }
+}

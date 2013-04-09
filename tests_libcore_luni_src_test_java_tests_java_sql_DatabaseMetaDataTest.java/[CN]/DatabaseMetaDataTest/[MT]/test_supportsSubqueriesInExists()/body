@@ -1,0 +1,22 @@
+{
+  insertNewRecord();
+  String selectQuery="SELECT field1 FROM " + DatabaseCreator.TEST_TABLE1 + " WHERE EXISTS(SELECT field2 FROM "+ DatabaseCreator.TEST_TABLE1+ ")";
+  try {
+    statement.executeQuery(selectQuery);
+    if (!meta.supportsSubqueriesInExists()) {
+      fail("Subqueries in exists are supported");
+    }
+  }
+ catch (  SQLException e) {
+    if (meta.supportsSubqueriesInExists()) {
+      fail("Subqueries in exists are not supported");
+    }
+  }
+  conn.close();
+  try {
+    meta.supportsSubqueriesInExists();
+    fail("SQLException not thrown");
+  }
+ catch (  SQLException e) {
+  }
+}

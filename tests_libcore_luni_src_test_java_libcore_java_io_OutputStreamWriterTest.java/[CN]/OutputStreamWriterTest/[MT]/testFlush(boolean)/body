@@ -1,0 +1,35 @@
+{
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  OutputStreamWriter writer=new OutputStreamWriter(baos,"UTF-32BE");
+  char[] cs=new char[8192 / 4 + 1];
+  Arrays.fill(cs,'x');
+  cs[cs.length - 1]='\ud842';
+  writer.write(cs,0,cs.length);
+  writer.flush();
+  assertEquals(8192,baos.size());
+  if (includeSecondHalf) {
+    writer.write(0xdf9f);
+  }
+  writer.close();
+  byte[] bytes=baos.toByteArray();
+  assertEquals(8196,bytes.length);
+  int i=0;
+  while (i < 8192) {
+    assertEquals((byte)0,bytes[i++]);
+    assertEquals((byte)0,bytes[i++]);
+    assertEquals((byte)0,bytes[i++]);
+    assertEquals((byte)'x',bytes[i++]);
+  }
+  if (includeSecondHalf) {
+    assertEquals((byte)0x00,bytes[i++]);
+    assertEquals((byte)0x02,bytes[i++]);
+    assertEquals((byte)0x0b,bytes[i++]);
+    assertEquals((byte)0x9f,bytes[i++]);
+  }
+ else {
+    assertEquals((byte)0,bytes[i++]);
+    assertEquals((byte)0,bytes[i++]);
+    assertEquals((byte)0xff,bytes[i++]);
+    assertEquals((byte)0xfd,bytes[i++]);
+  }
+}

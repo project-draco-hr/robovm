@@ -1,0 +1,12 @@
+{
+  TestKeyStore testKeyStore=new TestKeyStore.Builder().keyAlgorithms("RSA","DSA","EC","EC_RSA").aliasPrefix("rsa-dsa-ec").ca(true).build();
+  if (StandardNames.IS_RI) {
+    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,StandardNames.JSSE_PROVIDER_NAME,StandardNames.JSSE_PROVIDER_NAME,true,true);
+  }
+ else {
+    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,"HarmonyJSSE","HarmonyJSSE",false,false);
+    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,"AndroidOpenSSL","AndroidOpenSSL",true,true);
+    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,"HarmonyJSSE","AndroidOpenSSL",false,true);
+    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,"AndroidOpenSSL","HarmonyJSSE",true,false);
+  }
+}

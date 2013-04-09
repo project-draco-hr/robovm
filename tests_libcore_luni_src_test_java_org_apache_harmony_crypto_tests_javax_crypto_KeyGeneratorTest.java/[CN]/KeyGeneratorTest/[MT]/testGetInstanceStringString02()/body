@@ -1,0 +1,29 @@
+{
+  if (!DEFSupported) {
+    fail(NotSupportMsg);
+    return;
+  }
+  String provider=null;
+  for (int i=0; i < validValues.length; i++) {
+    try {
+      KeyGenerator.getInstance(validValues[i],provider);
+      fail("IllegalArgumentException must be thrown when provider is null");
+    }
+ catch (    IllegalArgumentException e) {
+    }
+    try {
+      KeyGenerator.getInstance(validValues[i],"");
+      fail("IllegalArgumentException must be thrown when provider is empty");
+    }
+ catch (    IllegalArgumentException e) {
+    }
+    for (int j=1; j < invalidValues.length; j++) {
+      try {
+        KeyGenerator.getInstance(validValues[i],invalidValues[j]);
+        fail("NoSuchProviderException must be thrown (algorithm: ".concat(validValues[i]).concat(" provider: ").concat(invalidValues[j]).concat(")"));
+      }
+ catch (      NoSuchProviderException e) {
+      }
+    }
+  }
+}

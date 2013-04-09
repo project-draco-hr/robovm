@@ -1,0 +1,22 @@
+{
+  long[] randomArray=new long[100];
+  boolean someDifferent=false;
+  final long firstSeed=1000;
+  long aLong, anotherLong, yetAnotherLong;
+  Random aRandom=new Random();
+  Random anotherRandom=new Random();
+  Random yetAnotherRandom=new Random();
+  aRandom.setSeed(firstSeed);
+  anotherRandom.setSeed(firstSeed);
+  for (int counter=0; counter < randomArray.length; counter++) {
+    aLong=aRandom.nextLong();
+    anotherLong=anotherRandom.nextLong();
+    assertTrue("Two randoms with same seeds gave differing nextLong values",aLong == anotherLong);
+    yetAnotherLong=yetAnotherRandom.nextLong();
+    randomArray[counter]=aLong;
+    if (aLong != yetAnotherLong)     someDifferent=true;
+  }
+  assertTrue("Two randoms with the different seeds gave the same chain of values",someDifferent);
+  aRandom.setSeed(firstSeed);
+  for (int counter=0; counter < randomArray.length; counter++)   assertTrue("Reseting a random to its old seed did not result in the same chain of values as it gave before",aRandom.nextLong() == randomArray[counter]);
+}

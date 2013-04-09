@@ -1,0 +1,9 @@
+{
+  server.enqueue(new MockResponse().setBody("This connection won't pool properly").setSocketPolicy(socketPolicy));
+  server.enqueue(new MockResponse().setBody("This comes after a busted connection"));
+  server.play();
+  assertContent("This connection won't pool properly",server.getUrl("/a").openConnection());
+  assertEquals(0,server.takeRequest().getSequenceNumber());
+  assertContent("This comes after a busted connection",server.getUrl("/b").openConnection());
+  assertEquals(0,server.takeRequest().getSequenceNumber());
+}

@@ -1,0 +1,49 @@
+{
+  ThreadGroup thrGroup=new ThreadGroup("Test Group 1");
+  List<MyThread> subThreads=populateGroupsWithThreads(thrGroup,3);
+  int numGroupThreads=thrGroup.activeGroupCount();
+  ThreadGroup[] listOfGroups=new ThreadGroup[numGroupThreads];
+  assertEquals(0,thrGroup.enumerate(listOfGroups,true));
+  assertEquals(0,thrGroup.enumerate(listOfGroups,false));
+  for (  MyThread thr : subThreads) {
+    thr.start();
+  }
+  numGroupThreads=thrGroup.activeGroupCount();
+  listOfGroups=new ThreadGroup[numGroupThreads];
+  assertEquals(0,thrGroup.enumerate(listOfGroups,true));
+  assertEquals(0,thrGroup.enumerate(listOfGroups,false));
+  ThreadGroup subGroup1=new ThreadGroup(thrGroup,"Test Group 2");
+  List<MyThread> subThreads1=populateGroupsWithThreads(subGroup1,3);
+  numGroupThreads=thrGroup.activeGroupCount();
+  listOfGroups=new ThreadGroup[numGroupThreads];
+  assertEquals(1,thrGroup.enumerate(listOfGroups,true));
+  assertEquals(1,thrGroup.enumerate(listOfGroups,false));
+  for (  MyThread thr : subThreads1) {
+    thr.start();
+  }
+  numGroupThreads=thrGroup.activeGroupCount();
+  listOfGroups=new ThreadGroup[numGroupThreads];
+  assertEquals(1,thrGroup.enumerate(listOfGroups,true));
+  assertEquals(1,thrGroup.enumerate(listOfGroups,false));
+  for (  MyThread thr : subThreads) {
+    thr.interrupt();
+  }
+  ThreadGroup subGroup2=new ThreadGroup(subGroup1,"Test Group 3");
+  List<MyThread> subThreads2=populateGroupsWithThreads(subGroup2,3);
+  numGroupThreads=thrGroup.activeGroupCount();
+  listOfGroups=new ThreadGroup[numGroupThreads];
+  assertEquals(2,thrGroup.enumerate(listOfGroups,true));
+  assertEquals(1,thrGroup.enumerate(listOfGroups,false));
+  List<MyThread> allThreads=new ArrayList<MyThread>();
+  allThreads.addAll(subThreads);
+  allThreads.addAll(subThreads1);
+  allThreads.addAll(subThreads2);
+  for (  MyThread thr : allThreads) {
+    thr.interrupt();
+    try {
+      thr.join(5000);
+    }
+ catch (    InterruptedException e) {
+    }
+  }
+}

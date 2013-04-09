@@ -1,0 +1,49 @@
+{
+  String[] envp=getEnv();
+  checkExec(4,envp,null);
+  checkExec(4,null,null);
+  try {
+    Runtime.getRuntime().exec((String[])null,null);
+    fail("NullPointerException should be thrown.");
+  }
+ catch (  IOException ioe) {
+    fail("IOException was thrown.");
+  }
+catch (  NullPointerException npe) {
+  }
+  try {
+    Runtime.getRuntime().exec(new String[]{"ls",null},null);
+    fail("NullPointerException should be thrown.");
+  }
+ catch (  IOException ioe) {
+    fail("IOException was thrown.");
+  }
+catch (  NullPointerException npe) {
+  }
+  SecurityManager sm=new SecurityManager(){
+    public void checkPermission(    Permission perm){
+      if (perm.getName().equals("checkExec")) {
+        throw new SecurityException();
+      }
+    }
+    public void checkExec(    String cmd){
+      throw new SecurityException();
+    }
+  }
+;
+  try {
+    Runtime.getRuntime().exec(new String[]{},envp);
+    fail("IndexOutOfBoundsException should be thrown.");
+  }
+ catch (  IndexOutOfBoundsException ioob) {
+  }
+catch (  IOException e) {
+    fail("IOException was thrown.");
+  }
+  try {
+    Runtime.getRuntime().exec(new String[]{""},envp);
+    fail("IOException should be thrown.");
+  }
+ catch (  IOException e) {
+  }
+}

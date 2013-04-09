@@ -1,0 +1,14 @@
+{
+  int sport=startServer("SServer getLocRemoteAddress");
+  int portNumber=Support_PortManager.getNextPort();
+  s=new Socket(InetAddress.getLocalHost(),sport,null,portNumber);
+  assertTrue("Returned incorrect InetSocketAddress(1):" + s.getLocalSocketAddress().toString(),s.getRemoteSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),sport)));
+  s.close();
+  Socket theSocket=new Socket();
+  portNumber=Support_PortManager.getNextPort();
+  theSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(),portNumber));
+  assertNull("Returned incorrect InetSocketAddress -unconnected socket:" + "Expected: NULL",theSocket.getRemoteSocketAddress());
+  theSocket.connect(new InetSocketAddress(InetAddress.getLocalHost(),sport));
+  assertTrue("Returned incorrect InetSocketAddress(2):" + theSocket.getRemoteSocketAddress().toString(),theSocket.getRemoteSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),sport)));
+  theSocket.close();
+}

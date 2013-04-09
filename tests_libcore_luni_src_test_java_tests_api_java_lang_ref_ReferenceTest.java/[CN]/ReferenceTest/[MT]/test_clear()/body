@@ -1,0 +1,16 @@
+{
+  tmpA=new Object();
+  tmpB=new Object();
+  tmpC=new Object();
+  SoftReference sr=new SoftReference(tmpA,new ReferenceQueue());
+  WeakReference wr=new WeakReference(tmpB,new ReferenceQueue());
+  PhantomReference pr=new PhantomReference(tmpC,new ReferenceQueue());
+  assertTrue("Start: Object not cleared.",(sr.get() != null) && (wr.get() != null));
+  assertNull("Referent is not null.",pr.get());
+  sr.clear();
+  wr.clear();
+  pr.clear();
+  assertTrue("End: Object cleared.",(sr.get() == null) && (wr.get() == null));
+  assertNull("Referent is not null.",pr.get());
+  assertTrue("should always pass",tmpA != sr.get() && tmpB != wr.get());
+}

@@ -1,0 +1,30 @@
+{
+  byte[] encoded=k.getEncoded();
+  String keyAlgo=k.getAlgorithm();
+  Provider[] providers=Security.getProviders();
+  for (  Provider p : providers) {
+    Set<Provider.Service> services=p.getServices();
+    for (    Provider.Service service : services) {
+      if (!"KeyFactory".equals(service.getType())) {
+        continue;
+      }
+      if (!service.getAlgorithm().equals(keyAlgo)) {
+        continue;
+      }
+      if ("PKCS#8".equals(k.getFormat())) {
+        PKCS8EncodedKeySpec spec=new PKCS8EncodedKeySpec(encoded);
+        KeyFactory kf=KeyFactory.getInstance(k.getAlgorithm(),p);
+        PrivateKey privKey=kf.generatePrivate(spec);
+        assertNotNull(privKey);
+        assertTrue(Arrays.equals(privKey.getEncoded(),encoded));
+      }
+ else       if ("X.509".equals(k.getFormat())) {
+        X509EncodedKeySpec spec=new X509EncodedKeySpec(encoded);
+        KeyFactory kf=KeyFactory.getInstance(k.getAlgorithm(),p);
+        PublicKey pubKey=kf.generatePublic(spec);
+        assertNotNull(pubKey);
+        assertTrue(Arrays.equals(encoded,pubKey.getEncoded()));
+      }
+    }
+  }
+}

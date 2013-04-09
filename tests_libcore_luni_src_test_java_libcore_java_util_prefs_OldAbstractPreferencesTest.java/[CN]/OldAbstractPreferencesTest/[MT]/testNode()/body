@@ -1,0 +1,42 @@
+{
+  AbstractPreferences first=(AbstractPreferences)pref.node("First node");
+  AbstractPreferences second=(AbstractPreferences)pref.node("Second node");
+  try {
+    first.node("blabla/");
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    first.node("///invalid");
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  StringBuffer sb=new StringBuffer();
+  for (int i=0; i < Preferences.MAX_NAME_LENGTH; i++) {
+    sb.append('c');
+  }
+  first.node(new String(sb));
+  sb.append('c');
+  try {
+    first.node(new String(sb));
+    fail("IllegalArgumentException expected");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  second.removeNode();
+  try {
+    second.node("");
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+  pref.removeNode();
+  try {
+    first.node("");
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+}

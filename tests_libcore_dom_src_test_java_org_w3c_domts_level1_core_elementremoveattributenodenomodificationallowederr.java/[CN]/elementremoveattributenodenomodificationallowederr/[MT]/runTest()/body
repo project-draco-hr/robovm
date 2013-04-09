@@ -1,0 +1,39 @@
+{
+  Document doc;
+  NodeList genderList;
+  Node gender;
+  NodeList genList;
+  Node gen;
+  int nodeType;
+  NodeList gList;
+  Element genElement;
+  NamedNodeMap attrList;
+  Attr attrNode;
+  Attr removedAttr;
+  doc=(Document)load("staff",true);
+  genderList=doc.getElementsByTagName("gender");
+  gender=genderList.item(2);
+  genList=gender.getChildNodes();
+  gen=genList.item(0);
+  assertNotNull("genNotNull",gen);
+  nodeType=(int)gen.getNodeType();
+  if (equals(1,nodeType)) {
+    gen=doc.createEntityReference("ent4");
+    assertNotNull("createdEntRefNotNull",gen);
+  }
+  gList=gen.getChildNodes();
+  genElement=(Element)gList.item(0);
+  assertNotNull("genElementNotNull",genElement);
+  attrList=genElement.getAttributes();
+  attrNode=(Attr)attrList.getNamedItem("domestic");
+{
+    boolean success=false;
+    try {
+      removedAttr=genElement.removeAttributeNode(attrNode);
+    }
+ catch (    DOMException ex) {
+      success=(ex.code == DOMException.NO_MODIFICATION_ALLOWED_ERR);
+    }
+    assertTrue("throw_NO_MODIFICATION_ALLOWED_ERR",success);
+  }
+}

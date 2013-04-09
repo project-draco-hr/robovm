@@ -1,0 +1,33 @@
+{
+  String expected=makeString();
+  byte[] expectedBytes=expected.getBytes("UTF-8");
+  byte[] deflatedBytes=deflate(expectedBytes,dictionary);
+  Inflater inflater=new Inflater();
+  final int CHUNK_SIZE=16;
+  int offset=0;
+  inflater.setInput(deflatedBytes,offset,CHUNK_SIZE);
+  offset+=CHUNK_SIZE;
+  if (dictionary != null) {
+    assertEquals(0,inflater.inflate(new byte[8]));
+    assertTrue(inflater.needsDictionary());
+    assertEquals(adler32(dictionary),inflater.getAdler());
+    inflater.setDictionary(dictionary);
+  }
+  ByteArrayOutputStream inflatedBytes=new ByteArrayOutputStream();
+  byte[] buf=new byte[8];
+  while (inflatedBytes.size() != expectedBytes.length) {
+    if (inflater.needsInput()) {
+      int nextChunkByteCount=Math.min(CHUNK_SIZE,deflatedBytes.length - offset);
+      inflater.setInput(deflatedBytes,offset,nextChunkByteCount);
+      offset+=nextChunkByteCount;
+    }
+ else {
+      int inflatedByteCount=inflater.inflate(buf);
+      if (inflatedByteCount > 0) {
+        inflatedBytes.write(buf,0,inflatedByteCount);
+      }
+    }
+  }
+  inflater.end();
+  assertEquals(expected,new String(inflatedBytes.toByteArray(),"UTF-8"));
+}

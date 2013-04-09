@@ -1,0 +1,23 @@
+{
+  final StringBuilder text=new StringBuilder();
+  DefaultHandler handler=new DefaultHandler(){
+    public void characters(    char[] ch,    int start,    int length){
+      String s=new String(ch,start,length).trim();
+      if (s.length() != 0) {
+        if (text.length() != 0) {
+          text.append(",");
+        }
+        text.append(s);
+      }
+    }
+    public InputSource resolveEntity(    String publicId,    String systemId) throws IOException, SAXException {
+      return new InputSource(new InputStreamReader(new ByteArrayInputStream("test".getBytes())));
+    }
+  }
+;
+  SAXParserFactory spf=SAXParserFactory.newInstance();
+  spf.setValidating(false);
+  parser=spf.newSAXParser();
+  parser.parse(this.getClass().getResourceAsStream("/staffEntRes.xml"),handler);
+  assertTrue("resolved external entity must be in parser character stream",text.toString().contains("test"));
+}

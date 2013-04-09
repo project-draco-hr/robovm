@@ -1,0 +1,16 @@
+{
+  String certName=Support_Resources.getURL("test.cert");
+  InputStream is=new URL(certName).openConnection().getInputStream();
+  CertificateFactory cf=CertificateFactory.getInstance("X.509");
+  Certificate cert=cf.generateCertificate(is);
+  is.close();
+  Cipher c=Cipher.getInstance("RSA");
+  c.init(Cipher.ENCRYPT_MODE,cert);
+  c=Cipher.getInstance("DES/CBC/PKCS5Padding");
+  try {
+    c.init(Cipher.ENCRYPT_MODE,cert);
+    fail();
+  }
+ catch (  InvalidKeyException expected) {
+  }
+}

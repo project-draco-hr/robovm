@@ -1,0 +1,17 @@
+{
+  String select=element.getAttribute("select");
+  Context context=new Context(inputSource,url,select);
+  XPath xpath=XPathFactory.newInstance().newXPath();
+  xpath.setXPathVariableResolver(new ElementVariableResolver(element));
+  for (  Element test : elementsOf(element.getChildNodes())) {
+    if (test.getTagName().equals("test")) {
+      suite.addTest(createFromTest(xpath,context,test));
+    }
+ else     if (test.getTagName().equals("valueOf")) {
+      suite.addTest(createFromValueOf(xpath,context,test));
+    }
+ else {
+      throw new UnsupportedOperationException("Unsupported test: " + context);
+    }
+  }
+}

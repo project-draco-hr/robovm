@@ -1,0 +1,42 @@
+{
+  if (("2.5.29.14".equals(oid)) || ("2.5.29.35".equals(oid))) {
+    return ASN1OctetString.getInstance().encode(keyIdentifier);
+  }
+  if ("2.5.29.16".equals(oid)) {
+    PrivateKeyUsagePeriod pkup=new PrivateKeyUsagePeriod(notBefore,notAfter);
+    byte[] encoded=pkup.getEncoded();
+    return ASN1OctetString.getInstance().encode(encoded);
+  }
+  if (("2.5.29.37".equals(oid)) && (extKeyUsage != null)) {
+    ASN1Oid[] oa=new ASN1Oid[extKeyUsage.size()];
+    String[] val=new String[extKeyUsage.size()];
+    Iterator it=extKeyUsage.iterator();
+    int id=0;
+    while (it.hasNext()) {
+      oa[id]=ASN1Oid.getInstanceForString();
+      val[id++]=(String)it.next();
+    }
+    return ASN1OctetString.getInstance().encode(new ASN1Sequence(oa).encode(val));
+  }
+  if ("2.5.29.19".equals(oid)) {
+    return ASN1OctetString.getInstance().encode(new ASN1Sequence(new ASN1Type[]{ASN1Boolean.getInstance(),ASN1Integer.getInstance()}).encode(new Object[]{new Boolean(pathLen != 1),BigInteger.valueOf(pathLen).toByteArray()}));
+  }
+  if ("2.5.29.17".equals(oid) && (sans != null)) {
+    if (sans.getNames() == null) {
+      return null;
+    }
+    return ASN1OctetString.getInstance().encode(GeneralNames.ASN1.encode(sans));
+  }
+  if ("2.5.29.32".equals(oid) && (policies != null) && (policies.length > 0)) {
+    CertificatePolicies certificatePolicies=new CertificatePolicies();
+    for (int i=0; i < policies.length; i++) {
+      PolicyInformation policyInformation=new PolicyInformation(policies[i]);
+      certificatePolicies.addPolicyInformation(policyInformation);
+    }
+    return ASN1OctetString.getInstance().encode(certificatePolicies.getEncoded());
+  }
+  if ("2.5.29.30".equals(oid) && (nameConstraints != null)) {
+    return ASN1OctetString.getInstance().encode(nameConstraints.getEncoded());
+  }
+  return null;
+}

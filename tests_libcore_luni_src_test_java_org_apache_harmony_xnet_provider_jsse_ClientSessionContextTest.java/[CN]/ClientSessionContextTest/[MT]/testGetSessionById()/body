@@ -1,0 +1,21 @@
+{
+  ClientSessionContext context=new ClientSessionContext();
+  SSLSession a=new ValidSSLSession("a");
+  SSLSession b=new ValidSSLSession("b");
+  context.putSession(a);
+  context.putSession(b);
+  assertSame(a,context.getSession("a".getBytes()));
+  assertSame(b,context.getSession("b".getBytes()));
+  assertSame(a,context.getSession("a",443));
+  assertSame(b,context.getSession("b",443));
+  assertEquals(2,context.size());
+  Set<SSLSession> sessions=new HashSet<SSLSession>();
+  Enumeration ids=context.getIds();
+  while (ids.hasMoreElements()) {
+    sessions.add(context.getSession((byte[])ids.nextElement()));
+  }
+  Set<SSLSession> expected=new HashSet<SSLSession>();
+  expected.add(a);
+  expected.add(b);
+  assertEquals(expected,sessions);
+}

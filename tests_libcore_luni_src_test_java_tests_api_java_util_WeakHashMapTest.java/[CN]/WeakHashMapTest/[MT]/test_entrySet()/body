@@ -1,0 +1,26 @@
+{
+  whm=new WeakHashMap();
+  for (int i=0; i < 100; i++)   whm.put(keyArray[i],valueArray[i]);
+  List keys=Arrays.asList(keyArray);
+  List values=Arrays.asList(valueArray);
+  Set entrySet=whm.entrySet();
+  assertTrue("Incorrect number of entries returned--wanted 100, got: " + entrySet.size(),entrySet.size() == 100);
+  Iterator it=entrySet.iterator();
+  while (it.hasNext()) {
+    Map.Entry entry=(Map.Entry)it.next();
+    assertTrue("Invalid map entry returned--bad key",keys.contains(entry.getKey()));
+    assertTrue("Invalid map entry returned--bad key",values.contains(entry.getValue()));
+  }
+  keys=null;
+  values=null;
+  keyArray[50]=null;
+  int count=0;
+  do {
+    System.gc();
+    System.gc();
+    Runtime.getRuntime().runFinalization();
+    count++;
+  }
+ while (count <= 5 && entrySet.size() == 100);
+  assertTrue("Incorrect number of entries returned after gc--wanted 99, got: " + entrySet.size(),entrySet.size() == 99);
+}

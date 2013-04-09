@@ -1,0 +1,50 @@
+{
+  Hashtable<String,Integer> allSupported=new Hashtable<String,Integer>();
+  Provider[] allProviders=Security.getProviders();
+  for (int i=0; i < allProviders.length; i++) {
+    Provider provider=allProviders[i];
+    Iterator it=provider.entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry entry=(Map.Entry)it.next();
+      String key=(String)entry.getKey();
+      if (!isAlias(key) && !isProviderData(key)) {
+        addOrIncrementTable(allSupported,key);
+      }
+    }
+  }
+  for (int i=0; i < allProviders.length; i++) {
+    Provider provider=allProviders[i];
+    Iterator it=provider.entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry entry=(Map.Entry)it.next();
+      String key=(String)entry.getKey();
+      if (isAlias(key)) {
+        String aliasVal=key.substring("ALG.ALIAS.".length());
+        String aliasKey=aliasVal.substring(0,aliasVal.indexOf(".") + 1) + entry.getValue();
+        if (!aliasVal.equals(aliasKey)) {
+          if (allSupported.containsKey(aliasVal)) {
+            addOrIncrementTable(allSupported,aliasKey);
+          }
+        }
+      }
+    }
+  }
+  Provider provTest[]=null;
+  Iterator it=allSupported.keySet().iterator();
+  while (it.hasNext()) {
+    String filterString=(String)it.next();
+    try {
+      provTest=Security.getProviders(filterString);
+      int expected=((Integer)allSupported.get(filterString)).intValue();
+      assertEquals("Unexpected number of providers returned for filter " + filterString,expected,provTest.length);
+    }
+ catch (    InvalidParameterException e) {
+    }
+  }
+  try {
+    provTest=Security.getProviders("Signature.SHA1withDSA :512");
+    fail("InvalidParameterException should be thrown <Signature.SHA1withDSA :512>");
+  }
+ catch (  InvalidParameterException e) {
+  }
+}

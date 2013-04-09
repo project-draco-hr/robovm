@@ -1,0 +1,59 @@
+{
+  executor=Executors.newCachedThreadPool();
+  serverSocket=new ServerSocket(port);
+  serverSocket.setReuseAddress(true);
+  this.port=serverSocket.getLocalPort();
+  executor.execute(namedRunnable("MockWebServer-accept-" + port,new Runnable(){
+    public void run(){
+      try {
+        acceptConnections();
+      }
+ catch (      Throwable e) {
+        logger.log(Level.WARNING,"MockWebServer connection failed",e);
+      }
+      try {
+        serverSocket.close();
+      }
+ catch (      Throwable e) {
+        logger.log(Level.WARNING,"MockWebServer server socket close failed",e);
+      }
+      for (Iterator<Socket> s=openClientSockets.iterator(); s.hasNext(); ) {
+        try {
+          s.next().close();
+          s.remove();
+        }
+ catch (        Throwable e) {
+          logger.log(Level.WARNING,"MockWebServer socket close failed",e);
+        }
+      }
+      try {
+        executor.shutdown();
+      }
+ catch (      Throwable e) {
+        logger.log(Level.WARNING,"MockWebServer executor shutdown failed",e);
+      }
+    }
+    private void acceptConnections() throws Exception {
+      do {
+        Socket socket;
+        try {
+          socket=serverSocket.accept();
+        }
+ catch (        SocketException ignored) {
+          continue;
+        }
+        MockResponse peek=responseQueue.peek();
+        if (peek != null && peek.getSocketPolicy() == DISCONNECT_AT_START) {
+          responseQueue.take();
+          socket.close();
+        }
+ else {
+          openClientSockets.add(socket);
+          serveConnection(socket);
+        }
+      }
+ while (!responseQueue.isEmpty());
+    }
+  }
+));
+}

@@ -1,0 +1,31 @@
+{
+  for (; ; ) {
+    if (pp == pattern.length() && rp == result.length())     return true;
+    if (pp == pattern.length())     return false;
+    char pc=pattern.charAt(pp);
+    if (pc == '_') {
+      if (rp == result.length())       return false;
+      pp++;
+      rp++;
+    }
+ else     if (pc == '%') {
+      if (pp == pattern.length() - 1) {
+        return true;
+      }
+      for (int sp=rp; sp < result.length(); sp++) {
+        if (doesMatch(pattern,pp + 1,result,sp)) {
+          return true;
+        }
+      }
+      return false;
+    }
+ else {
+      if (rp == result.length())       return false;
+      if (pc != result.charAt(rp)) {
+        return false;
+      }
+      pp++;
+      rp++;
+    }
+  }
+}

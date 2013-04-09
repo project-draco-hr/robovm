@@ -1,0 +1,26 @@
+{
+  Document doc;
+  NodeList elementList;
+  Node child;
+  String childName;
+  String childValue;
+  int commentCount=0;
+  int childType;
+  NamedNodeMap attributes;
+  doc=(Document)load("hc_staff",false);
+  elementList=doc.getChildNodes();
+  for (int indexN1005E=0; indexN1005E < elementList.getLength(); indexN1005E++) {
+    child=(Node)elementList.item(indexN1005E);
+    childType=(int)child.getNodeType();
+    if (equals(8,childType)) {
+      childName=child.getNodeName();
+      assertEquals("nodeName","#comment",childName);
+      childValue=child.getNodeValue();
+      assertEquals("nodeValue"," This is comment number 1.",childValue);
+      attributes=child.getAttributes();
+      assertNull("attributes",attributes);
+      commentCount+=1;
+    }
+  }
+  assertTrue("atMostOneComment",(commentCount < 2));
+}

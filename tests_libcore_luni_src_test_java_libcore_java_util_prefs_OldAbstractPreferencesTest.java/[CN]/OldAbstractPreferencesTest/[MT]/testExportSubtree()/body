@@ -1,0 +1,48 @@
+{
+  AbstractPreferences ap1=(AbstractPreferences)pref.node("First node");
+  AbstractPreferences ap2=(AbstractPreferences)pref.node("Second node");
+  pref.putInt("IntegerValue",33);
+  pref.putBoolean("BoolValue",true);
+  pref.flush();
+  ap1.putInt("FirstIntValue",11);
+  ap2.putDouble("DoubleValue",new Double(6.626e-34));
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  pref.exportSubtree(baos);
+  ByteArrayInputStream bais=new ByteArrayInputStream(baos.toByteArray());
+  assertTrue(pref.getBoolean("BoolValue",false));
+  assertEquals(33,pref.getInt("IntegerValue",22));
+  assertEquals(2,pref.childrenNames().length);
+  assertEquals(11,ap1.getInt("FirstIntValue",22));
+  assertEquals(new Double(6.626e-34),ap2.getDouble("DoubleValue",new Double(3.14)));
+  String xmlData=new String(baos.toByteArray());
+  assertTrue(xmlData.contains("IntegerValue"));
+  assertTrue(xmlData.contains("BoolValue"));
+  assertTrue(xmlData.contains("FirstIntValue"));
+  assertTrue(xmlData.contains("DoubleValue"));
+  assertTrue(xmlData.contains("33"));
+  assertTrue(xmlData.contains("true"));
+  assertTrue(xmlData.contains("11"));
+  assertTrue(xmlData.contains("6.626E-34"));
+  pref.removeNode();
+  try {
+    pref.exportSubtree(new ByteArrayOutputStream());
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+  try {
+    pref.getBoolean("BoolValue",false);
+    fail("IllegalStateException expected");
+  }
+ catch (  IllegalStateException e) {
+  }
+  pref=(AbstractPreferences)parent.node(nodeName);
+  pref.importPreferences(bais);
+  ap1=(AbstractPreferences)pref.node("First node");
+  ap2=(AbstractPreferences)pref.node("Second node");
+  assertTrue(pref.getBoolean("BoolValue",false));
+  assertEquals(33,pref.getInt("IntegerValue",22));
+  assertEquals(2,pref.childrenNames().length);
+  assertEquals(11,ap1.getInt("FirstIntValue",22));
+  assertEquals(new Double(6.626e-34),ap2.getDouble("DoubleValue",new Double(3.14)));
+}

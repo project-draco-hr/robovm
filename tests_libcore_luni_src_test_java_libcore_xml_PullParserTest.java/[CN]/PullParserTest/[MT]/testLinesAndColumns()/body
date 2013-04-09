@@ -1,0 +1,25 @@
+{
+  XmlPullParser parser=newPullParser();
+  parser.setInput(new StringReader("\n" + "  <foo><bar a='\n" + "' b='cde'></bar\n"+ "><!--\n"+ "\n"+ "--><baz/>fg\n"+ "</foo>"));
+  assertEquals("1,1",parser.getLineNumber() + "," + parser.getColumnNumber());
+  assertEquals(XmlPullParser.IGNORABLE_WHITESPACE,parser.nextToken());
+  assertEquals("2,3",parser.getLineNumber() + "," + parser.getColumnNumber());
+  assertEquals(XmlPullParser.START_TAG,parser.nextToken());
+  assertEquals("2,8",parser.getLineNumber() + "," + parser.getColumnNumber());
+  assertEquals(XmlPullParser.START_TAG,parser.nextToken());
+  assertEquals("3,11",parser.getLineNumber() + "," + parser.getColumnNumber());
+  assertEquals(XmlPullParser.END_TAG,parser.nextToken());
+  assertEquals("4,2",parser.getLineNumber() + "," + parser.getColumnNumber());
+  assertEquals(XmlPullParser.COMMENT,parser.nextToken());
+  assertEquals("6,4",parser.getLineNumber() + "," + parser.getColumnNumber());
+  assertEquals(XmlPullParser.START_TAG,parser.nextToken());
+  assertEquals("6,10",parser.getLineNumber() + "," + parser.getColumnNumber());
+  assertEquals(XmlPullParser.END_TAG,parser.nextToken());
+  assertEquals("6,10",parser.getLineNumber() + "," + parser.getColumnNumber());
+  assertEquals(XmlPullParser.TEXT,parser.nextToken());
+  assertEquals("7,1",parser.getLineNumber() + "," + parser.getColumnNumber());
+  assertEquals(XmlPullParser.END_TAG,parser.nextToken());
+  assertEquals("7,7",parser.getLineNumber() + "," + parser.getColumnNumber());
+  assertEquals(XmlPullParser.END_DOCUMENT,parser.nextToken());
+  assertEquals("7,7",parser.getLineNumber() + "," + parser.getColumnNumber());
+}

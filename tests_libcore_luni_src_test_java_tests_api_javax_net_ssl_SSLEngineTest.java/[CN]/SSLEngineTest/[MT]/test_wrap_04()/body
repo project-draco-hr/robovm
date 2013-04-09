@@ -1,0 +1,31 @@
+{
+  String host="new host";
+  int port=8080;
+  ByteBuffer[] bbA={ByteBuffer.allocate(100),ByteBuffer.allocate(10),ByteBuffer.allocate(100)};
+  ByteBuffer[] bbN=null;
+  ByteBuffer bN=null;
+  SSLEngine e=getEngine(host,port);
+  e.setUseClientMode(true);
+  try {
+    e.wrap(bbA,0,3,bN);
+    fail("IllegalArgumentException must be thrown for null srcs byte buffer array");
+  }
+ catch (  NullPointerException npe) {
+  }
+catch (  IllegalArgumentException ex) {
+  }
+catch (  Exception ex) {
+    fail(ex + " was thrown instead of IllegalArgumentException");
+  }
+  try {
+    e.wrap(bbN,0,0,bN);
+    fail("IllegalArgumentException wasn't thrown");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+catch (  NullPointerException npe) {
+  }
+catch (  Exception ex) {
+    fail(ex + " was thrown instead of IllegalArgumentException");
+  }
+}

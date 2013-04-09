@@ -1,0 +1,42 @@
+{
+  HashMap smallMap=new HashMap();
+  for (int i=0; i < 50; i++) {
+    smallMap.put(objArray[i],objArray[i]);
+  }
+  final int numberOfLoops=200;
+  Map synchMap=Collections.synchronizedMap(smallMap);
+  SynchMapChecker normalSynchChecker=new SynchMapChecker(synchMap,false,numberOfLoops);
+  SynchMapChecker offsetSynchChecker=new SynchMapChecker(synchMap,true,numberOfLoops);
+  Thread normalThread=new Thread(normalSynchChecker);
+  Thread offsetThread=new Thread(offsetSynchChecker);
+  normalThread.start();
+  offsetThread.start();
+  while ((normalSynchChecker.getNumberOfChecks() < numberOfLoops) || (offsetSynchChecker.getNumberOfChecks() < numberOfLoops)) {
+    try {
+      Thread.sleep(10);
+    }
+ catch (    InterruptedException e) {
+    }
+  }
+  assertTrue("Returned map corrupted by multiple thread access",normalSynchChecker.getResult() && offsetSynchChecker.getResult());
+  try {
+    normalThread.join(5000);
+    offsetThread.join(5000);
+  }
+ catch (  InterruptedException e) {
+    fail("join() interrupted");
+  }
+  synchMap.put(new Long(25),null);
+  synchMap.put(null,new Long(30));
+  assertNull("Trying to use a null value in map failed",synchMap.get(new Long(25)));
+  assertTrue("Trying to use a null key in map failed",synchMap.get(null).equals(new Long(30)));
+  smallMap=new HashMap();
+  for (int i=0; i < 100; i++) {
+    smallMap.put(objArray[i].toString(),objArray[i]);
+  }
+  synchMap=Collections.synchronizedMap(smallMap);
+  new Support_UnmodifiableMapTest("",synchMap).runTest();
+  synchMap.keySet().remove(objArray[50].toString());
+  assertNull("Removing a key from the keySet of the synchronized map did not remove it from the synchronized map: ",synchMap.get(objArray[50].toString()));
+  assertNull("Removing a key from the keySet of the synchronized map did not remove it from the original map",smallMap.get(objArray[50].toString()));
+}

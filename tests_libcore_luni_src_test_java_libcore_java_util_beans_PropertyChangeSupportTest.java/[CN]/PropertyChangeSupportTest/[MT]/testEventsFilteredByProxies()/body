@@ -1,0 +1,31 @@
+{
+  Object bean=new Object();
+  PropertyChangeEvent eventA=new PropertyChangeEvent(bean,"a",false,true);
+  PropertyChangeEvent eventB=new PropertyChangeEvent(bean,"b",false,true);
+  PropertyChangeEvent eventC=new PropertyChangeEvent(bean,"c",false,true);
+  PropertyChangeSupport support=new PropertyChangeSupport(bean);
+  EventLog all=new EventLog();
+  support.addPropertyChangeListener(all);
+  EventLog proxiedA=new EventLog();
+  support.addPropertyChangeListener(new PropertyChangeListenerProxy("a",proxiedA));
+  EventLog addA=new EventLog();
+  support.addPropertyChangeListener("a",addA);
+  EventLog addAProxiedB=new EventLog();
+  support.addPropertyChangeListener("a",new PropertyChangeListenerProxy("b",addAProxiedB));
+  EventLog proxiedAB=new EventLog();
+  support.addPropertyChangeListener(new PropertyChangeListenerProxy("a",new PropertyChangeListenerProxy("b",proxiedAB)));
+  EventLog proxiedAA=new EventLog();
+  support.addPropertyChangeListener(new PropertyChangeListenerProxy("a",new PropertyChangeListenerProxy("a",proxiedAA)));
+  EventLog proxiedAAC=new EventLog();
+  support.addPropertyChangeListener(new PropertyChangeListenerProxy("a",new PropertyChangeListenerProxy("a",new PropertyChangeListenerProxy("c",proxiedAAC))));
+  support.firePropertyChange(eventA);
+  support.firePropertyChange(eventB);
+  support.firePropertyChange(eventC);
+  assertEquals(Arrays.asList(eventA,eventB,eventC),all.log);
+  assertEquals(Arrays.asList(eventA),proxiedA.log);
+  assertEquals(Arrays.asList(eventA),addA.log);
+  assertEquals(Arrays.<PropertyChangeEvent>asList(),addAProxiedB.log);
+  assertEquals(Arrays.<PropertyChangeEvent>asList(),proxiedAB.log);
+  assertEquals(Arrays.<PropertyChangeEvent>asList(eventA),proxiedAA.log);
+  assertEquals(Arrays.<PropertyChangeEvent>asList(),proxiedAAC.log);
+}

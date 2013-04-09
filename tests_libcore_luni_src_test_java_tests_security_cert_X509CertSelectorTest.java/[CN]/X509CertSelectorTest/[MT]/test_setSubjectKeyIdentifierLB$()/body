@@ -1,0 +1,15 @@
+{
+  byte[] skid1=new byte[]{1,2,3,4,5};
+  byte[] skid2=new byte[]{5,4,3,2,1};
+  TestCert cert1=new TestCert(skid1);
+  TestCert cert2=new TestCert(skid2);
+  X509CertSelector selector=new X509CertSelector();
+  selector.setSubjectKeyIdentifier(null);
+  assertTrue("Any certificate should match in the case of null " + "serialNumber criteria.",selector.match(cert1) && selector.match(cert2));
+  selector.setSubjectKeyIdentifier(skid1);
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert1));
+  assertFalse("The certificate should not match the selection criteria.",selector.match(cert2));
+  selector.setSubjectKeyIdentifier(skid2);
+  skid2[0]++;
+  assertTrue("The certificate should match the selection criteria.",selector.match(cert2));
+}

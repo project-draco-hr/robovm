@@ -1,0 +1,30 @@
+{
+  server.enqueue(new MockResponse().setStatus("HTTP/1.0 200 Fantastic").addHeader("A: c").addHeader("B: d").addHeader("A: e").setChunkedBody("ABCDE\nFGHIJ\nKLMNO\nPQR",8));
+  server.play();
+  HttpURLConnection urlConnection=(HttpURLConnection)server.getUrl("/").openConnection();
+  assertEquals(200,urlConnection.getResponseCode());
+  assertEquals("Fantastic",urlConnection.getResponseMessage());
+  assertEquals("HTTP/1.0 200 Fantastic",urlConnection.getHeaderField(null));
+  Map<String,List<String>> responseHeaders=urlConnection.getHeaderFields();
+  assertEquals(Arrays.asList("HTTP/1.0 200 Fantastic"),responseHeaders.get(null));
+  assertEquals(newSet("c","e"),new HashSet<String>(responseHeaders.get("A")));
+  assertEquals(newSet("c","e"),new HashSet<String>(responseHeaders.get("a")));
+  try {
+    responseHeaders.put("N",Arrays.asList("o"));
+    fail("Modified an unmodifiable view.");
+  }
+ catch (  UnsupportedOperationException expected) {
+  }
+  try {
+    responseHeaders.get("A").add("f");
+    fail("Modified an unmodifiable view.");
+  }
+ catch (  UnsupportedOperationException expected) {
+  }
+  assertEquals("A",urlConnection.getHeaderFieldKey(0));
+  assertEquals("c",urlConnection.getHeaderField(0));
+  assertEquals("B",urlConnection.getHeaderFieldKey(1));
+  assertEquals("d",urlConnection.getHeaderField(1));
+  assertEquals("A",urlConnection.getHeaderFieldKey(2));
+  assertEquals("e",urlConnection.getHeaderField(2));
+}

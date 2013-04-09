@@ -1,0 +1,25 @@
+{
+  int portNumber=Support_PortManager.getNextPortForUDP();
+  ds=new java.net.DatagramSocket(portNumber);
+  ds.setReceiveBufferSize(130);
+  assertTrue("Incorrect buffer size",ds.getReceiveBufferSize() >= 130);
+  try {
+    ds.setReceiveBufferSize(0);
+    fail("IllegalArgumentException was not thrown.");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  try {
+    ds.setReceiveBufferSize(-1);
+    fail("IllegalArgumentException was not thrown.");
+  }
+ catch (  IllegalArgumentException iae) {
+  }
+  ds.close();
+  try {
+    ds.setReceiveBufferSize(1);
+    fail("SocketException was not thrown.");
+  }
+ catch (  SocketException e) {
+  }
+}
