@@ -3,7 +3,15 @@
   try {
     fd=Libcore.os.socket(AF_INET,SOCK_DGRAM,0);
     InetAddress address=Libcore.os.ioctlInetAddress(fd,SIOCGIFADDR,interfaceName);
-    InetAddress broadcast=Libcore.os.ioctlInetAddress(fd,SIOCGIFBRDADDR,interfaceName);
+    InetAddress broadcast=Inet4Address.ANY;
+    try {
+      broadcast=Libcore.os.ioctlInetAddress(fd,SIOCGIFBRDADDR,interfaceName);
+    }
+ catch (    ErrnoException e) {
+      if (!DARWIN || e.errno != EINVAL) {
+        throw e;
+      }
+    }
     InetAddress netmask=Libcore.os.ioctlInetAddress(fd,SIOCGIFNETMASK,interfaceName);
     if (broadcast.equals(Inet4Address.ANY)) {
       broadcast=null;
