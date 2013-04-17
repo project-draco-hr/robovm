@@ -5,6 +5,30 @@
     return;
   }
   try {
+    int timeout=(Integer)getOption(SO_RCVTIMEO);
+    if (timeout > 0) {
+      StructPollfd pfd=new StructPollfd();
+      pfd.fd=fd;
+      pfd.events=(short)(POLLIN | POLLERR);
+      StructPollfd[] pfds=new StructPollfd[]{pfd};
+      while (true) {
+        long start=System.currentTimeMillis();
+        try {
+          if (timeout <= 0 || Libcore.os.poll(pfds,timeout) == 0) {
+            throw new SocketTimeoutException("accept() timed out");
+          }
+        }
+ catch (        ErrnoException e) {
+          if (e.errno == EINTR) {
+            long duration=System.currentTimeMillis() - start;
+            timeout-=duration;
+          }
+ else {
+            throw e;
+          }
+        }
+      }
+    }
     InetSocketAddress peerAddress=new InetSocketAddress();
     FileDescriptor clientFd=Libcore.os.accept(fd,peerAddress);
     newImpl.fd.setInt$(clientFd.getInt$());
