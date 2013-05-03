@@ -1,34 +1,23 @@
 {
-  Map<String,NSObject> dict=null;
+  NSDictionary dict=new NSDictionary();
   if (infoPListDict != null) {
-    dict=new HashMap<String,NSObject>(infoPListDict.getValue());
+    for (    String key : infoPListDict.allKeys()) {
+      dict.put(key,infoPListDict.objectForKey(key));
+    }
   }
- else {
-    dict=new HashMap<String,NSObject>();
+  if (dict.objectForKey("CFBundleExecutable") == null) {
+    dict.put("CFBundleExecutable",config.getExecutable());
   }
-  if (!dict.containsKey("CFBundleExecutable")) {
-    dict.put("CFBundleExecutable",new NSString(config.getExecutable()));
+  if (dict.objectForKey("CFBundleName") == null) {
+    dict.put("CFBundleName",config.getExecutable());
   }
-  if (!dict.containsKey("CFBundleName")) {
-    dict.put("CFBundleName",new NSString(config.getExecutable()));
-  }
-  if (!dict.containsKey("CFBundleIdentifier")) {
+  if (dict.objectForKey("CFBundleIdentifier") == null) {
     String value=config.getMainClass() != null ? config.getMainClass() : config.getExecutable();
-    dict.put("CFBundleIdentifier",new NSString(value));
+    dict.put("CFBundleIdentifier",value);
   }
   customizeInfoPList(dict);
-  File tmpInfoPlistXml=new File(config.getTmpDir(),"Info.plist.xml");
   File tmpInfoPlist=new File(config.getTmpDir(),"Info.plist");
-  try {
-    PropertyListWriter.write(new NSDictionary(dict),tmpInfoPlistXml,Format.XML);
-  }
- catch (  PropertyListException e) {
-    throw new CompilerException(e);
-  }
-catch (  ParserConfigurationException e) {
-    throw new CompilerException(e);
-  }
-  CompilerUtil.exec(config,"plutil","-convert","binary1","-o",tmpInfoPlist,tmpInfoPlistXml);
+  PropertyListParser.saveAsBinary(dict,tmpInfoPlist);
   config.getLogger().debug("Installing Info.plist to %s",dir);
   FileUtils.copyFile(tmpInfoPlist,new File(dir,tmpInfoPlist.getName()));
 }
