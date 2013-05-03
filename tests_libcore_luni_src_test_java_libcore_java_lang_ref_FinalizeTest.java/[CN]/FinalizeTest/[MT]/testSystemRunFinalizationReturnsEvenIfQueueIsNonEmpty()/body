@@ -2,12 +2,8 @@
   AtomicInteger count=new AtomicInteger();
   AtomicBoolean keepGoing=new AtomicBoolean(true);
   createChainedFinalizer(count,keepGoing);
-  FinalizationTester.induceFinalization();
-  for (int i=0; i < 10; i++) {
-    if (count.get() > 0) {
-      break;
-    }
-    createChainedFinalizer(count,keepGoing);
+  while (count.get() == 0) {
+    Thread.sleep(500);
     FinalizationTester.induceFinalization();
   }
   keepGoing.set(false);
