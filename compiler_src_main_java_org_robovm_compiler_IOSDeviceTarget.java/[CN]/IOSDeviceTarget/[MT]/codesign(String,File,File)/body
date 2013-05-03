@@ -8,5 +8,7 @@
     args.add(entitlementsPList);
   }
   args.add(appDir);
-  CompilerUtil.exec(config,"codesign",args);
+  @SuppressWarnings("unchecked") Map<String,String> env=new HashMap<String,String>(EnvironmentUtils.getProcEnvironment());
+  env.put("CODESIGN_ALLOCATE",CompilerUtil.execCaptureOutput("xcrun","-sdk","iphoneos","-f","codesign_allocate").trim());
+  CompilerUtil.execWithEnv(config,null,env,"codesign",args);
 }
