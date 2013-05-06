@@ -8,6 +8,7 @@
     OS os=null;
     Arch arch=null;
     int i=0;
+    List<String> targetArgs=new ArrayList<String>();
     while (i < args.length) {
       if ("-cp".equals(args[i]) || "-classpath".equals(args[i])) {
         for (        String p : args[++i].split(File.pathSeparator)) {
@@ -121,6 +122,26 @@
         }
         builder.cacerts(cacerts);
       }
+ else       if ("-plist".equals(args[i])) {
+        targetArgs.add(args[i++]);
+        targetArgs.add(args[i]);
+      }
+ else       if ("-entitlements".equals(args[i])) {
+        targetArgs.add(args[i++]);
+        targetArgs.add(args[i]);
+      }
+ else       if ("-resourcerules".equals(args[i])) {
+        targetArgs.add(args[i++]);
+        targetArgs.add(args[i]);
+      }
+ else       if ("-signidentity".equals(args[i])) {
+        targetArgs.add(args[i++]);
+        targetArgs.add(args[i]);
+      }
+ else       if ("-sdk".equals(args[i])) {
+        targetArgs.add(args[i++]);
+        targetArgs.add(args[i]);
+      }
  else       if (args[i].startsWith("-D")) {
       }
  else       if (args[i].startsWith("-X")) {
@@ -162,19 +183,82 @@
 );
     }
     builder.skipInstall(run);
+    Target.Builder targetBuilder=null;
     if (os == OS.ios) {
       if (arch != null && arch.isArm()) {
-        builder.targetBuilder(new IOSDeviceTarget.Builder());
+        targetBuilder=new IOSDeviceTarget.Builder();
       }
  else {
-        builder.targetBuilder(new IOSSimulatorTarget.Builder());
+        targetBuilder=new IOSSimulatorTarget.Builder();
       }
     }
+    i=0;
+    while (i < targetArgs.size()) {
+      String arg=targetArgs.get(i++);
+      if (arg.equals("-plist")) {
+        if (targetBuilder instanceof AbstractIOSTarget.Builder) {
+          ((AbstractIOSTarget.Builder)targetBuilder).infoPList(new File(targetArgs.get(i++)));
+          continue;
+        }
+      }
+      if (arg.equals("-entitlements")) {
+        if (targetBuilder instanceof IOSDeviceTarget.Builder) {
+          ((IOSDeviceTarget.Builder)targetBuilder).entitlementsPList(new File(targetArgs.get(i++)));
+          continue;
+        }
+      }
+      if (arg.equals("-resourcerules")) {
+        if (targetBuilder instanceof IOSDeviceTarget.Builder) {
+          ((IOSDeviceTarget.Builder)targetBuilder).resourceRulesPList(new File(targetArgs.get(i++)));
+          continue;
+        }
+      }
+      if (arg.equals("-signidentity")) {
+        if (targetBuilder instanceof IOSDeviceTarget.Builder) {
+          ((IOSDeviceTarget.Builder)targetBuilder).signingIdentity(targetArgs.get(i++));
+          continue;
+        }
+      }
+      if (arg.equals("-sdk")) {
+        if (targetBuilder instanceof AbstractIOSTarget.Builder) {
+          String value=targetArgs.get(i++);
+          SDK matchSdk=null;
+          if (value.matches("\\d+\\.\\d+(\\.\\d+)?")) {
+            List<SDK> sdks=null;
+            if (targetBuilder instanceof IOSDeviceTarget.Builder) {
+              sdks=IOSDeviceTarget.listSDKs();
+            }
+ else {
+              sdks=IOSSimulatorTarget.listSDKs();
+            }
+            for (            SDK sdk : sdks) {
+              if (sdk.getVersion().equals(value)) {
+                matchSdk=sdk;
+                break;
+              }
+            }
+            if (matchSdk == null) {
+              throw new IllegalArgumentException("No SDK found matching version string " + value);
+            }
+          }
+ else {
+            matchSdk=SDK.create(new File(value));
+          }
+          ((AbstractIOSTarget.Builder)targetBuilder).sdk(matchSdk);
+          continue;
+        }
+      }
+      throw new IllegalArgumentException("Unsupported argument for the specified target: " + arg);
+    }
+    builder.targetBuilder(targetBuilder);
     compiler=new AppCompiler(builder.build());
   }
  catch (  Throwable t) {
     String message=t.getMessage();
-    if (t instanceof StringIndexOutOfBoundsException) {
+    if (t instanceof ArrayIndexOutOfBoundsException) {
+      message="Missing argument";
+    }
+    if (t instanceof IndexOutOfBoundsException) {
       message="Missing argument";
     }
     if (verbose && !(t instanceof StringIndexOutOfBoundsException) && !(t instanceof IllegalArgumentException)) {

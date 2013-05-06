@@ -1,0 +1,15 @@
+{
+  File settingsFile=new File(root,"SDKSettings.plist");
+  if (settingsFile.exists()) {
+    NSDictionary settings=(NSDictionary)PropertyListParser.parse(settingsFile);
+    NSObject displayName=settings.objectForKey("DisplayName");
+    NSObject minimalDisplayName=settings.objectForKey("MinimalDisplayName");
+    NSObject canonicalName=settings.objectForKey("CanonicalName");
+    NSObject version=settings.objectForKey("Version");
+    NSDictionary defaultProperties=(NSDictionary)settings.objectForKey("DefaultProperties");
+    if (displayName != null && version != null) {
+      return new SDK(displayName.toString(),minimalDisplayName.toString(),canonicalName.toString(),version.toString(),root,defaultProperties);
+    }
+  }
+  throw new IllegalArgumentException(root.getAbsolutePath() + " is not an SDK root path");
+}
