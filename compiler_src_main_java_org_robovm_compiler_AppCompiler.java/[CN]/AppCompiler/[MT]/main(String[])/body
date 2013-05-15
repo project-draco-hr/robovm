@@ -2,6 +2,7 @@
   AppCompiler compiler=null;
   boolean verbose=false;
   boolean run=false;
+  boolean dumpConfig=false;
   List<String> runArgs=new ArrayList<String>();
   List<String> launchArgs=new ArrayList<String>();
   try {
@@ -25,7 +26,7 @@
         builder.mainJar(new File(args[++i]));
       }
  else       if ("-o".equals(args[i])) {
-        builder.executable(args[++i]);
+        builder.executableName(args[++i]);
       }
  else       if ("-d".equals(args[i])) {
         builder.installDir(new File(args[++i]));
@@ -45,6 +46,9 @@
  else       if ("-verbose".equals(args[i])) {
         verbose=true;
       }
+ else       if ("-dumpconfig".equals(args[i])) {
+        dumpConfig=true;
+      }
  else       if ("-debug".equals(args[i])) {
         builder.debug(true);
       }
@@ -52,7 +56,7 @@
         builder.useDebugLibs(true);
       }
  else       if ("-dynamic-jni".equals(args[i])) {
-        builder.dynamicJNI(true);
+        builder.useDynamicJni(true);
       }
  else       if ("-skiprt".equals(args[i])) {
         builder.skipRuntimeLib(true);
@@ -76,18 +80,13 @@
         String s=args[++i];
         if (!"auto".equals(s)) {
           os=OS.valueOf(s);
-          builder.os(os);
         }
       }
  else       if ("-arch".equals(args[i])) {
         String s=args[++i];
         if (!"auto".equals(s)) {
           arch=Arch.valueOf(s);
-          builder.arch(arch);
         }
-      }
- else       if ("-cpu".equals(args[i])) {
-        builder.cpu(args[++i]);
       }
  else       if ("-roots".equals(args[i])) {
         for (        String p : args[++i].split(":")) {
@@ -192,58 +191,53 @@
 );
     }
     builder.skipInstall(run);
-    Target.Builder targetBuilder=null;
+    Target target=null;
     if (os == OS.ios) {
-      if (arch != null && arch.isArm()) {
-        targetBuilder=new IOSDeviceTarget.Builder();
+      if (arch == null || arch.isArm() || dumpConfig) {
+        target=new IOSDeviceTarget();
       }
  else {
-        targetBuilder=new IOSSimulatorTarget.Builder();
+        target=new IOSSimulatorTarget();
       }
     }
-    if (targetBuilder == null) {
-      targetBuilder=new ConsoleTarget.Builder();
+    if (target == null) {
+      target=new ConsoleTarget();
+      ((ConsoleTarget)target).setOS(os);
+      ((ConsoleTarget)target).setArch(arch);
     }
     i=0;
     while (i < targetArgs.size()) {
       String arg=targetArgs.get(i++);
       if (arg.equals("-plist")) {
-        if (targetBuilder instanceof AbstractIOSTarget.Builder) {
-          ((AbstractIOSTarget.Builder)targetBuilder).infoPList(new File(targetArgs.get(i++)));
+        if (target instanceof AbstractIOSTarget) {
+          ((AbstractIOSTarget)target).setInfoPList(new File(targetArgs.get(i++)));
           continue;
         }
       }
       if (arg.equals("-entitlements")) {
-        if (targetBuilder instanceof IOSDeviceTarget.Builder) {
-          ((IOSDeviceTarget.Builder)targetBuilder).entitlementsPList(new File(targetArgs.get(i++)));
+        if (target instanceof IOSDeviceTarget) {
+          ((IOSDeviceTarget)target).setEntitlementsPList(new File(targetArgs.get(i++)));
           continue;
         }
       }
       if (arg.equals("-resourcerules")) {
-        if (targetBuilder instanceof IOSDeviceTarget.Builder) {
-          ((IOSDeviceTarget.Builder)targetBuilder).resourceRulesPList(new File(targetArgs.get(i++)));
+        if (target instanceof IOSDeviceTarget) {
+          ((IOSDeviceTarget)target).setResourceRulesPList(new File(targetArgs.get(i++)));
           continue;
         }
       }
       if (arg.equals("-signidentity")) {
-        if (targetBuilder instanceof IOSDeviceTarget.Builder) {
-          ((IOSDeviceTarget.Builder)targetBuilder).signingIdentity(targetArgs.get(i++));
+        if (target instanceof IOSDeviceTarget) {
+          ((IOSDeviceTarget)target).setSigningIdentity(targetArgs.get(i++));
           continue;
         }
       }
       if (arg.equals("-sdk")) {
-        if (targetBuilder instanceof AbstractIOSTarget.Builder) {
+        if (target instanceof AbstractIOSTarget) {
           String value=targetArgs.get(i++);
           SDK matchSdk=null;
           if (value.matches("\\d+\\.\\d+(\\.\\d+)?")) {
-            List<SDK> sdks=null;
-            if (targetBuilder instanceof IOSDeviceTarget.Builder) {
-              sdks=IOSDeviceTarget.listSDKs();
-            }
- else {
-              sdks=IOSSimulatorTarget.listSDKs();
-            }
-            for (            SDK sdk : sdks) {
+            for (            SDK sdk : ((AbstractIOSTarget)target).getSDKs()) {
               if (sdk.getVersion().equals(value)) {
                 matchSdk=sdk;
                 break;
@@ -256,13 +250,21 @@
  else {
             matchSdk=SDK.create(new File(value));
           }
-          ((AbstractIOSTarget.Builder)targetBuilder).sdk(matchSdk);
+          ((AbstractIOSTarget)target).setSDK(matchSdk);
           continue;
         }
       }
       throw new IllegalArgumentException("Unsupported argument for the specified target: " + arg);
     }
-    builder.targetBuilder(targetBuilder);
+    builder.target(target);
+    if (dumpConfig) {
+      File file=new File("robovm.xml");
+      if (file.exists()) {
+        throw new IllegalArgumentException("Cannot dump config to " + file.getAbsolutePath() + ". The file already exists.");
+      }
+      builder.write(file);
+      return;
+    }
     compiler=new AppCompiler(builder.build());
   }
  catch (  Throwable t) {

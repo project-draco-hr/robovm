@@ -95,7 +95,7 @@
     NativeCall nc=(NativeCall)t;
     String shortName=mangleNativeMethod(target.getInternalName(),nc.getMethodName());
     String longName=mangleNativeMethod(target.getInternalName(),nc.getMethodName(),nc.getMethodDesc());
-    if (target.isInBootClasspath() || !config.isDynamicJNI() || config.getOs() == OS.ios) {
+    if (target.isInBootClasspath() || !config.isUseDynamicJni() || config.getOs() == OS.ios) {
       Function fnLong=new FunctionBuilder(longName,nc.getFunctionType()).linkage(weak).build();
       popNativeFrame(fnLong);
       call(fnLong,BC_THROW_UNSATISIFED_LINK_ERROR,fnLong.getParameterRef(0),mb.getString(String.format(UNSATISFIED_LINK_ERROR,target.getClassName(),nc.getMethodName(),nc.getMethodDesc())));

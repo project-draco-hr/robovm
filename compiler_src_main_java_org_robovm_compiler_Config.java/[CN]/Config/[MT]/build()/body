@@ -9,39 +9,40 @@
     mainClass=getMainClass(mainJar);
     classpath.add(mainJar);
   }
-  if (!skipLinking && executable == null && mainClass == null) {
+  if (!skipLinking && executableName == null && mainClass == null) {
     throw new IllegalArgumentException("No target and no main class specified");
   }
   if (!skipLinking && classpath.isEmpty()) {
     throw new IllegalArgumentException("No classpath specified");
   }
-  if (os == null) {
-    os=OS.getDefaultOS(llvmHomeDir);
-  }
-  if (arch == null) {
-    arch=Arch.getDefaultArch(llvmHomeDir);
-  }
   if (skipLinking) {
     skipInstall=true;
   }
-  osArchDepLibDir=new File(new File(home.libVmDir,os.toString()),arch.toString());
-  File osDir=new File(cacheDir,os.toString());
-  File archDir=new File(osDir,arch.toString());
-  cacheDir=new File(archDir,cpu == null ? "default" : cpu);
-  cacheDir.mkdirs();
-  if (executable == null) {
-    executable=mainClass;
+  if (executableName == null) {
+    executableName=mainClass;
   }
+  List<File> realBootclasspath=bootclasspath;
   if (!skipRuntimeLib) {
-    bootclasspath.add(0,home.rtPath);
+    realBootclasspath=new ArrayList<File>(bootclasspath);
+    realBootclasspath.add(0,home.rtPath);
   }
-  this.clazzes=new Clazzes(this,bootclasspath,classpath);
+  this.clazzes=new Clazzes(this,realBootclasspath,classpath);
   if (!skipInstall) {
     if (installDir == null) {
-      installDir=new File(".",executable);
+      installDir=new File(".",executableName);
     }
     installDir.mkdirs();
   }
-  target=targetBuilder.build(this);
+  if (target == null) {
+    target=new ConsoleTarget();
+  }
+  target.init(this);
+  OS os=target.getOS();
+  Arch arch=target.getArch();
+  osArchDepLibDir=new File(new File(home.libVmDir,os.toString()),arch.toString());
+  File osDir=new File(cacheDir,os.toString());
+  File archDir=new File(osDir,arch.toString());
+  cacheDir=new File(archDir,"default");
+  cacheDir.mkdirs();
   return this;
 }
