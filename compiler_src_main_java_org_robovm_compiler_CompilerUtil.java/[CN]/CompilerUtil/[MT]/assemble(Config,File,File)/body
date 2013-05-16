@@ -1,16 +1,4 @@
 {
-  String ccPath=config.getOs().getFamily() == OS.Family.darwin ? "clang" : "gcc";
-  if (config.getCcBinPath() != null) {
-    ccPath=config.getCcBinPath().getAbsolutePath();
-  }
- else   if (config.getOs() == OS.ios) {
-    if (config.getArch() == Arch.x86) {
-      ccPath=getIOSSimClang();
-    }
- else {
-      ccPath=getIOSDevClang();
-    }
-  }
   List<String> opts=new ArrayList<String>();
   if (config.isDebug()) {
     opts.add("-g");
@@ -23,5 +11,5 @@
     opts.add("-m32");
   }
   outFile.getParentFile().mkdirs();
-  exec(config,ccPath,"-c","-o",outFile,opts,inFile);
+  new Executor(config.getLogger(),getCcPath(config)).args("-c","-o",outFile,opts,inFile).exec();
 }

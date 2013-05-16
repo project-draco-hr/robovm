@@ -1,0 +1,31 @@
+{
+  if (logger == null) {
+    return;
+  }
+  String[] args=commandLine.getArguments();
+  if (args.length == 0) {
+    logger.debug(commandLine.toString());
+    return;
+  }
+  StringBuilder result=new StringBuilder();
+  result.append(StringUtils.quoteArgument(commandLine.getExecutable()));
+  result.append(' ');
+  boolean first=true;
+  for (int i=0; i < args.length; i++) {
+    String currArgument=args[i];
+    if (StringUtils.isQuoted(currArgument)) {
+      result.append(currArgument);
+    }
+ else {
+      result.append(StringUtils.quoteArgument(currArgument));
+    }
+    if (i < args.length - 1) {
+      result.append(' ');
+    }
+    if (i == args.length - 1 || result.length() > 2048) {
+      logger.debug((first ? "" : "    ") + result.toString());
+      result.delete(0,result.length());
+      first=false;
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  File dir=getAppDir();
+  String fruitstrapPath=new File(config.getHome().getBinDir(),"fruitstrap").getAbsolutePath();
+  List<Object> args=new ArrayList<Object>();
+  args.add("--verbose");
+  args.add("--unbuffered");
+  args.add("--debug");
+  args.add("--gdbargs");
+  args.add("-i mi -q");
+  args.add("--nostart");
+  if (!launchParameters.getArguments().isEmpty()) {
+    args.add("--args");
+    args.add(joinArgs(launchParameters.getArguments()));
+  }
+  args.add("--bundle");
+  args.add(dir.getAbsolutePath());
+  OutputStream fruitstrapOut=new DebugOutputStream(config.getLogger());
+  OutputStream fruitstrapErr=new ErrorOutputStream(config.getLogger());
+  OutputStream out=null;
+  OutputStream err=null;
+  if (launchParameters.getStdoutFifo() != null) {
+    out=new OpenOnWriteFileOutputStream(launchParameters.getStdoutFifo());
+  }
+ else {
+    out=System.out;
+  }
+  if (launchParameters.getStderrFifo() != null) {
+    err=new OpenOnWriteFileOutputStream(launchParameters.getStderrFifo());
+  }
+ else {
+    err=System.err;
+  }
+  return super.createExecutor(launchParameters,fruitstrapPath).args(args).streamHandler(new FruitstrapStreamHandler(out,err,fruitstrapOut,fruitstrapErr));
+}

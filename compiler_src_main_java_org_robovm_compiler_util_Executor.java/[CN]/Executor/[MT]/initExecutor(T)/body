@@ -1,0 +1,36 @@
+{
+  if (streamHandler == null) {
+    OutputStream pumpOut=null;
+    OutputStream pumpErr=null;
+    InputStream pumpIn=null;
+    if (out != null) {
+      pumpOut=out;
+    }
+ else {
+      pumpOut=new DebugOutputStream(logger);
+    }
+    if (err != null) {
+      pumpErr=err;
+    }
+ else {
+      pumpErr=new ErrorOutputStream(logger);
+    }
+    if (in != null) {
+      pumpIn=in;
+    }
+    executor.setStreamHandler(new PumpStreamHandler(pumpOut,pumpErr,pumpIn){
+      @Override protected Thread createPump(      InputStream is,      OutputStream os,      boolean closeWhenExhausted){
+        return super.createPump(is,os,closeOutputStreams ? true : closeWhenExhausted);
+      }
+    }
+);
+  }
+ else {
+    executor.setStreamHandler(streamHandler);
+  }
+  if (wd != null) {
+    executor.setWorkingDirectory(wd);
+  }
+  executor.setExitValue(0);
+  return executor;
+}
