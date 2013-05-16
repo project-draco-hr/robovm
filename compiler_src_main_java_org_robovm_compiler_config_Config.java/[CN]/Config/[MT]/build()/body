@@ -5,6 +5,12 @@
   if (llvmHomeDir == null) {
     llvmHomeDir=findLlvmHomeDir();
   }
+  if (bootclasspath == null) {
+    bootclasspath=new ArrayList<File>();
+  }
+  if (classpath == null) {
+    classpath=new ArrayList<File>();
+  }
   if (mainJar != null) {
     mainClass=getMainClass(mainJar);
     classpath.add(mainJar);
@@ -21,8 +27,8 @@
   if (executableName == null) {
     executableName=mainClass;
   }
-  List<File> realBootclasspath=bootclasspath;
-  if (!skipRuntimeLib) {
+  List<File> realBootclasspath=bootclasspath == null ? new ArrayList<File>() : bootclasspath;
+  if (!isSkipRuntimeLib()) {
     realBootclasspath=new ArrayList<File>(bootclasspath);
     realBootclasspath.add(0,home.rtPath);
   }
