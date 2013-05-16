@@ -1,5 +1,8 @@
 {
   super.init(config);
+  if (arch == null) {
+    arch=Arch.thumbv7;
+  }
   if (this.infoPList != null) {
     try {
       this.infoPListDict=(NSDictionary)PropertyListParser.parse(this.infoPList);
@@ -8,9 +11,20 @@
       throw new IllegalArgumentException(t);
     }
   }
-  if (this.sdk == null) {
-    List<SDK> sdks=getSDKs();
+  List<SDK> sdks=getSDKs();
+  if (this.sdkVersion == null) {
     Collections.sort(sdks);
     this.sdk=sdks.get(sdks.size() - 1);
+  }
+ else {
+    for (    SDK sdk : sdks) {
+      if (sdk.getVersion().equals(sdkVersion)) {
+        this.sdk=sdk;
+        break;
+      }
+    }
+    if (sdk == null) {
+      throw new IllegalArgumentException("No SDK found matching version string " + sdkVersion);
+    }
   }
 }

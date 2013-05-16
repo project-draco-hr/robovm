@@ -204,29 +204,14 @@
       }
       if (arg.equals("-signidentity")) {
         if (target instanceof IOSTarget) {
-          ((IOSTarget)target).setSigningIdentity(targetArgs.get(i++));
+          ((IOSTarget)target).setSignIdentity(targetArgs.get(i++));
           continue;
         }
       }
       if (arg.equals("-sdk")) {
         if (target instanceof IOSTarget) {
           String value=targetArgs.get(i++);
-          SDK matchSdk=null;
-          if (value.matches("\\d+\\.\\d+(\\.\\d+)?")) {
-            for (            SDK sdk : ((IOSTarget)target).getSDKs()) {
-              if (sdk.getVersion().equals(value)) {
-                matchSdk=sdk;
-                break;
-              }
-            }
-            if (matchSdk == null) {
-              throw new IllegalArgumentException("No SDK found matching version string " + value);
-            }
-          }
- else {
-            matchSdk=SDK.create(new File(value));
-          }
-          ((IOSTarget)target).setSDK(matchSdk);
+          ((IOSTarget)target).setSdkVersion(value);
           continue;
         }
       }
