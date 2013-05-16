@@ -1,0 +1,19 @@
+{
+  Config.Builder builder=new Config.Builder();
+  builder.addClasspathEntry(new File("foo1.jar"));
+  builder.addClasspathEntry(new File(tmp,"foo2.jar"));
+  builder.addFramework("Foundation");
+  builder.addFramework("AppKit");
+  builder.addLib("dl");
+  builder.addLib("libs/libmy.a");
+  builder.addLib("libs/foo.o");
+  builder.addLib("/usr/lib/libbar.a");
+  builder.addResource(new File("resources"));
+  builder.addResource(new File("/usr/share/resources"));
+  builder.addRoot("javax.**.*");
+  builder.target(new ConsoleTarget());
+  StringWriter out=new StringWriter();
+  builder.write(out,wd);
+  System.out.println(out.toString());
+  assertEquals(IOUtils.toString(getClass().getResourceAsStream("ConfigTest.write.xml")),out.toString());
+}
