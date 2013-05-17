@@ -39,12 +39,23 @@
     }
     installDir.mkdirs();
   }
-  if (target == null) {
+  if (targetType == TargetType.console) {
     target=new ConsoleTarget();
   }
+ else   if (targetType == TargetType.ios) {
+    target=new IOSTarget();
+  }
+ else {
+    if (os == OS.ios) {
+      target=new IOSTarget();
+    }
+ else {
+      target=new ConsoleTarget();
+    }
+  }
   target.init(this);
-  OS os=target.getOS();
-  Arch arch=target.getArch();
+  os=target.getOs();
+  arch=target.getArch();
   osArchDepLibDir=new File(new File(home.libVmDir,os.toString()),arch.toString());
   File osDir=new File(cacheDir,os.toString());
   File archDir=new File(osDir,arch.toString());

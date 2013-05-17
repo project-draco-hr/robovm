@@ -1,21 +1,30 @@
 {
   super.init(config);
-  if (arch == null) {
+  if (config.getArch() == null) {
     arch=Arch.thumbv7;
   }
+ else {
+    if (config.getArch() != Arch.x86 && config.getArch() != Arch.thumbv7) {
+      throw new IllegalArgumentException("Arch '" + config.getArch() + "' is unsupported for iOS target");
+    }
+    arch=config.getArch();
+  }
+  signIdentity=config.getIosSignIdentity();
   if (signIdentity == null) {
     signIdentity="iPhone Developer";
   }
-  if (this.infoPList != null) {
+  infoPList=config.getIosInfoPList();
+  if (infoPList != null) {
     try {
-      this.infoPListDict=(NSDictionary)PropertyListParser.parse(this.infoPList);
+      infoPListDict=(NSDictionary)PropertyListParser.parse(infoPList);
     }
  catch (    Throwable t) {
       throw new IllegalArgumentException(t);
     }
   }
+  String sdkVersion=config.getIosSdkVersion();
   List<SDK> sdks=getSDKs();
-  if (this.sdkVersion == null) {
+  if (sdkVersion == null) {
     Collections.sort(sdks);
     this.sdk=sdks.get(sdks.size() - 1);
   }
