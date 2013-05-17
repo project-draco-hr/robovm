@@ -1,0 +1,27 @@
+{
+  if (node instanceof Text) {
+    Text el=(Text)node;
+    String value=el.getNodeValue();
+    if (value != null && value.trim().length() > 0) {
+      Matcher matcher=VARIABLE_PATTERN.matcher(value);
+      StringBuilder sb=new StringBuilder();
+      int pos=0;
+      while (matcher.find()) {
+        if (pos < matcher.start()) {
+          sb.append(value.substring(pos,matcher.start()));
+        }
+        String key=matcher.group(1);
+        sb.append(props.getProperty(key,matcher.group()));
+        pos=matcher.end();
+      }
+      if (pos < value.length()) {
+        sb.append(value.substring(pos));
+      }
+      el.setNodeValue(sb.toString());
+    }
+  }
+  NodeList children=node.getChildNodes();
+  for (int i=0; i < children.getLength(); i++) {
+    replacePropertyRefs(children.item(i),props);
+  }
+}

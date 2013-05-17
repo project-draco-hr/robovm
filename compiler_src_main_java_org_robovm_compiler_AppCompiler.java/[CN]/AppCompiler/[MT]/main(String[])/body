@@ -49,6 +49,27 @@
  else       if ("-dumpconfig".equals(args[i])) {
         dumpConfigFile=args[++i];
       }
+ else       if ("-properties".equals(args[i])) {
+        Properties props=new Properties();
+        Reader reader=null;
+        try {
+          reader=new InputStreamReader(new FileInputStream(args[++i]),"utf-8");
+          props.load(reader);
+          builder.addProperties(props);
+        }
+  finally {
+          IOUtils.closeQuietly(reader);
+        }
+      }
+ else       if (args[i].startsWith("-P")) {
+        int index=args[i].indexOf('=');
+        if (index <= 0) {
+          throw new IllegalArgumentException("Malformed property: " + args[i]);
+        }
+        String name=args[i].substring(0,index);
+        String value=args[i].substring(index + 1);
+        builder.addProperty(name,value);
+      }
  else       if ("-debug".equals(args[i])) {
         builder.debug(true);
       }
