@@ -1,0 +1,20 @@
+{
+  ILaunchManager manager=DebugPlugin.getDefault().getLaunchManager();
+  ILaunchConfigurationType configType=manager.getLaunchConfigurationType(getConfigurationTypeId());
+  ILaunchConfiguration config=findConfig(manager,configType,project);
+  if (config == null) {
+    ILaunchConfigurationWorkingCopy wc=null;
+    try {
+      wc=configType.newInstance(null,manager.generateLaunchConfigurationName(project.getName()));
+      wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,project.getName());
+      customizeConfiguration(wc);
+      config=wc.doSave();
+    }
+ catch (    CoreException e) {
+      RoboVMPlugin.log(e);
+    }
+  }
+  if (config != null) {
+    DebugUITools.launch(config,mode);
+  }
+}

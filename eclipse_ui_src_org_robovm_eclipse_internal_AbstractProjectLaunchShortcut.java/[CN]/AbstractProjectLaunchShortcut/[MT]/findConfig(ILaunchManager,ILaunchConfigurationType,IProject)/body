@@ -1,0 +1,22 @@
+{
+  try {
+    ILaunchConfiguration[] configs=manager.getLaunchConfigurations(configType);
+    List<ILaunchConfiguration> matchingConfigs=new ArrayList<ILaunchConfiguration>();
+    for (    ILaunchConfiguration config : configs) {
+      if (config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,"").equals(project.getName())) {
+        matchingConfigs.add(config);
+      }
+    }
+    matchingConfigs=filterConfigs(matchingConfigs);
+    if (matchingConfigs.size() == 1) {
+      return matchingConfigs.get(0);
+    }
+    if (matchingConfigs.size() > 1) {
+      return chooseConfiguration(matchingConfigs);
+    }
+  }
+ catch (  CoreException e) {
+    RoboVMPlugin.log(e);
+  }
+  return null;
+}
