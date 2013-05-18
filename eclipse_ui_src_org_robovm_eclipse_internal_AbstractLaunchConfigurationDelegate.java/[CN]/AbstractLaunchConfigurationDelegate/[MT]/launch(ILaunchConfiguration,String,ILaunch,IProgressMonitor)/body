@@ -8,8 +8,8 @@
   }
   try {
     monitor.subTask("Verifying launch attributes");
-    String mainTypeName=verifyMainTypeName(configuration);
-    File workingDir=verifyWorkingDirectory(configuration);
+    String mainTypeName=getMainTypeName(configuration);
+    File workingDir=getWorkingDirectory(configuration);
     String[] envp=getEnvironment(configuration);
     String pgmArgs=getProgramArguments(configuration);
     String vmArgs=getVMArguments(configuration);
@@ -26,6 +26,35 @@
     monitor.subTask("Creating build configuration");
     Config.Builder configBuilder=new Config.Builder();
     File projectRoot=getJavaProject(configuration).getProject().getLocation().toFile();
+    File propsFile=new File(projectRoot,"robovm.properties");
+    File configFile=new File(projectRoot,"robovm.xml");
+    if (configFile.exists()) {
+      Properties props=new Properties();
+      if (propsFile.exists()) {
+        Reader reader=null;
+        try {
+          reader=new InputStreamReader(new FileInputStream(propsFile),"utf-8");
+          props.load(reader);
+          configBuilder.addProperties(props);
+        }
+ catch (        IOException e) {
+          RoboVMPlugin.log(e);
+          throw new RuntimeException(e);
+        }
+ finally {
+          IOUtils.closeQuietly(reader);
+        }
+      }
+      try {
+        configBuilder.read(configFile);
+      }
+ catch (      Exception e) {
+        RoboVMPlugin.log(e);
+        throw new RuntimeException(e);
+      }
+      configBuilder.clearBootClasspathEntries();
+      configBuilder.clearClasspathEntries();
+    }
     Arch arch=getArch(configuration,mode);
     OS os=getOS(configuration,mode);
     configBuilder.os(os);
@@ -33,7 +62,9 @@
     File tmpDir=new File(RoboVMPlugin.getMetadataDir(),getJavaProjectName(configuration));
     tmpDir=new File(tmpDir,configuration.getName());
     tmpDir=new File(new File(tmpDir,os.toString()),arch.toString());
-    tmpDir=new File(tmpDir,mainTypeName);
+    if (mainTypeName != null) {
+      tmpDir=new File(tmpDir,mainTypeName);
+    }
     configBuilder.debug(true);
     configBuilder.home(RoboVMPlugin.getRoboVMHome());
     if (!RoboVMPlugin.useSystemLlvm()) {
@@ -49,7 +80,9 @@
     for (    String p : classpath) {
       configBuilder.addClasspathEntry(new File(p));
     }
-    configBuilder.mainClass(mainTypeName);
+    if (mainTypeName != null) {
+      configBuilder.mainClass(mainTypeName);
+    }
     configBuilder.tmpDir(tmpDir);
     configBuilder.skipInstall(true);
     Config config=null;

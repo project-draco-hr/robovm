@@ -17,9 +17,27 @@
     newClasspath=customizeClasspath(newClasspath);
     javaProject.setRawClasspath(newClasspath.toArray(new IClasspathEntry[newClasspath.size()]),new NullProgressMonitor());
     RoboVMNature.configureNatures(project,new NullProgressMonitor());
+    File projectRoot=project.getLocation().toFile();
+    File propsFile=new File(projectRoot,"robovm.properties");
+    File configFile=new File(projectRoot,"robovm.xml");
+    if (!propsFile.exists() && !configFile.exists()) {
+      Properties props=new Properties();
+      Config.Builder configBuilder=new Config.Builder();
+      customizeConfig(configBuilder,props);
+      configBuilder.write(configFile);
+      Writer writer=null;
+      try {
+        writer=new OutputStreamWriter(new FileOutputStream(propsFile));
+        props.store(writer,"");
+      }
+  finally {
+        IOUtils.closeQuietly(writer);
+      }
+      project.refreshLocal(IResource.DEPTH_ONE,null);
+    }
   }
  catch (  Exception e) {
-    e.printStackTrace();
+    RoboVMPlugin.log(e);
     return false;
   }
   OpenJavaPerspectiveAction action=new OpenJavaPerspectiveAction();
