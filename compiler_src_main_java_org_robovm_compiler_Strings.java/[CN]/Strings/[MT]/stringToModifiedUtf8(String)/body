@@ -1,33 +1,3 @@
 {
-  List<Byte> s=new ArrayList<Byte>();
-  for (int i=0; i < unicode.length(); i++) {
-    int ch=unicode.charAt(i);
-    if (ch == 0) {
-      s.add((byte)0xc0);
-      s.add((byte)0x80);
-    }
- else     if (ch < 0x80) {
-      s.add((byte)ch);
-    }
- else     if (ch < 0x800) {
-      int b5_0=ch & 0x3f;
-      int b10_6=(ch >> 6) & 0x1f;
-      s.add((byte)(0xc0 | b10_6));
-      s.add((byte)(0x80 | b5_0));
-    }
- else {
-      int b5_0=ch & 0x3f;
-      int b11_6=(ch >> 6) & 0x3f;
-      int b15_12=(ch >> 12) & 0xf;
-      s.add((byte)(0xe0 | b15_12));
-      s.add((byte)(0x80 | b11_6));
-      s.add((byte)(0x80 | b5_0));
-    }
-  }
-  s.add((byte)0);
-  byte[] result=new byte[s.size()];
-  for (int i=0; i < result.length; i++) {
-    result[i]=s.get(i);
-  }
-  return result;
+  return stringToModifiedUtf8(unicode,false);
 }
