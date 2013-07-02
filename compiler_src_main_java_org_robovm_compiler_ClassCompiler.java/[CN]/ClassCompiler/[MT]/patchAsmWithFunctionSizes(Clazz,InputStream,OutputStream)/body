@@ -1,0 +1,85 @@
+{
+  Set<String> functionNames=new HashSet<String>();
+  for (  SootMethod method : clazz.getSootClass().getMethods()) {
+    if (!method.isAbstract()) {
+      String name=mangleMethod(method);
+      if (config.getOs().getFamily() == OS.Family.darwin) {
+        name="_" + name;
+      }
+      functionNames.add(name);
+    }
+  }
+  String localLabelPrefix=".L";
+  String prefix=mangleClass(clazz.getInternalName());
+  if (config.getOs().getFamily() == OS.Family.darwin) {
+    localLabelPrefix="L";
+    prefix="_" + prefix;
+  }
+  String infoStructLabel=prefix + "_info_struct";
+  Pattern methodImplPattern=Pattern.compile("\\s*\\.(?:quad|long)\\s+(" + Pattern.quote(prefix) + "[^\\s]+).*");
+  BufferedReader in=null;
+  BufferedWriter out=null;
+  try {
+    in=new BufferedReader(new InputStreamReader(inStream,"UTF-8"));
+    out=new BufferedWriter(new OutputStreamWriter(outStream,"UTF-8"));
+    String line=null;
+    String currentFunction=null;
+    while ((line=in.readLine()) != null) {
+      if (currentFunction == null) {
+        out.write(line);
+        out.write('\n');
+        if (line.startsWith(prefix)) {
+          int colon=line.indexOf(':');
+          if (colon == -1) {
+            continue;
+          }
+          String label=line.substring(0,colon);
+          if (functionNames.contains(label)) {
+            currentFunction=label;
+          }
+ else           if (label.equals(infoStructLabel)) {
+            break;
+          }
+        }
+      }
+ else       if (line.trim().equals(".cfi_endproc") || line.trim().startsWith(".section") || line.trim().startsWith(".globl")) {
+        out.write(localLabelPrefix);
+        out.write(currentFunction);
+        out.write("_end:\n\n");
+        currentFunction=null;
+        out.write(line);
+        out.write('\n');
+      }
+ else {
+        out.write(line);
+        out.write('\n');
+      }
+    }
+    while ((line=in.readLine()) != null) {
+      out.write(line);
+      out.write('\n');
+      if (line.contains(prefix)) {
+        Matcher matcher=methodImplPattern.matcher(line);
+        if (matcher.matches()) {
+          String functionName=matcher.group(1);
+          if (functionNames.contains(functionName)) {
+            line=in.readLine();
+            if (line.contains(String.valueOf(DUMMY_METHOD_SIZE))) {
+              out.write("\t.long\t");
+              out.write(localLabelPrefix + functionName + "_end - "+ functionName);
+              out.write('\n');
+            }
+ else {
+              out.write(line);
+              out.write('\n');
+            }
+          }
+        }
+      }
+    }
+  }
+  finally {
+    IOUtils.closeQuietly(in);
+    IOUtils.closeQuietly(out);
+  }
+}

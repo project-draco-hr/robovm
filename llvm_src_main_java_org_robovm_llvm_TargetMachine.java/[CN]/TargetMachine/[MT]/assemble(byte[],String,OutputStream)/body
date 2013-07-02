@@ -1,0 +1,12 @@
+{
+  MemoryBufferRef memoryBufferRef=LLVM.CreateMemoryBufferWithMemoryRangeCopy(asm,filename);
+  if (memoryBufferRef == null) {
+    throw new LlvmException("Failed to create memory buffer");
+  }
+  filename=filename == null ? "" : filename;
+  StringOut errorMessage=new StringOut();
+  if (LLVM.TargetMachineAssembleToOutputStream(ref,memoryBufferRef,out,false,false,errorMessage) != 0) {
+    String error=errorMessage.getValue() != null ? errorMessage.getValue().trim() : "Unknown error";
+    throw new LlvmException(error);
+  }
+}

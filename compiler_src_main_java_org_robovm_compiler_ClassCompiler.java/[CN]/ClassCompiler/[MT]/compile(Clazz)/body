@@ -1,21 +1,15 @@
 {
   reset();
-  File llFile=config.getLlFile(clazz);
-  File bcFile=config.getBcFile(clazz);
-  File sFile=config.getSFile(clazz);
   File oFile=config.getOFile(clazz);
-  llFile.getParentFile().mkdirs();
-  bcFile.getParentFile().mkdirs();
-  sFile.getParentFile().mkdirs();
   oFile.getParentFile().mkdirs();
-  OutputStream out=null;
+  Arch arch=config.getArch();
+  OS os=config.getOs();
   try {
-    config.getLogger().debug("Compiling %s",clazz);
-    out=new FileOutputStream(llFile);
-    compile(clazz,out);
+    config.getLogger().debug("Compiling %s (%s)",clazz,arch);
+    output.reset();
+    compile(clazz,output);
   }
  catch (  Throwable t) {
-    FileUtils.deleteQuietly(llFile);
     if (t instanceof IOException) {
       throw (IOException)t;
     }
@@ -24,14 +18,30 @@
     }
     throw new RuntimeException(t);
   }
- finally {
-    IOUtils.closeQuietly(out);
-  }
-  config.getLogger().debug("Optimizing %s",clazz);
-  ToolchainUtil.opt(config,llFile,bcFile,"-mem2reg","-always-inline");
-  config.getLogger().debug("Generating %s assembly for %s",config.getArch(),clazz);
-  ToolchainUtil.llc(config,bcFile,sFile);
-  patchAsmWithFunctionSizes(clazz,sFile);
-  config.getLogger().debug("Assembling %s",clazz);
-  ToolchainUtil.assemble(config,sFile,oFile);
+  Context context=new Context();
+  Module module=Module.parseIR(context,output.toByteArray(),clazz.getClassName());
+  PassManager passManager=new PassManager();
+  passManager.addAlwaysInlinerPass();
+  passManager.addPromoteMemoryToRegisterPass();
+  passManager.run(module);
+  passManager.dispose();
+  String triple=arch.getLlvmName() + "-unknown-" + os;
+  Target target=Target.lookupTarget(triple);
+  TargetMachine targetMachine=target.createTargetMachine(triple);
+  targetMachine.setAsmVerbosityDefault(true);
+  targetMachine.setFunctionSections(true);
+  targetMachine.setDataSections(true);
+  targetMachine.getOptions().setNoFramePointerElim(true);
+  output.reset();
+  targetMachine.emit(module,output,CodeGenFileType.AssemblyFile);
+  module.dispose();
+  context.dispose();
+  byte[] asm=output.toByteArray();
+  output.reset();
+  patchAsmWithFunctionSizes(clazz,new ByteArrayInputStream(asm),output);
+  asm=output.toByteArray();
+  BufferedOutputStream oOut=new BufferedOutputStream(new FileOutputStream(oFile));
+  targetMachine.assemble(asm,clazz.getClassName(),oOut);
+  oOut.close();
+  targetMachine.dispose();
 }
