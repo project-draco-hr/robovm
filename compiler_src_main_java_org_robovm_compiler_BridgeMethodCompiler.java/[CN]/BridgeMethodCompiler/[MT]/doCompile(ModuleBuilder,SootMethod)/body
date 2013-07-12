@@ -2,19 +2,47 @@
   validateBridgeMethod(method);
   Function outerFn=FunctionBuilder.method(method);
   moduleBuilder.addFunction(outerFn);
-  Function innerFn=FunctionBuilder.bridgeInner(method);
-  moduleBuilder.addFunction(innerFn);
-  Type[] parameterTypes=innerFn.getType().getParameterTypes();
-  String[] parameterNames=innerFn.getParameterNames();
+  Type[] parameterTypes=outerFn.getType().getParameterTypes();
+  String[] parameterNames=outerFn.getParameterNames();
   ArrayList<Argument> args=new ArrayList<Argument>();
   for (int i=0; i < parameterTypes.length; i++) {
     args.add(new Argument(new VariableRef(parameterNames[i],parameterTypes[i])));
   }
+  SootMethod originalMethod=method;
+  if (isPassByValue(originalMethod)) {
+    Arch arch=config.getArch();
+    OS os=config.getOs();
+    String triple=config.getTriple();
+    if (getStructType(originalMethod.getReturnType()).getAllocSize(triple) > os.getMaxRegisterReturnSize(arch)) {
+      method=createFakeStructRetMethod(method);
+      VariableRef env=outerFn.getParameterRef(0);
+      LdcClass ldcClass=new LdcClass(getInternalName(method.getDeclaringClass()),getInternalName(originalMethod.getReturnType()));
+      trampolines.add(ldcClass);
+      Value cls=call(outerFn,ldcClass.getFunctionRef(),env);
+      Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),"org/robovm/rt/bro/Struct","allocate","(Ljava/lang/Class;)Lorg/robovm/rt/bro/Struct;");
+      trampolines.add(invokestatic);
+      Value structObj=call(outerFn,invokestatic.getFunctionRef(),env,cls);
+      args.add(1,new Argument(structObj));
+    }
+  }
+  Function innerFn=FunctionBuilder.bridgeInner(method);
+  moduleBuilder.addFunction(innerFn);
   Value resultOuter=callWithArguments(outerFn,innerFn.ref(),args);
-  outerFn.add(new Ret(resultOuter));
+  if (method != originalMethod) {
+    outerFn.add(new Ret(args.get(1).getValue()));
+  }
+ else {
+    outerFn.add(new Ret(resultOuter));
+  }
+  parameterTypes=innerFn.getType().getParameterTypes();
+  parameterNames=innerFn.getParameterNames();
+  args=new ArrayList<Argument>();
+  for (int i=0; i < parameterTypes.length; i++) {
+    args.add(new Argument(new VariableRef(parameterNames[i],parameterTypes[i])));
+  }
   FunctionType targetFnType=getBridgeFunctionType(method);
   Variable targetFn=innerFn.newVariable(targetFnType);
-  Global targetFnPtr=new Global(getTargetFnPtrName(method),_private,new NullConstant(I8_PTR));
+  Global targetFnPtr=new Global(getTargetFnPtrName(originalMethod),_private,new NullConstant(I8_PTR));
   moduleBuilder.addGlobal(targetFnPtr);
   innerFn.add(new Load(targetFn,new ConstantBitcast(targetFnPtr.ref(),new PointerType(targetFnType))));
   Label nullLabel=new Label();
@@ -24,7 +52,7 @@
   innerFn.add(new Br(nullCheck.ref(),innerFn.newBasicBlockRef(nullLabel),innerFn.newBasicBlockRef(notNullLabel)));
   innerFn.newBasicBlock(nullLabel);
   VariableRef env=innerFn.getParameterRef(0);
-  call(innerFn,BC_THROW_UNSATISIFED_LINK_ERROR,env,moduleBuilder.getString(String.format("Bridge method %s.%s%s not bound",className,method.getName(),getDescriptor(method))));
+  call(innerFn,BC_THROW_UNSATISIFED_LINK_ERROR,env,moduleBuilder.getString(String.format("Bridge method %s.%s%s not bound",className,originalMethod.getName(),getDescriptor(originalMethod))));
   innerFn.add(new Unreachable());
   innerFn.newBasicBlock(notNullLabel);
   args.remove(0);
@@ -33,8 +61,8 @@
   }
   List<MarshaledArg> marshaledArgs=new ArrayList<MarshaledArg>();
   Type[] targetParameterTypes=targetFnType.getParameterTypes();
-  for (int i=0; i < sootMethod.getParameterCount(); i++) {
-    soot.Type type=sootMethod.getParameterType(i);
+  for (int i=0; i < method.getParameterCount(); i++) {
+    soot.Type type=method.getParameterType(i);
     if (needsMarshaler(type)) {
       String marshalerClassName=getMarshalerClassName(method,i,false);
       Type nativeType=targetParameterTypes[i];
@@ -80,7 +108,7 @@
   trycatchLeave(innerFn,env);
   popNativeFrame(innerFn);
   for (  MarshaledArg value : marshaledArgs) {
-    soot.Type type=sootMethod.getParameterType(value.paramIndex);
+    soot.Type type=method.getParameterType(value.paramIndex);
     String marshalerClassName=getMarshalerClassName(method,value.paramIndex,true);
     if (isPtr(type)) {
       SootClass sootPtrTargetClass=getPtrTargetClass(method,value.paramIndex);
