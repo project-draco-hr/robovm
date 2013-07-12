@@ -1,3 +1,38 @@
 {
+  for (  Method method : c.getDeclaredMethods()) {
+    Bridge bridge=method.getAnnotation(Bridge.class);
+    if (bridge != null && (bridge.symbol() == null || "".equals(bridge.symbol()))) {
+      Class<?>[] paramTypes=method.getParameterTypes();
+      if (paramTypes.length >= 2) {
+        if (paramTypes[1] == Selector.class) {
+          String symbol=null;
+          if (paramTypes[0] == ObjCSuper.class) {
+            symbol="objc_msgSendSuper";
+          }
+ else           if (ObjCObject.class.isAssignableFrom(paramTypes[0])) {
+            symbol="objc_msgSend";
+          }
+          if (symbol != null) {
+            Class<?> returnType=method.getReturnType();
+            if (returnType.getSuperclass() == Struct.class && (method.getAnnotation(ByVal.class) != null || returnType.getAnnotation(ByVal.class) != null)) {
+              int structSize=getStructSize(returnType);
+              if (Bro.IS_X86) {
+                if (structSize > 8) {
+                  symbol+="_stret";
+                }
+              }
+ else {
+                if (structSize > 4) {
+                  symbol+="_stret";
+                }
+              }
+            }
+            long f=Runtime.resolveBridge("objc",symbol,method);
+            VM.bindBridgeMethod(method,f);
+          }
+        }
+      }
+    }
+  }
   Bro.bind(c);
 }
