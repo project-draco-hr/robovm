@@ -13,24 +13,24 @@
     }
     classes.add(clazz);
   }
-  if (config.getRoots().isEmpty()) {
+  if (config.getForceLinkClasses().isEmpty()) {
     if (config.getMainClass() == null) {
       classes.addAll(config.getClazzes().listClasses());
     }
   }
  else {
-    for (    String root : config.getRoots()) {
-      if (root.indexOf('*') == -1) {
-        Clazz clazz=config.getClazzes().load(root.replace('.','/'));
+    for (    String pattern : config.getForceLinkClasses()) {
+      if (pattern.indexOf('*') == -1) {
+        Clazz clazz=config.getClazzes().load(pattern.replace('.','/'));
         if (clazz == null) {
-          throw new CompilerException("Root class " + root + " not found");
+          throw new CompilerException("Root class " + pattern + " not found");
         }
         classes.add(clazz);
       }
  else {
-        Collection<Clazz> matches=getMatchingClasses(root);
+        Collection<Clazz> matches=getMatchingClasses(pattern);
         if (matches.isEmpty()) {
-          config.getLogger().warn("Root pattern %s matches no classes",root);
+          config.getLogger().warn("Root pattern %s matches no classes",pattern);
         }
  else {
           classes.addAll(matches);
