@@ -1,0 +1,28 @@
+{
+  if (targetPath != null && targetPath.trim().length() > 0) {
+    destDir=new File(destDir,targetPath);
+  }
+  if (path != null) {
+    walk(walker,path.getParentFile(),path.getName(),destDir,Collections.singletonList(MATCH_ALL_MATCHER),DEFAULTEXCLUDESMATCHERS);
+  }
+ else {
+    List<AntPathMatcher> inc=toAntPathMatchers(includes);
+    if (inc.isEmpty()) {
+      inc.add(MATCH_ALL_MATCHER);
+    }
+    List<AntPathMatcher> exc=toAntPathMatchers(excludes);
+    if (!isIgnoreDefaultExcludes()) {
+      exc.addAll(DEFAULTEXCLUDESMATCHERS);
+    }
+    File dir=null;
+    if (directory != null) {
+      dir=directory.getCanonicalFile();
+    }
+ else {
+      dir=new File("").getCanonicalFile();
+    }
+    for (    File f : dir.listFiles()) {
+      walk(walker,dir,f.getName(),destDir,inc,exc);
+    }
+  }
+}

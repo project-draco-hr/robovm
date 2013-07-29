@@ -1,0 +1,17 @@
+{
+  File f=new File(baseDir,path);
+  if ((f.isDirectory() || matches(path,inc)) && !matches(path,exc)) {
+    if (f.isFile()) {
+      walker.process(this,f,destDir);
+    }
+ else     if (f.isDirectory()) {
+      File newDestDir=destDir;
+      if (!isFlatten()) {
+        newDestDir=new File(destDir,f.getName());
+      }
+      for (      File child : f.listFiles()) {
+        walk(walker,baseDir,path + File.separator + child.getName(),newDestDir,inc,exc);
+      }
+    }
+  }
+}

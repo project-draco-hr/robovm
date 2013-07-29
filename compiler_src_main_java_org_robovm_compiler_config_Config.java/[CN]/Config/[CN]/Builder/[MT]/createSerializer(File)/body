@@ -1,8 +1,11 @@
 {
-  Registry registry=new Registry();
   RelativeFileConverter fileConverter=new RelativeFileConverter(wd);
+  Serializer resourceSerializer=new Persister(new RegistryStrategy(new Registry().bind(File.class,fileConverter)),new PlatformFilter(config.properties),new Format(2));
+  Registry registry=new Registry();
+  RegistryStrategy registryStrategy=new RegistryStrategy(registry);
+  Serializer serializer=new Persister(registryStrategy,new PlatformFilter(config.properties),new Format(2));
   registry.bind(File.class,fileConverter);
   registry.bind(Lib.class,new RelativeLibConverter(fileConverter));
-  Serializer serializer=new Persister(new RegistryStrategy(registry),new PlatformFilter(config.properties),new Format(2));
+  registry.bind(Resource.class,new ResourceConverter(fileConverter,resourceSerializer));
   return serializer;
 }

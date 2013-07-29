@@ -115,7 +115,14 @@
       }
  else       if ("-resources".equals(args[i])) {
         for (        String p : args[++i].split(":")) {
-          builder.addResource(new File(p));
+          if (AntPathMatcher.isPattern(p)) {
+            File dir=new File(AntPathMatcher.rtrimWildcardTokens(p));
+            String pattern=AntPathMatcher.extractPattern(p);
+            builder.addResource(new Resource(dir,null).include(pattern));
+          }
+ else {
+            builder.addResource(new Resource(new File(p)));
+          }
         }
       }
  else       if ("-cacerts".equals(args[i])) {
