@@ -13,19 +13,8 @@
             symbol="objc_msgSend";
           }
           if (symbol != null) {
-            Class<?> returnType=method.getReturnType();
-            if (returnType.getSuperclass() == Struct.class && (method.getAnnotation(ByVal.class) != null || returnType.getAnnotation(ByVal.class) != null)) {
-              int structSize=getStructSize(returnType);
-              if (Bro.IS_X86) {
-                if (structSize > 8) {
-                  symbol+="_stret";
-                }
-              }
- else {
-                if (structSize > 4) {
-                  symbol+="_stret";
-                }
-              }
+            if (isStret(method)) {
+              symbol+="_stret";
             }
             long f=Runtime.resolveBridge("objc",symbol,method);
             VM.bindBridgeMethod(method,f);

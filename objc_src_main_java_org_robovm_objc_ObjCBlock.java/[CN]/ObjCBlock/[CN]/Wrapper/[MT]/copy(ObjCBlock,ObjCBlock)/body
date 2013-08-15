@@ -1,0 +1,13 @@
+{
+  Object blockObj=src.object();
+  Wrapper wrapper=src.wrapper();
+  IdentityHashMap<Object,AtomicInteger> refCounts=wrapper.refCounts;
+synchronized (refCounts) {
+    AtomicInteger count=refCounts.get(blockObj);
+    if (count == null) {
+      count=new AtomicInteger(0);
+      refCounts.put(blockObj,count);
+    }
+    count.incrementAndGet();
+  }
+}
