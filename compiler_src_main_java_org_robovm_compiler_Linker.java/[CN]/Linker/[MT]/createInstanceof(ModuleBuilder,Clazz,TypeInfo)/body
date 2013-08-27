@@ -1,0 +1,17 @@
+{
+  Function fn=FunctionBuilder.instanceOf(clazz);
+  Value info=getInfoStruct(mb,fn,clazz);
+  if (typeInfo.error) {
+    call(fn,BC_LDC_CLASS,fn.getParameterRef(0),info);
+    fn.add(new Ret(new IntegerConstant(0)));
+  }
+ else   if (!clazz.getClazzInfo().isInterface()) {
+    Value result=call(fn,INSTANCEOF_CLASS,fn.getParameterRef(0),info,fn.getParameterRef(1),new IntegerConstant((typeInfo.classTypes.length - 1) * 4 + 5 * 4),new IntegerConstant(typeInfo.id));
+    fn.add(new Ret(result));
+  }
+ else {
+    Value result=call(fn,INSTANCEOF_INTERFACE,fn.getParameterRef(0),info,fn.getParameterRef(1),new IntegerConstant(typeInfo.id));
+    fn.add(new Ret(result));
+  }
+  return fn;
+}

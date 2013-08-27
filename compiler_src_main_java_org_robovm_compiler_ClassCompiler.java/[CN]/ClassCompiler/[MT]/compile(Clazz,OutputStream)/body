@@ -26,8 +26,6 @@
   }
   mb.addInclude(getClass().getClassLoader().getResource(String.format("header-%s-%s.ll",config.getOs().getFamily(),config.getArch())));
   mb.addInclude(getClass().getClassLoader().getResource("header.ll"));
-  mb.addFunction(createInstanceof());
-  mb.addFunction(createCheckcast());
   mb.addFunction(createLdcClass());
   mb.addFunction(createLdcClassWrapper());
   Function allocator=createAllocator();
@@ -76,26 +74,21 @@
     trampolineResolver.compile(mb,trampoline);
     trampolineDependencies.addAll(trampolineResolver.getDependencies());
   }
-  Global classInfoStruct=null;
-  StructureConstant classInfoErrorStruct=createClassInfoErrorStruct();
-  if (classInfoErrorStruct != null) {
-    classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",classInfoErrorStruct);
-  }
- else {
-    classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",createClassInfoStruct());
-  }
+  Global classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",Linkage.weak,createClassInfoStruct());
   mb.addGlobal(classInfoStruct);
   Function infoFn=FunctionBuilder.infoStruct(sootClass);
   infoFn.add(new Ret(new ConstantBitcast(classInfoStruct.ref(),I8_PTR_PTR)));
   mb.addFunction(infoFn);
   out.write(mb.build().toString().getBytes("UTF-8"));
-  clazz.clearDependencies();
-  clazz.addDependency("java/lang/Object");
+  ClazzInfo ci=clazz.resetClazzInfo();
+  ci.setCatchNames(catches);
+  ci.setTrampolines(trampolines);
+  ci.addDependency("java/lang/Object");
   if (sootClass.hasSuperclass() && !sootClass.isInterface()) {
-    clazz.addDependency(getInternalName(sootClass.getSuperclass()));
+    ci.addDependency(getInternalName(sootClass.getSuperclass()));
   }
   for (  SootClass iface : sootClass.getInterfaces()) {
-    clazz.addDependency(getInternalName(iface));
+    ci.addDependency(getInternalName(iface));
   }
   for (  SootField f : sootClass.getFields()) {
     addDependencyIfNeeded(clazz,f.getType());
@@ -107,9 +100,9 @@
       addDependencyIfNeeded(clazz,type);
     }
   }
-  clazz.addDependencies(attributesEncoder.getDependencies());
-  clazz.addDependencies(trampolineDependencies);
-  clazz.addDependencies(catches);
+  ci.addDependencies(attributesEncoder.getDependencies());
+  ci.addDependencies(trampolineDependencies);
+  ci.addDependencies(catches);
   for (  Trampoline t : trampolines) {
     if (!(t instanceof LdcString)) {
       String desc=t.getTarget();
@@ -117,7 +110,7 @@
         addDependencyIfNeeded(clazz,desc);
       }
  else {
-        clazz.addDependency(t.getTarget());
+        ci.addDependency(t.getTarget());
       }
     }
     if (t instanceof FieldAccessor) {
@@ -131,5 +124,5 @@
       }
     }
   }
-  clazz.saveDependencies();
+  clazz.saveClazzInfo();
 }

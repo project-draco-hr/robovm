@@ -7,8 +7,22 @@
   mb.addGlobal(new Global("_bcDynamicJNI",new IntegerConstant(config.isUseDynamicJni() ? (byte)1 : (byte)0)));
   HashTableGenerator<String,Constant> bcpHashGen=new HashTableGenerator<String,Constant>(new ModifiedUtf8HashFunction());
   HashTableGenerator<String,Constant> cpHashGen=new HashTableGenerator<String,Constant>(new ModifiedUtf8HashFunction());
+  int classCount=0;
+  Map<ClazzInfo,TypeInfo> typeInfos=new HashMap<ClazzInfo,TypeInfo>();
   for (  Clazz clazz : linkClasses) {
-    Global info=new Global(mangleClass(clazz.getInternalName()) + "_info_struct",external,I8_PTR,false);
+    TypeInfo typeInfo=new TypeInfo();
+    typeInfo.clazz=clazz;
+    typeInfo.id=classCount++;
+    typeInfos.put(clazz.getClazzInfo(),typeInfo);
+    StructureConstant infoErrorStruct=createClassInfoErrorStruct(mb,clazz.getClazzInfo());
+    Global info=null;
+    if (infoErrorStruct == null) {
+      info=new Global(mangleClass(clazz.getInternalName()) + "_info_struct",external,I8_PTR,false);
+    }
+ else {
+      typeInfo.error=true;
+      info=new Global(mangleClass(clazz.getInternalName()) + "_info_struct",infoErrorStruct);
+    }
     mb.addGlobal(info);
     if (clazz.isInBootClasspath()) {
       bcpHashGen.put(clazz.getInternalName(),new ConstantBitcast(info.ref(),I8_PTR));
@@ -45,6 +59,23 @@
   mb.addGlobal(new Global("_bcClasspath",new ConstantGetelementptr(mb.newGlobal(classpathValues.build()).ref(),0,0)));
   if (config.getMainClass() != null) {
     mb.addGlobal(new Global("_bcMainClass",mb.getString(config.getMainClass())));
+  }
+  buildTypeInfos(typeInfos);
+  for (  Clazz clazz : linkClasses) {
+    TypeInfo typeInfo=typeInfos.get(clazz.getClazzInfo());
+    if (!typeInfo.error) {
+      int[] classIds=new int[typeInfo.classTypes.length];
+      for (int i=0; i < typeInfo.classTypes.length; i++) {
+        classIds[i]=typeInfo.classTypes[i].id;
+      }
+      int[] interfaceIds=new int[typeInfo.interfaceTypes.length];
+      for (int i=0; i < typeInfo.interfaceTypes.length; i++) {
+        interfaceIds[i]=typeInfo.interfaceTypes[i].id;
+      }
+      mb.addGlobal(new Global(mangleClass(clazz.getInternalName()) + "_typeinfo",new StructureConstantBuilder().add(new IntegerConstant(typeInfo.id)).add(new IntegerConstant((typeInfo.classTypes.length - 1) * 4 + 5 * 4)).add(new IntegerConstant(-1)).add(new IntegerConstant(typeInfo.classTypes.length)).add(new IntegerConstant(typeInfo.interfaceTypes.length)).add(new ArrayConstantBuilder(I32).add(classIds).build()).add(new ArrayConstantBuilder(I32).add(interfaceIds).build()).build()));
+    }
+    mb.addFunction(createCheckcast(mb,clazz,typeInfo));
+    mb.addFunction(createInstanceof(mb,clazz,typeInfo));
   }
   Arch arch=config.getArch();
   OS os=config.getOs();

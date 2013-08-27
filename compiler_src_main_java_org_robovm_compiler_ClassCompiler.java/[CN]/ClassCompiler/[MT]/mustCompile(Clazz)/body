@@ -3,7 +3,11 @@
   if (!oFile.exists() || oFile.lastModified() < clazz.lastModified()) {
     return true;
   }
-  Set<Dependency> dependencies=clazz.getDependencies();
+  ClazzInfo ci=clazz.getClazzInfo();
+  if (ci == null) {
+    return true;
+  }
+  Set<Dependency> dependencies=ci.getDependencies();
   for (  Dependency dep : dependencies) {
     Clazz depClazz=config.getClazzes().load(dep.getClassName());
     if (depClazz == null) {

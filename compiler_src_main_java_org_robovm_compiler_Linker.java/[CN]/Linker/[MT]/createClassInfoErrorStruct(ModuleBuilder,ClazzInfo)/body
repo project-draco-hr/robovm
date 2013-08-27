@@ -1,0 +1,62 @@
+{
+  int errorType=ClassCompiler.CI_ERROR_TYPE_NONE;
+  String errorMessage=null;
+  if (!ci.isInterface() && ci.hasSuperclass()) {
+    ClazzInfo superclazz=ci.getSuperclass();
+    if (superclazz.isPhantom()) {
+      errorType=ClassCompiler.CI_ERROR_TYPE_NO_CLASS_DEF_FOUND;
+      errorMessage=superclazz.getName();
+    }
+ else     if (!checkClassAccessible(superclazz,ci)) {
+      errorType=ClassCompiler.CI_ERROR_TYPE_ILLEGAL_ACCESS;
+      errorMessage=String.format(ILLEGAL_ACCESS_ERROR_CLASS,superclazz,ci);
+    }
+ else     if (superclazz.isInterface()) {
+      errorType=ClassCompiler.CI_ERROR_TYPE_INCOMPATIBLE_CLASS_CHANGE;
+      errorMessage=String.format("class %s has interface %s as super class",ci,superclazz);
+    }
+  }
+  if (errorType == ClassCompiler.CI_ERROR_TYPE_NONE) {
+    for (    ClazzInfo interfaze : ci.getInterfaces()) {
+      if (interfaze.isPhantom()) {
+        errorType=ClassCompiler.CI_ERROR_TYPE_NO_CLASS_DEF_FOUND;
+        errorMessage=interfaze.getName();
+        break;
+      }
+ else       if (!checkClassAccessible(interfaze,ci)) {
+        errorType=ClassCompiler.CI_ERROR_TYPE_ILLEGAL_ACCESS;
+        errorMessage=String.format(ILLEGAL_ACCESS_ERROR_CLASS,interfaze,ci);
+        break;
+      }
+ else       if (!interfaze.isInterface()) {
+        errorType=ClassCompiler.CI_ERROR_TYPE_INCOMPATIBLE_CLASS_CHANGE;
+        errorMessage=String.format("class %s tries to implement class %s as interface",ci,interfaze);
+        break;
+      }
+    }
+  }
+  if (errorType == ClassCompiler.CI_ERROR_TYPE_NONE) {
+    for (    ClazzInfo ex : ci.getCatches()) {
+      if (ex == null || ex.isPhantom()) {
+        errorType=ClassCompiler.CI_ERROR_TYPE_NO_CLASS_DEF_FOUND;
+        errorMessage=ex.getInternalName();
+        break;
+      }
+ else       if (!checkClassAccessible(ex,ci)) {
+        errorType=ClassCompiler.CI_ERROR_TYPE_ILLEGAL_ACCESS;
+        errorMessage=String.format(ILLEGAL_ACCESS_ERROR_CLASS,ex,ci);
+        break;
+      }
+    }
+  }
+  if (errorType == ClassCompiler.CI_ERROR_TYPE_NONE) {
+    return null;
+  }
+  StructureConstantBuilder error=new StructureConstantBuilder();
+  error.add(new NullConstant(I8_PTR));
+  error.add(new IntegerConstant(ClassCompiler.CI_ERROR));
+  error.add(mb.getString(ci.getInternalName()));
+  error.add(new IntegerConstant(errorType));
+  error.add(mb.getString(errorMessage));
+  return error.build();
+}

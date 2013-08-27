@@ -1,0 +1,32 @@
+{
+  if (typeInfo.error || typeInfo.classTypes != null) {
+    return typeInfo;
+  }
+  typeInfo.classTypes=EMPTY_TYPE_INFOS;
+  typeInfo.interfaceTypes=EMPTY_TYPE_INFOS;
+  ClazzInfo ci=typeInfo.clazz.getClazzInfo();
+  Set<TypeInfo> ifTypeInfos=new TreeSet<TypeInfo>();
+  if (!ci.isInterface()) {
+    if (ci.hasSuperclass()) {
+      TypeInfo superTypeInfo=buildTypeInfo(typeInfos.get(ci.getSuperclass()),typeInfos);
+      typeInfo.classTypes=new TypeInfo[superTypeInfo.classTypes.length + 1];
+      System.arraycopy(superTypeInfo.classTypes,0,typeInfo.classTypes,0,superTypeInfo.classTypes.length);
+      typeInfo.classTypes[typeInfo.classTypes.length - 1]=typeInfo;
+      ifTypeInfos.addAll(Arrays.asList(superTypeInfo.interfaceTypes));
+    }
+ else {
+      typeInfo.classTypes=new TypeInfo[]{typeInfo};
+    }
+  }
+  for (  ClazzInfo ifCi : ci.getInterfaces()) {
+    TypeInfo ifTypeInfo=buildTypeInfo(typeInfos.get(ifCi),typeInfos);
+    ifTypeInfos.addAll(Arrays.asList(ifTypeInfo.interfaceTypes));
+  }
+  if (ci.isInterface()) {
+    ifTypeInfos.add(typeInfo);
+  }
+  if (!ifTypeInfos.isEmpty()) {
+    typeInfo.interfaceTypes=ifTypeInfos.toArray(new TypeInfo[ifTypeInfos.size()]);
+  }
+  return typeInfo;
+}
