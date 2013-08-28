@@ -1,0 +1,23 @@
+{
+  if (parent == null) {
+    return childEntries.toArray(new Entry[childEntries.size()]);
+  }
+  ArrayList<Entry> result=new ArrayList<Entry>();
+  outer:   for (  Entry entryParent : parent.entries) {
+    for (Iterator<Entry> it=childEntries.iterator(); it.hasNext(); ) {
+      Entry entryChild=it.next();
+      if (entryChild.overrides(entryParent)) {
+        entryChild.index=entryParent.index;
+        result.add(entryChild);
+        it.remove();
+        continue outer;
+      }
+    }
+    result.add(entryParent);
+  }
+  for (  Entry entry : childEntries) {
+    entry.index=result.size();
+    result.add(entry);
+  }
+  return result.toArray(new Entry[result.size()]);
+}

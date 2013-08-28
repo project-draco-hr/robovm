@@ -1,0 +1,24 @@
+{
+  SootClass sc=getSootClass("org.robovm.compiler.a.A");
+  VTable.Cache cache=new VTable.Cache();
+  VTable vtable=cache.get(sc);
+  assertEquals(14,vtable.size());
+  Entry toStringEntry=vtable.findEntry("toString","()Ljava/lang/String;");
+  assertEquals(sc.getName(),toStringEntry.getDeclaringClass());
+  Entry superToStringEntry=cache.get(getSootClass("java.lang.Object")).findEntry("toString","()Ljava/lang/String;");
+  assertEquals(superToStringEntry.getIndex(),toStringEntry.getIndex());
+  assertNotSame(toStringEntry,superToStringEntry);
+  Entry equalsEntry=vtable.findEntry("equals","(Ljava/lang/Object;)Z");
+  assertEquals(sc.getName(),equalsEntry.getDeclaringClass());
+  Entry superEqualsEntry=cache.get(getSootClass("java.lang.Object")).findEntry("equals","(Ljava/lang/Object;)Z");
+  assertEquals(superEqualsEntry.getIndex(),equalsEntry.getIndex());
+  assertNotSame(superEqualsEntry,equalsEntry);
+  Entry cloneEntry=vtable.findEntry("clone","()Ljava/lang/Object;");
+  assertEquals("java.lang.Object",cloneEntry.getDeclaringClass());
+  Entry superCloneEntry=cache.get(getSootClass("java.lang.Object")).findEntry("clone","()Ljava/lang/Object;");
+  assertSame(superCloneEntry,cloneEntry);
+  assertNull(vtable.findEntry("foo","()V"));
+  Entry fooEntry=vtable.findEntry("org.robovm.compiler.a","foo","()V");
+  assertEquals(sc.getName(),fooEntry.getDeclaringClass());
+  assertEquals(11,fooEntry.getIndex());
+}

@@ -1,0 +1,17 @@
+{
+  SootClass scA=getSootClass("org.robovm.compiler.a.A");
+  SootClass scC=getSootClass("org.robovm.compiler.a.C");
+  VTable.Cache cache=new VTable.Cache();
+  VTable vtableA=cache.get(scA);
+  VTable vtableC=cache.get(scC);
+  assertEquals(14,vtableC.size());
+  Entry fooEntry=vtableC.findEntry("org.robovm.compiler.a","foo","()V");
+  assertEquals(scC.getName(),fooEntry.getDeclaringClass());
+  Entry superFooEntry=vtableA.findEntry("org.robovm.compiler.a","foo","()V");
+  assertEquals(superFooEntry.getIndex(),fooEntry.getIndex());
+  assertNotSame(superFooEntry,fooEntry);
+  Entry barEntry=vtableC.findEntry("org.robovm.compiler.a","bar","()V");
+  assertEquals(scA.getName(),barEntry.getDeclaringClass());
+  Entry superBarEntry=vtableA.findEntry("org.robovm.compiler.a","bar","()V");
+  assertSame(superBarEntry,barEntry);
+}
