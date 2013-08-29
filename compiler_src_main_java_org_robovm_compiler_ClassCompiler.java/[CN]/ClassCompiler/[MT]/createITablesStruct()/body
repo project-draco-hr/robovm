@@ -1,0 +1,32 @@
+{
+  if (!sootClass.isInterface()) {
+    HashSet<SootClass> interfaces=new HashSet<SootClass>();
+    collectInterfaces(sootClass,interfaces);
+    List<Constant> tables=new ArrayList<Constant>();
+    int i=0;
+    for (    SootClass ifs : interfaces) {
+      ITable itable=config.getITableCache().get(ifs);
+      if (itable.size() > 0) {
+        String name=mangleClass(sootClass) + "_itable" + (i++);
+        String typeInfoName=mangleClass(ifs) + "_typeinfo";
+        if (!mb.hasSymbol(typeInfoName)) {
+          mb.addGlobal(new Global(typeInfoName,Linkage.external,I8_PTR,true));
+        }
+        Global itableStruct=new Global(name,Linkage._private,new StructureConstantBuilder().add(mb.getGlobalRef(typeInfoName)).add(itable.getStruct(sootClass)).build(),true);
+        mb.addGlobal(itableStruct);
+        tables.add(new ConstantBitcast(itableStruct.ref(),I8_PTR));
+      }
+    }
+    if (tables.isEmpty()) {
+      return new NullConstant(I8_PTR);
+    }
+ else {
+      Global itablesStruct=new Global(mangleClass(sootClass) + "_itables",Linkage._private,new StructureConstantBuilder().add(new IntegerConstant((short)tables.size())).add(tables.get(0)).add(new ArrayConstantBuilder(I8_PTR).add(tables).build()).build());
+      mb.addGlobal(itablesStruct);
+      return new ConstantBitcast(itablesStruct.ref(),I8_PTR);
+    }
+  }
+ else {
+    return new NullConstant(I8_PTR);
+  }
+}

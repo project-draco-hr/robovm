@@ -74,7 +74,16 @@
     trampolineResolver.compile(mb,trampoline);
     trampolineDependencies.addAll(trampolineResolver.getDependencies());
   }
-  Global classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",Linkage.weak,createClassInfoStruct());
+  Global classInfoStruct=null;
+  try {
+    if (!sootClass.isInterface()) {
+      config.getVTableCache().get(sootClass);
+    }
+    classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",Linkage.weak,createClassInfoStruct());
+  }
+ catch (  IllegalArgumentException e) {
+    classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",I8_PTR,true);
+  }
   mb.addGlobal(classInfoStruct);
   Function infoFn=FunctionBuilder.infoStruct(sootClass);
   infoFn.add(new Ret(new ConstantBitcast(classInfoStruct.ref(),I8_PTR_PTR)));

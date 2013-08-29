@@ -1,0 +1,13 @@
+{
+  VTable vtable=config.getVTableCache().get(sootClass);
+  String name=mangleClass(sootClass) + "_vtable";
+  for (  VTable.Entry entry : vtable.getEntries()) {
+    FunctionRef fref=entry.getFunctionRef();
+    if (fref != null && !mb.hasSymbol(fref.getName())) {
+      mb.addFunctionDeclaration(new FunctionDeclaration(fref));
+    }
+  }
+  Global vtableStruct=new Global(name,Linkage._private,vtable.getStruct(),true);
+  mb.addGlobal(vtableStruct);
+  return new ConstantBitcast(vtableStruct.ref(),I8_PTR);
+}
