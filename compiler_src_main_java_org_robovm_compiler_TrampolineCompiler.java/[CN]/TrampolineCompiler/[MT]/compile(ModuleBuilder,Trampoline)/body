@@ -163,7 +163,12 @@
       mb.addFunction(f);
       return;
     }
-    createTrampolineAliasForField((FieldAccessor)t,field);
+    if (!field.isStatic()) {
+      createInlinedAccessorForInstanceField((FieldAccessor)t,field);
+    }
+ else {
+      createTrampolineAliasForField((FieldAccessor)t,field);
+    }
   }
  else   if (t instanceof Invokeinterface) {
     SootMethod rm=resolveInterfaceMethod(f,(Invokeinterface)t);
