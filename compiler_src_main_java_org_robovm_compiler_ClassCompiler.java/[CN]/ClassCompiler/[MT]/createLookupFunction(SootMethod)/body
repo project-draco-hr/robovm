@@ -8,12 +8,17 @@
   function.add(new Store(getString(m.getName()),reserved0.ref()));
   function.add(new Store(getString(getDescriptor(m)),reserved1.ref()));
   if (!sootClass.isInterface()) {
-    VTable vtable=config.getVTableCache().get(sootClass);
-    VTable.Entry entry=vtable.getEntry(m);
+    int vtableIndex=0;
+    try {
+      VTable vtable=config.getVTableCache().get(sootClass);
+      vtableIndex=vtable.getEntry(m).getIndex();
+    }
+ catch (    IllegalArgumentException e) {
+    }
     Value classPtr=call(function,OBJECT_CLASS,function.getParameterRef(1));
-    Value vtablePtr=call(function,CLASS_VTABLE,classPtr);
+    Value vtablePtr=call(function,CLASS_VITABLE,classPtr);
     Variable funcPtrPtr=function.newVariable(I8_PTR_PTR);
-    function.add(new Getelementptr(funcPtrPtr,vtablePtr,0,1,entry.getIndex()));
+    function.add(new Getelementptr(funcPtrPtr,vtablePtr,0,1,vtableIndex));
     Variable funcPtr=function.newVariable(I8_PTR);
     function.add(new Load(funcPtr,funcPtrPtr.ref()));
     Variable f=function.newVariable(function.getType());
@@ -22,17 +27,14 @@
     function.add(new Ret(result));
   }
  else {
-    Value lookupFn=sootClass.isInterface() ? BC_LOOKUP_INTERFACE_METHOD : BC_LOOKUP_VIRTUAL_METHOD;
+    ITable itable=config.getITableCache().get(sootClass);
+    ITable.Entry entry=itable.getEntry(m);
     List<Value> args=new ArrayList<Value>();
     args.add(function.getParameterRef(0));
-    if (sootClass.isInterface()) {
-      Value info=getInfoStruct(function,sootClass);
-      args.add(info);
-    }
+    args.add(getInfoStruct(function,sootClass));
     args.add(function.getParameterRef(1));
-    args.add(getString(m.getName()));
-    args.add(getString(getDescriptor(m)));
-    Value fptr=call(function,lookupFn,args);
+    args.add(new IntegerConstant(entry.getIndex()));
+    Value fptr=call(function,BC_LOOKUP_INTERFACE_METHOD_IMPL,args);
     Variable f=function.newVariable(function.getType());
     function.add(new Bitcast(f,fptr,f.getType()));
     Value result=call(function,f.ref(),function.getParameterRefs());

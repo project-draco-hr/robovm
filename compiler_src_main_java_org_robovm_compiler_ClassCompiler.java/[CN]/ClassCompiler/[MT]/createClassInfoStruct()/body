@@ -40,22 +40,13 @@
   }
   mb.addGlobal(new Global(mangleClass(sootClass) + "_typeinfo",Linkage.external,I8_PTR,true));
   header.add(new GlobalRef(mangleClass(sootClass) + "_typeinfo",I8_PTR));
-  VTable vtable=null;
   if (!sootClass.isInterface()) {
-    vtable=config.getVTableCache().get(sootClass);
-    for (    VTable.Entry entry : vtable.getEntries()) {
-      FunctionRef fref=entry.getFunctionRef();
-      if (fref != null && !mb.hasSymbol(fref.getName())) {
-        mb.addFunctionDeclaration(new FunctionDeclaration(fref));
-      }
-    }
-    Global vtableStruct=new Global(mangleClass(sootClass) + "_vtable",Linkage._private,vtable.getStruct(),true);
-    mb.addGlobal(vtableStruct);
-    header.add(new ConstantBitcast(vtableStruct.ref(),I8_PTR_PTR));
+    header.add(createVTableStruct());
   }
  else {
-    header.add(new NullConstant(I8_PTR_PTR));
+    header.add(createITableStruct());
   }
+  header.add(createITablesStruct());
   header.add(sizeof(classType));
   header.add(sizeof(instanceType));
   if (!instanceFields.isEmpty()) {
@@ -156,6 +147,9 @@
       body.add(new ConstantBitcast(attributesEncoder.getFieldAttributes(f).ref(),I8_PTR));
     }
   }
+  VTable vtable=!sootClass.isInterface() ? config.getVTableCache().get(sootClass) : null;
+  ITable itable=sootClass.isInterface() ? config.getITableCache().get(sootClass) : null;
+  ;
   for (  SootMethod m : sootClass.getMethods()) {
     soot.Type t=m.getReturnType();
     flags=0;
@@ -210,14 +204,20 @@
       flags|=MI_COMPACT_DESC;
     }
     body.add(new IntegerConstant((short)flags));
-    Constant vtableIndex=new IntegerConstant((short)-1);
+    Constant viTableIndex=new IntegerConstant((short)-1);
     if (vtable != null) {
       VTable.Entry entry=vtable.getEntry(m);
       if (entry != null) {
-        vtableIndex=new IntegerConstant((short)entry.getIndex());
+        viTableIndex=new IntegerConstant((short)entry.getIndex());
       }
     }
-    body.add(vtableIndex);
+ else {
+      ITable.Entry entry=itable.getEntry(m);
+      if (entry != null) {
+        viTableIndex=new IntegerConstant((short)entry.getIndex());
+      }
+    }
+    body.add(viTableIndex);
     body.add(getString(m.getName()));
     if ((flags & MI_COMPACT_DESC) > 0) {
       int desc=0;
