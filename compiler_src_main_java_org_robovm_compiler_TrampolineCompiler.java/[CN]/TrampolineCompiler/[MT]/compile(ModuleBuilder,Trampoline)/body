@@ -2,9 +2,14 @@
   this.mb=mb;
   this.dependencies=new HashSet<String>();
   if (t instanceof LdcString) {
+    byte[] modUtf8=stringToModifiedUtf8Z(t.getTarget());
+    Global g=new Global(getStringVarName(modUtf8) + "_ptr",weak,new NullConstant(OBJECT_PTR));
+    if (!mb.hasSymbol(g.getName())) {
+      mb.addGlobal(g);
+    }
     Function f=new FunctionBuilder(t).linkage(weak).build();
     mb.addFunction(f);
-    Value result=call(f,BC_LDC_STRING,f.getParameterRef(0),mb.getString(t.getTarget()));
+    Value result=call(f,BC_LDC_STRING,f.getParameterRef(0),g.ref(),mb.getString(t.getTarget()),new IntegerConstant(t.getTarget().length()));
     f.add(new Ret(result));
     return;
   }
