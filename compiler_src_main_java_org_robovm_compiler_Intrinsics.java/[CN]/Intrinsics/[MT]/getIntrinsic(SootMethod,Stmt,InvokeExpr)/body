@@ -1,0 +1,14 @@
+{
+  SootMethodRef methodRef=expr.getMethodRef();
+  FunctionRef fref=SIMPLE_INTRINSICS.get(getInternalName(methodRef.declaringClass()) + "/" + methodRef.name()+ getDescriptor(methodRef));
+  if (fref != null) {
+    return fref;
+  }
+  if (methodRef.name().startsWith("memmove") && "org.robovm.rt.VM".equals(methodRef.declaringClass().getName())) {
+    return new FunctionRef("intrinsics.org_robovm_rt_VM_" + methodRef.name(),new FunctionType(VOID,ENV_PTR,I64,I64,I64));
+  }
+  if ("arraycopy".equals(methodRef.name()) && "java.lang.System".equals(methodRef.declaringClass().getName()) && "_getChars".equals(currMethod.getName())&& "java.lang.String".equals(currMethod.getDeclaringClass().getName())) {
+    return new FunctionRef("intrinsics.java_lang_System_arraycopy_C",new FunctionType(VOID,ENV_PTR,OBJECT_PTR,I32,OBJECT_PTR,I32,I32));
+  }
+  return null;
+}
