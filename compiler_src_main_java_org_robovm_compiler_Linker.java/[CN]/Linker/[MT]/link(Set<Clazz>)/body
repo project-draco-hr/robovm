@@ -62,7 +62,8 @@
   }
   buildTypeInfos(typeInfos);
   for (  Clazz clazz : linkClasses) {
-    TypeInfo typeInfo=typeInfos.get(clazz.getClazzInfo());
+    ClazzInfo ci=clazz.getClazzInfo();
+    TypeInfo typeInfo=typeInfos.get(ci);
     if (!typeInfo.error) {
       int[] classIds=new int[typeInfo.classTypes.length];
       for (int i=0; i < typeInfo.classTypes.length; i++) {
@@ -73,6 +74,14 @@
         interfaceIds[i]=typeInfo.interfaceTypes[i].id;
       }
       mb.addGlobal(new Global(mangleClass(clazz.getInternalName()) + "_typeinfo",new StructureConstantBuilder().add(new IntegerConstant(typeInfo.id)).add(new IntegerConstant((typeInfo.classTypes.length - 1) * 4 + 5 * 4)).add(new IntegerConstant(-1)).add(new IntegerConstant(typeInfo.classTypes.length)).add(new IntegerConstant(typeInfo.interfaceTypes.length)).add(new ArrayConstantBuilder(I32).add(classIds).build()).add(new ArrayConstantBuilder(I32).add(interfaceIds).build()).build()));
+      if (!ci.isInterface() && !ci.isFinal() && typeInfo.children.isEmpty()) {
+        for (        MethodInfo mi : ci.getMethods()) {
+          String name=mi.getName();
+          if (!name.equals("<clinit>") && !name.equals("<init>") && !mi.isPrivate()&& !mi.isStatic()&& !mi.isFinal()&& !mi.isAbstract()) {
+            mb.addFunction(createLookup(mb,ci,mi));
+          }
+        }
+      }
     }
     mb.addFunction(createCheckcast(mb,clazz,typeInfo));
     mb.addFunction(createInstanceof(mb,clazz,typeInfo));
