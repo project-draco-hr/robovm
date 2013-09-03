@@ -64,7 +64,10 @@
   for (  Clazz clazz : linkClasses) {
     ClazzInfo ci=clazz.getClazzInfo();
     TypeInfo typeInfo=typeInfos.get(ci);
-    if (!typeInfo.error) {
+    if (typeInfo.error) {
+      mb.addGlobal(new Global(mangleClass(clazz.getInternalName()) + "_typeinfo",new StructureConstantBuilder().add(new IntegerConstant(typeInfo.id)).add(new IntegerConstant(0)).add(new IntegerConstant(-1)).add(new IntegerConstant(0)).add(new IntegerConstant(0)).build()));
+    }
+ else {
       int[] classIds=new int[typeInfo.classTypes.length];
       for (int i=0; i < typeInfo.classTypes.length; i++) {
         classIds[i]=typeInfo.classTypes[i].id;
