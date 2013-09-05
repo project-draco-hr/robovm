@@ -10,11 +10,13 @@
   }
   SootMethod originalMethod=method;
   Value structObj=null;
-  if (isPassByValue(originalMethod)) {
+  boolean passByValue=isPassByValue(originalMethod);
+  if (passByValue) {
     Arch arch=config.getArch();
     OS os=config.getOs();
     String triple=config.getTriple();
-    if (getStructType(originalMethod.getReturnType()).getAllocSize(triple) > os.getMaxRegisterReturnSize(arch)) {
+    int size=getStructType(originalMethod.getReturnType()).getAllocSize(triple);
+    if (!os.isReturnedInRegisters(arch,size)) {
       method=createFakeStructRetMethod(method);
       VariableRef env=fn.getParameterRef(0);
       LdcClass ldcClass=new LdcClass(getInternalName(method.getDeclaringClass()),getInternalName(originalMethod.getReturnType()));
@@ -27,6 +29,11 @@
     }
   }
   FunctionType targetFnType=getBridgeFunctionType(method);
+  if (method == originalMethod && passByValue) {
+    int size=((StructureType)targetFnType.getReturnType()).getAllocSize(config.getTriple());
+    Type t=size <= 1 ? I8 : (size <= 2 ? I16 : (size <= 4 ? I32 : I64));
+    targetFnType=new FunctionType(t,targetFnType.isVarargs(),targetFnType.getParameterTypes());
+  }
   Variable targetFn=fn.newVariable(targetFnType);
   Global targetFnPtr=new Global(getTargetFnPtrName(originalMethod),_private,new NullConstant(I8_PTR));
   moduleBuilder.addGlobal(targetFnPtr);
@@ -113,7 +120,10 @@
   if (needsMarshaler(method.getReturnType())) {
     String marshalerClassName=getMarshalerClassName(method,true);
     String targetClassName=getInternalName(method.getReturnType());
-    if (targetFnType.getReturnType() instanceof PrimitiveType) {
+    if (passByValue) {
+      result=marshalNativeToObject(fn,marshalerClassName,null,env,targetClassName,result,true,true);
+    }
+ else     if (targetFnType.getReturnType() instanceof PrimitiveType) {
       if (isEnum(method.getReturnType())) {
         result=marshalNativeToEnumObject(fn,marshalerClassName,env,targetClassName,result);
       }
@@ -126,7 +136,7 @@
         result=marshalNativeToPtr(fn,marshalerClassName,null,env,getPtrTargetClass(method),result,getPtrWrapCount(method));
       }
  else {
-        result=marshalNativeToObject(fn,marshalerClassName,null,env,targetClassName,result,isPassByValue(method));
+        result=marshalNativeToObject(fn,marshalerClassName,null,env,targetClassName,result,passByValue);
       }
     }
   }

@@ -1,0 +1,19 @@
+{
+  Invokestatic invokestatic=new Invokestatic(getInternalName(sootMethod.getDeclaringClass()),marshalerClassName,"toNative","(Ljava/lang/Object;)J");
+  trampolines.add(invokestatic);
+  Value handle=call(fn,invokestatic.getFunctionRef(),env,object);
+  Variable nativeValue=fn.newVariable(nativeType);
+  if (nativeType instanceof StructureType || smallStructRet) {
+    Variable tmp=fn.newVariable(new PointerType(nativeType));
+    fn.add(new Inttoptr(tmp,handle,tmp.getType()));
+    fn.add(new Load(nativeValue,tmp.ref()));
+  }
+ else {
+    fn.add(new Inttoptr(nativeValue,handle,nativeType));
+  }
+  if (marshaledArg != null) {
+    marshaledArg.handle=handle;
+    marshaledArg.object=object;
+  }
+  return nativeValue.ref();
+}

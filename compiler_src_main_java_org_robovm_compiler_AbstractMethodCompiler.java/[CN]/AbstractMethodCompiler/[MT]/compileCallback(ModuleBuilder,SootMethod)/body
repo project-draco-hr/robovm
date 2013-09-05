@@ -1,20 +1,27 @@
 {
   validateCallbackMethod(method);
   SootMethod originalMethod=method;
-  if (isPassByValue(originalMethod)) {
+  boolean passByValue=isPassByValue(originalMethod);
+  if (passByValue) {
     Arch arch=config.getArch();
     OS os=config.getOs();
     String triple=config.getTriple();
-    if (getStructType(originalMethod.getReturnType()).getAllocSize(triple) > os.getMaxRegisterReturnSize(arch)) {
+    int size=getStructType(originalMethod.getReturnType()).getAllocSize(triple);
+    if (!os.isReturnedInRegisters(arch,size)) {
       method=createFakeStructRetMethod(method);
     }
   }
   Function callbackFn=FunctionBuilder.callback(method);
   if (originalMethod != method) {
     callbackFn.setParameterAttributes(0,ParameterAttribute.sret);
-    moduleBuilder.addAlias(new Alias(mangleMethod(originalMethod) + "_callback",Linkage._private,new ConstantBitcast(callbackFn.ref(),getCallbackFunctionType(originalMethod))));
+  }
+ else   if (passByValue) {
+    int size=((StructureType)callbackFn.getType().getReturnType()).getAllocSize(config.getTriple());
+    Type t=size <= 1 ? I8 : (size <= 2 ? I16 : (size <= 4 ? I32 : I64));
+    callbackFn=FunctionBuilder.callback(method,t);
   }
   moduleBuilder.addFunction(callbackFn);
+  moduleBuilder.addAlias(new Alias(mangleMethod(originalMethod) + "_callback_i8p",Linkage._private,new ConstantBitcast(callbackFn.ref(),I8_PTR_PTR)));
   String targetName=mangleMethod(originalMethod);
   if (originalMethod.isSynchronized()) {
     targetName+="_synchronized";
@@ -71,7 +78,10 @@
   if (needsMarshaler(method.getReturnType())) {
     String marshalerClassName=getMarshalerClassName(method,false);
     Type nativeType=callbackFn.getType().getReturnType();
-    if (nativeType instanceof PrimitiveType) {
+    if (passByValue) {
+      result=marshalObjectToNative(callbackFn,marshalerClassName,null,nativeType,env,result,true);
+    }
+ else     if (nativeType instanceof PrimitiveType) {
       if (isEnum(method.getReturnType())) {
         result=marshalEnumObjectToNative(callbackFn,marshalerClassName,nativeType,env,result);
       }
