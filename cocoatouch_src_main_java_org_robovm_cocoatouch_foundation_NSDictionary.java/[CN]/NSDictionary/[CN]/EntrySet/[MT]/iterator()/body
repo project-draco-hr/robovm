@@ -1,22 +1,17 @@
 {
   final Iterator<K> keysIt=map.keySet().iterator();
   return new Iterator<Map.Entry<K,V>>(){
-    Map.Entry<K,V> entry=null;
+    private Map.Entry<K,V> entry=null;
     @Override public boolean hasNext(){
       return keysIt.hasNext();
     }
     @SuppressWarnings("serial") @Override public Map.Entry<K,V> next(){
-      K key=keysIt.next();
-      entry=new SimpleEntry<K,V>(key,map.get(key)){
-        public V setValue(        V v){
-          Object value=map.get(entry.getKey());
-          if (entry.getValue() != value) {
-            throw new ConcurrentModificationException();
-          }
-          return super.setValue(v);
-        }
+      final K key=keysIt.next();
+      final V value=map.get(key);
+      if (value == null) {
+        throw new ConcurrentModificationException();
       }
-;
+      entry=new Entry<K,V>(map,key,value);
       return entry;
     }
     @Override public void remove(){
