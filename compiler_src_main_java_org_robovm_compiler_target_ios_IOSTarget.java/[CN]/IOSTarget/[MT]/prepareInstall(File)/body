@@ -4,6 +4,9 @@
   if (arch == Arch.thumbv7) {
     strip(installDir,getExecutable());
     copyResourcesPList(installDir);
-    codesign(signIdentity,entitlementsPList,installDir);
+    config.getLogger().debug("Copying provisioning profile: %s (%s)",provisioningProfile.getName(),provisioningProfile.getEntitlements().objectForKey("application-identifier"));
+    FileUtils.copyFile(provisioningProfile.getFile(),new File(installDir,"embedded.mobileprovision"));
+    codesign(signIdentity,getOrCreateEntitlementsPList(false),installDir);
+    new Executor(config.getLogger(),"ln").args("-s","_CodeSignature/CodeResources",new File(installDir,"CodeResources")).exec();
   }
 }

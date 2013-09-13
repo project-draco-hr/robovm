@@ -1,0 +1,28 @@
+{
+  try {
+    File destFile=new File(config.getTmpDir(),"Entitlements.plist");
+    NSDictionary dict=null;
+    if (entitlementsPList != null) {
+      dict=(NSDictionary)PropertyListParser.parse(entitlementsPList);
+    }
+ else {
+      dict=(NSDictionary)PropertyListParser.parse(IOUtils.toByteArray(getClass().getResourceAsStream("/Entitlements.plist")));
+    }
+    NSDictionary profileEntitlements=provisioningProfile.getEntitlements();
+    for (    String key : profileEntitlements.allKeys()) {
+      if (dict.objectForKey(key) == null) {
+        dict.put(key,profileEntitlements.objectForKey(key));
+      }
+    }
+    dict.put("application-identifier",provisioningProfile.getAppIdPrefix() + "." + getBundleId());
+    dict.put("get-task-allow",getTaskAllow);
+    PropertyListParser.saveAsXML(dict,destFile);
+    return destFile;
+  }
+ catch (  IOException e) {
+    throw e;
+  }
+catch (  Exception e) {
+    throw new RuntimeException(e);
+  }
+}

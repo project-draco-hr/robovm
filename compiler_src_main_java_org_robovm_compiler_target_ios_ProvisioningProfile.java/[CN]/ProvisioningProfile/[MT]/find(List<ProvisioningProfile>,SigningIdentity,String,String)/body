@@ -1,0 +1,16 @@
+{
+  for (  ProvisioningProfile p : profiles) {
+    NSString appId=(NSString)p.entitlements.objectForKey("application-identifier");
+    if (appId != null && appId.toString().equals(p.appIdPrefix + "." + bundleId)) {
+      for (      String fp : p.certFingerprints) {
+        if (fp.equals(signingIdentity.getFingerprint())) {
+          return p;
+        }
+      }
+    }
+  }
+  if (!bundleId.equals("*")) {
+    return find(profiles,signingIdentity,"*",bundleId);
+  }
+  throw new IllegalArgumentException("No provisioning profile found " + "matching signing identity '" + signingIdentity.getName() + "' and app bundle ID '"+ origBundleId+ "'");
+}

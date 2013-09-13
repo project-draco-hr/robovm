@@ -9,9 +9,11 @@
     }
     arch=config.getArch();
   }
-  signIdentity=config.getIosSignIdentity();
-  if (signIdentity == null) {
-    signIdentity="iPhone Developer";
+  if (arch == Arch.thumbv7) {
+    signIdentity=config.getIosSignIdentity();
+    if (signIdentity == null) {
+      signIdentity=SigningIdentity.find(SigningIdentity.list(),"iPhone Developer");
+    }
   }
   infoPList=config.getIosInfoPList();
   if (infoPList != null) {
@@ -20,6 +22,16 @@
     }
  catch (    Throwable t) {
       throw new IllegalArgumentException(t);
+    }
+  }
+  if (arch == Arch.thumbv7) {
+    provisioningProfile=config.getIosProvisioningProfile();
+    if (provisioningProfile == null) {
+      NSString bundleId=infoPListDict != null ? (NSString)infoPListDict.objectForKey("CFBundleIdentifier") : null;
+      if (bundleId == null) {
+        bundleId=new NSString("*");
+      }
+      provisioningProfile=ProvisioningProfile.find(ProvisioningProfile.list(),signIdentity,bundleId.toString());
     }
   }
   String sdkVersion=config.getIosSdkVersion();

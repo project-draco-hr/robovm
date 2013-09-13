@@ -1,0 +1,14 @@
+{
+  File dir=new File(new File(System.getProperty("user.home")),"Library/MobileDevice/Provisioning Profiles");
+  List<ProvisioningProfile> result=new ArrayList<ProvisioningProfile>();
+  for (  File f : dir.listFiles()) {
+    if (f.getName().endsWith(".mobileprovision")) {
+      ProvisioningProfile p=create(f);
+      if (p.expirationDate.after(new Date())) {
+        result.add(p);
+      }
+    }
+  }
+  Collections.sort(result);
+  return result;
+}

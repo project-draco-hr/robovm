@@ -1,0 +1,16 @@
+{
+  InputStream in=null;
+  try {
+    in=new BufferedInputStream(new FileInputStream(file));
+    CMSSignedData data=new CMSSignedData(in);
+    byte[] content=(byte[])data.getSignedContent().getContent();
+    NSDictionary dict=(NSDictionary)PropertyListParser.parse(content);
+    return new ProvisioningProfile(file,dict);
+  }
+ catch (  Exception e) {
+    throw new RuntimeException(e);
+  }
+ finally {
+    IOUtils.closeQuietly(in);
+  }
+}

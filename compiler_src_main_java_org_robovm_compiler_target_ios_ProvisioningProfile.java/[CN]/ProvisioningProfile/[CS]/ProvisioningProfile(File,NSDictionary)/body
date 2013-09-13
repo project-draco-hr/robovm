@@ -1,0 +1,15 @@
+{
+  this.file=file;
+  this.dict=dict;
+  this.uuid=dict.objectForKey("UUID").toString();
+  this.name=dict.objectForKey("Name").toString();
+  this.appIdName=dict.objectForKey("AppIDName") != null ? dict.objectForKey("AppIDName").toString() : null;
+  this.appIdPrefix=((NSArray)dict.objectForKey("ApplicationIdentifierPrefix")).objectAtIndex(0).toString();
+  this.creationDate=((NSDate)dict.objectForKey("CreationDate")).getDate();
+  this.expirationDate=((NSDate)dict.objectForKey("ExpirationDate")).getDate();
+  this.entitlements=(NSDictionary)dict.objectForKey("Entitlements");
+  for (  NSObject o : ((NSArray)dict.objectForKey("DeveloperCertificates")).getArray()) {
+    NSData data=(NSData)o;
+    certFingerprints.add(getCertFingerprint(data.bytes()));
+  }
+}

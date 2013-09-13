@@ -1,15 +1,30 @@
 {
-  File settingsFile=new File(root,"SDKSettings.plist");
-  if (settingsFile.exists()) {
-    NSDictionary settings=(NSDictionary)PropertyListParser.parse(settingsFile);
-    NSObject displayName=settings.objectForKey("DisplayName");
-    NSObject minimalDisplayName=settings.objectForKey("MinimalDisplayName");
-    NSObject canonicalName=settings.objectForKey("CanonicalName");
-    NSObject version=settings.objectForKey("Version");
-    NSDictionary defaultProperties=(NSDictionary)settings.objectForKey("DefaultProperties");
-    if (displayName != null && version != null) {
-      return new SDK(displayName.toString(),minimalDisplayName.toString(),canonicalName.toString(),version.toString(),root,defaultProperties);
-    }
+  File sdkSettingsFile=new File(root,"SDKSettings.plist");
+  File sdkSysVersionFile=new File(root,"System/Library/CoreServices/SystemVersion.plist");
+  File platformVersionFile=new File(root,"../../../version.plist");
+  File platformInfoFile=new File(root,"../../../Info.plist");
+  if (sdkSettingsFile.exists() && platformVersionFile.exists() && platformInfoFile.exists()) {
+    NSDictionary sdkSettingsDict=(NSDictionary)PropertyListParser.parse(sdkSettingsFile);
+    NSDictionary sdkSysVersionDict=(NSDictionary)PropertyListParser.parse(sdkSysVersionFile);
+    NSDictionary platformVersionDict=(NSDictionary)PropertyListParser.parse(platformVersionFile);
+    NSDictionary platformInfoDict=(NSDictionary)PropertyListParser.parse(platformInfoFile);
+    SDK sdk=new SDK();
+    sdk.root=root;
+    sdk.displayName=toString(sdkSettingsDict.objectForKey("DisplayName"));
+    sdk.minimalDisplayName=toString(sdkSettingsDict.objectForKey("MinimalDisplayName"));
+    sdk.canonicalName=toString(sdkSettingsDict.objectForKey("CanonicalName"));
+    sdk.version=toString(sdkSettingsDict.objectForKey("Version"));
+    sdk.defaultProperties=(NSDictionary)sdkSettingsDict.objectForKey("DefaultProperties");
+    sdk.build=toString(sdkSysVersionDict.objectForKey("ProductBuildVersion"));
+    sdk.platformBuild=toString(platformVersionDict.objectForKey("ProductBuildVersion"));
+    NSDictionary additionalInfo=(NSDictionary)platformInfoDict.objectForKey("AdditionalInfo");
+    sdk.platformVersion=toString(additionalInfo.objectForKey("DTPlatformVersion"));
+    sdk.platformName=toString(additionalInfo.objectForKey("DTPlatformName"));
+    String[] parts=StringUtils.split(sdk.version,".");
+    sdk.major=Integer.parseInt(parts[0]);
+    sdk.minor=parts.length >= 2 ? Integer.parseInt(parts[1]) : 0;
+    sdk.revision=parts.length >= 3 ? Integer.parseInt(parts[2]) : 0;
+    return sdk;
   }
   throw new IllegalArgumentException(root.getAbsolutePath() + " is not an SDK root path");
 }

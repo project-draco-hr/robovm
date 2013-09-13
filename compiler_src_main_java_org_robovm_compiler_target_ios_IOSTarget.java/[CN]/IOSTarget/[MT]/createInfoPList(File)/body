@@ -8,8 +8,7 @@
  else {
     dict.put("CFBundleExecutable",config.getExecutableName());
     dict.put("CFBundleName",config.getExecutableName());
-    String identifier=config.getMainClass() != null ? config.getMainClass() : config.getExecutableName();
-    dict.put("CFBundleIdentifier",identifier);
+    dict.put("CFBundleIdentifier",getBundleId());
     dict.put("CFBundlePackageType","APPL");
     dict.put("LSRequiresIPhoneOS",true);
     if (sdk.getDefaultProperty("SUPPORTED_DEVICE_FAMILIES") != null) {
@@ -24,9 +23,11 @@
     dict.put("UISupportedInterfaceOrientations~ipad",new NSArray(new NSString("UIInterfaceOrientationPortrait"),new NSString("UIInterfaceOrientationLandscapeLeft"),new NSString("UIInterfaceOrientationLandscapeRight"),new NSString("UIInterfaceOrientationPortraitUpsideDown")));
     dict.put("UIRequiredDeviceCapabilities",new NSArray(new NSString("armv7")));
   }
-  dict.put("DTPlatformName",sdk.getDefaultProperty("PLATFORM_NAME"));
-  dict.put("DTPlatformVersion",sdk.getVersion());
+  dict.put("DTPlatformName",sdk.getPlatformName());
   dict.put("DTSDKName",sdk.getCanonicalName());
+  if (dict.objectForKey("MinimumOSVersion") == null) {
+    dict.put("MinimumOSVersion","5.0");
+  }
   customizeInfoPList(dict);
   File tmpInfoPlist=new File(config.getTmpDir(),"Info.plist");
   PropertyListParser.saveAsBinary(dict,tmpInfoPlist);
