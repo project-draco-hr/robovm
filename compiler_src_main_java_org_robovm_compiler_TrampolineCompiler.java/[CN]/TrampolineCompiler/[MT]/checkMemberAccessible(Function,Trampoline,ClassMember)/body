@@ -7,7 +7,11 @@
   runtimeClassName=t instanceof PutField ? ((PutField)t).getRuntimeClass() : runtimeClassName;
   SootClass runtimeClass=null;
   if (runtimeClassName != null && !isArray(runtimeClassName)) {
-    runtimeClass=config.getClazzes().load(runtimeClassName).getSootClass();
+    Clazz c=config.getClazzes().load(runtimeClassName);
+    if (c == null) {
+      return true;
+    }
+    runtimeClass=c.getSootClass();
   }
   if (Access.checkMemberAccessible(member,caller,runtimeClass)) {
     return true;
