@@ -1,17 +1,22 @@
 {
   File objectsFile=new File(config.getTmpDir(),"objects");
-  BufferedOutputStream objectsOut=null;
-  try {
-    objectsOut=new BufferedOutputStream(new FileOutputStream(objectsFile));
-    for (    File f : objectFiles) {
-      objectsOut.write('"');
-      objectsOut.write(f.getAbsolutePath().getBytes());
-      objectsOut.write('"');
-      objectsOut.write('\n');
-    }
+  if (config.getOs().getFamily() == OS.Family.darwin) {
+    FileUtils.writeLines(objectsFile,objectFiles,"\n");
   }
+ else {
+    BufferedOutputStream objectsOut=null;
+    try {
+      objectsOut=new BufferedOutputStream(new FileOutputStream(objectsFile));
+      for (      File f : objectFiles) {
+        objectsOut.write('"');
+        objectsOut.write(f.getAbsolutePath().getBytes());
+        objectsOut.write('"');
+        objectsOut.write('\n');
+      }
+    }
   finally {
-    IOUtils.closeQuietly(objectsOut);
+      IOUtils.closeQuietly(objectsOut);
+    }
   }
   List<String> opts=new ArrayList<String>();
   if (config.isDebug()) {
