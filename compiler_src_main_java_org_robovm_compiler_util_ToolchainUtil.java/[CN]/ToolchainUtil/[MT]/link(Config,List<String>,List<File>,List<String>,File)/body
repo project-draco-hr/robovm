@@ -1,6 +1,18 @@
 {
   File objectsFile=new File(config.getTmpDir(),"objects");
-  FileUtils.writeLines(objectsFile,"UTF-8",objectFiles,"\n");
+  BufferedOutputStream objectsOut=null;
+  try {
+    objectsOut=new BufferedOutputStream(new FileOutputStream(objectsFile));
+    for (    File f : objectFiles) {
+      objectsOut.write('"');
+      objectsOut.write(f.getAbsolutePath().getBytes());
+      objectsOut.write('"');
+      objectsOut.write('\n');
+    }
+  }
+  finally {
+    IOUtils.closeQuietly(objectsOut);
+  }
   List<String> opts=new ArrayList<String>();
   if (config.isDebug()) {
     opts.add("-g");
