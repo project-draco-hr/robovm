@@ -1,0 +1,75 @@
+{
+  makeDirectory(targetPath);
+  final Path root=localFile.toPath().getParent();
+class FileCounterVisitor extends SimpleFileVisitor<Path> {
+    int count;
+    @Override public FileVisitResult preVisitDirectory(    Path dir,    BasicFileAttributes attrs) throws IOException {
+      count++;
+      return FileVisitResult.CONTINUE;
+    }
+    @Override public FileVisitResult visitFile(    Path file,    BasicFileAttributes attrs) throws IOException {
+      count++;
+      return FileVisitResult.CONTINUE;
+    }
+  }
+  FileCounterVisitor visitor=new FileCounterVisitor();
+  if (callback != null) {
+    Files.walkFileTree(localFile.toPath(),visitor);
+  }
+  try {
+    final int fileCount=visitor.count;
+    Files.walkFileTree(localFile.toPath(),new SimpleFileVisitor<Path>(){
+      int filesUploaded=0;
+      private void reportProgress(      Path path){
+        if (callback != null) {
+          callback.progress(path.toFile(),100 * filesUploaded / fileCount);
+        }
+        filesUploaded++;
+      }
+      @Override public FileVisitResult preVisitDirectory(      Path dir,      BasicFileAttributes attrs) throws IOException {
+        reportProgress(dir);
+        String deviceDir=toAbsoluteDevicePath(targetPath,root.relativize(dir));
+        makeDirectory(deviceDir);
+        return FileVisitResult.CONTINUE;
+      }
+      @Override public FileVisitResult visitFile(      Path file,      BasicFileAttributes attrs) throws IOException {
+        reportProgress(file);
+        String deviceFile=toAbsoluteDevicePath(targetPath,root.relativize(file));
+        if (Files.isSymbolicLink(file)) {
+          Path linkTargetPath=Files.readSymbolicLink(file);
+          makeLink(AfcLinkType.AFC_SYMLINK,toRelativeDevicePath(linkTargetPath),deviceFile);
+        }
+ else         if (Files.isRegularFile(file,LinkOption.NOFOLLOW_LINKS)) {
+          long fd=fileOpen(deviceFile,AfcFileMode.AFC_FOPEN_WRONLY);
+          try (InputStream is=Files.newInputStream(file)){
+            byte[] buffer=new byte[4096];
+            int n=0;
+            while ((n=is.read(buffer)) != -1) {
+              fileWrite(fd,buffer,0,n);
+            }
+          }
+  finally {
+            fileClose(fd);
+          }
+        }
+        return FileVisitResult.CONTINUE;
+      }
+    }
+);
+    if (callback != null) {
+      callback.success();
+    }
+  }
+ catch (  IOException e) {
+    if (callback != null) {
+      callback.error(e.getMessage());
+    }
+    throw e;
+  }
+catch (  LibIMobileDeviceException e) {
+    if (callback != null) {
+      callback.error(e.getMessage());
+    }
+    throw e;
+  }
+}

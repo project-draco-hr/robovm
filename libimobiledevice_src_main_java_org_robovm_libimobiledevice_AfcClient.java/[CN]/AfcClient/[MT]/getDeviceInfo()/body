@@ -1,0 +1,27 @@
+{
+  StringArrayOut infosOut=new StringArrayOut();
+  try {
+    checkResult(LibIMobileDevice.afc_get_device_info(getRef(),infosOut));
+    StringArray list=infosOut.getValue();
+    Map<String,String> result=new TreeMap<String,String>();
+    if (list != null) {
+      int i=0;
+      while (true) {
+        String key=list.get(i++);
+        if (key == null) {
+          break;
+        }
+        String value=list.get(i++);
+        if (value == null) {
+          break;
+        }
+        result.put(key,value);
+      }
+    }
+    return result;
+  }
+  finally {
+    LibIMobileDevice.delete_StringArray_values_z(infosOut.getValue());
+    infosOut.delete();
+  }
+}

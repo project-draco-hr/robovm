@@ -1,0 +1,18 @@
+{
+  if (!recurse) {
+    checkResult(LibIMobileDevice.afc_remove_path(getRef(),path));
+  }
+ else {
+    int rc=LibIMobileDevice.afc_remove_path(getRef(),path);
+    if (rc == LibIMobileDeviceConstants.AFC_E_DIR_NOT_EMPTY) {
+      for (      String child : readDirectory(path)) {
+        if (".".equals(child) || "..".equals(child)) {
+          continue;
+        }
+        removePath(stripDirSep(path) + "/" + child,true);
+      }
+      rc=LibIMobileDevice.afc_remove_path(getRef(),path);
+    }
+    checkResult(rc);
+  }
+}

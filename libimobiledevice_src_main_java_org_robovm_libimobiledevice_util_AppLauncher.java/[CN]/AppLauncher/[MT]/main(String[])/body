@@ -1,0 +1,59 @@
+{
+  String appId=null;
+  File localAppPath=null;
+  String[] arguments=new String[0];
+  Map<String,String> env=new HashMap<>();
+  boolean debug=false;
+  String deviceId=null;
+  int i=0;
+  loop:   while (i < args.length) {
+switch (args[i++]) {
+case "-h":
+case "-help":
+      printUsageAndExit();
+    break;
+case "-appid":
+  appId=args[i++];
+break;
+case "-b":
+localAppPath=new File(args[i++]);
+break;
+case "-udid":
+deviceId=args[i++];
+break;
+case "-env":
+String[] parts=args[i++].split("=",2);
+env.put(parts[0],parts[1]);
+break;
+case "-debug":
+debug=true;
+break;
+case "-args":
+arguments=Arrays.copyOfRange(args,i,args.length);
+break loop;
+}
+}
+if (appId == null && localAppPath == null) {
+printUsageAndExit();
+}
+if (deviceId == null) {
+String[] udids=IDevice.listUdids();
+if (udids.length == 0) {
+System.err.println("No device connected");
+return;
+}
+if (udids.length > 1) {
+System.err.println("More than 1 device connected (" + Arrays.asList(udids) + "). Using "+ udids[0]);
+}
+deviceId=udids[0];
+}
+IDevice device=new IDevice(deviceId);
+AppLauncher launcher=null;
+if (localAppPath != null) {
+launcher=new AppLauncher(device,localAppPath);
+}
+ else {
+launcher=new AppLauncher(device,appId);
+}
+System.exit(launcher.args(arguments).env(env).debug(debug).launch());
+}

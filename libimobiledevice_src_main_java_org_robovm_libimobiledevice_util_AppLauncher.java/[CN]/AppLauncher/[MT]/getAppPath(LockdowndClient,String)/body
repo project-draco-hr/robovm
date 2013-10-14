@@ -1,0 +1,26 @@
+{
+  LockdowndServiceDescriptor instService=lockdowndClient.startService(InstallationProxyClient.SERVICE_NAME);
+  InstallationProxyClient instClient=new InstallationProxyClient(device,instService);
+  try {
+    NSArray apps=instClient.browse();
+    for (int i=0; i < apps.count(); i++) {
+      NSDictionary appInfo=(NSDictionary)apps.objectAtIndex(i);
+      NSString bundleId=(NSString)appInfo.objectForKey("CFBundleIdentifier");
+      if (bundleId != null && appId.equals(bundleId.toString())) {
+        NSString path=(NSString)appInfo.objectForKey("Path");
+        NSDictionary entitlements=(NSDictionary)appInfo.objectForKey("Entitlements");
+        if (entitlements == null || entitlements.objectForKey("get-task-allow") == null || !entitlements.objectForKey("get-task-allow").equals(new NSNumber(true))) {
+          throw new RuntimeException("App with id '" + appId + "' does not "+ "have the 'get-task-allow' entitlement and cannot be debugged");
+        }
+        if (path == null) {
+          throw new RuntimeException("Path for app with id '" + appId + "' not found");
+        }
+        return path.toString();
+      }
+    }
+    throw new RuntimeException("No app with id '" + appId + "' found on device");
+  }
+  finally {
+    instClient.dispose();
+  }
+}

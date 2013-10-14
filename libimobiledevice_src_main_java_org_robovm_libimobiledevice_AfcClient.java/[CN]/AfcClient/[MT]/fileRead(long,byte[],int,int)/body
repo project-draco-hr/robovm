@@ -1,0 +1,27 @@
+{
+  if ((offset | count) < 0 || offset > buffer.length || buffer.length - offset < count) {
+    throw new ArrayIndexOutOfBoundsException("length=" + buffer.length + "; regionStart="+ offset+ "; regionLength="+ count);
+  }
+  if (count == 0) {
+    return 0;
+  }
+  byte[] data=buffer;
+  if (offset > 0) {
+    data=new byte[count];
+  }
+  IntOut bytesReadOut=new IntOut();
+  try {
+    checkResult(LibIMobileDevice.afc_file_read(getRef(),handle,data,count,bytesReadOut));
+    int bytesRead=bytesReadOut.getValue();
+    if (bytesRead == 0) {
+      return -1;
+    }
+    if (data != buffer) {
+      System.arraycopy(data,0,buffer,offset,bytesRead);
+    }
+    return bytesRead;
+  }
+  finally {
+    bytesReadOut.delete();
+  }
+}

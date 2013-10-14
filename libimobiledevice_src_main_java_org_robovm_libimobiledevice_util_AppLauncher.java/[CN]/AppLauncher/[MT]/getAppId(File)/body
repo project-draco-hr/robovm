@@ -1,0 +1,51 @@
+{
+  if (f == null) {
+    throw new NullPointerException("localAppPath");
+  }
+  if (!f.exists()) {
+    throw new FileNotFoundException(f.getAbsolutePath());
+  }
+  NSDictionary infoPlistDict=null;
+  if (f.getName().toLowerCase().endsWith(".ipa")) {
+    try (ZipFile zipFile=new ZipFile(f)){
+      for (      ZipEntry entry : Collections.list(zipFile.entries())) {
+        if (entry.getName().matches("Payload/[^/]+\\.app/Info\\.plist")) {
+          try (InputStream is=zipFile.getInputStream(entry)){
+            try {
+              infoPlistDict=(NSDictionary)PropertyListParser.parse(is);
+            }
+ catch (            IOException e) {
+              throw e;
+            }
+catch (            Exception e) {
+              throw new IOException(e);
+            }
+            break;
+          }
+         }
+      }
+    }
+   }
+ else   if (f.isDirectory()) {
+    File infoPlistFile=new File(f,"Info.plist");
+    if (infoPlistFile.exists()) {
+      try {
+        infoPlistDict=(NSDictionary)PropertyListParser.parse(infoPlistFile);
+      }
+ catch (      IOException e) {
+        throw e;
+      }
+catch (      Exception e) {
+        throw new IOException(e);
+      }
+    }
+  }
+  if (infoPlistDict == null) {
+    throw new IllegalArgumentException("Path " + f + " is neither a "+ ".ipa file nor an iOS app bundle directory.");
+  }
+  NSString appId=(NSString)infoPlistDict.objectForKey("CFBundleIdentifier");
+  if (appId == null) {
+    throw new IllegalArgumentException("No CFBundleIdentifier found in " + "the Info.plist file in " + f);
+  }
+  return appId.toString();
+}

@@ -1,0 +1,13 @@
+{
+  PlistRefOut plistOut=new PlistRefOut();
+  PlistRef clientOpts=new Options().applicationType(type).toPlistRef();
+  try {
+    checkResult(LibIMobileDevice.instproxy_browse(getRef(),clientOpts,plistOut));
+    PlistRef plist=plistOut.getValue();
+    return (NSArray)PlistUtil.toJavaPlist(plist);
+  }
+  finally {
+    plistOut.delete();
+    LibIMobileDevice.plist_free(clientOpts);
+  }
+}

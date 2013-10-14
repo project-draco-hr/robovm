@@ -1,0 +1,30 @@
+{
+  int packetEnd=bufferedResponses.indexOf("#");
+  if (packetEnd != -1 && bufferedResponses.length() - packetEnd > 2) {
+    String packet=bufferedResponses.substring(0,packetEnd + 3);
+    bufferedResponses.delete(0,packetEnd + 3);
+    debug("Received packet: " + packet);
+    return packet;
+  }
+  long deadline=System.currentTimeMillis() + timeout;
+  while (true) {
+    if (killed || Thread.currentThread().isInterrupted()) {
+      killed=true;
+      throw new InterruptedIOException();
+    }
+    int receivedBytes=conn.receive(buffer,0,buffer.length,500);
+    if (receivedBytes > 0) {
+      bufferedResponses.append(new String(buffer,0,receivedBytes,"ASCII"));
+      packetEnd=bufferedResponses.indexOf("#");
+      if (packetEnd != -1 && bufferedResponses.length() - packetEnd > 2) {
+        String packet=bufferedResponses.substring(0,packetEnd + 3);
+        bufferedResponses.delete(0,packetEnd + 3);
+        debug("Received packet: " + packet);
+        return packet;
+      }
+    }
+    if (System.currentTimeMillis() > deadline) {
+      throw new TimeoutException();
+    }
+  }
+}

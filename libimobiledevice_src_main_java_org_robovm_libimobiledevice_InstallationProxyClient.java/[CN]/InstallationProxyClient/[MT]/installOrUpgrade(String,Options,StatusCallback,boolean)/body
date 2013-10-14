@@ -1,0 +1,20 @@
+{
+  PlistRef clientOpts=options.toPlistRef();
+  try {
+    long cb=0L;
+    int cbId=0;
+    if (callback != null) {
+      cb=LibIMobileDevice.get_global_instproxy_status_cb();
+      cbId=Callbacks.registerInstproxyCallback(callback);
+    }
+    if (upgrade) {
+      checkResult(LibIMobileDevice.instproxy_upgrade(getRef(),pkgPath,clientOpts,cb,cbId));
+    }
+ else {
+      checkResult(LibIMobileDevice.instproxy_install(getRef(),pkgPath,clientOpts,cb,cbId));
+    }
+  }
+  finally {
+    LibIMobileDevice.plist_free(clientOpts);
+  }
+}

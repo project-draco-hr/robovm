@@ -1,0 +1,25 @@
+{
+  PlistRefOut plistOut=new PlistRefOut();
+  ByteArrayOut plistBinOut=new ByteArrayOut();
+  IntOut lengthOut=new IntOut();
+  try {
+    LibIMobileDevice.plist_to_bin(plist,plistBinOut,lengthOut);
+    LibIMobileDevice.plist_free(plist);
+    int length=lengthOut.getValue();
+    ByteArray plistBin=plistBinOut.getValue();
+    if (length == 0 || plistBin == null) {
+      return null;
+    }
+    byte[] data=new byte[length];
+    for (int i=0; i < length; i++) {
+      data[i]=plistBin.get(i);
+    }
+    return PropertyListParser.parse(data);
+  }
+  finally {
+    plistOut.delete();
+    LibIMobileDevice.delete_ByteArrayOut_value(plistBinOut);
+    plistBinOut.delete();
+    lengthOut.delete();
+  }
+}

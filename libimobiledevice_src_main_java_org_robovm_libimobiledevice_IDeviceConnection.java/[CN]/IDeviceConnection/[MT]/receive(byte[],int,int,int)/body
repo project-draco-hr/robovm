@@ -1,0 +1,24 @@
+{
+  if ((offset | count) < 0 || offset > buffer.length || buffer.length - offset < count) {
+    throw new ArrayIndexOutOfBoundsException("length=" + buffer.length + "; regionStart="+ offset+ "; regionLength="+ count);
+  }
+  if (count == 0) {
+    return 0;
+  }
+  byte[] data=buffer;
+  if (offset > 0) {
+    data=new byte[count];
+  }
+  IntOut bytesReceivedOut=new IntOut();
+  try {
+    IDevice.checkResult(LibIMobileDevice.idevice_connection_receive_timeout(getRef(),data,count,bytesReceivedOut,timeout));
+    int bytesRead=bytesReceivedOut.getValue();
+    if (bytesRead > 0 && data != buffer) {
+      System.arraycopy(data,0,buffer,offset,bytesRead);
+    }
+    return bytesRead;
+  }
+  finally {
+    bytesReceivedOut.delete();
+  }
+}

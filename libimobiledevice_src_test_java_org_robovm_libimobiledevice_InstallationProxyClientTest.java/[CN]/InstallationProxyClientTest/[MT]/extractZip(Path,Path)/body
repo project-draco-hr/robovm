@@ -1,0 +1,20 @@
+{
+  try (ZipFile archive=new ZipFile(zipFile.toFile())){
+    Enumeration<? extends ZipEntry> entries=archive.entries();
+    while (entries.hasMoreElements()) {
+      ZipEntry entry=entries.nextElement();
+      Path outFile=outDir.resolve(entry.getName());
+      if (entry.isDirectory()) {
+        Files.createDirectories(outFile);
+      }
+ else {
+        if (!Files.exists(outFile.getParent())) {
+          Files.createDirectories(outFile.getParent());
+        }
+        try (InputStream in=archive.getInputStream(entry)){
+          Files.copy(in,outFile);
+        }
+       }
+    }
+  }
+ }

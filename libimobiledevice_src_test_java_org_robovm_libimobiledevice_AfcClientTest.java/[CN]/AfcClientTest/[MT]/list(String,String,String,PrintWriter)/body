@@ -1,0 +1,22 @@
+{
+  Map<String,String> info=client.getFileInfo(path);
+  if ("S_IFDIR".equals(info.get(AfcClient.FILE_INFO_KEY_ST_IFMT))) {
+    out.println(indent + filename + "/");
+    out.flush();
+    for (    String f : client.readDirectory(path)) {
+      if (f.equals("..") || f.equals(".")) {
+        continue;
+      }
+      String childPath=path + "/" + f;
+      list(childPath,f,indent + "  ",out);
+    }
+  }
+ else   if ("S_IFLNK".equals(info.get(AfcClient.FILE_INFO_KEY_ST_IFMT))) {
+    out.println(indent + filename + " -> "+ info.get(AfcClient.FILE_INFO_KEY_LINK_TARGET));
+    out.flush();
+  }
+ else {
+    out.println(indent + filename + " "+ info.get(AfcClient.FILE_INFO_KEY_ST_SIZE)+ " ("+ info.get(AfcClient.FILE_INFO_KEY_ST_IFMT)+ ")");
+    out.flush();
+  }
+}

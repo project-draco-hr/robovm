@@ -1,0 +1,21 @@
+{
+  Path dir=Files.createTempDirectory(AfcClientTest.class.getSimpleName());
+  try {
+    Path foo=Files.createDirectory(dir.resolve("foo"));
+    Path bar=Files.createDirectory(foo.resolve("bar"));
+    Path wooz=Files.createFile(bar.resolve("wooz"));
+    Files.createSymbolicLink(foo.resolve("rooz"),foo.relativize(wooz));
+    try {
+      client.upload(foo.toFile(),"/baz");
+      StringWriter sw=new StringWriter();
+      list("/baz","baz","",new PrintWriter(sw));
+      assertEquals("baz/\n" + "  foo/\n" + "    bar/\n"+ "      wooz 0 (S_IFREG)\n"+ "    rooz -> bar/wooz\n",sw.toString());
+    }
+  finally {
+      client.removePath("/baz",true);
+    }
+  }
+  finally {
+    FileUtils.deleteDirectory(dir.toFile());
+  }
+}

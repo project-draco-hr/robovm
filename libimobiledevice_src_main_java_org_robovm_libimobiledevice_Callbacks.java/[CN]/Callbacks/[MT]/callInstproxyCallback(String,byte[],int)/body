@@ -1,0 +1,38 @@
+{
+  StatusCallback callback=null;
+synchronized (Callbacks.class) {
+    callback=instProxyStatusCallbacks.get(id);
+  }
+  if (callback != null) {
+    boolean done=false;
+    try {
+      NSDictionary dict=(NSDictionary)PropertyListParser.parse(statusPlistBin);
+      NSObject status=dict.objectForKey("Status");
+      NSObject percentComplete=dict.objectForKey("PercentComplete");
+      NSObject error=dict.objectForKey("Error");
+      if (error != null) {
+        done=true;
+        callback.error(error.toString());
+      }
+ else {
+        if ("Complete".equals(status.toString())) {
+          done=true;
+          callback.success();
+        }
+ else {
+          callback.progress(status.toString(),((NSNumber)percentComplete).intValue());
+        }
+      }
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+ finally {
+      if (done) {
+synchronized (Callbacks.class) {
+          instProxyStatusCallbacks.remove(id);
+        }
+      }
+    }
+  }
+}

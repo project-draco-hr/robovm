@@ -1,0 +1,21 @@
+{
+  client.makeDirectory("/FOO");
+  client.makeDirectory("/FOO/BAR");
+  client.makeDirectory("/FOO/BAR/WOOZ/BAZ");
+  assertEquals("S_IFDIR",client.getFileInfo("/FOO/BAR/WOOZ/BAZ").get(AfcClient.FILE_INFO_KEY_ST_IFMT));
+  try {
+    client.removePath("/FOO");
+    fail("LibIMobileDeviceException expected");
+  }
+ catch (  LibIMobileDeviceException e) {
+    assertEquals(LibIMobileDeviceConstants.AFC_E_DIR_NOT_EMPTY,e.getErrorCode());
+  }
+  client.removePath("/FOO",true);
+  try {
+    client.getFileInfo("/FOO");
+    fail("LibIMobileDeviceException expected");
+  }
+ catch (  LibIMobileDeviceException e) {
+    assertEquals(LibIMobileDeviceConstants.AFC_E_OBJECT_NOT_FOUND,e.getErrorCode());
+  }
+}

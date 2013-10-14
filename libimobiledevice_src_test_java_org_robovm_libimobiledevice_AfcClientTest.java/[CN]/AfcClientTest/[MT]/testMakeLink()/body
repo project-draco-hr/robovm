@@ -1,0 +1,15 @@
+{
+  try {
+    client.makeDirectory("/FOOBAR");
+    client.makeLink(AfcLinkType.AFC_SYMLINK,"../Safari","/FOOBAR/KAZ");
+    assertEquals("S_IFLNK",client.getFileInfo("/FOOBAR/KAZ").get(AfcClient.FILE_INFO_KEY_ST_IFMT));
+    assertEquals("../Safari",client.getFileInfo("/FOOBAR/KAZ").get(AfcClient.FILE_INFO_KEY_LINK_TARGET));
+  }
+  finally {
+    try {
+      client.removePath("/FOOBAR",true);
+    }
+ catch (    LibIMobileDeviceException e) {
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  byte[] buffer=new byte[4096];
+  int n=0;
+  long seed=System.currentTimeMillis();
+  int size=1 << 20;
+  long fd=0;
+  fd=client.fileOpen("/FOO.TXT",AfcFileMode.AFC_FOPEN_WRONLY);
+  RandomInputStream ris=new RandomInputStream(size,seed);
+  while ((n=ris.read(buffer)) != -1) {
+    client.fileWrite(fd,buffer,0,n);
+  }
+  client.fileClose(fd);
+  Map<String,String> fileInfo=client.getFileInfo("/FOO.TXT");
+  assertEquals("" + size,fileInfo.get(AfcClient.FILE_INFO_KEY_ST_SIZE));
+  Random random=new Random(seed);
+  fd=client.fileOpen("/FOO.TXT",AfcFileMode.AFC_FOPEN_RDONLY);
+  int totalRead=0;
+  while ((n=client.fileRead(fd,buffer,0,buffer.length)) != -1) {
+    for (int i=0; i < n; i++) {
+      assertEquals(nextCharAZ(random),buffer[i] & 0xff);
+    }
+    totalRead+=n;
+  }
+  client.fileClose(fd);
+  assertEquals(size,totalRead);
+  client.removePath("/FOO.TXT");
+  try {
+    client.getFileInfo("/FOO.TXT");
+    fail("LibIMobileDeviceException expected");
+  }
+ catch (  LibIMobileDeviceException e) {
+    assertEquals(LibIMobileDeviceConstants.AFC_E_OBJECT_NOT_FOUND,e.getErrorCode());
+  }
+}

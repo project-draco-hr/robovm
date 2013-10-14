@@ -1,0 +1,17 @@
+{
+  if (identifier == null) {
+    throw new NullPointerException("identifier");
+  }
+  LockdowndServiceDescriptorStructOut serviceOut=new LockdowndServiceDescriptorStructOut();
+  try {
+    checkResult(LibIMobileDevice.lockdownd_start_service(getRef(),identifier,serviceOut));
+    return new LockdowndServiceDescriptor(serviceOut.getValue());
+  }
+  finally {
+    LockdowndServiceDescriptorStruct d=serviceOut.getValue();
+    if (d != null) {
+      LibIMobileDevice.lockdownd_service_descriptor_free(d);
+    }
+    serviceOut.delete();
+  }
+}

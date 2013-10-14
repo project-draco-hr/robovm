@@ -1,0 +1,21 @@
+{
+  Set<String> udids=new TreeSet<>(Arrays.asList(IDevice.listUdids()));
+  final Set<String> eventUdids=new TreeSet<>();
+  final CountDownLatch countDownLatch=new CountDownLatch(udids.size());
+  EventListener listener=new EventListener(){
+    public void deviceRemoved(    String udid){
+      eventUdids.remove(udid);
+    }
+    public void deviceAdded(    String udid){
+      eventUdids.add(udid);
+      countDownLatch.countDown();
+    }
+  }
+;
+  IDevice.addEventListener(listener);
+  assertEquals(1,IDevice.listeners.size());
+  countDownLatch.await(5,TimeUnit.SECONDS);
+  IDevice.removeEventListener(listener);
+  assertEquals(0,IDevice.listeners.size());
+  assertEquals(udids,eventUdids);
+}

@@ -1,0 +1,38 @@
+{
+  Path tmpDir=Files.createTempDirectory(getClass().getSimpleName());
+  Path ipaFile=tmpDir.resolve("demo.ipa");
+  Files.copy(getClass().getResourceAsStream("/demo.ipa"),ipaFile);
+  extractZip(ipaFile,tmpDir);
+  Path appDir=tmpDir.resolve("Payload/demo.app");
+  afcClient.upload(appDir.toFile(),"/TestStaging",new UploadProgressCallback(){
+    public void progress(    File path,    int percentComplete){
+      System.out.format("[%3d%%] Uploading %s\n",percentComplete,path);
+    }
+    public void success(){
+      System.out.format("[100%%] Upload done\n");
+    }
+    public void error(    String message){
+      System.out.format("Error: %s\n",message);
+    }
+  }
+);
+  final boolean[] success=new boolean[]{false};
+  final CountDownLatch countDownLatch=new CountDownLatch(1);
+  client.upgrade("/TestStaging/demo.app",new Options().packageType(PackageType.Developer),new StatusCallback(){
+    @Override public void progress(    String status,    int percentComplete){
+      System.out.format("[%3d%%] %s\n",percentComplete,status);
+    }
+    @Override public void success(){
+      System.out.format("[100%%] Complete\n");
+      success[0]=true;
+      countDownLatch.countDown();
+    }
+    @Override public void error(    String message){
+      System.out.println("Error: " + message);
+      countDownLatch.countDown();
+    }
+  }
+);
+  countDownLatch.await(10,TimeUnit.SECONDS);
+  assertTrue(success[0]);
+}

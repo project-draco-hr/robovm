@@ -1,0 +1,13 @@
+{
+  if (port < 0 || port > 0xffff) {
+    throw new IllegalArgumentException("port out of range");
+  }
+  IDeviceConnectionRefOut connOut=new IDeviceConnectionRefOut();
+  try {
+    checkResult(LibIMobileDevice.idevice_connect(getRef(),(short)port,connOut));
+    return new IDeviceConnection(connOut.getValue());
+  }
+  finally {
+    connOut.delete();
+  }
+}

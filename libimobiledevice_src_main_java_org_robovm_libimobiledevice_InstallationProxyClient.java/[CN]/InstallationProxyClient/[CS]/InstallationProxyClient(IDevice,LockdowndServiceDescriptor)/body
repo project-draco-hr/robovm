@@ -1,0 +1,20 @@
+{
+  if (device == null) {
+    throw new NullPointerException("device");
+  }
+  if (service == null) {
+    throw new NullPointerException("service");
+  }
+  InstproxyClientRefOut refOut=new InstproxyClientRefOut();
+  LockdowndServiceDescriptorStruct serviceStruct=new LockdowndServiceDescriptorStruct();
+  serviceStruct.setPort((short)service.getPort());
+  serviceStruct.setSslEnabled(service.isSslEnabled());
+  try {
+    checkResult(LibIMobileDevice.instproxy_client_new(device.getRef(),serviceStruct,refOut));
+    this.ref=refOut.getValue();
+  }
+  finally {
+    serviceStruct.delete();
+    refOut.delete();
+  }
+}
