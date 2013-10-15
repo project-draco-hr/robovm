@@ -1,0 +1,20 @@
+{
+  Path dir=Files.createTempDirectory(AfcClientTest.class.getSimpleName());
+  try {
+    Path foo=Files.createFile(dir.resolve("foo"));
+    byte[] data=new byte[1 << 24];
+    Files.write(foo,data);
+    long start=System.currentTimeMillis();
+    try {
+      client.upload(foo.toFile(),"/wooz");
+    }
+  finally {
+      long duration=System.currentTimeMillis() - start;
+      System.out.format("%d bytes uploaded in %d ms (%f kB/s)\n",data.length,duration,data.length / 1024.0 / (duration / 1000.0));
+      client.removePath("/wooz",true);
+    }
+  }
+  finally {
+    FileUtils.deleteDirectory(dir.toFile());
+  }
+}
