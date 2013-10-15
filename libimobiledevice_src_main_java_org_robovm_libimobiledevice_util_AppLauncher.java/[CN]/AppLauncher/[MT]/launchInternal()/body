@@ -1,0 +1,53 @@
+{
+  IDeviceConnection conn=null;
+  String appPath=null;
+  try (LockdowndClient lockdowndClient=new LockdowndClient(device,getClass().getSimpleName(),true)){
+    if (localAppPath != null) {
+      uploadAndInstall(lockdowndClient);
+    }
+    appPath=getAppPath(lockdowndClient,appId);
+    LockdowndServiceDescriptor debugService=lockdowndClient.startService(DEBUG_SERVER_SERVICE_NAME);
+    conn=device.connect(debugService.getPort());
+  }
+   try {
+    sendGdbPacket(conn,"+");
+    sendReceivePacket(conn,encode("QStartNoAckMode"),"OK",true);
+    sendGdbPacket(conn,"+");
+    sendReceivePacket(conn,encode("QEnvironment:NSUnbufferedIO=YES"),"OK",false);
+    for (    Entry<String,String> entry : env.entrySet()) {
+      String cmd=String.format("QEnvironment:%s=%s",entry.getKey(),entry.getValue());
+      sendReceivePacket(conn,encode(cmd),"OK",false);
+    }
+    sendReceivePacket(conn,encode("A" + encodeArgs(appPath)),"OK",false);
+    sendReceivePacket(conn,encode("qLaunchSuccess"),"OK",false);
+    sendGdbPacket(conn,encode("c"));
+    boolean wasInterrupted=false;
+    try {
+      while (true) {
+        try {
+          String response=receiveGdbPacket(conn);
+          String payload=decode(response);
+          if (payload.charAt(0) == 'W') {
+            int exitCode=Integer.parseInt(payload.substring(1),16);
+            return exitCode;
+          }
+ else           if (payload.charAt(0) == 'O') {
+            stdout.write(fromHex(payload.substring(1)));
+          }
+        }
+ catch (        InterruptedIOException e) {
+          wasInterrupted=Thread.currentThread().isInterrupted();
+          kill(conn);
+        }
+      }
+    }
+  finally {
+      if (wasInterrupted) {
+        Thread.currentThread().interrupt();
+      }
+    }
+  }
+  finally {
+    conn.dispose();
+  }
+}
