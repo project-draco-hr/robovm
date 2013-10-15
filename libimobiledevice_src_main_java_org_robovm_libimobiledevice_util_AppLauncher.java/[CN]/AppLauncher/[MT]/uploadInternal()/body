@@ -1,0 +1,27 @@
+{
+  try (LockdowndClient lockdowndClient=new LockdowndClient(device,getClass().getSimpleName(),true)){
+    LockdowndServiceDescriptor afcService=lockdowndClient.startService(AfcClient.SERVICE_NAME);
+    try (AfcClient afcClient=new AfcClient(device,afcService)){
+      afcClient.upload(localAppPath,"/PublicStaging",new UploadProgressCallback(){
+        public void progress(        File path,        int percentComplete){
+          debug("[%3d%%] Uploading %s",percentComplete / 2,path);
+          if (uploadProgressCallback != null) {
+            uploadProgressCallback.progress(path,percentComplete);
+          }
+        }
+        public void success(){
+          if (uploadProgressCallback != null) {
+            uploadProgressCallback.success();
+          }
+        }
+        public void error(        String message){
+          debug("Error: %s",message);
+          if (uploadProgressCallback != null) {
+            uploadProgressCallback.error(message);
+          }
+        }
+      }
+);
+    }
+   }
+ }

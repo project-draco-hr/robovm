@@ -5,6 +5,9 @@
   }
   String response=decode(receiveGdbPacket(conn,RECEIVE_TIMEOUT));
   if (!expectedResponse.equals(response)) {
-    throw new RuntimeException("Unexpected response '" + response + "' to command '"+ packet+ "'");
+    if (response.startsWith("E")) {
+      throw new RuntimeException("Launch failed: " + response.substring(1));
+    }
+    throw new RuntimeException("Launch failed: Unexpected response '" + response + "' to command '"+ decode(packet)+ "'");
   }
 }
