@@ -1,0 +1,57 @@
+{
+  String deviceId=((IOSDeviceLaunchParameters)launchParameters).getDeviceId();
+  if (deviceId == null) {
+    String[] udids=IDevice.listUdids();
+    if (udids.length == 0) {
+      throw new RuntimeException("No devices connected");
+    }
+    if (udids.length > 1) {
+      config.getLogger().warn("More than 1 device connected (%s). " + "Using %s.",Arrays.asList(udids),udids[0]);
+    }
+    deviceId=udids[0];
+  }
+  IDevice device=new IDevice(deviceId);
+  OutputStream out=null;
+  if (launchParameters.getStdoutFifo() != null) {
+    out=new OpenOnWriteFileOutputStream(launchParameters.getStdoutFifo());
+  }
+ else {
+    out=System.out;
+  }
+  Map<String,String> env=launchParameters.getEnvironment();
+  if (env == null) {
+    env=Collections.emptyMap();
+  }
+  AppLauncher launcher=new AppLauncher(device,getAppDir()).stdout(out).closeOutOnExit(true).args(launchParameters.getArguments().toArray(new String[0])).env(env).uploadProgressCallback(new UploadProgressCallback(){
+    boolean first=true;
+    public void success(){
+      config.getLogger().debug("[100%%] Upload complete");
+    }
+    public void progress(    File path,    int percentComplete){
+      if (first) {
+        config.getLogger().debug("[  0%%] Beginning upload...");
+      }
+      first=false;
+      config.getLogger().debug("[%3d%%] Uploading %s...",percentComplete,path);
+    }
+    public void error(    String message){
+    }
+  }
+).installStatusCallback(new StatusCallback(){
+    boolean first=true;
+    public void success(){
+      config.getLogger().debug("[100%%] Install complete");
+    }
+    public void progress(    String status,    int percentComplete){
+      if (first) {
+        config.getLogger().debug("[  0%%] Beginning installation...");
+      }
+      first=false;
+      config.getLogger().debug("[%3d%%] %s",percentComplete,status);
+    }
+    public void error(    String message){
+    }
+  }
+);
+  return new AppLauncherProcess(config.getLogger(),launcher,launchParameters);
+}

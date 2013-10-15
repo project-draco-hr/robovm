@@ -1,0 +1,12 @@
+{
+  File dir=config.isSkipInstall() ? config.getTmpDir() : config.getInstallDir();
+  OutputStream out=System.out;
+  OutputStream err=System.err;
+  if (launchParameters.getStdoutFifo() != null) {
+    out=new OpenOnWriteFileOutputStream(launchParameters.getStdoutFifo());
+  }
+  if (launchParameters.getStderrFifo() != null) {
+    err=new OpenOnWriteFileOutputStream(launchParameters.getStderrFifo());
+  }
+  return createExecutor(launchParameters,new File(dir,config.getExecutableName()).getAbsolutePath(),launchParameters.getArguments()).out(out).err(err).closeOutputStreams(true);
+}
