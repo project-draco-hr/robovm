@@ -1,0 +1,23 @@
+{
+  Context context=null;
+  Module module=null;
+  TargetMachine targetMachine=null;
+  try {
+    context=new Context();
+    module=Module.parseIR(context,"%Object = type {i8*, i8*}\n%DataObject = type {%Object}\n%t = type " + type,null);
+    Target target=Target.lookupTarget(triple);
+    targetMachine=target.createTargetMachine(triple);
+    return (int)targetMachine.getDataLayout().getTypeAllocSize(module.getTypeByName("t"));
+  }
+  finally {
+    if (module != null) {
+      module.dispose();
+    }
+    if (context != null) {
+      context.dispose();
+    }
+    if (targetMachine != null) {
+      targetMachine.dispose();
+    }
+  }
+}

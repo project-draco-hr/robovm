@@ -1,0 +1,26 @@
+{
+  List<Type> types=new ArrayList<Type>();
+  List<SootField> fields=getInstanceFields(os,arch,clazz);
+  int superAlignment=1;
+  if (!fields.isEmpty()) {
+    SootField field=fields.get(0);
+    superAlignment=getFieldAlignment(os,arch,field);
+  }
+  if (clazz.hasSuperclass()) {
+    types.add(getInstanceType0(os,arch,clazz.getSuperclass(),superAlignment,superSize));
+  }
+  int offset=superSize[0];
+  for (  SootField field : fields) {
+    int falign=getFieldAlignment(os,arch,field);
+    int padding=(offset & (falign - 1)) != 0 ? (falign - (offset & (falign - 1))) : 0;
+    types.add(padType(getType(field.getType()),padding));
+    offset+=padding + getFieldSize(field);
+  }
+  int padding=(offset & (subClassAlignment - 1)) != 0 ? (subClassAlignment - (offset & (subClassAlignment - 1))) : 0;
+  for (int i=0; i < padding; i++) {
+    types.add(I8);
+    offset++;
+  }
+  superSize[0]=offset;
+  return new PackedStructureType(types.toArray(new Type[types.size()]));
+}
