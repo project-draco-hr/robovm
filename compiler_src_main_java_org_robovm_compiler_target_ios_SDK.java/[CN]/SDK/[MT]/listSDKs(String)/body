@@ -1,24 +1,22 @@
 {
   try {
     List<SDK> sdks=new ArrayList<SDK>();
-    List<File> sdksDirs=Arrays.asList(new File(new Executor(Logger.NULL_LOGGER,"xcode-select").args("--print-path").execCapture() + "/Platforms/" + platform+ ".platform/Developer/SDKs"),new File("/Applications/Xcode.app/Contents/Developer/Platforms/" + platform + ".platform/Developer/SDKs"),new File("/Developer/Platforms/" + platform + ".platform/Developer/SDKs"));
-    for (    File sdksDir : sdksDirs) {
-      if (sdksDir.exists() && sdksDir.isDirectory()) {
-        for (        File root : sdksDir.listFiles()) {
-          try {
-            sdks.add(SDK.create(root));
-          }
- catch (          Exception e) {
-          }
+    File sdksDir=new File(ToolchainUtil.findXcodePath() + "/Platforms/" + platform+ ".platform/Developer/SDKs");
+    if (sdksDir.exists() && sdksDir.isDirectory()) {
+      for (      File root : sdksDir.listFiles()) {
+        try {
+          sdks.add(SDK.create(root));
         }
-        if (!sdks.isEmpty()) {
-          return sdks;
+ catch (        Exception e) {
         }
       }
     }
     return sdks;
   }
- catch (  Throwable t) {
+ catch (  RuntimeException e) {
+    throw e;
+  }
+catch (  Throwable t) {
     throw new RuntimeException(t);
   }
 }

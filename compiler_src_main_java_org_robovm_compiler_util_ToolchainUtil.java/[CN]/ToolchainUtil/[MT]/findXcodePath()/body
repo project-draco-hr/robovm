@@ -1,0 +1,16 @@
+{
+  try {
+    String path=new Executor(Logger.NULL_LOGGER,"xcode-select").args("--print-path").execCapture();
+    File f=new File(path);
+    if (f.exists() && f.isDirectory()) {
+      if (new File(f,"Platforms").exists() && new File(f,"Toolchains").exists()) {
+        return path;
+      }
+    }
+    throw new IllegalArgumentException(String.format("The path '%s' does not appear to be a valid Xcode path. Use " + "'sudo xcode-select -switch <path-to-xcode>' from a Terminal " + "to switch to the correct Xcode path.",path));
+  }
+ catch (  ExecuteException e) {
+    handleExecuteException(e);
+    return null;
+  }
+}
