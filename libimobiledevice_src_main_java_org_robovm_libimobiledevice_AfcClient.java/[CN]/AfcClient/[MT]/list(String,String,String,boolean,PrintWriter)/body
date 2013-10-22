@@ -1,0 +1,28 @@
+{
+  Map<String,String> info=getFileInfo(path);
+  DateFormat df=new SimpleDateFormat("yyyyMMdd-HHmmss");
+  long birthTime=Long.parseLong(info.get(FILE_INFO_KEY_ST_BIRTHTIME)) / 1000 / 1000;
+  long mtime=Long.parseLong(info.get(FILE_INFO_KEY_ST_MTIME)) / 1000 / 1000;
+  long size=Long.parseLong(info.get(AfcClient.FILE_INFO_KEY_ST_SIZE));
+  if ("S_IFDIR".equals(info.get(AfcClient.FILE_INFO_KEY_ST_IFMT))) {
+    out.format("%s %s %9d (%s)\t%s%s/\n",df.format(new Date(birthTime)),df.format(new Date(mtime)),size,info.get(AfcClient.FILE_INFO_KEY_ST_IFMT),indent,filename);
+    out.flush();
+    for (    String f : readDirectory(path)) {
+      if (f.equals("..") || f.equals(".")) {
+        continue;
+      }
+      if (recurse) {
+        String childPath=path + "/" + f;
+        list(childPath,f,indent + "  ",recurse,out);
+      }
+    }
+  }
+ else   if ("S_IFLNK".equals(info.get(AfcClient.FILE_INFO_KEY_ST_IFMT))) {
+    out.format("%s %s %9d (%s)\t%s%s -> %s\n",df.format(new Date(birthTime)),df.format(new Date(mtime)),size,info.get(AfcClient.FILE_INFO_KEY_ST_IFMT),indent,filename,info.get(AfcClient.FILE_INFO_KEY_LINK_TARGET));
+    out.flush();
+  }
+ else {
+    out.format("%s %s %9d (%s)\t%s%s\n",df.format(new Date(birthTime)),df.format(new Date(mtime)),size,info.get(AfcClient.FILE_INFO_KEY_ST_IFMT),indent,filename);
+    out.flush();
+  }
+}

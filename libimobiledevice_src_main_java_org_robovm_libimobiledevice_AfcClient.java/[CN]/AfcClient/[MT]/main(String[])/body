@@ -1,0 +1,79 @@
+{
+  String deviceId=null;
+  String action=null;
+  int index=0;
+  try {
+    action=args[index++];
+    if (action.matches("[0-9a-f]{40}")) {
+      deviceId=action;
+      action=args[index++];
+    }
+    if (!action.matches("deviceinfo|rm|ls|mkdir|mv|upload")) {
+      System.err.println("Unknown action: " + action);
+      printUsageAndExit();
+    }
+    if (deviceId == null) {
+      if (deviceId == null) {
+        String[] udids=IDevice.listUdids();
+        if (udids.length == 0) {
+          System.err.println("No device connected");
+          return;
+        }
+        if (udids.length > 1) {
+          System.err.println("More than 1 device connected (" + Arrays.asList(udids) + "). Using "+ udids[0]);
+        }
+        deviceId=udids[0];
+      }
+    }
+    try (IDevice device=new IDevice(deviceId)){
+      try (LockdowndClient lockdowndClient=new LockdowndClient(device,AfcClient.class.getSimpleName(),true)){
+        LockdowndServiceDescriptor service=lockdowndClient.startService(SERVICE_NAME);
+        try (AfcClient client=new AfcClient(device,service)){
+          boolean recurse=false;
+switch (action) {
+case "deviceinfo":
+            System.out.println(client.getDeviceInfo());
+          break;
+case "rm":
+        if ("-r".equals(args[index])) {
+          recurse=true;
+          index++;
+        }
+      client.removePath(args[index],recurse);
+    break;
+case "ls":
+  if ("-r".equals(args[index])) {
+    recurse=true;
+    index++;
+  }
+client.list(args[index],recurse);
+break;
+case "mkdir":
+client.makeDirectory(args[index]);
+break;
+case "mv":
+client.renamePath(args[index++],args[index]);
+break;
+case "upload":
+client.upload(new File(args[index++]),args[index],new UploadProgressCallback(){
+public void progress(File path,int percentComplete){
+System.out.format("[%3d%%] Uploading %s\n",percentComplete,path);
+}
+public void success(){
+System.out.format("[100%%] Upload done!\n");
+}
+public void error(String message){
+System.out.format("Error: %s\n",message);
+}
+}
+);
+break;
+}
+}
+ }
+ }
+ }
+ catch (ArrayIndexOutOfBoundsException e) {
+printUsageAndExit();
+}
+}
