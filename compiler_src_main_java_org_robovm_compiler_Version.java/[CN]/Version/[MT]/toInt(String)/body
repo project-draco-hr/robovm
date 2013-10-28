@@ -1,0 +1,18 @@
+{
+  boolean snapshot=v.endsWith("-SNAPSHOT");
+  if (snapshot) {
+    v=v.substring(0,v.indexOf("-SNAPSHOT"));
+  }
+  String[] parts=v.split("\\.");
+  if (parts.length > 3) {
+    throw new IllegalArgumentException("Illegal version number: " + v);
+  }
+  int major=parts.length > 0 ? Integer.parseInt(parts[0]) : 0;
+  int minor=parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+  int rev=parts.length > 2 ? Integer.parseInt(parts[2]) : 0;
+  int result=major * 10000000 + minor * 10000 + rev * 10;
+  if (!snapshot) {
+    result+=1;
+  }
+  return result;
+}

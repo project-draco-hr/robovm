@@ -1,0 +1,26 @@
+{
+  try {
+    String uuid=getInstallUuid();
+    if (uuid == null) {
+      return;
+    }
+    String osName=System.getProperty("os.name","Unknown");
+    String osArch=System.getProperty("os.arch","Unknown");
+    String osVersion=System.getProperty("os.version","Unknown");
+    UpdateChecker t=new UpdateChecker("http://download.robovm.org/version?" + "uuid=" + URLEncoder.encode(uuid,"UTF-8") + "&"+ "version="+ URLEncoder.encode(Version.getVersion(),"UTF-8")+ "&"+ "osName="+ URLEncoder.encode(osName,"UTF-8")+ "&"+ "osArch="+ URLEncoder.encode(osArch,"UTF-8")+ "&"+ "osVersion="+ URLEncoder.encode(osVersion,"UTF-8"));
+    t.start();
+    t.join((int)(3.0 * Math.random()) * 1000);
+    JSONObject result=t.result;
+    if (result != null) {
+      String version=result.optString("version",null);
+      if (version != null && Version.isOlderThan(version)) {
+        config.getLogger().info("A new version of RoboVM is available. " + "Current version: %s. New version: %s.",Version.getVersion(),version);
+      }
+    }
+  }
+ catch (  Throwable t) {
+    if (config.getHome().isDev()) {
+      t.printStackTrace();
+    }
+  }
+}

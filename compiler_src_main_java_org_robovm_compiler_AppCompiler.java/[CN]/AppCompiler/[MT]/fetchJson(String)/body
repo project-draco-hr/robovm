@@ -1,0 +1,17 @@
+{
+  try {
+    URL url=new URL(address);
+    URLConnection conn=url.openConnection();
+    conn.setConnectTimeout(5 * 1000);
+    conn.setReadTimeout(5 * 1000);
+    try (InputStream in=new BufferedInputStream(conn.getInputStream())){
+      return new JSONObject(IOUtils.toString(in,"UTF-8"));
+    }
+   }
+ catch (  Exception e) {
+    if (config.getHome().isDev()) {
+      e.printStackTrace();
+    }
+  }
+  return null;
+}
