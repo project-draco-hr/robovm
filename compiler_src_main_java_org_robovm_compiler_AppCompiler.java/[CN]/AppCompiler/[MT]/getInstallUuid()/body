@@ -1,12 +1,13 @@
 {
   File uuidFile=new File(new File(System.getProperty("user.home"),".robovm"),"uuid");
+  uuidFile.getParentFile().mkdirs();
   String uuid=uuidFile.exists() ? FileUtils.readFileToString(uuidFile,"UTF-8") : null;
   if (uuid == null) {
     uuid=UUID.randomUUID().toString();
     FileUtils.writeStringToFile(uuidFile,uuid,"UTF-8");
   }
   uuid=uuid.trim();
-  if (uuid.matches("[0-9a-fA-F-]*")) {
+  if (uuid.matches("[0-9a-fA-F-]{36}")) {
     return uuid;
   }
   return null;

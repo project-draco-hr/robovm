@@ -4,12 +4,17 @@
     if (uuid == null) {
       return;
     }
+    long lastCheckTime=getLastUpdateCheckTime();
+    if (System.currentTimeMillis() - lastCheckTime < 6 * 60 * 60* 1000) {
+      return;
+    }
+    updateLastUpdateCheckTime();
     String osName=System.getProperty("os.name","Unknown");
     String osArch=System.getProperty("os.arch","Unknown");
     String osVersion=System.getProperty("os.version","Unknown");
     UpdateChecker t=new UpdateChecker("http://download.robovm.org/version?" + "uuid=" + URLEncoder.encode(uuid,"UTF-8") + "&"+ "version="+ URLEncoder.encode(Version.getVersion(),"UTF-8")+ "&"+ "osName="+ URLEncoder.encode(osName,"UTF-8")+ "&"+ "osArch="+ URLEncoder.encode(osArch,"UTF-8")+ "&"+ "osVersion="+ URLEncoder.encode(osVersion,"UTF-8"));
     t.start();
-    t.join((int)(3.0 * Math.random()) * 1000);
+    t.join(5 * 1000);
     JSONObject result=t.result;
     if (result != null) {
       String version=result.optString("version",null);
