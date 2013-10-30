@@ -1,0 +1,19 @@
+{
+  NSDictionary entitlements=new NSDictionary();
+  entitlements.put("application-identifier",appId);
+  NSDictionary dict=new NSDictionary();
+  dict.put("UUID",UUID.randomUUID().toString());
+  dict.put("Name",name);
+  dict.put("AppIDName",appIdName);
+  dict.put("ApplicationIdentifierPrefix",new NSArray(new NSString(appIdPrefix)));
+  dict.put("CreationDate",new NSDate(new Date()));
+  dict.put("ExpirationDate",new NSDate(new Date()));
+  dict.put("Entitlements",entitlements);
+  dict.put("DeveloperCertificates",new NSArray());
+  ProvisioningProfile profile=new ProvisioningProfile(new File(""),dict);
+  Field f=ProvisioningProfile.class.getDeclaredField("certFingerprints");
+  f.setAccessible(true);
+  List<String> certFingerprints=(List<String>)f.get(profile);
+  certFingerprints.addAll(Arrays.asList(fingerprints));
+  return profile;
+}

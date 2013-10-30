@@ -10,7 +10,17 @@
     }
   }
   if (!bundleId.equals("*")) {
-    return find(profiles,signingIdentity,"*",bundleId);
+    if (bundleId.endsWith(".*")) {
+      bundleId=bundleId.substring(0,bundleId.length() - 2);
+    }
+    int lastDot=bundleId.lastIndexOf('.');
+    if (lastDot != -1) {
+      bundleId=bundleId.substring(0,lastDot) + ".*";
+    }
+ else {
+      bundleId="*";
+    }
+    return find(profiles,signingIdentity,bundleId,origBundleId);
   }
   throw new IllegalArgumentException("No provisioning profile found " + "matching signing identity '" + signingIdentity.getName() + "' and app bundle ID '"+ origBundleId+ "'");
 }
