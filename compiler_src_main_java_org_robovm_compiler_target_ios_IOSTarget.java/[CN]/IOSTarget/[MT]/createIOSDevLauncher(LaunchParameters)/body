@@ -22,7 +22,12 @@
   if (env == null) {
     env=Collections.emptyMap();
   }
-  AppLauncher launcher=new AppLauncher(device,getAppDir()).stdout(out).closeOutOnExit(true).args(launchParameters.getArguments().toArray(new String[0])).env(env).uploadProgressCallback(new UploadProgressCallback(){
+  AppLauncher launcher=new AppLauncher(device,getAppDir()){
+    protected void log(    String s,    Object... args){
+      config.getLogger().debug(s,args);
+    }
+  }
+.stdout(out).closeOutOnExit(true).args(launchParameters.getArguments().toArray(new String[0])).env(env).xcodePath(ToolchainUtil.findXcodePath()).uploadProgressCallback(new UploadProgressCallback(){
     boolean first=true;
     public void success(){
       config.getLogger().debug("[100%%] Upload complete");
