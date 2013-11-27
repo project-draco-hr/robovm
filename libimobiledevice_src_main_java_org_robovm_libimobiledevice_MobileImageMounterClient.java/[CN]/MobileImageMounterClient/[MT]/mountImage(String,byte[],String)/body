@@ -1,0 +1,24 @@
+{
+  if (imagePath == null) {
+    throw new NullPointerException("imagePath");
+  }
+  if (imageSignature == null) {
+    throw new NullPointerException("imageSignature");
+  }
+  if (imageType == null) {
+    imageType="Developer";
+  }
+  if (!imagePath.startsWith("/")) {
+    imagePath="/" + imagePath;
+  }
+  imagePath=PRIVATE_MOUNT_PREFIX + imagePath;
+  PlistRefOut plistOut=new PlistRefOut();
+  try {
+    checkResult(LibIMobileDevice.mobile_image_mounter_mount_image(getRef(),imagePath,imageSignature,(short)imageSignature.length,imageType,plistOut));
+    PlistRef plist=plistOut.getValue();
+    return (NSDictionary)PlistUtil.toJavaPlist(plist);
+  }
+  finally {
+    plistOut.delete();
+  }
+}

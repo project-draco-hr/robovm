@@ -4,9 +4,11 @@
     try (AfcClient afcClient=new AfcClient(device,afcService)){
       afcClient.upload(localAppPath,"/PublicStaging",new UploadProgressCallback(){
         public void progress(        File path,        int percentComplete){
-          debug("[%3d%%] Uploading %s",percentComplete / 2,path);
           if (uploadProgressCallback != null) {
             uploadProgressCallback.progress(path,percentComplete);
+          }
+ else {
+            log("[%3d%%] Uploading %s",percentComplete / 2,path);
           }
         }
         public void success(){
@@ -15,9 +17,11 @@
           }
         }
         public void error(        String message){
-          debug("Error: %s",message);
           if (uploadProgressCallback != null) {
             uploadProgressCallback.error(message);
+          }
+ else {
+            log("Error: %s",message);
           }
         }
       }

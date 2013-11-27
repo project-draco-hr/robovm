@@ -1,0 +1,16 @@
+{
+  if (xcodePath != null) {
+    return new File(xcodePath);
+  }
+  File tmpFile=File.createTempFile(this.getClass().getSimpleName(),".tmp");
+  try {
+    int ret=new ProcessBuilder("xcode-select","-print-path").redirectErrorStream(true).redirectOutput(Redirect.to(tmpFile)).start().waitFor();
+    if (ret != 0) {
+      throw new IOException("xcode-select failed with error code: " + ret);
+    }
+    return new File(new String(Files.readAllBytes(tmpFile.toPath()),"UTF-8").trim());
+  }
+  finally {
+    tmpFile.delete();
+  }
+}

@@ -1,0 +1,64 @@
+{
+  String deviceId=null;
+  String action=null;
+  int index=0;
+  try {
+    action=args[index++];
+    if (action.matches("[0-9a-f]{40}")) {
+      deviceId=action;
+      action=args[index++];
+    }
+    if (!action.matches("lookup|mount")) {
+      System.err.println("Unknown action: " + action);
+      printUsageAndExit();
+    }
+    if (deviceId == null) {
+      if (deviceId == null) {
+        String[] udids=IDevice.listUdids();
+        if (udids.length == 0) {
+          System.err.println("No device connected");
+          return;
+        }
+        if (udids.length > 1) {
+          System.err.println("More than 1 device connected (" + Arrays.asList(udids) + "). Using "+ udids[0]);
+        }
+        deviceId=udids[0];
+      }
+    }
+    try (IDevice device=new IDevice(deviceId)){
+      try (LockdowndClient lockdowndClient=new LockdowndClient(device,MobileImageMounterClient.class.getSimpleName(),true)){
+        LockdowndServiceDescriptor afcService=lockdowndClient.startService(AfcClient.SERVICE_NAME);
+        try (AfcClient afcClient=new AfcClient(device,afcService)){
+          LockdowndServiceDescriptor mimService=lockdowndClient.startService(SERVICE_NAME);
+          try (MobileImageMounterClient mimClient=new MobileImageMounterClient(device,mimService)){
+            NSObject result=null;
+            String imageType=null;
+switch (action) {
+case "lookup":
+              if (args.length < index) {
+                imageType=args[index];
+              }
+            result=mimClient.lookupImage(imageType);
+          break;
+case "mount":
+        String imagePath=args[index++];
+      String sigPath=args[index++];
+    byte[] sig=Files.readAllBytes(new File(sigPath).toPath());
+  if (args.length < index) {
+    imageType=args[index];
+  }
+afcClient.makeDirectory("/PublicStaging");
+afcClient.fileCopy(new File(imagePath),"/PublicStaging/staging.dimage");
+result=mimClient.mountImage("/PublicStaging/staging.dimage",sig,imageType);
+break;
+}
+System.out.println(result.toXMLPropertyList());
+}
+ }
+ }
+ }
+ }
+ catch (ArrayIndexOutOfBoundsException e) {
+printUsageAndExit();
+}
+}

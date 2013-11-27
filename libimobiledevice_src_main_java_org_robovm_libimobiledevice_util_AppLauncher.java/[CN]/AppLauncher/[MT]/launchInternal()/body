@@ -4,10 +4,23 @@
   String appPath=null;
   try (LockdowndClient lockdowndClient=new LockdowndClient(device,getClass().getSimpleName(),true)){
     appPath=getAppPath(lockdowndClient,appId);
-    LockdowndServiceDescriptor debugService=lockdowndClient.startService(DEBUG_SERVER_SERVICE_NAME);
+    LockdowndServiceDescriptor debugService=null;
+    try {
+      debugService=lockdowndClient.startService(DEBUG_SERVER_SERVICE_NAME);
+    }
+ catch (    LibIMobileDeviceException e) {
+      if (e.getErrorCode() == LibIMobileDeviceConstants.LOCKDOWN_E_INVALID_SERVICE) {
+        mountDeveloperImage(lockdowndClient);
+        debugService=lockdowndClient.startService(DEBUG_SERVER_SERVICE_NAME);
+      }
+ else {
+        throw e;
+      }
+    }
     conn=device.connect(debugService.getPort());
   }
-   try {
+   log("Launching app...");
+  try {
     sendGdbPacket(conn,"+");
     sendReceivePacket(conn,encode("QStartNoAckMode"),"OK",true);
     sendGdbPacket(conn,"+");
