@@ -1,6 +1,7 @@
 {
   NSDictionary entitlements=new NSDictionary();
   entitlements.put("application-identifier",appId);
+  entitlements.put("get-task-allow",new NSNumber(getTaskAllow));
   NSDictionary dict=new NSDictionary();
   dict.put("UUID",UUID.randomUUID().toString());
   dict.put("Name",name);
@@ -10,10 +11,15 @@
   dict.put("ExpirationDate",new NSDate(new Date()));
   dict.put("Entitlements",entitlements);
   dict.put("DeveloperCertificates",new NSArray());
+  if (provisionedDevice != null) {
+    NSArray devices=new NSArray(1);
+    devices.setValue(0,new NSString(provisionedDevice));
+    dict.put("ProvisionedDevices",devices);
+  }
   ProvisioningProfile profile=new ProvisioningProfile(new File(""),dict);
   Field f=ProvisioningProfile.class.getDeclaredField("certFingerprints");
   f.setAccessible(true);
   List<String> certFingerprints=(List<String>)f.get(profile);
-  certFingerprints.addAll(Arrays.asList(fingerprints));
+  certFingerprints.add(fingerprint);
   return profile;
 }
