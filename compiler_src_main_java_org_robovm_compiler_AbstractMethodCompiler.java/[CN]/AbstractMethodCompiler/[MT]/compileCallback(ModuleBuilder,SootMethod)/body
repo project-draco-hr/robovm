@@ -1,24 +1,24 @@
 {
   validateCallbackMethod(method);
+  DataLayout dataLayout=config.getDataLayout();
   SootMethod originalMethod=method;
   boolean passByValue=isPassByValue(originalMethod);
   if (passByValue) {
     Arch arch=config.getArch();
     OS os=config.getOs();
-    String triple=config.getTriple();
-    int size=getStructType(originalMethod.getReturnType()).getAllocSize(triple);
+    int size=dataLayout.getAllocSize(getStructType(dataLayout,originalMethod.getReturnType()));
     if (!os.isReturnedInRegisters(arch,size)) {
       method=createFakeStructRetMethod(method);
     }
   }
-  Function callbackFn=FunctionBuilder.callback(method);
+  Function callbackFn=FunctionBuilder.callback(dataLayout,method);
   if (originalMethod != method) {
     callbackFn.setParameterAttributes(0,ParameterAttribute.sret);
   }
  else   if (passByValue) {
-    int size=((StructureType)callbackFn.getType().getReturnType()).getAllocSize(config.getTriple());
+    int size=dataLayout.getAllocSize(callbackFn.getType().getReturnType());
     Type t=size <= 1 ? I8 : (size <= 2 ? I16 : (size <= 4 ? I32 : I64));
-    callbackFn=FunctionBuilder.callback(method,t);
+    callbackFn=FunctionBuilder.callback(dataLayout,method,t);
   }
   moduleBuilder.addFunction(callbackFn);
   moduleBuilder.addAlias(new Alias(mangleMethod(originalMethod) + "_callback_i8p",Linkage._private,new ConstantBitcast(callbackFn.ref(),I8_PTR_PTR)));

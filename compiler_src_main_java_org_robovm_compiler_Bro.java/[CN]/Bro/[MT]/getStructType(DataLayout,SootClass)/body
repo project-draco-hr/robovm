@@ -1,0 +1,55 @@
+{
+  int n=0;
+  for (  SootMethod method : clazz.getMethods()) {
+    n=Math.max(getStructMemberOffset(method) + 1,n);
+  }
+  if (n == 0) {
+    throw new IllegalArgumentException("Struct class " + clazz + " has no @StructMember annotated methods");
+  }
+  Type[] result=new Type[n];
+  for (  SootMethod method : clazz.getMethods()) {
+    int offset=getStructMemberOffset(method);
+    if (offset != -1) {
+      if (!method.isNative() && !method.isStatic()) {
+        throw new IllegalArgumentException("@StructMember annotated method " + method.getName() + " in class "+ clazz+ " must be native and not static");
+      }
+      Type type=null;
+      if (method.getParameterCount() == 0) {
+        if (hasPointerAnnotation(method) && !method.getReturnType().equals(LongType.v())) {
+          throw new IllegalArgumentException("@StructMember(" + offset + ") annotated getter "+ method.getName()+ " in class "+ clazz+ " must be of type long when annotated with @Pointer");
+        }
+        if (!canMarshal(method)) {
+          throw new IllegalArgumentException("No @Marshaler found for " + "@StructMember(" + offset + ") annotated getter "+ method.getName()+ " in class "+ clazz);
+        }
+      }
+ else       if (method.getParameterCount() == 1) {
+        if (hasPointerAnnotation(method,0) && !method.getParameterType(0).equals(LongType.v())) {
+          throw new IllegalArgumentException("@StructMember(" + offset + ") annotated setter "+ method.getName()+ " in class "+ clazz+ " must be of type long when annotated with @Pointer");
+        }
+        if (!canMarshal(method,0)) {
+          throw new IllegalArgumentException("No @Marshaler found for " + "@StructMember(" + offset + ") annotated setter "+ method.getName()+ " in class "+ clazz);
+        }
+        soot.Type retType=method.getReturnType();
+        if (!retType.equals(VoidType.v()) && !(retType instanceof RefType && ((RefType)retType).getSootClass().equals(clazz))) {
+          throw new IllegalArgumentException("Setter " + method.getName() + " for "+ "@StructMember("+ offset+ ") in class "+ clazz+ " must either return nothing or return a "+ clazz);
+        }
+      }
+ else {
+        throw new IllegalArgumentException("@StructMember annotated method " + method.getName() + " in class "+ clazz+ " has too many parameters");
+      }
+      type=getStructMemberType(dataLayout,method);
+      if (result[offset] == null) {
+        result[offset]=type;
+      }
+ else       if (type != result[offset]) {
+        result[offset]=mergeStructMemberTypes(dataLayout,type,result[offset]);
+      }
+    }
+  }
+  for (int i=0; i < result.length; i++) {
+    if (result[i] == null) {
+      throw new IllegalArgumentException("No @StructMember(" + i + ") defined in class "+ clazz);
+    }
+  }
+  return new StructureType(result);
+}

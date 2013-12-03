@@ -11,11 +11,11 @@
   SootMethod originalMethod=method;
   Value structObj=null;
   boolean passByValue=isPassByValue(originalMethod);
+  DataLayout dataLayout=config.getDataLayout();
   if (passByValue) {
     Arch arch=config.getArch();
     OS os=config.getOs();
-    String triple=config.getTriple();
-    int size=getStructType(originalMethod.getReturnType()).getAllocSize(triple);
+    int size=dataLayout.getAllocSize(getStructType(dataLayout,originalMethod.getReturnType()));
     if (!os.isReturnedInRegisters(arch,size)) {
       method=createFakeStructRetMethod(method);
       VariableRef env=fn.getParameterRef(0);
@@ -28,9 +28,9 @@
       args.add(method.isStatic() ? 1 : 2,new Argument(structObj));
     }
   }
-  FunctionType targetFnType=getBridgeFunctionType(method);
+  FunctionType targetFnType=getBridgeFunctionType(dataLayout,method);
   if (method == originalMethod && passByValue) {
-    int size=((StructureType)targetFnType.getReturnType()).getAllocSize(config.getTriple());
+    int size=dataLayout.getAllocSize(targetFnType.getReturnType());
     Type t=size <= 1 ? I8 : (size <= 2 ? I16 : (size <= 4 ? I32 : I64));
     targetFnType=new FunctionType(t,targetFnType.isVarargs(),targetFnType.getParameterTypes());
   }

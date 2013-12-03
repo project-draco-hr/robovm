@@ -1,0 +1,27 @@
+{
+  Context context=null;
+  Module module=null;
+  try {
+    String definition;
+    if (type instanceof PrimitiveType) {
+      definition="{" + ((PrimitiveType)type).getName() + "}";
+    }
+ else     if (type instanceof AggregateType) {
+      definition=((AggregateType)type).getDefinition();
+    }
+ else {
+      definition="{" + ((UserType)type).getDefinition() + "}";
+    }
+    context=new Context();
+    module=Module.parseIR(context,"%t = type " + definition,null);
+    return module.getTypeByName("t");
+  }
+  finally {
+    if (module != null) {
+      module.dispose();
+    }
+    if (context != null) {
+      context.dispose();
+    }
+  }
+}
