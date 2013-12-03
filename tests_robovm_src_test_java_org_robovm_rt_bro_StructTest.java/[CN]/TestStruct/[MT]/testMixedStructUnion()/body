@@ -1,0 +1,22 @@
+{
+  assertEquals(16,MixedStructUnion.sizeOf());
+  MixedStructUnion s=new MixedStructUnion();
+  assertEquals(0,s.b1());
+  s.b1((byte)0x34);
+  assertEquals(0x34,s.b1());
+  assertEquals(0x34,VM.getByte(s.getHandle()));
+  assertEquals(0,s.l());
+  s.l(0x1234567890abcdefl);
+  assertEquals(0x34,s.b1());
+  assertEquals(0x1234567890abcdefl,s.l());
+  assertEquals(0x1234567890abcdefl,VM.getLong(s.getHandle() + 4));
+  assertEquals(Double.longBitsToDouble(0x1234567890abcdefl),s.d(),0.00001);
+  s.d(Math.PI);
+  assertEquals(0x34,s.b1());
+  assertEquals(Double.doubleToLongBits(Math.PI),s.l());
+  assertEquals(Math.PI,VM.getDouble(s.getHandle() + 4),0.00001);
+  assertEquals(0,s.b2());
+  s.b2((byte)0x43);
+  assertEquals(0x43,s.b2());
+  assertEquals(0x43,VM.getByte(s.getHandle() + 12));
+}

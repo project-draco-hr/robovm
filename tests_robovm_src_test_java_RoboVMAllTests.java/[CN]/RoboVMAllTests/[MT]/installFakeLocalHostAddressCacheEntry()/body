@@ -1,0 +1,12 @@
+{
+  Class<?> addressCacheClass=Class.forName("java.net.AddressCache");
+  Class<?> addressCacheEntryClass=Class.forName("java.net.AddressCache$AddressCacheEntry");
+  Constructor<?> entryConstructor=addressCacheEntryClass.getDeclaredConstructor(Object.class);
+  entryConstructor.setAccessible(true);
+  InetAddress[] addresses=new InetAddress[]{getFakeLocalHost()};
+  Object entry=entryConstructor.newInstance(new Object[]{addresses});
+  field(addressCacheEntryClass,"expiryNanos").set(entry,Long.MAX_VALUE);
+  BasicLruCache<Object,Object> cache=new BasicLruCache<Object,Object>(64);
+  cache.put(Libcore.os.uname().nodename,entry);
+  field(addressCacheClass,"cache").set(field(InetAddress.class,"addressCache").get(null),cache);
+}

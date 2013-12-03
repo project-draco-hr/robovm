@@ -1,0 +1,28 @@
+{
+  assertEquals(8,TestUnion.sizeOf());
+  TestUnion s=new TestUnion();
+  s.d(Math.PI);
+  assertEquals(Math.PI,s.d(),0.0001);
+  assertEquals(Double.doubleToLongBits(Math.PI),s.l());
+  assertEquals(Double.doubleToLongBits(Math.PI) & 0xff,s.b());
+  assertEquals(Double.doubleToLongBits(Math.PI) & 0xffffffffl,s.p().x() & 0xffffffffl);
+  assertEquals(Double.doubleToLongBits(Math.PI) >>> 32,s.p().y() & 0xffffffffl);
+  s.l(0x123456789abcdef0l);
+  assertEquals(Double.longBitsToDouble(0x123456789abcdef0l),s.d(),0.0001);
+  assertEquals(0x123456789abcdef0l,s.l());
+  assertEquals(0xf0,s.b() & 0xffl);
+  assertEquals(0x9abcdef0l,s.p().x() & 0xffffffffl);
+  assertEquals(0x12345678l,s.p().y() & 0xffffffffl);
+  s.b((byte)0xe4);
+  assertEquals(Double.longBitsToDouble(0x123456789abcdee4l),s.d(),0.0001);
+  assertEquals(0x123456789abcdee4l,s.l());
+  assertEquals(0xe4,s.b() & 0xffl);
+  assertEquals(0x9abcdee4l,s.p().x() & 0xffffffffl);
+  assertEquals(0x12345678l,s.p().y() & 0xffffffffl);
+  s.p().x(0x10002000).y(0x30004000);
+  assertEquals(Double.longBitsToDouble(0x3000400010002000l),s.d(),0.0001);
+  assertEquals("6",0x3000400010002000l,s.l());
+  assertEquals(0x00,s.b() & 0xffl);
+  assertEquals("7",0x10002000l,s.p().x() & 0xffffffffl);
+  assertEquals("8",0x30004000l,s.p().y() & 0xffffffffl);
+}
