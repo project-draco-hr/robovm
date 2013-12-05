@@ -1,0 +1,22 @@
+{
+  assertEquals(96,StructWithArray.sizeOf());
+  StructWithArray s=new StructWithArray();
+  IntPtr p=s.intArray();
+  assertEquals(s.getHandle(),p.getHandle());
+  for (int i=0; i < 24; i++) {
+    p.next(i).set(i + 1);
+  }
+  IntPtr q=s.intArray();
+  for (int i=0; i < 24; i++) {
+    assertEquals(i + 1,q.next(i).get());
+  }
+  IntPtr r=Struct.allocate(IntPtr.class,24);
+  assertNotEquals(s.getHandle(),r.getHandle());
+  for (int i=0; i < 24; i++) {
+    r.next(i).set(2 * (i + 1));
+  }
+  s.intArray(r);
+  for (int i=0; i < 24; i++) {
+    assertEquals(2 * (i + 1),p.next(i).get());
+  }
+}

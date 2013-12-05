@@ -2,14 +2,15 @@
   SootMethod getter=method.getParameterCount() == 0 ? method : null;
   SootMethod setter=getter == null ? method : null;
   soot.Type type=getter != null ? getter.getReturnType() : setter.getParameterType(0);
+  Type memberType=null;
   if (isStruct(type)) {
     boolean byVal=getter != null ? isPassByValue(getter) : isPassByValue(setter,0);
     if (!byVal) {
-      return I8_PTR;
+      memberType=I8_PTR;
     }
  else {
       try {
-        return getStructType(dataLayout,type);
+        memberType=getStructType(dataLayout,type);
       }
  catch (      StackOverflowError e) {
         throw new IllegalArgumentException("Struct type " + type + " refers to itself");
@@ -17,16 +18,25 @@
     }
   }
  else   if (isNativeObject(type)) {
-    return I8_PTR;
+    memberType=I8_PTR;
   }
  else   if (getter != null && hasPointerAnnotation(getter) || setter != null && hasPointerAnnotation(setter,0)) {
-    return I8_PTR;
+    memberType=I8_PTR;
   }
  else   if (type instanceof PrimType) {
-    return getType(type);
+    memberType=getType(type);
   }
  else {
     String marshalerClassName=getter != null ? getMarshalerClassName(getter,false) : getMarshalerClassName(setter,0,false);
-    return getMarshalType(marshalerClassName,type);
+    memberType=getMarshalType(marshalerClassName,type);
   }
+  long[] dimensions=getter != null ? getArrayDimensions(getter) : getArrayDimensions(setter,0);
+  if (dimensions != null && dimensions.length > 0) {
+    long total=dimensions[0];
+    for (int i=1; i < dimensions.length; i++) {
+      total*=dimensions[i];
+    }
+    memberType=new ArrayType(total,memberType);
+  }
+  return memberType;
 }
