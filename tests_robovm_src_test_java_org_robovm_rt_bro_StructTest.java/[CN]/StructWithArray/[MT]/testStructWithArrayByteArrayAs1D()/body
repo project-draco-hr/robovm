@@ -1,0 +1,36 @@
+{
+  assertEquals(192,StructWithArray.sizeOf());
+  final int D1=24;
+  byte[] array1;
+  byte[] array2;
+  byte[] array3;
+  StructWithArray s=new StructWithArray();
+  BytePtr p=s.byteArrayAsPtr();
+  array1=s.byteArray1D();
+  assertEquals(D1,array1.length);
+  for (int i=0; i < array1.length; i++) {
+    assertEquals(0,array1[i]);
+  }
+  for (int i=0; i < D1; i++) {
+    p.next(i).set((byte)(i + 1));
+  }
+  array2=s.byteArray1D();
+  assertEquals(D1,array2.length);
+  for (int i=0; i < array2.length; i++) {
+    assertEquals(i + 1,array2[i]);
+  }
+  array3=new byte[D1];
+  for (int i=0; i < array3.length; i++) {
+    array3[i]=(byte)(2 * (i + 1));
+  }
+  s.byteArray1D(array3);
+  for (int i=0; i < D1; i++) {
+    assertEquals(2 * (i + 1),p.next(i).get() & 0xff);
+  }
+  try {
+    s.byteArray1D(new byte[D1 / 2]);
+    fail("Expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

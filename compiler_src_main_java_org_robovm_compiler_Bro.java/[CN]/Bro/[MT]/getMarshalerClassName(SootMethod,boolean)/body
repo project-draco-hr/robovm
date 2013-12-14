@@ -1,27 +1,3 @@
 {
-  AnnotationTag annotation=getMarshalerAnnotation(method);
-  if (annotation == null) {
-    SootClass type=((RefType)method.getReturnType()).getSootClass();
-    if (unwrapPtr && isPtr(type)) {
-      type=getPtrTargetClass(method);
-    }
-    annotation=getMarshalerAnnotation(method.getDeclaringClass(),RefType.v(type));
-    if (annotation == null) {
-      SootClass outerClass=getOuterClass(method.getDeclaringClass());
-      if (outerClass != null) {
-        annotation=getMarshalerAnnotation(outerClass,RefType.v(type));
-      }
-    }
-    if (annotation == null) {
-      annotation=getMarshalerAnnotation(type);
-      if (annotation == null && isEnum(type)) {
-        return "org/robovm/rt/bro/EnumMarshalers$AsIntMarshaler";
-      }
-    }
-  }
-  if (annotation == null) {
-    return null;
-  }
-  String desc=((AnnotationClassElem)getElemByName(annotation,"value")).getDesc();
-  return getInternalNameFromDescriptor(desc);
+  return getMarshalerClassName(method,-1,unwrapPtr);
 }

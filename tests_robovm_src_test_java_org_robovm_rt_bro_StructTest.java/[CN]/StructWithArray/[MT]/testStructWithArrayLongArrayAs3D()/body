@@ -1,0 +1,66 @@
+{
+  assertEquals(192,StructWithArray.sizeOf());
+  final int D1=2;
+  final int D2=3;
+  final int D3=4;
+  long[][][] array1;
+  long[][][] array2;
+  long[][][] array3;
+  StructWithArray s=new StructWithArray();
+  LongPtr p=s.longArrayAsPtr();
+  array1=s.longArray3D();
+  assertEquals(D1,array1.length);
+  for (int i=0; i < array1.length; i++) {
+    assertEquals(D2,array1[i].length);
+    for (int j=0; j < array1[i].length; j++) {
+      assertEquals(D3,array1[i][j].length);
+      for (int k=0; k < array1[i][j].length; k++) {
+        assertEquals(0,array1[i][j][k]);
+      }
+    }
+  }
+  for (int i=0; i < D1 * D2 * D3; i++) {
+    p.next(i).set(i + 1);
+  }
+  array2=s.longArray3D();
+  assertEquals(D1,array2.length);
+  for (int i=0; i < array2.length; i++) {
+    assertEquals(D2,array2[i].length);
+    for (int j=0; j < array2[i].length; j++) {
+      assertEquals(D3,array2[i][j].length);
+      for (int k=0; k < array2[i][j].length; k++) {
+        assertEquals((i * D2 + j) * D3 + k + 1,array2[i][j][k]);
+      }
+    }
+  }
+  array3=new long[D1][D2][D3];
+  for (int i=0; i < array3.length; i++) {
+    for (int j=0; j < array3[i].length; j++) {
+      for (int k=0; k < array3[i][j].length; k++) {
+        array3[i][j][k]=2 * ((i * D2 + j) * D3 + k + 1);
+      }
+    }
+  }
+  s.longArray3D(array3);
+  for (int i=0; i < D1 * D2 * D3; i++) {
+    assertEquals(2 * (i + 1),p.next(i).get());
+  }
+  try {
+    s.longArray3D(new long[D1 / 2][][]);
+    fail("Expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    s.longArray3D(new long[D1][D2 / 2][]);
+    fail("Expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    s.longArray3D(new long[D1][D2][D3 / 2]);
+    fail("Expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

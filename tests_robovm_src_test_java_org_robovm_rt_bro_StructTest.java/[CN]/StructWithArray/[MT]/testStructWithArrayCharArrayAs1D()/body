@@ -1,0 +1,36 @@
+{
+  assertEquals(192,StructWithArray.sizeOf());
+  final int D1=24;
+  char[] array1;
+  char[] array2;
+  char[] array3;
+  StructWithArray s=new StructWithArray();
+  CharPtr p=s.charArrayAsPtr();
+  array1=s.charArray1D();
+  assertEquals(D1,array1.length);
+  for (int i=0; i < array1.length; i++) {
+    assertEquals(0,array1[i]);
+  }
+  for (int i=0; i < D1; i++) {
+    p.next(i).set((char)(i + 1));
+  }
+  array2=s.charArray1D();
+  assertEquals(D1,array2.length);
+  for (int i=0; i < array2.length; i++) {
+    assertEquals(i + 1,array2[i]);
+  }
+  array3=new char[D1];
+  for (int i=0; i < array3.length; i++) {
+    array3[i]=(char)(2 * (i + 1));
+  }
+  s.charArray1D(array3);
+  for (int i=0; i < D1; i++) {
+    assertEquals(2 * (i + 1),p.next(i).get() & 0xffff);
+  }
+  try {
+    s.charArray1D(new char[D1 / 2]);
+    fail("Expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

@@ -1,12 +1,20 @@
 {
-  FunctionRef ldcClassFn=null;
-  if (name.equals(this.className)) {
-    ldcClassFn=FunctionBuilder.ldcInternal(this.className).ref();
+  if (isArray(name) && isPrimitiveBaseType(name)) {
+    String primitiveDesc=name.substring(name.length() - 1);
+    Variable result=fn.newVariable(OBJECT_PTR);
+    fn.add(new Load(result,new ConstantBitcast(new GlobalRef("array_" + primitiveDesc,CLASS_PTR),new PointerType(OBJECT_PTR))));
+    return result.ref();
   }
  else {
-    Trampoline trampoline=new LdcClass(this.className,name);
-    trampolines.add(trampoline);
-    ldcClassFn=trampoline.getFunctionRef();
+    FunctionRef ldcClassFn=null;
+    if (name.equals(this.className)) {
+      ldcClassFn=FunctionBuilder.ldcInternal(this.className).ref();
+    }
+ else {
+      Trampoline trampoline=new LdcClass(this.className,name);
+      trampolines.add(trampoline);
+      ldcClassFn=trampoline.getFunctionRef();
+    }
+    return call(fn,ldcClassFn,env);
   }
-  return call(fn,ldcClassFn,env);
 }

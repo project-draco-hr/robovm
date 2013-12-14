@@ -1,22 +1,39 @@
 {
-  AnnotationTag annotation=getMarshalerAnnotation(method,paramIndex);
+  AnnotationTag annotation=paramIndex == -1 ? getMarshalerAnnotation(method) : getMarshalerAnnotation(method,paramIndex);
   if (annotation == null) {
-    SootClass paramType=((RefType)method.getParameterType(paramIndex)).getSootClass();
-    if (unwrapPtr && isPtr(paramType)) {
-      paramType=getPtrTargetClass(method,paramIndex);
+    soot.Type type=paramIndex == -1 ? method.getReturnType() : method.getParameterType(paramIndex);
+    SootClass clazz=null;
+    if (type instanceof RefType) {
+      clazz=((RefType)type).getSootClass();
+      if (unwrapPtr && isPtr(clazz)) {
+        clazz=paramIndex == -1 ? getPtrTargetClass(method) : getPtrTargetClass(method,paramIndex);
+      }
     }
-    annotation=getMarshalerAnnotation(method.getDeclaringClass(),RefType.v(paramType));
+ else {
+      soot.Type elType=((soot.ArrayType)type).getElementType();
+      while (elType instanceof soot.ArrayType) {
+        elType=((soot.ArrayType)elType).getElementType();
+      }
+      if (elType instanceof RefType) {
+        clazz=((soot.RefType)elType).getSootClass();
+      }
+    }
+    annotation=getMarshalerAnnotation(method.getDeclaringClass(),type);
     if (annotation == null) {
       SootClass outerClass=getOuterClass(method.getDeclaringClass());
       if (outerClass != null) {
-        annotation=getMarshalerAnnotation(outerClass,RefType.v(paramType));
+        annotation=getMarshalerAnnotation(outerClass,type);
+      }
+    }
+    if (clazz != null && annotation == null) {
+      annotation=getMarshalerAnnotation(clazz);
+      if (annotation == null && isEnum(clazz)) {
+        return "org/robovm/rt/bro/EnumMarshalers$AsIntMarshaler";
       }
     }
     if (annotation == null) {
-      annotation=getMarshalerAnnotation(paramType);
-      if (annotation == null && isEnum(paramType)) {
-        return "org/robovm/rt/bro/EnumMarshalers$AsIntMarshaler";
-      }
+      SootClass builtins=SootResolver.v().resolveClass("org.robovm.rt.bro.BuiltinMarshalers",SootClass.SIGNATURES);
+      annotation=getMarshalerAnnotation(builtins,type);
     }
   }
   if (annotation == null) {

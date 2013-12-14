@@ -18,6 +18,9 @@
         if (hasPointerAnnotation(method) && !method.getReturnType().equals(LongType.v())) {
           throw new IllegalArgumentException("@StructMember(" + offset + ") annotated getter "+ method.getName()+ " in class "+ clazz+ " must be of type long when annotated with @Pointer");
         }
+        if (method.getReturnType() instanceof soot.ArrayType && !hasArrayAnnotation(method)) {
+          throw new IllegalArgumentException("@Array annotation expected on struct member getter " + method);
+        }
         if (!canMarshal(method)) {
           throw new IllegalArgumentException("No @Marshaler found for " + "@StructMember(" + offset + ") annotated getter "+ method.getName()+ " in class "+ clazz);
         }
@@ -25,6 +28,9 @@
  else       if (method.getParameterCount() == 1) {
         if (hasPointerAnnotation(method,0) && !method.getParameterType(0).equals(LongType.v())) {
           throw new IllegalArgumentException("@StructMember(" + offset + ") annotated setter "+ method.getName()+ " in class "+ clazz+ " must be of type long when annotated with @Pointer");
+        }
+        if (method.getParameterType(0) instanceof soot.ArrayType && !hasArrayAnnotation(method,0)) {
+          throw new IllegalArgumentException("@Array annotation expected on first parameter of struct member setter " + method);
         }
         if (!canMarshal(method,0)) {
           throw new IllegalArgumentException("No @Marshaler found for " + "@StructMember(" + offset + ") annotated setter "+ method.getName()+ " in class "+ clazz);

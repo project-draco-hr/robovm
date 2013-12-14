@@ -1,0 +1,25 @@
+{
+  assertEquals(192,StructWithArray.sizeOf());
+  final int D1=24;
+  StructWithArray s=new StructWithArray();
+  IntPtr p=s.intArrayAsPtr();
+  IntPtr q;
+  IntPtr r;
+  assertEquals(s.getHandle(),p.getHandle());
+  for (int i=0; i < D1; i++) {
+    p.next(i).set(i + 1);
+  }
+  q=s.intArrayAsPtr();
+  for (int i=0; i < D1; i++) {
+    assertEquals(i + 1,q.next(i).get());
+  }
+  r=Struct.allocate(IntPtr.class,D1);
+  assertNotEquals(s.getHandle(),r.getHandle());
+  for (int i=0; i < D1; i++) {
+    r.next(i).set(2 * (i + 1));
+  }
+  s.intArrayAsPtr(r);
+  for (int i=0; i < D1; i++) {
+    assertEquals(2 * (i + 1),p.next(i).get());
+  }
+}
