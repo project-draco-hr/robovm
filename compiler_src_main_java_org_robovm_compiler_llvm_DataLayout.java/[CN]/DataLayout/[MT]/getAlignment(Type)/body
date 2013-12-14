@@ -1,12 +1,8 @@
 {
-  TargetMachine targetMachine=null;
-  try {
-    targetMachine=target.createTargetMachine(triple);
-    return (int)targetMachine.getDataLayout().getABITypeAlignment(getTypeRef(type));
-  }
-  finally {
-    if (targetMachine != null) {
-      targetMachine.dispose();
+  return runTypeQuery(type,new TypeCallback<Integer>(){
+    Integer doWithType(    TargetMachine targetMachine,    org.robovm.llvm.Type type){
+      return (int)targetMachine.getDataLayout().getABITypeAlignment(type);
     }
   }
+);
 }

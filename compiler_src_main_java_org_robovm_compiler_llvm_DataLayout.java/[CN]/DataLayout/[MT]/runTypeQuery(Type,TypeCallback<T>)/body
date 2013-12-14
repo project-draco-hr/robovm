@@ -1,6 +1,7 @@
 {
   Context context=null;
   Module module=null;
+  TargetMachine targetMachine=null;
   try {
     String definition;
     if (type instanceof PrimitiveType) {
@@ -14,9 +15,13 @@
     }
     context=new Context();
     module=Module.parseIR(context,"%t = type " + definition,null);
-    return module.getTypeByName("t");
+    targetMachine=target.createTargetMachine(triple);
+    return cb.doWithType(targetMachine,module.getTypeByName("t"));
   }
   finally {
+    if (targetMachine != null) {
+      targetMachine.dispose();
+    }
     if (module != null) {
       module.dispose();
     }
