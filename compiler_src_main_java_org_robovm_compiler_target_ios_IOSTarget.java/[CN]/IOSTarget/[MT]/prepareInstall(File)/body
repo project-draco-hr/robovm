@@ -5,7 +5,7 @@
     strip(installDir,getExecutable());
     copyResourcesPList(installDir);
     config.getLogger().debug("Copying %s provisioning profile: %s (%s)",provisioningProfile.getType(),provisioningProfile.getName(),provisioningProfile.getEntitlements().objectForKey("application-identifier"));
-    boolean getTaskAllow=provisioningProfile.getType() != Type.AppStore;
+    boolean getTaskAllow=provisioningProfile.getType() == Type.Development;
     FileUtils.copyFile(provisioningProfile.getFile(),new File(installDir,"embedded.mobileprovision"));
     codesign(signIdentity,getOrCreateEntitlementsPList(getTaskAllow),installDir);
     new Executor(config.getLogger(),"ln").args("-f","-s","_CodeSignature/CodeResources",new File(installDir,"CodeResources")).exec();
