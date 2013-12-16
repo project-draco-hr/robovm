@@ -3,7 +3,10 @@
   SootMethod setter=getter == null ? method : null;
   soot.Type type=getter != null ? getter.getReturnType() : setter.getParameterType(0);
   Type memberType=null;
-  if (type instanceof PrimType) {
+  if (getter != null && hasPointerAnnotation(getter) || setter != null && hasPointerAnnotation(setter,0)) {
+    memberType=I8_PTR;
+  }
+ else   if (type instanceof PrimType) {
     memberType=getType(type);
   }
  else   if (getter != null && hasArrayAnnotation(getter) || setter != null && hasArrayAnnotation(setter,0)) {
@@ -16,7 +19,18 @@
     }
     Type baseType=null;
     if (type instanceof soot.ArrayType) {
-      baseType=getType(((soot.ArrayType)type).baseType);
+      soot.ArrayType arrayType=(soot.ArrayType)type;
+      if (isStruct(arrayType.baseType)) {
+        try {
+          baseType=getStructType(dataLayout,arrayType.baseType);
+        }
+ catch (        StackOverflowError e) {
+          throw new IllegalArgumentException("Struct type " + type + " refers to itself");
+        }
+      }
+ else {
+        baseType=getType(arrayType.baseType);
+      }
     }
  else     if (isStruct(type)) {
       boolean byVal=getter != null ? isPassByValue(getter) : isPassByValue(setter,0);
@@ -56,9 +70,6 @@
     }
   }
  else   if (isNativeObject(type)) {
-    memberType=I8_PTR;
-  }
- else   if (getter != null && hasPointerAnnotation(getter) || setter != null && hasPointerAnnotation(setter,0)) {
     memberType=I8_PTR;
   }
  else {

@@ -1,0 +1,39 @@
+{
+  assertEquals(192,StructWithArray.sizeOf());
+  final int D1=24;
+  Point[] array1;
+  Point[] array2;
+  Point[] array3;
+  StructWithArray s=new StructWithArray();
+  Point p=s.pointArrayAsPtr();
+  array1=s.pointArray1D();
+  assertEquals(D1,array1.length);
+  for (int i=0; i < array1.length; i++) {
+    assertEquals(0,array1[i].x());
+    assertEquals(0,array1[i].y());
+  }
+  for (int i=0; i < D1; i++) {
+    p.next(i).x(100 * i).y(-100 * i);
+  }
+  array2=s.pointArray1D();
+  assertEquals(D1,array2.length);
+  for (int i=0; i < array2.length; i++) {
+    assertEquals(100 * i,array2[i].x());
+    assertEquals(-100 * i,array2[i].y());
+  }
+  array3=new Point[D1];
+  for (int i=0; i < array3.length; i++) {
+    array3[i]=new Point().x(-1000 * i).y(1000 * i);
+  }
+  s.pointArray1D(array3);
+  for (int i=0; i < D1; i++) {
+    assertEquals(-1000 * i,p.next(i).x());
+    assertEquals(1000 * i,p.next(i).y());
+  }
+  try {
+    s.pointArray1D(new Point[D1 / 2]);
+    fail("Expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

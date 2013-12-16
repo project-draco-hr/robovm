@@ -1,0 +1,23 @@
+{
+  final T[][][] o=(T[][][])object;
+  Class<T> structClass=(Class<T>)object.getClass().getComponentType().getComponentType().getComponentType();
+  checkDimensions(structClass,"[%d][][]",o.length,d1);
+  int len1=o.length;
+  for (int i=0; i < len1; i++) {
+    T[][] p=o[i];
+    checkDimensions(structClass,"[][%d][]",p.length,d2);
+    int len2=p.length;
+    for (int j=0; j < len2; j++) {
+      checkDimensions(structClass,"[][][%d]",p[j].length,d3);
+    }
+  }
+  Struct<T> s=Struct.toStruct((Class<T>)structClass,handle);
+  for (int i=0; i < len1; i++) {
+    T[][] p=o[i];
+    int len2=p.length;
+    for (int j=0; j < len2; j++) {
+      s.update(o[i][j]);
+      s=s.next(d3);
+    }
+  }
+}

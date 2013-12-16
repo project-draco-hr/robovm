@@ -1,0 +1,22 @@
+{
+  if (array == null) {
+    throw new NullPointerException("array");
+  }
+  Class<?> cls=this.getClass();
+  int len=array.length;
+  for (int i=0; i < len; i++) {
+    T o=array[i];
+    if (o == null) {
+      throw new NullPointerException("null at index " + i);
+    }
+    if (o.getClass() != cls) {
+      throw new IllegalArgumentException("Expected an instance of " + cls.getName() + " at index "+ i+ ". Actual type: "+ o.getClass().getName());
+    }
+  }
+  long dst=getHandle();
+  int size=_sizeOf();
+  for (int i=0; i < len; i++) {
+    VM.memcpy(dst,array[i].getHandle(),size);
+    dst+=size;
+  }
+}

@@ -1,0 +1,27 @@
+{
+  assertEquals(192,StructWithArray.sizeOf());
+  final int D1=24;
+  StructWithArray s=new StructWithArray();
+  Point p=s.pointArrayAsPtr();
+  Point q;
+  Point r;
+  assertEquals(s.getHandle(),p.getHandle());
+  for (int i=0; i < D1; i++) {
+    p.next(i).x(100 * i).y(-100 * i);
+  }
+  q=s.pointArrayAsPtr();
+  for (int i=0; i < D1; i++) {
+    assertEquals(100 * i,q.next(i).x());
+    assertEquals(-100 * i,q.next(i).y());
+  }
+  r=Struct.allocate(Point.class,D1);
+  assertNotEquals(s.getHandle(),r.getHandle());
+  for (int i=0; i < D1; i++) {
+    r.next(i).x(-1000 * i).y(1000 * i);
+  }
+  s.pointArrayAsPtr(r);
+  for (int i=0; i < D1; i++) {
+    assertEquals(-1000 * i,p.next(i).x());
+    assertEquals(1000 * i,p.next(i).y());
+  }
+}
