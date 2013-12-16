@@ -1,0 +1,42 @@
+{
+  assertEquals(192,StructWithArray.sizeOf());
+  final int D1=24;
+  StructWithArray s=new StructWithArray();
+  FloatPtr p=s.floatArrayAsPtr();
+  FloatBuffer b1;
+  FloatBuffer b2;
+  FloatBuffer b3;
+  for (int i=0; i < D1; i++) {
+    p.next(i).set(i + 1);
+  }
+  b1=s.floatArrayAsBuffer();
+  assertEquals(D1,b1.capacity());
+  assertEquals(D1,b1.limit());
+  assertEquals(0,b1.position());
+  for (int i=0; i < D1; i++) {
+    assertEquals(i + 1,b1.get(i),0.0001f);
+  }
+  b2=ByteBuffer.allocateDirect(D1 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+  for (int i=0; i < D1; i++) {
+    b2.put(i,2 * (i + 1));
+  }
+  s.floatArrayAsBuffer(b2);
+  for (int i=0; i < D1; i++) {
+    assertEquals(2 * (i + 1),p.next(i).get(),0.0001f);
+  }
+  b3=FloatBuffer.allocate(D1);
+  assertFalse(b3.isDirect());
+  for (int i=0; i < D1; i++) {
+    b3.put(i,3 * (i + 1));
+  }
+  s.floatArrayAsBuffer(b3);
+  for (int i=0; i < D1; i++) {
+    assertEquals(3 * (i + 1),p.next(i).get(),0.0001f);
+  }
+  try {
+    s.floatArrayAsBuffer(FloatBuffer.allocate(D1 / 2));
+    fail("Expected IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

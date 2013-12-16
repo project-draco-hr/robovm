@@ -1,0 +1,73 @@
+{
+  Buffer buffer=(Buffer)object;
+  if (d1 != buffer.capacity()) {
+    Class<?> cls=null;
+    if (buffer instanceof ByteBuffer) {
+      cls=ByteBuffer.class;
+    }
+ else     if (buffer instanceof ShortBuffer) {
+      cls=ShortBuffer.class;
+    }
+ else     if (buffer instanceof CharBuffer) {
+      cls=CharBuffer.class;
+    }
+ else     if (buffer instanceof IntBuffer) {
+      cls=IntBuffer.class;
+    }
+ else     if (buffer instanceof LongBuffer) {
+      cls=LongBuffer.class;
+    }
+ else     if (buffer instanceof FloatBuffer) {
+      cls=FloatBuffer.class;
+    }
+ else     if (buffer instanceof DoubleBuffer) {
+      cls=DoubleBuffer.class;
+    }
+    throw new IllegalArgumentException("Expected " + cls.getName() + " of capacity "+ d1+ ". Got "+ cls.getName()+ " of capacity "+ buffer.capacity());
+  }
+  long src=0L;
+  Object array=null;
+  int offset=0;
+  int shift=VM.getInt(VM.getObjectAddress(buffer) + _ELEMENT_SIZE_SHIFT_OFFSET);
+  if (buffer.isDirect()) {
+    src=VM.getInt(VM.getObjectAddress(buffer) + EFFECTIVE_DIRECT_ADDRESS_OFFSET);
+  }
+ else {
+    if (buffer.hasArray()) {
+      array=buffer.array();
+      offset=buffer.arrayOffset();
+    }
+ else {
+      if (buffer instanceof ByteBuffer) {
+        array=new byte[d1];
+        ((ByteBuffer)buffer).get((byte[])array);
+      }
+ else       if (buffer instanceof ShortBuffer) {
+        array=new short[d1];
+        ((ShortBuffer)buffer).get((short[])array);
+      }
+ else       if (buffer instanceof CharBuffer) {
+        array=new char[d1];
+        ((CharBuffer)buffer).get((char[])array);
+      }
+ else       if (buffer instanceof IntBuffer) {
+        array=new int[d1];
+        ((IntBuffer)buffer).get((int[])array);
+      }
+ else       if (buffer instanceof LongBuffer) {
+        array=new long[d1];
+        ((LongBuffer)buffer).get((long[])array);
+      }
+ else       if (buffer instanceof FloatBuffer) {
+        array=new float[d1];
+        ((FloatBuffer)buffer).get((float[])array);
+      }
+ else       if (buffer instanceof DoubleBuffer) {
+        array=new double[d1];
+        ((DoubleBuffer)buffer).get((double[])array);
+      }
+    }
+    src=VM.getArrayValuesAddress(array);
+  }
+  VM.memcpy(handle,src + (offset << shift),d1 << shift);
+}

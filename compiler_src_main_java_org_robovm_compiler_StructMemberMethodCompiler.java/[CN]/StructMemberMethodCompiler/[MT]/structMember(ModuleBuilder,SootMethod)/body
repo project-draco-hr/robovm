@@ -46,7 +46,7 @@
         if (isPtr(type)) {
           result=marshalNativeToPtr(function,marshalerClassName,null,env,getPtrTargetClass(method),result,getPtrWrapCount(method));
         }
- else         if (type instanceof soot.ArrayType) {
+ else         if (type instanceof soot.ArrayType || memberType instanceof ArrayType && isInstanceOfClass(((RefType)type).getSootClass(),"java.nio.Buffer")) {
           result=marshalNativeToArray(function,marshalerClassName,env,targetClassName,result,getArrayDimensions(method));
         }
  else {
@@ -76,7 +76,7 @@
         if (memberType instanceof StructureType || memberType instanceof ArrayType) {
           call(function,CHECK_NULL,env,nativeValue);
         }
-        if (type instanceof soot.ArrayType) {
+        if (type instanceof soot.ArrayType || memberType instanceof ArrayType && isInstanceOfClass(((RefType)type).getSootClass(),"java.nio.Buffer")) {
           marshalArrayToNative(function,marshalerClassName,env,nativeValue,memberPtr.ref(),getArrayDimensions(method,0));
           nativeValue=null;
         }
