@@ -69,6 +69,10 @@
  else       if (isInstanceOfClass(c,"java.nio.DoubleBuffer")) {
         baseType=DOUBLE;
       }
+ else {
+        String marshalerClassName=getter != null ? getMarshalerClassName(getter,false) : getMarshalerClassName(setter,0,false);
+        baseType=getMarshalType(marshalerClassName,type,true);
+      }
     }
     if (baseType == null) {
       throw new IllegalArgumentException("Arrays of " + type + " is not supported");
@@ -98,7 +102,7 @@
   }
  else {
     String marshalerClassName=getter != null ? getMarshalerClassName(getter,false) : getMarshalerClassName(setter,0,false);
-    memberType=getMarshalType(marshalerClassName,type);
+    memberType=getMarshalType(marshalerClassName,type,false);
   }
   return memberType;
 }
