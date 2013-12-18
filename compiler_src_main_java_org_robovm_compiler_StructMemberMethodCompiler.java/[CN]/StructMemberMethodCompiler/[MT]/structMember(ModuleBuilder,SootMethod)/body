@@ -5,7 +5,7 @@
   function.add(new Load(handleI64,getFieldPtr(function,function.getParameterRef(1),offsetof(new StructureType(DATA_OBJECT,new StructureType(I64)),1,0),I64)));
   Variable handlePtr=function.newVariable(new PointerType(structType));
   function.add(new Inttoptr(handlePtr,handleI64.ref(),handlePtr.getType()));
-  int offset=getStructMemberOffset(method);
+  int offset=getStructMemberOffset(method) + 1;
   Type memberType=getStructMemberType(config.getDataLayout(),method);
   Variable memberPtr=function.newVariable(new PointerType(memberType));
   if (memberType != structType.getTypeAt(offset)) {
@@ -32,7 +32,7 @@
       result=tmp.ref();
     }
     if (needsMarshaler(type)) {
-      String marshalerClassName=getMarshalerClassName(method,true);
+      String marshalerClassName=getMarshalerClassName(method);
       String targetClassName=getInternalName(type);
       if (memberType instanceof PrimitiveType) {
         if (isEnum(type)) {
@@ -43,10 +43,7 @@
         }
       }
  else {
-        if (isPtr(type)) {
-          result=marshalNativeToPtr(function,marshalerClassName,null,env,getPtrTargetClass(method),result,getPtrWrapCount(method));
-        }
- else         if (memberType instanceof ArrayType && !isStruct(type)) {
+        if (memberType instanceof ArrayType && !isStruct(type)) {
           result=marshalNativeToArray(function,marshalerClassName,env,targetClassName,result,getArrayDimensions(method));
         }
  else {
@@ -63,7 +60,7 @@
     Value nativeValue=function.getParameterRef(2);
     soot.Type type=method.getParameterType(0);
     if (needsMarshaler(type)) {
-      String marshalerClassName=getMarshalerClassName(method,0,false);
+      String marshalerClassName=getMarshalerClassName(method,0);
       if (memberType instanceof PrimitiveType) {
         if (isEnum(type)) {
           nativeValue=marshalEnumObjectToNative(function,marshalerClassName,memberType,env,nativeValue);

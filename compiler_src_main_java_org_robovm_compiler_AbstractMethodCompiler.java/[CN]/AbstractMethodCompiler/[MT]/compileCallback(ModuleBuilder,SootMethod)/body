@@ -41,7 +41,7 @@
     Value arg=callbackFn.getParameterRef(i);
     soot.Type type=method.getParameterType(i);
     if (needsMarshaler(type)) {
-      String marshalerClassName=getMarshalerClassName(method,i,true);
+      String marshalerClassName=getMarshalerClassName(method,i);
       String targetClassName=getInternalName(type);
       if (arg.getType() instanceof PrimitiveType) {
         if (isEnum(type)) {
@@ -55,12 +55,7 @@
         MarshaledArg marshaledArg=new MarshaledArg();
         marshaledArg.paramIndex=i;
         marshaledArgs.add(marshaledArg);
-        if (isPtr(type)) {
-          arg=marshalNativeToPtr(callbackFn,marshalerClassName,marshaledArg,env,getPtrTargetClass(method,i),arg,getPtrWrapCount(method,i));
-        }
- else {
-          arg=marshalNativeToObject(callbackFn,marshalerClassName,marshaledArg,env,targetClassName,arg,false);
-        }
+        arg=marshalNativeToObject(callbackFn,marshalerClassName,marshaledArg,env,targetClassName,arg,false);
       }
     }
  else     if (hasPointerAnnotation(method,i)) {
@@ -70,13 +65,13 @@
   }
   Value result=call(callbackFn,targetFn,args);
   for (  MarshaledArg marshaledArg : marshaledArgs) {
-    String marshalerClassName=getMarshalerClassName(method,marshaledArg.paramIndex,false);
+    String marshalerClassName=getMarshalerClassName(method,marshaledArg.paramIndex);
     Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"updateNative","(Ljava/lang/Object;J)V");
     trampolines.add(invokestatic);
     call(callbackFn,invokestatic.getFunctionRef(),env,marshaledArg.object,marshaledArg.handle);
   }
   if (needsMarshaler(method.getReturnType())) {
-    String marshalerClassName=getMarshalerClassName(method,false);
+    String marshalerClassName=getMarshalerClassName(method);
     Type nativeType=callbackFn.getType().getReturnType();
     if (passByValue) {
       result=marshalObjectToNative(callbackFn,marshalerClassName,null,nativeType,env,result,true);
@@ -97,7 +92,7 @@
     result=marshalLongToPointer(callbackFn,result);
   }
  else   if (originalMethod != method) {
-    String marshalerClassName=getMarshalerClassName(originalMethod,false);
+    String marshalerClassName=getMarshalerClassName(originalMethod);
     PointerType nativeType=(PointerType)callbackFn.getType().getParameterTypes()[0];
     Value addr=marshalObjectToNative(callbackFn,marshalerClassName,null,nativeType,env,result);
     Variable src=callbackFn.newVariable(I8_PTR);

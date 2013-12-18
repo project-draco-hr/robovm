@@ -1,0 +1,25 @@
+{
+  Class<?> type=TYPE_CACHE.get(getClass());
+  if (type == null) {
+    type=(Class<?>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+    TYPE_CACHE.put(getClass(),type);
+  }
+  try {
+    Method toObject=TO_OBJECT_CACHE.get(type);
+    if (toObject == null) {
+      Class<?> marshaler=findMarshaler(type,type);
+      toObject=marshaler.getMethod("toObject",Class.class,long.class,boolean.class);
+      TO_OBJECT_CACHE.put(type,toObject);
+    }
+    return (S)toObject.invoke(null,type,handle,false);
+  }
+ catch (  InvocationTargetException e) {
+    throw new Error(e);
+  }
+catch (  NoSuchMethodException e) {
+    throw new Error(e);
+  }
+catch (  IllegalAccessException e) {
+    throw new Error(e);
+  }
+}
