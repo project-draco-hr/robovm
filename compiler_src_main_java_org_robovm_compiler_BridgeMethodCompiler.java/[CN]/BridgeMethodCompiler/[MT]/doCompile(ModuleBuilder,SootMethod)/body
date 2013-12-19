@@ -61,11 +61,11 @@
       Type nativeType=targetParameterTypes[i];
       if (nativeType instanceof PrimitiveType) {
         if (isEnum(type)) {
-          Value nativeValue=marshalEnumObjectToNative(fn,marshalerClassName,nativeType,env,args.get(i).getValue());
+          Value nativeValue=marshalEnumObjectToNative(fn,marshalerClassName,nativeType,env,args.get(i).getValue(),MarshalerFlags.CALL_TYPE_BRIDGE);
           args.set(i,new Argument(nativeValue));
         }
  else {
-          Value nativeValue=marshalValueObjectToNative(fn,marshalerClassName,nativeType,env,args.get(i).getValue());
+          Value nativeValue=marshalValueObjectToNative(fn,marshalerClassName,nativeType,env,args.get(i).getValue(),MarshalerFlags.CALL_TYPE_BRIDGE);
           args.set(i,new Argument(nativeValue));
         }
       }
@@ -84,7 +84,7 @@
         MarshaledArg marshaledArg=new MarshaledArg();
         marshaledArg.paramIndex=i;
         marshaledArgs.add(marshaledArg);
-        Value nativeValue=marshalObjectToNative(fn,marshalerClassName,marshaledArg,nativeType,env,args.get(i).getValue());
+        Value nativeValue=marshalObjectToNative(fn,marshalerClassName,marshaledArg,nativeType,env,args.get(i).getValue(),MarshalerFlags.CALL_TYPE_BRIDGE);
         args.set(i,new Argument(nativeValue,parameterAttributes));
       }
     }
@@ -100,28 +100,27 @@
   Value result=callWithArguments(fn,targetFn.ref(),args);
   trycatchLeave(fn,env);
   popNativeFrame(fn);
-  for (  MarshaledArg value : marshaledArgs) {
-    String marshalerClassName=getMarshalerClassName(method,value.paramIndex);
-    Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"updateObject","(Ljava/lang/Object;J)V");
-    trampolines.add(invokestatic);
-    call(fn,invokestatic.getFunctionRef(),env,value.object,value.handle);
-  }
+  updateObject(method,fn,env,MarshalerFlags.CALL_TYPE_BRIDGE,marshaledArgs);
   if (needsMarshaler(method.getReturnType())) {
     String marshalerClassName=getMarshalerClassName(method);
     String targetClassName=getInternalName(method.getReturnType());
     if (passByValue) {
-      result=marshalNativeToObject(fn,marshalerClassName,null,env,targetClassName,result,true,true);
+      Value stackCopy=createStackCopy(fn,result);
+      Variable src=fn.newVariable(I8_PTR);
+      fn.add(new Bitcast(src,stackCopy,I8_PTR));
+      Value heapCopy=call(fn,BC_COPY_STRUCT,env,src.ref(),new IntegerConstant(dataLayout.getAllocSize(result.getType())));
+      result=marshalNativeToObject(fn,marshalerClassName,null,env,targetClassName,heapCopy,MarshalerFlags.CALL_TYPE_BRIDGE);
     }
  else     if (targetFnType.getReturnType() instanceof PrimitiveType) {
       if (isEnum(method.getReturnType())) {
-        result=marshalNativeToEnumObject(fn,marshalerClassName,env,targetClassName,result);
+        result=marshalNativeToEnumObject(fn,marshalerClassName,env,targetClassName,result,MarshalerFlags.CALL_TYPE_BRIDGE);
       }
  else {
-        result=marshalNativeToValueObject(fn,marshalerClassName,env,targetClassName,result);
+        result=marshalNativeToValueObject(fn,marshalerClassName,env,targetClassName,result,MarshalerFlags.CALL_TYPE_BRIDGE);
       }
     }
  else {
-      result=marshalNativeToObject(fn,marshalerClassName,null,env,targetClassName,result,passByValue);
+      result=marshalNativeToObject(fn,marshalerClassName,null,env,targetClassName,result,MarshalerFlags.CALL_TYPE_BRIDGE);
     }
   }
  else   if (hasPointerAnnotation(method)) {
@@ -136,6 +135,8 @@
   fn.newBasicBlock(bbFailure.getLabel());
   trycatchLeave(fn,env);
   popNativeFrame(fn);
-  call(fn,BC_THROW_IF_EXCEPTION_OCCURRED,env);
+  Value ex=call(fn,BC_EXCEPTION_CLEAR,env);
+  updateObject(method,fn,env,MarshalerFlags.CALL_TYPE_BRIDGE,marshaledArgs);
+  call(fn,BC_THROW,env,ex);
   fn.add(new Unreachable());
 }

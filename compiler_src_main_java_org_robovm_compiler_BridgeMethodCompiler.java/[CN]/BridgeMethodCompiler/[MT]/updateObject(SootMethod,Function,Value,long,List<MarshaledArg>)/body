@@ -1,0 +1,14 @@
+{
+  for (  MarshaledArg value : marshaledArgs) {
+    String marshalerClassName=getMarshalerClassName(method,value.paramIndex);
+    Clazz marshalerClazz=config.getClazzes().load(marshalerClassName);
+    if (marshalerClazz != null) {
+      SootClass marshalerSootClass=marshalerClazz.getSootClass();
+      if (!marshalerSootClass.isPhantom() && marshalerSootClass.declaresMethod("updateObject",Arrays.asList(RefType.v("java.lang.Object"),LongType.v(),LongType.v()),VoidType.v())) {
+        Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),marshalerClassName,"updateObject","(Ljava/lang/Object;JJ)V");
+        trampolines.add(invokestatic);
+        call(fn,invokestatic.getFunctionRef(),env,value.object,value.handle,new IntegerConstant(flags));
+      }
+    }
+  }
+}

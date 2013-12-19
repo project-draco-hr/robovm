@@ -1,0 +1,14 @@
+{
+  Invokestatic invokeToObject=new Invokestatic(getInternalName(sootMethod.getDeclaringClass()),marshalerClassName,"toObject",String.format("(Ljava/lang/Class;JJ%s)Ljava/lang/Object;",arrayDimensionsDescriptor(dimensions.length)));
+  trampolines.add(invokeToObject);
+  Variable handle=fn.newVariable(I64);
+  fn.add(new Ptrtoint(handle,nativeValue,I64));
+  Value valueClass=ldcClass(fn,arrayClassName,env);
+  List<Value> args=new ArrayList<>();
+  args.add(env);
+  args.add(valueClass);
+  args.add(handle.ref());
+  args.add(new IntegerConstant(flags));
+  args.addAll(arrayDimensionsValues(dimensions));
+  return call(fn,invokeToObject.getFunctionRef(),args);
+}

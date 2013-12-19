@@ -36,18 +36,18 @@
       String targetClassName=getInternalName(type);
       if (memberType instanceof PrimitiveType) {
         if (isEnum(type)) {
-          result=marshalNativeToEnumObject(function,marshalerClassName,env,targetClassName,result);
+          result=marshalNativeToEnumObject(function,marshalerClassName,env,targetClassName,result,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER);
         }
  else {
-          result=marshalNativeToValueObject(function,marshalerClassName,env,targetClassName,result);
+          result=marshalNativeToValueObject(function,marshalerClassName,env,targetClassName,result,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER);
         }
       }
  else {
         if (memberType instanceof ArrayType && !isStruct(type)) {
-          result=marshalNativeToArray(function,marshalerClassName,env,targetClassName,result,getArrayDimensions(method));
+          result=marshalNativeToArray(function,marshalerClassName,env,targetClassName,result,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER,getArrayDimensions(method));
         }
  else {
-          result=marshalNativeToObject(function,marshalerClassName,null,env,targetClassName,result,false);
+          result=marshalNativeToObject(function,marshalerClassName,null,env,targetClassName,result,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER);
         }
       }
     }
@@ -63,10 +63,10 @@
       String marshalerClassName=getMarshalerClassName(method,0);
       if (memberType instanceof PrimitiveType) {
         if (isEnum(type)) {
-          nativeValue=marshalEnumObjectToNative(function,marshalerClassName,memberType,env,nativeValue);
+          nativeValue=marshalEnumObjectToNative(function,marshalerClassName,memberType,env,nativeValue,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER);
         }
  else {
-          nativeValue=marshalValueObjectToNative(function,marshalerClassName,memberType,env,nativeValue);
+          nativeValue=marshalValueObjectToNative(function,marshalerClassName,memberType,env,nativeValue,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER);
         }
       }
  else {
@@ -74,11 +74,11 @@
           call(function,CHECK_NULL,env,nativeValue);
         }
         if (memberType instanceof ArrayType && !isStruct(type)) {
-          marshalArrayToNative(function,marshalerClassName,env,nativeValue,memberPtr.ref(),getArrayDimensions(method,0));
+          marshalArrayToNative(function,marshalerClassName,env,nativeValue,memberPtr.ref(),MarshalerFlags.CALL_TYPE_STRUCT_MEMBER,getArrayDimensions(method,0));
           nativeValue=null;
         }
  else {
-          nativeValue=marshalObjectToNative(function,marshalerClassName,null,memberType,env,nativeValue);
+          nativeValue=marshalObjectToNative(function,marshalerClassName,null,memberType,env,nativeValue,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER);
         }
       }
     }
