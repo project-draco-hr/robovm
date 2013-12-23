@@ -1,0 +1,20 @@
+{
+  long callType=flags & MarshalerFlags.CALL_TYPE_MASK;
+  if (callType != MarshalerFlags.CALL_TYPE_BRIDGE) {
+    if (callType == MarshalerFlags.CALL_TYPE_CALLBACK) {
+      throw new UnsupportedOperationException("Marshaling String to pointer " + "for callback return values is not supported");
+    }
+    if (callType == MarshalerFlags.CALL_TYPE_STRUCT_MEMBER) {
+      throw new UnsupportedOperationException("Marshaling String to pointer " + "for struct member setter values is not supported");
+    }
+    throw new UnsupportedOperationException();
+  }
+  if (object == null) {
+    return 0L;
+  }
+  String s=(String)object;
+  byte[] bytes=s.getBytes(charset);
+  long handle=VM.allocateMemoryAtomic(bytes.length + 1);
+  VM.memcpy(handle,VM.getArrayValuesAddress(bytes),bytes.length);
+  return handle;
+}

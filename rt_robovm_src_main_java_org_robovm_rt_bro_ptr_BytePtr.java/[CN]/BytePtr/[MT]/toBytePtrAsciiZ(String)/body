@@ -1,17 +1,3 @@
 {
-  int length=s.length();
-  long handle=VM.allocateMemoryAtomic(length + 1);
-  byte[] bytes=new byte[length];
-  for (int i=0; i < length; i++) {
-    char c=s.charAt(i);
-    if (c < 0x80) {
-      bytes[i]=(byte)c;
-    }
- else {
-      bytes[i]='?';
-    }
-  }
-  VM.memcpy(handle,VM.getArrayValuesAddress(bytes),length);
-  VM.setByte(handle + length,(byte)0);
-  return Struct.toStruct(BytePtr.class,handle);
+  return toBytePtrAsciiZ(s,false);
 }

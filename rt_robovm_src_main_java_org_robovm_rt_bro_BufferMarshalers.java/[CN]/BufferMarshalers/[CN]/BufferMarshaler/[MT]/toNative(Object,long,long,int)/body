@@ -38,6 +38,10 @@
       offset=buffer.arrayOffset();
     }
  else {
+      int pos=buffer.position();
+      int limit=buffer.limit();
+      buffer.position(0);
+      buffer.limit(buffer.capacity());
       if (buffer instanceof ByteBuffer) {
         array=new byte[d1];
         ((ByteBuffer)buffer).get((byte[])array);
@@ -66,6 +70,8 @@
         array=new double[d1];
         ((DoubleBuffer)buffer).get((double[])array);
       }
+      buffer.position(pos);
+      buffer.limit(limit);
     }
     src=VM.getArrayValuesAddress(array);
   }
