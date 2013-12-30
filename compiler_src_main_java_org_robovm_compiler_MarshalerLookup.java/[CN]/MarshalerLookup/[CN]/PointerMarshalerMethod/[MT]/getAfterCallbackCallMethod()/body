@@ -1,0 +1,16 @@
+{
+  if (hasSearchedForAfterCallbackCallMethod) {
+    return afterCallbackCallMethod;
+  }
+  hasSearchedForAfterCallbackCallMethod=true;
+  List<soot.Type> paramTypes=Arrays.asList(LongType.v(),method.getReturnType(),LongType.v());
+  for (  SootMethod m : method.getDeclaringClass().getMethods()) {
+    if (hasAfterCallbackCallAnnotation(m)) {
+      if (m.getReturnType() == VoidType.v() && m.getParameterTypes().equals(paramTypes)) {
+        afterCallbackCallMethod=m;
+        break;
+      }
+    }
+  }
+  return afterCallbackCallMethod;
+}

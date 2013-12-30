@@ -1,0 +1,59 @@
+{
+  if (pointerAnno == null && valueAnno == null && arrayAnno == null) {
+    return false;
+  }
+  if (pointerAnno != null && (valueAnno != null || arrayAnno != null) || (valueAnno != null && arrayAnno != null)) {
+    return false;
+  }
+  @SuppressWarnings("unchecked") List<soot.Type> paramTypes=m.getParameterTypes();
+  if (paramTypes.size() < 3) {
+    return false;
+  }
+  if (!(paramTypes.get(0) instanceof RefType)) {
+    return false;
+  }
+  SootClass sc=((RefType)paramTypes.get(0)).getSootClass();
+  if (!sc.getName().equals("java.lang.Class")) {
+    return false;
+  }
+  soot.Type returnType=m.getReturnType();
+  if (pointerAnno != null) {
+    if (!(returnType instanceof RefLikeType)) {
+      return false;
+    }
+    if (paramTypes.size() == 3) {
+      if (paramTypes.get(1) == LongType.v() && paramTypes.get(2) == LongType.v()) {
+        return true;
+      }
+    }
+  }
+ else   if (valueAnno != null) {
+    if (!(returnType instanceof RefLikeType)) {
+      return false;
+    }
+    if (paramTypes.size() == 3) {
+      if (paramTypes.get(1) instanceof PrimType && paramTypes.get(2) == LongType.v()) {
+        return true;
+      }
+    }
+  }
+ else   if (arrayAnno != null) {
+    if (!(returnType instanceof RefLikeType)) {
+      return false;
+    }
+    if (getBaseType(m,arrayAnno) == null) {
+      return false;
+    }
+    if (paramTypes.size() > 3) {
+      if (paramTypes.get(1) == LongType.v() && paramTypes.get(2) == LongType.v()) {
+        for (int i=3; i < paramTypes.size(); i++) {
+          if (paramTypes.get(i) != IntType.v()) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+  }
+  return false;
+}

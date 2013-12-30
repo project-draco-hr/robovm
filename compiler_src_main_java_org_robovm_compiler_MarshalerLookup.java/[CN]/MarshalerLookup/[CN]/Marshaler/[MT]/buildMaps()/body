@@ -1,0 +1,56 @@
+{
+  if (toObjectMethods == null && toNativeMethods == null && toArrayObjectMethods == null && toNativeArrayMethods == null) {
+    toObjectMethods=new HashMap<>();
+    toNativeMethods=new HashMap<>();
+    toArrayObjectMethods=new HashMap<>();
+    toNativeArrayMethods=new HashMap<>();
+    for (    SootMethod m : clazz.getSootClass().getMethods()) {
+      if (m.isStatic() && m.isPublic()) {
+        AnnotationTag pointerAnno=getMarshalsPointerAnnotation(m);
+        AnnotationTag valueAnno=getMarshalsValueAnnotation(m);
+        AnnotationTag arrayAnno=getMarshalsArrayAnnotation(m);
+        if (isToObject(m,pointerAnno,valueAnno,arrayAnno)) {
+          AnnotationTag anno=pointerAnno != null ? pointerAnno : (valueAnno != null ? valueAnno : arrayAnno);
+          Set<Long> supportedCallTypes=getSupportedCallTypes(anno);
+          if (pointerAnno != null) {
+            toObjectMethods.put(getDescriptor(m.getReturnType()),new PointerMarshalerMethod(m,supportedCallTypes));
+          }
+ else           if (valueAnno != null) {
+            toObjectMethods.put(getDescriptor(m.getReturnType()),new ValueMarshalerMethod(m,supportedCallTypes));
+          }
+ else {
+            int dimCount=m.getParameterCount() - 3;
+            Map<String,ArrayMarshalerMethod> map=toArrayObjectMethods.get(dimCount);
+            if (map == null) {
+              map=new HashMap<>();
+              toArrayObjectMethods.put(dimCount,map);
+            }
+            map.put(getDescriptor(m.getReturnType()),new ArrayMarshalerMethod(m,supportedCallTypes,getBaseType(m,arrayAnno)));
+          }
+        }
+ else         if (isToNative(m,pointerAnno,valueAnno,arrayAnno)) {
+          AnnotationTag anno=pointerAnno != null ? pointerAnno : (valueAnno != null ? valueAnno : arrayAnno);
+          Set<Long> supportedCallTypes=getSupportedCallTypes(anno);
+          if (pointerAnno != null) {
+            toNativeMethods.put(getDescriptor(m.getParameterType(0)),new PointerMarshalerMethod(m,supportedCallTypes));
+          }
+ else           if (valueAnno != null) {
+            toNativeMethods.put(getDescriptor(m.getParameterType(0)),new ValueMarshalerMethod(m,supportedCallTypes));
+          }
+ else {
+            int dimCount=m.getParameterCount() - 3;
+            Map<String,ArrayMarshalerMethod> map=toNativeArrayMethods.get(dimCount);
+            if (map == null) {
+              map=new HashMap<>();
+              toNativeArrayMethods.put(dimCount,map);
+            }
+            map.put(getDescriptor(m.getParameterType(0)),new ArrayMarshalerMethod(m,supportedCallTypes,getBaseType(m,arrayAnno)));
+          }
+        }
+ else         if (pointerAnno != null || valueAnno != null || arrayAnno != null) {
+          config.getLogger().warn("Ignoring invalid marshaler method %s",m);
+        }
+      }
+    }
+  }
+}

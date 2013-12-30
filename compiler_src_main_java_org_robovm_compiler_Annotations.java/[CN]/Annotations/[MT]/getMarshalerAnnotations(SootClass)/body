@@ -1,0 +1,17 @@
+{
+  List<AnnotationTag> tags=new ArrayList<AnnotationTag>();
+  AnnotationTag marshaler=getAnnotation(clazz,MARSHALER);
+  if (marshaler != null) {
+    tags.add(marshaler);
+  }
+ else {
+    AnnotationTag marshalers=getAnnotation(clazz,MARSHALERS);
+    if (marshalers != null) {
+      for (      AnnotationElem e : ((AnnotationArrayElem)marshalers.getElemAt(0)).getValues()) {
+        AnnotationAnnotationElem elem=(AnnotationAnnotationElem)e;
+        tags.add(elem.getValue());
+      }
+    }
+  }
+  return tags;
+}

@@ -1,0 +1,17 @@
+{
+  if (buffer == null) {
+    return 0L;
+  }
+  if (!buffer.isDirect() && !buffer.hasArray()) {
+    throw new IllegalArgumentException("Only direct and array-backed " + "java.nio.Buffers can be marshaled to pointers.");
+  }
+  if (buffer.isDirect()) {
+    return VM.getInt(VM.getObjectAddress(buffer) + EFFECTIVE_DIRECT_ADDRESS_OFFSET);
+  }
+ else {
+    Object array=buffer.array();
+    int offset=buffer.arrayOffset();
+    int shift=VM.getInt(VM.getObjectAddress(buffer) + _ELEMENT_SIZE_SHIFT_OFFSET);
+    return VM.getArrayValuesAddress(array) + (offset << shift);
+  }
+}

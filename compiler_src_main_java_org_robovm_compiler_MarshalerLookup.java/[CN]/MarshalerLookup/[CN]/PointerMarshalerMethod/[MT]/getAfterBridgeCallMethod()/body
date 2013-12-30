@@ -1,0 +1,16 @@
+{
+  if (hasSearchedForAfterBridgeCallMethod) {
+    return afterBridgeCallMethod;
+  }
+  hasSearchedForAfterBridgeCallMethod=true;
+  List<soot.Type> paramTypes=Arrays.asList(method.getParameterType(0),LongType.v(),LongType.v());
+  for (  SootMethod m : method.getDeclaringClass().getMethods()) {
+    if (hasAfterBridgeCallAnnotation(m)) {
+      if (m.getReturnType() == VoidType.v() && m.getParameterTypes().equals(paramTypes)) {
+        afterBridgeCallMethod=m;
+        break;
+      }
+    }
+  }
+  return afterBridgeCallMethod;
+}

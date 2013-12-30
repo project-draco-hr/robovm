@@ -1,0 +1,23 @@
+{
+  soot.Type type=marshalSite.getType();
+  SootClass sc=null;
+  if (type instanceof RefType) {
+    sc=((RefType)type).getSootClass();
+  }
+ else   if (type instanceof ArrayType && ((ArrayType)type).baseType instanceof RefType) {
+    sc=((RefType)((ArrayType)type).baseType).getSootClass();
+  }
+  List<Marshaler> result=new ArrayList<>();
+  Set<String> visited=new HashSet<>();
+  Set<String> seen=new HashSet<>();
+  if (sc != null) {
+    findMarshalers(sc,result,visited,seen,false);
+  }
+  findMarshalers(marshalSite.method.getDeclaringClass(),result,visited,seen,searchBuiltins);
+  for (  Marshaler marshaler : result) {
+    if (marshaler.canMarshal(marshalSite)) {
+      return marshaler;
+    }
+  }
+  return null;
+}

@@ -1,0 +1,11 @@
+{
+  for (  MarshaledArg value : marshaledArgs) {
+    MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,value.paramIndex));
+    SootMethod afterMethod=((PointerMarshalerMethod)marshalerMethod).getAfterCallbackCallMethod();
+    if (afterMethod != null) {
+      Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),getInternalName(afterMethod.getDeclaringClass()),afterMethod.getName(),getDescriptor(afterMethod));
+      trampolines.add(invokestatic);
+      call(fn,invokestatic.getFunctionRef(),env,value.handle,value.object,new IntegerConstant(flags));
+    }
+  }
+}

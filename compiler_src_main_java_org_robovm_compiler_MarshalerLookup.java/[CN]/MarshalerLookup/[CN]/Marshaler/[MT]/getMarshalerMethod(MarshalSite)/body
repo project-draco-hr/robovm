@@ -1,0 +1,21 @@
+{
+  buildMaps();
+  Map<String,? extends MarshalerMethod> map=null;
+  if (marshalSite.isArray()) {
+    int dimCount=Bro.getArrayDimensions(marshalSite.method,marshalSite.paramIdx).length;
+    map=marshalSite.isToNative() ? toNativeArrayMethods.get(dimCount) : toArrayObjectMethods.get(dimCount);
+    if (map == null) {
+      return null;
+    }
+  }
+ else {
+    map=marshalSite.isToNative() ? toNativeMethods : toObjectMethods;
+  }
+  MarshalerMethod m=findMarshalerMethod(marshalSite.getType(),map);
+  if (m != null) {
+    if (m.supportsCallType(marshalSite.getCallType())) {
+      return m;
+    }
+  }
+  return null;
+}

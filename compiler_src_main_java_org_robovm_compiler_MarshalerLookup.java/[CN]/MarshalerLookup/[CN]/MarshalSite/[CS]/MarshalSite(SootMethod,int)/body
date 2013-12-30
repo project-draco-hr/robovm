@@ -1,0 +1,23 @@
+{
+  this.method=method;
+  this.paramIdx=paramIdx;
+  this.type=paramIdx == -1 ? method.getReturnType() : method.getParameterType(paramIdx);
+  if (hasBridgeAnnotation(method)) {
+    callType=Bro.MarshalerFlags.CALL_TYPE_BRIDGE;
+    callTypeName="@Bridge";
+    array=false;
+  }
+ else   if (hasCallbackAnnotation(method)) {
+    callType=Bro.MarshalerFlags.CALL_TYPE_CALLBACK;
+    callTypeName="@Callback";
+    array=false;
+  }
+ else   if (hasStructMemberAnnotation(method)) {
+    callType=Bro.MarshalerFlags.CALL_TYPE_STRUCT_MEMBER;
+    callTypeName="@StructMember";
+    array=paramIdx == -1 ? hasArrayAnnotation(method) : hasArrayAnnotation(method,paramIdx);
+  }
+ else {
+    throw new IllegalArgumentException();
+  }
+}

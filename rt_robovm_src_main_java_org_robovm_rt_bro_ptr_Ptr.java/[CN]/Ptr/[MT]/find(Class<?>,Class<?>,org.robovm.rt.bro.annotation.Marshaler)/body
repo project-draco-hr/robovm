@@ -1,0 +1,15 @@
+{
+  Class<?> marshalerClass=anno.value();
+  for (  Method method : marshalerClass.getMethods()) {
+    if (method.isAnnotationPresent(MarshalsPointer.class)) {
+      Class<?> returnType=method.getReturnType();
+      Class<?>[] paramTypes=method.getParameterTypes();
+      if (!returnType.isPrimitive() && paramTypes.length == 3 && paramTypes[0] == Class.class && paramTypes[1] == long.class && paramTypes[2] == long.class) {
+        if (returnType.isAssignableFrom(findClass)) {
+          return method;
+        }
+      }
+    }
+  }
+  return null;
+}

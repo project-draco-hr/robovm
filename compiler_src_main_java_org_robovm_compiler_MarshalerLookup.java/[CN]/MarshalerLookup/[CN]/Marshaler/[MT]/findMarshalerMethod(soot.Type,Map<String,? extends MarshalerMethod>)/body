@@ -1,0 +1,40 @@
+{
+  MarshalerMethod m=map.get(getDescriptor(type));
+  if (m != null) {
+    return m;
+  }
+  if (type instanceof RefType) {
+    SootClass sc=((RefType)type).getSootClass();
+    if (sc.hasSuperclass()) {
+      m=findMarshalerMethod(sc.getSuperclass().getType(),map);
+      if (m != null) {
+        return m;
+      }
+    }
+    for (    SootClass ifs : sc.getInterfaces()) {
+      m=findMarshalerMethod(ifs.getType(),map);
+      if (m != null) {
+        return m;
+      }
+    }
+  }
+ else   if (type instanceof ArrayType) {
+    ArrayType arrayType=(ArrayType)type;
+    if (arrayType.baseType instanceof RefType) {
+      SootClass sc=((RefType)arrayType.baseType).getSootClass();
+      if (sc.hasSuperclass()) {
+        m=findMarshalerMethod(makeArrayType(sc.getSuperclass().getType(),arrayType.numDimensions),map);
+        if (m != null) {
+          return m;
+        }
+      }
+      for (      SootClass ifs : sc.getInterfaces()) {
+        m=findMarshalerMethod(makeArrayType(ifs.getType(),arrayType.numDimensions),map);
+        if (m != null) {
+          return m;
+        }
+      }
+    }
+  }
+  return null;
+}

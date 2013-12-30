@@ -1,0 +1,22 @@
+{
+  @SuppressWarnings("unchecked") ArrayList<soot.Type> newParameterTypes=new ArrayList<soot.Type>(originalMethod.getParameterTypes());
+  newParameterTypes.add(0,originalMethod.getReturnType());
+  SootMethod method=new SootMethod(originalMethod.getName(),newParameterTypes,VoidType.v(),originalMethod.getModifiers());
+  method.setDeclaringClass(originalMethod.getDeclaringClass());
+  method.setDeclared(true);
+  method.addAllTagsOf(originalMethod);
+  method.removeTag("VisibilityParameterAnnotationTag");
+  VisibilityParameterAnnotationTag vpaTag=new VisibilityParameterAnnotationTag(newParameterTypes.size(),0);
+  VisibilityAnnotationTag vaTag=new VisibilityAnnotationTag(0);
+  vaTag.addAnnotation(new AnnotationTag(STRUCT_RET,0));
+  vpaTag.addVisibilityAnnotation(vaTag);
+  for (int i=0; i < originalMethod.getParameterCount(); i++) {
+    vaTag=new VisibilityAnnotationTag(0);
+    for (    AnnotationTag tag : getParameterAnnotations(originalMethod,i)) {
+      vaTag.addAnnotation(tag);
+    }
+    vpaTag.addVisibilityAnnotation(vaTag);
+  }
+  method.addTag(vpaTag);
+  return method;
+}

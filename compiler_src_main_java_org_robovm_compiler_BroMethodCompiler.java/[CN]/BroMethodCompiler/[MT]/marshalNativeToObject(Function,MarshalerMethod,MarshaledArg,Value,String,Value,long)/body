@@ -1,0 +1,16 @@
+{
+  if (nativeValue.getType() instanceof StructureType) {
+    nativeValue=createStackCopy(fn,nativeValue);
+  }
+  Invokestatic invokestatic=marshalerMethod.getInvokeStatic(sootMethod.getDeclaringClass());
+  trampolines.add(invokestatic);
+  Value valueClass=ldcClass(fn,valueClassName,env);
+  Variable handle=fn.newVariable(I64);
+  fn.add(new Ptrtoint(handle,nativeValue,I64));
+  Value object=call(fn,invokestatic.getFunctionRef(),env,valueClass,handle.ref(),new IntegerConstant(flags));
+  if (marshaledArg != null) {
+    marshaledArg.handle=handle.ref();
+    marshaledArg.object=object;
+  }
+  return object;
+}

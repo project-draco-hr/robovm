@@ -1,0 +1,62 @@
+{
+  AnnotationClassElem el=(AnnotationClassElem)getElemByName(anno,"baseType");
+  if (el != null) {
+switch (el.getDesc().charAt(0)) {
+case 'Z':
+      return BooleanType.v();
+case 'B':
+    return ByteType.v();
+case 'S':
+  return ShortType.v();
+case 'C':
+return CharType.v();
+case 'I':
+return IntType.v();
+case 'J':
+return LongType.v();
+case 'F':
+return FloatType.v();
+case 'D':
+return DoubleType.v();
+}
+return null;
+}
+soot.Type t=m.getReturnType();
+if (t == VoidType.v()) {
+t=m.getParameterType(0);
+}
+if (t instanceof RefType) {
+SootClass c=((RefType)t).getSootClass();
+if (isInstanceOfClass(c,"java.nio.ByteBuffer")) {
+return ByteType.v();
+}
+ else if (isInstanceOfClass(c,"java.nio.ShortBuffer")) {
+return ShortType.v();
+}
+ else if (isInstanceOfClass(c,"java.nio.CharBuffer")) {
+return CharType.v();
+}
+ else if (isInstanceOfClass(c,"java.nio.IntBuffer")) {
+return IntType.v();
+}
+ else if (isInstanceOfClass(c,"java.nio.LongBuffer")) {
+return LongType.v();
+}
+ else if (isInstanceOfClass(c,"java.nio.FloatBuffer")) {
+return FloatType.v();
+}
+ else if (isInstanceOfClass(c,"java.nio.DoubleBuffer")) {
+return DoubleType.v();
+}
+ else if (isInstanceOfClass(c,"org.robovm.rt.bro.Struct")) {
+return config.getClazzes().load("org/robovm/rt/bro/Struct").getSootClass().getType();
+}
+}
+ else if (t instanceof ArrayType) {
+ArrayType arrayType=(ArrayType)t;
+if (arrayType.baseType instanceof PrimType || isInstanceOfClass(arrayType.baseType,"org.robovm.rt.bro.Struct")) {
+return arrayType.baseType;
+}
+}
+return null;
+}

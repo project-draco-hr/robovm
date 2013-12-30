@@ -1,6 +1,7 @@
 {
   methodCompiler.reset(clazz);
   bridgeMethodCompiler.reset(clazz);
+  callbackMethodCompiler.reset(clazz);
   nativeMethodCompiler.reset(clazz);
   structMemberMethodCompiler.reset(clazz);
   sootClass=clazz.getSootClass();
@@ -46,10 +47,10 @@
   }
   for (  SootMethod method : sootClass.getMethods()) {
     String name=method.getName();
-    if (isBridge(method)) {
+    if (hasBridgeAnnotation(method)) {
       bridgeMethod(method);
     }
- else     if (isStruct(sootClass) && ("_sizeOf".equals(name) || "sizeOf".equals(name) || isStructMember(method))) {
+ else     if (isStruct(sootClass) && ("_sizeOf".equals(name) || "sizeOf".equals(name) || hasStructMemberAnnotation(method))) {
       structMember(method);
     }
  else     if (method.isNative()) {
@@ -57,6 +58,9 @@
     }
  else     if (!method.isAbstract()) {
       method(method);
+    }
+    if (hasCallbackAnnotation(method)) {
+      callbackMethod(method);
     }
     if (!name.equals("<clinit>") && !name.equals("<init>") && !method.isPrivate()&& !method.isStatic()&& !Modifier.isFinal(method.getModifiers())&& !Modifier.isFinal(sootClass.getModifiers())) {
       createLookupFunction(method);

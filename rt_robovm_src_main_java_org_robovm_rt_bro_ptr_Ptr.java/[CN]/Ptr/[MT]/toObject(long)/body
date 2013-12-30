@@ -7,16 +7,12 @@
   try {
     Method toObject=TO_OBJECT_CACHE.get(type);
     if (toObject == null) {
-      Class<?> marshaler=findMarshaler(type,type);
-      toObject=marshaler.getMethod("toObject",Class.class,long.class,long.class);
+      toObject=findMarshaler(type,type);
       TO_OBJECT_CACHE.put(type,toObject);
     }
     return (S)toObject.invoke(null,type,handle,MarshalerFlags.CALL_TYPE_PTR);
   }
  catch (  InvocationTargetException e) {
-    throw new Error(e);
-  }
-catch (  NoSuchMethodException e) {
     throw new Error(e);
   }
 catch (  IllegalAccessException e) {

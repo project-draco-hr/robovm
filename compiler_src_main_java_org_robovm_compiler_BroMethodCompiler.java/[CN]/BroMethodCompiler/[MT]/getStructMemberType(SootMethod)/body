@@ -1,0 +1,83 @@
+{
+  SootMethod getter=method.getParameterCount() == 0 ? method : null;
+  SootMethod setter=getter == null ? method : null;
+  soot.Type type=getter != null ? getter.getReturnType() : setter.getParameterType(0);
+  Type memberType=null;
+  if (getter != null && hasPointerAnnotation(getter) || setter != null && hasPointerAnnotation(setter,0)) {
+    memberType=I8_PTR;
+  }
+ else   if (type instanceof PrimType) {
+    memberType=getType(type);
+  }
+ else   if (getter != null && hasArrayAnnotation(getter) || setter != null && hasArrayAnnotation(setter,0)) {
+    int[] dimensions=getter != null ? getArrayDimensions(getter) : getArrayDimensions(setter,0);
+    if (dimensions == null || dimensions.length == 0) {
+      throw new IllegalArgumentException("No dimensions specified for @Array annotation on struct member " + (getter != null ? "getter" : "setter") + " "+ method);
+    }
+    if (type instanceof soot.ArrayType && ((soot.ArrayType)type).numDimensions != dimensions.length) {
+      throw new IllegalArgumentException("Mismatch in number of dimennsions for @Array annotation " + "and struct member type on struct member " + (getter != null ? "getter" : "setter") + " "+ method);
+    }
+    Type baseType=null;
+    if (type instanceof soot.ArrayType) {
+      soot.ArrayType arrayType=(soot.ArrayType)type;
+      if (isStruct(arrayType.baseType)) {
+        try {
+          baseType=getStructType(arrayType.baseType);
+        }
+ catch (        StackOverflowError e) {
+          throw new IllegalArgumentException("Struct type " + type + " refers to itself");
+        }
+      }
+ else {
+        baseType=getType(arrayType.baseType);
+      }
+    }
+ else     if (isStruct(type)) {
+      try {
+        baseType=getStructType(type);
+      }
+ catch (      StackOverflowError e) {
+        throw new IllegalArgumentException("Struct type " + type + " refers to itself");
+      }
+    }
+ else     if (type instanceof RefType) {
+      MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(getter != null ? new MarshalSite(getter) : new MarshalSite(setter,0));
+      baseType=getType(((ArrayMarshalerMethod)marshalerMethod).getBaseType());
+    }
+    if (baseType == null) {
+      throw new IllegalArgumentException("Arrays of " + type + " is not supported");
+    }
+    long total=dimensions[0];
+    for (int i=1; i < dimensions.length; i++) {
+      total*=dimensions[i];
+    }
+    memberType=new ArrayType(total,baseType);
+  }
+ else   if (isStruct(type)) {
+    boolean byVal=getter != null ? isPassByValue(getter) : isPassByValue(setter,0);
+    if (!byVal) {
+      memberType=I8_PTR;
+    }
+ else {
+      try {
+        memberType=getStructType(type);
+      }
+ catch (      StackOverflowError e) {
+        throw new IllegalArgumentException("Struct type " + type + " refers to itself");
+      }
+    }
+  }
+ else   if (isNativeObject(type)) {
+    memberType=I8_PTR;
+  }
+ else {
+    MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(getter != null ? new MarshalSite(getter) : new MarshalSite(setter,0));
+    if (marshalerMethod instanceof ValueMarshalerMethod) {
+      memberType=((ValueMarshalerMethod)marshalerMethod).getNativeType();
+    }
+ else {
+      memberType=I8_PTR;
+    }
+  }
+  return memberType;
+}
