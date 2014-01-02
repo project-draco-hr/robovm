@@ -1,0 +1,27 @@
+{
+  soot.Type type=method.getParameterType(0);
+  if (needsMarshaler(type)) {
+    MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,0));
+    if (memberType instanceof PrimitiveType) {
+      value=marshalValueObjectToNative(function,marshalerMethod,memberType,env,value,flags);
+    }
+ else {
+      if (memberType instanceof StructureType || memberType instanceof ArrayType) {
+        call(function,CHECK_NULL,env,value);
+      }
+      if (memberType instanceof ArrayType) {
+        marshalArrayToNative(function,marshalerMethod,env,value,memberPtr,flags,getArrayDimensions(method,0));
+        value=null;
+      }
+ else {
+        value=marshalObjectToNative(function,marshalerMethod,null,memberType,env,value,flags);
+      }
+    }
+  }
+ else   if (hasPointerAnnotation(method,0)) {
+    value=marshalLongToPointer(function,value);
+  }
+  if (value != null) {
+    function.add(new Store(value,memberPtr));
+  }
+}

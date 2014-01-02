@@ -18,66 +18,12 @@
   }
   VariableRef env=function.getParameterRef(0);
   if (method.getParameterCount() == 0) {
-    soot.Type type=method.getReturnType();
-    Value result=null;
-    if (memberType instanceof StructureType) {
-      result=memberPtr.ref();
-    }
- else     if (memberType instanceof ArrayType) {
-      result=memberPtr.ref();
-    }
- else {
-      Variable tmp=function.newVariable(memberType);
-      function.add(new Load(tmp,memberPtr.ref()));
-      result=tmp.ref();
-    }
-    if (needsMarshaler(type)) {
-      MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method));
-      String targetClassName=getInternalName(type);
-      if (memberType instanceof PrimitiveType) {
-        result=marshalNativeToValueObject(function,marshalerMethod,env,targetClassName,result,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER);
-      }
- else {
-        if (memberType instanceof ArrayType) {
-          result=marshalNativeToArray(function,marshalerMethod,env,targetClassName,result,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER,getArrayDimensions(method));
-        }
- else {
-          result=marshalNativeToObject(function,marshalerMethod,null,env,targetClassName,result,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER);
-        }
-      }
-    }
- else     if (hasPointerAnnotation(method)) {
-      result=marshalPointerToLong(function,result);
-    }
+    Value result=loadValueForGetter(method,function,memberType,memberPtr.ref(),function.getParameterRef(0),MarshalerFlags.CALL_TYPE_STRUCT_MEMBER);
     function.add(new Ret(result));
   }
  else {
-    Value nativeValue=function.getParameterRef(2);
-    soot.Type type=method.getParameterType(0);
-    if (needsMarshaler(type)) {
-      MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,0));
-      if (memberType instanceof PrimitiveType) {
-        nativeValue=marshalValueObjectToNative(function,marshalerMethod,memberType,env,nativeValue,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER);
-      }
- else {
-        if (memberType instanceof StructureType || memberType instanceof ArrayType) {
-          call(function,CHECK_NULL,env,nativeValue);
-        }
-        if (memberType instanceof ArrayType) {
-          marshalArrayToNative(function,marshalerMethod,env,nativeValue,memberPtr.ref(),MarshalerFlags.CALL_TYPE_STRUCT_MEMBER,getArrayDimensions(method,0));
-          nativeValue=null;
-        }
- else {
-          nativeValue=marshalObjectToNative(function,marshalerMethod,null,memberType,env,nativeValue,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER);
-        }
-      }
-    }
- else     if (hasPointerAnnotation(method,0)) {
-      nativeValue=marshalLongToPointer(function,nativeValue);
-    }
-    if (nativeValue != null) {
-      function.add(new Store(nativeValue,memberPtr.ref()));
-    }
+    Value value=function.getParameterRef(2);
+    storeValueForSetter(method,function,memberType,memberPtr.ref(),env,value,MarshalerFlags.CALL_TYPE_STRUCT_MEMBER);
     if (method.getReturnType().equals(VoidType.v())) {
       function.add(new Ret());
     }

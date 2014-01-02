@@ -1,0 +1,29 @@
+{
+  validateGlobalValueMethod(method);
+  Function fn=FunctionBuilder.method(method);
+  moduleBuilder.addFunction(fn);
+  Type valueType=getStructMemberType(method);
+  Variable valuePtr=fn.newVariable(new PointerType(valueType));
+  Global valuePtrPtr=new Global(getGlobalValuePtrName(method),_private,new NullConstant(I8_PTR));
+  moduleBuilder.addGlobal(valuePtrPtr);
+  fn.add(new Load(valuePtr,new ConstantBitcast(valuePtrPtr.ref(),new PointerType(valuePtr.getType()))));
+  Label nullLabel=new Label();
+  Label notNullLabel=new Label();
+  Variable nullCheck=fn.newVariable(I1);
+  fn.add(new Icmp(nullCheck,Condition.eq,valuePtr.ref(),new NullConstant(valuePtr.getType())));
+  fn.add(new Br(nullCheck.ref(),fn.newBasicBlockRef(nullLabel),fn.newBasicBlockRef(notNullLabel)));
+  fn.newBasicBlock(nullLabel);
+  VariableRef env=fn.getParameterRef(0);
+  call(fn,BC_THROW_UNSATISIFED_LINK_ERROR,env,moduleBuilder.getString(String.format("@GlobalValue method %s.%s%s not bound",className,method.getName(),getDescriptor(method))));
+  fn.add(new Unreachable());
+  fn.newBasicBlock(notNullLabel);
+  if (method.getParameterCount() == 0) {
+    Value result=loadValueForGetter(method,fn,valueType,valuePtr.ref(),env,MarshalerFlags.CALL_TYPE_GLOBAL_VALUE);
+    fn.add(new Ret(result));
+  }
+ else {
+    Value value=fn.getParameterRef(1);
+    storeValueForSetter(method,fn,valueType,valuePtr.ref(),env,value,MarshalerFlags.CALL_TYPE_GLOBAL_VALUE);
+    fn.add(new Ret());
+  }
+}

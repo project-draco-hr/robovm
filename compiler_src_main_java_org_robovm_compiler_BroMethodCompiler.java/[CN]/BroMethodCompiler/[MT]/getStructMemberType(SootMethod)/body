@@ -1,4 +1,5 @@
 {
+  String methodType=hasStructMemberAnnotation(method) ? "@StructMember" : "@GlobalValue";
   SootMethod getter=method.getParameterCount() == 0 ? method : null;
   SootMethod setter=getter == null ? method : null;
   soot.Type type=getter != null ? getter.getReturnType() : setter.getParameterType(0);
@@ -12,10 +13,10 @@
  else   if (getter != null && hasArrayAnnotation(getter) || setter != null && hasArrayAnnotation(setter,0)) {
     int[] dimensions=getter != null ? getArrayDimensions(getter) : getArrayDimensions(setter,0);
     if (dimensions == null || dimensions.length == 0) {
-      throw new IllegalArgumentException("No dimensions specified for @Array annotation on struct member " + (getter != null ? "getter" : "setter") + " "+ method);
+      throw new IllegalArgumentException("No dimensions specified for @Array annotation on " + methodType + " "+ (getter != null ? "getter" : "setter")+ " "+ method);
     }
     if (type instanceof soot.ArrayType && ((soot.ArrayType)type).numDimensions != dimensions.length) {
-      throw new IllegalArgumentException("Mismatch in number of dimennsions for @Array annotation " + "and struct member type on struct member " + (getter != null ? "getter" : "setter") + " "+ method);
+      throw new IllegalArgumentException("Mismatch in number of dimennsions for @Array annotation " + "and type on " + methodType + " "+ (getter != null ? "getter" : "setter")+ " "+ method);
     }
     Type baseType=null;
     if (type instanceof soot.ArrayType) {

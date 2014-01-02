@@ -4,6 +4,7 @@
   callbackMethodCompiler.reset(clazz);
   nativeMethodCompiler.reset(clazz);
   structMemberMethodCompiler.reset(clazz);
+  globalValueMethodCompiler.reset(clazz);
   sootClass=clazz.getSootClass();
   mb=new ModuleBuilder();
   trampolines=new HashSet<Trampoline>();
@@ -49,6 +50,9 @@
     String name=method.getName();
     if (hasBridgeAnnotation(method)) {
       bridgeMethod(method);
+    }
+ else     if (hasGlobalValueAnnotation(method)) {
+      globalValueMethod(method);
     }
  else     if (isStruct(sootClass) && ("_sizeOf".equals(name) || "sizeOf".equals(name) || hasStructMemberAnnotation(method))) {
       structMember(method);
