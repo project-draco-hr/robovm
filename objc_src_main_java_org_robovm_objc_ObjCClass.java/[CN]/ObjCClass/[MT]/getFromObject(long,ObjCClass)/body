@@ -3,9 +3,15 @@
   ObjCClass c=null;
   long classPtr=ObjCRuntime.object_getClass(handle);
   c=ObjCObject.getPeerObject(classPtr);
+  if (c == null) {
+    c=getByNameNotLoaded(VM.newStringUTF(ObjCRuntime.object_getClassName(classPtr)));
+  }
   while (c == null && classPtr != 0L && classPtr != fallbackHandle) {
     classPtr=ObjCRuntime.class_getSuperclass(classPtr);
     c=ObjCObject.getPeerObject(classPtr);
+    if (c == null) {
+      c=getByNameNotLoaded(VM.newStringUTF(ObjCRuntime.object_getClassName(classPtr)));
+    }
   }
   if (c == null) {
     String name=VM.newStringUTF(ObjCRuntime.object_getClassName(handle));
