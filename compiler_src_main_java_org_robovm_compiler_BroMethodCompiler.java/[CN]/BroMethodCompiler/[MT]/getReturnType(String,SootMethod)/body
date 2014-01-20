@@ -2,9 +2,21 @@
   soot.Type sootType=method.getReturnType();
   if (hasPointerAnnotation(method)) {
     if (!sootType.equals(LongType.v())) {
-      throw new IllegalArgumentException(anno + " annotated method " + method.getName()+ " must return long when annotated with @Pointer");
+      throw new IllegalArgumentException(anno + " annotated method " + method+ " must return long when annotated with @Pointer");
     }
     return I8_PTR;
+  }
+  if (hasMachineSizedFloatAnnotation(method)) {
+    if (!sootType.equals(DoubleType.v()) && !sootType.equals(FloatType.v())) {
+      throw new IllegalArgumentException(anno + " annotated method " + method+ " must return float or double when annotated with @MachineSizedFloat");
+    }
+    return config.getArch().is32Bit() ? FLOAT : DOUBLE;
+  }
+  if (hasMachineSizedSIntAnnotation(method) || hasMachineSizedUIntAnnotation(method)) {
+    if (!sootType.equals(LongType.v())) {
+      throw new IllegalArgumentException(anno + " annotated method " + method+ " must return long when annotated with @MachineSizedSInt or @MachineSizedUInt");
+    }
+    return config.getArch().is32Bit() ? I32 : I64;
   }
   if (isStruct(sootType)) {
     if (!isPassByValue(method)) {

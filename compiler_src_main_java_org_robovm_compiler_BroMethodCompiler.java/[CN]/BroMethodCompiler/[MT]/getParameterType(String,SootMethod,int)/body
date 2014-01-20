@@ -2,16 +2,28 @@
   soot.Type sootType=method.getParameterType(i);
   if (hasPointerAnnotation(method,i)) {
     if (!sootType.equals(LongType.v())) {
-      throw new IllegalArgumentException("Parameter " + (i + 1) + " of "+ anno+ " annotated method "+ method.getName()+ " must be of type long when annotated with @Pointer.");
+      throw new IllegalArgumentException("Parameter " + (i + 1) + " of "+ anno+ " annotated method "+ method+ " must be of type long when annotated with @Pointer.");
     }
     return I8_PTR;
   }
+  if (hasMachineSizedFloatAnnotation(method,i)) {
+    if (!sootType.equals(DoubleType.v()) && !sootType.equals(FloatType.v())) {
+      throw new IllegalArgumentException("Parameter " + (i + 1) + " of "+ anno+ " annotated method "+ method+ " must be of type float or double when annotated with @MachineSizedFloat.");
+    }
+    return config.getArch().is32Bit() ? FLOAT : DOUBLE;
+  }
+  if (hasMachineSizedSIntAnnotation(method,i) || hasMachineSizedUIntAnnotation(method,i)) {
+    if (!sootType.equals(LongType.v())) {
+      throw new IllegalArgumentException("Parameter " + (i + 1) + " of "+ anno+ " annotated method "+ method+ " must be of type long when annotated with "+ "@MachineSizedSInt or @MachineSizedUInt");
+    }
+    return config.getArch().is32Bit() ? I32 : I64;
+  }
   if (hasStructRetAnnotation(method,i)) {
     if (i > 0) {
-      throw new IllegalArgumentException("Parameter " + (i + 1) + " of "+ anno+ " annotated method "+ method.getName()+ " cannot be annotated with @StructRet. Only the first"+ " parameter may have this annotation.");
+      throw new IllegalArgumentException("Parameter " + (i + 1) + " of "+ anno+ " annotated method "+ method+ " cannot be annotated with @StructRet. Only the first"+ " parameter may have this annotation.");
     }
     if (!isStruct(sootType)) {
-      throw new IllegalArgumentException("Parameter " + (i + 1) + " of "+ anno+ " annotated method "+ method.getName()+ " must be a sub class of Struct when annotated with @StructRet.");
+      throw new IllegalArgumentException("Parameter " + (i + 1) + " of "+ anno+ " annotated method "+ method+ " must be a sub class of Struct when annotated with @StructRet.");
     }
     return new PointerType(getStructType(sootType));
   }

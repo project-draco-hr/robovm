@@ -82,8 +82,8 @@
         args.set(i,new Argument(nativeValue,parameterAttributes));
       }
     }
- else     if (hasPointerAnnotation(method,i)) {
-      args.set(i,new Argument(marshalLongToPointer(fn,args.get(i).getValue())));
+ else {
+      args.set(i,new Argument(marshalPrimitiveToNative(fn,method,i,args.get(i).getValue())));
     }
   }
   BasicBlockRef bbSuccess=fn.newBasicBlockRef(new Label("success"));
@@ -112,8 +112,8 @@
       result=marshalNativeToObject(fn,marshalerMethod,null,env,targetClassName,result,MarshalerFlags.CALL_TYPE_BRIDGE);
     }
   }
- else   if (hasPointerAnnotation(method)) {
-    result=marshalPointerToLong(fn,result);
+ else {
+    result=marshalNativeToPrimitive(fn,method,result);
   }
   if (method != originalMethod) {
     fn.add(new Ret(structObj));

@@ -7,6 +7,12 @@
   if (getter != null && hasPointerAnnotation(getter) || setter != null && hasPointerAnnotation(setter,0)) {
     memberType=I8_PTR;
   }
+ else   if (getter != null && hasMachineSizedFloatAnnotation(getter) || setter != null && hasMachineSizedFloatAnnotation(setter,0)) {
+    memberType=config.getArch().is32Bit() ? FLOAT : DOUBLE;
+  }
+ else   if (getter != null && (hasMachineSizedSIntAnnotation(getter) || hasMachineSizedUIntAnnotation(getter)) || setter != null && (hasMachineSizedSIntAnnotation(setter,0) || hasMachineSizedUIntAnnotation(setter,0))) {
+    memberType=config.getArch().is32Bit() ? I32 : I64;
+  }
  else   if (type instanceof PrimType) {
     memberType=getType(type);
   }

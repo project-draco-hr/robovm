@@ -16,31 +16,45 @@
     int offset=getStructMemberOffset(method);
     if (offset != -1) {
       if (!method.isNative() && !method.isStatic()) {
-        throw new IllegalArgumentException("@StructMember annotated method " + method.getName() + " in class "+ clazz+ " must be native and not static");
+        throw new IllegalArgumentException("@StructMember annotated method " + method + " must be native and not static");
       }
       Type type=null;
       if (method.getParameterCount() == 0) {
-        if (hasPointerAnnotation(method) && !method.getReturnType().equals(LongType.v())) {
-          throw new IllegalArgumentException("@StructMember(" + offset + ") annotated getter "+ method.getName()+ " in class "+ clazz+ " must be of type long when annotated with @Pointer");
+        soot.Type sootType=method.getReturnType();
+        if (hasPointerAnnotation(method) && !sootType.equals(LongType.v())) {
+          throw new IllegalArgumentException("@StructMember(" + offset + ") annotated getter "+ method+ " must be of type long when annotated with @Pointer");
         }
-        if (method.getReturnType() instanceof soot.ArrayType && !hasArrayAnnotation(method)) {
+        if (hasMachineSizedFloatAnnotation(method) && !sootType.equals(DoubleType.v()) && !sootType.equals(FloatType.v())) {
+          throw new IllegalArgumentException("@StructMember(" + offset + ") annotated getter "+ method+ " must be of type float or double when annotated with @MachineSizedFloat");
+        }
+        if ((hasMachineSizedSIntAnnotation(method) || hasMachineSizedUIntAnnotation(method)) && !sootType.equals(LongType.v())) {
+          throw new IllegalArgumentException("@StructMember(" + offset + ") annotated getter "+ method+ " must be of type long when annotated with @MachineSizedSInt or @MachineSizedUInt");
+        }
+        if (sootType instanceof soot.ArrayType && !hasArrayAnnotation(method)) {
           throw new IllegalArgumentException("@Array annotation expected on struct member getter " + method);
         }
       }
  else       if (method.getParameterCount() == 1) {
-        if (hasPointerAnnotation(method,0) && !method.getParameterType(0).equals(LongType.v())) {
-          throw new IllegalArgumentException("@StructMember(" + offset + ") annotated setter "+ method.getName()+ " in class "+ clazz+ " must be of type long when annotated with @Pointer");
+        soot.Type sootType=method.getParameterType(0);
+        if (hasPointerAnnotation(method,0) && !sootType.equals(LongType.v())) {
+          throw new IllegalArgumentException("@StructMember(" + offset + ") annotated setter "+ method+ " must be of type long when annotated with @Pointer");
         }
-        if (method.getParameterType(0) instanceof soot.ArrayType && !hasArrayAnnotation(method,0)) {
+        if (hasMachineSizedFloatAnnotation(method,0) && !sootType.equals(DoubleType.v()) && !sootType.equals(FloatType.v())) {
+          throw new IllegalArgumentException("@StructMember(" + offset + ") annotated setter "+ method+ " must be of type float or double when annotated with @MachineSizedFloat");
+        }
+        if ((hasMachineSizedSIntAnnotation(method,0) || hasMachineSizedUIntAnnotation(method)) && !sootType.equals(LongType.v())) {
+          throw new IllegalArgumentException("@StructMember(" + offset + ") annotated setter "+ method+ " must be of type long when annotated with @MachineSizedSInt or @MachineSizedUInt");
+        }
+        if (sootType instanceof soot.ArrayType && !hasArrayAnnotation(method,0)) {
           throw new IllegalArgumentException("@Array annotation expected on first parameter of struct member setter " + method);
         }
         soot.Type retType=method.getReturnType();
         if (!retType.equals(VoidType.v()) && !(retType instanceof RefType && ((RefType)retType).getSootClass().equals(clazz))) {
-          throw new IllegalArgumentException("Setter " + method.getName() + " for "+ "@StructMember("+ offset+ ") in class "+ clazz+ " must either return nothing or return a "+ clazz);
+          throw new IllegalArgumentException("Setter " + method + " for "+ "@StructMember("+ offset+ ") "+ " must either return nothing or return a "+ clazz);
         }
       }
  else {
-        throw new IllegalArgumentException("@StructMember annotated method " + method.getName() + " in class "+ clazz+ " has too many parameters");
+        throw new IllegalArgumentException("@StructMember annotated method " + method + " has too many parameters");
       }
       type=getStructMemberType(method);
       int index=offset + 1;

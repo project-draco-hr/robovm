@@ -53,8 +53,8 @@
         arg=marshalNativeToObject(callbackFn,marshalerMethod,marshaledArg,env,targetClassName,arg,MarshalerFlags.CALL_TYPE_CALLBACK);
       }
     }
- else     if (hasPointerAnnotation(method,i)) {
-      arg=marshalPointerToLong(callbackFn,arg);
+ else {
+      arg=marshalNativeToPrimitive(callbackFn,method,i,arg);
     }
     args.add(arg);
   }
@@ -73,9 +73,6 @@
       result=marshalObjectToNative(callbackFn,marshalerMethod,null,nativeType,env,result,MarshalerFlags.CALL_TYPE_CALLBACK);
     }
   }
- else   if (hasPointerAnnotation(method)) {
-    result=marshalLongToPointer(callbackFn,result);
-  }
  else   if (originalMethod != method) {
     MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(originalMethod));
     PointerType nativeType=(PointerType)callbackFn.getType().getParameterTypes()[0];
@@ -86,6 +83,9 @@
     callbackFn.add(new Bitcast(dest,callbackFn.getParameterRef(0),I8_PTR));
     call(callbackFn,LLVM_MEMCPY,dest.ref(),src.ref(),sizeof((StructureType)nativeType.getBase()),new IntegerConstant(0),BooleanConstant.FALSE);
     result=null;
+  }
+ else {
+    result=marshalPrimitiveToNative(callbackFn,method,result);
   }
   trycatchLeave(callbackFn,env);
   popCallbackFrame(callbackFn,env);
