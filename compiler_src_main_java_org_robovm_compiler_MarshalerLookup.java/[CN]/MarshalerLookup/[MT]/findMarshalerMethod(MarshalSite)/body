@@ -1,23 +1,23 @@
 {
   int pidx=marshalSite.paramIdx;
-  AnnotationTag anno=pidx == -1 ? getMarshalerAnnotation(marshalSite.method) : getMarshalerAnnotation(marshalSite.method,pidx);
-  if (anno != null) {
-    AnnotationClassElem elem=(AnnotationClassElem)getElemByName(anno,"value");
-    String name=getInternalNameFromDescriptor(elem.getDesc());
-    Clazz marshalerClazz=config.getClazzes().load(name);
-    if (marshalerClazz != null) {
-      Marshaler marshaler=new Marshaler(marshalerClazz);
-      if (marshaler.canMarshal(marshalSite)) {
-        return marshaler.getMarshalerMethod(marshalSite);
+  if (pidx != MarshalSite.RECEIVER) {
+    AnnotationTag anno=pidx == MarshalSite.RETURN_TYPE ? getMarshalerAnnotation(marshalSite.method) : getMarshalerAnnotation(marshalSite.method,pidx);
+    if (anno != null) {
+      AnnotationClassElem elem=(AnnotationClassElem)getElemByName(anno,"value");
+      String name=getInternalNameFromDescriptor(elem.getDesc());
+      Clazz marshalerClazz=config.getClazzes().load(name);
+      if (marshalerClazz != null) {
+        Marshaler marshaler=new Marshaler(marshalerClazz);
+        if (marshaler.canMarshal(marshalSite)) {
+          return marshaler.getMarshalerMethod(marshalSite);
+        }
       }
+      throw new IllegalArgumentException(String.format("@Marshaler %s specified for %s of %s method %s can " + "not be used to marshal %s",name.replace('/','.'),(pidx == MarshalSite.RETURN_TYPE ? "return type" : "parameter " + (pidx + 1)),marshalSite.callTypeName,marshalSite.method,marshalSite.type));
     }
-    throw new IllegalArgumentException(String.format("@Marshaler %s specified for %s of %s method %s can " + "not be used to marshal %s",name.replace('/','.'),(pidx == -1 ? "return type" : "parameter " + (pidx + 1)),marshalSite.callTypeName,marshalSite.method,marshalSite.type));
   }
- else {
-    Marshaler marshaler=findMarshalers(marshalSite);
-    if (marshaler != null) {
-      return marshaler.getMarshalerMethod(marshalSite);
-    }
-    throw new IllegalArgumentException(String.format("No @Marshaler found for %s of %s method %s",(pidx == -1 ? "return type" : "parameter " + (pidx + 1)),marshalSite.callTypeName,marshalSite.method));
+  Marshaler marshaler=findMarshalers(marshalSite);
+  if (marshaler != null) {
+    return marshaler.getMarshalerMethod(marshalSite);
   }
+  throw new IllegalArgumentException(String.format("No @Marshaler found for %s of %s method %s",(pidx == MarshalSite.RECEIVER ? "receiver" : (pidx == MarshalSite.RETURN_TYPE ? "return type" : "parameter " + (pidx + 1))),marshalSite.callTypeName,marshalSite.method));
 }

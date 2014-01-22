@@ -1,5 +1,4 @@
 {
-  validateCallbackMethod(method);
   DataLayout dataLayout=config.getDataLayout();
   SootMethod originalMethod=method;
   boolean passByValue=isPassByValue(originalMethod);
@@ -36,9 +35,24 @@
   List<MarshaledArg> marshaledArgs=new ArrayList<MarshaledArg>();
   ArrayList<Value> args=new ArrayList<Value>();
   args.add(env);
+  int receiverIdx=-1;
+  if (!method.isStatic()) {
+    MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,MarshalSite.RECEIVER));
+    MarshaledArg marshaledArg=new MarshaledArg();
+    marshaledArg.paramIndex=MarshalSite.RECEIVER;
+    marshaledArgs.add(marshaledArg);
+    receiverIdx=method == originalMethod ? 0 : 1;
+    Value arg=callbackFn.getParameterRef(receiverIdx);
+    String targetClassName=getInternalName(originalMethod.getDeclaringClass());
+    arg=marshalNativeToObject(callbackFn,marshalerMethod,marshaledArg,env,targetClassName,arg,MarshalerFlags.CALL_TYPE_BRIDGE);
+    args.add(arg);
+  }
   int start=originalMethod == method ? 0 : 1;
-  for (int i=start; i < method.getParameterCount(); i++) {
-    Value arg=callbackFn.getParameterRef(i);
+  for (int i=start, argIdx=start; i < method.getParameterCount(); i++, argIdx++) {
+    if (argIdx == receiverIdx) {
+      argIdx++;
+    }
+    Value arg=callbackFn.getParameterRef(argIdx);
     soot.Type type=method.getParameterType(i);
     if (needsMarshaler(type)) {
       MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,i));

@@ -1,0 +1,21 @@
+{
+  NativeObj obj=new NativeObj();
+  obj.setHandle(0x12345678);
+  LongPtr l=new LongPtr();
+  assertEquals(100 * 100,obj.simpleInstanceMethod(100,l));
+  assertEquals(obj.getHandle(),l.get());
+  SmallStruct ss1=new SmallStruct().v1((byte)64).v2((byte)128);
+  SmallStruct ss2=obj.returnSmallStructInstanceMethod(ss1,l);
+  assertNotEquals(ss1.getHandle(),ss2.getHandle());
+  assertEquals(64,ss2.v1() & 0xff);
+  assertEquals(128,ss2.v2() & 0xff);
+  assertEquals(obj.getHandle(),l.get());
+  LargeStruct ls1=new LargeStruct().v1(0x12).v2(0x1234).v3(0x12345678).v4(0x123456789abcdef0L);
+  LargeStruct ls2=obj.returnLargeStructInstanceMethod(ls1,l);
+  assertNotEquals(ls1.getHandle(),ls2.getHandle());
+  assertEquals(0x12,ls2.v1());
+  assertEquals(0x1234,ls2.v2());
+  assertEquals(0x12345678,ls2.v3());
+  assertEquals(0x123456789abcdef0L,ls2.v4());
+  assertEquals(obj.getHandle(),l.get());
+}

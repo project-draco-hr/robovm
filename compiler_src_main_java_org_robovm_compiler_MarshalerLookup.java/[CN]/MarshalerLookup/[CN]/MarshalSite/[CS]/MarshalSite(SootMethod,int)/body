@@ -1,7 +1,7 @@
 {
   this.method=method;
   this.paramIdx=paramIdx;
-  this.type=paramIdx == -1 ? method.getReturnType() : method.getParameterType(paramIdx);
+  this.type=paramIdx == RETURN_TYPE ? method.getReturnType() : (paramIdx == RECEIVER ? method.getDeclaringClass().getType() : method.getParameterType(paramIdx));
   if (hasBridgeAnnotation(method)) {
     callType=Bro.MarshalerFlags.CALL_TYPE_BRIDGE;
     callTypeName="@Bridge";
@@ -15,12 +15,12 @@
  else   if (hasStructMemberAnnotation(method)) {
     callType=Bro.MarshalerFlags.CALL_TYPE_STRUCT_MEMBER;
     callTypeName="@StructMember";
-    array=paramIdx == -1 ? hasArrayAnnotation(method) : hasArrayAnnotation(method,paramIdx);
+    array=paramIdx == RETURN_TYPE ? hasArrayAnnotation(method) : hasArrayAnnotation(method,paramIdx);
   }
  else   if (hasGlobalValueAnnotation(method)) {
     callType=Bro.MarshalerFlags.CALL_TYPE_GLOBAL_VALUE;
     callTypeName="@GlobalValue";
-    array=paramIdx == -1 ? hasArrayAnnotation(method) : hasArrayAnnotation(method,paramIdx);
+    array=paramIdx == RETURN_TYPE ? hasArrayAnnotation(method) : hasArrayAnnotation(method,paramIdx);
   }
  else {
     throw new IllegalArgumentException();

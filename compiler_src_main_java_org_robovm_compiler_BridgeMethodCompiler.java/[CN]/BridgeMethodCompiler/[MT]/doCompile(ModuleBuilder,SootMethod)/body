@@ -25,7 +25,7 @@
       Invokestatic invokestatic=new Invokestatic(getInternalName(method.getDeclaringClass()),"org/robovm/rt/bro/Struct","allocate","(Ljava/lang/Class;)Lorg/robovm/rt/bro/Struct;");
       trampolines.add(invokestatic);
       structObj=call(fn,invokestatic.getFunctionRef(),env,cls);
-      args.add(method.isStatic() ? 1 : 2,new Argument(structObj));
+      args.add(1,new Argument(structObj));
     }
   }
   FunctionType targetFnType=getBridgeFunctionType(method);
@@ -49,24 +49,35 @@
   fn.add(new Unreachable());
   fn.newBasicBlock(notNullLabel);
   args.remove(0);
-  if (!method.isStatic()) {
-    args.remove(0);
-  }
   List<MarshaledArg> marshaledArgs=new ArrayList<MarshaledArg>();
   Type[] targetParameterTypes=targetFnType.getParameterTypes();
-  for (int i=0; i < method.getParameterCount(); i++) {
+  int receiverIdx=-1;
+  if (!method.isStatic()) {
+    MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,MarshalSite.RECEIVER));
+    MarshaledArg marshaledArg=new MarshaledArg();
+    marshaledArg.paramIndex=MarshalSite.RECEIVER;
+    marshaledArgs.add(marshaledArg);
+    receiverIdx=method == originalMethod ? 0 : 1;
+    Type nativeType=targetParameterTypes[receiverIdx];
+    Value nativeValue=marshalObjectToNative(fn,marshalerMethod,marshaledArg,nativeType,env,args.get(receiverIdx).getValue(),MarshalerFlags.CALL_TYPE_BRIDGE);
+    args.set(receiverIdx,new Argument(nativeValue));
+  }
+  for (int i=0, argIdx=0; i < method.getParameterCount(); i++, argIdx++) {
+    if (argIdx == receiverIdx) {
+      argIdx++;
+    }
     soot.Type type=method.getParameterType(i);
     if (needsMarshaler(type)) {
       MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,i));
-      Type nativeType=targetParameterTypes[i];
+      Type nativeType=targetParameterTypes[argIdx];
       if (nativeType instanceof PrimitiveType) {
-        Value nativeValue=marshalValueObjectToNative(fn,marshalerMethod,nativeType,env,args.get(i).getValue(),MarshalerFlags.CALL_TYPE_BRIDGE);
-        args.set(i,new Argument(nativeValue));
+        Value nativeValue=marshalValueObjectToNative(fn,marshalerMethod,nativeType,env,args.get(argIdx).getValue(),MarshalerFlags.CALL_TYPE_BRIDGE);
+        args.set(argIdx,new Argument(nativeValue));
       }
  else {
         ParameterAttribute[] parameterAttributes=new ParameterAttribute[0];
         if (isPassByValue(method,i) || isStructRet(method,i)) {
-          call(fn,CHECK_NULL,env,args.get(i).getValue());
+          call(fn,CHECK_NULL,env,args.get(argIdx).getValue());
           parameterAttributes=new ParameterAttribute[1];
           if (isStructRet(method,i)) {
             parameterAttributes[0]=sret;
@@ -78,12 +89,12 @@
         MarshaledArg marshaledArg=new MarshaledArg();
         marshaledArg.paramIndex=i;
         marshaledArgs.add(marshaledArg);
-        Value nativeValue=marshalObjectToNative(fn,marshalerMethod,marshaledArg,nativeType,env,args.get(i).getValue(),MarshalerFlags.CALL_TYPE_BRIDGE);
-        args.set(i,new Argument(nativeValue,parameterAttributes));
+        Value nativeValue=marshalObjectToNative(fn,marshalerMethod,marshaledArg,nativeType,env,args.get(argIdx).getValue(),MarshalerFlags.CALL_TYPE_BRIDGE);
+        args.set(argIdx,new Argument(nativeValue,parameterAttributes));
       }
     }
  else {
-      args.set(i,new Argument(marshalPrimitiveToNative(fn,method,i,args.get(i).getValue())));
+      args.set(argIdx,new Argument(marshalPrimitiveToNative(fn,method,i,args.get(argIdx).getValue())));
     }
   }
   BasicBlockRef bbSuccess=fn.newBasicBlockRef(new Label("success"));
