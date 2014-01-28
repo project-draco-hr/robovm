@@ -32,6 +32,7 @@
     ccArgs.add("-Wl,--gc-sections");
   }
  else   if (config.getOs().getFamily() == OS.Family.darwin) {
+    ccArgs.add("-ObjC");
     File exportedSymbolsFile=new File(config.getTmpDir(),"exported_symbols");
     List<String> exportedSymbols=new ArrayList<String>();
     if (config.isSkipInstall()) {
@@ -57,6 +58,11 @@
     for (    String p : config.getWeakFrameworks()) {
       libs.add("-weak_framework");
       libs.add(p);
+    }
+  }
+  if (config.getOs().getFamily() == OS.Family.darwin && !config.getFrameworkPaths().isEmpty()) {
+    for (    File p : config.getFrameworkPaths()) {
+      ccArgs.add("-F" + p.getAbsolutePath());
     }
   }
   if (!config.getLibs().isEmpty()) {
