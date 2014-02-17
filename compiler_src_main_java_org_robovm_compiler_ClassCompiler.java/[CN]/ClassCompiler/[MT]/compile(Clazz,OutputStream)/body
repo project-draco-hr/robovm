@@ -5,6 +5,9 @@
   nativeMethodCompiler.reset(clazz);
   structMemberMethodCompiler.reset(clazz);
   globalValueMethodCompiler.reset(clazz);
+  for (  CompilerPlugin compilerPlugin : config.getCompilerPlugins()) {
+    compilerPlugin.beforeClass(config,clazz);
+  }
   sootClass=clazz.getSootClass();
   mb=new ModuleBuilder();
   trampolines=new HashSet<Trampoline>();
@@ -47,6 +50,9 @@
     }
   }
   for (  SootMethod method : sootClass.getMethods()) {
+    for (    CompilerPlugin compilerPlugin : config.getCompilerPlugins()) {
+      compilerPlugin.beforeMethod(config,clazz,method);
+    }
     String name=method.getName();
     if (hasBridgeAnnotation(method)) {
       bridgeMethod(method);
