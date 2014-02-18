@@ -71,7 +71,12 @@
  else   if (expr instanceof LengthExpr)   return IntType.v();
  else   if (expr instanceof InvokeExpr)   return ((InvokeExpr)expr).getMethodRef().returnType();
  else   if (expr instanceof NewExpr)   return ((NewExpr)expr).getBaseType();
- else   if (expr instanceof FieldRef)   return ((FieldRef)expr).getField().getType();
+ else   if (expr instanceof FieldRef)   try {
+    return ((FieldRef)expr).getField().getType();
+  }
+ catch (  ResolutionFailedException e) {
+    return ((FieldRef)expr).getType();
+  }
  else   if (expr instanceof DoubleConstant)   return DoubleType.v();
  else   if (expr instanceof FloatConstant)   return FloatType.v();
  else   if (expr instanceof IntConstant) {
