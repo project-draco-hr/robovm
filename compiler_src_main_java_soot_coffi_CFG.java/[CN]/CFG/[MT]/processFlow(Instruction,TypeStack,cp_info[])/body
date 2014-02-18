@@ -585,6 +585,26 @@ typeStack=typeStack.push(Long2ndHalfType.v());
  else typeStack=typeStack.push(type);
 break;
 }
+case ByteCode.INVOKEDYNAMIC:
+{
+Instruction_Invokedynamic iv=(Instruction_Invokedynamic)ins;
+CONSTANT_InvokeDynamic_info iv_info=(CONSTANT_InvokeDynamic_info)constant_pool[iv.invoke_dynamic_index];
+int args=cp_info.countParams(constant_pool,iv_info.name_and_type_index);
+Type returnType=byteCodeTypeOf(jimpleReturnTypeOfNameAndType(cm,constant_pool,iv_info.name_and_type_index));
+for (int j=args - 1; j >= 0; j--) {
+if (typeStack.top().equals(Long2ndHalfType.v())) {
+typeStack=popSafe(typeStack,Long2ndHalfType.v());
+typeStack=popSafe(typeStack,LongType.v());
+}
+ else if (typeStack.top().equals(Double2ndHalfType.v())) {
+typeStack=popSafe(typeStack,Double2ndHalfType.v());
+typeStack=popSafe(typeStack,DoubleType.v());
+}
+ else typeStack=popSafe(typeStack,typeStack.top());
+}
+if (!returnType.equals(VoidType.v())) typeStack=smartPush(typeStack,returnType);
+break;
+}
 case ByteCode.INVOKEVIRTUAL:
 {
 Instruction_Invokevirtual iv=(Instruction_Invokevirtual)ins;

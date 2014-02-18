@@ -1,0 +1,16 @@
+{
+  if (!methodRef.getSignature().startsWith("<" + SootClass.INVOKEDYNAMIC_DUMMY_CLASS_NAME + ": "))   throw new IllegalArgumentException("Receiver type of JDynamicInvokeExpr must be " + SootClass.INVOKEDYNAMIC_DUMMY_CLASS_NAME + "!");
+  if (!bootstrapMethodRef.returnType().equals(RefType.v("java.lang.invoke.CallSite"))) {
+    throw new IllegalArgumentException("Return type of bootstrap method must be java.lang.invoke.CallSite!");
+  }
+  this.bsmRef=bootstrapMethodRef;
+  this.methodRef=methodRef;
+  this.bsmArgBoxes=new ValueBox[bootstrapArgs.size()];
+  this.argBoxes=new ValueBox[methodArgs.size()];
+  for (int i=0; i < bootstrapArgs.size(); i++) {
+    this.bsmArgBoxes[i]=Jimple.v().newImmediateBox((Value)bootstrapArgs.get(i));
+  }
+  for (int i=0; i < methodArgs.size(); i++) {
+    this.argBoxes[i]=Jimple.v().newImmediateBox((Value)methodArgs.get(i));
+  }
+}

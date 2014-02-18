@@ -1,20 +1,115 @@
 {
-  boolean produceJimple=true;
-  Iterator methodIt=c.methodIterator();
-  while (methodIt.hasNext()) {
-    SootMethod m=(SootMethod)methodIt.next();
-    if (DEBUG) {
-      if (m.getExceptions().size() != 0)       System.out.println("PackManager printing out jimple body exceptions for method " + m.toString() + " "+ m.getExceptions().toString());
-    }
-    if (!m.isConcrete())     continue;
-    if (produceJimple) {
-      JimpleBody body=(JimpleBody)m.retrieveActiveBody();
-      PackManager.v().getPack("jtp").apply(body);
-      if (Options.v().validate()) {
-        body.validate();
-      }
-      PackManager.v().getPack("jop").apply(body);
-      PackManager.v().getPack("jap").apply(body);
-    }
+  final int format=Options.v().output_format();
+  if (format == Options.output_format_dava) {
+    G.v().out.print("Decompiling ");
+    G.v().SootMethodAddedByDava=false;
   }
+ else {
+    G.v().out.print("Transforming ");
+  }
+  G.v().out.println(c.getName() + "... ");
+  boolean produceBaf=false, produceGrimp=false, produceDava=false, produceJimple=true, produceShimple=false;
+switch (format) {
+case Options.output_format_none:
+case Options.output_format_xml:
+case Options.output_format_jimple:
+case Options.output_format_jimp:
+case Options.output_format_template:
+    break;
+case Options.output_format_shimp:
+case Options.output_format_shimple:
+  produceShimple=true;
+produceJimple=false;
+break;
+case Options.output_format_dava:
+produceDava=true;
+case Options.output_format_grimp:
+case Options.output_format_grimple:
+produceGrimp=true;
+break;
+case Options.output_format_baf:
+case Options.output_format_b:
+produceBaf=true;
+break;
+case Options.output_format_jasmin:
+case Options.output_format_class:
+produceGrimp=Options.v().via_grimp();
+produceBaf=!produceGrimp;
+break;
+default :
+throw new RuntimeException();
+}
+soot.xml.TagCollector tc=new soot.xml.TagCollector();
+boolean wholeShimple=Options.v().whole_shimple();
+if (Options.v().via_shimple()) produceShimple=true;
+LinkedList<SootMethod> methodsCopy=new LinkedList<SootMethod>(c.getMethods());
+Iterator methodIt=methodsCopy.iterator();
+while (methodIt.hasNext()) {
+SootMethod m=(SootMethod)methodIt.next();
+if (DEBUG) {
+if (m.getExceptions().size() != 0) System.out.println("PackManager printing out jimple body exceptions for method " + m.toString() + " "+ m.getExceptions().toString());
+}
+if (!m.isConcrete()) continue;
+if (produceShimple || wholeShimple) {
+ShimpleBody sBody=null;
+{
+Body body=m.retrieveActiveBody();
+if (body instanceof ShimpleBody) {
+sBody=(ShimpleBody)body;
+if (!sBody.isSSA()) sBody.rebuild();
+}
+ else {
+sBody=Shimple.v().newBody(body);
+}
+}
+m.setActiveBody(sBody);
+PackManager.v().getPack("stp").apply(sBody);
+PackManager.v().getPack("sop").apply(sBody);
+if (produceJimple || (wholeShimple && !produceShimple)) m.setActiveBody(sBody.toJimpleBody());
+}
+if (produceJimple) {
+JimpleBody body=(JimpleBody)m.retrieveActiveBody();
+PackManager.v().getPack("jtp").apply(body);
+if (Options.v().validate()) {
+body.validate();
+}
+PackManager.v().getPack("jop").apply(body);
+PackManager.v().getPack("jap").apply(body);
+if (Options.v().xml_attributes() && Options.v().output_format() != Options.output_format_jimple) {
+tc.collectBodyTags(body);
+}
+}
+if (produceGrimp) {
+m.setActiveBody(Grimp.v().newBody(m.getActiveBody(),"gb"));
+PackManager.v().getPack("gop").apply(m.getActiveBody());
+}
+ else if (produceBaf) {
+m.setActiveBody(Baf.v().newBody((JimpleBody)m.getActiveBody()));
+PackManager.v().getPack("bop").apply(m.getActiveBody());
+PackManager.v().getPack("tag").apply(m.getActiveBody());
+if (Options.v().validate()) {
+m.getActiveBody().validate();
+}
+}
+}
+if (Options.v().xml_attributes() && Options.v().output_format() != Options.output_format_jimple) {
+processXMLForClass(c,tc);
+}
+if (produceDava) {
+methodIt=c.methodIterator();
+while (methodIt.hasNext()) {
+SootMethod m=(SootMethod)methodIt.next();
+if (!m.isConcrete()) continue;
+m.setActiveBody(Dava.v().newBody(m.getActiveBody()));
+}
+if (G.v().SootMethodAddedByDava) {
+ArrayList sootMethodsAdded=G.v().SootMethodsAdded;
+Iterator it=sootMethodsAdded.iterator();
+while (it.hasNext()) {
+c.addMethod((SootMethod)it.next());
+}
+G.v().SootMethodsAdded=new ArrayList();
+G.v().SootMethodAddedByDava=false;
+}
+}
 }

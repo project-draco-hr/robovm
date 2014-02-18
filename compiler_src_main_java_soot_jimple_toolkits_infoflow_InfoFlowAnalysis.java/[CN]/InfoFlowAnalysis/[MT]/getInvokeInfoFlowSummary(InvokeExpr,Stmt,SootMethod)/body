@@ -1,0 +1,21 @@
+{
+  HashMutableDirectedGraph ret=null;
+  SootMethodRef methodRef=ie.getMethodRef();
+  String subSig=methodRef.resolve().getSubSignature();
+  CallGraph cg=Scene.v().getCallGraph();
+  for (Iterator<Edge> edges=cg.edgesOutOf(is); edges.hasNext(); ) {
+    Edge e=edges.next();
+    SootMethod target=e.getTgt().method();
+    if (target.getSubSignature().equals(subSig)) {
+      HashMutableDirectedGraph ifs=getMethodInfoFlowSummary(target,context.getDeclaringClass().isApplicationClass());
+      if (ret == null)       ret=ifs;
+ else {
+        for (        Object node : ifs.getNodes()) {
+          if (!ret.containsNode(node))           ret.addNode(node);
+          for (          Object succ : ifs.getSuccsOf(node))           ret.addEdge(node,succ);
+        }
+      }
+    }
+  }
+  return ret;
+}

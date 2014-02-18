@@ -1,4 +1,11 @@
 {
+  if (classesToLoad == null) {
+    classesToLoad=new HashSet<String>();
+    classesToLoad.addAll(Scene.v().getBasicClasses());
+    for (    SootClass c : Scene.v().getApplicationClasses()) {
+      classesToLoad.add(c.getName());
+    }
+  }
   if (classPath == null) {
     classPath=explodeClassPath(Scene.v().getSootClassPath());
   }
@@ -13,11 +20,20 @@
     ClassSource ret=new ClassProvider(){
       public ClassSource find(      String className){
         String fileName=className.replace('.','/') + ".class";
-        return new CoffiClassSource(className,cl.getResourceAsStream(fileName));
+        InputStream stream=cl.getResourceAsStream(fileName);
+        if (stream == null)         return null;
+        return new CoffiClassSource(className,stream);
       }
     }
 .find(className);
     if (ret != null)     return ret;
+  }
+  if (className.startsWith("soot.rtlib.tamiflex.")) {
+    String fileName=className.replace('.','/') + ".class";
+    InputStream stream=getClass().getClassLoader().getResourceAsStream(fileName);
+    if (stream != null) {
+      return new CoffiClassSource(className,stream);
+    }
   }
   return null;
 }

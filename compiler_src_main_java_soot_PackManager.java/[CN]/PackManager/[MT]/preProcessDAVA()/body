@@ -1,0 +1,15 @@
+{
+  if (Options.v().output_format() == Options.output_format_dava) {
+    Map options=PhaseOptions.v().getPhaseOptions("db");
+    boolean isSourceJavac=PhaseOptions.getBoolean(options,"source-is-javac");
+    if (!isSourceJavac) {
+      if (DEBUG)       System.out.println("Source is not Javac hence invoking ThrowFinder");
+      ThrowFinder.v().find();
+    }
+ else {
+      if (DEBUG)       System.out.println("Source is javac hence we dont need to invoke ThrowFinder");
+    }
+    PackageNamer.v().fixNames();
+    G.v().out.println();
+  }
+}
