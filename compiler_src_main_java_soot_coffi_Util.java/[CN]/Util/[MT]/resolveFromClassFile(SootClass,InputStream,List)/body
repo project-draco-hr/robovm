@@ -97,6 +97,11 @@ field.addTag(new SignatureTag(generic_sig));
  else if (fieldInfo.attributes[j] instanceof RuntimeVisibleAnnotations_attribute || fieldInfo.attributes[j] instanceof RuntimeInvisibleAnnotations_attribute) {
 addAnnotationVisibilityAttribute(field,fieldInfo.attributes[j],coffiClass,references);
 }
+ else if (fieldInfo.attributes[j] instanceof Generic_attribute) {
+Generic_attribute attr=(Generic_attribute)fieldInfo.attributes[j];
+String name=((CONSTANT_Utf8_info)(coffiClass.constant_pool[attr.attribute_name])).convert();
+field.addTag(new GenericAttribute(name,attr.info));
+}
 }
 }
 for (int i=0; i < coffiClass.methods_count; i++) {
@@ -158,6 +163,11 @@ element_value[] input=new element_value[1];
 input[0]=attr.default_value;
 ArrayList<AnnotationElem> list=createElementTags(1,coffiClass,input);
 method.addTag(new AnnotationDefaultTag(list.get(0)));
+}
+ else if (methodInfo.attributes[j] instanceof Generic_attribute) {
+Generic_attribute attr=(Generic_attribute)methodInfo.attributes[j];
+String name=((CONSTANT_Utf8_info)(coffiClass.constant_pool[attr.attribute_name])).convert();
+method.addTag(new GenericAttribute(name,attr.info));
 }
 }
 }
@@ -231,6 +241,11 @@ bclass.addTag(new EnclosingMethodTag(class_name,method_name,method_sig));
 }
  else if (coffiClass.attributes[i] instanceof RuntimeVisibleAnnotations_attribute || coffiClass.attributes[i] instanceof RuntimeInvisibleAnnotations_attribute) {
 addAnnotationVisibilityAttribute(bclass,coffiClass.attributes[i],coffiClass,references);
+}
+ else if (coffiClass.attributes[i] instanceof Generic_attribute) {
+Generic_attribute attr=(Generic_attribute)coffiClass.attributes[i];
+String name=((CONSTANT_Utf8_info)(coffiClass.constant_pool[attr.attribute_name])).convert();
+bclass.addTag(new GenericAttribute(name,attr.info));
 }
 }
 }

@@ -1,4 +1,7 @@
 {
+  if (declaringClass.getName().equals("java.dyn.InvokeDynamic")) {
+    throw new IllegalStateException("Cannot resolve invokedynamic method references at compile time!");
+  }
   SootClass cl=declaringClass;
   while (true) {
     if (trace != null)     trace.append("Looking in " + cl + " which has methods "+ cl.getMethods()+ "\n");
@@ -25,5 +28,26 @@
     if (cl.hasSuperclass())     cl=cl.getSuperclass();
  else     break;
   }
-  throw new ClassResolutionFailedException();
+  if (Options.v().allow_phantom_refs()) {
+    SootMethod m=new SootMethod(name,parameterTypes,returnType);
+    JimpleBody body=Jimple.v().newBody(m);
+    m.setActiveBody(body);
+    RefType runtimeExceptionType=RefType.v("java.lang.Error");
+    NewExpr newExpr=Jimple.v().newNewExpr(runtimeExceptionType);
+    LocalGenerator lg=new LocalGenerator(body);
+    Local exceptionLocal=lg.generateLocal(runtimeExceptionType);
+    AssignStmt assignStmt=Jimple.v().newAssignStmt(exceptionLocal,newExpr);
+    body.getUnits().add(assignStmt);
+    SootMethodRef cref=runtimeExceptionType.getSootClass().getMethod("<init>",Collections.singletonList(RefType.v("java.lang.String"))).makeRef();
+    SpecialInvokeExpr constructorInvokeExpr=Jimple.v().newSpecialInvokeExpr(exceptionLocal,cref,StringConstant.v("Unresolved compilation error: Method " + getSignature() + " does not exist!"));
+    InvokeStmt initStmt=Jimple.v().newInvokeStmt(constructorInvokeExpr);
+    body.getUnits().insertAfter(initStmt,assignStmt);
+    body.getUnits().insertAfter(Jimple.v().newThrowStmt(exceptionLocal),initStmt);
+    declaringClass.addMethod(m);
+    return m;
+  }
+ else   if (trace == null) {
+    throw new ClassResolutionFailedException();
+  }
+  return null;
 }

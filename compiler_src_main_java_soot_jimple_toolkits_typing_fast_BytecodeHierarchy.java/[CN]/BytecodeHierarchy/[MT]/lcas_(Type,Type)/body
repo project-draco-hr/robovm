@@ -24,8 +24,10 @@
     if (a instanceof ArrayType)     rt=b;
  else     rt=a;
     LinkedList<Type> r=new LinkedList<Type>();
-    if (ancestor_(RefType.v("java.io.Serializable"),rt))     r.add(RefType.v("java.io.Serializable"));
-    if (ancestor_(RefType.v("java.lang.Cloneable"),rt))     r.add(RefType.v("java.lang.Cloneable"));
+    if (!TypeResolver.typesEqual(RefType.v("java.lang.Object"),rt)) {
+      if (ancestor_(RefType.v("java.io.Serializable"),rt))       r.add(RefType.v("java.io.Serializable"));
+      if (ancestor_(RefType.v("java.lang.Cloneable"),rt))       r.add(RefType.v("java.lang.Cloneable"));
+    }
     if (r.isEmpty())     r.add(RefType.v("java.lang.Object"));
     return r;
   }

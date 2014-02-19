@@ -9,9 +9,9 @@
     }
   }
   SootClass sootClass=Scene.v().getSootClass(className);
-  Set<SootMethod> methodsWithRightName=new HashSet<SootMethod>();
+  Set<SootMethod> methodsWithRightName=new LinkedHashSet<SootMethod>();
   for (  SootMethod m : sootClass.getMethods()) {
-    if (m.getName().equals(methodName)) {
+    if (m.isConcrete() && m.getName().equals(methodName)) {
       methodsWithRightName.add(m);
     }
   }
@@ -26,7 +26,8 @@
       if (coversLineNumber(lineNumber,sootMethod)) {
         return Collections.singleton(sootMethod);
       }
-      if (sootMethod.hasActiveBody()) {
+      if (sootMethod.isConcrete()) {
+        if (!sootMethod.hasActiveBody())         sootMethod.retrieveActiveBody();
         Body body=sootMethod.getActiveBody();
         if (coversLineNumber(lineNumber,body)) {
           return Collections.singleton(sootMethod);

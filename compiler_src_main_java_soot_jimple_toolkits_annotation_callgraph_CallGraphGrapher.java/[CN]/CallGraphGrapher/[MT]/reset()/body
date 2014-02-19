@@ -2,10 +2,12 @@
   if (methodToContexts == null) {
     methodToContexts=new MethodToContexts(Scene.v().getReachableMethods().listener());
   }
-  SootClass sc=Scene.v().getMainClass();
-  SootMethod sm=getFirstMethod(sc);
-  ArrayList<MethInfo> tgts=getTgtMethods(sm,true);
-  ArrayList<MethInfo> srcs=getSrcMethods(sm,true);
-  CallGraphInfo info=new CallGraphInfo(sm,tgts,srcs);
-  InteractionHandler.v().handleCallGraphStart(info,this);
+  if (Scene.v().hasCallGraph()) {
+    SootClass sc=Scene.v().getMainClass();
+    SootMethod sm=getFirstMethod(sc);
+    ArrayList<MethInfo> tgts=getTgtMethods(sm,true);
+    ArrayList<MethInfo> srcs=getSrcMethods(sm,true);
+    CallGraphInfo info=new CallGraphInfo(sm,tgts,srcs);
+    InteractionHandler.v().handleCallGraphStart(info,this);
+  }
 }
