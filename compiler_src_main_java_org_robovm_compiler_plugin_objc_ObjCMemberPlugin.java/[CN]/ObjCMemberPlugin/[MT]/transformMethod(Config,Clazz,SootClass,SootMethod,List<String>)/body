@@ -1,0 +1,57 @@
+{
+  AnnotationTag methodAnno=getAnnotation(method,METHOD);
+  if (methodAnno != null) {
+    String selectorName=readStringElem(methodAnno,"selector","").trim();
+    if (selectorName.length() == 0) {
+      StringBuilder sb=new StringBuilder(method.getName());
+      int argCount=method.getParameterCount();
+      for (int i=0; i < argCount; i++) {
+        sb.append(':');
+      }
+      selectorName=sb.toString();
+    }
+    createCallback(sootClass,method,selectorName);
+    if (method.isNative()) {
+      selectors.add(selectorName);
+      createBridge(sootClass,method,selectorName);
+    }
+  }
+ else {
+    AnnotationTag propertyAnno=getAnnotation(method,PROPERTY);
+    if (propertyAnno != null) {
+      String methodName=method.getName();
+      if (!(methodName.startsWith("get") && methodName.length() > 3) && !(methodName.startsWith("is") && methodName.length() > 2) && !(methodName.startsWith("set") && methodName.length() > 3)) {
+        throw new CompilerException("Invalid Objective-C @Property method name " + method);
+      }
+      boolean isGetter=!methodName.startsWith("set");
+      if (isGetter && method.getParameterCount() != 0) {
+        throw new CompilerException("Objective-C @Property getter method " + method + " must take 0 arguments");
+      }
+      if (isGetter && method.getReturnType() == VoidType.v()) {
+        throw new CompilerException("Objective-C @Property getter method " + method + " must not return void");
+      }
+      if (!isGetter && method.getParameterCount() != 1) {
+        throw new CompilerException("Objective-C @Property setter method " + method + " must take 1 argument");
+      }
+      if (!isGetter && method.getReturnType() != VoidType.v()) {
+        throw new CompilerException("Objective-C @Property setter method " + method + " must return void");
+      }
+      String selectorName=readStringElem(propertyAnno,"selector","").trim();
+      if (selectorName.length() == 0) {
+        selectorName=methodName;
+        if (isGetter) {
+          selectorName=methodName.startsWith("is") ? methodName.substring(2) : methodName.substring(3);
+          selectorName=selectorName.substring(0,1).toLowerCase() + selectorName.substring(1);
+        }
+ else {
+          selectorName+=":";
+        }
+      }
+      createCallback(sootClass,method,selectorName);
+      if (method.isNative()) {
+        selectors.add(selectorName);
+        createBridge(sootClass,method,selectorName);
+      }
+    }
+  }
+}

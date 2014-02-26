@@ -1,0 +1,73 @@
+{
+  Jimple j=Jimple.v();
+  SootMethod msgSendMethod=getMsgSendMethod(selectorName,method);
+  sootClass.addMethod(msgSendMethod);
+  addBridgeAnnotation(msgSendMethod);
+  SootMethod msgSendSuperMethod=null;
+  if (!method.isStatic()) {
+    msgSendSuperMethod=getMsgSendSuperMethod(selectorName,method);
+    sootClass.addMethod(msgSendSuperMethod);
+    addBridgeAnnotation(msgSendSuperMethod);
+  }
+  method.setModifiers(method.getModifiers() & ~NATIVE);
+  Body body=j.newBody(method);
+  method.setActiveBody(body);
+  PatchingChain<Unit> units=body.getUnits();
+  if (!method.isStatic()) {
+    Local thiz=j.newLocal("$this",sootClass.getType());
+    body.getLocals().add(thiz);
+    units.add(j.newIdentityStmt(thiz,j.newThisRef(sootClass.getType())));
+  }
+  LinkedList<Value> args=new LinkedList<>();
+  for (int i=0; i < method.getParameterCount(); i++) {
+    Type t=method.getParameterType(i);
+    Local p=j.newLocal("$p" + i,t);
+    body.getLocals().add(p);
+    units.add(j.newIdentityStmt(p,j.newParameterRef(t,i)));
+    args.add(p);
+  }
+  Local sel=j.newLocal("$sel",org_robovm_objc_Selector.getType());
+  body.getLocals().add(sel);
+  units.add(j.newAssignStmt(sel,j.newStaticFieldRef(Scene.v().makeFieldRef(sootClass,getSelectorFieldName(selectorName),org_robovm_objc_Selector.getType(),true))));
+  args.addFirst(sel);
+  Local objCClass=null;
+  if (method.isStatic()) {
+    objCClass=j.newLocal("$objCClass",org_robovm_objc_ObjCClass.getType());
+    body.getLocals().add(objCClass);
+    units.add(j.newAssignStmt(objCClass,j.newStaticFieldRef(Scene.v().makeFieldRef(sootClass,"$objCClass",org_robovm_objc_ObjCClass.getType(),true))));
+  }
+  Local customClass=null;
+  if (!Modifier.isFinal(sootClass.getModifiers()) && !method.isStatic()) {
+    customClass=j.newLocal("$customClass",BooleanType.v());
+    body.getLocals().add(customClass);
+    units.add(j.newAssignStmt(customClass,j.newInstanceFieldRef(body.getThisLocal(),org_robovm_objc_ObjCObject_customClass)));
+  }
+  Local ret=null;
+  if (method.getReturnType() != VoidType.v()) {
+    ret=j.newLocal("$ret",method.getReturnType());
+    body.getLocals().add(ret);
+  }
+  StaticInvokeExpr invokeMsgSendExpr=j.newStaticInvokeExpr(msgSendMethod.makeRef(),l(method.isStatic() ? objCClass : body.getThisLocal(),args));
+  Stmt invokeMsgSendStmt=ret == null ? j.newInvokeStmt(invokeMsgSendExpr) : j.newAssignStmt(ret,invokeMsgSendExpr);
+  if (customClass != null) {
+    units.add(j.newIfStmt(j.newEqExpr(customClass,IntConstant.v(0)),invokeMsgSendStmt));
+    Local zuper=j.newLocal("$super",org_robovm_objc_ObjCSuper.getType());
+    body.getLocals().add(zuper);
+    units.add(j.newAssignStmt(zuper,j.newVirtualInvokeExpr(body.getThisLocal(),org_robovm_objc_ObjCObject_getSuper)));
+    StaticInvokeExpr invokeMsgSendSuperExpr=j.newStaticInvokeExpr(msgSendMethod.makeRef(),l(zuper,args));
+    units.add(ret == null ? j.newInvokeStmt(invokeMsgSendSuperExpr) : j.newAssignStmt(ret,invokeMsgSendSuperExpr));
+    if (ret != null) {
+      units.add(j.newReturnStmt(ret));
+    }
+ else {
+      units.add(j.newReturnVoidStmt());
+    }
+  }
+  units.add(invokeMsgSendStmt);
+  if (ret != null) {
+    units.add(j.newReturnStmt(ret));
+  }
+ else {
+    units.add(j.newReturnVoidStmt());
+  }
+}

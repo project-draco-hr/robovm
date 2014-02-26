@@ -1,0 +1,13 @@
+{
+  for (  SootMethod m : sootClass.getMethods()) {
+    if ("<clinit>".equals(m.getName())) {
+      return m;
+    }
+  }
+  SootMethod m=new SootMethod("<clinit>",Collections.emptyList(),VoidType.v(),STATIC);
+  Body body=Jimple.v().newBody(m);
+  body.getUnits().add(Jimple.v().newReturnVoidStmt());
+  m.setActiveBody(body);
+  sootClass.addMethod(m);
+  return m;
+}

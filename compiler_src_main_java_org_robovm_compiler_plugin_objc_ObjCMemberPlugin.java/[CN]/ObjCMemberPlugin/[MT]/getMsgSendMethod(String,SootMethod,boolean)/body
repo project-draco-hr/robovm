@@ -1,0 +1,14 @@
+{
+  List<Type> paramTypes=new ArrayList<>();
+  if (method.isStatic()) {
+    paramTypes.add(org_robovm_objc_ObjCClass.getType());
+  }
+ else {
+    paramTypes.add(method.getDeclaringClass().getType());
+  }
+  paramTypes.add(org_robovm_objc_Selector.getType());
+  paramTypes.addAll(method.getParameterTypes());
+  SootMethod m=new SootMethod((isCallback ? "$cb$" : "$m$") + selectorName.replace(':','$'),paramTypes,method.getReturnType(),STATIC | PRIVATE | (isCallback ? 0 : NATIVE));
+  copyAnnotations(method,m,2);
+  return m;
+}

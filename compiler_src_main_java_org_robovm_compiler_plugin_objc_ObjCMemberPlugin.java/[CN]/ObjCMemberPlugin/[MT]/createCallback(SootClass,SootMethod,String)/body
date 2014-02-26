@@ -1,0 +1,36 @@
+{
+  Jimple j=Jimple.v();
+  SootMethod callbackMethod=getCallbackMethod(selectorName,method);
+  sootClass.addMethod(callbackMethod);
+  addCallbackAnnotation(callbackMethod);
+  Body body=j.newBody(callbackMethod);
+  callbackMethod.setActiveBody(body);
+  PatchingChain<Unit> units=body.getUnits();
+  Local thiz=null;
+  if (!method.isStatic()) {
+    thiz=j.newLocal("$this",sootClass.getType());
+    body.getLocals().add(thiz);
+    units.add(j.newIdentityStmt(thiz,j.newParameterRef(sootClass.getType(),0)));
+  }
+  LinkedList<Value> args=new LinkedList<>();
+  for (int i=0; i < method.getParameterCount(); i++) {
+    Type t=method.getParameterType(i);
+    Local p=j.newLocal("$p" + i,t);
+    body.getLocals().add(p);
+    units.add(j.newIdentityStmt(p,j.newParameterRef(t,i + 2)));
+    args.add(p);
+  }
+  Local ret=null;
+  if (method.getReturnType() != VoidType.v()) {
+    ret=j.newLocal("$ret",method.getReturnType());
+    body.getLocals().add(ret);
+  }
+  InvokeExpr expr=method.isStatic() ? j.newStaticInvokeExpr(method.makeRef(),args) : j.newVirtualInvokeExpr(thiz,method.makeRef(),args);
+  units.add(ret == null ? j.newInvokeStmt(expr) : j.newAssignStmt(ret,expr));
+  if (ret != null) {
+    units.add(j.newReturnStmt(ret));
+  }
+ else {
+    units.add(j.newReturnVoidStmt());
+  }
+}
