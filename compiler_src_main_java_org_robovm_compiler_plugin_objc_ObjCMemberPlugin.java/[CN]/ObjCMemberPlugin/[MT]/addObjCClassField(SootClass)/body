@@ -1,0 +1,11 @@
+{
+  Jimple j=Jimple.v();
+  SootMethod clinit=getOrCreateStaticInitializer(sootClass);
+  Body body=clinit.retrieveActiveBody();
+  Local objCClass=Jimple.v().newLocal("$objCClass",org_robovm_objc_ObjCClass.getType());
+  body.getLocals().add(objCClass);
+  Chain<Unit> units=body.getUnits();
+  SootField f=new SootField("$objCClass",org_robovm_objc_ObjCClass.getType(),STATIC | PRIVATE | FINAL);
+  sootClass.addField(f);
+  units.insertBefore(Arrays.<Unit>asList(j.newAssignStmt(objCClass,j.newStaticInvokeExpr(org_robovm_objc_ObjCClass_getByType,ClassConstant.v(sootClass.getName().replace('.','/')))),j.newAssignStmt(j.newStaticFieldRef(f.makeRef()),objCClass)),units.getLast());
+}
