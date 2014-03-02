@@ -1,0 +1,23 @@
+{
+  Jimple j=Jimple.v();
+  SootMethod clinit=getOrCreateStaticInitializer(sootClass);
+  Body body=clinit.retrieveActiveBody();
+  String internalName=sootClass.getName().replace('.','/');
+  ClassConstant c=ClassConstant.v(internalName);
+  Chain<Unit> units=body.getUnits();
+  for (  Unit unit : units) {
+    if (unit instanceof InvokeStmt) {
+      InvokeStmt stmt=(InvokeStmt)unit;
+      if (stmt.getInvokeExpr() instanceof StaticInvokeExpr) {
+        StaticInvokeExpr expr=(StaticInvokeExpr)stmt.getInvokeExpr();
+        SootMethodRef ref=expr.getMethodRef();
+        if (ref.isStatic() && ref.declaringClass().equals(org_robovm_objc_ObjCRuntime) && ref.name().equals("bind")) {
+          if (ref.parameterTypes().isEmpty() || expr.getArg(0).equals(c)) {
+            return;
+          }
+        }
+      }
+    }
+  }
+  units.insertBefore(j.newInvokeStmt(j.newStaticInvokeExpr(org_robovm_objc_ObjCRuntime_bind,ClassConstant.v(internalName))),units.getLast());
+}
