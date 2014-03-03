@@ -1,0 +1,21 @@
+{
+  init();
+  SootClass sootClass=clazz.getSootClass();
+  if (isObjCProtocol(sootClass)) {
+    try {
+      String proxyInternalName=clazz.getInternalName() + PROXY_CLASS_NAME_SUFFIX;
+      ArrayList<String> interfazes=new ArrayList<>();
+      collectProxyInterfaceInternalNames(sootClass,interfazes);
+      ClassWriter cw=new ClassWriter(ClassWriter.COMPUTE_MAXS);
+      cw.visit(51,ACC_SUPER + ACC_FINAL + ACC_SYNTHETIC+ ACC_PUBLIC,proxyInternalName,null,getProxySuperclassInternalName(sootClass),new String[]{clazz.getInternalName()});
+      generateProxyMethods(config,interfazes,cw);
+      cw.visitEnd();
+      clazz.getClazzInfo().addDependency(proxyInternalName);
+      File f=clazz.getPath().getGeneratedClassFile(proxyInternalName);
+      FileUtils.writeByteArrayToFile(f,cw.toByteArray());
+    }
+ catch (    IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+}

@@ -10,7 +10,8 @@
       }
       selectorName=sb.toString();
     }
-    createCallback(sootClass,method,selectorName);
+    Type receiverType=ObjCProtocolProxyPlugin.isObjCProxy(sootClass) ? sootClass.getInterfaces().getFirst().getType() : sootClass.getType();
+    createCallback(sootClass,method,selectorName,receiverType);
     if (method.isNative()) {
       selectors.add(selectorName);
       createBridge(sootClass,method,selectorName);
@@ -47,7 +48,8 @@
           selectorName+=":";
         }
       }
-      createCallback(sootClass,method,selectorName);
+      Type receiverType=ObjCProtocolProxyPlugin.isObjCProxy(sootClass) ? sootClass.getInterfaces().getFirst().getType() : sootClass.getType();
+      createCallback(sootClass,method,selectorName,receiverType);
       if (method.isNative()) {
         selectors.add(selectorName);
         createBridge(sootClass,method,selectorName);

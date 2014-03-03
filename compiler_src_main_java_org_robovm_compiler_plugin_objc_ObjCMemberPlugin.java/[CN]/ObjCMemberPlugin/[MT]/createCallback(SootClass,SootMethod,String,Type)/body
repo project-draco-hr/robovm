@@ -1,6 +1,6 @@
 {
   Jimple j=Jimple.v();
-  SootMethod callbackMethod=getCallbackMethod(selectorName,method);
+  SootMethod callbackMethod=getCallbackMethod(selectorName,method,receiverType);
   sootClass.addMethod(callbackMethod);
   addCallbackAnnotation(callbackMethod);
   addBindSelectorAnnotation(callbackMethod,selectorName);
@@ -9,9 +9,9 @@
   PatchingChain<Unit> units=body.getUnits();
   Local thiz=null;
   if (!method.isStatic()) {
-    thiz=j.newLocal("$this",sootClass.getType());
+    thiz=j.newLocal("$this",receiverType);
     body.getLocals().add(thiz);
-    units.add(j.newIdentityStmt(thiz,j.newParameterRef(sootClass.getType(),0)));
+    units.add(j.newIdentityStmt(thiz,j.newParameterRef(receiverType,0)));
   }
   LinkedList<Value> args=new LinkedList<>();
   for (int i=0; i < method.getParameterCount(); i++) {
@@ -26,7 +26,12 @@
     ret=j.newLocal("$ret",method.getReturnType());
     body.getLocals().add(ret);
   }
-  InvokeExpr expr=method.isStatic() ? j.newStaticInvokeExpr(method.makeRef(),args) : j.newVirtualInvokeExpr(thiz,method.makeRef(),args);
+  SootMethodRef targetMethod=method.makeRef();
+  if (((RefType)receiverType).getSootClass().isInterface()) {
+    @SuppressWarnings("unchecked") List<Type> parameterTypes=method.getParameterTypes();
+    targetMethod=Scene.v().makeMethodRef(((RefType)receiverType).getSootClass(),method.getName(),parameterTypes,method.getReturnType(),false);
+  }
+  InvokeExpr expr=method.isStatic() ? j.newStaticInvokeExpr(targetMethod,args) : (((RefType)receiverType).getSootClass().isInterface() ? j.newInterfaceInvokeExpr(thiz,targetMethod,args) : j.newVirtualInvokeExpr(thiz,targetMethod,args));
   units.add(ret == null ? j.newInvokeStmt(expr) : j.newAssignStmt(ret,expr));
   if (ret != null) {
     units.add(j.newReturnStmt(ret));

@@ -1,0 +1,42 @@
+{
+  Clazzes clazzes=config.getClazzes();
+  final Set<String> addedMethods=new HashSet<>();
+  for (  String interfaze : interfazes) {
+    Clazz clazz=clazzes.load(interfaze);
+    if (clazz == null) {
+      continue;
+    }
+    ClassReader classReader=new ClassReader(clazz.getBytes());
+    classReader.accept(new ClassVisitor(ASM4,cw){
+      @Override public MethodVisitor visitMethod(      int access,      String name,      String desc,      String signature,      String[] exceptions){
+        String key=name + desc;
+        if ((access & ACC_ABSTRACT) > 0 && !addedMethods.contains(key)) {
+          access&=~ACC_ABSTRACT;
+          access|=ACC_NATIVE;
+          addedMethods.add(key);
+          return super.visitMethod(access,name,desc,signature,exceptions);
+        }
+        return null;
+      }
+      @Override public void visit(      int version,      int access,      String name,      String signature,      String superName,      String[] interfaces){
+      }
+      @Override public void visitEnd(){
+      }
+      @Override public AnnotationVisitor visitAnnotation(      String desc,      boolean visible){
+        return null;
+      }
+      @Override public void visitAttribute(      Attribute attr){
+      }
+      @Override public FieldVisitor visitField(      int access,      String name,      String desc,      String signature,      Object value){
+        return null;
+      }
+      @Override public void visitInnerClass(      String name,      String outerName,      String innerName,      int access){
+      }
+      @Override public void visitOuterClass(      String owner,      String name,      String desc){
+      }
+      @Override public void visitSource(      String source,      String debug){
+      }
+    }
+,0);
+  }
+}
