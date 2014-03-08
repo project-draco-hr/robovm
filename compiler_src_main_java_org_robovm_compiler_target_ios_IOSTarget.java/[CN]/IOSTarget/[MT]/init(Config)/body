@@ -10,9 +10,11 @@
     arch=config.getArch();
   }
   if (arch == Arch.thumbv7) {
-    signIdentity=config.getIosSignIdentity();
-    if (signIdentity == null) {
-      signIdentity=SigningIdentity.find(SigningIdentity.list(),"iPhone Developer");
+    if (!config.isSkipSigning()) {
+      signIdentity=config.getIosSignIdentity();
+      if (signIdentity == null) {
+        signIdentity=SigningIdentity.find(SigningIdentity.list(),"iPhone Developer");
+      }
     }
   }
   infoPList=config.getIosInfoPList();
@@ -25,13 +27,15 @@
     }
   }
   if (arch == Arch.thumbv7) {
-    provisioningProfile=config.getIosProvisioningProfile();
-    if (provisioningProfile == null) {
-      NSString bundleId=infoPListDict != null ? (NSString)infoPListDict.objectForKey("CFBundleIdentifier") : null;
-      if (bundleId == null) {
-        bundleId=new NSString("*");
+    if (!config.isSkipSigning()) {
+      provisioningProfile=config.getIosProvisioningProfile();
+      if (provisioningProfile == null) {
+        NSString bundleId=infoPListDict != null ? (NSString)infoPListDict.objectForKey("CFBundleIdentifier") : null;
+        if (bundleId == null) {
+          bundleId=new NSString("*");
+        }
+        provisioningProfile=ProvisioningProfile.find(ProvisioningProfile.list(),signIdentity,bundleId.toString());
       }
-      provisioningProfile=ProvisioningProfile.find(ProvisioningProfile.list(),signIdentity,bundleId.toString());
     }
   }
   String sdkVersion=config.getIosSdkVersion();

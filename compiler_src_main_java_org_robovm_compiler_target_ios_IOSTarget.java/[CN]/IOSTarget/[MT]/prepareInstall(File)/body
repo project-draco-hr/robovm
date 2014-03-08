@@ -4,9 +4,11 @@
   if (arch == Arch.thumbv7) {
     strip(installDir,getExecutable());
     copyResourcesPList(installDir);
-    copyProvisioningProfile(provisioningProfile,installDir);
-    boolean getTaskAllow=provisioningProfile.getType() == Type.Development;
-    codesign(signIdentity,getOrCreateEntitlementsPList(getTaskAllow),installDir);
+    if (!config.isSkipSigning()) {
+      copyProvisioningProfile(provisioningProfile,installDir);
+      boolean getTaskAllow=provisioningProfile.getType() == Type.Development;
+      codesign(signIdentity,getOrCreateEntitlementsPList(getTaskAllow),installDir);
+    }
     new Executor(config.getLogger(),"ln").args("-f","-s","_CodeSignature/CodeResources",new File(installDir,"CodeResources")).exec();
   }
 }
