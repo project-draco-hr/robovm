@@ -1,0 +1,24 @@
+{
+  final Iterator<K> it=map.allKeys().iterator();
+  return new Iterator<K>(){
+    private K last=null;
+    @Override public boolean hasNext(){
+      return it.hasNext();
+    }
+    @Override public K next(){
+      last=it.next();
+      return last;
+    }
+    @Override public void remove(){
+      if (last == null) {
+        throw new IllegalStateException();
+      }
+      if (map.get(last) == null) {
+        throw new ConcurrentModificationException();
+      }
+      map.remove(last);
+      last=null;
+    }
+  }
+;
+}
