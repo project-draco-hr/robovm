@@ -8,13 +8,15 @@
  else {
       dict=(NSDictionary)PropertyListParser.parse(IOUtils.toByteArray(getClass().getResourceAsStream("/Entitlements.plist")));
     }
-    NSDictionary profileEntitlements=provisioningProfile.getEntitlements();
-    for (    String key : profileEntitlements.allKeys()) {
-      if (dict.objectForKey(key) == null) {
-        dict.put(key,profileEntitlements.objectForKey(key));
+    if (provisioningProfile != null) {
+      NSDictionary profileEntitlements=provisioningProfile.getEntitlements();
+      for (      String key : profileEntitlements.allKeys()) {
+        if (dict.objectForKey(key) == null) {
+          dict.put(key,profileEntitlements.objectForKey(key));
+        }
       }
+      dict.put("application-identifier",provisioningProfile.getAppIdPrefix() + "." + getBundleId());
     }
-    dict.put("application-identifier",provisioningProfile.getAppIdPrefix() + "." + getBundleId());
     dict.put("get-task-allow",getTaskAllow);
     PropertyListParser.saveAsXML(dict,destFile);
     return destFile;
