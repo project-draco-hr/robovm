@@ -1,10 +1,10 @@
 {
   Jimple j=Jimple.v();
-  SootMethod msgSendMethod=getMsgSendMethod(selectorName,method);
+  SootMethod msgSendMethod=getMsgSendMethod(selectorName,method,extensions);
   sootClass.addMethod(msgSendMethod);
   addBridgeAnnotation(msgSendMethod);
   SootMethod msgSendSuperMethod=null;
-  if (!method.isStatic()) {
+  if (!extensions && !method.isStatic()) {
     msgSendSuperMethod=getMsgSendSuperMethod(selectorName,method);
     sootClass.addMethod(msgSendSuperMethod);
     addBridgeAnnotation(msgSendSuperMethod);
@@ -13,13 +13,19 @@
   Body body=j.newBody(method);
   method.setActiveBody(body);
   PatchingChain<Unit> units=body.getUnits();
-  if (!method.isStatic()) {
-    Local thiz=j.newLocal("$this",sootClass.getType());
+  Local thiz=null;
+  if (extensions) {
+    thiz=j.newLocal("$this",sootClass.getType());
+    body.getLocals().add(thiz);
+    units.add(j.newIdentityStmt(thiz,j.newParameterRef(method.getParameterType(0),0)));
+  }
+ else   if (!method.isStatic()) {
+    thiz=j.newLocal("$this",sootClass.getType());
     body.getLocals().add(thiz);
     units.add(j.newIdentityStmt(thiz,j.newThisRef(sootClass.getType())));
   }
   LinkedList<Value> args=new LinkedList<>();
-  for (int i=0; i < method.getParameterCount(); i++) {
+  for (int i=extensions ? 1 : 0; i < method.getParameterCount(); i++) {
     Type t=method.getParameterType(i);
     Local p=j.newLocal("$p" + i,t);
     body.getLocals().add(p);
@@ -31,23 +37,23 @@
   units.add(j.newAssignStmt(sel,j.newStaticFieldRef(Scene.v().makeFieldRef(sootClass,getSelectorFieldName(selectorName),org_robovm_objc_Selector.getType(),true))));
   args.addFirst(sel);
   Local objCClass=null;
-  if (method.isStatic()) {
+  if (!extensions && method.isStatic()) {
     objCClass=j.newLocal("$objCClass",org_robovm_objc_ObjCClass.getType());
     body.getLocals().add(objCClass);
     units.add(j.newAssignStmt(objCClass,j.newStaticFieldRef(Scene.v().makeFieldRef(sootClass,"$objCClass",org_robovm_objc_ObjCClass.getType(),true))));
   }
   Local customClass=null;
-  if (!Modifier.isFinal(sootClass.getModifiers()) && !method.isStatic()) {
+  if (!extensions && !Modifier.isFinal(sootClass.getModifiers()) && !method.isStatic()) {
     customClass=j.newLocal("$customClass",BooleanType.v());
     body.getLocals().add(customClass);
-    units.add(j.newAssignStmt(customClass,j.newInstanceFieldRef(body.getThisLocal(),org_robovm_objc_ObjCObject_customClass)));
+    units.add(j.newAssignStmt(customClass,j.newInstanceFieldRef(thiz,org_robovm_objc_ObjCObject_customClass)));
   }
   Local ret=null;
   if (method.getReturnType() != VoidType.v()) {
     ret=j.newLocal("$ret",method.getReturnType());
     body.getLocals().add(ret);
   }
-  StaticInvokeExpr invokeMsgSendExpr=j.newStaticInvokeExpr(msgSendMethod.makeRef(),l(method.isStatic() ? objCClass : body.getThisLocal(),args));
+  StaticInvokeExpr invokeMsgSendExpr=j.newStaticInvokeExpr(msgSendMethod.makeRef(),l(thiz != null ? thiz : objCClass,args));
   Stmt invokeMsgSendStmt=ret == null ? j.newInvokeStmt(invokeMsgSendExpr) : j.newAssignStmt(ret,invokeMsgSendExpr);
   if (customClass != null) {
     units.add(j.newIfStmt(j.newEqExpr(customClass,IntConstant.v(0)),invokeMsgSendStmt));
@@ -70,4 +76,5 @@
  else {
     units.add(j.newReturnVoidStmt());
   }
+  System.out.println(body);
 }

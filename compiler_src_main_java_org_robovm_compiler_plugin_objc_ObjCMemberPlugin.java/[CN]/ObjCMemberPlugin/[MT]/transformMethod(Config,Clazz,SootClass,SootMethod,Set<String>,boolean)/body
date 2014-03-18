@@ -1,6 +1,9 @@
 {
   AnnotationTag methodAnno=getAnnotation(method,METHOD);
   if (methodAnno != null) {
+    if (extensions && !(method.isStatic() && method.isNative())) {
+      throw new CompilerException("Objective-C @Method method " + method + " in extension class must be static and native.");
+    }
     String selectorName=readStringElem(methodAnno,"selector","").trim();
     if (selectorName.length() == 0) {
       StringBuilder sb=new StringBuilder(method.getName());
@@ -10,11 +13,13 @@
       }
       selectorName=sb.toString();
     }
-    Type receiverType=ObjCProtocolProxyPlugin.isObjCProxy(sootClass) ? sootClass.getInterfaces().getFirst().getType() : sootClass.getType();
-    createCallback(sootClass,method,selectorName,receiverType);
+    if (!extensions) {
+      Type receiverType=ObjCProtocolProxyPlugin.isObjCProxy(sootClass) ? sootClass.getInterfaces().getFirst().getType() : sootClass.getType();
+      createCallback(sootClass,method,selectorName,receiverType);
+    }
     if (method.isNative()) {
       selectors.add(selectorName);
-      createBridge(sootClass,method,selectorName);
+      createBridge(sootClass,method,selectorName,extensions);
     }
   }
  else {
@@ -24,15 +29,28 @@
       if (!(methodName.startsWith("get") && methodName.length() > 3) && !(methodName.startsWith("is") && methodName.length() > 2) && !(methodName.startsWith("set") && methodName.length() > 3)) {
         throw new CompilerException("Invalid Objective-C @Property method name " + method);
       }
+      if (extensions && !(method.isStatic() && method.isNative())) {
+        throw new CompilerException("Objective-C @Property method " + method + " in extension class must be static and native.");
+      }
       boolean isGetter=!methodName.startsWith("set");
-      if (isGetter && method.getParameterCount() != 0) {
-        throw new CompilerException("Objective-C @Property getter method " + method + " must take 0 arguments");
+      if (!extensions) {
+        if (isGetter && method.getParameterCount() != 0) {
+          throw new CompilerException("Objective-C @Property getter method " + method + " must take 0 arguments");
+        }
+        if (!isGetter && method.getParameterCount() != 1) {
+          throw new CompilerException("Objective-C @Property setter method " + method + " must take 1 argument");
+        }
+      }
+ else {
+        if (isGetter && method.getParameterCount() != 1) {
+          throw new CompilerException("Objective-C @Property getter method " + method + " in extension class must take 1 argument (this)");
+        }
+        if (!isGetter && method.getParameterCount() != 2) {
+          throw new CompilerException("Objective-C @Property setter method " + method + " in extension class must take 2 arguments");
+        }
       }
       if (isGetter && method.getReturnType() == VoidType.v()) {
         throw new CompilerException("Objective-C @Property getter method " + method + " must not return void");
-      }
-      if (!isGetter && method.getParameterCount() != 1) {
-        throw new CompilerException("Objective-C @Property setter method " + method + " must take 1 argument");
       }
       if (!isGetter && method.getReturnType() != VoidType.v()) {
         throw new CompilerException("Objective-C @Property setter method " + method + " must return void");
@@ -48,11 +66,13 @@
           selectorName+=":";
         }
       }
-      Type receiverType=ObjCProtocolProxyPlugin.isObjCProxy(sootClass) ? sootClass.getInterfaces().getFirst().getType() : sootClass.getType();
-      createCallback(sootClass,method,selectorName,receiverType);
+      if (!extensions) {
+        Type receiverType=ObjCProtocolProxyPlugin.isObjCProxy(sootClass) ? sootClass.getInterfaces().getFirst().getType() : sootClass.getType();
+        createCallback(sootClass,method,selectorName,receiverType);
+      }
       if (method.isNative()) {
         selectors.add(selectorName);
-        createBridge(sootClass,method,selectorName);
+        createBridge(sootClass,method,selectorName,extensions);
       }
     }
   }
