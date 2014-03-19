@@ -4,10 +4,10 @@
   }
 synchronized (ASSOCIATED_OBJECTS) {
     List l=(List)getAssociatedObject(from,STRONG_REFS_KEY);
-    if (l == null || !l.remove(to)) {
+    if (!ignoreNotExists && (l == null || !l.remove(to))) {
       throw new IllegalArgumentException("No strong ref exists from " + from + " (a "+ from.getClass().getName()+ ") to "+ to+ " a ("+ to.getClass().getName()+ ")");
     }
-    if (l.isEmpty()) {
+    if (l != null && l.isEmpty()) {
       setAssociatedObject(from,STRONG_REFS_KEY,null);
     }
   }

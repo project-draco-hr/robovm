@@ -15,7 +15,7 @@
   PatchingChain<Unit> units=body.getUnits();
   Local thiz=null;
   if (extensions) {
-    thiz=j.newLocal("$this",sootClass.getType());
+    thiz=j.newLocal("$this",method.getParameterType(0));
     body.getLocals().add(thiz);
     units.add(j.newIdentityStmt(thiz,j.newParameterRef(method.getParameterType(0),0)));
   }
@@ -31,6 +31,22 @@
     body.getLocals().add(p);
     units.add(j.newIdentityStmt(p,j.newParameterRef(t,i)));
     args.add(p);
+  }
+  if (strongRefSetter) {
+    Type propType=method.getParameterType(extensions ? 1 : 0);
+    if (propType instanceof RefLikeType) {
+      SootMethodRef getter=Scene.v().makeMethodRef(method.getDeclaringClass(),"get" + method.getName().substring(3),extensions ? Arrays.asList(thiz.getType()) : Collections.<Type>emptyList(),propType,extensions);
+      Local before=j.newLocal("$before",propType);
+      body.getLocals().add(before);
+      units.add(j.newAssignStmt(before,extensions ? j.newStaticInvokeExpr(getter,thiz) : j.newVirtualInvokeExpr(thiz,getter)));
+      Value after=args.get(0);
+      if (extensions) {
+        units.add(j.newInvokeStmt(j.newStaticInvokeExpr(org_robovm_objc_ObjCExtensions_updateStrongRef,Arrays.asList(thiz,before,after))));
+      }
+ else {
+        units.add(j.newInvokeStmt(j.newVirtualInvokeExpr(thiz,org_robovm_objc_ObjCObject_updateStrongRef,before,after)));
+      }
+    }
   }
   Local sel=j.newLocal("$sel",org_robovm_objc_Selector.getType());
   body.getLocals().add(sel);
