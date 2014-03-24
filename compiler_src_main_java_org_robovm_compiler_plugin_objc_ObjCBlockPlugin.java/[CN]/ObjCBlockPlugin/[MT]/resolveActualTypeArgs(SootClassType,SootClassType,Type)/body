@@ -1,0 +1,62 @@
+{
+  TypeVariable<SootClassType>[] typeParameters=offspring.getTypeParameters();
+  if (actualArgs.length == 0) {
+    actualArgs=typeParameters;
+  }
+  Map<String,Type> typeVariables=new HashMap<>();
+  for (int i=0; i < actualArgs.length; i++) {
+    TypeVariable<?> typeVariable=(TypeVariable<?>)typeParameters[i];
+    Type t=actualArgs[i];
+    if (t instanceof WildcardType) {
+      Type upper=((WildcardType)t).getUpperBounds()[0];
+      if (upper instanceof SootClassType) {
+        if ("java.lang.Object".equals(((SootClassType)upper).getSootClass().getName())) {
+          actualArgs[i]=typeVariable.getBounds()[0];
+        }
+      }
+    }
+    typeVariables.put(typeVariable.getName(),actualArgs[i]);
+  }
+  List<Type> ancestors=new LinkedList<Type>();
+  if (offspring.getGenericSuperclass() != null) {
+    ancestors.add(offspring.getGenericSuperclass());
+  }
+  for (  Type t : offspring.getGenericInterfaces()) {
+    ancestors.add(t);
+  }
+  for (  Type type : ancestors) {
+    if (type instanceof SootClassType) {
+      SootClassType ancestorClass=(SootClassType)type;
+      if (base.isAssignableFrom(ancestorClass)) {
+        Type[] result=resolveActualTypeArgs(ancestorClass,base);
+        if (result != null) {
+          return result;
+        }
+      }
+    }
+    if (type instanceof ParameterizedType) {
+      ParameterizedType parameterizedType=(ParameterizedType)type;
+      Type rawType=parameterizedType.getRawType();
+      if (rawType instanceof SootClassType) {
+        SootClassType rawTypeClass=(SootClassType)rawType;
+        if (base.isAssignableFrom(rawTypeClass)) {
+          List<Type> resolvedTypes=new LinkedList<Type>();
+          for (          Type t : parameterizedType.getActualTypeArguments()) {
+            if (t instanceof TypeVariable<?>) {
+              Type resolvedType=typeVariables.get(((TypeVariable<?>)t).getName());
+              resolvedTypes.add(resolvedType != null ? resolvedType : t);
+            }
+ else {
+              resolvedTypes.add(t);
+            }
+          }
+          Type[] result=resolveActualTypeArgs(rawTypeClass,base,resolvedTypes.toArray(new Type[]{}));
+          if (result != null) {
+            return result;
+          }
+        }
+      }
+    }
+  }
+  return offspring.equals(base) ? actualArgs : null;
+}

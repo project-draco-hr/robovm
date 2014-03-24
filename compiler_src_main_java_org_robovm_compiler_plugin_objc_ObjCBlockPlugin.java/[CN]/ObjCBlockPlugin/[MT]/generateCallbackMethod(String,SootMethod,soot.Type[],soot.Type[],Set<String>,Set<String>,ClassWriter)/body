@@ -1,0 +1,67 @@
+{
+  String targetInterfaceName=Types.getInternalName(targetMethod.getDeclaringClass());
+  List<soot.Type> paramTypes=new ArrayList<>();
+  paramTypes.add(org_robovm_objc_ObjCBlock.getType());
+  paramTypes.addAll(Arrays.asList(unboxedTypes).subList(1,unboxedTypes.length));
+  String name="invoked";
+  String desc=getDescriptor(paramTypes,unboxedTypes[0]);
+  MethodVisitor mv=cw.visitMethod(ACC_PRIVATE | ACC_STATIC,name,desc,null,null);
+  mv.visitAnnotation(CALLBACK,true).visitEnd();
+  mv.visitCode();
+  mv.visitVarInsn(ALOAD,0);
+  mv.visitMethodInsn(INVOKEVIRTUAL,"org/robovm/objc/ObjCBlock","object","()Ljava/lang/Object;");
+  mv.visitTypeInsn(CHECKCAST,targetInterfaceName);
+  for (int i=1, var=1; i < actualTypes.length; i++, var++) {
+    soot.Type from=unboxedTypes[i];
+    if (from == LongType.v()) {
+      mv.visitVarInsn(LLOAD,var);
+      var++;
+    }
+ else     if (from == FloatType.v()) {
+      mv.visitVarInsn(FLOAD,var);
+    }
+ else     if (from == DoubleType.v()) {
+      mv.visitVarInsn(DLOAD,var);
+      var++;
+    }
+ else     if (from instanceof PrimType) {
+      mv.visitVarInsn(ILOAD,var);
+    }
+ else {
+      mv.visitVarInsn(ALOAD,var);
+    }
+    soot.Type to=actualTypes[i];
+    if (from != to) {
+      String boxDesc=getDescriptor(Collections.singletonList(from),to);
+      usedBoxMethods.add(boxDesc);
+      mv.visitMethodInsn(INVOKESTATIC,owner,"box",boxDesc);
+    }
+  }
+  mv.visitMethodInsn(INVOKEINTERFACE,targetInterfaceName,targetMethod.getName(),getDescriptor(targetMethod));
+  if (unboxedTypes[0] != actualTypes[0]) {
+    mv.visitTypeInsn(CHECKCAST,getInternalName(actualTypes[0]));
+    String unboxDesc=getDescriptor(Collections.singletonList(actualTypes[0]),unboxedTypes[0]);
+    usedUnboxMethods.add(unboxDesc);
+    mv.visitMethodInsn(INVOKESTATIC,owner,"unbox",unboxDesc);
+  }
+  if (unboxedTypes[0] == VoidType.v()) {
+    mv.visitInsn(RETURN);
+  }
+ else   if (unboxedTypes[0] == LongType.v()) {
+    mv.visitInsn(LRETURN);
+  }
+ else   if (unboxedTypes[0] == FloatType.v()) {
+    mv.visitInsn(FRETURN);
+  }
+ else   if (unboxedTypes[0] == DoubleType.v()) {
+    mv.visitInsn(DRETURN);
+  }
+ else   if (unboxedTypes[0] instanceof PrimType) {
+    mv.visitInsn(IRETURN);
+  }
+ else {
+    mv.visitInsn(ARETURN);
+  }
+  mv.visitMaxs(0,0);
+  mv.visitEnd();
+}

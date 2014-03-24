@@ -1,0 +1,32 @@
+{
+  if (!eof) {
+    StringBuilder identBuf=new StringBuilder(32);
+    if (!isStopSymbol(symbol)) {
+      identBuf.append(symbol);
+      do {
+        char ch=buffer[pos];
+        if ((ch >= 'a') && (ch <= 'z') || (ch >= 'A') && (ch <= 'Z') || !isStopSymbol(ch)) {
+          identBuf.append(buffer[pos]);
+          pos++;
+        }
+ else {
+          identifier=identBuf.toString();
+          scanSymbol();
+          return;
+        }
+      }
+ while (pos != buffer.length);
+      identifier=identBuf.toString();
+      symbol=0;
+      eof=true;
+    }
+ else {
+      symbol=0;
+      eof=true;
+      throw new GenericSignatureFormatError();
+    }
+  }
+ else {
+    throw new GenericSignatureFormatError();
+  }
+}

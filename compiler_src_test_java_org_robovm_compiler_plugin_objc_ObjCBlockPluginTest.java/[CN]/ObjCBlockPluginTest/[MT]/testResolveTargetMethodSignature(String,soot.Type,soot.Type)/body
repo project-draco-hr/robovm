@@ -1,0 +1,11 @@
+{
+  SootMethod m=toSootClass(Runners.class).getMethodByName(runnerMethodName);
+  SootMethodType mType=new SootMethodType(m);
+  SootMethod target=ObjCBlockPlugin.getBlockTargetMethod(m,0);
+  soot.Type[] types=ObjCBlockPlugin.resolveTargetMethodSignature(m,target,mType.getGenericParameterTypes()[0]);
+  assertEquals(target.getParameterCount() + 1,types.length);
+  assertEquals(expectedReturnType,types[0]);
+  for (int i=0; i < types.length - 1; i++) {
+    assertEquals(expectedParamTypes[i],types[i + 1]);
+  }
+}

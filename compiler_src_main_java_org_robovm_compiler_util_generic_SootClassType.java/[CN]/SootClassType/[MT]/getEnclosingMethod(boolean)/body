@@ -1,0 +1,22 @@
+{
+  EnclosingMethodTag emTag=(EnclosingMethodTag)sootClass.getTag("EnclosingMethodTag");
+  if (emTag != null) {
+    String clsName=emTag.getEnclosingClass();
+    String name=emTag.getEnclosingMethod();
+    String desc=emTag.getEnclosingMethodSig();
+    if (clsName != null && name != null && desc != null) {
+      if ((constructor && name.equals("<init>")) || (!constructor && !name.equals("<init>") && !name.equals("<clinit>"))) {
+        SootClass cls=SootResolver.v().makeClassRef(clsName);
+        if (!cls.isPhantom()) {
+          for (          SootMethod m : cls.getMethods()) {
+            String mDesc=org.robovm.compiler.Types.getDescriptor(m);
+            if (m.getName().equals(name) && desc.equals(mDesc)) {
+              return new SootMethodType(m);
+            }
+          }
+        }
+      }
+    }
+  }
+  return null;
+}

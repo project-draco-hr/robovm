@@ -1,0 +1,18 @@
+{
+  soot.Type type=method.getReturnType();
+  if (!(type instanceof RefType)) {
+    throw new CompilerException("@Block annotated return type of method " + method + " must be of interface type");
+  }
+  SootClass blockType=((RefType)type).getSootClass();
+  if (!blockType.isInterface()) {
+    throw new CompilerException("@Block annotated parameter return type " + "of method " + method + " must be of interface type");
+  }
+  List<SootMethod> allMethods=collectAbstractMethods(blockType);
+  if (allMethods.isEmpty()) {
+    throw new CompilerException("No abstract method found in interface " + blockType + " used in @Block annotated return type of method "+ method);
+  }
+  if (allMethods.size() > 1) {
+    throw new CompilerException("More than 1 abstract method found in interface " + blockType + " used in @Block annotated return type of method "+ method);
+  }
+  return allMethods.get(0);
+}

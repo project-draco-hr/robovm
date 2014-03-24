@@ -1,20 +1,3 @@
 {
-  Method method=null;
-  for (  Method m : callbacks.getDeclaredMethods()) {
-    if (m.getAnnotation(Callback.class) != null) {
-      if (method != null) {
-        throw new IllegalArgumentException("Several @Callback " + "methods found in class " + callbacks.getName());
-      }
-      method=m;
-    }
-  }
-  if (method == null) {
-    throw new IllegalArgumentException("No @Callback method found " + "in class " + callbacks.getName());
-  }
-  callbackImpl=VM.getCallbackMethodImpl(method);
-  int flags=BLOCK_HAS_COPY_DISPOSE | BLOCK_HAS_SIGNATURE;
-  if (ObjCRuntime.isStret(method)) {
-    flags|=BLOCK_HAS_STRET;
-  }
-  this.flags=flags;
+  this(findCallback(callbacks),false);
 }

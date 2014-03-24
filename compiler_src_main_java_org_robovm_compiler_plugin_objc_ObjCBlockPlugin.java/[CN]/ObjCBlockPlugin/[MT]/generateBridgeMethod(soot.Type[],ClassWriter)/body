@@ -1,0 +1,14 @@
+{
+  List<soot.Type> paramTypes=new ArrayList<>();
+  paramTypes.add(LongType.v());
+  paramTypes.add(org_robovm_objc_ObjCBlock.getType());
+  paramTypes.addAll(Arrays.asList(unboxedTypes).subList(1,unboxedTypes.length));
+  String name="invoke";
+  String desc=getDescriptor(paramTypes,unboxedTypes[0]);
+  MethodVisitor mv=cw.visitMethod(ACC_PRIVATE | ACC_STATIC | ACC_NATIVE,name,desc,null,null);
+  AnnotationVisitor av=mv.visitAnnotation(BRIDGE,true);
+  av.visit("dynamic",true);
+  av.visitEnd();
+  mv.visitParameterAnnotation(0,POINTER,true).visitEnd();
+  mv.visitEnd();
+}
