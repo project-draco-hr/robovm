@@ -1,0 +1,16 @@
+{
+  Matcher matcher=BLOCK_ANNOTATION_PATTERN.matcher(value);
+  int pos=0;
+  while (matcher.find()) {
+    if (matcher.start() != pos) {
+      break;
+    }
+    String anno=BLOCK_ANNOTATIONS.get(matcher.group().trim());
+    if (anno == null) {
+      throw new CompilerException("Unsupported annotation \"" + matcher.group().trim() + "\" in @Block annotation value \""+ originalValue+ "\" on method "+ m);
+    }
+    values.add(anno);
+    pos=matcher.end();
+  }
+  return pos;
+}

@@ -7,6 +7,14 @@
   String desc=getDescriptor(paramTypes,unboxedTypes[0]);
   MethodVisitor mv=cw.visitMethod(ACC_PRIVATE | ACC_STATIC,name,desc,null,null);
   mv.visitAnnotation(CALLBACK,true).visitEnd();
+  for (  String s : targetMethodAnnotations[0]) {
+    mv.visitAnnotation(s,true).visitEnd();
+  }
+  for (int i=1; i < targetMethodAnnotations.length; i++) {
+    for (    String s : targetMethodAnnotations[i]) {
+      mv.visitParameterAnnotation(i,s,true);
+    }
+  }
   mv.visitCode();
   mv.visitVarInsn(ALOAD,0);
   mv.visitMethodInsn(INVOKEVIRTUAL,"org/robovm/objc/ObjCBlock","object","()Ljava/lang/Object;");

@@ -2,7 +2,7 @@
   if (targetMethod.getDeclaringClass().getName().equals("java.lang.Runnable") && targetMethod.getName().equals("run")) {
     return RUNNABLE_AS_OBJC_BLOCK_MARSHALER;
   }
-  String targetMethodKey=getTargetMethodKey(targetMethod,actualTypes);
+  String targetMethodKey=getTargetMethodKey(targetMethod,actualTypes,targetMethodAnnotations);
   Integer id=blockTypeIds.get(targetMethodKey);
   if (id != null) {
     return getBlockMarshalerName(clazz,id);
@@ -16,8 +16,8 @@
   final Set<String> usedUnboxMethods=new HashSet<>();
   ClassWriter cw=new ClassWriter(ClassWriter.COMPUTE_MAXS);
   generateTargetMethod(blockMarshalerName,targetMethod,actualTypes,unboxedTypes,usedBoxMethods,usedUnboxMethods,cw);
-  generateBridgeMethod(unboxedTypes,cw);
-  generateCallbackMethod(blockMarshalerName,targetMethod,actualTypes,unboxedTypes,usedBoxMethods,usedUnboxMethods,cw);
+  generateBridgeMethod(unboxedTypes,targetMethodAnnotations,cw);
+  generateCallbackMethod(blockMarshalerName,targetMethod,actualTypes,unboxedTypes,usedBoxMethods,usedUnboxMethods,targetMethodAnnotations,cw);
   ClassReader classReader=new ClassReader(templateMarshaler.getBytes());
   classReader.accept(new ClassVisitor(ASM4,cw){
     @Override public void visit(    int version,    int access,    String name,    String signature,    String superName,    String[] interfaces){
