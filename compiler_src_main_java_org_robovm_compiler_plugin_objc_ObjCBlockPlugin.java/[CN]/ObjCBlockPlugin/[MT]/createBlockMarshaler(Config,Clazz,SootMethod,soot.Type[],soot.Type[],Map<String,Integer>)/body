@@ -23,6 +23,8 @@
     @Override public void visit(    int version,    int access,    String name,    String signature,    String superName,    String[] interfaces){
       super.visit(version,access,blockMarshalerName,signature,superName,new String[]{targetInterfaceName});
     }
+    @Override public void visitInnerClass(    String name,    String outerName,    String innerName,    int access){
+    }
     @Override public void visitSource(    String source,    String debug){
     }
     @Override public MethodVisitor visitMethod(    int access,    String name,    String desc,    String signature,    String[] exceptions){
@@ -86,6 +88,7 @@ super.visitMethodInsn(opcode,owner,name,desc);
 }
 }
 ,0);
+cw.visitInnerClass(blockMarshalerName,clazz.getInternalName(),blockMarshalerName.substring(clazz.getInternalName().length() + 1),ACC_PUBLIC + ACC_STATIC);
 cw.visitEnd();
 File f=clazz.getPath().getGeneratedClassFile(blockMarshalerName);
 FileUtils.writeByteArrayToFile(f,cw.toByteArray());
