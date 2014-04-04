@@ -1,5 +1,7 @@
 {
   validateGlobalValueMethod(method);
+  AnnotationTag globalValueAnnotation=getAnnotation(method,GLOBAL_VALUE);
+  boolean optional=readBooleanElem(globalValueAnnotation,"optional",false);
   Function fn=FunctionBuilder.method(method);
   moduleBuilder.addFunction(fn);
   Type valueType=getStructMemberType(method);
@@ -14,7 +16,7 @@
   fn.add(new Br(nullCheck.ref(),fn.newBasicBlockRef(nullLabel),fn.newBasicBlockRef(notNullLabel)));
   fn.newBasicBlock(nullLabel);
   VariableRef env=fn.getParameterRef(0);
-  call(fn,BC_THROW_UNSATISIFED_LINK_ERROR,env,moduleBuilder.getString(String.format("@GlobalValue method %s.%s%s not bound",className,method.getName(),getDescriptor(method))));
+  call(fn,BC_THROW_UNSATISIFED_LINK_ERROR,env,moduleBuilder.getString(String.format((optional ? "Optional " : "") + "@GlobalValue method %s.%s%s not bound",className,method.getName(),getDescriptor(method))));
   fn.add(new Unreachable());
   fn.newBasicBlock(notNullLabel);
   if (method.getParameterCount() == 0) {
