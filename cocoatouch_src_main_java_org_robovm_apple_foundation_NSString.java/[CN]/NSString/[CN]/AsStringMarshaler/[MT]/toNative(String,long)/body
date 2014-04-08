@@ -2,11 +2,15 @@
   if (o == null) {
     return 0L;
   }
-  try (NSString s=new NSString(o)){
+  NSString s=new NSString(o);
+  try {
     s.retain();
     if ((flags & MarshalerFlags.CALL_TYPE_CALLBACK) > 0) {
       s.autorelease();
     }
     return s.getHandle();
   }
- }
+  finally {
+    s.dispose();
+  }
+}
