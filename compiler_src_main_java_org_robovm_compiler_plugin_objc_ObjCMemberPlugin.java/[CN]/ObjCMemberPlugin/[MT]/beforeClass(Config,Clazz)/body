@@ -4,9 +4,10 @@
   boolean extensions=false;
   if (!sootClass.isInterface() && (isObjCObject(sootClass) || (extensions=isObjCExtensions(sootClass)))) {
     Set<String> selectors=new TreeSet<>();
+    Set<String> overridables=new HashSet<>();
     for (    SootMethod method : sootClass.getMethods()) {
       if (!"<clinit>".equals(method.getName()) && !"<init>".equals(method.getName())) {
-        transformMethod(config,clazz,sootClass,method,selectors,extensions);
+        transformMethod(config,clazz,sootClass,method,selectors,overridables,extensions);
       }
     }
     addBindCall(sootClass);

@@ -18,6 +18,9 @@
       createCallback(sootClass,method,selectorName,receiverType);
     }
     if (method.isNative()) {
+      if (checkOverridable(overridables,selectorName,method)) {
+        overridables.add(selectorName);
+      }
       selectors.add(selectorName);
       createBridge(sootClass,method,selectorName,false,extensions);
     }
@@ -71,6 +74,9 @@
         createCallback(sootClass,method,selectorName,receiverType);
       }
       if (method.isNative()) {
+        if (checkOverridable(overridables,selectorName,method)) {
+          overridables.add(selectorName);
+        }
         selectors.add(selectorName);
         boolean strongRefSetter=!isGetter && readBooleanElem(propertyAnno,"strongRef",false);
         createBridge(sootClass,method,selectorName,strongRefSetter,extensions);
