@@ -2,6 +2,9 @@
   if (handle == 0L) {
     return null;
   }
+  if (cls == ObjCClass.class) {
+    return (T)ObjCClass.toObjCClass(handle);
+  }
   T o=getPeerObject(handle);
   if (o != null && o.getHandle() != 0) {
     if (forceType && !cls.isAssignableFrom(o.getClass())) {
@@ -9,12 +12,8 @@
     }
     return o;
   }
-  ObjCClass fallback=ObjCClass.getByType(cls);
-  ObjCClass objCClass=forceType ? ObjCClass.getByType(cls) : ObjCClass.getFromObject(handle,fallback);
+  ObjCClass objCClass=forceType ? ObjCClass.getByType(cls) : ObjCClass.getFromObject(handle);
   Class<T> c=(Class<T>)objCClass.getType();
-  if (c == ObjCClass.class) {
-    return (T)objCClass;
-  }
   o=VM.allocateObject(c);
   o.setHandle(handle);
   AssociatedObjectHelper.setPeerObject(handle,o);

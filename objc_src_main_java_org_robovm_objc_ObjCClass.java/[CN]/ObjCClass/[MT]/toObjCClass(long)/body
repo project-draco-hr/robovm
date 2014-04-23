@@ -1,0 +1,19 @@
+{
+  long classPtr=handle;
+  ObjCClass c=ObjCObject.getPeerObject(classPtr);
+  if (c == null) {
+    c=getByNameNotLoaded(VM.newStringUTF(ObjCRuntime.class_getName(classPtr)));
+  }
+  while (c == null && classPtr != 0L) {
+    classPtr=ObjCRuntime.class_getSuperclass(classPtr);
+    c=ObjCObject.getPeerObject(classPtr);
+    if (c == null) {
+      c=getByNameNotLoaded(VM.newStringUTF(ObjCRuntime.class_getName(classPtr)));
+    }
+  }
+  if (c == null) {
+    String name=VM.newStringUTF(ObjCRuntime.class_getName(handle));
+    throw new ObjCClassNotFoundException("Could not find Java class corresponding to Objective-C class: " + name);
+  }
+  return c;
+}
