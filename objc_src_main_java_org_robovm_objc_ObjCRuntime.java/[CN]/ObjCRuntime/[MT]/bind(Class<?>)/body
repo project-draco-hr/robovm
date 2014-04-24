@@ -12,6 +12,15 @@
  else           if (ObjCObject.class.isAssignableFrom(paramTypes[0])) {
             symbol="objc_msgSend";
           }
+ else           if (paramTypes[0] == long.class) {
+            Annotation[] paramAnnos=method.getParameterAnnotations()[0];
+            for (            Annotation a : paramAnnos) {
+              if (a.annotationType() == Pointer.class) {
+                symbol="objc_msgSend";
+                break;
+              }
+            }
+          }
           if (symbol != null) {
             if (isStret(method)) {
               symbol+="_stret";
