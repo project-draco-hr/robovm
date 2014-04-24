@@ -1,0 +1,24 @@
+{
+  List<AnnotationTag>[] fromAnnos=getParameterAnnotations(fromMethod,Visibility.values()[visibility]);
+  List<AnnotationTag>[] toAnnos=getParameterAnnotations(toMethod,Visibility.values()[visibility]);
+  for (int i=start; i < end; i++) {
+    toAnnos[i + shift].addAll(fromAnnos[i]);
+  }
+  for (Iterator<Tag> it=toMethod.getTags().iterator(); it.hasNext(); ) {
+    Tag tag=it.next();
+    if (tag instanceof VisibilityParameterAnnotationTag) {
+      if (((VisibilityParameterAnnotationTag)tag).getKind() == visibility) {
+        it.remove();
+      }
+    }
+  }
+  VisibilityParameterAnnotationTag vpaTag=new VisibilityParameterAnnotationTag(toAnnos.length,visibility);
+  for (  List<AnnotationTag> annos : toAnnos) {
+    VisibilityAnnotationTag vaTag=new VisibilityAnnotationTag(visibility);
+    for (    AnnotationTag anno : annos) {
+      vaTag.addAnnotation(anno);
+    }
+    vpaTag.addVisibilityAnnotation(vaTag);
+  }
+  toMethod.addTag(vpaTag);
+}
