@@ -1,0 +1,136 @@
+{
+  HashMutableDirectedGraph dataFlowSummary=dfa.getInvokeInfoFlowSummary(ie,is,sm);
+  if (false) {
+    SootMethod method=ie.getMethodRef().resolve();
+    if (method.getDeclaringClass().isApplicationClass()) {
+      G.v().out.println("Attempting to print graph (will succeed only if ./dfg/ is a valid path)");
+      MutableDirectedGraph abbreviatedDataFlowGraph=dfa.getInvokeAbbreviatedInfoFlowGraph(ie,sm);
+      InfoFlowAnalysis.printGraphToDotFile("dfg/" + method.getDeclaringClass().getShortName() + "_"+ method.getName()+ (refOnly ? "" : "_primitive"),abbreviatedDataFlowGraph,method.getName() + (refOnly ? "" : "_primitive"),false);
+    }
+  }
+  List returnValueSources=new ArrayList();
+  Iterator<Object> nodeIt=dataFlowSummary.getNodes().iterator();
+  while (nodeIt.hasNext()) {
+    EquivalentValue nodeEqVal=(EquivalentValue)nodeIt.next();
+    if (!(nodeEqVal.getValue() instanceof Ref))     throw new RuntimeException("Illegal node type in data flow summary:" + nodeEqVal.getValue() + " should be an object of type Ref.");
+    Ref node=(Ref)nodeEqVal.getValue();
+    List sources=new ArrayList();
+    if (node instanceof ParameterRef) {
+      ParameterRef param=(ParameterRef)node;
+      if (param.getIndex() == -1)       continue;
+      sources.add(ie.getArg(param.getIndex()));
+    }
+ else     if (node instanceof StaticFieldRef) {
+      sources.add(node);
+    }
+ else     if (node instanceof InstanceFieldRef && ie instanceof InstanceInvokeExpr) {
+      InstanceInvokeExpr iie=(InstanceInvokeExpr)ie;
+      if (iie.getBase() == thisLocal) {
+        sources.add(node);
+      }
+ else       if (includeInnerFields) {
+        if (false) {
+          InstanceFieldRef ifr=(InstanceFieldRef)node;
+          if (ifr.getBase() instanceof FakeJimpleLocal)           ;
+ else           sources.add(ifr.getBase());
+        }
+ else {
+          InstanceFieldRef ifr=(InstanceFieldRef)node;
+          if (ifr.getBase() instanceof FakeJimpleLocal)           ;
+ else           sources.add(ifr.getBase());
+          sources.add(node);
+        }
+      }
+ else {
+        sources.add(iie.getBase());
+      }
+    }
+ else     if (node instanceof InstanceFieldRef && includeInnerFields) {
+      if (false) {
+        InstanceFieldRef ifr=(InstanceFieldRef)node;
+        if (ifr.getBase() instanceof FakeJimpleLocal)         ;
+ else         sources.add(ifr.getBase());
+      }
+ else {
+        InstanceFieldRef ifr=(InstanceFieldRef)node;
+        if (ifr.getBase() instanceof FakeJimpleLocal)         ;
+ else         sources.add(ifr.getBase());
+        sources.add(node);
+      }
+    }
+ else     if (node instanceof ThisRef && ie instanceof InstanceInvokeExpr) {
+      InstanceInvokeExpr iie=(InstanceInvokeExpr)ie;
+      sources.add(iie.getBase());
+    }
+ else {
+      throw new RuntimeException("Unknown Node Type in Data Flow Graph: node " + node + " in InvokeExpr "+ ie);
+    }
+    Iterator sinksIt=dataFlowSummary.getSuccsOfAsSet(nodeEqVal).iterator();
+    while (sinksIt.hasNext()) {
+      EquivalentValue sinkEqVal=(EquivalentValue)sinksIt.next();
+      Ref sink=(Ref)sinkEqVal.getValue();
+      if (sink instanceof ParameterRef) {
+        ParameterRef param=(ParameterRef)sink;
+        if (param.getIndex() == -1) {
+          returnValueSources.addAll(sources);
+        }
+ else {
+          for (Iterator sourcesIt=sources.iterator(); sourcesIt.hasNext(); ) {
+            Value source=(Value)sourcesIt.next();
+            handleFlowsToDataStructure(ie.getArg(param.getIndex()),source);
+          }
+        }
+      }
+ else       if (sink instanceof StaticFieldRef) {
+        for (Iterator sourcesIt=sources.iterator(); sourcesIt.hasNext(); ) {
+          Value source=(Value)sourcesIt.next();
+          handleFlowsToValue(sink,source);
+        }
+      }
+ else       if (sink instanceof InstanceFieldRef && ie instanceof InstanceInvokeExpr) {
+        InstanceInvokeExpr iie=(InstanceInvokeExpr)ie;
+        if (iie.getBase() == thisLocal) {
+          for (Iterator sourcesIt=sources.iterator(); sourcesIt.hasNext(); ) {
+            Value source=(Value)sourcesIt.next();
+            handleFlowsToValue(sink,source);
+          }
+        }
+ else         if (includeInnerFields) {
+          for (Iterator sourcesIt=sources.iterator(); sourcesIt.hasNext(); ) {
+            Value source=(Value)sourcesIt.next();
+            if (false) {
+              InstanceFieldRef ifr=(InstanceFieldRef)sink;
+              if (ifr.getBase() instanceof FakeJimpleLocal)               ;
+ else               handleFlowsToDataStructure(ifr.getBase(),source);
+            }
+ else {
+              handleFlowsToValue(sink,source);
+            }
+            handleInnerField(sink);
+          }
+        }
+ else {
+          for (Iterator sourcesIt=sources.iterator(); sourcesIt.hasNext(); ) {
+            Value source=(Value)sourcesIt.next();
+            handleFlowsToDataStructure(iie.getBase(),source);
+          }
+        }
+      }
+ else       if (sink instanceof InstanceFieldRef && includeInnerFields) {
+        for (Iterator sourcesIt=sources.iterator(); sourcesIt.hasNext(); ) {
+          Value source=(Value)sourcesIt.next();
+          if (false) {
+            InstanceFieldRef ifr=(InstanceFieldRef)sink;
+            if (ifr.getBase() instanceof FakeJimpleLocal)             ;
+ else             handleFlowsToDataStructure(ifr.getBase(),source);
+          }
+ else {
+            handleFlowsToValue(sink,source);
+          }
+          handleInnerField(sink);
+        }
+      }
+    }
+  }
+  return returnValueSources;
+}

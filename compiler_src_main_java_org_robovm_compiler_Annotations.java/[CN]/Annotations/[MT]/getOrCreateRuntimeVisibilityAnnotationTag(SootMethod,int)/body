@@ -1,0 +1,19 @@
+{
+  for (  Tag tag : method.getTags()) {
+    if (tag instanceof VisibilityParameterAnnotationTag) {
+      ArrayList<VisibilityAnnotationTag> l=((VisibilityParameterAnnotationTag)tag).getVisibilityAnnotations();
+      if (l != null && paramIndex < l.size()) {
+        if ((l.get(paramIndex)).getVisibility() == RUNTIME_VISIBLE) {
+          return l.get(paramIndex);
+        }
+      }
+    }
+  }
+  VisibilityParameterAnnotationTag ptag=new VisibilityParameterAnnotationTag(method.getParameterCount(),RUNTIME_VISIBLE);
+  ArrayList<VisibilityAnnotationTag> l=new ArrayList<VisibilityAnnotationTag>();
+  for (int i=0; i < method.getParameterCount(); i++) {
+    l.add(new VisibilityAnnotationTag(RUNTIME_VISIBLE));
+  }
+  method.addTag(ptag);
+  return l.get(paramIndex);
+}

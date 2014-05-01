@@ -1,0 +1,26 @@
+{
+  SootMethodType blockMethodType=new SootMethodType(blockMethod);
+  if (blockParamIndexes != null) {
+    Type[] genericParameterTypes=blockMethodType.getGenericParameterTypes();
+    for (int i=0; i < blockParamIndexes.length; i++) {
+      int idx=blockParamIndexes[i];
+      if (idx == -1) {
+        break;
+      }
+      SootMethod targetMethod=getBlockTargetMethod(blockMethod,idx);
+      soot.Type[] actualTypes=resolveTargetMethodSignature(blockMethod,targetMethod,genericParameterTypes[idx]);
+      soot.Type[] unboxedTypes=unboxTypes(actualTypes);
+      String[][] targetMethodAnnotations=parseTargetMethodAnnotations(targetMethod,readStringElem(getParameterAnnotation(blockMethod,idx,BLOCK),"value",""));
+      String marshaler=createBlockMarshaler(config,clazz,targetMethod,actualTypes,unboxedTypes,blockTypeIds,targetMethodAnnotations);
+      addMarshalerAnnotation(blockMethod,idx,marshaler);
+    }
+  }
+  if (hasAnnotation(blockMethod,BLOCK)) {
+    SootMethod targetMethod=getBlockTargetMethod(blockMethod);
+    soot.Type[] actualTypes=resolveTargetMethodSignature(blockMethod,targetMethod,blockMethodType.getGenericReturnType());
+    soot.Type[] unboxedTypes=unboxTypes(actualTypes);
+    String[][] targetMethodAnnotations=parseTargetMethodAnnotations(targetMethod,readStringElem(getAnnotation(blockMethod,BLOCK),"value",""));
+    String marshaler=createBlockMarshaler(config,clazz,targetMethod,actualTypes,unboxedTypes,blockTypeIds,targetMethodAnnotations);
+    addMarshalerAnnotation(blockMethod,marshaler);
+  }
+}

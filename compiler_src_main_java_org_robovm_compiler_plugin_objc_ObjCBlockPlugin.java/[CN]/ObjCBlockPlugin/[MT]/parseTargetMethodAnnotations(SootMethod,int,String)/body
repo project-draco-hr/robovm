@@ -1,0 +1,44 @@
+{
+  String originalValue=value;
+  value=value.trim();
+  String[][] result=new String[paramCount + 1][];
+  if (value.length() == 0) {
+    Arrays.fill(result,new String[0]);
+  }
+ else {
+    TreeSet<String> values=new TreeSet<>();
+    int pos=parseAnnotations(m,originalValue,value,values);
+    result[0]=new String[values.size()];
+    values.toArray(result[0]);
+    if (pos < value.length()) {
+      if (value.charAt(pos) != '(') {
+        throw new CompilerException("Error in @Block annotation value \"" + originalValue + "\" on method "+ m+ ". Expected '(' but got '"+ value.charAt(pos)+ "'.");
+      }
+      if (pos + 1 == value.length()) {
+        throw new CompilerException("Error in @Block annotation value \"" + originalValue + "\" on method "+ m+ ". Expected a ')' at end of value but "+ "got end of string.");
+      }
+      value=value.substring(pos + 1).trim();
+      if (value.charAt(value.length() - 1) != ')') {
+        throw new CompilerException("Error in @Block annotation value \"" + originalValue + "\" on method "+ m+ ". Expected a ')' at end of value but got '"+ value.charAt(value.length() - 1)+ "'.");
+      }
+      value=value.substring(0,value.length() - 1).trim();
+      if (value.length() > 0 || paramCount > 0) {
+        String[] parts=value.split(",",paramCount + 1);
+        if (parts.length != paramCount) {
+          throw new CompilerException("Error in @Block annotation value \"" + originalValue + "\" on method "+ m+ ". Expected "+ paramCount+ " parameters");
+        }
+        for (int i=0; i < parts.length; i++) {
+          String p=parts[i].trim();
+          values=new TreeSet<>();
+          pos=parseAnnotations(m,originalValue,p,values);
+          if (pos != p.length()) {
+            throw new CompilerException("Error in @Block annotation value \"" + originalValue + "\" on method "+ m+ ". Expected a ',' after parameter "+ (i + 1)+ " but got '"+ p.charAt(pos)+ "'.");
+          }
+          result[i + 1]=new String[values.size()];
+          values.toArray(result[i + 1]);
+        }
+      }
+    }
+  }
+  return result;
+}

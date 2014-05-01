@@ -2,4 +2,10 @@
   if (!method.isNative()) {
     throw new IllegalArgumentException("@Bridge annotated method " + method + " must be native");
   }
+  AnnotationTag bridgeAnnotation=getAnnotation(method,BRIDGE);
+  if (readBooleanElem(bridgeAnnotation,"dynamic",false)) {
+    if (!method.isStatic() || method.getParameterCount() == 0 || method.getParameterType(0) != LongType.v() || !hasParameterAnnotation(method,0,POINTER)) {
+      throw new IllegalArgumentException("Dynamic @Bridge annotated method " + method + " must be static and take a @Pointer long as first parameter");
+    }
+  }
 }

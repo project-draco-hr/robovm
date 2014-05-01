@@ -4,7 +4,13 @@
   generateDsym(appDir,getExecutable());
   if (arch == Arch.thumbv7) {
     copyResourcesPList(appDir);
-    copyProvisioningProfile(provisioningProfile,appDir);
-    codesign(signIdentity,getOrCreateEntitlementsPList(true),appDir);
+    if (config.isIosSkipSigning()) {
+      config.getLogger().warn("Skiping code signing. The resulting app will " + "be unsigned and will not run on unjailbroken devices");
+      ldid(getOrCreateEntitlementsPList(true),appDir);
+    }
+ else {
+      copyProvisioningProfile(provisioningProfile,appDir);
+      codesign(signIdentity,getOrCreateEntitlementsPList(true),appDir);
+    }
   }
 }

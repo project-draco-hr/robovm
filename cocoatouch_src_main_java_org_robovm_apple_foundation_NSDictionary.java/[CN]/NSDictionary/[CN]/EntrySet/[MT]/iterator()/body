@@ -1,0 +1,30 @@
+{
+  final Iterator<K> keysIt=map.keySet().iterator();
+  return new Iterator<Map.Entry<K,V>>(){
+    private Map.Entry<K,V> entry=null;
+    @Override public boolean hasNext(){
+      return keysIt.hasNext();
+    }
+    @Override public Map.Entry<K,V> next(){
+      final K key=keysIt.next();
+      final V value=map.get(key);
+      if (value == null) {
+        throw new ConcurrentModificationException();
+      }
+      entry=new Entry<K,V>(map,key,value);
+      return entry;
+    }
+    @Override public void remove(){
+      if (entry == null) {
+        throw new IllegalStateException();
+      }
+      Object value=map.get(entry.getKey());
+      if (entry.getValue() != value) {
+        throw new ConcurrentModificationException();
+      }
+      keysIt.remove();
+      entry=null;
+    }
+  }
+;
+}

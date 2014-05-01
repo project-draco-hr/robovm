@@ -1,26 +1,3 @@
 {
-  if (handle == 0L) {
-    return null;
-  }
-  T o=getPeerObject(handle);
-  if (o != null) {
-    return o;
-  }
-  ObjCClass fallback=ObjCClass.getByType(cls.isInterface() ? ObjCObject.class : cls);
-  ObjCClass objCClass=ObjCClass.getFromObject(handle,fallback);
-  Class<T> c=(Class<T>)objCClass.getType();
-  if (c == ObjCClass.class) {
-    return (T)objCClass;
-  }
-  if (c == ObjCObject.class && cls.isInterface()) {
-    throw new ObjCClassNotFoundException("Could not create a Java object for interface: " + cls.getName());
-  }
-  o=VM.allocateObject(c);
-  o.setHandle(handle);
-  AssociatedObjectHelper.setPeerObject(handle,o);
-  if (objCClass.isCustom()) {
-    VM.setBoolean(VM.getObjectAddress(o) + CUSTOM_CLASS_OFFSET,true);
-  }
-  o.afterMarshaled();
-  return o;
+  return toObjCObject(cls,handle,false);
 }

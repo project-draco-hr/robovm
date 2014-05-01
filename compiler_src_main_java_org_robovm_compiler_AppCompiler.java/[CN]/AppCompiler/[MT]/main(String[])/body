@@ -74,6 +74,9 @@
  else       if ("-skiprt".equals(args[i])) {
         builder.skipRuntimeLib(true);
       }
+ else       if ("-skipsign".equals(args[i])) {
+        builder.iosSkipSigning(true);
+      }
  else       if ("-clean".equals(args[i])) {
         builder.clean(true);
       }
@@ -106,7 +109,7 @@
       }
  else       if ("-libs".equals(args[i])) {
         for (        String p : args[++i].split(":")) {
-          builder.addLib(p);
+          builder.addLib(new Config.Lib(p,true));
         }
       }
  else       if ("-exportedsymbols".equals(args[i])) {
@@ -243,6 +246,12 @@
           if (launchParameters instanceof IOSSimulatorLaunchParameters) {
             String name=launchArgs.get(i++);
             try {
+              if (name.equals("iphone")) {
+                name=Family.iPhoneRetina4Inch.name();
+              }
+ else               if (name.equals("ipad")) {
+                name=Family.iPadRetina.name();
+              }
               ((IOSSimulatorLaunchParameters)launchParameters).setFamily(Family.valueOf(name));
             }
  catch (            IllegalArgumentException e) {

@@ -10,11 +10,17 @@
   if (leftType instanceof RefType && ((RefType)leftType).getClassName().equals("java.lang.Object"))   return;
   if (leftType instanceof ArrayType || rightType instanceof ArrayType) {
     if (leftType instanceof ArrayType && rightType instanceof ArrayType)     return;
+    if (rightType instanceof ArrayType) {
+      if (leftType.equals(RefType.v("java.io.Serializable")) || leftType.equals(RefType.v("java.lang.Cloneable")) || leftType.equals(RefType.v("java.lang.Object")))       return;
+    }
     throw new RuntimeException("Warning: Bad use of array type" + errorSuffix + " in "+ getMethod());
   }
   if (leftType instanceof RefType && rightType instanceof RefType) {
     SootClass leftClass=((RefType)leftType).getSootClass();
     SootClass rightClass=((RefType)rightType).getSootClass();
+    if (leftClass.isPhantom() || rightClass.isPhantom()) {
+      return;
+    }
     if (leftClass.isInterface()) {
       if (rightClass.isInterface()) {
         if (!(leftClass.getName().equals(rightClass.getName()) || Scene.v().getActiveHierarchy().isInterfaceSubinterfaceOf(rightClass,leftClass)))         throw new RuntimeException("Warning: Bad use of interface type" + errorSuffix + " in "+ getMethod());

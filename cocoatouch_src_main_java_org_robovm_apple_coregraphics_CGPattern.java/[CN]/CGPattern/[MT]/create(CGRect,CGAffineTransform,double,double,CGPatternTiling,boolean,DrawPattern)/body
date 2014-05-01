@@ -1,0 +1,13 @@
+{
+  long infoId=CGPattern.infoId.getAndIncrement();
+  CGPatternCallbacks callbacks=new CGPatternCallbacks();
+  callbacks.drawPattern(new FunctionPtr(cbDrawPattern));
+  callbacks.releaseInfo(new FunctionPtr(cbReleaseInfo));
+  CGPattern result=create(infoId,bounds,matrix,xStep,yStep,tiling,isColored,callbacks);
+  if (result != null) {
+synchronized (infos) {
+      infos.put(infoId,drawPattern);
+    }
+  }
+  return result;
+}

@@ -1,0 +1,13 @@
+{
+  Jimple j=Jimple.v();
+  SootMethod clinit=getOrCreateStaticInitializer(sootClass);
+  Body body=clinit.retrieveActiveBody();
+  Local sel=Jimple.v().newLocal("$sel",org_robovm_objc_Selector.getType());
+  body.getLocals().add(sel);
+  Chain<Unit> units=body.getUnits();
+  for (  String selectorName : selectors) {
+    SootField f=getSelectorField(selectorName);
+    sootClass.addField(f);
+    units.insertBefore(Arrays.<Unit>asList(j.newAssignStmt(sel,j.newStaticInvokeExpr(org_robovm_objc_Selector_register,StringConstant.v(selectorName))),j.newAssignStmt(j.newStaticFieldRef(f.makeRef()),sel)),units.getLast());
+  }
+}

@@ -4,9 +4,15 @@
   if (arch == Arch.thumbv7) {
     strip(installDir,getExecutable());
     copyResourcesPList(installDir);
-    copyProvisioningProfile(provisioningProfile,installDir);
-    boolean getTaskAllow=provisioningProfile.getType() == Type.Development;
-    codesign(signIdentity,getOrCreateEntitlementsPList(getTaskAllow),installDir);
-    new Executor(config.getLogger(),"ln").args("-f","-s","_CodeSignature/CodeResources",new File(installDir,"CodeResources")).exec();
+    if (config.isIosSkipSigning()) {
+      config.getLogger().warn("Skiping code signing. The resulting app will " + "be unsigned and will not run on unjailbroken devices");
+      ldid(entitlementsPList,installDir);
+    }
+ else {
+      copyProvisioningProfile(provisioningProfile,installDir);
+      boolean getTaskAllow=provisioningProfile.getType() == Type.Development;
+      codesign(signIdentity,getOrCreateEntitlementsPList(getTaskAllow),installDir);
+      new Executor(config.getLogger(),"ln").args("-f","-s","_CodeSignature/CodeResources",new File(installDir,"CodeResources")).exec();
+    }
   }
 }

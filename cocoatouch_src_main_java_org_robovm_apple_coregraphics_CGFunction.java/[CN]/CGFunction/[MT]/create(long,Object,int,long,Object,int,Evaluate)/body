@@ -1,0 +1,46 @@
+{
+  if (domain != null && domainLength != 2 * domainDimension) {
+    throw new IllegalArgumentException("domain.length != 2 * domainDimension");
+  }
+  if (range != null && rangeLength != 2 * rangeDimension) {
+    throw new IllegalArgumentException("range.length != 2 * rangeDimension");
+  }
+  if (evaluate == null) {
+    throw new NullPointerException("callback");
+  }
+  MachineSizedFloatPtr domainPtr=null;
+  if (domain != null) {
+    domainPtr=Struct.allocate(MachineSizedFloatPtr.class,domainLength);
+    if (domain instanceof double[]) {
+      domainPtr.set((double[])domain);
+    }
+ else {
+      domainPtr.set((float[])domain);
+    }
+  }
+  MachineSizedFloatPtr rangePtr=null;
+  if (range != null) {
+    rangePtr=Struct.allocate(MachineSizedFloatPtr.class,rangeLength);
+    if (range instanceof double[]) {
+      rangePtr.set((double[])range);
+    }
+ else {
+      rangePtr.set((float[])range);
+    }
+  }
+  Info info=new Info();
+  info.domainDimension=domainDimension;
+  info.rangeDimension=rangeDimension;
+  info.evaluate=evaluate;
+  CGFunctionCallbacks callbacks=new CGFunctionCallbacks();
+  callbacks.evaluate(new FunctionPtr(cbEvaluate));
+  callbacks.releaseInfo(new FunctionPtr(cbReleaseInfo));
+  long infoId=CGFunction.infoId.getAndIncrement();
+  CGFunction result=create(infoId,domainDimension,domainPtr,rangeDimension,rangePtr,callbacks);
+  if (result != null) {
+synchronized (infos) {
+      infos.put(infoId,info);
+    }
+  }
+  return result;
+}

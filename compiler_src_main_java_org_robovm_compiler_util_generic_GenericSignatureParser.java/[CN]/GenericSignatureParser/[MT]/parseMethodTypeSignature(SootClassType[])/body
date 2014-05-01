@@ -1,0 +1,29 @@
+{
+  parseOptFormalTypeParameters();
+  parameterTypes=new ListOfTypes(16);
+  expect('(');
+  while (symbol != ')' && (symbol > 0)) {
+    parameterTypes.add(parseTypeSignature());
+  }
+  expect(')');
+  returnType=parseReturnType();
+  if (symbol == '^') {
+    exceptionTypes=new ListOfTypes(8);
+    do {
+      scanSymbol();
+      if (symbol == 'T') {
+        exceptionTypes.add(parseTypeVariableSignature());
+      }
+ else {
+        exceptionTypes.add(parseClassTypeSignature());
+      }
+    }
+ while (symbol == '^');
+  }
+ else   if (rawExceptionTypes != null) {
+    exceptionTypes=new ListOfTypes(rawExceptionTypes);
+  }
+ else {
+    exceptionTypes=new ListOfTypes(0);
+  }
+}
