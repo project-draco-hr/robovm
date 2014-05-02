@@ -1,7 +1,6 @@
 {
   LockdowndServiceDescriptor instService=lockdowndClient.startService(InstallationProxyClient.SERVICE_NAME);
-  InstallationProxyClient instClient=new InstallationProxyClient(device,instService);
-  try {
+  try (InstallationProxyClient instClient=new InstallationProxyClient(device,instService)){
     NSArray apps=instClient.browse();
     for (int i=0; i < apps.count(); i++) {
       NSDictionary appInfo=(NSDictionary)apps.objectAtIndex(i);
@@ -20,7 +19,4 @@
     }
     throw new RuntimeException("No app with id '" + appId + "' found on device");
   }
-  finally {
-    instClient.dispose();
-  }
-}
+ }

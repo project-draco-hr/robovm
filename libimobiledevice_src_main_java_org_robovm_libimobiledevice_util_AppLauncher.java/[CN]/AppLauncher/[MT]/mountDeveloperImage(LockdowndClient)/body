@@ -4,21 +4,27 @@
   File deviceSupport=new File(getXcodePath(),"Platforms/iPhoneOS.platform/DeviceSupport");
   log("Looking up developer disk image for iOS version %s (%s) in %s",productVersion,buildVersion,deviceSupport);
   File devImage=findDeveloperImage(deviceSupport,productVersion,buildVersion);
-  LockdowndServiceDescriptor afcService=lockdowndClient.startService(AfcClient.SERVICE_NAME);
-  try (AfcClient afcClient=new AfcClient(device,afcService)){
-    LockdowndServiceDescriptor mimService=lockdowndClient.startService(MobileImageMounterClient.SERVICE_NAME);
-    try (MobileImageMounterClient mimClient=new MobileImageMounterClient(device,mimService)){
-      File devImageSig=new File(devImage.getParentFile(),devImage.getName() + ".signature");
-      byte[] devImageSigBytes=Files.readAllBytes(devImageSig.toPath());
-      log("Copying developer disk image %s to device",devImage);
-      afcClient.makeDirectory("/PublicStaging");
-      afcClient.fileCopy(devImage,"/PublicStaging/staging.dimage");
-      log("Mounting developer disk image");
-      NSDictionary result=mimClient.mountImage("/PublicStaging/staging.dimage",devImageSigBytes,null);
-      NSString status=(NSString)result.objectForKey("Status");
-      if (status == null || !"Complete".equals(status.toString())) {
-        throw new IOException("Failed to mount " + devImage.getAbsolutePath() + " on the device.");
-      }
+  LockdowndServiceDescriptor mimService=lockdowndClient.startService(MobileImageMounterClient.SERVICE_NAME);
+  try (MobileImageMounterClient mimClient=new MobileImageMounterClient(device,mimService)){
+    log("Copying developer disk image %s to device",devImage);
+    int majorVersion=Integer.parseInt(getProductVersionParts(productVersion)[0]);
+    if (majorVersion >= 7) {
+      mimClient.uploadImage(devImage,null);
     }
-   }
+ else {
+      LockdowndServiceDescriptor afcService=lockdowndClient.startService(AfcClient.SERVICE_NAME);
+      try (AfcClient afcClient=new AfcClient(device,afcService)){
+        afcClient.makeDirectory("/PublicStaging");
+        afcClient.fileCopy(devImage,"/PublicStaging/staging.dimage");
+      }
+     }
+    log("Mounting developer disk image");
+    File devImageSig=new File(devImage.getParentFile(),devImage.getName() + ".signature");
+    byte[] devImageSigBytes=Files.readAllBytes(devImageSig.toPath());
+    NSDictionary result=mimClient.mountImage("/PublicStaging/staging.dimage",devImageSigBytes,null);
+    NSString status=(NSString)result.objectForKey("Status");
+    if (status == null || !"Complete".equals(status.toString())) {
+      throw new IOException("Failed to mount " + devImage.getAbsolutePath() + " on the device.");
+    }
+  }
  }
