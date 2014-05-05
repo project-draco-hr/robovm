@@ -1,0 +1,35 @@
+{
+  File tmpDir=createTempDir();
+  File cacheDir=new File(tmpDir,"cache");
+  File p1=createMergeConfig(tmpDir,"p1","Foo",OS.ios,Arch.thumbv7,false);
+  File p2=createMergeConfig(tmpDir,"p2","Wooz",OS.linux,Arch.x86,false);
+  File p3=createMergeConfig(tmpDir,"p3","Baaz",OS.ios,Arch.thumbv7,true);
+  Config.Builder builder=new Config.Builder();
+  builder.cacheDir(cacheDir);
+  builder.os(OS.ios);
+  builder.arch(Arch.thumbv7);
+  builder.targetType(TargetType.ios);
+  builder.mainClass("Main");
+  builder.addClasspathEntry(p1);
+  builder.addClasspathEntry(p2);
+  builder.addClasspathEntry(p3);
+  builder.addExportedSymbol("YADA*");
+  builder.addFrameworkPath(new File(p1,"yada"));
+  builder.addFramework("Yada");
+  builder.addForceLinkClass("org.yada.**");
+  builder.addLib(new Lib("yada",true));
+  builder.addResource(new Resource(new File(p1,"resources")));
+  builder.addWeakFramework("WeakYada");
+  builder.home(fakeHome);
+  Config config=builder.build();
+  File p1Root=new File(p1,"META-INF/robovm/ios/thumbv7");
+  File p3Cache=config.getCacheDir(config.getClazzes().getClasspathPaths().get(2));
+  File p3Root=new File(p3Cache.getParentFile(),p3Cache.getName() + ".extracted/META-INF/robovm/ios/thumbv7");
+  assertEquals(Arrays.asList("FOO*","BAAZ*","YADA*"),config.getExportedSymbols());
+  assertEquals(Arrays.asList("com.foo.**","com.baaz.**","org.yada.**"),config.getForceLinkClasses());
+  assertEquals(Arrays.asList(new File(p1Root,"foo/bar"),new File(p3Root,"baaz/bar"),new File(p1,"yada")),config.getFrameworkPaths());
+  assertEquals(Arrays.asList("Foo","Baaz","Yada"),config.getFrameworks());
+  assertEquals(Arrays.asList(new Lib("foo",true),new Lib(new File(p1Root,"libfoo.a").getAbsolutePath(),true),new Lib("baaz",true),new Lib(new File(p3Root,"libbaaz.a").getAbsolutePath(),true),new Lib("yada",true)),config.getLibs());
+  assertEquals(Arrays.asList(new Resource(new File(p1Root,"resources")),new Resource(new File(p3Root,"resources")),new Resource(new File(p1,"resources"))),config.getResources());
+  assertEquals(Arrays.asList("WeakFoo","WeakBaaz","WeakYada"),config.getWeakFrameworks());
+}

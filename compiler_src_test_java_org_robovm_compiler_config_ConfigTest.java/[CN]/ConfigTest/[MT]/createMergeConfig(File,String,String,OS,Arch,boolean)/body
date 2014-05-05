@@ -1,0 +1,26 @@
+{
+  File p=new File(tmpDir,dir);
+  File root1=new File(p,"META-INF/robovm/ios/thumbv7");
+  File root2=new File(p,"META-INF/robovm/ios/x86");
+  File root3=new File(p,"META-INF/robovm/macosx/x86");
+  File root4=new File(p,"META-INF/robovm/linux/x86");
+  root1.mkdirs();
+  root2.mkdirs();
+  root3.mkdirs();
+  root4.mkdirs();
+  new Config.Builder().write(new File(root1,"robovm.xml"));
+  new Config.Builder().write(new File(root2,"robovm.xml"));
+  new Config.Builder().write(new File(root3,"robovm.xml"));
+  new Config.Builder().write(new File(root4,"robovm.xml"));
+  File root=new File(p,"META-INF/robovm/" + os + "/"+ arch);
+  new Config.Builder().addExportedSymbol(id.toUpperCase() + "*").addForceLinkClass("com." + id.toLowerCase() + ".**").addFrameworkPath(new File(root,id.toLowerCase() + "/bar")).addFramework(id).addLib(new Lib(id.toLowerCase(),true)).addLib(new Lib(new File(root,"lib" + id.toLowerCase() + ".a").getAbsolutePath(),true)).addResource(new Resource(new File(root,"resources"))).addWeakFramework("Weak" + id).write(new File(root,"robovm.xml"));
+  if (jar) {
+    File jarFile=new File(tmpDir,p.getName() + ".jar");
+    ZipUtil.pack(p,jarFile);
+    FileUtils.deleteDirectory(p);
+    return jarFile;
+  }
+ else {
+    return p;
+  }
+}

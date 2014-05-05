@@ -1,0 +1,23 @@
+{
+  List<String> dirs=Arrays.asList("META-INF/robovm/" + os + "/"+ arch,"META-INF/robovm/" + os);
+  Config config=new Config();
+  for (  Path path : clazzes.getPaths()) {
+    for (    String dir : dirs) {
+      if (path.contains(dir + "/robovm.xml")) {
+        File configXml=new File(new File(extractIfNeeded(path),dir),"robovm.xml");
+        Builder builder=new Builder();
+        builder.read(configXml);
+        mergeConfig(builder.config,config);
+        break;
+      }
+    }
+  }
+  mergeConfig(this,config);
+  this.exportedSymbols=config.exportedSymbols;
+  this.forceLinkClasses=config.forceLinkClasses;
+  this.frameworkPaths=config.frameworkPaths;
+  this.frameworks=config.frameworks;
+  this.libs=config.libs;
+  this.resources=config.resources;
+  this.weakFrameworks=config.weakFrameworks;
+}

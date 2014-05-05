@@ -1,0 +1,31 @@
+{
+  if (path.getFile().isFile()) {
+    File pathCacheDir=getCacheDir(path);
+    File target=new File(pathCacheDir.getParentFile(),pathCacheDir.getName() + ".extracted");
+    if (!target.exists() || path.getFile().lastModified() > target.lastModified()) {
+      FileUtils.deleteDirectory(target);
+      target.mkdirs();
+      try (ZipFile zipFile=new ZipFile(path.getFile())){
+        Enumeration<? extends ZipEntry> entries=zipFile.entries();
+        while (entries.hasMoreElements()) {
+          ZipEntry entry=entries.nextElement();
+          if (entry.getName().startsWith("META-INF/robovm/") && !entry.isDirectory()) {
+            File f=new File(target,entry.getName());
+            f.getParentFile().mkdirs();
+            try (InputStream in=zipFile.getInputStream(entry);OutputStream out=new FileOutputStream(f)){
+              IOUtils.copy(in,out);
+              if (entry.getTime() != -1) {
+                f.setLastModified(entry.getTime());
+              }
+            }
+           }
+        }
+      }
+       target.setLastModified(path.getFile().lastModified());
+    }
+    return target;
+  }
+ else {
+    return path.getFile();
+  }
+}
