@@ -6,11 +6,11 @@
   structMemberMethodCompiler.reset(clazz);
   globalValueMethodCompiler.reset(clazz);
   ClazzInfo ci=clazz.resetClazzInfo();
+  mb=new ModuleBuilder();
   for (  CompilerPlugin compilerPlugin : config.getCompilerPlugins()) {
-    compilerPlugin.beforeClass(config,clazz);
+    compilerPlugin.beforeClass(config,clazz,mb);
   }
   sootClass=clazz.getSootClass();
-  mb=new ModuleBuilder();
   trampolines=new HashSet<Trampoline>();
   catches=new HashSet<String>();
   classFields=getClassFields(config.getOs(),config.getArch(),sootClass);
@@ -52,23 +52,24 @@
   }
   for (  SootMethod method : sootClass.getMethods()) {
     for (    CompilerPlugin compilerPlugin : config.getCompilerPlugins()) {
-      compilerPlugin.beforeMethod(config,clazz,method);
+      compilerPlugin.beforeMethod(config,clazz,method,mb);
     }
     String name=method.getName();
+    Function function=null;
     if (hasBridgeAnnotation(method)) {
-      bridgeMethod(method);
+      function=bridgeMethod(method);
     }
  else     if (hasGlobalValueAnnotation(method)) {
-      globalValueMethod(method);
+      function=globalValueMethod(method);
     }
  else     if (isStruct(sootClass) && ("_sizeOf".equals(name) || "sizeOf".equals(name) || hasStructMemberAnnotation(method))) {
-      structMember(method);
+      function=structMember(method);
     }
  else     if (method.isNative()) {
-      nativeMethod(method);
+      function=nativeMethod(method);
     }
  else     if (!method.isAbstract()) {
-      method(method);
+      function=method(method);
     }
     if (hasCallbackAnnotation(method)) {
       callbackMethod(method);
@@ -83,6 +84,11 @@
       }
       FunctionRef fn=new FunctionRef(fnName,getFunctionType(method));
       mb.addFunction(createClassInitWrapperFunction(fn));
+    }
+    for (    CompilerPlugin compilerPlugin : config.getCompilerPlugins()) {
+      if (function != null) {
+        compilerPlugin.afterMethod(config,clazz,method,mb,function);
+      }
     }
   }
   Set<String> trampolineDependencies=new HashSet<String>();
@@ -104,6 +110,9 @@
   Function infoFn=FunctionBuilder.infoStruct(sootClass);
   infoFn.add(new Ret(new ConstantBitcast(classInfoStruct.ref(),I8_PTR_PTR)));
   mb.addFunction(infoFn);
+  for (  CompilerPlugin compilerPlugin : config.getCompilerPlugins()) {
+    compilerPlugin.afterClass(config,clazz,mb);
+  }
   out.write(mb.build().toString().getBytes("UTF-8"));
   ci.setCatchNames(catches);
   ci.setTrampolines(trampolines);
