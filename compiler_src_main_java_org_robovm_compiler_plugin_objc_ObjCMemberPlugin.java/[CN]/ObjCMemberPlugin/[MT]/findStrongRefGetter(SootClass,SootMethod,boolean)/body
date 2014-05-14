@@ -1,0 +1,33 @@
+{
+  String setterPropName=readStringElem(getAnnotation(method,PROPERTY),"name","").trim();
+  if (setterPropName.length() == 0) {
+    String methodName=method.getName();
+    if (!methodName.startsWith("set") || methodName.length() == 3) {
+      throw new CompilerException("Failed to determine the property " + "name from the @Property method " + method + ". Either specify the name explicitly in the @Property "+ "annotation or rename the method according to the Java "+ "beans property setter method naming convention.");
+    }
+    setterPropName=methodName.substring(3);
+    setterPropName=setterPropName.substring(0,1).toLowerCase() + setterPropName.substring(1);
+  }
+  int paramCount=extensions ? 1 : 0;
+  Type propType=method.getParameterType(extensions ? 1 : 0);
+  for (  SootMethod m : sootClass.getMethods()) {
+    if (m != method && method.isStatic() == m.isStatic() && m.getParameterCount() == paramCount && m.getReturnType().equals(propType)) {
+      AnnotationTag propertyAnno=getAnnotation(m,PROPERTY);
+      if (propertyAnno != null) {
+        String getterPropName=readStringElem(propertyAnno,"name","").trim();
+        if (getterPropName.length() == 0) {
+          String methodName=m.getName();
+          if (!methodName.startsWith("get") || methodName.length() == 3) {
+            continue;
+          }
+          getterPropName=methodName.substring(3);
+          getterPropName=getterPropName.substring(0,1).toLowerCase() + getterPropName.substring(1);
+        }
+        if (setterPropName.equals(getterPropName)) {
+          return m;
+        }
+      }
+    }
+  }
+  throw new CompilerException("Failed to determine the getter method " + "corresponding to the strong ref @Property setter method " + method + ". The getter must either specify the name explicitly in the @Property "+ "annotation or be named according to the Java "+ "beans property getter method naming convention.");
+}

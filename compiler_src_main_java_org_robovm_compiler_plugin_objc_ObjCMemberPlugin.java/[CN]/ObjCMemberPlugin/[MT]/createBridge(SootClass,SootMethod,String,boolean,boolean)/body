@@ -44,7 +44,7 @@
   if (strongRefSetter) {
     Type propType=method.getParameterType(extensions ? 1 : 0);
     if (propType instanceof RefLikeType) {
-      SootMethodRef getter=Scene.v().makeMethodRef(method.getDeclaringClass(),"get" + method.getName().substring(3),extensions ? Arrays.asList(thiz.getType()) : Collections.<Type>emptyList(),propType,extensions || method.isStatic());
+      SootMethodRef getter=findStrongRefGetter(sootClass,method,extensions).makeRef();
       Local before=j.newLocal("$before",propType);
       body.getLocals().add(before);
       units.add(j.newAssignStmt(before,extensions ? j.newStaticInvokeExpr(getter,thiz) : (objCClass != null ? j.newStaticInvokeExpr(getter) : j.newVirtualInvokeExpr(thiz,getter))));
