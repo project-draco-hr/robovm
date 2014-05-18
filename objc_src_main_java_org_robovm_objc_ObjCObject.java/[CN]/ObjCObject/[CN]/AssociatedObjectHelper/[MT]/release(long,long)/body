@@ -1,14 +1,8 @@
 {
   if (ObjCRuntime.int_objc_msgSend(self,retainCount.getHandle()) == 1) {
-    Key key=Key.values()[VM.getInt(self + KEY_IVAR_OFFSET)];
-    Object value=VM.castAddressToObject(VM.getLong(self + VALUE_IVAR_OFFSET));
-    if (key == Key.Peer && value != null) {
-      VM.unregisterDisappearingLink(self + VALUE_IVAR_OFFSET);
-    }
- else     if (key == Key.AssociatedObjects) {
+    long owner=VM.getPointer(self + OWNER_IVAR_OFFSET);
 synchronized (ASSOCIATED_OBJECTS) {
-        ASSOCIATED_OBJECTS.remove(self);
-      }
+      ASSOCIATED_OBJECTS.remove(owner);
     }
   }
   ObjCRuntime.void_objc_msgSendSuper(new Super(self,NS_OBJECT_CLASS).getHandle(),sel);

@@ -5,21 +5,23 @@
   if (cls == ObjCClass.class) {
     return (T)ObjCClass.toObjCClass(handle);
   }
-  T o=getPeerObject(handle);
-  if (o != null && o.getHandle() != 0) {
-    if (forceType && !cls.isAssignableFrom(o.getClass())) {
-      throw new IllegalStateException("The peer object type " + o.getClass().getName() + " is not compatible with the forced type "+ cls.getName());
+synchronized (peers) {
+    T o=getPeerObject(handle);
+    if (o != null && o.getHandle() != 0) {
+      if (forceType && !cls.isAssignableFrom(o.getClass())) {
+        throw new IllegalStateException("The peer object type " + o.getClass().getName() + " is not compatible with the forced type "+ cls.getName());
+      }
+      return o;
     }
+    ObjCClass objCClass=forceType ? ObjCClass.getByType(cls) : ObjCClass.getFromObject(handle);
+    Class<T> c=(Class<T>)objCClass.getType();
+    o=VM.allocateObject(c);
+    o.setHandle(handle);
+    setPeerObject(handle,o);
+    if (objCClass.isCustom()) {
+      VM.setBoolean(VM.getObjectAddress(o) + CUSTOM_CLASS_OFFSET,true);
+    }
+    o.afterMarshaled();
     return o;
   }
-  ObjCClass objCClass=forceType ? ObjCClass.getByType(cls) : ObjCClass.getFromObject(handle);
-  Class<T> c=(Class<T>)objCClass.getType();
-  o=VM.allocateObject(c);
-  o.setHandle(handle);
-  AssociatedObjectHelper.setPeerObject(handle,o);
-  if (objCClass.isCustom()) {
-    VM.setBoolean(VM.getObjectAddress(o) + CUSTOM_CLASS_OFFSET,true);
-  }
-  o.afterMarshaled();
-  return o;
 }

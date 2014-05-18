@@ -1,0 +1,13 @@
+{
+  long releaseListener=ObjCRuntime.objc_getAssociatedObject(handle,RELEASE_LISTENER_CLASS);
+  if (releaseListener == 0) {
+    releaseListener=ObjCRuntime.ptr_objc_msgSend(RELEASE_LISTENER_CLASS,alloc.getHandle());
+    if (releaseListener == 0L) {
+      throw new OutOfMemoryError();
+    }
+    releaseListener=ObjCRuntime.ptr_objc_msgSend(releaseListener,init.getHandle());
+    VM.setPointer(releaseListener + OWNER_IVAR_OFFSET,handle);
+    ObjCRuntime.objc_setAssociatedObject(handle,RELEASE_LISTENER_CLASS,releaseListener,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    ObjCRuntime.void_objc_msgSend(releaseListener,release.getHandle());
+  }
+}

@@ -2,6 +2,12 @@
   if (handle == 0) {
     throw new RuntimeException("Objective-C initialization method returned nil");
   }
-  setHandle(handle);
-  AssociatedObjectHelper.setPeerObject(handle,this);
+  long oldHandle=getHandle();
+  if (handle != oldHandle) {
+    if (oldHandle != 0) {
+      removePeerObject(this);
+    }
+    setHandle(handle);
+    setPeerObject(handle,this);
+  }
 }
