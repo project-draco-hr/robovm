@@ -1,5 +1,6 @@
 {
-  SootClass caller=config.getClazzes().load(t.getCallingClass()).getSootClass();
+  Clazz caller=config.getClazzes().load(t.getCallingClass());
+  Clazz target=config.getClazzes().load(t.getTarget());
   String runtimeClassName=null;
   runtimeClassName=t instanceof Invokevirtual ? ((Invokevirtual)t).getRuntimeClass() : runtimeClassName;
   runtimeClassName=t instanceof Invokespecial ? ((Invokespecial)t).getRuntimeClass() : runtimeClassName;
@@ -13,16 +14,16 @@
     }
     runtimeClass=c.getSootClass();
   }
-  if (Access.checkMemberAccessible(member,caller,runtimeClass)) {
+  if (Access.checkMemberAccessible(member,caller,target,runtimeClass)) {
     return true;
   }
   if (member instanceof SootMethod) {
     SootMethod method=(SootMethod)member;
-    throwIllegalAccessError(f,ILLEGAL_ACCESS_ERROR_METHOD,method.getDeclaringClass(),method.getName(),getDescriptor(method),caller);
+    throwIllegalAccessError(f,ILLEGAL_ACCESS_ERROR_METHOD,method.getDeclaringClass(),method.getName(),getDescriptor(method),caller.getSootClass());
   }
  else {
     SootField field=(SootField)member;
-    throwIllegalAccessError(f,ILLEGAL_ACCESS_ERROR_FIELD,field.getDeclaringClass(),field.getName(),caller);
+    throwIllegalAccessError(f,ILLEGAL_ACCESS_ERROR_FIELD,field.getDeclaringClass(),field.getName(),caller.getSootClass());
   }
   f.add(new Unreachable());
   return false;
