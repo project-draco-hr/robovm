@@ -1,0 +1,26 @@
+{
+  if (caller == target || member.isPublic()) {
+    return true;
+  }
+  if (!member.isPrivate()) {
+    if (target.getSootClass().getPackageName().equals(caller.getSootClass().getPackageName()) && target.isInBootClasspath() == caller.isInBootClasspath()) {
+      return true;
+    }
+    if (member.isProtected()) {
+      if (member.isStatic()) {
+        if (isSubClassOrSame(target.getSootClass(),caller.getSootClass())) {
+          return true;
+        }
+      }
+ else       if (isSubClassOrSame(target.getSootClass(),caller.getSootClass())) {
+        if (runtimeClass == null) {
+          return true;
+        }
+        if (isSubClassOrSame(caller.getSootClass(),runtimeClass)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
