@@ -1,0 +1,26 @@
+{
+  String implName=clazz.getInternalName() + IMPL_CLASS_NAME_SUFFIX;
+  MethodVisitor mv=cw.visitMethod(ACC_PROTECTED,"fastEquals","(Ljava/lang/Object;)Z",null,null);
+  mv.visitCode();
+  mv.visitVarInsn(ALOAD,1);
+  mv.visitTypeInsn(CHECKCAST,implName);
+  mv.visitVarInsn(ASTORE,1);
+  for (  SootMethod method : clazz.getSootClass().getMethods()) {
+    String fieldName=getFieldName(method);
+    mv.visitVarInsn(ALOAD,0);
+    mv.visitInsn(DUP);
+    mv.visitFieldInsn(GETFIELD,implName,fieldName,"Ljava/lang/Object;");
+    mv.visitVarInsn(ALOAD,1);
+    mv.visitFieldInsn(GETFIELD,implName,fieldName,"Ljava/lang/Object;");
+    mv.visitMethodInsn(INVOKESPECIAL,BASE_CLASS,"memberEquals","(Ljava/lang/Object;Ljava/lang/Object;)Z");
+    Label l1=new Label();
+    mv.visitJumpInsn(IFNE,l1);
+    mv.visitInsn(ICONST_0);
+    mv.visitInsn(IRETURN);
+    mv.visitLabel(l1);
+  }
+  mv.visitInsn(ICONST_1);
+  mv.visitInsn(IRETURN);
+  mv.visitMaxs(0,0);
+  mv.visitEnd();
+}

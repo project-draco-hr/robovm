@@ -1,0 +1,47 @@
+{
+  String implName=clazz.getInternalName() + IMPL_CLASS_NAME_SUFFIX;
+  SootClass sootClass=clazz.getSootClass();
+  List<SootMethod> methods=sootClass.getMethods();
+  for (  SootMethod method : methods) {
+    String fieldName=getFieldName(method);
+    soot.Type type=method.getReturnType();
+    String typeDesc=Types.getDescriptor(type);
+    cw.visitField(ACC_PRIVATE,fieldName,"Ljava/lang/Object;",null,null).visitEnd();
+    MethodVisitor mv=cw.visitMethod(ACC_PUBLIC,method.getName(),Types.getDescriptor(method),null,null);
+    mv.visitCode();
+    mv.visitVarInsn(ALOAD,0);
+    mv.visitInsn(DUP);
+    mv.visitFieldInsn(GETFIELD,implName,fieldName,"Ljava/lang/Object;");
+    mv.visitLdcInsn(method.getName());
+    mv.visitMethodInsn(INVOKESPECIAL,BASE_CLASS,"validate","(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;");
+    int retOp=0;
+switch (typeDesc.charAt(0)) {
+case 'Z':
+case 'B':
+case 'S':
+case 'C':
+case 'I':
+      retOp=IRETURN;
+    break;
+case 'J':
+  retOp=LRETURN;
+break;
+case 'F':
+retOp=FRETURN;
+break;
+case 'D':
+retOp=DRETURN;
+break;
+default :
+retOp=ARETURN;
+break;
+}
+unboxIfNeeded(mv,type);
+if (!(type instanceof PrimType)) {
+mv.visitTypeInsn(CHECKCAST,Types.getInternalName(type));
+}
+mv.visitInsn(retOp);
+mv.visitMaxs(0,0);
+mv.visitEnd();
+}
+}

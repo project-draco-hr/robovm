@@ -1,0 +1,99 @@
+{
+  String implName=clazz.getInternalName() + IMPL_CLASS_NAME_SUFFIX;
+  SootClass sootClass=clazz.getSootClass();
+  List<SootMethod> methods=sootClass.getMethods();
+  MethodVisitor mv=cw.visitMethod(ACC_PRIVATE,"$setDefaults","()V",null,null);
+  mv.visitCode();
+  for (  SootMethod method : methods) {
+    AnnotationDefaultTag defTag=(AnnotationDefaultTag)method.getTag(AnnotationDefaultTag.class.getSimpleName());
+    String fieldName=getFieldName(method);
+    if (defTag == null) {
+      mv.visitVarInsn(ALOAD,0);
+      mv.visitFieldInsn(GETSTATIC,BASE_CLASS,"NO_VALUE","Ljava/lang/Object;");
+      mv.visitFieldInsn(PUTFIELD,implName,fieldName,"Ljava/lang/Object;");
+    }
+ else {
+      soot.Type type=method.getReturnType();
+      String typeDesc=Types.getDescriptor(type);
+      Object v=null;
+      if (type instanceof PrimType) {
+switch (typeDesc.charAt(0)) {
+case 'Z':
+case 'B':
+case 'S':
+case 'C':
+case 'I':
+          v=((AnnotationIntElem)defTag.getDefaultVal()).getValue();
+        break;
+case 'J':
+      v=((AnnotationLongElem)defTag.getDefaultVal()).getValue();
+    break;
+case 'F':
+  v=((AnnotationFloatElem)defTag.getDefaultVal()).getValue();
+break;
+case 'D':
+v=((AnnotationDoubleElem)defTag.getDefaultVal()).getValue();
+break;
+}
+}
+ else if ("Ljava/lang/Class;".equals(typeDesc)) {
+v=Type.getType(((AnnotationClassElem)defTag.getDefaultVal()).getDesc());
+if (((Type)v).getDescriptor().length() != 1) {
+v=null;
+}
+}
+ else if ("Ljava/lang/String;".equals(typeDesc)) {
+v=((AnnotationStringElem)defTag.getDefaultVal()).getValue();
+}
+if (v != null) {
+mv.visitVarInsn(ALOAD,0);
+if (v instanceof Type && ((Type)v).getDescriptor().length() == 1) {
+switch (((Type)v).getDescriptor().charAt(0)) {
+case 'V':
+mv.visitFieldInsn(GETSTATIC,"java/lang/Void","TYPE","Ljava/lang/Class;");
+break;
+case 'Z':
+mv.visitFieldInsn(GETSTATIC,"java/lang/Boolean","TYPE","Ljava/lang/Class;");
+break;
+case 'B':
+mv.visitFieldInsn(GETSTATIC,"java/lang/Byte","TYPE","Ljava/lang/Class;");
+break;
+case 'S':
+mv.visitFieldInsn(GETSTATIC,"java/lang/Short","TYPE","Ljava/lang/Class;");
+break;
+case 'C':
+mv.visitFieldInsn(GETSTATIC,"java/lang/Character","TYPE","Ljava/lang/Class;");
+break;
+case 'I':
+mv.visitFieldInsn(GETSTATIC,"java/lang/Integer","TYPE","Ljava/lang/Class;");
+break;
+case 'J':
+mv.visitFieldInsn(GETSTATIC,"java/lang/Long","TYPE","Ljava/lang/Class;");
+break;
+case 'F':
+mv.visitFieldInsn(GETSTATIC,"java/lang/Float","TYPE","Ljava/lang/Class;");
+break;
+case 'D':
+mv.visitFieldInsn(GETSTATIC,"java/lang/Double","TYPE","Ljava/lang/Class;");
+break;
+}
+}
+ else {
+mv.visitLdcInsn(v);
+}
+boxIfNeeded(mv,type);
+mv.visitFieldInsn(PUTFIELD,implName,fieldName,"Ljava/lang/Object;");
+}
+ else {
+mv.visitVarInsn(ALOAD,0);
+mv.visitInsn(DUP);
+mv.visitLdcInsn(method.getName());
+mv.visitMethodInsn(INVOKESPECIAL,BASE_CLASS,"getDefaultValue","(Ljava/lang/String;)Ljava/lang/Object;");
+mv.visitFieldInsn(PUTFIELD,implName,fieldName,"Ljava/lang/Object;");
+}
+}
+}
+mv.visitInsn(RETURN);
+mv.visitMaxs(0,0);
+mv.visitEnd();
+}

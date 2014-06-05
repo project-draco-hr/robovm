@@ -1,0 +1,16 @@
+{
+  String implName=clazz.getInternalName() + IMPL_CLASS_NAME_SUFFIX;
+  MethodVisitor mv=cw.visitMethod(ACC_PUBLIC + ACC_STATIC,"$create","()Ljava/lang/Object;",null,null);
+  mv.visitCode();
+  if (clazz.getSootClass().getMethodCount() == 0) {
+    mv.visitMethodInsn(INVOKESTATIC,implName,"$createSingleton","()Ljava/lang/Object;");
+  }
+ else {
+    mv.visitTypeInsn(NEW,implName);
+    mv.visitInsn(DUP);
+    mv.visitMethodInsn(INVOKESPECIAL,implName,"<init>","()V");
+  }
+  mv.visitInsn(ARETURN);
+  mv.visitMaxs(0,0);
+  mv.visitEnd();
+}

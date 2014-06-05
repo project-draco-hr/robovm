@@ -1,0 +1,29 @@
+{
+  init();
+  SootClass sootClass=clazz.getSootClass();
+  if ((sootClass.getModifiers() & MOD_ANNOTATION) > 0) {
+    try {
+      String implInternalName=clazz.getInternalName() + IMPL_CLASS_NAME_SUFFIX;
+      ClassWriter cw=new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+      cw.visit(V1_7,ACC_SUPER + ACC_FINAL + ACC_SYNTHETIC+ ACC_PUBLIC,implInternalName,null,BASE_CLASS,new String[]{clazz.getInternalName()});
+      generateConstructor(clazz,cw);
+      generateAnnotationTypeMethod(clazz,cw);
+      generateMembersToStringMethod(clazz,cw);
+      generateFastEqualsMethod(clazz,cw);
+      generateSlowEqualsMethod(clazz,cw);
+      generateHashCodeMethod(clazz,cw);
+      generateMemberFieldsAndAccessorMethods(clazz,cw);
+      generateSetDefaultsMethod(clazz,cw);
+      generateSingletonFactoryMethod(clazz,cw);
+      generateFactoryMethod(clazz,cw);
+      cw.visitEnd();
+      File f=clazz.getPath().getGeneratedClassFile(implInternalName);
+      FileUtils.writeByteArrayToFile(f,cw.toByteArray());
+      f.setLastModified(clazz.lastModified());
+      clazz.getClazzInfo().addDependency(implInternalName);
+    }
+ catch (    IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+}

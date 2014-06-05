@@ -1,0 +1,55 @@
+{
+  if (value instanceof Exception) {
+    if (value instanceof TypeNotPresentException) {
+      TypeNotPresentException e=(TypeNotPresentException)value;
+      throw new TypeNotPresentException(e.typeName(),e.getCause());
+    }
+ else     if (value instanceof EnumConstantNotPresentException) {
+      EnumConstantNotPresentException e=(EnumConstantNotPresentException)value;
+      throw new EnumConstantNotPresentException(e.enumType(),e.constantName());
+    }
+ else     if (value instanceof AnnotationTypeMismatchException) {
+      AnnotationTypeMismatchException e=(AnnotationTypeMismatchException)value;
+      throw new AnnotationTypeMismatchException(e.element(),e.foundType());
+    }
+ else     if (value instanceof ArrayStoreException) {
+      ArrayStoreException e=(ArrayStoreException)value;
+      throw new ArrayStoreException(e.getMessage());
+    }
+ else {
+      throw new RuntimeException((Exception)value);
+    }
+  }
+  if (value == NO_VALUE) {
+    throw new IncompleteAnnotationException(annotationType,memberName);
+  }
+  Class<?> type=value.getClass();
+  if (type.isArray()) {
+    if (type == int[].class) {
+      return ((int[])value).clone();
+    }
+ else     if (type == byte[].class) {
+      return ((byte[])value).clone();
+    }
+ else     if (type == short[].class) {
+      return ((short[])value).clone();
+    }
+ else     if (type == long[].class) {
+      return ((long[])value).clone();
+    }
+ else     if (type == char[].class) {
+      return ((char[])value).clone();
+    }
+ else     if (type == boolean[].class) {
+      return ((boolean[])value).clone();
+    }
+ else     if (type == float[].class) {
+      return ((float[])value).clone();
+    }
+ else     if (type == double[].class) {
+      return ((double[])value).clone();
+    }
+    return ((Object[])value).clone();
+  }
+  return value;
+}

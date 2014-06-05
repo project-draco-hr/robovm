@@ -1,0 +1,20 @@
+{
+  String implName=clazz.getInternalName() + IMPL_CLASS_NAME_SUFFIX;
+  MethodVisitor mv=cw.visitMethod(ACC_PROTECTED,"membersToString","(Ljava/lang/StringBuilder;)V",null,null);
+  mv.visitCode();
+  boolean first=true;
+  for (  SootMethod method : clazz.getSootClass().getMethods()) {
+    String fieldName=getFieldName(method);
+    mv.visitVarInsn(ALOAD,0);
+    mv.visitVarInsn(ALOAD,1);
+    mv.visitVarInsn(ALOAD,0);
+    mv.visitFieldInsn(GETFIELD,implName,fieldName,"Ljava/lang/Object;");
+    mv.visitLdcInsn(method.getName());
+    mv.visitInsn(first ? ICONST_1 : ICONST_0);
+    mv.visitMethodInsn(INVOKESPECIAL,BASE_CLASS,"memberToString","(Ljava/lang/StringBuilder;Ljava/lang/Object;Ljava/lang/String;Z)V");
+    first=false;
+  }
+  mv.visitInsn(RETURN);
+  mv.visitMaxs(0,0);
+  mv.visitEnd();
+}

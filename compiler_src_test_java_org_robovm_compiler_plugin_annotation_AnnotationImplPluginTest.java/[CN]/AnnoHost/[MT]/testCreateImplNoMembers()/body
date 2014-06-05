@@ -1,0 +1,14 @@
+{
+  final File implFile=createAnnoImpl(Anno3.class);
+  Class<?> implClass=loadClassFromFile(implFile,Anno3.class.getName() + "$Impl");
+  Anno3 impl1=(Anno3)implClass.getMethod("$create").invoke(null);
+  assertSame(Anno3.class,impl1.annotationType());
+  Anno3 impl2=(Anno3)implClass.getMethod("$create").invoke(null);
+  assertSame(impl1,impl2);
+  Anno3 annotation=AnnoHost.class.getAnnotation(Anno3.class);
+  assertTrue(annotation.equals(impl1));
+  assertTrue(impl1.equals(annotation));
+  assertEquals(annotation.hashCode(),impl1.hashCode());
+  assertEquals(annotation.toString(),impl1.toString());
+  assertSame(annotation.annotationType(),impl1.annotationType());
+}

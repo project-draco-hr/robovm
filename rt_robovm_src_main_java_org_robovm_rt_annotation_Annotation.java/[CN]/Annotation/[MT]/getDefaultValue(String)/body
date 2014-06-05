@@ -1,0 +1,27 @@
+{
+synchronized (defaultValueCache) {
+    HashMap<String,Object> cache=defaultValueCache.get(annotationType);
+    if (cache != null) {
+      Object value=cache.get(memberName);
+      if (value != null) {
+        return value;
+      }
+    }
+    Object value=null;
+    try {
+      value=annotationType.getMethod(memberName).getDefaultValue();
+    }
+ catch (    Throwable t) {
+      value=t;
+    }
+    if (value == null) {
+      value=NO_VALUE;
+    }
+    if (cache == null) {
+      cache=new HashMap<String,Object>();
+      defaultValueCache.put(annotationType,cache);
+    }
+    cache.put(memberName,value);
+    return value;
+  }
+}
