@@ -1,0 +1,18 @@
+{
+  encoder.onMalformedInput(CodingErrorAction.REPORT);
+  encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+  try {
+    encoder.encode(CharBuffer.wrap("\ud800\udc00"));
+    fail("should unmappable");
+  }
+ catch (  UnmappableCharacterException e) {
+  }
+  encoder.reset();
+  ByteBuffer out=ByteBuffer.allocate(10);
+  assertTrue(encoder.encode(CharBuffer.wrap("\ud800"),out,true).isMalformed());
+  encoder.flush(out);
+  encoder.reset();
+  out=ByteBuffer.allocate(10);
+  assertSame(CoderResult.UNDERFLOW,encoder.encode(CharBuffer.wrap("\ud800"),out,false));
+  assertTrue(encoder.encode(CharBuffer.wrap("\udc00"),out,true).isMalformed());
+}

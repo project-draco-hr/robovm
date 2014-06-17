@@ -1,0 +1,39 @@
+{
+  try {
+    ASN1Set signedAttr=null;
+    AlgorithmIdentifier digestAlg=null;
+    if (sAttrGen != null) {
+      digestAlg=digester.getAlgorithmIdentifier();
+      calculatedDigest=digester.getDigest();
+      Map parameters=getBaseParameters(contentType,digester.getAlgorithmIdentifier(),calculatedDigest);
+      AttributeTable signed=sAttrGen.getAttributes(Collections.unmodifiableMap(parameters));
+      signedAttr=getAttributeSet(signed);
+      OutputStream sOut=signer.getOutputStream();
+      sOut.write(signedAttr.getEncoded(ASN1Encoding.DER));
+      sOut.close();
+    }
+ else {
+      if (digester != null) {
+        digestAlg=digester.getAlgorithmIdentifier();
+        calculatedDigest=digester.getDigest();
+      }
+ else {
+        digestAlg=digAlgFinder.find(signer.getAlgorithmIdentifier());
+        calculatedDigest=null;
+      }
+    }
+    byte[] sigBytes=signer.getSignature();
+    ASN1Set unsignedAttr=null;
+    if (unsAttrGen != null) {
+      Map parameters=getBaseParameters(contentType,digestAlg,calculatedDigest);
+      parameters.put(CMSAttributeTableGenerator.SIGNATURE,sigBytes.clone());
+      AttributeTable unsigned=unsAttrGen.getAttributes(Collections.unmodifiableMap(parameters));
+      unsignedAttr=getAttributeSet(unsigned);
+    }
+    AlgorithmIdentifier digestEncryptionAlgorithm=sigEncAlgFinder.findEncryptionAlgorithm(signer.getAlgorithmIdentifier());
+    return new SignerInfo(signerIdentifier,digestAlg,signedAttr,digestEncryptionAlgorithm,new DEROctetString(sigBytes),unsignedAttr);
+  }
+ catch (  IOException e) {
+    throw new CMSException("encoding error.",e);
+  }
+}

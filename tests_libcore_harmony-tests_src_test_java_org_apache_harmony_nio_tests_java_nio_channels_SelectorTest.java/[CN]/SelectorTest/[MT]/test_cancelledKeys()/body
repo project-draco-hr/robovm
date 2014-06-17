@@ -1,0 +1,34 @@
+{
+  final AtomicReference<Throwable> failure=new AtomicReference<Throwable>();
+  final AtomicBoolean complete=new AtomicBoolean();
+  final Pipe pipe=Pipe.open();
+  pipe.source().configureBlocking(false);
+  final SelectionKey key=pipe.source().register(selector,SelectionKey.OP_READ);
+  Thread thread=new Thread(){
+    public void run(){
+      try {
+        Thread.sleep(500);
+        key.cancel();
+        assertFalse(key.isValid());
+        pipe.sink().write(ByteBuffer.allocate(4));
+      }
+ catch (      Throwable e) {
+        failure.set(e);
+      }
+ finally {
+        complete.set(true);
+      }
+    }
+  }
+;
+  assertTrue(key.isValid());
+  thread.start();
+  do {
+    assertEquals(0,selector.select(5000));
+    assertEquals(0,selector.selectedKeys().size());
+  }
+ while (!complete.get());
+  assertFalse(key.isValid());
+  thread.join();
+  assertNull(failure.get());
+}

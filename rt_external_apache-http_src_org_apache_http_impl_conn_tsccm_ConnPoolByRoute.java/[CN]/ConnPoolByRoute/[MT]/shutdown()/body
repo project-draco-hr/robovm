@@ -1,0 +1,22 @@
+{
+  poolLock.lock();
+  try {
+    super.shutdown();
+    Iterator<BasicPoolEntry> ibpe=freeConnections.iterator();
+    while (ibpe.hasNext()) {
+      BasicPoolEntry entry=ibpe.next();
+      ibpe.remove();
+      closeConnection(entry.getConnection());
+    }
+    Iterator<WaitingThread> iwth=waitingThreads.iterator();
+    while (iwth.hasNext()) {
+      WaitingThread waiter=iwth.next();
+      iwth.remove();
+      waiter.wakeup();
+    }
+    routeToPool.clear();
+  }
+  finally {
+    poolLock.unlock();
+  }
+}

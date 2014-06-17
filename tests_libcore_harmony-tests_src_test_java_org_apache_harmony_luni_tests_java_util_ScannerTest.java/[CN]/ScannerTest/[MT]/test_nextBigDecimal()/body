@@ -1,0 +1,53 @@
+{
+  s=new Scanner("123 45\u0666. 123.4 .123 ");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(new BigDecimal("123"),s.nextBigDecimal());
+  assertEquals(new BigDecimal("456"),s.nextBigDecimal());
+  assertEquals(new BigDecimal("123.4"),s.nextBigDecimal());
+  assertEquals(new BigDecimal("0.123"),s.nextBigDecimal());
+  try {
+    s.nextBigDecimal();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("+123.4 -456.7 123,456.789 0.1\u06623,4");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(new BigDecimal("123.4"),s.nextBigDecimal());
+  assertEquals(new BigDecimal("-456.7"),s.nextBigDecimal());
+  assertEquals(new BigDecimal("123456.789"),s.nextBigDecimal());
+  try {
+    s.nextBigDecimal();
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("+123.4E10 -456.7e+12 123,456.789E-10");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(new BigDecimal("1.234E12"),s.nextBigDecimal());
+  assertEquals(new BigDecimal("-4.567E14"),s.nextBigDecimal());
+  assertEquals(new BigDecimal("1.23456789E-5"),s.nextBigDecimal());
+  s=new Scanner("NaN");
+  try {
+    s.nextBigDecimal();
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("23,456 23,456");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(new BigDecimal("23456"),s.nextBigDecimal());
+  s.useLocale(Locale.GERMANY);
+  assertEquals(new BigDecimal("23.456"),s.nextBigDecimal());
+  s=new Scanner("23.456 23.456");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(new BigDecimal("23.456"),s.nextBigDecimal());
+  s.useLocale(Locale.GERMANY);
+  assertEquals(new BigDecimal("23456"),s.nextBigDecimal());
+  s=new Scanner("23,456.7");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(new BigDecimal("23456.7"),s.nextBigDecimal());
+  s=new Scanner("-123.4");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(new BigDecimal("-123.4"),s.nextBigDecimal());
+}

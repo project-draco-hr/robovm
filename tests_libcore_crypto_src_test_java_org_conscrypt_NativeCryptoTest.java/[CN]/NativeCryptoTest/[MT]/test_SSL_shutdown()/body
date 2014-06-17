@@ -1,0 +1,22 @@
+{
+  try {
+    NativeCrypto.SSL_shutdown(NULL,null,DUMMY_CB);
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    NativeCrypto.SSL_shutdown(NULL,INVALID_FD,null);
+  }
+ catch (  NullPointerException expected) {
+  }
+  NativeCrypto.SSL_shutdown(NULL,INVALID_FD,DUMMY_CB);
+  long c=NativeCrypto.SSL_CTX_new();
+  long s=NativeCrypto.SSL_new(c);
+  try {
+    NativeCrypto.SSL_shutdown(s,INVALID_FD,DUMMY_CB);
+  }
+ catch (  SSLProtocolException expected) {
+  }
+  NativeCrypto.SSL_free(s);
+  NativeCrypto.SSL_CTX_free(c);
+}

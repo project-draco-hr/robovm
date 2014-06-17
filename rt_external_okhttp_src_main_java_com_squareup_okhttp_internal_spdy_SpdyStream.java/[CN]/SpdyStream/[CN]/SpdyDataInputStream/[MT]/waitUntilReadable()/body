@@ -1,0 +1,25 @@
+{
+  long start=0;
+  long remaining=0;
+  if (readTimeoutMillis != 0) {
+    start=(System.nanoTime() / 1000000);
+    remaining=readTimeoutMillis;
+  }
+  try {
+    while (pos == -1 && !finished && !closed && rstStatusCode == -1) {
+      if (readTimeoutMillis == 0) {
+        SpdyStream.this.wait();
+      }
+ else       if (remaining > 0) {
+        SpdyStream.this.wait(remaining);
+        remaining=start + readTimeoutMillis - (System.nanoTime() / 1000000);
+      }
+ else {
+        throw new SocketTimeoutException();
+      }
+    }
+  }
+ catch (  InterruptedException e) {
+    throw new InterruptedIOException();
+  }
+}

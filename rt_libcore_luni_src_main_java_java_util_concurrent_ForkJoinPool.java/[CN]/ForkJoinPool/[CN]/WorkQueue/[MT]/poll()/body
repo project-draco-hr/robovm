@@ -1,0 +1,20 @@
+{
+  ForkJoinTask<?>[] a;
+  int b;
+  ForkJoinTask<?> t;
+  while ((b=base) - top < 0 && (a=array) != null) {
+    int j=(((a.length - 1) & b) << ASHIFT) + ABASE;
+    t=(ForkJoinTask<?>)U.getObjectVolatile(a,j);
+    if (t != null) {
+      if (base == b && U.compareAndSwapObject(a,j,t,null)) {
+        base=b + 1;
+        return t;
+      }
+    }
+ else     if (base == b) {
+      if (b + 1 == top)       break;
+      Thread.yield();
+    }
+  }
+  return null;
+}

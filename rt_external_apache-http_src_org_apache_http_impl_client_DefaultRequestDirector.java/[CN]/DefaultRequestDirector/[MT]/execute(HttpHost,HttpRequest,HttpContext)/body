@@ -1,0 +1,170 @@
+{
+  HttpRequest orig=request;
+  RequestWrapper origWrapper=wrapRequest(orig);
+  origWrapper.setParams(params);
+  HttpRoute origRoute=determineRoute(target,origWrapper,context);
+  RoutedRequest roureq=new RoutedRequest(origWrapper,origRoute);
+  long timeout=ConnManagerParams.getTimeout(params);
+  int execCount=0;
+  boolean reuse=false;
+  HttpResponse response=null;
+  boolean done=false;
+  try {
+    while (!done) {
+      RequestWrapper wrapper=roureq.getRequest();
+      HttpRoute route=roureq.getRoute();
+      Object userToken=context.getAttribute(ClientContext.USER_TOKEN);
+      if (managedConn == null) {
+        ClientConnectionRequest connRequest=connManager.requestConnection(route,userToken);
+        if (orig instanceof AbortableHttpRequest) {
+          ((AbortableHttpRequest)orig).setConnectionRequest(connRequest);
+        }
+        try {
+          managedConn=connRequest.getConnection(timeout,TimeUnit.MILLISECONDS);
+        }
+ catch (        InterruptedException interrupted) {
+          InterruptedIOException iox=new InterruptedIOException();
+          iox.initCause(interrupted);
+          throw iox;
+        }
+        if (HttpConnectionParams.isStaleCheckingEnabled(params)) {
+          this.log.debug("Stale connection check");
+          if (managedConn.isStale()) {
+            this.log.debug("Stale connection detected");
+            try {
+              managedConn.close();
+            }
+ catch (            IOException ignored) {
+            }
+          }
+        }
+      }
+      if (orig instanceof AbortableHttpRequest) {
+        ((AbortableHttpRequest)orig).setReleaseTrigger(managedConn);
+      }
+      if (!managedConn.isOpen()) {
+        managedConn.open(route,context,params);
+      }
+ else {
+        managedConn.setSocketTimeout(HttpConnectionParams.getSoTimeout(params));
+      }
+      try {
+        establishRoute(route,context);
+      }
+ catch (      TunnelRefusedException ex) {
+        if (this.log.isDebugEnabled()) {
+          this.log.debug(ex.getMessage());
+        }
+        response=ex.getResponse();
+        break;
+      }
+      wrapper.resetHeaders();
+      rewriteRequestURI(wrapper,route);
+      target=(HttpHost)wrapper.getParams().getParameter(ClientPNames.VIRTUAL_HOST);
+      if (target == null) {
+        target=route.getTargetHost();
+      }
+      HttpHost proxy=route.getProxyHost();
+      context.setAttribute(ExecutionContext.HTTP_TARGET_HOST,target);
+      context.setAttribute(ExecutionContext.HTTP_PROXY_HOST,proxy);
+      context.setAttribute(ExecutionContext.HTTP_CONNECTION,managedConn);
+      context.setAttribute(ClientContext.TARGET_AUTH_STATE,targetAuthState);
+      context.setAttribute(ClientContext.PROXY_AUTH_STATE,proxyAuthState);
+      requestExec.preProcess(wrapper,httpProcessor,context);
+      context.setAttribute(ExecutionContext.HTTP_REQUEST,wrapper);
+      boolean retrying=true;
+      while (retrying) {
+        execCount++;
+        wrapper.incrementExecCount();
+        if (wrapper.getExecCount() > 1 && !wrapper.isRepeatable()) {
+          throw new NonRepeatableRequestException("Cannot retry request " + "with a non-repeatable request entity");
+        }
+        try {
+          if (this.log.isDebugEnabled()) {
+            this.log.debug("Attempt " + execCount + " to execute request");
+          }
+          response=requestExec.execute(wrapper,managedConn,context);
+          retrying=false;
+        }
+ catch (        IOException ex) {
+          this.log.debug("Closing the connection.");
+          managedConn.close();
+          if (retryHandler.retryRequest(ex,execCount,context)) {
+            if (this.log.isInfoEnabled()) {
+              this.log.info("I/O exception (" + ex.getClass().getName() + ") caught when processing request: "+ ex.getMessage());
+            }
+            if (this.log.isDebugEnabled()) {
+              this.log.debug(ex.getMessage(),ex);
+            }
+            this.log.info("Retrying request");
+          }
+ else {
+            throw ex;
+          }
+          if (route.getHopCount() == 1) {
+            this.log.debug("Reopening the direct connection.");
+            managedConn.open(route,context,params);
+          }
+ else {
+            throw ex;
+          }
+        }
+      }
+      response.setParams(params);
+      requestExec.postProcess(response,httpProcessor,context);
+      reuse=reuseStrategy.keepAlive(response,context);
+      if (reuse) {
+        long duration=keepAliveStrategy.getKeepAliveDuration(response,context);
+        managedConn.setIdleDuration(duration,TimeUnit.MILLISECONDS);
+      }
+      RoutedRequest followup=handleResponse(roureq,response,context);
+      if (followup == null) {
+        done=true;
+      }
+ else {
+        if (reuse) {
+          this.log.debug("Connection kept alive");
+          HttpEntity entity=response.getEntity();
+          if (entity != null) {
+            entity.consumeContent();
+          }
+          managedConn.markReusable();
+        }
+ else {
+          managedConn.close();
+        }
+        if (!followup.getRoute().equals(roureq.getRoute())) {
+          releaseConnection();
+        }
+        roureq=followup;
+      }
+      userToken=this.userTokenHandler.getUserToken(context);
+      context.setAttribute(ClientContext.USER_TOKEN,userToken);
+      if (managedConn != null) {
+        managedConn.setState(userToken);
+      }
+    }
+    if ((response == null) || (response.getEntity() == null) || !response.getEntity().isStreaming()) {
+      if (reuse)       managedConn.markReusable();
+      releaseConnection();
+    }
+ else {
+      HttpEntity entity=response.getEntity();
+      entity=new BasicManagedEntity(entity,managedConn,reuse);
+      response.setEntity(entity);
+    }
+    return response;
+  }
+ catch (  HttpException ex) {
+    abortConnection();
+    throw ex;
+  }
+catch (  IOException ex) {
+    abortConnection();
+    throw ex;
+  }
+catch (  RuntimeException ex) {
+    abortConnection();
+    throw ex;
+  }
+}

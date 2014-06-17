@@ -1,0 +1,133 @@
+{
+  ClassLoader contextClassLoader=getContextClassLoader();
+  if (contextClassLoader == null) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("Context classloader is null.");
+    }
+  }
+  LogFactory factory=getCachedFactory(contextClassLoader);
+  if (factory != null) {
+    return factory;
+  }
+  if (isDiagnosticsEnabled()) {
+    logDiagnostic("[LOOKUP] LogFactory implementation requested for the first time for context classloader " + objectId(contextClassLoader));
+    logHierarchy("[LOOKUP] ",contextClassLoader);
+  }
+  Properties props=getConfigurationFile(contextClassLoader,FACTORY_PROPERTIES);
+  ClassLoader baseClassLoader=contextClassLoader;
+  if (props != null) {
+    String useTCCLStr=props.getProperty(TCCL_KEY);
+    if (useTCCLStr != null) {
+      if (Boolean.valueOf(useTCCLStr).booleanValue() == false) {
+        baseClassLoader=thisClassLoader;
+      }
+    }
+  }
+  if (isDiagnosticsEnabled()) {
+    logDiagnostic("[LOOKUP] Looking for system property [" + FACTORY_PROPERTY + "] to define the LogFactory subclass to use...");
+  }
+  try {
+    String factoryClass=System.getProperty(FACTORY_PROPERTY);
+    if (factoryClass != null) {
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic("[LOOKUP] Creating an instance of LogFactory class '" + factoryClass + "' as specified by system property "+ FACTORY_PROPERTY);
+      }
+      factory=newFactory(factoryClass,baseClassLoader,contextClassLoader);
+    }
+ else {
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic("[LOOKUP] No system property [" + FACTORY_PROPERTY + "] defined.");
+      }
+    }
+  }
+ catch (  SecurityException e) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("[LOOKUP] A security exception occurred while trying to create an" + " instance of the custom factory class" + ": [" + e.getMessage().trim() + "]. Trying alternative implementations...");
+    }
+    ;
+  }
+catch (  RuntimeException e) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("[LOOKUP] An exception occurred while trying to create an" + " instance of the custom factory class" + ": [" + e.getMessage().trim() + "] as specified by a system property.");
+    }
+    throw e;
+  }
+  if (factory == null) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("[LOOKUP] Looking for a resource file of name [" + SERVICE_ID + "] to define the LogFactory subclass to use...");
+    }
+    try {
+      InputStream is=getResourceAsStream(contextClassLoader,SERVICE_ID);
+      if (is != null) {
+        BufferedReader rd;
+        try {
+          rd=new BufferedReader(new InputStreamReader(is,"UTF-8"));
+        }
+ catch (        java.io.UnsupportedEncodingException e) {
+          rd=new BufferedReader(new InputStreamReader(is));
+        }
+        String factoryClassName=rd.readLine();
+        rd.close();
+        if (factoryClassName != null && !"".equals(factoryClassName)) {
+          if (isDiagnosticsEnabled()) {
+            logDiagnostic("[LOOKUP]  Creating an instance of LogFactory class " + factoryClassName + " as specified by file '"+ SERVICE_ID+ "' which was present in the path of the context"+ " classloader.");
+          }
+          factory=newFactory(factoryClassName,baseClassLoader,contextClassLoader);
+        }
+      }
+ else {
+        if (isDiagnosticsEnabled()) {
+          logDiagnostic("[LOOKUP] No resource file with name '" + SERVICE_ID + "' found.");
+        }
+      }
+    }
+ catch (    Exception ex) {
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic("[LOOKUP] A security exception occurred while trying to create an" + " instance of the custom factory class" + ": [" + ex.getMessage().trim() + "]. Trying alternative implementations...");
+      }
+      ;
+    }
+  }
+  if (factory == null) {
+    if (props != null) {
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic("[LOOKUP] Looking in properties file for entry with key '" + FACTORY_PROPERTY + "' to define the LogFactory subclass to use...");
+      }
+      String factoryClass=props.getProperty(FACTORY_PROPERTY);
+      if (factoryClass != null) {
+        if (isDiagnosticsEnabled()) {
+          logDiagnostic("[LOOKUP] Properties file specifies LogFactory subclass '" + factoryClass + "'");
+        }
+        factory=newFactory(factoryClass,baseClassLoader,contextClassLoader);
+      }
+ else {
+        if (isDiagnosticsEnabled()) {
+          logDiagnostic("[LOOKUP] Properties file has no entry specifying LogFactory subclass.");
+        }
+      }
+    }
+ else {
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic("[LOOKUP] No properties file available to determine" + " LogFactory subclass from..");
+      }
+    }
+  }
+  if (factory == null) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("[LOOKUP] Loading the default LogFactory implementation '" + FACTORY_DEFAULT + "' via the same classloader that loaded this LogFactory"+ " class (ie not looking in the context classloader).");
+    }
+    factory=newFactory(FACTORY_DEFAULT,thisClassLoader,contextClassLoader);
+  }
+  if (factory != null) {
+    cacheFactory(contextClassLoader,factory);
+    if (props != null) {
+      Enumeration names=props.propertyNames();
+      while (names.hasMoreElements()) {
+        String name=(String)names.nextElement();
+        String value=props.getProperty(name);
+        factory.setAttribute(name,value);
+      }
+    }
+  }
+  return factory;
+}

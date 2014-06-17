@@ -1,15 +1,16 @@
 {
-  fileName=file.getPath();
+  filename=file.getPath();
   if (mode != OPEN_READ && mode != (OPEN_READ | OPEN_DELETE)) {
-    throw new IllegalArgumentException();
+    throw new IllegalArgumentException("Bad mode: " + mode);
   }
   if ((mode & OPEN_DELETE) != 0) {
     fileToDeleteOnClose=file;
+    fileToDeleteOnClose.deleteOnExit();
   }
  else {
     fileToDeleteOnClose=null;
   }
-  mRaf=new RandomAccessFile(fileName,"r");
+  raf=new RandomAccessFile(filename,"r");
   readCentralDir();
   guard.open("close");
 }

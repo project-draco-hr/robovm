@@ -1,0 +1,29 @@
+{
+  if (buffer == null) {
+    throw new IllegalArgumentException("Char array buffer may not be null");
+  }
+  if (cursor == null) {
+    throw new IllegalArgumentException("Parser cursor may not be null");
+  }
+  int index=cursor.getPos();
+  final String protoname=this.protocol.getProtocol();
+  final int protolength=protoname.length();
+  if (buffer.length() < protolength + 4)   return false;
+  if (index < 0) {
+    index=buffer.length() - 4 - protolength;
+  }
+ else   if (index == 0) {
+    while ((index < buffer.length()) && HTTP.isWhitespace(buffer.charAt(index))) {
+      index++;
+    }
+  }
+  if (index + protolength + 4 > buffer.length())   return false;
+  boolean ok=true;
+  for (int j=0; ok && (j < protolength); j++) {
+    ok=(buffer.charAt(index + j) == protoname.charAt(j));
+  }
+  if (ok) {
+    ok=(buffer.charAt(index + protolength) == '/');
+  }
+  return ok;
+}

@@ -1,11 +1,6 @@
 {
-  String algorithms=attributes.getValue("Digest-Algorithms");
-  if (algorithms == null) {
-    algorithms="SHA SHA1";
-  }
-  StringTokenizer tokens=new StringTokenizer(algorithms);
-  while (tokens.hasMoreTokens()) {
-    String algorithm=tokens.nextToken();
+  for (int i=0; i < DIGEST_ALGORITHMS.length; i++) {
+    String algorithm=DIGEST_ALGORITHMS[i];
     String hash=attributes.getValue(algorithm + entry);
     if (hash == null) {
       continue;
@@ -24,7 +19,7 @@
       md.update(data,start,end - start);
     }
     byte[] b=md.digest();
-    byte[] hashBytes=hash.getBytes(Charsets.ISO_8859_1);
+    byte[] hashBytes=hash.getBytes(StandardCharsets.ISO_8859_1);
     return MessageDigest.isEqual(b,Base64.decode(hashBytes));
   }
   return ignorable;

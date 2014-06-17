@@ -1,0 +1,22 @@
+{
+  int nbytes=8;
+  byte bytes[]=new byte[nbytes];
+  long value;
+  buf.clear();
+  for (int i=0; buf.remaining() >= nbytes; i++) {
+    buf.order(i % 2 == 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
+    assertEquals(i * nbytes,buf.position());
+    buf.mark();
+    buf.get(bytes);
+    buf.reset();
+    value=buf.getLong();
+    assertEquals(bytes2long(bytes,buf.order()),value);
+  }
+  try {
+    buf.getLong();
+    fail("Should throw Exception");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  buf.order(ByteOrder.BIG_ENDIAN);
+}

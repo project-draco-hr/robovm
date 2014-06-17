@@ -1,0 +1,39 @@
+{
+  if ((status & DONE_MASK) != EXCEPTIONAL)   return null;
+  int h=System.identityHashCode(this);
+  ExceptionNode e;
+  final ReentrantLock lock=exceptionTableLock;
+  lock.lock();
+  try {
+    expungeStaleExceptions();
+    ExceptionNode[] t=exceptionTable;
+    e=t[h & (t.length - 1)];
+    while (e != null && e.get() != this)     e=e.next;
+  }
+  finally {
+    lock.unlock();
+  }
+  Throwable ex;
+  if (e == null || (ex=e.ex) == null)   return null;
+  if (false && e.thrower != Thread.currentThread().getId()) {
+    Class<? extends Throwable> ec=ex.getClass();
+    try {
+      Constructor<?> noArgCtor=null;
+      Constructor<?>[] cs=ec.getConstructors();
+      for (int i=0; i < cs.length; ++i) {
+        Constructor<?> c=cs[i];
+        Class<?>[] ps=c.getParameterTypes();
+        if (ps.length == 0)         noArgCtor=c;
+ else         if (ps.length == 1 && ps[0] == Throwable.class)         return (Throwable)(c.newInstance(ex));
+      }
+      if (noArgCtor != null) {
+        Throwable wx=(Throwable)(noArgCtor.newInstance());
+        wx.initCause(ex);
+        return wx;
+      }
+    }
+ catch (    Exception ignore) {
+    }
+  }
+  return ex;
+}

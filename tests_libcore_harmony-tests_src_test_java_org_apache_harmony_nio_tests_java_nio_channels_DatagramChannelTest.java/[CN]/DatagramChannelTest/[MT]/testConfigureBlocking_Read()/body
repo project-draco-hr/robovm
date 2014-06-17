@@ -1,0 +1,19 @@
+{
+  assertTrue(this.channel1.isBlocking());
+  ByteBuffer buf=ByteBuffer.allocate(CAPACITY_1KB);
+  new Thread(){
+    public void run(){
+      try {
+        sleep(TIME_UNIT * 5);
+        channel1.configureBlocking(false);
+        assertFalse(channel1.isBlocking());
+        datagramSocket1.close();
+      }
+ catch (      Exception e) {
+      }
+    }
+  }
+.start();
+  SocketAddress addr=channel1.receive(buf);
+  assertNull(addr);
+}

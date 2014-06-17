@@ -7,13 +7,15 @@
     ++sshift;
     ssize<<=1;
   }
-  segmentShift=32 - sshift;
-  segmentMask=ssize - 1;
-  this.segments=Segment.newArray(ssize);
+  this.segmentShift=32 - sshift;
+  this.segmentMask=ssize - 1;
   if (initialCapacity > MAXIMUM_CAPACITY)   initialCapacity=MAXIMUM_CAPACITY;
   int c=initialCapacity / ssize;
   if (c * ssize < initialCapacity)   ++c;
-  int cap=1;
+  int cap=MIN_SEGMENT_TABLE_CAPACITY;
   while (cap < c)   cap<<=1;
-  for (int i=0; i < this.segments.length; ++i)   this.segments[i]=new Segment<K,V>(cap,loadFactor);
+  Segment<K,V> s0=new Segment<K,V>(loadFactor,(int)(cap * loadFactor),(HashEntry<K,V>[])new HashEntry<?,?>[cap]);
+  Segment<K,V>[] ss=(Segment<K,V>[])new Segment<?,?>[ssize];
+  UNSAFE.putOrderedObject(ss,SBASE,s0);
+  this.segments=ss;
 }

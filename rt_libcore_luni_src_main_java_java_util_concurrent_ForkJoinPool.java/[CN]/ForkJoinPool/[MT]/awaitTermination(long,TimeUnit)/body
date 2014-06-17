@@ -1,0 +1,15 @@
+{
+  long nanos=unit.toNanos(timeout);
+  if (isTerminated())   return true;
+  if (nanos <= 0L)   return false;
+  long deadline=System.nanoTime() + nanos;
+synchronized (this) {
+    for (; ; ) {
+      if (isTerminated())       return true;
+      if (nanos <= 0L)       return false;
+      long millis=TimeUnit.NANOSECONDS.toMillis(nanos);
+      wait(millis > 0L ? millis : 1L);
+      nanos=deadline - System.nanoTime();
+    }
+  }
+}

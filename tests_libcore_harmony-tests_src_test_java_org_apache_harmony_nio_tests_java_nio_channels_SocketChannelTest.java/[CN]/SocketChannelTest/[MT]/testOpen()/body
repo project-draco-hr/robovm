@@ -1,0 +1,16 @@
+{
+  java.nio.ByteBuffer[] buf=new java.nio.ByteBuffer[1];
+  buf[0]=java.nio.ByteBuffer.allocateDirect(CAPACITY_NORMAL);
+  MockSocketChannel testMSChannel=new MockSocketChannel(null);
+  MockSocketChannel testMSChannelnotnull=new MockSocketChannel(SelectorProvider.provider());
+  assertNull(testMSChannel.provider());
+  assertNotNull(testMSChannelnotnull.provider());
+  assertNotNull(this.channel1);
+  assertEquals(this.channel1.provider(),testMSChannelnotnull.provider());
+  try {
+    this.channel1.write(buf);
+    fail("Should throw NotYetConnectedException");
+  }
+ catch (  NotYetConnectedException e) {
+  }
+}

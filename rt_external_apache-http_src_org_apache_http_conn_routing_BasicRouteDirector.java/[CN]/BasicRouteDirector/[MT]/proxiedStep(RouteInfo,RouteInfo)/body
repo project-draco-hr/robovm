@@ -1,0 +1,16 @@
+{
+  if (fact.getHopCount() <= 1)   return UNREACHABLE;
+  if (!plan.getTargetHost().equals(fact.getTargetHost()))   return UNREACHABLE;
+  final int phc=plan.getHopCount();
+  final int fhc=fact.getHopCount();
+  if (phc < fhc)   return UNREACHABLE;
+  for (int i=0; i < fhc - 1; i++) {
+    if (!plan.getHopTarget(i).equals(fact.getHopTarget(i)))     return UNREACHABLE;
+  }
+  if (phc > fhc)   return TUNNEL_PROXY;
+  if ((fact.isTunnelled() && !plan.isTunnelled()) || (fact.isLayered() && !plan.isLayered()))   return UNREACHABLE;
+  if (plan.isTunnelled() && !fact.isTunnelled())   return TUNNEL_TARGET;
+  if (plan.isLayered() && !fact.isLayered())   return LAYER_PROTOCOL;
+  if (plan.isSecure() != fact.isSecure())   return UNREACHABLE;
+  return COMPLETE;
+}

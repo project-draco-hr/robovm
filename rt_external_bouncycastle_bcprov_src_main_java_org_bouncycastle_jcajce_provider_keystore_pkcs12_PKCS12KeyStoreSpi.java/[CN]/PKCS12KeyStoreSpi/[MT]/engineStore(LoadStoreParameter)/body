@@ -1,0 +1,27 @@
+{
+  if (param == null) {
+    throw new IllegalArgumentException("'param' arg cannot be null");
+  }
+  if (!(param instanceof PKCS12StoreParameter || param instanceof JDKPKCS12StoreParameter)) {
+    throw new IllegalArgumentException("No support for 'param' of type " + param.getClass().getName());
+  }
+  PKCS12StoreParameter bcParam;
+  if (param instanceof PKCS12StoreParameter) {
+    bcParam=(PKCS12StoreParameter)param;
+  }
+ else {
+    bcParam=new PKCS12StoreParameter(((JDKPKCS12StoreParameter)param).getOutputStream(),param.getProtectionParameter(),((JDKPKCS12StoreParameter)param).isUseDEREncoding());
+  }
+  char[] password;
+  ProtectionParameter protParam=param.getProtectionParameter();
+  if (protParam == null) {
+    password=null;
+  }
+ else   if (protParam instanceof KeyStore.PasswordProtection) {
+    password=((KeyStore.PasswordProtection)protParam).getPassword();
+  }
+ else {
+    throw new IllegalArgumentException("No support for protection parameter of type " + protParam.getClass().getName());
+  }
+  doStore(bcParam.getOutputStream(),password,bcParam.isForDEREncoding());
+}

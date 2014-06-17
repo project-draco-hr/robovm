@@ -1,0 +1,59 @@
+{
+  final ByteArrayOutputStream errBuffer=new ByteArrayOutputStream();
+  PrintStream out=new PrintStream(errBuffer);
+  Set<String> seenBaseCipherNames=new HashSet<String>();
+  Set<String> seenCiphersWithModeAndPadding=new HashSet<String>();
+  Provider[] providers=Security.getProviders();
+  for (  Provider provider : providers) {
+    Set<Provider.Service> services=provider.getServices();
+    for (    Provider.Service service : services) {
+      String type=service.getType();
+      if (!type.equals("Cipher")) {
+        continue;
+      }
+      String algorithm=service.getAlgorithm();
+      final int firstSlash=algorithm.indexOf('/');
+      if (firstSlash == -1) {
+        seenBaseCipherNames.add(algorithm);
+      }
+ else {
+        final String baseCipherName=algorithm.substring(0,firstSlash);
+        if (!seenBaseCipherNames.contains(baseCipherName)) {
+          seenCiphersWithModeAndPadding.add(baseCipherName);
+        }
+        continue;
+      }
+      try {
+        test_Cipher_Algorithm(provider,algorithm);
+      }
+ catch (      Throwable e) {
+        out.append("Error encountered checking " + algorithm + " with provider "+ provider.getName()+ "\n");
+        e.printStackTrace(out);
+      }
+      Set<String> modes=StandardNames.getModesForCipher(algorithm);
+      if (modes != null) {
+        for (        String mode : modes) {
+          Set<String> paddings=StandardNames.getPaddingsForCipher(algorithm);
+          if (paddings != null) {
+            for (            String padding : paddings) {
+              final String algorithmName=algorithm + "/" + mode+ "/"+ padding;
+              try {
+                test_Cipher_Algorithm(provider,algorithmName);
+              }
+ catch (              Throwable e) {
+                out.append("Error encountered checking " + algorithmName + " with provider "+ provider.getName()+ "\n");
+                e.printStackTrace(out);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  seenCiphersWithModeAndPadding.removeAll(seenBaseCipherNames);
+  assertEquals("Ciphers seen with mode and padding but not base cipher",Collections.EMPTY_SET,seenCiphersWithModeAndPadding);
+  out.flush();
+  if (errBuffer.size() > 0) {
+    throw new Exception("Errors encountered:\n\n" + errBuffer.toString() + "\n\n");
+  }
+}

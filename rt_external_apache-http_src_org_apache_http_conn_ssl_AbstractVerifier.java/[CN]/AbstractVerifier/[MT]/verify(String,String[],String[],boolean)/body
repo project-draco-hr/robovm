@@ -1,0 +1,46 @@
+{
+  LinkedList<String> names=new LinkedList<String>();
+  if (cns != null && cns.length > 0 && cns[0] != null) {
+    names.add(cns[0]);
+  }
+  if (subjectAlts != null) {
+    for (    String subjectAlt : subjectAlts) {
+      if (subjectAlt != null) {
+        names.add(subjectAlt);
+      }
+    }
+  }
+  if (names.isEmpty()) {
+    String msg="Certificate for <" + host + "> doesn't contain CN or DNS subjectAlt";
+    throw new SSLException(msg);
+  }
+  StringBuffer buf=new StringBuffer();
+  String hostName=host.trim().toLowerCase(Locale.ENGLISH);
+  boolean match=false;
+  for (Iterator<String> it=names.iterator(); it.hasNext(); ) {
+    String cn=it.next();
+    cn=cn.toLowerCase(Locale.ENGLISH);
+    buf.append(" <");
+    buf.append(cn);
+    buf.append('>');
+    if (it.hasNext()) {
+      buf.append(" OR");
+    }
+    boolean doWildcard=cn.startsWith("*.") && cn.indexOf('.',2) != -1 && acceptableCountryWildcard(cn) && !InetAddressUtils.isIPv4Address(host);
+    if (doWildcard) {
+      match=hostName.endsWith(cn.substring(1));
+      if (match && strictWithSubDomains) {
+        match=countDots(hostName) == countDots(cn);
+      }
+    }
+ else {
+      match=hostName.equals(cn);
+    }
+    if (match) {
+      break;
+    }
+  }
+  if (!match) {
+    throw new SSLException("hostname in certificate didn't match: <" + host + "> !="+ buf);
+  }
+}

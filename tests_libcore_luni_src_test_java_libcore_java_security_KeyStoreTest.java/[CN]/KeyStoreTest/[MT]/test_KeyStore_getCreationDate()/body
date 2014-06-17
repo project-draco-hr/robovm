@@ -2,18 +2,18 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       keyStore.getCreationDate(null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    KeyStoreException expected) {
     }
   }
   long before=System.currentTimeMillis();
   for (  KeyStore keyStore : keyStores()) {
-    long after=System.currentTimeMillis() + 1000;
     populate(keyStore);
+    long after=System.currentTimeMillis() + 1000;
     try {
       keyStore.getCreationDate(null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
@@ -21,8 +21,8 @@
     if (!isReadOnly(keyStore) && isCertificateEnabled(keyStore)) {
       Date date=keyStore.getCreationDate(ALIAS_CERTIFICATE);
       assertNotNull(date);
-      assertTrue(before <= date.getTime());
-      assertTrue(date.getTime() <= after);
+      assertTrue("date should be after start time: " + date.getTime() + " >= "+ before,before <= date.getTime());
+      assertTrue("date should be before expiry time: " + date.getTime() + " <= "+ after,date.getTime() <= after);
     }
  else {
       assertNull(keyStore.getCreationDate(ALIAS_CERTIFICATE));

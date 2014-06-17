@@ -1,0 +1,33 @@
+{
+  ByteBuffer[] writeBuffers=new ByteBuffer[2];
+  writeBuffers[0]=ByteBuffer.allocate(CAPACITY);
+  writeBuffers[1]=ByteBuffer.allocate(CAPACITY);
+  readOnlyFileChannel.close();
+  try {
+    readOnlyFileChannel.write(writeBuffers,0,2);
+    fail("should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+  writeOnlyFileChannel.close();
+  try {
+    writeOnlyFileChannel.write(writeBuffers,0,2);
+    fail("should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+  readWriteFileChannel.close();
+  try {
+    readWriteFileChannel.write(writeBuffers,0,2);
+    fail("should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+  writeBuffers[0]=null;
+  try {
+    readWriteFileChannel.write(writeBuffers,0,2);
+    fail("should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+}

@@ -1,0 +1,36 @@
+{
+  if (!(obj instanceof X509CertificateHolder)) {
+    return false;
+  }
+  X509CertificateHolder x509Cert=(X509CertificateHolder)obj;
+  if (holder.getBaseCertificateID() != null) {
+    return holder.getBaseCertificateID().getSerial().getValue().equals(x509Cert.getSerialNumber()) && matchesDN(x509Cert.getIssuer(),holder.getBaseCertificateID().getIssuer());
+  }
+  if (holder.getEntityName() != null) {
+    if (matchesDN(x509Cert.getSubject(),holder.getEntityName())) {
+      return true;
+    }
+  }
+  if (holder.getObjectDigestInfo() != null) {
+    try {
+      DigestCalculator digCalc=digestCalculatorProvider.get(holder.getObjectDigestInfo().getDigestAlgorithm());
+      OutputStream digOut=digCalc.getOutputStream();
+switch (getDigestedObjectType()) {
+case ObjectDigestInfo.publicKey:
+        digOut.write(x509Cert.getSubjectPublicKeyInfo().getEncoded());
+      break;
+case ObjectDigestInfo.publicKeyCert:
+    digOut.write(x509Cert.getEncoded());
+  break;
+}
+digOut.close();
+if (!Arrays.areEqual(digCalc.getDigest(),getObjectDigest())) {
+return false;
+}
+}
+ catch (Exception e) {
+return false;
+}
+}
+return false;
+}

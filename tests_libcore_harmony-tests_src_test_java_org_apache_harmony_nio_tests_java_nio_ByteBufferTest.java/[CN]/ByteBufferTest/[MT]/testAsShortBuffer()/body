@@ -1,0 +1,47 @@
+{
+  ShortBuffer shortBuffer;
+  byte bytes[]=new byte[2];
+  short value;
+  buf.clear();
+  buf.order(ByteOrder.BIG_ENDIAN);
+  shortBuffer=buf.asShortBuffer();
+  assertSame(ByteOrder.BIG_ENDIAN,shortBuffer.order());
+  while (shortBuffer.remaining() > 0) {
+    buf.get(bytes);
+    value=shortBuffer.get();
+    assertEquals(bytes2short(bytes,buf.order()),value);
+  }
+  buf.clear();
+  buf.order(ByteOrder.LITTLE_ENDIAN);
+  shortBuffer=buf.asShortBuffer();
+  assertSame(ByteOrder.LITTLE_ENDIAN,shortBuffer.order());
+  while (shortBuffer.remaining() > 0) {
+    buf.get(bytes);
+    value=shortBuffer.get();
+    assertEquals(bytes2short(bytes,buf.order()),value);
+  }
+  if (!buf.isReadOnly()) {
+    buf.clear();
+    buf.order(ByteOrder.BIG_ENDIAN);
+    shortBuffer=buf.asShortBuffer();
+    assertSame(ByteOrder.BIG_ENDIAN,shortBuffer.order());
+    while (shortBuffer.remaining() > 0) {
+      value=(short)shortBuffer.remaining();
+      shortBuffer.put(value);
+      buf.get(bytes);
+      assertTrue(Arrays.equals(bytes,short2bytes(value,buf.order())));
+    }
+    buf.clear();
+    buf.order(ByteOrder.LITTLE_ENDIAN);
+    shortBuffer=buf.asShortBuffer();
+    assertSame(ByteOrder.LITTLE_ENDIAN,shortBuffer.order());
+    while (shortBuffer.remaining() > 0) {
+      value=(short)shortBuffer.remaining();
+      shortBuffer.put(value);
+      buf.get(bytes);
+      assertTrue(Arrays.equals(bytes,short2bytes(value,buf.order())));
+    }
+  }
+  buf.clear();
+  buf.order(ByteOrder.BIG_ENDIAN);
+}

@@ -1,0 +1,30 @@
+{
+  MockDatagramChannel testMock=new MockDatagramChannel(SelectorProvider.provider());
+  MockDatagramChannel testMocknull=new MockDatagramChannel(null);
+  int bufSize=10;
+  ByteBuffer[] readBuf=null;
+  try {
+    this.channel1.write(readBuf);
+    fail("Should throw NPE");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    testMock.write(readBuf);
+    fail("Should throw NPE");
+  }
+ catch (  NullPointerException e) {
+  }
+  readBuf=new ByteBuffer[bufSize];
+  try {
+    this.channel1.write(readBuf);
+    fail("Should throw NotYetConnectedException");
+  }
+ catch (  NotYetConnectedException e) {
+  }
+  long writeres=0;
+  writeres=testMock.write(readBuf);
+  assertEquals(0,writeres);
+  writeres=testMocknull.write(readBuf);
+  assertEquals(0,writeres);
+}

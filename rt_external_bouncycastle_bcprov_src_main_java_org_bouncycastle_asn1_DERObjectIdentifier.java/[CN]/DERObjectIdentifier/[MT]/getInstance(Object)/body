@@ -1,0 +1,15 @@
+{
+  if (obj == null || obj instanceof ASN1ObjectIdentifier) {
+    return (ASN1ObjectIdentifier)obj;
+  }
+  if (obj instanceof DERObjectIdentifier) {
+    return new ASN1ObjectIdentifier(((DERObjectIdentifier)obj).getId());
+  }
+  if (obj instanceof ASN1Encodable && ((ASN1Encodable)obj).toASN1Primitive() instanceof ASN1ObjectIdentifier) {
+    return (ASN1ObjectIdentifier)((ASN1Encodable)obj).toASN1Primitive();
+  }
+  if (obj instanceof byte[]) {
+    return ASN1ObjectIdentifier.fromOctetString((byte[])obj);
+  }
+  throw new IllegalArgumentException("illegal object in getInstance: " + obj.getClass().getName());
+}

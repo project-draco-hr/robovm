@@ -1,0 +1,32 @@
+{
+  byte[] sourceArray="".getBytes();
+  byte[] targetArray=new byte[CAPACITY_NORMAL];
+  this.channel1.socket().bind(localAddr2);
+  this.channel1.connect(localAddr1);
+  this.channel2.socket().bind(localAddr1);
+  this.channel2.connect(localAddr2);
+  ByteBuffer sourceBuf=ByteBuffer.wrap(sourceArray);
+  assertEquals(0,this.channel1.write(sourceBuf));
+  ByteBuffer targetBuf=ByteBuffer.wrap(targetArray);
+  new Thread(){
+    public void run(){
+      try {
+        Thread.sleep(TIME_UNIT);
+        channel2.configureBlocking(false);
+        Thread.sleep(TIME_UNIT * 5);
+        channel2.close();
+      }
+ catch (      Exception e) {
+      }
+    }
+  }
+.start();
+  try {
+    assertTrue(this.channel2.isBlocking());
+    this.channel2.read(targetBuf);
+    fail("Should throw AsynchronousCloseException");
+  }
+ catch (  AsynchronousCloseException e) {
+    assertFalse(this.channel2.isBlocking());
+  }
+}

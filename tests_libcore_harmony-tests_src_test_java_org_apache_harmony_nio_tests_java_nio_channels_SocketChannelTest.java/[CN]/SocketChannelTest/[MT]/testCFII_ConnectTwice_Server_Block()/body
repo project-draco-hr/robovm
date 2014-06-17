@@ -1,0 +1,32 @@
+{
+  ensureServerOpen();
+  assertTrue(this.channel1.isBlocking());
+  statusNotConnected_NotPending();
+  assertTrue(this.channel1.connect(localAddr1));
+  statusConnected_NotPending();
+  try {
+    this.channel1.connect(localAddr1);
+    fail("Should throw an AlreadyConnectedException here.");
+  }
+ catch (  AlreadyConnectedException e) {
+  }
+  statusConnected_NotPending();
+  try {
+    this.channel1.connect(localAddr2);
+    fail("Should throw an AlreadyConnectedException here.");
+  }
+ catch (  AlreadyConnectedException e) {
+  }
+  statusConnected_NotPending();
+  ensureServerClosed();
+  try {
+    this.channel1.connect(localAddr1);
+    fail("Should throw an AlreadyConnectedException here.");
+  }
+ catch (  AlreadyConnectedException e) {
+  }
+  statusConnected_NotPending();
+  tryFinish();
+  this.channel1.close();
+  statusChannelClosed();
+}

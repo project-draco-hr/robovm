@@ -1,0 +1,18 @@
+{
+  int hLen=hMac.getMacSize();
+  int l=(dkLen + hLen - 1) / hLen;
+  byte[] iBuf=new byte[4];
+  byte[] outBytes=new byte[l * hLen];
+  int outPos=0;
+  CipherParameters param=new KeyParameter(password);
+  hMac.init(param);
+  for (int i=1; i <= l; i++) {
+    int pos=3;
+    while (++iBuf[pos] == 0) {
+      --pos;
+    }
+    F(salt,iterationCount,iBuf,outBytes,outPos);
+    outPos+=hLen;
+  }
+  return outBytes;
+}

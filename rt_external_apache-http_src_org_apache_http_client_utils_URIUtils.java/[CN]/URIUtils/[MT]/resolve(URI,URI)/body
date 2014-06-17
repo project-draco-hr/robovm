@@ -1,0 +1,18 @@
+{
+  if (baseURI == null) {
+    throw new IllegalArgumentException("Base URI may nor be null");
+  }
+  if (reference == null) {
+    throw new IllegalArgumentException("Reference URI may nor be null");
+  }
+  boolean emptyReference=reference.toString().length() == 0;
+  if (emptyReference) {
+    reference=URI.create("#");
+  }
+  URI resolved=baseURI.resolve(reference);
+  if (emptyReference) {
+    String resolvedString=resolved.toString();
+    resolved=URI.create(resolvedString.substring(0,resolvedString.indexOf('#')));
+  }
+  return resolved;
+}

@@ -1,0 +1,17 @@
+{
+  Enumeration certs=c.getRevokedCertificateEnumeration();
+  X500Name previousCertificateIssuer=null;
+  while (certs.hasMoreElements()) {
+    TBSCertList.CRLEntry entry=(TBSCertList.CRLEntry)certs.nextElement();
+    if (serialNumber.equals(entry.getUserCertificate().getValue())) {
+      return new X509CRLEntryObject(entry,isIndirect,previousCertificateIssuer);
+    }
+    if (isIndirect && entry.hasExtensions()) {
+      Extension currentCaName=entry.getExtensions().getExtension(Extension.certificateIssuer);
+      if (currentCaName != null) {
+        previousCertificateIssuer=X500Name.getInstance(GeneralNames.getInstance(currentCaName.getParsedValue()).getNames()[0].getName());
+      }
+    }
+  }
+  return null;
+}

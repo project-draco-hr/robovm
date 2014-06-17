@@ -1,0 +1,18 @@
+{
+  TBSCertList tbsCRL=x509CRL.getTBSCertList();
+  if (!CertUtils.isAlgIdEqual(tbsCRL.getSignature(),x509CRL.getSignatureAlgorithm())) {
+    throw new CertException("signature invalid - algorithm identifier mismatch");
+  }
+  ContentVerifier verifier;
+  try {
+    verifier=verifierProvider.get((tbsCRL.getSignature()));
+    OutputStream sOut=verifier.getOutputStream();
+    DEROutputStream dOut=new DEROutputStream(sOut);
+    dOut.writeObject(tbsCRL);
+    sOut.close();
+  }
+ catch (  Exception e) {
+    throw new CertException("unable to process signature: " + e.getMessage(),e);
+  }
+  return verifier.verify(x509CRL.getSignature().getBytes());
+}

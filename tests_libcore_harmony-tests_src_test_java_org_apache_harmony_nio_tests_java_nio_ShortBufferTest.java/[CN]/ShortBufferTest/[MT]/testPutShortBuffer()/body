@@ -1,0 +1,30 @@
+{
+  ShortBuffer other=ShortBuffer.allocate(buf.capacity());
+  try {
+    buf.put(buf);
+    fail("Should throw Exception");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    buf.put(ShortBuffer.allocate(buf.capacity() + 1));
+    fail("Should throw Exception");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  try {
+    buf.flip();
+    buf.put((ShortBuffer)null);
+    fail("Should throw Exception");
+  }
+ catch (  NullPointerException e) {
+  }
+  loadTestData2(other);
+  other.clear();
+  buf.clear();
+  ShortBuffer ret=buf.put(other);
+  assertEquals(other.position(),other.capacity());
+  assertEquals(buf.position(),buf.capacity());
+  assertContentEquals(other,buf);
+  assertSame(ret,buf);
+}

@@ -2,7 +2,7 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       keyStore.getCertificateAlias(null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    KeyStoreException expected) {
     }
@@ -14,7 +14,9 @@
   for (  KeyStore keyStore : keyStores()) {
     populate(keyStore);
     Set<String> expected=new HashSet<String>();
-    expected.add(ALIAS_PRIVATE);
+    if (isKeyPasswordSupported(keyStore)) {
+      expected.add(ALIAS_PRIVATE);
+    }
     if (isNullPasswordAllowed(keyStore)) {
       expected.add(ALIAS_NO_PASSWORD_PRIVATE);
     }

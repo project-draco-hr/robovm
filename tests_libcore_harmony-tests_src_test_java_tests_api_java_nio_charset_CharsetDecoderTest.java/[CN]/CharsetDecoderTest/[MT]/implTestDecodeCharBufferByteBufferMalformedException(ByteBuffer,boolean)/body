@@ -1,0 +1,23 @@
+{
+  if (null == in) {
+    return;
+  }
+  CharBuffer out=CharBuffer.allocate(getString().length() * 3);
+  decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+  decoder.reset();
+  decoder.onMalformedInput(CodingErrorAction.REPORT);
+  CoderResult result=decoder.decode(in,out,endOfInput);
+  assertTrue(result.isMalformed());
+  decoder.reset();
+  out.clear();
+  in.rewind();
+  decoder.onMalformedInput(CodingErrorAction.IGNORE);
+  assertSame(CoderResult.UNDERFLOW,decoder.decode(in,out,endOfInput));
+  assertCharBufferValue(getString(),out);
+  decoder.reset();
+  out.clear();
+  in.rewind();
+  decoder.onMalformedInput(CodingErrorAction.REPLACE);
+  assertSame(CoderResult.UNDERFLOW,decoder.decode(in,out,endOfInput));
+  assertCharBufferValue(decoder.replacement() + getString(),out);
+}

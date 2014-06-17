@@ -1,0 +1,63 @@
+{
+  SocketChannel sc=SocketChannel.open();
+  SocketChannel client=null;
+  SocketChannel sc2=SocketChannel.open();
+  SocketChannel client2=null;
+  try {
+    ssc.configureBlocking(true);
+    sc.connect(localAddress);
+    client=ssc.accept();
+    sc.configureBlocking(false);
+    sc.register(selector,SelectionKey.OP_READ);
+    client.configureBlocking(true);
+    sc2.connect(localAddress);
+    client2=ssc.accept();
+    sc2.configureBlocking(false);
+    sc2.register(selector,SelectionKey.OP_READ);
+    client2.configureBlocking(true);
+    client.write(ByteBuffer.wrap("a".getBytes()));
+    int count=blockingSelect(type,timeout);
+    assertEquals(1,count);
+    Set<SelectionKey> selectedKeys=selector.selectedKeys();
+    assertEquals(1,selectedKeys.size());
+    SelectionKey key=selectedKeys.iterator().next();
+    assertEquals(sc.keyFor(selector),key);
+    assertEquals(SelectionKey.OP_READ,key.readyOps());
+    count=selectOnce(type,timeout);
+    assertEquals(0,count);
+    assertSame(selectedKeys,selector.selectedKeys());
+    sc.read(ByteBuffer.allocate(8));
+    client2.write(ByteBuffer.wrap("a".getBytes()));
+    count=blockingSelect(type,timeout);
+    assertEquals(1,count);
+    selectedKeys=selector.selectedKeys();
+    assertEquals(2,selectedKeys.size());
+  }
+  finally {
+    if (null != client) {
+      try {
+        client.close();
+      }
+ catch (      Exception e) {
+      }
+    }
+    if (null != client2) {
+      try {
+        client2.close();
+      }
+ catch (      Exception e) {
+      }
+    }
+    try {
+      sc.close();
+    }
+ catch (    Exception e) {
+    }
+    try {
+      sc2.close();
+    }
+ catch (    Exception e) {
+    }
+    ssc.configureBlocking(false);
+  }
+}

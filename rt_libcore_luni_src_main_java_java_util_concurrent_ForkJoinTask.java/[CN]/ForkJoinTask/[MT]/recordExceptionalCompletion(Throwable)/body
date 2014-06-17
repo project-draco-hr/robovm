@@ -1,0 +1,25 @@
+{
+  int s;
+  if ((s=status) >= 0) {
+    int h=System.identityHashCode(this);
+    final ReentrantLock lock=exceptionTableLock;
+    lock.lock();
+    try {
+      expungeStaleExceptions();
+      ExceptionNode[] t=exceptionTable;
+      int i=h & (t.length - 1);
+      for (ExceptionNode e=t[i]; ; e=e.next) {
+        if (e == null) {
+          t[i]=new ExceptionNode(this,ex,t[i]);
+          break;
+        }
+        if (e.get() == this)         break;
+      }
+    }
+  finally {
+      lock.unlock();
+    }
+    s=setCompletion(EXCEPTIONAL);
+  }
+  return s;
+}

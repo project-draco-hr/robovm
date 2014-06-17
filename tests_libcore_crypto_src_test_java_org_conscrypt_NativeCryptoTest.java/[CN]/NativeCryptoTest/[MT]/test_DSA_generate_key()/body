@@ -1,0 +1,41 @@
+{
+  final byte[] seed=new byte[20];
+{
+    long ctx=0;
+    try {
+      ctx=NativeCrypto.DSA_generate_key(2048,seed,dsa2048_g,dsa2048_p,dsa2048_q);
+      assertTrue(ctx != NULL);
+    }
+  finally {
+      if (ctx != 0) {
+        NativeCrypto.EVP_PKEY_free(ctx);
+      }
+    }
+  }
+{
+    long ctx=0;
+    try {
+      ctx=NativeCrypto.DSA_generate_key(0,null,null,null,null);
+      assertTrue(ctx != NULL);
+    }
+  finally {
+      if (ctx != 0) {
+        NativeCrypto.EVP_PKEY_free(ctx);
+      }
+    }
+  }
+{
+    long ctx=0;
+    try {
+      ctx=NativeCrypto.DSA_generate_key(0,null,new byte[]{},new byte[]{},new byte[]{});
+      fail();
+    }
+ catch (    RuntimeException expected) {
+    }
+ finally {
+      if (ctx != 0) {
+        NativeCrypto.EVP_PKEY_free(ctx);
+      }
+    }
+  }
+}

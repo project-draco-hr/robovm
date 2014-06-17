@@ -1,0 +1,22 @@
+{
+  initChannelIdKey();
+  final ServerSocket listener=new ServerSocket(0);
+  Hooks cHooks=new Hooks();
+  cHooks.channelIdPrivateKey=CHANNEL_ID_PRIVATE_KEY;
+  ServerHooks sHooks=new ServerHooks(getServerPrivateKey(),getServerCertificates());
+  sHooks.channelIdEnabled=false;
+  Future<TestSSLHandshakeCallbacks> client=handshake(listener,0,true,cHooks,null,null);
+  Future<TestSSLHandshakeCallbacks> server=handshake(listener,0,false,sHooks,null,null);
+  TestSSLHandshakeCallbacks clientCallback=client.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+  TestSSLHandshakeCallbacks serverCallback=server.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+  assertTrue(clientCallback.verifyCertificateChainCalled);
+  assertEqualCertificateChains(getServerCertificates(),clientCallback.asn1DerEncodedCertificateChain);
+  assertEquals("RSA",clientCallback.authMethod);
+  assertFalse(serverCallback.verifyCertificateChainCalled);
+  assertFalse(clientCallback.clientCertificateRequestedCalled);
+  assertFalse(serverCallback.clientCertificateRequestedCalled);
+  assertTrue(clientCallback.handshakeCompletedCalled);
+  assertTrue(serverCallback.handshakeCompletedCalled);
+  assertNull(sHooks.channelIdAfterHandshakeException);
+  assertNull(sHooks.channelIdAfterHandshake);
+}

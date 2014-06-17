@@ -1,0 +1,31 @@
+{
+  ByteBuffer in=ByteBuffer.wrap(new byte[]{98,98});
+  CharBuffer out=CharBuffer.allocate(100);
+  decoder.decode(in,out,true);
+  in.rewind();
+  out.rewind();
+  decoder.reset();
+  decoder.decode(in,CharBuffer.allocate(30),true);
+  in.rewind();
+  decoder.decode(in,out,true);
+  in.rewind();
+  out.rewind();
+  decoder.reset();
+  decoder.decode(in,CharBuffer.allocate(30),false);
+  in.rewind();
+  decoder.decode(in,out,true);
+  in.rewind();
+  out.rewind();
+  decoder.reset();
+  decoder.decode(in,CharBuffer.allocate(30),true);
+  decoder.flush(CharBuffer.allocate(10));
+  in.rewind();
+  try {
+    decoder.decode(in,out,true);
+    fail("should illegal state");
+  }
+ catch (  IllegalStateException e) {
+  }
+  in.rewind();
+  out.rewind();
+}

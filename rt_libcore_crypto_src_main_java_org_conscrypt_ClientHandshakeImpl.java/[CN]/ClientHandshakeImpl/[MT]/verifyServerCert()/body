@@ -1,0 +1,28 @@
+{
+  String authType=session.cipherSuite.getAuthType(serverKeyExchange != null);
+  if (authType == null) {
+    return;
+  }
+  String hostname=null;
+  if (engineOwner != null) {
+    hostname=engineOwner.getPeerHost();
+  }
+ else {
+    hostname=socketOwner.getWrappedHostName();
+  }
+  try {
+    X509TrustManager x509tm=parameters.getTrustManager();
+    if (x509tm instanceof TrustManagerImpl) {
+      TrustManagerImpl tm=(TrustManagerImpl)x509tm;
+      tm.checkServerTrusted(serverCert.certs,authType,hostname);
+    }
+ else {
+      x509tm.checkServerTrusted(serverCert.certs,authType);
+    }
+  }
+ catch (  CertificateException e) {
+    fatalAlert(AlertProtocol.BAD_CERTIFICATE,"Not trusted server certificate",e);
+    return;
+  }
+  session.peerCertificates=serverCert.certs;
+}

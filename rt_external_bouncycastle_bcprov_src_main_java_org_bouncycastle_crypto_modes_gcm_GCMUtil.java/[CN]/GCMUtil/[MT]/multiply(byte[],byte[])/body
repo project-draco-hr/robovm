@@ -1,0 +1,18 @@
+{
+  byte[] tmp=Arrays.clone(block);
+  byte[] c=new byte[16];
+  for (int i=0; i < 16; ++i) {
+    byte bits=val[i];
+    for (int j=7; j >= 0; --j) {
+      if ((bits & (1 << j)) != 0) {
+        xor(c,tmp);
+      }
+      boolean lsb=(tmp[15] & 1) != 0;
+      shiftRight(tmp);
+      if (lsb) {
+        tmp[0]^=(byte)0xe1;
+      }
+    }
+  }
+  System.arraycopy(c,0,block,0,16);
+}

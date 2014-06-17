@@ -1,0 +1,16 @@
+{
+  ForkJoinTask<?>[] a;
+  ForkJoinTask<?> t;
+  int m;
+  if ((a=array) != null && (m=a.length - 1) >= 0) {
+    for (int s; (s=top - 1) - base >= 0; ) {
+      long j=((m & s) << ASHIFT) + ABASE;
+      if ((t=(ForkJoinTask<?>)U.getObject(a,j)) == null)       break;
+      if (U.compareAndSwapObject(a,j,t,null)) {
+        top=s;
+        return t;
+      }
+    }
+  }
+  return null;
+}

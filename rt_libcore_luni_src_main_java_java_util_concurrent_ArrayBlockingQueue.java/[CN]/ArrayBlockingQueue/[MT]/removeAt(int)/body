@@ -1,23 +1,27 @@
 {
   final Object[] items=this.items;
-  if (i == takeIndex) {
+  if (removeIndex == takeIndex) {
     items[takeIndex]=null;
     takeIndex=inc(takeIndex);
+    count--;
+    if (itrs != null)     itrs.elementDequeued();
   }
  else {
-    for (; ; ) {
-      int nexti=inc(i);
-      if (nexti != putIndex) {
-        items[i]=items[nexti];
-        i=nexti;
+    final int putIndex=this.putIndex;
+    for (int i=removeIndex; ; ) {
+      int next=inc(i);
+      if (next != putIndex) {
+        items[i]=items[next];
+        i=next;
       }
  else {
         items[i]=null;
-        putIndex=i;
+        this.putIndex=i;
         break;
       }
     }
+    count--;
+    if (itrs != null)     itrs.removedAt(removeIndex);
   }
-  --count;
   notFull.signal();
 }

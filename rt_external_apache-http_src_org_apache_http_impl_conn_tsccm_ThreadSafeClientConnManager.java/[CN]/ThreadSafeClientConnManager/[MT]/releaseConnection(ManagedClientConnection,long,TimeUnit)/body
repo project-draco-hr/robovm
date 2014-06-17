@@ -1,0 +1,33 @@
+{
+  if (!(conn instanceof BasicPooledConnAdapter)) {
+    throw new IllegalArgumentException("Connection class mismatch, " + "connection not obtained from this manager.");
+  }
+  BasicPooledConnAdapter hca=(BasicPooledConnAdapter)conn;
+  if ((hca.getPoolEntry() != null) && (hca.getManager() != this)) {
+    throw new IllegalArgumentException("Connection not obtained from this manager.");
+  }
+  try {
+    final BasicPoolEntry entry=(BasicPoolEntry)hca.getPoolEntry();
+    final Socket socket=entry.getConnection().getSocket();
+    if (socket != null) {
+      SocketTagger.get().untag(socket);
+    }
+    if (hca.isOpen() && !hca.isMarkedReusable()) {
+      if (log.isDebugEnabled()) {
+        log.debug("Released connection open but not marked reusable.");
+      }
+      hca.shutdown();
+    }
+  }
+ catch (  IOException iox) {
+    if (log.isDebugEnabled())     log.debug("Exception shutting down released connection.",iox);
+  }
+ finally {
+    BasicPoolEntry entry=(BasicPoolEntry)hca.getPoolEntry();
+    boolean reusable=hca.isMarkedReusable();
+    hca.detach();
+    if (entry != null) {
+      connectionPool.freeEntry(entry,reusable,validDuration,timeUnit);
+    }
+  }
+}

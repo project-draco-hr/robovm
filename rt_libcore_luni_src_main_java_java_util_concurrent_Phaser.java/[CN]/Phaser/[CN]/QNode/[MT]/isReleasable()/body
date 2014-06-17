@@ -1,0 +1,22 @@
+{
+  if (thread == null)   return true;
+  if (phaser.getPhase() != phase) {
+    thread=null;
+    return true;
+  }
+  if (Thread.interrupted())   wasInterrupted=true;
+  if (wasInterrupted && interruptible) {
+    thread=null;
+    return true;
+  }
+  if (timed) {
+    if (nanos > 0L) {
+      nanos=deadline - System.nanoTime();
+    }
+    if (nanos <= 0L) {
+      thread=null;
+      return true;
+    }
+  }
+  return false;
+}

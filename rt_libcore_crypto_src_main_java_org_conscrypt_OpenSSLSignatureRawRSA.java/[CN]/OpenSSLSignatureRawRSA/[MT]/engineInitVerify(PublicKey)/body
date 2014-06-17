@@ -1,0 +1,16 @@
+{
+  if (publicKey instanceof OpenSSLRSAPublicKey) {
+    OpenSSLRSAPublicKey rsaPublicKey=(OpenSSLRSAPublicKey)publicKey;
+    key=rsaPublicKey.getOpenSSLKey();
+  }
+ else   if (publicKey instanceof RSAPublicKey) {
+    RSAPublicKey rsaPublicKey=(RSAPublicKey)publicKey;
+    key=OpenSSLRSAPublicKey.getInstance(rsaPublicKey);
+  }
+ else {
+    throw new InvalidKeyException("Need RSA public key");
+  }
+  int maxSize=NativeCrypto.RSA_size(key.getPkeyContext());
+  inputBuffer=new byte[maxSize];
+  inputOffset=0;
+}

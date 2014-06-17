@@ -1,0 +1,13 @@
+{
+  int responseCode=responseHeaders.getHeaders().getResponseCode();
+  if (method.equals("HEAD")) {
+    return false;
+  }
+  if ((responseCode < HTTP_CONTINUE || responseCode >= 200) && responseCode != HttpURLConnectionImpl.HTTP_NO_CONTENT && responseCode != HttpURLConnectionImpl.HTTP_NOT_MODIFIED) {
+    return true;
+  }
+  if (responseHeaders.getContentLength() != -1 || responseHeaders.isChunked()) {
+    return true;
+  }
+  return false;
+}

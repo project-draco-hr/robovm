@@ -11,16 +11,16 @@
     return;
   }
   char[] passW=null;
-  if (protParam instanceof KeyStore.PasswordProtection) {
-    try {
-      passW=((KeyStore.PasswordProtection)protParam).getPassword();
+  if (protParam != null) {
+    if (protParam instanceof KeyStore.PasswordProtection) {
+      try {
+        passW=((KeyStore.PasswordProtection)protParam).getPassword();
+      }
+ catch (      IllegalStateException ee) {
+        throw new KeyStoreException("Password was destroyed",ee);
+      }
     }
- catch (    IllegalStateException ee) {
-      throw new KeyStoreException("Password was destroyed",ee);
-    }
-  }
- else {
-    if (protParam instanceof KeyStore.CallbackHandlerProtection) {
+ else     if (protParam instanceof KeyStore.CallbackHandlerProtection) {
       try {
         passW=getPasswordFromCallBack(protParam);
       }

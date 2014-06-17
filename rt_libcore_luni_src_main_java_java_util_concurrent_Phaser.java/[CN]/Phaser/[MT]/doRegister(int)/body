@@ -1,0 +1,38 @@
+{
+  long adjust=((long)registrations << PARTIES_SHIFT) | registrations;
+  final Phaser parent=this.parent;
+  int phase;
+  for (; ; ) {
+    long s=(parent == null) ? state : reconcileState();
+    int counts=(int)s;
+    int parties=counts >>> PARTIES_SHIFT;
+    int unarrived=counts & UNARRIVED_MASK;
+    if (registrations > MAX_PARTIES - parties)     throw new IllegalStateException(badRegister(s));
+    phase=(int)(s >>> PHASE_SHIFT);
+    if (phase < 0)     break;
+    if (counts != EMPTY) {
+      if (parent == null || reconcileState() == s) {
+        if (unarrived == 0)         root.internalAwaitAdvance(phase,null);
+ else         if (UNSAFE.compareAndSwapLong(this,stateOffset,s,s + adjust))         break;
+      }
+    }
+ else     if (parent == null) {
+      long next=((long)phase << PHASE_SHIFT) | adjust;
+      if (UNSAFE.compareAndSwapLong(this,stateOffset,s,next))       break;
+    }
+ else {
+synchronized (this) {
+        if (state == s) {
+          phase=parent.doRegister(1);
+          if (phase < 0)           break;
+          while (!UNSAFE.compareAndSwapLong(this,stateOffset,s,((long)phase << PHASE_SHIFT) | adjust)) {
+            s=state;
+            phase=(int)(root.state >>> PHASE_SHIFT);
+          }
+          break;
+        }
+      }
+    }
+  }
+  return phase;
+}

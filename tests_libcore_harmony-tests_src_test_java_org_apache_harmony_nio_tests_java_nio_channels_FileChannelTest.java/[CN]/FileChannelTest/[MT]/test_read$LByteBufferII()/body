@@ -1,0 +1,13 @@
+{
+  writeDataToFile(fileOfReadOnlyFileChannel);
+  ByteBuffer[] readBuffers=new ByteBuffer[2];
+  readBuffers[0]=ByteBuffer.allocate(CAPACITY);
+  readBuffers[1]=ByteBuffer.allocate(CAPACITY);
+  assertEquals(CONTENT_AS_BYTES_LENGTH,readOnlyFileChannel.read(readBuffers,1,1));
+  assertEquals(0,readBuffers[0].position());
+  assertEquals(CONTENT_AS_BYTES_LENGTH,readBuffers[1].position());
+  readBuffers[1].flip();
+  for (int i=0; i < CONTENT_AS_BYTES_LENGTH; i++) {
+    assertEquals(CONTENT_AS_BYTES[i],readBuffers[1].get());
+  }
+}

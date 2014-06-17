@@ -2,5 +2,24 @@
   if (bitLength < 2) {
     throw new ArithmeticException("bitLength < 2: " + bitLength);
   }
-  setBigInt(BigInt.generatePrimeDefault(bitLength));
+  if (bitLength < 16) {
+    int candidate;
+    do {
+      candidate=random.nextInt() & ((1 << bitLength) - 1);
+      candidate|=(1 << (bitLength - 1));
+      if (bitLength > 2) {
+        candidate|=1;
+      }
+    }
+ while (!isSmallPrime(candidate));
+    BigInt prime=new BigInt();
+    prime.putULongInt(candidate,false);
+    setBigInt(prime);
+  }
+ else {
+    do {
+      setBigInt(BigInt.generatePrimeDefault(bitLength));
+    }
+ while (bitLength() != bitLength);
+  }
 }

@@ -1,0 +1,55 @@
+{
+  ByteBuffer out=ByteBuffer.allocate(100);
+  CharBuffer in=getMalformedCharBuffer();
+  encoder.onMalformedInput(CodingErrorAction.REPORT);
+  encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+  if (in != null) {
+    encoder.reset();
+    CoderResult r=encoder.encode(in,out,endOfInput);
+    assertTrue(r.isMalformed());
+    encoder.reset();
+    out.clear();
+    in.rewind();
+    encoder.onMalformedInput(CodingErrorAction.IGNORE);
+    assertSame(CoderResult.UNDERFLOW,encoder.encode(in,out,endOfInput));
+    assertCodingErrorAction(endOfInput,out,in,unibytes);
+    encoder.reset();
+    out.clear();
+    in.rewind();
+    encoder.onMalformedInput(CodingErrorAction.REPLACE);
+    assertSame(CoderResult.UNDERFLOW,encoder.encode(in,out,endOfInput));
+    assertCodingErrorAction(endOfInput,out,in,unibytesWithRep);
+  }
+ else {
+    System.out.println("Cannot find malformed char buffer for " + cs.name());
+  }
+  in=getUnmapCharBuffer();
+  encoder.onMalformedInput(CodingErrorAction.REPORT);
+  encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+  if (in != null) {
+    encoder.reset();
+    out.clear();
+    assertTrue(encoder.encode(in,out,endOfInput).isUnmappable());
+    encoder.reset();
+    out.clear();
+    in.rewind();
+    encoder.onUnmappableCharacter(CodingErrorAction.IGNORE);
+    assertSame(CoderResult.UNDERFLOW,encoder.encode(in,out,endOfInput));
+    assertCodingErrorAction(endOfInput,out,in,unibytes);
+    encoder.reset();
+    out.clear();
+    in.rewind();
+    encoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
+    assertSame(CoderResult.UNDERFLOW,encoder.encode(in,out,endOfInput));
+    assertCodingErrorAction(endOfInput,out,in,unibytesWithRep);
+  }
+ else {
+    System.out.println("Cannot find unmapped char buffer for " + cs.name());
+  }
+  try {
+    encoder.encode(getExceptionCharBuffer());
+    fail("should throw runtime exception");
+  }
+ catch (  RuntimeException e) {
+  }
+}

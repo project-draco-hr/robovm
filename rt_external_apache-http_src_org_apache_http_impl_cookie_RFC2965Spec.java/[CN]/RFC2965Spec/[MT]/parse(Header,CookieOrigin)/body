@@ -1,0 +1,42 @@
+{
+  if (header == null) {
+    throw new IllegalArgumentException("Header may not be null");
+  }
+  if (origin == null) {
+    throw new IllegalArgumentException("Cookie origin may not be null");
+  }
+  origin=adjustEffectiveHost(origin);
+  HeaderElement[] elems=header.getElements();
+  List<Cookie> cookies=new ArrayList<Cookie>(elems.length);
+  for (  HeaderElement headerelement : elems) {
+    String name=headerelement.getName();
+    String value=headerelement.getValue();
+    if (name == null || name.length() == 0) {
+      throw new MalformedCookieException("Cookie name may not be empty");
+    }
+    BasicClientCookie cookie;
+    if (header.getName().equals(SM.SET_COOKIE2)) {
+      cookie=createCookie2(name,value,origin);
+    }
+ else {
+      cookie=createCookie(name,value,origin);
+    }
+    NameValuePair[] attribs=headerelement.getParameters();
+    Map<String,NameValuePair> attribmap=new HashMap<String,NameValuePair>(attribs.length);
+    for (int j=attribs.length - 1; j >= 0; j--) {
+      NameValuePair param=attribs[j];
+      attribmap.put(param.getName().toLowerCase(Locale.ENGLISH),param);
+    }
+    for (    Map.Entry<String,NameValuePair> entry : attribmap.entrySet()) {
+      NameValuePair attrib=entry.getValue();
+      String s=attrib.getName().toLowerCase(Locale.ENGLISH);
+      cookie.setAttribute(s,attrib.getValue());
+      CookieAttributeHandler handler=findAttribHandler(s);
+      if (handler != null) {
+        handler.parse(cookie,attrib.getValue());
+      }
+    }
+    cookies.add(cookie);
+  }
+  return cookies;
+}

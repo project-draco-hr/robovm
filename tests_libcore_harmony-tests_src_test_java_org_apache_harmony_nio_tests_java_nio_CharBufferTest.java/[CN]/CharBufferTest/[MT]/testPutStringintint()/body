@@ -1,0 +1,58 @@
+{
+  buf.clear();
+  String str=String.valueOf(new char[buf.capacity()]);
+  try {
+    buf.put(String.valueOf(new char[buf.capacity() + 1]),0,buf.capacity() + 1);
+    fail("Should throw Exception");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  try {
+    buf.put((String)null,0,buf.capacity() + 1);
+    fail("Should throw Exception");
+  }
+ catch (  NullPointerException e) {
+  }
+  assertEquals(0,buf.position());
+  buf.clear();
+  try {
+    buf.put(str,-1,str.length());
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    buf.put(str,str.length() + 1,str.length() + 2);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    buf.put((String)null,-1,0);
+    fail("Should throw Exception");
+  }
+ catch (  NullPointerException e) {
+  }
+  buf.put(str,str.length(),str.length());
+  assertEquals(buf.position(),0);
+  try {
+    buf.put(str,2,1);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    buf.put(str,2,str.length() + 1);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  assertEquals(buf.position(),0);
+  char array[]=new char[buf.capacity()];
+  loadTestData2(array,0,array.length);
+  str=String.valueOf(array);
+  CharBuffer ret=buf.put(str,0,str.length());
+  assertEquals(buf.position(),buf.capacity());
+  assertContentEquals(buf,str.toCharArray(),0,str.length());
+  assertSame(ret,buf);
+}

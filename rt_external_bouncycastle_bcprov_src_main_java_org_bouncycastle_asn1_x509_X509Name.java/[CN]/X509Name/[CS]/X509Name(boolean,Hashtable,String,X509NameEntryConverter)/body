@@ -1,0 +1,40 @@
+{
+  this.converter=converter;
+  X509NameTokenizer nTok=new X509NameTokenizer(dirName);
+  while (nTok.hasMoreTokens()) {
+    String token=nTok.nextToken();
+    if (token.indexOf('+') > 0) {
+      X509NameTokenizer pTok=new X509NameTokenizer(token,'+');
+      addEntry(lookUp,pTok.nextToken(),FALSE);
+      while (pTok.hasMoreTokens()) {
+        addEntry(lookUp,pTok.nextToken(),TRUE);
+      }
+    }
+ else {
+      addEntry(lookUp,token,FALSE);
+    }
+  }
+  if (reverse) {
+    Vector o=new Vector();
+    Vector v=new Vector();
+    Vector a=new Vector();
+    int count=1;
+    for (int i=0; i < this.ordering.size(); i++) {
+      if (((Boolean)this.added.elementAt(i)).booleanValue()) {
+        o.insertElementAt(this.ordering.elementAt(i),count);
+        v.insertElementAt(this.values.elementAt(i),count);
+        a.insertElementAt(this.added.elementAt(i),count);
+        count++;
+      }
+ else {
+        o.insertElementAt(this.ordering.elementAt(i),0);
+        v.insertElementAt(this.values.elementAt(i),0);
+        a.insertElementAt(this.added.elementAt(i),0);
+        count=1;
+      }
+    }
+    this.ordering=o;
+    this.values=v;
+    this.added=a;
+  }
+}

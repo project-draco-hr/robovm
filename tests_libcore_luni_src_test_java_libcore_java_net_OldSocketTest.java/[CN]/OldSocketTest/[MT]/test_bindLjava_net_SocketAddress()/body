@@ -5,22 +5,19 @@ class mySocketAddress extends SocketAddress {
   }
   Socket theSocket=new Socket();
   try {
-    theSocket.bind(new InetSocketAddress(InetAddress.getByAddress(Support_Configuration.nonLocalAddressBytes),Support_PortManager.getNextPort()));
+    theSocket.bind(new InetSocketAddress(InetAddress.getByAddress(Support_Configuration.nonLocalAddressBytes),80));
     fail("No exception when binding to bad address:" + theSocket.getLocalSocketAddress().toString());
   }
  catch (  IOException ex) {
   }
   theSocket.close();
   theSocket=new Socket();
-  int portNumber=Support_PortManager.getNextPort();
-  theSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(),portNumber));
-  assertTrue("Local address not correct after bind:" + theSocket.getLocalSocketAddress().toString() + " Expected: "+ (new InetSocketAddress(InetAddress.getLocalHost(),portNumber)).toString(),theSocket.getLocalSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),portNumber)));
-  InetSocketAddress theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
-  ServerSocket serverSocket=new ServerSocket();
-  serverSocket.bind(theAddress);
-  theSocket.connect(theAddress);
+  theSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(),0));
+  assertEquals(new InetSocketAddress(InetAddress.getLocalHost(),theSocket.getLocalPort()),theSocket.getLocalSocketAddress());
+  ServerSocket serverSocket=new ServerSocket(0,5);
+  theSocket.connect(serverSocket.getLocalSocketAddress());
   Socket servSock=serverSocket.accept();
-  assertTrue("Returned Remote address from server connected to does not match expected local address:" + servSock.getRemoteSocketAddress().toString() + " Expected: "+ (new InetSocketAddress(InetAddress.getLocalHost(),portNumber)).toString(),servSock.getRemoteSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),portNumber)));
+  assertEquals(new InetSocketAddress(InetAddress.getLocalHost(),theSocket.getLocalPort()),servSock.getRemoteSocketAddress());
   theSocket.close();
   servSock.close();
   serverSocket.close();
@@ -31,9 +28,8 @@ class mySocketAddress extends SocketAddress {
   theSocket=new Socket();
   Socket theSocket2=new Socket();
   try {
-    theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
-    theSocket.bind(theAddress);
-    theSocket2.bind(theAddress);
+    theSocket.bind(null);
+    theSocket2.bind(theSocket.getLocalSocketAddress());
     fail("No exception binding to address that is not available");
   }
  catch (  IOException ex) {

@@ -18,13 +18,32 @@
   if (input.isEmpty()) {
     return new String[]{""};
   }
-  ArrayList<String> list=new ArrayList<String>();
-  int maxSize=limit <= 0 ? Integer.MAX_VALUE : limit;
+  int separatorCount=0;
   int begin=0;
   int end;
-  while ((end=input.indexOf(ch,begin)) != -1 && list.size() + 1 < maxSize) {
-    list.add(input.substring(begin,end));
+  while (separatorCount + 1 != limit && (end=input.indexOf(ch,begin)) != -1) {
+    ++separatorCount;
     begin=end + 1;
   }
-  return finishSplit(list,input,begin,maxSize,limit);
+  int lastPartEnd=input.length();
+  if (limit == 0 && begin == lastPartEnd) {
+    if (separatorCount == lastPartEnd) {
+      return EmptyArray.STRING;
+    }
+    do {
+      --begin;
+    }
+ while (input.charAt(begin - 1) == ch);
+    separatorCount-=input.length() - begin;
+    lastPartEnd=begin;
+  }
+  String[] result=new String[separatorCount + 1];
+  begin=0;
+  for (int i=0; i != separatorCount; ++i) {
+    end=input.indexOf(ch,begin);
+    result[i]=input.substring(begin,end);
+    begin=end + 1;
+  }
+  result[separatorCount]=input.substring(begin,lastPartEnd);
+  return result;
 }

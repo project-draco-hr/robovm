@@ -1,0 +1,62 @@
+{
+  if (key == null) {
+    throw new InvalidKeySpecException("key == null");
+  }
+  if (keySpec == null) {
+    throw new InvalidKeySpecException("keySpec == null");
+  }
+  if (!"DSA".equals(key.getAlgorithm())) {
+    throw new InvalidKeySpecException("Key must be a DSA key");
+  }
+  if (key instanceof DSAPublicKey && DSAPublicKeySpec.class.isAssignableFrom(keySpec)) {
+    DSAPublicKey dsaKey=(DSAPublicKey)key;
+    DSAParams params=dsaKey.getParams();
+    return (T)new DSAPublicKeySpec(dsaKey.getY(),params.getP(),params.getQ(),params.getG());
+  }
+ else   if (key instanceof PublicKey && DSAPublicKeySpec.class.isAssignableFrom(keySpec)) {
+    final byte[] encoded=key.getEncoded();
+    if (!"X.509".equals(key.getFormat()) || encoded == null) {
+      throw new InvalidKeySpecException("Not a valid X.509 encoding");
+    }
+    DSAPublicKey dsaKey=(DSAPublicKey)engineGeneratePublic(new X509EncodedKeySpec(encoded));
+    DSAParams params=dsaKey.getParams();
+    return (T)new DSAPublicKeySpec(dsaKey.getY(),params.getP(),params.getQ(),params.getG());
+  }
+ else   if (key instanceof DSAPrivateKey && DSAPrivateKeySpec.class.isAssignableFrom(keySpec)) {
+    DSAPrivateKey dsaKey=(DSAPrivateKey)key;
+    DSAParams params=dsaKey.getParams();
+    return (T)new DSAPrivateKeySpec(dsaKey.getX(),params.getP(),params.getQ(),params.getG());
+  }
+ else   if (key instanceof PrivateKey && DSAPrivateKeySpec.class.isAssignableFrom(keySpec)) {
+    final byte[] encoded=key.getEncoded();
+    if (!"PKCS#8".equals(key.getFormat()) || encoded == null) {
+      throw new InvalidKeySpecException("Not a valid PKCS#8 encoding");
+    }
+    DSAPrivateKey dsaKey=(DSAPrivateKey)engineGeneratePrivate(new PKCS8EncodedKeySpec(encoded));
+    DSAParams params=dsaKey.getParams();
+    return (T)new DSAPrivateKeySpec(dsaKey.getX(),params.getP(),params.getQ(),params.getG());
+  }
+ else   if (key instanceof PrivateKey && PKCS8EncodedKeySpec.class.isAssignableFrom(keySpec)) {
+    final byte[] encoded=key.getEncoded();
+    if (!"PKCS#8".equals(key.getFormat())) {
+      throw new InvalidKeySpecException("Encoding type must be PKCS#8; was " + key.getFormat());
+    }
+ else     if (encoded == null) {
+      throw new InvalidKeySpecException("Key is not encodable");
+    }
+    return (T)new PKCS8EncodedKeySpec(encoded);
+  }
+ else   if (key instanceof PublicKey && X509EncodedKeySpec.class.isAssignableFrom(keySpec)) {
+    final byte[] encoded=key.getEncoded();
+    if (!"X.509".equals(key.getFormat())) {
+      throw new InvalidKeySpecException("Encoding type must be X.509; was " + key.getFormat());
+    }
+ else     if (encoded == null) {
+      throw new InvalidKeySpecException("Key is not encodable");
+    }
+    return (T)new X509EncodedKeySpec(encoded);
+  }
+ else {
+    throw new InvalidKeySpecException("Unsupported key type and key spec combination; key=" + key.getClass().getName() + ", keySpec="+ keySpec.getName());
+  }
+}

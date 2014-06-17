@@ -1,0 +1,22 @@
+{
+  try {
+    decoder.decode(null);
+    fail("should throw null pointer exception");
+  }
+ catch (  NullPointerException e) {
+  }
+  CharBuffer out=decoder.decode(ByteBuffer.allocate(0));
+  assertCharBufferValue("",out);
+  ByteBuffer in=getByteBuffer();
+  out=decoder.decode(in);
+  assertEquals(0,out.position());
+  assertEquals(getString().length(),out.limit());
+  assertEquals(getString().length(),out.remaining());
+  assertCharBufferValue(getString(),out);
+  in=getByteBuffer().asReadOnlyBuffer();
+  out=decoder.decode(in);
+  assertEquals(out.position(),0);
+  assertEquals(out.limit(),getString().length());
+  assertEquals(out.remaining(),getString().length());
+  assertCharBufferValue(getString(),out);
+}

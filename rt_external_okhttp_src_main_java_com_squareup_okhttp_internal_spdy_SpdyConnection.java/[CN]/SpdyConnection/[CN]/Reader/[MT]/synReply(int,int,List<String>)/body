@@ -1,0 +1,11 @@
+{
+  SpdyStream replyStream=getStream(streamId);
+  if (replyStream == null) {
+    writeSynResetLater(streamId,SpdyStream.RST_INVALID_STREAM);
+    return;
+  }
+  replyStream.receiveReply(nameValueBlock);
+  if ((flags & SpdyConnection.FLAG_FIN) != 0) {
+    replyStream.receiveFin();
+  }
+}

@@ -1,0 +1,50 @@
+{
+  WorkQueue w=null;
+  if (wt != null && (w=wt.workQueue) != null) {
+    int ps;
+    w.qlock=-1;
+    long ns=w.nsteals, sc;
+    do {
+    }
+ while (!U.compareAndSwapLong(this,STEALCOUNT,sc=stealCount,sc + ns));
+    if (((ps=plock) & PL_LOCK) != 0 || !U.compareAndSwapInt(this,PLOCK,ps,ps+=PL_LOCK))     ps=acquirePlock();
+    int nps=(ps & SHUTDOWN) | ((ps + PL_LOCK) & ~SHUTDOWN);
+    try {
+      int idx=w.poolIndex;
+      WorkQueue[] ws=workQueues;
+      if (ws != null && idx >= 0 && idx < ws.length && ws[idx] == w)       ws[idx]=null;
+    }
+  finally {
+      if (!U.compareAndSwapInt(this,PLOCK,ps,nps))       releasePlock(nps);
+    }
+  }
+  long c;
+  do {
+  }
+ while (!U.compareAndSwapLong(this,CTL,c=ctl,(((c - AC_UNIT) & AC_MASK) | ((c - TC_UNIT) & TC_MASK) | (c & ~(AC_MASK | TC_MASK)))));
+  if (!tryTerminate(false,false) && w != null && w.array != null) {
+    w.cancelAll();
+    WorkQueue[] ws;
+    WorkQueue v;
+    Thread p;
+    int u, i, e;
+    while ((u=(int)((c=ctl) >>> 32)) < 0 && (e=(int)c) >= 0) {
+      if (e > 0) {
+        if ((ws=workQueues) == null || (i=e & SMASK) >= ws.length || (v=ws[i]) != null)         break;
+        long nc=(((long)(v.nextWait & E_MASK)) | ((long)(u + UAC_UNIT) << 32));
+        if (v.eventCount != (e | INT_SIGN))         break;
+        if (U.compareAndSwapLong(this,CTL,c,nc)) {
+          v.eventCount=(e + E_SEQ) & E_MASK;
+          if ((p=v.parker) != null)           U.unpark(p);
+          break;
+        }
+      }
+ else {
+        if ((short)u < 0)         tryAddWorker();
+        break;
+      }
+    }
+  }
+  if (ex == null)   ForkJoinTask.helpExpungeStaleExceptions();
+ else   ForkJoinTask.rethrow(ex);
+}

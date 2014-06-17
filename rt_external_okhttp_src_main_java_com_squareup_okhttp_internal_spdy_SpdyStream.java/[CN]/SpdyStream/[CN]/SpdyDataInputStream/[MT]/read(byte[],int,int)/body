@@ -1,0 +1,36 @@
+{
+synchronized (SpdyStream.this) {
+    checkOffsetAndCount(b.length,offset,count);
+    waitUntilReadable();
+    checkNotClosed();
+    if (pos == -1) {
+      return -1;
+    }
+    int copied=0;
+    if (limit <= pos) {
+      int bytesToCopy=Math.min(count,buffer.length - pos);
+      System.arraycopy(buffer,pos,b,offset,bytesToCopy);
+      pos+=bytesToCopy;
+      copied+=bytesToCopy;
+      if (pos == buffer.length) {
+        pos=0;
+      }
+    }
+    if (copied < count) {
+      int bytesToCopy=Math.min(limit - pos,count - copied);
+      System.arraycopy(buffer,pos,b,offset + copied,bytesToCopy);
+      pos+=bytesToCopy;
+      copied+=bytesToCopy;
+    }
+    unacknowledgedBytes+=copied;
+    if (unacknowledgedBytes >= WINDOW_UPDATE_THRESHOLD) {
+      connection.writeWindowUpdateLater(id,unacknowledgedBytes);
+      unacknowledgedBytes=0;
+    }
+    if (pos == limit) {
+      pos=-1;
+      limit=0;
+    }
+    return copied;
+  }
+}

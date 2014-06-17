@@ -1,0 +1,72 @@
+{
+  StringBuffer buf=new StringBuffer();
+  String nl=System.getProperty("line.separator");
+  buf.append("              Version: ").append(this.getVersion()).append(nl);
+  buf.append("             IssuerDN: ").append(this.getIssuerDN()).append(nl);
+  buf.append("          This update: ").append(this.getThisUpdate()).append(nl);
+  buf.append("          Next update: ").append(this.getNextUpdate()).append(nl);
+  buf.append("  Signature Algorithm: ").append(this.getSigAlgName()).append(nl);
+  byte[] sig=this.getSignature();
+  buf.append("            Signature: ").append(new String(Hex.encode(sig,0,20))).append(nl);
+  for (int i=20; i < sig.length; i+=20) {
+    if (i < sig.length - 20) {
+      buf.append("                       ").append(new String(Hex.encode(sig,i,20))).append(nl);
+    }
+ else {
+      buf.append("                       ").append(new String(Hex.encode(sig,i,sig.length - i))).append(nl);
+    }
+  }
+  Extensions extensions=c.getTBSCertList().getExtensions();
+  if (extensions != null) {
+    Enumeration e=extensions.oids();
+    if (e.hasMoreElements()) {
+      buf.append("           Extensions: ").append(nl);
+    }
+    while (e.hasMoreElements()) {
+      ASN1ObjectIdentifier oid=(ASN1ObjectIdentifier)e.nextElement();
+      Extension ext=extensions.getExtension(oid);
+      if (ext.getExtnValue() != null) {
+        byte[] octs=ext.getExtnValue().getOctets();
+        ASN1InputStream dIn=new ASN1InputStream(octs);
+        buf.append("                       critical(").append(ext.isCritical()).append(") ");
+        try {
+          if (oid.equals(Extension.cRLNumber)) {
+            buf.append(new CRLNumber(ASN1Integer.getInstance(dIn.readObject()).getPositiveValue())).append(nl);
+          }
+ else           if (oid.equals(Extension.deltaCRLIndicator)) {
+            buf.append("Base CRL: " + new CRLNumber(ASN1Integer.getInstance(dIn.readObject()).getPositiveValue())).append(nl);
+          }
+ else           if (oid.equals(Extension.issuingDistributionPoint)) {
+            buf.append(IssuingDistributionPoint.getInstance(dIn.readObject())).append(nl);
+          }
+ else           if (oid.equals(Extension.cRLDistributionPoints)) {
+            buf.append(CRLDistPoint.getInstance(dIn.readObject())).append(nl);
+          }
+ else           if (oid.equals(Extension.freshestCRL)) {
+            buf.append(CRLDistPoint.getInstance(dIn.readObject())).append(nl);
+          }
+ else {
+            buf.append(oid.getId());
+            buf.append(" value = ").append(ASN1Dump.dumpAsString(dIn.readObject())).append(nl);
+          }
+        }
+ catch (        Exception ex) {
+          buf.append(oid.getId());
+          buf.append(" value = ").append("*****").append(nl);
+        }
+      }
+ else {
+        buf.append(nl);
+      }
+    }
+  }
+  Set set=getRevokedCertificates();
+  if (set != null) {
+    Iterator it=set.iterator();
+    while (it.hasNext()) {
+      buf.append(it.next());
+      buf.append(nl);
+    }
+  }
+  return buf.toString();
+}

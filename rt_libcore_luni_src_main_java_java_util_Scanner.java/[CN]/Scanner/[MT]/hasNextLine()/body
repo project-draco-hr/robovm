@@ -1,26 +1,6 @@
 {
-  checkClosed();
-  matcher.usePattern(LINE_PATTERN);
-  matcher.region(findStartIndex,bufferLength);
-  boolean hasNextLine=false;
-  while (true) {
-    if (matcher.find()) {
-      if (inputExhausted || matcher.end() != bufferLength) {
-        matchSuccessful=true;
-        hasNextLine=true;
-        break;
-      }
-    }
- else {
-      if (inputExhausted) {
-        matchSuccessful=false;
-        break;
-      }
-    }
-    if (!inputExhausted) {
-      readMore();
-      resetMatcher();
-    }
-  }
-  return hasNextLine;
+  saveCurrentStatus();
+  String result=findWithinHorizon(LINE_PATTERN,0);
+  recoverPreviousStatus();
+  return result != null;
 }

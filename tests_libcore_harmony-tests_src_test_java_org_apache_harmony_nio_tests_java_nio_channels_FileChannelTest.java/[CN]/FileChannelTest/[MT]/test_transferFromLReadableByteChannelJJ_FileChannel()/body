@@ -1,0 +1,23 @@
+{
+  writeDataToFile(fileOfReadOnlyFileChannel);
+  writeDataToFile(fileOfWriteOnlyFileChannel);
+  final int READONLYFILECHANNELPOSITION=2;
+  final int WRITEONLYFILECHANNELPOSITION=4;
+  readOnlyFileChannel.position(READONLYFILECHANNELPOSITION);
+  writeOnlyFileChannel.position(WRITEONLYFILECHANNELPOSITION);
+  final int POSITION=3;
+  final int LENGTH=5;
+  long result=writeOnlyFileChannel.transferFrom(readOnlyFileChannel,POSITION,LENGTH);
+  assertEquals(LENGTH,result);
+  assertEquals(WRITEONLYFILECHANNELPOSITION,writeOnlyFileChannel.position());
+  assertEquals(READONLYFILECHANNELPOSITION + LENGTH,readOnlyFileChannel.position());
+  writeOnlyFileChannel.close();
+  final int EXPECTED_LENGTH=POSITION + LENGTH;
+  fis=new FileInputStream(fileOfWriteOnlyFileChannel);
+  byte[] resultContent=new byte[EXPECTED_LENGTH];
+  fis.read(resultContent);
+  byte[] expectedContent=new byte[EXPECTED_LENGTH];
+  System.arraycopy(CONTENT_AS_BYTES,0,expectedContent,0,POSITION);
+  System.arraycopy(CONTENT_AS_BYTES,READONLYFILECHANNELPOSITION,expectedContent,POSITION,LENGTH);
+  assertTrue(Arrays.equals(expectedContent,resultContent));
+}

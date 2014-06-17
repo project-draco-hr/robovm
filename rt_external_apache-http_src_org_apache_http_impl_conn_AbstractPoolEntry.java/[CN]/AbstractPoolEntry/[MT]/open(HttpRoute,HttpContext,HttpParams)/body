@@ -1,0 +1,24 @@
+{
+  if (route == null) {
+    throw new IllegalArgumentException("Route must not be null.");
+  }
+  if (params == null) {
+    throw new IllegalArgumentException("Parameters must not be null.");
+  }
+  if ((this.tracker != null) && this.tracker.isConnected()) {
+    throw new IllegalStateException("Connection already open.");
+  }
+  this.tracker=new RouteTracker(route);
+  final HttpHost proxy=route.getProxyHost();
+  connOperator.openConnection(this.connection,(proxy != null) ? proxy : route.getTargetHost(),route.getLocalAddress(),context,params);
+  RouteTracker localTracker=tracker;
+  if (localTracker == null) {
+    throw new IOException("Request aborted");
+  }
+  if (proxy == null) {
+    localTracker.connectTarget(this.connection.isSecure());
+  }
+ else {
+    localTracker.connectProxy(proxy,this.connection.isSecure());
+  }
+}

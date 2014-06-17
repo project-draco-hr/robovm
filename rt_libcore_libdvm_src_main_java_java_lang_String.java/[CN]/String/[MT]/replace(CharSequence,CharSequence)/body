@@ -1,0 +1,36 @@
+{
+  if (target == null) {
+    throw new NullPointerException("target == null");
+  }
+  if (replacement == null) {
+    throw new NullPointerException("replacement == null");
+  }
+  String targetString=target.toString();
+  int matchStart=indexOf(targetString,0);
+  if (matchStart == -1) {
+    return this;
+  }
+  String replacementString=replacement.toString();
+  int targetLength=targetString.length();
+  if (targetLength == 0) {
+    int resultLength=count + (count + 1) * replacementString.length();
+    StringBuilder result=new StringBuilder(resultLength);
+    result.append(replacementString);
+    int end=offset + count;
+    for (int i=offset; i != end; ++i) {
+      result.append(value[i]);
+      result.append(replacementString);
+    }
+    return result.toString();
+  }
+  StringBuilder result=new StringBuilder(count);
+  int searchStart=0;
+  do {
+    result.append(value,offset + searchStart,matchStart - searchStart);
+    result.append(replacementString);
+    searchStart=matchStart + targetLength;
+  }
+ while ((matchStart=indexOf(targetString,searchStart)) != -1);
+  result.append(value,offset + searchStart,count - searchStart);
+  return result.toString();
+}

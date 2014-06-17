@@ -1,0 +1,36 @@
+{
+  String name=method.getName();
+  Class[] params=method.getParameterTypes();
+  if (params.length == 0) {
+    if ("annotationType".equals(name)) {
+      return klazz;
+    }
+ else     if ("toString".equals(name)) {
+      return toString();
+    }
+ else     if ("hashCode".equals(name)) {
+      return hashCode();
+    }
+    AnnotationMember element=null;
+    for (    AnnotationMember el : elements) {
+      if (name.equals(el.name)) {
+        element=el;
+        break;
+      }
+    }
+    if (element == null || !method.equals(element.definingMethod)) {
+      throw new IllegalArgumentException(method.toString());
+    }
+ else {
+      Object value=element.validateValue();
+      if (value == null) {
+        throw new IncompleteAnnotationException(klazz,name);
+      }
+      return value;
+    }
+  }
+ else   if (params.length == 1 && params[0] == Object.class && "equals".equals(name)) {
+    return Boolean.valueOf(equals(args[0]));
+  }
+  throw new IllegalArgumentException("Invalid method for annotation type: " + method);
+}

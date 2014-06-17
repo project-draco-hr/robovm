@@ -1,0 +1,17 @@
+{
+  this.writeDataToFile(fileOfReadWriteFileChannel);
+  MappedByteBuffer mapped=readWriteFileChannel.map(MapMode.PRIVATE,0,CONTENT_LENGTH);
+  assertEquals(CONTENT_LENGTH,mapped.limit());
+  ByteBuffer returnByPut=mapped.put(TEST_BYTES);
+  assertSame(returnByPut,mapped);
+  ByteBuffer checkBuffer=ByteBuffer.allocate(CONTENT_LENGTH);
+  mapped.force();
+  readWriteFileChannel.read(checkBuffer);
+  assertEquals(CONTENT,new String(checkBuffer.array(),"iso8859-1"));
+  try {
+    mapped.put(("test" + CONTENT).getBytes("iso8859-1"));
+    fail("should throw BufferOverflowException.");
+  }
+ catch (  BufferOverflowException ex) {
+  }
+}

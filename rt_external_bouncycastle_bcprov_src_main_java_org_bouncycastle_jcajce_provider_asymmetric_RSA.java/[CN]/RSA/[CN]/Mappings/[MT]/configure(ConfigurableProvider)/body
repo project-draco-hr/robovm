@@ -1,0 +1,24 @@
+{
+  provider.addAlgorithm("AlgorithmParameters.OAEP",PREFIX + "AlgorithmParametersSpi$OAEP");
+  provider.addAlgorithm("Cipher.RSA",PREFIX + "CipherSpi$NoPadding");
+  provider.addAlgorithm("Alg.Alias.Cipher.RSA/RAW","RSA");
+  provider.addAlgorithm("Alg.Alias.Cipher.RSA//RAW","RSA");
+  provider.addAlgorithm("Alg.Alias.Cipher.RSA//NOPADDING","RSA");
+  provider.addAlgorithm("KeyFactory.RSA",PREFIX + "KeyFactorySpi");
+  provider.addAlgorithm("KeyPairGenerator.RSA",PREFIX + "KeyPairGeneratorSpi");
+  AsymmetricKeyInfoConverter keyFact=new KeyFactorySpi();
+  registerOid(provider,PKCSObjectIdentifiers.rsaEncryption,"RSA",keyFact);
+  registerOid(provider,X509ObjectIdentifiers.id_ea_rsa,"RSA",keyFact);
+  registerOid(provider,PKCSObjectIdentifiers.id_RSAES_OAEP,"RSA",keyFact);
+  if (provider.hasAlgorithm("MessageDigest","MD5")) {
+    addDigestSignature(provider,"MD5",PREFIX + "DigestSignatureSpi$MD5",PKCSObjectIdentifiers.md5WithRSAEncryption);
+  }
+  if (provider.hasAlgorithm("MessageDigest","SHA1")) {
+    addDigestSignature(provider,"SHA1",PREFIX + "DigestSignatureSpi$SHA1",PKCSObjectIdentifiers.sha1WithRSAEncryption);
+    provider.addAlgorithm("Alg.Alias.Signature." + OIWObjectIdentifiers.sha1WithRSA,"SHA1WITHRSA");
+    provider.addAlgorithm("Alg.Alias.Signature.OID." + OIWObjectIdentifiers.sha1WithRSA,"SHA1WITHRSA");
+  }
+  addDigestSignature(provider,"SHA256",PREFIX + "DigestSignatureSpi$SHA256",PKCSObjectIdentifiers.sha256WithRSAEncryption);
+  addDigestSignature(provider,"SHA384",PREFIX + "DigestSignatureSpi$SHA384",PKCSObjectIdentifiers.sha384WithRSAEncryption);
+  addDigestSignature(provider,"SHA512",PREFIX + "DigestSignatureSpi$SHA512",PKCSObjectIdentifiers.sha512WithRSAEncryption);
+}

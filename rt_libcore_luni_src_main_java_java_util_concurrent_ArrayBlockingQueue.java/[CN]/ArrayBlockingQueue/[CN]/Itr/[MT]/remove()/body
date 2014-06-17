@@ -2,16 +2,19 @@
   final ReentrantLock lock=ArrayBlockingQueue.this.lock;
   lock.lock();
   try {
-    int i=lastRet;
-    if (i == -1)     throw new IllegalStateException();
-    lastRet=-1;
-    E x=lastItem;
-    lastItem=null;
-    if (x != null && x == items[i]) {
-      boolean removingHead=(i == takeIndex);
-      removeAt(i);
-      if (!removingHead)       nextIndex=dec(nextIndex);
+    if (!isDetached())     incorporateDequeues();
+    final int lastRet=this.lastRet;
+    this.lastRet=NONE;
+    if (lastRet >= 0) {
+      if (!isDetached())       removeAt(lastRet);
+ else {
+        final E lastItem=this.lastItem;
+        this.lastItem=null;
+        if (itemAt(lastRet) == lastItem)         removeAt(lastRet);
+      }
     }
+ else     if (lastRet == NONE)     throw new IllegalStateException();
+    if (cursor < 0 && nextIndex < 0)     detach();
   }
   finally {
     lock.unlock();

@@ -1,31 +1,32 @@
 {
+  final Thread self=Thread.currentThread();
+  final UncaughtExceptionHandler original=self.getUncaughtExceptionHandler();
+  final RuntimeException expectedException=new RuntimeException("expected");
+  final TestUncaughtExceptionHandler test=new TestUncaughtExceptionHandler();
+  self.setUncaughtExceptionHandler(test);
   final TestSSLContext c=TestSSLContext.create();
   final SSLSocket client=(SSLSocket)c.clientContext.getSocketFactory().createSocket(c.host,c.port);
   final SSLSocket server=(SSLSocket)c.serverSocket.accept();
-  Thread thread=new Thread(new Runnable(){
-    public void run(){
-      try {
-        server.startHandshake();
-      }
- catch (      RuntimeException e) {
-        throw e;
-      }
-catch (      Exception e) {
-        throw new RuntimeException(e);
-      }
+  ExecutorService executor=Executors.newSingleThreadExecutor();
+  Future<Void> future=executor.submit(new Callable<Void>(){
+    @Override public Void call() throws Exception {
+      server.startHandshake();
+      return null;
     }
   }
 );
-  thread.start();
+  executor.shutdown();
   client.addHandshakeCompletedListener(new HandshakeCompletedListener(){
     public void handshakeCompleted(    HandshakeCompletedEvent event){
-      throw new RuntimeException("RuntimeException from handshakeCompleted");
+      throw expectedException;
     }
   }
 );
   client.startHandshake();
-  thread.join();
+  future.get();
   client.close();
   server.close();
   c.close();
+  assertSame(expectedException,test.actualException);
+  self.setUncaughtExceptionHandler(original);
 }

@@ -1,0 +1,24 @@
+{
+  final String curveName=NativeCrypto.EC_GROUP_get_curve_name(groupCtx);
+  final byte[][] curveParams=NativeCrypto.EC_GROUP_get_curve(groupCtx);
+  final BigInteger p=new BigInteger(curveParams[0]);
+  final BigInteger a=new BigInteger(curveParams[1]);
+  final BigInteger b=new BigInteger(curveParams[2]);
+  final ECField field;
+  final int type=NativeCrypto.get_EC_GROUP_type(groupCtx);
+  if (type == NativeCrypto.EC_CURVE_GFP) {
+    field=new ECFieldFp(p);
+  }
+ else   if (type == NativeCrypto.EC_CURVE_GF2M) {
+    field=new ECFieldF2m(p.bitLength() - 1,p);
+  }
+ else {
+    throw new RuntimeException("unknown curve type " + type);
+  }
+  final EllipticCurve curve=new EllipticCurve(field,a,b);
+  final OpenSSLECPointContext generatorCtx=new OpenSSLECPointContext(this,NativeCrypto.EC_GROUP_get_generator(groupCtx));
+  final ECPoint generator=generatorCtx.getECPoint();
+  final BigInteger order=new BigInteger(NativeCrypto.EC_GROUP_get_order(groupCtx));
+  final BigInteger cofactor=new BigInteger(NativeCrypto.EC_GROUP_get_cofactor(groupCtx));
+  return new ECParameterSpec(curve,generator,order,cofactor.intValue(),curveName);
+}

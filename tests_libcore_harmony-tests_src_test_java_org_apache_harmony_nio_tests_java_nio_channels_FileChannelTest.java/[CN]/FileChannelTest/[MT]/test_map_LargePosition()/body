@@ -1,0 +1,19 @@
+{
+  int[] sizes={4096,65536};
+  final int CONTENT_LEN=10;
+  for (int i=0; i < sizes.length; ++i) {
+    if (i > 0) {
+      fileOfReadOnlyFileChannel=File.createTempFile("File_of_readOnlyFileChannel","tmp");
+      fileOfReadOnlyFileChannel.deleteOnExit();
+      readOnlyFileChannel=new FileInputStream(fileOfReadOnlyFileChannel).getChannel();
+    }
+    writeLargeDataToFile(fileOfReadOnlyFileChannel,sizes[i] + 2 * CONTENT_LEN);
+    MappedByteBuffer mapped=readOnlyFileChannel.map(MapMode.READ_ONLY,sizes[i],CONTENT_LEN);
+    assertEquals("Incorrectly mapped file channel for " + sizes[i] + " position (capacity)",CONTENT_LEN,mapped.capacity());
+    assertEquals("Incorrectly mapped file channel for " + sizes[i] + " position (limit)",CONTENT_LEN,mapped.limit());
+    assertEquals("Incorrectly mapped file channel for " + sizes[i] + " position (position)",0,mapped.position());
+    assertEquals(0,readOnlyFileChannel.position());
+    readOnlyFileChannel.close();
+    fileOfReadOnlyFileChannel.delete();
+  }
+}

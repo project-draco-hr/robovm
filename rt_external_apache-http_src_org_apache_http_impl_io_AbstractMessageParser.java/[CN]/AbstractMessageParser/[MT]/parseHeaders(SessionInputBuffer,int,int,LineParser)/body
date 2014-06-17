@@ -1,0 +1,55 @@
+{
+  if (inbuffer == null) {
+    throw new IllegalArgumentException("Session input buffer may not be null");
+  }
+  if (parser == null)   parser=BasicLineParser.DEFAULT;
+  ArrayList headerLines=new ArrayList();
+  CharArrayBuffer current=null;
+  CharArrayBuffer previous=null;
+  for (; ; ) {
+    if (current == null) {
+      current=new CharArrayBuffer(64);
+    }
+ else {
+      current.clear();
+    }
+    int l=inbuffer.readLine(current);
+    if (l == -1 || current.length() < 1) {
+      break;
+    }
+    if ((current.charAt(0) == ' ' || current.charAt(0) == '\t') && previous != null) {
+      int i=0;
+      while (i < current.length()) {
+        char ch=current.charAt(i);
+        if (ch != ' ' && ch != '\t') {
+          break;
+        }
+        i++;
+      }
+      if (maxLineLen > 0 && previous.length() + 1 + current.length() - i > maxLineLen) {
+        throw new IOException("Maximum line length limit exceeded");
+      }
+      previous.append(' ');
+      previous.append(current,i,current.length() - i);
+    }
+ else {
+      headerLines.add(current);
+      previous=current;
+      current=null;
+    }
+    if (maxHeaderCount > 0 && headerLines.size() >= maxHeaderCount) {
+      throw new IOException("Maximum header count exceeded");
+    }
+  }
+  Header[] headers=new Header[headerLines.size()];
+  for (int i=0; i < headerLines.size(); i++) {
+    CharArrayBuffer buffer=(CharArrayBuffer)headerLines.get(i);
+    try {
+      headers[i]=parser.parseHeader(buffer);
+    }
+ catch (    ParseException ex) {
+      throw new ProtocolException(ex.getMessage());
+    }
+  }
+  return headers;
+}

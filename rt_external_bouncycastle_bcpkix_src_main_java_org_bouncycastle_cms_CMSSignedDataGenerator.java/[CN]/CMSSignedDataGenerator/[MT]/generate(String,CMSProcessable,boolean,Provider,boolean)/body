@@ -1,0 +1,37 @@
+{
+  boolean isCounterSignature=(eContentType == null);
+  final ASN1ObjectIdentifier contentTypeOID=isCounterSignature ? null : new ASN1ObjectIdentifier(eContentType);
+  for (Iterator it=signerInfs.iterator(); it.hasNext(); ) {
+    SignerInf signer=(SignerInf)it.next();
+    try {
+      signerGens.add(signer.toSignerInfoGenerator(rand,sigProvider,addDefaultAttributes));
+    }
+ catch (    OperatorCreationException e) {
+      throw new CMSException("exception creating signerInf",e);
+    }
+catch (    IOException e) {
+      throw new CMSException("exception encoding attributes",e);
+    }
+catch (    CertificateEncodingException e) {
+      throw new CMSException("error creating sid.",e);
+    }
+  }
+  signerInfs.clear();
+  if (content != null) {
+    return generate(new CMSTypedData(){
+      public ASN1ObjectIdentifier getContentType(){
+        return contentTypeOID;
+      }
+      public void write(      OutputStream out) throws IOException, CMSException {
+        content.write(out);
+      }
+      public Object getContent(){
+        return content.getContent();
+      }
+    }
+,encapsulate);
+  }
+ else {
+    return generate(new CMSAbsentContent(contentTypeOID),encapsulate);
+  }
+}

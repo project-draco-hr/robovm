@@ -1,0 +1,26 @@
+{
+  byte[] targetArray=new byte[2];
+  this.channel1.socket().bind(localAddr2);
+  this.channel1.connect(localAddr1);
+  this.channel2.socket().bind(localAddr1);
+  this.channel2.connect(localAddr2);
+  ByteBuffer targetBuf=ByteBuffer.wrap(targetArray);
+  new Thread(){
+    public void run(){
+      try {
+        Thread.sleep(TIME_UNIT);
+        channel1.configureBlocking(false);
+        channel1.close();
+      }
+ catch (      Exception e) {
+      }
+    }
+  }
+.start();
+  try {
+    this.channel1.read(targetBuf);
+    fail("should throw AsynchronousCloseException");
+  }
+ catch (  AsynchronousCloseException e) {
+  }
+}

@@ -1,0 +1,16 @@
+{
+  try {
+    Collection certHldrs=certStore.getMatches(null);
+    List certs=new ArrayList(certHldrs.size());
+    for (Iterator it=certHldrs.iterator(); it.hasNext(); ) {
+      certs.add(new X509V2AttributeCertificate(((X509AttributeCertificateHolder)it.next()).getEncoded()));
+    }
+    return X509Store.getInstance("AttributeCertificate/" + type,new X509CollectionStoreParameters(certs),provider);
+  }
+ catch (  IllegalArgumentException e) {
+    throw new CMSException("can't setup the X509Store",e);
+  }
+catch (  IOException e) {
+    throw new CMSException("can't setup the X509Store",e);
+  }
+}

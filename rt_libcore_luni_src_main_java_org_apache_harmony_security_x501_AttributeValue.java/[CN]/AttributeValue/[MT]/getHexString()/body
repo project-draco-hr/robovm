@@ -1,7 +1,16 @@
 {
   if (hexString == null) {
     if (!wasEncoded) {
-      encoded=isPrintableString(rawString) ? ASN1StringType.PRINTABLESTRING.encode(rawString) : ASN1StringType.UTF8STRING.encode(rawString);
+      if (tag == ASN1StringType.IA5STRING.id) {
+        encoded=ASN1StringType.IA5STRING.encode(rawString);
+      }
+ else       if (tag == ASN1StringType.PRINTABLESTRING.id) {
+        encoded=ASN1StringType.PRINTABLESTRING.encode(rawString);
+      }
+ else {
+        encoded=ASN1StringType.UTF8STRING.encode(rawString);
+      }
+      wasEncoded=true;
     }
     StringBuilder buf=new StringBuilder(encoded.length * 2 + 1);
     buf.append('#');

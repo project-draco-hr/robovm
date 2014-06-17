@@ -1,0 +1,23 @@
+{
+  Map<String,Date> dates=new HashMap<String,Date>();
+  final SimpleDateFormat sdf=new SimpleDateFormat("MMM dd HH:mm:ss yyyy zzz");
+  final InputStream ris=Support_Resources.getStream(name);
+  try {
+    final BufferedReader buf=new BufferedReader(new InputStreamReader(ris));
+    String line;
+    while ((line=buf.readLine()) != null) {
+      int index=line.indexOf('=');
+      String key=line.substring(0,index);
+      final Date value=sdf.parse(line.substring(index + 1));
+      dates.put(key,value);
+    }
+    return dates;
+  }
+  finally {
+    try {
+      ris.close();
+    }
+ catch (    IOException ignored) {
+    }
+  }
+}

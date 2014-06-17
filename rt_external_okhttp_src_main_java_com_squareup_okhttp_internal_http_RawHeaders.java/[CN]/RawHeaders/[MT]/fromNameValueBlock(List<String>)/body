@@ -1,0 +1,34 @@
+{
+  if (nameValueBlock.size() % 2 != 0) {
+    throw new IllegalArgumentException("Unexpected name value block: " + nameValueBlock);
+  }
+  String status=null;
+  String version=null;
+  RawHeaders result=new RawHeaders();
+  for (int i=0; i < nameValueBlock.size(); i+=2) {
+    String name=nameValueBlock.get(i);
+    String values=nameValueBlock.get(i + 1);
+    for (int start=0; start < values.length(); ) {
+      int end=values.indexOf('\0',start);
+      if (end == -1) {
+        end=values.length();
+      }
+      String value=values.substring(start,end);
+      if (":status".equals(name)) {
+        status=value;
+      }
+ else       if (":version".equals(name)) {
+        version=value;
+      }
+ else {
+        result.namesAndValues.add(name);
+        result.namesAndValues.add(value);
+      }
+      start=end + 1;
+    }
+  }
+  if (status == null)   throw new ProtocolException("Expected ':status' header not present");
+  if (version == null)   throw new ProtocolException("Expected ':version' header not present");
+  result.setStatusLine(version + " " + status);
+  return result;
+}

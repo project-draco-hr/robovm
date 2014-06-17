@@ -1,0 +1,23 @@
+{
+  Set<String> names=new HashSet<String>();
+  List<String> result=new ArrayList<String>();
+  for (int i=0; i < namesAndValues.size(); i+=2) {
+    String name=namesAndValues.get(i).toLowerCase(Locale.US);
+    String value=namesAndValues.get(i + 1);
+    if (name.equals("connection") || name.equals("host") || name.equals("keep-alive")|| name.equals("proxy-connection")|| name.equals("transfer-encoding")) {
+      continue;
+    }
+    if (names.add(name)) {
+      result.add(name);
+      result.add(value);
+      continue;
+    }
+    for (int j=0; j < result.size(); j+=2) {
+      if (name.equals(result.get(j))) {
+        result.set(j + 1,result.get(j + 1) + "\0" + value);
+        break;
+      }
+    }
+  }
+  return result;
+}

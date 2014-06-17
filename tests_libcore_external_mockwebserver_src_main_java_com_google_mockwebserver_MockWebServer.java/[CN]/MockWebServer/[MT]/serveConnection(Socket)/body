@@ -1,0 +1,93 @@
+{
+  String name="MockWebServer-" + raw.getRemoteSocketAddress();
+  executor.execute(namedRunnable(name,new Runnable(){
+    int sequenceNumber=0;
+    public void run(){
+      try {
+        processConnection();
+      }
+ catch (      Exception e) {
+        logger.log(Level.WARNING,"MockWebServer connection failed",e);
+      }
+    }
+    public void processConnection() throws Exception {
+      Socket socket;
+      if (sslSocketFactory != null) {
+        if (tunnelProxy) {
+          createTunnel();
+        }
+        final SocketPolicy socketPolicy=dispatcher.peekSocketPolicy();
+        if (socketPolicy == FAIL_HANDSHAKE) {
+          dispatchBookkeepingRequest(sequenceNumber,raw);
+          processHandshakeFailure(raw,sequenceNumber++);
+          return;
+        }
+        socket=sslSocketFactory.createSocket(raw,raw.getInetAddress().getHostAddress(),raw.getPort(),true);
+        ((SSLSocket)socket).setUseClientMode(false);
+        openClientSockets.put(socket,true);
+        openClientSockets.remove(raw);
+      }
+ else {
+        socket=raw;
+      }
+      InputStream in=new BufferedInputStream(socket.getInputStream());
+      OutputStream out=new BufferedOutputStream(socket.getOutputStream());
+      while (processOneRequest(socket,in,out)) {
+      }
+      if (sequenceNumber == 0) {
+        logger.warning("MockWebServer connection didn't make a request");
+      }
+      in.close();
+      out.close();
+      socket.close();
+      openClientSockets.remove(socket);
+    }
+    /** 
+ * Respond to CONNECT requests until a SWITCH_TO_SSL_AT_END response
+ * is dispatched.
+ */
+    private void createTunnel() throws IOException, InterruptedException {
+      while (true) {
+        final SocketPolicy socketPolicy=dispatcher.peekSocketPolicy();
+        if (!processOneRequest(raw,raw.getInputStream(),raw.getOutputStream())) {
+          throw new IllegalStateException("Tunnel without any CONNECT!");
+        }
+        if (socketPolicy == SocketPolicy.UPGRADE_TO_SSL_AT_END) {
+          return;
+        }
+      }
+    }
+    /** 
+ * Reads a request and writes its response. Returns true if a request
+ * was processed.
+ */
+    private boolean processOneRequest(    Socket socket,    InputStream in,    OutputStream out) throws IOException, InterruptedException {
+      RecordedRequest request=readRequest(socket,in,sequenceNumber);
+      if (request == null) {
+        return false;
+      }
+      requestCount.incrementAndGet();
+      requestQueue.add(request);
+      MockResponse response=dispatcher.dispatch(request);
+      if (response.getSocketPolicy() == SocketPolicy.DISCONNECT_AFTER_READING_REQUEST) {
+        logger.info("Received request: " + request + " and disconnected without responding");
+        return false;
+      }
+      writeResponse(out,response);
+      if (response.getSocketPolicy() == SocketPolicy.DISCONNECT_AT_END) {
+        in.close();
+        out.close();
+      }
+ else       if (response.getSocketPolicy() == SocketPolicy.SHUTDOWN_INPUT_AT_END) {
+        socket.shutdownInput();
+      }
+ else       if (response.getSocketPolicy() == SocketPolicy.SHUTDOWN_OUTPUT_AT_END) {
+        socket.shutdownOutput();
+      }
+      logger.info("Received request: " + request + " and responded: "+ response);
+      sequenceNumber++;
+      return true;
+    }
+  }
+));
+}

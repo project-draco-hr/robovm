@@ -1,0 +1,19 @@
+{
+  AttributeTable unsignedAttributeTable=getUnsignedAttributes();
+  if (unsignedAttributeTable == null) {
+    return new SignerInformationStore(new ArrayList(0));
+  }
+  List counterSignatures=new ArrayList();
+  ASN1EncodableVector allCSAttrs=unsignedAttributeTable.getAll(CMSAttributes.counterSignature);
+  for (int i=0; i < allCSAttrs.size(); ++i) {
+    Attribute counterSignatureAttribute=(Attribute)allCSAttrs.get(i);
+    ASN1Set values=counterSignatureAttribute.getAttrValues();
+    if (values.size() < 1) {
+    }
+    for (Enumeration en=values.getObjects(); en.hasMoreElements(); ) {
+      SignerInfo si=SignerInfo.getInstance(en.nextElement());
+      counterSignatures.add(new SignerInformation(si,null,new CMSProcessableByteArray(getSignature()),null));
+    }
+  }
+  return new SignerInformationStore(counterSignatures);
+}

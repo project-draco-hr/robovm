@@ -1,0 +1,11 @@
+{
+  if (certificate instanceof OpenSSLX509Certificate) {
+    OpenSSLX509Certificate osslCert=(OpenSSLX509Certificate)certificate;
+    final long x509RevokedRef=NativeCrypto.X509_CRL_get0_by_cert(mContext,osslCert.getContext());
+    if (x509RevokedRef == 0) {
+      return null;
+    }
+    return new OpenSSLX509CRLEntry(NativeCrypto.X509_REVOKED_dup(x509RevokedRef));
+  }
+  return getRevokedCertificate(certificate.getSerialNumber());
+}

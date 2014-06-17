@@ -1,0 +1,13 @@
+{
+  byte[] encoded=publicKey.getEncoded();
+  Digest digest=AndroidDigestFactory.getSHA1();
+  digest.update(encoded,0,encoded.length);
+  byte[] out=new byte[digest.getDigestSize()];
+  digest.doFinal(out,0);
+  for (  byte[] blacklisted : pubkeyBlacklist) {
+    if (Arrays.equals(blacklisted,Hex.encode(out))) {
+      return true;
+    }
+  }
+  return false;
+}

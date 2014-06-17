@@ -1,0 +1,39 @@
+{
+  HttpRouteDirector rowdy=new BasicRouteDirector();
+  int step;
+  do {
+    HttpRoute fact=managedConn.getRoute();
+    step=rowdy.nextStep(route,fact);
+switch (step) {
+case HttpRouteDirector.CONNECT_TARGET:
+case HttpRouteDirector.CONNECT_PROXY:
+      managedConn.open(route,context,this.params);
+    break;
+case HttpRouteDirector.TUNNEL_TARGET:
+{
+    boolean secure=createTunnelToTarget(route,context);
+    this.log.debug("Tunnel to target created.");
+    managedConn.tunnelTarget(secure,this.params);
+  }
+break;
+case HttpRouteDirector.TUNNEL_PROXY:
+{
+final int hop=fact.getHopCount() - 1;
+boolean secure=createTunnelToProxy(route,hop,context);
+this.log.debug("Tunnel to proxy created.");
+managedConn.tunnelProxy(route.getHopTarget(hop),secure,this.params);
+}
+break;
+case HttpRouteDirector.LAYER_PROTOCOL:
+managedConn.layerProtocol(context,this.params);
+break;
+case HttpRouteDirector.UNREACHABLE:
+throw new IllegalStateException("Unable to establish route." + "\nplanned = " + route + "\ncurrent = "+ fact);
+case HttpRouteDirector.COMPLETE:
+break;
+default :
+throw new IllegalStateException("Unknown step indicator " + step + " from RouteDirector.");
+}
+}
+ while (step > HttpRouteDirector.COMPLETE);
+}

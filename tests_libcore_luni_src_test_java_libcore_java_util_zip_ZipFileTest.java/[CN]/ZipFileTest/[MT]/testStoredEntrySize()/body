@@ -1,0 +1,30 @@
+{
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  ZipOutputStream out=new ZipOutputStream(baos);
+  String name="test_file";
+  int expectedLength=5;
+  ZipEntry outEntry=new ZipEntry(name);
+  byte[] buffer=new byte[expectedLength];
+  outEntry.setMethod(ZipEntry.STORED);
+  CRC32 crc=new CRC32();
+  crc.update(buffer);
+  outEntry.setCrc(crc.getValue());
+  outEntry.setSize(buffer.length);
+  out.putNextEntry(outEntry);
+  out.write(buffer);
+  out.closeEntry();
+  out.close();
+  byte[] outBuffer=baos.toByteArray();
+  File zipFile=createTemporaryZipFile();
+  writeBytes(zipFile,outBuffer);
+  ZipFile zip=new ZipFile(zipFile);
+  ZipEntry ze=zip.getEntry(name);
+  ze.setCompressedSize(expectedLength - 1);
+  InputStream stream=zip.getInputStream(ze);
+  int count=0;
+  int read;
+  while ((read=stream.read(buffer)) != -1) {
+    count+=read;
+  }
+  assertEquals(expectedLength,count);
+}

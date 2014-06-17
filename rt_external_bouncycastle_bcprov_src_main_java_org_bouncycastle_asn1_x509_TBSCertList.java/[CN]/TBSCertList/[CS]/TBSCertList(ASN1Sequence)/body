@@ -1,0 +1,24 @@
+{
+  if (seq.size() < 3 || seq.size() > 7) {
+    throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+  }
+  int seqPos=0;
+  if (seq.getObjectAt(seqPos) instanceof ASN1Integer) {
+    version=ASN1Integer.getInstance(seq.getObjectAt(seqPos++));
+  }
+ else {
+    version=null;
+  }
+  signature=AlgorithmIdentifier.getInstance(seq.getObjectAt(seqPos++));
+  issuer=X500Name.getInstance(seq.getObjectAt(seqPos++));
+  thisUpdate=Time.getInstance(seq.getObjectAt(seqPos++));
+  if (seqPos < seq.size() && (seq.getObjectAt(seqPos) instanceof DERUTCTime || seq.getObjectAt(seqPos) instanceof DERGeneralizedTime || seq.getObjectAt(seqPos) instanceof Time)) {
+    nextUpdate=Time.getInstance(seq.getObjectAt(seqPos++));
+  }
+  if (seqPos < seq.size() && !(seq.getObjectAt(seqPos) instanceof DERTaggedObject)) {
+    revokedCertificates=ASN1Sequence.getInstance(seq.getObjectAt(seqPos++));
+  }
+  if (seqPos < seq.size() && seq.getObjectAt(seqPos) instanceof DERTaggedObject) {
+    crlExtensions=Extensions.getInstance(ASN1Sequence.getInstance((ASN1TaggedObject)seq.getObjectAt(seqPos),true));
+  }
+}

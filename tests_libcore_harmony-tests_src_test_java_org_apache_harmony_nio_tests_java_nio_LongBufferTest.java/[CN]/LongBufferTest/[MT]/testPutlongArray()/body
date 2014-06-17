@@ -1,0 +1,24 @@
+{
+  long array[]=new long[1];
+  buf.clear();
+  for (int i=0; i < buf.capacity(); i++) {
+    assertEquals(buf.position(),i);
+    array[0]=(long)i;
+    LongBuffer ret=buf.put(array);
+    assertEquals(buf.get(i),(long)i);
+    assertSame(ret,buf);
+  }
+  try {
+    buf.put(array);
+    fail("Should throw Exception");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  try {
+    buf.position(buf.limit());
+    buf.put((long[])null);
+    fail("Should throw Exception");
+  }
+ catch (  NullPointerException e) {
+  }
+}

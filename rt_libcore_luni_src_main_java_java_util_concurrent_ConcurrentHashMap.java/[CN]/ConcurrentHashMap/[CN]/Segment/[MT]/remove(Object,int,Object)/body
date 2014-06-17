@@ -1,27 +1,31 @@
 {
-  lock();
+  if (!tryLock())   scanAndLock(key,hash);
+  V oldValue=null;
   try {
-    int c=count - 1;
     HashEntry<K,V>[] tab=table;
-    int index=hash & (tab.length - 1);
-    HashEntry<K,V> first=tab[index];
-    HashEntry<K,V> e=first;
-    while (e != null && (e.hash != hash || !key.equals(e.key)))     e=e.next;
-    V oldValue=null;
-    if (e != null) {
-      V v=e.value;
-      if (value == null || value.equals(v)) {
-        oldValue=v;
-        ++modCount;
-        HashEntry<K,V> newFirst=e.next;
-        for (HashEntry<K,V> p=first; p != e; p=p.next)         newFirst=new HashEntry<K,V>(p.key,p.hash,newFirst,p.value);
-        tab[index]=newFirst;
-        count=c;
+    int index=(tab.length - 1) & hash;
+    HashEntry<K,V> e=entryAt(tab,index);
+    HashEntry<K,V> pred=null;
+    while (e != null) {
+      K k;
+      HashEntry<K,V> next=e.next;
+      if ((k=e.key) == key || (e.hash == hash && key.equals(k))) {
+        V v=e.value;
+        if (value == null || value == v || value.equals(v)) {
+          if (pred == null)           setEntryAt(tab,index,next);
+ else           pred.setNext(next);
+          ++modCount;
+          --count;
+          oldValue=v;
+        }
+        break;
       }
+      pred=e;
+      e=next;
     }
-    return oldValue;
   }
   finally {
     unlock();
   }
+  return oldValue;
 }

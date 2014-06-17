@@ -1,19 +1,15 @@
 {
   if (publicKey == null) {
-    String alg_oid=algorithmID.getAlgorithm();
-    try {
-      String alg=AlgNameMapper.map2AlgName(alg_oid);
-      if (alg == null) {
-        alg=alg_oid;
-      }
-      publicKey=KeyFactory.getInstance(alg).generatePublic(new X509EncodedKeySpec(getEncoded()));
-    }
- catch (    InvalidKeySpecException ignored) {
-    }
-catch (    NoSuchAlgorithmException ignored) {
+    final byte[] encoded=getEncoded();
+    final KeySpec keySpec=new X509EncodedKeySpec(encoded);
+    final String algName=algorithmID.getAlgorithmName();
+    publicKey=generateKeyForAlgorithm(keySpec,algName);
+    final String algOid=algorithmID.getAlgorithm();
+    if (publicKey == null && !algOid.equals(algName)) {
+      publicKey=generateKeyForAlgorithm(keySpec,algOid);
     }
     if (publicKey == null) {
-      publicKey=new X509PublicKey(alg_oid,getEncoded(),subjectPublicKey);
+      publicKey=new X509PublicKey(algOid,encoded,subjectPublicKey);
     }
   }
   return publicKey;

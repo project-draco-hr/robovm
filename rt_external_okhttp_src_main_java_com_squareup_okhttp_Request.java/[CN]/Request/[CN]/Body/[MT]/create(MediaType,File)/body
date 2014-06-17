@@ -1,0 +1,28 @@
+{
+  if (contentType == null)   throw new NullPointerException("contentType == null");
+  if (file == null)   throw new NullPointerException("content == null");
+  return new Body(){
+    @Override public MediaType contentType(){
+      return contentType;
+    }
+    @Override public long contentLength(){
+      return file.length();
+    }
+    @Override public void writeTo(    OutputStream out) throws IOException {
+      long length=contentLength();
+      if (length == 0)       return;
+      InputStream in=null;
+      try {
+        in=new FileInputStream(file);
+        byte[] buffer=new byte[(int)Math.min(8192,length)];
+        for (int c; (c=in.read(buffer)) != -1; ) {
+          out.write(buffer,0,c);
+        }
+      }
+  finally {
+        Util.closeQuietly(in);
+      }
+    }
+  }
+;
+}

@@ -1,0 +1,10 @@
+{
+  byte[] cert1Bytes=getResourceAsBytes(CERT_RSA);
+  byte[] cert1WithTrailing=new byte[cert1Bytes.length * 2];
+  System.arraycopy(cert1Bytes,0,cert1WithTrailing,0,cert1Bytes.length);
+  System.arraycopy(cert1Bytes,0,cert1WithTrailing,cert1Bytes.length,cert1Bytes.length);
+  ByteArrayInputStream bais=new ByteArrayInputStream(cert1WithTrailing);
+  assertEquals(cert1Bytes.length * 2,bais.available());
+  X509Certificate cert1=(X509Certificate)f.generateCertificate(bais);
+  assertEquals(cert1Bytes.length,bais.available());
+}

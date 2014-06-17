@@ -1,0 +1,40 @@
+{
+  if (StandardNames.IS_RI) {
+    return;
+  }
+  final TestSSLContext c=TestSSLContext.create();
+  SSLSocket client=(SSLSocket)c.clientContext.getSocketFactory().createSocket();
+  int sendBufferSize=1024;
+  client.setSendBufferSize(sendBufferSize);
+  sendBufferSize=client.getSendBufferSize();
+  final int recvBufferSize=128;
+  c.serverSocket.setReceiveBufferSize(recvBufferSize);
+  client.connect(new InetSocketAddress(c.host,c.port));
+  final SSLSocket server=(SSLSocket)c.serverSocket.accept();
+  ExecutorService executor=Executors.newSingleThreadExecutor();
+  Future<Void> future=executor.submit(new Callable<Void>(){
+    @Override public Void call() throws Exception {
+      server.startHandshake();
+      return null;
+    }
+  }
+);
+  executor.shutdown();
+  client.startHandshake();
+  String expectedClassName="com.android.org.conscrypt.OpenSSLSocketImpl";
+  Class actualClass=client.getClass();
+  assertEquals(expectedClassName,actualClass.getName());
+  Method setSoWriteTimeout=actualClass.getMethod("setSoWriteTimeout",new Class[]{Integer.TYPE});
+  setSoWriteTimeout.invoke(client,1);
+  try {
+    final int extra=1;
+    client.getOutputStream().write(new byte[sendBufferSize + extra]);
+    fail();
+  }
+ catch (  SocketTimeoutException expected) {
+  }
+  future.get();
+  client.close();
+  server.close();
+  c.close();
+}

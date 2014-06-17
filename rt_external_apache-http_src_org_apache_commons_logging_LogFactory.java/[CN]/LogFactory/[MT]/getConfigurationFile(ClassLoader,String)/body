@@ -1,0 +1,63 @@
+{
+  Properties props=null;
+  double priority=0.0;
+  URL propsUrl=null;
+  try {
+    Enumeration urls=getResources(classLoader,fileName);
+    if (urls == null) {
+      return null;
+    }
+    while (urls.hasMoreElements()) {
+      URL url=(URL)urls.nextElement();
+      Properties newProps=getProperties(url);
+      if (newProps != null) {
+        if (props == null) {
+          propsUrl=url;
+          props=newProps;
+          String priorityStr=props.getProperty(PRIORITY_KEY);
+          priority=0.0;
+          if (priorityStr != null) {
+            priority=Double.parseDouble(priorityStr);
+          }
+          if (isDiagnosticsEnabled()) {
+            logDiagnostic("[LOOKUP] Properties file found at '" + url + "'"+ " with priority "+ priority);
+          }
+        }
+ else {
+          String newPriorityStr=newProps.getProperty(PRIORITY_KEY);
+          double newPriority=0.0;
+          if (newPriorityStr != null) {
+            newPriority=Double.parseDouble(newPriorityStr);
+          }
+          if (newPriority > priority) {
+            if (isDiagnosticsEnabled()) {
+              logDiagnostic("[LOOKUP] Properties file at '" + url + "'"+ " with priority "+ newPriority+ " overrides file at '"+ propsUrl+ "'"+ " with priority "+ priority);
+            }
+            propsUrl=url;
+            props=newProps;
+            priority=newPriority;
+          }
+ else {
+            if (isDiagnosticsEnabled()) {
+              logDiagnostic("[LOOKUP] Properties file at '" + url + "'"+ " with priority "+ newPriority+ " does not override file at '"+ propsUrl+ "'"+ " with priority "+ priority);
+            }
+          }
+        }
+      }
+    }
+  }
+ catch (  SecurityException e) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("SecurityException thrown while trying to find/read config files.");
+    }
+  }
+  if (isDiagnosticsEnabled()) {
+    if (props == null) {
+      logDiagnostic("[LOOKUP] No properties file of name '" + fileName + "' found.");
+    }
+ else {
+      logDiagnostic("[LOOKUP] Properties file of name '" + fileName + "' found at '"+ propsUrl+ '"');
+    }
+  }
+  return props;
+}

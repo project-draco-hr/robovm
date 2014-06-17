@@ -1,0 +1,30 @@
+{
+  long testEngine=NativeCrypto.ENGINE_by_id(TEST_ENGINE_ID);
+  if (testEngine != 0) {
+    NativeCrypto.ENGINE_finish(testEngine);
+    return;
+  }
+  NativeCrypto.ENGINE_load_dynamic();
+  long dynEngine=NativeCrypto.ENGINE_by_id("dynamic");
+  try {
+    ClassLoader loader=NativeCryptoTest.class.getClassLoader();
+    final String libraryPaths;
+    libraryPaths=System.getProperty("java.library.path");
+    assertNotNull(libraryPaths);
+    String[] libraryPathArray=libraryPaths.split(":");
+    for (    String path : libraryPathArray) {
+      assertEquals(1,NativeCrypto.ENGINE_ctrl_cmd_string(dynEngine,"DIR_ADD",path,0));
+    }
+    assertEquals(1,NativeCrypto.ENGINE_ctrl_cmd_string(dynEngine,"LIST_ADD","2",0));
+    assertEquals(1,NativeCrypto.ENGINE_ctrl_cmd_string(dynEngine,"ID",TEST_ENGINE_ID,0));
+    assertEquals(1,NativeCrypto.ENGINE_ctrl_cmd_string(dynEngine,"LOAD",null,0));
+  }
+  finally {
+    NativeCrypto.ENGINE_finish(dynEngine);
+  }
+  testEngine=NativeCrypto.ENGINE_by_id(TEST_ENGINE_ID);
+  if (testEngine == 0) {
+    fail("could not load test engine");
+  }
+  NativeCrypto.ENGINE_finish(testEngine);
+}

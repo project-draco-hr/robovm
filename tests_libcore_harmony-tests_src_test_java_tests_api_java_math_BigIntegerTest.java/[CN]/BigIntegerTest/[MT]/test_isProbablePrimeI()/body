@@ -1,0 +1,39 @@
+{
+  int fails=0;
+  bi=new BigInteger(20,20,rand);
+  if (!bi.isProbablePrime(17)) {
+    fails++;
+  }
+  bi=new BigInteger("4",10);
+  if (bi.isProbablePrime(17)) {
+    fail("isProbablePrime failed for: " + bi);
+  }
+  bi=BigInteger.valueOf(17L * 13L);
+  if (bi.isProbablePrime(17)) {
+    fail("isProbablePrime failed for: " + bi);
+  }
+  for (long a=2; a < 1000; a++) {
+    if (isPrime(a)) {
+      assertTrue("false negative on prime number <1000",BigInteger.valueOf(a).isProbablePrime(5));
+    }
+ else     if (BigInteger.valueOf(a).isProbablePrime(17)) {
+      System.out.println("isProbablePrime failed for: " + a);
+      fails++;
+    }
+  }
+  for (int a=0; a < 1000; a++) {
+    bi=BigInteger.valueOf(rand.nextInt(1000000)).multiply(BigInteger.valueOf(rand.nextInt(1000000)));
+    if (bi.isProbablePrime(17)) {
+      System.out.println("isProbablePrime failed for: " + bi);
+      fails++;
+    }
+  }
+  for (int a=0; a < 200; a++) {
+    bi=new BigInteger(70,rand).multiply(new BigInteger(70,rand));
+    if (bi.isProbablePrime(17)) {
+      System.out.println("isProbablePrime failed for: " + bi);
+      fails++;
+    }
+  }
+  assertTrue("Too many false positives - may indicate a problem",fails <= 1);
+}

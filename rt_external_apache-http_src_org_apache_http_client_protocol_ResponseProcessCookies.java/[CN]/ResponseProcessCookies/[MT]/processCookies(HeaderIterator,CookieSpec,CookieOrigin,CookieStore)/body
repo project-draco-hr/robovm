@@ -1,0 +1,27 @@
+{
+  while (iterator.hasNext()) {
+    Header header=iterator.nextHeader();
+    try {
+      List<Cookie> cookies=cookieSpec.parse(header,cookieOrigin);
+      for (      Cookie cookie : cookies) {
+        try {
+          cookieSpec.validate(cookie,cookieOrigin);
+          cookieStore.addCookie(cookie);
+          if (this.log.isDebugEnabled()) {
+            this.log.debug("Cookie accepted: \"" + cookieToString(cookie) + "\". ");
+          }
+        }
+ catch (        MalformedCookieException ex) {
+          if (this.log.isWarnEnabled()) {
+            this.log.warn("Cookie rejected: \"" + cookieToString(cookie) + "\". "+ ex.getMessage());
+          }
+        }
+      }
+    }
+ catch (    MalformedCookieException ex) {
+      if (this.log.isWarnEnabled()) {
+        this.log.warn("Invalid cookie header: \"" + header + "\". "+ ex.getMessage());
+      }
+    }
+  }
+}

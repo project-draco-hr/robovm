@@ -1,0 +1,80 @@
+{
+  Selector acceptSelector=SelectorProvider.provider().openSelector();
+  assertTrue(acceptSelector.isOpen());
+  MockSelectableChannel msc=new MockSelectableChannel(SelectorProvider.provider());
+  msc.configureBlocking(false);
+  try {
+    msc.register(acceptSelector,SelectionKey.OP_READ,null);
+    fail("Should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    msc.register(null,0,null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  acceptSelector.close();
+  try {
+    msc.register(acceptSelector,SelectionKey.OP_READ,null);
+    fail("Should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    msc.register(null,0,null);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    msc.register(acceptSelector,0,null);
+    fail("Should throw IllegalSelectorException");
+  }
+ catch (  IllegalSelectorException e) {
+  }
+  acceptSelector=SelectorProvider.provider().openSelector();
+  msc.configureBlocking(true);
+  try {
+    msc.register(acceptSelector,SelectionKey.OP_READ,null);
+    fail("Should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    msc.register(null,0,null);
+    fail("Should throw IllegalBlockingModeException");
+  }
+ catch (  IllegalBlockingModeException e) {
+  }
+  acceptSelector.close();
+  try {
+    msc.register(acceptSelector,SelectionKey.OP_READ,null);
+    fail("Should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    msc.register(null,0,null);
+    fail("Should throw IllegalBlockingModeException");
+  }
+ catch (  IllegalBlockingModeException e) {
+  }
+  Object argObj=new Object();
+  SocketChannel sc=SocketChannel.open();
+  sc.configureBlocking(false);
+  try {
+    sc.register(null,SelectionKey.OP_READ,argObj);
+    fail("Should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  msc.close();
+  try {
+    msc.register(acceptSelector,SelectionKey.OP_READ,null);
+    fail("Should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+}

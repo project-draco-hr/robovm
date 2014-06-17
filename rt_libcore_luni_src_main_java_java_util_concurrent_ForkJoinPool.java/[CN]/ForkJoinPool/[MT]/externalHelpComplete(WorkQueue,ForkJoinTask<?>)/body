@@ -1,0 +1,37 @@
+{
+  ForkJoinTask<?>[] a;
+  int m;
+  if (q != null && (a=q.array) != null && (m=(a.length - 1)) >= 0 && root != null && root.status >= 0) {
+    for (; ; ) {
+      int s, u;
+      Object o;
+      CountedCompleter<?> task=null;
+      if ((s=q.top) - q.base > 0) {
+        long j=((m & (s - 1)) << ASHIFT) + ABASE;
+        if ((o=U.getObject(a,j)) != null && (o instanceof CountedCompleter)) {
+          CountedCompleter<?> t=(CountedCompleter<?>)o, r=t;
+          do {
+            if (r == root) {
+              if (U.compareAndSwapInt(q,QLOCK,0,1)) {
+                if (q.array == a && q.top == s && U.compareAndSwapObject(a,j,t,null)) {
+                  q.top=s - 1;
+                  task=t;
+                }
+                q.qlock=0;
+              }
+              break;
+            }
+          }
+ while ((r=r.completer) != null);
+        }
+      }
+      if (task != null)       task.doExec();
+      if (root.status < 0 || (u=(int)(ctl >>> 32)) >= 0 || (u >> UAC_SHIFT) >= 0)       break;
+      if (task == null) {
+        helpSignal(root,q.poolIndex);
+        if (root.status >= 0)         helpComplete(root,SHARED_QUEUE);
+        break;
+      }
+    }
+  }
+}

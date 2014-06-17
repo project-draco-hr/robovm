@@ -1,0 +1,27 @@
+{
+  int hint=q.poolIndex;
+  long c;
+  int e, u, i, n;
+  WorkQueue[] ws;
+  WorkQueue w;
+  Thread p;
+  while ((u=(int)((c=ctl) >>> 32)) < 0) {
+    if ((e=(int)c) > 0) {
+      if ((ws=workQueues) != null && ws.length > (i=e & SMASK) && (w=ws[i]) != null && w.eventCount == (e | INT_SIGN)) {
+        long nc=(((long)(w.nextWait & E_MASK)) | ((long)(u + UAC_UNIT) << 32));
+        if (U.compareAndSwapLong(this,CTL,c,nc)) {
+          w.hint=hint;
+          w.eventCount=(e + E_SEQ) & E_MASK;
+          if ((p=w.parker) != null)           U.unpark(p);
+          break;
+        }
+        if (q.top - q.base <= 0)         break;
+      }
+ else       break;
+    }
+ else {
+      if ((short)u < 0)       tryAddWorker();
+      break;
+    }
+  }
+}

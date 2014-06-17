@@ -3,10 +3,10 @@
     return;
   }
   ROOT_CA=new Builder().aliasPrefix("RootCA").subject("CN=Test Root Certificate Authority").ca(true).build();
-  TestKeyStore intermediateCa=new Builder().aliasPrefix("IntermediateCA").subject("CN=Test Intermediate Certificate Authority").ca(true).signer(ROOT_CA.getPrivateKey("RSA","RSA")).rootCa(ROOT_CA.getRootCertificate("RSA")).build();
-  SERVER=new Builder().aliasPrefix("server").signer(intermediateCa.getPrivateKey("RSA","RSA")).rootCa(intermediateCa.getRootCertificate("RSA")).build();
-  CLIENT=new TestKeyStore(createClient(intermediateCa.keyStore),null,null);
-  CLIENT_CERTIFICATE=new Builder().aliasPrefix("client").subject("emailAddress=test@user").signer(intermediateCa.getPrivateKey("RSA","RSA")).rootCa(intermediateCa.getRootCertificate("RSA")).build();
+  INTERMEDIATE_CA=new Builder().aliasPrefix("IntermediateCA").subject("CN=Test Intermediate Certificate Authority").ca(true).signer(ROOT_CA.getPrivateKey("RSA","RSA")).rootCa(ROOT_CA.getRootCertificate("RSA")).build();
+  SERVER=new Builder().aliasPrefix("server").signer(INTERMEDIATE_CA.getPrivateKey("RSA","RSA")).rootCa(INTERMEDIATE_CA.getRootCertificate("RSA")).build();
+  CLIENT=new TestKeyStore(createClient(INTERMEDIATE_CA.keyStore),null,null);
+  CLIENT_CERTIFICATE=new Builder().aliasPrefix("client").subject("emailAddress=test@user").signer(INTERMEDIATE_CA.getPrivateKey("RSA","RSA")).rootCa(INTERMEDIATE_CA.getRootCertificate("RSA")).build();
   TestKeyStore rootCa2=new Builder().aliasPrefix("RootCA2").subject("CN=Test Root Certificate Authority 2").ca(true).build();
   CLIENT_2=new TestKeyStore(createClient(rootCa2.keyStore),null,null);
 }

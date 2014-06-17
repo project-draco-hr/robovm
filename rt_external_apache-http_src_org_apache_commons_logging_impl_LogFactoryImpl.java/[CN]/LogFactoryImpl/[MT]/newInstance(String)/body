@@ -1,0 +1,32 @@
+{
+  Log instance=null;
+  try {
+    if (logConstructor == null) {
+      instance=discoverLogImplementation(name);
+    }
+ else {
+      Object params[]={name};
+      instance=(Log)logConstructor.newInstance(params);
+    }
+    if (logMethod != null) {
+      Object params[]={this};
+      logMethod.invoke(instance,params);
+    }
+    return (instance);
+  }
+ catch (  LogConfigurationException lce) {
+    throw (LogConfigurationException)lce;
+  }
+catch (  InvocationTargetException e) {
+    Throwable c=e.getTargetException();
+    if (c != null) {
+      throw new LogConfigurationException(c);
+    }
+ else {
+      throw new LogConfigurationException(e);
+    }
+  }
+catch (  Throwable t) {
+    throw new LogConfigurationException(t);
+  }
+}

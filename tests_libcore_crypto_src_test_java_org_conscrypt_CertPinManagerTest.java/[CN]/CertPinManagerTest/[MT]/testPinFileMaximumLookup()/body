@@ -1,0 +1,10 @@
+{
+  String shortEntry="*.google.com=true|" + shortPin;
+  String longEntry="*.clients.google.com=true|" + longPin;
+  String path=writeTmpPinFile(shortEntry + "\n" + longEntry);
+  CertPinManager pf=new CertPinManager(path,new TrustedCertificateStore());
+  assertTrue("short chain long uri failed",pf.chainIsNotPinned("android.clients.google.com",shortChain));
+  assertTrue("long chain short uri failed",pf.chainIsNotPinned("android.google.com",longChain));
+  assertTrue("short chain short uri failed",!pf.chainIsNotPinned("android.google.com",shortChain));
+  assertTrue("long chain long uri failed",!pf.chainIsNotPinned("android.clients.google.com",longChain));
+}

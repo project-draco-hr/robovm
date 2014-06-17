@@ -1,0 +1,18 @@
+{
+  final InputStream ris=Support_Resources.getStream("x509/cert-rsa-pubkey.der");
+  try {
+    final int size=ris.available();
+    final DataInputStream is=new DataInputStream(ris);
+    final byte[] keyBytes=new byte[size];
+    is.readFully(keyBytes);
+    final KeyFactory kf=KeyFactory.getInstance("RSA");
+    return kf.generatePublic(new X509EncodedKeySpec(keyBytes));
+  }
+  finally {
+    try {
+      ris.close();
+    }
+ catch (    IOException ignored) {
+    }
+  }
+}

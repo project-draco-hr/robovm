@@ -1,0 +1,18 @@
+{
+  KeyFactory kf=KeyFactory.getInstance("RSA");
+  RSAPrivateKeySpec keySpec=new RSAPrivateKeySpec(RSA_2048_modulus,RSA_2048_privateExponent);
+  final PrivateKey privKey=kf.generatePrivate(keySpec);
+  Cipher c=Cipher.getInstance("RSA/ECB/NoPadding",provider);
+  c.init(Cipher.ENCRYPT_MODE,privKey);
+  c.update(RSA_Vector1_ZeroPadded_Encrypted);
+  try {
+    c.doFinal(RSA_Vector1_ZeroPadded_Encrypted);
+    fail("Should have error when block size is too big.");
+  }
+ catch (  IllegalBlockSizeException success) {
+    assertFalse(provider,"BC".equals(provider));
+  }
+catch (  ArrayIndexOutOfBoundsException success) {
+    assertEquals("BC",provider);
+  }
+}

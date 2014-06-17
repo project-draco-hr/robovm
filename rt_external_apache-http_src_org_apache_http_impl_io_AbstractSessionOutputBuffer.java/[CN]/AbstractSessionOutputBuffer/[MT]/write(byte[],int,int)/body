@@ -1,0 +1,17 @@
+{
+  if (b == null) {
+    return;
+  }
+  if (len > MAX_CHUNK || len > this.buffer.capacity()) {
+    flushBuffer();
+    this.outstream.write(b,off,len);
+    this.metrics.incrementBytesTransferred(len);
+  }
+ else {
+    int freecapacity=this.buffer.capacity() - this.buffer.length();
+    if (len > freecapacity) {
+      flushBuffer();
+    }
+    this.buffer.append(b,off,len);
+  }
+}

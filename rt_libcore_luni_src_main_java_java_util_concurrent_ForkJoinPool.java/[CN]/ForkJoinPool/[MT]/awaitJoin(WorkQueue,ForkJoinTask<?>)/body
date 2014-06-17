@@ -1,0 +1,39 @@
+{
+  int s=0;
+  if (joiner != null && task != null && (s=task.status) >= 0) {
+    ForkJoinTask<?> prevJoin=joiner.currentJoin;
+    joiner.currentJoin=task;
+    do {
+    }
+ while ((s=task.status) >= 0 && !joiner.isEmpty() && joiner.tryRemoveAndExec(task));
+    if (s >= 0 && (s=task.status) >= 0) {
+      helpSignal(task,joiner.poolIndex);
+      if ((s=task.status) >= 0 && (task instanceof CountedCompleter))       s=helpComplete(task,LIFO_QUEUE);
+    }
+    while (s >= 0 && (s=task.status) >= 0) {
+      if ((!joiner.isEmpty() || (s=tryHelpStealer(joiner,task)) == 0) && (s=task.status) >= 0) {
+        helpSignal(task,joiner.poolIndex);
+        if ((s=task.status) >= 0 && tryCompensate()) {
+          if (task.trySetSignal() && (s=task.status) >= 0) {
+synchronized (task) {
+              if (task.status >= 0) {
+                try {
+                  task.wait();
+                }
+ catch (                InterruptedException ie) {
+                }
+              }
+ else               task.notifyAll();
+            }
+          }
+          long c;
+          do {
+          }
+ while (!U.compareAndSwapLong(this,CTL,c=ctl,c + AC_UNIT));
+        }
+      }
+    }
+    joiner.currentJoin=prevJoin;
+  }
+  return s;
+}

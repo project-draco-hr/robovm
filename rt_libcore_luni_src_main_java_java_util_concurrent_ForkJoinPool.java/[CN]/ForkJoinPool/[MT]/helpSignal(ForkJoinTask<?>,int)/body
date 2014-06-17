@@ -1,0 +1,24 @@
+{
+  WorkQueue[] ws;
+  WorkQueue w;
+  Thread p;
+  long c;
+  int m, u, e, i, s;
+  if (task != null && task.status >= 0 && (u=(int)(ctl >>> 32)) < 0 && (u >> UAC_SHIFT) < 0 && (ws=workQueues) != null && (m=ws.length - 1) >= 0) {
+    outer:     for (int k=origin, j=m; j >= 0; --j) {
+      WorkQueue q=ws[k++ & m];
+      for (int n=m; ; ) {
+        if (task.status < 0)         break outer;
+        if (q == null || ((s=-q.base + q.top) <= n && (n=s) <= 0))         break;
+        if ((u=(int)((c=ctl) >>> 32)) >= 0 || (e=(int)c) <= 0 || m < (i=e & SMASK) || (w=ws[i]) == null)         break outer;
+        long nc=(((long)(w.nextWait & E_MASK)) | ((long)(u + UAC_UNIT) << 32));
+        if (w.eventCount != (e | INT_SIGN))         break outer;
+        if (U.compareAndSwapLong(this,CTL,c,nc)) {
+          w.eventCount=(e + E_SEQ) & E_MASK;
+          if ((p=w.parker) != null)           U.unpark(p);
+          if (--n <= 0)           break;
+        }
+      }
+    }
+  }
+}

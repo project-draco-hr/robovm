@@ -1,0 +1,17 @@
+{
+  if (o == this) {
+    return true;
+  }
+  if (!(o instanceof OpenSSLEngine)) {
+    return false;
+  }
+  OpenSSLEngine other=(OpenSSLEngine)o;
+  if (other.getEngineContext() == ctx) {
+    return true;
+  }
+  final String id=NativeCrypto.ENGINE_get_id(ctx);
+  if (id == null) {
+    return false;
+  }
+  return id.equals(NativeCrypto.ENGINE_get_id(other.getEngineContext()));
+}

@@ -1,0 +1,26 @@
+{
+  File tmpFile=File.createTempFile("TestFileForScanner",".tmp");
+  s=new Scanner(tmpFile);
+  assertNotNull(s);
+  s.close();
+  assertTrue(tmpFile.delete());
+  try {
+    s=new Scanner(tmpFile);
+    fail();
+  }
+ catch (  FileNotFoundException expected) {
+  }
+  tmpFile=File.createTempFile("TestFileForScanner",".tmp");
+  FileOutputStream fos=new FileOutputStream(tmpFile);
+  fos.write("test".getBytes());
+  fos.close();
+  s=new Scanner(tmpFile);
+  s.close();
+  tmpFile.delete();
+  try {
+    s=new Scanner((File)null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+}

@@ -1,7 +1,13 @@
 {
   s.defaultReadObject();
-  for (int i=0; i < segments.length; ++i) {
-    segments[i].setTable(new HashEntry[1]);
+  int cap=MIN_SEGMENT_TABLE_CAPACITY;
+  final Segment<K,V>[] segments=this.segments;
+  for (int k=0; k < segments.length; ++k) {
+    Segment<K,V> seg=segments[k];
+    if (seg != null) {
+      seg.threshold=(int)(cap * seg.loadFactor);
+      seg.table=(HashEntry<K,V>[])new HashEntry<?,?>[cap];
+    }
   }
   for (; ; ) {
     K key=(K)s.readObject();

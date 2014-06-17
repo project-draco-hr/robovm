@@ -1,0 +1,28 @@
+{
+  Selector acceptSelector=SelectorProvider.provider().openSelector();
+  ServerSocketChannel ssc=ServerSocketChannel.open();
+  ssc.configureBlocking(false);
+  acceptSelector.close();
+  assertFalse(acceptSelector.isOpen());
+  try {
+    ssc.register(acceptSelector,SelectionKey.OP_ACCEPT);
+    fail("should throw NullPointerException");
+  }
+ catch (  NullPointerException e) {
+  }
+  assertFalse(ssc.isRegistered());
+  acceptSelector=Selector.open();
+  ssc.configureBlocking(true);
+  try {
+    ssc.register(acceptSelector,SelectionKey.OP_ACCEPT);
+    fail("should throw IllegalBlockingModeException");
+  }
+ catch (  IllegalBlockingModeException e) {
+  }
+  assertFalse(ssc.isRegistered());
+  ssc.configureBlocking(false);
+  SelectionKey acceptKey=ssc.register(acceptSelector,SelectionKey.OP_ACCEPT);
+  assertNotNull(acceptKey);
+  assertTrue(acceptSelector.keys().contains(acceptKey));
+  assertTrue(ssc.isRegistered());
+}

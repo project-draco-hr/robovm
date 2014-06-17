@@ -1,0 +1,15 @@
+{
+  poolLock.lock();
+  try {
+    RouteSpecificPool rospl=getRoutePool(route,true);
+    rospl.dropEntry();
+    if (rospl.isUnused()) {
+      routeToPool.remove(route);
+    }
+    numConnections--;
+    notifyWaitingThread(rospl);
+  }
+  finally {
+    poolLock.unlock();
+  }
+}

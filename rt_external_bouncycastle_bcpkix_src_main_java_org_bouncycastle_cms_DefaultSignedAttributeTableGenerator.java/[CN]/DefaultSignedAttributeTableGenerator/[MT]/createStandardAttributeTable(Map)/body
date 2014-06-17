@@ -1,0 +1,21 @@
+{
+  Hashtable std=(Hashtable)table.clone();
+  if (!std.containsKey(CMSAttributes.contentType)) {
+    ASN1ObjectIdentifier contentType=ASN1ObjectIdentifier.getInstance(parameters.get(CMSAttributeTableGenerator.CONTENT_TYPE));
+    if (contentType != null) {
+      Attribute attr=new Attribute(CMSAttributes.contentType,new DERSet(contentType));
+      std.put(attr.getAttrType(),attr);
+    }
+  }
+  if (!std.containsKey(CMSAttributes.signingTime)) {
+    Date signingTime=new Date();
+    Attribute attr=new Attribute(CMSAttributes.signingTime,new DERSet(new Time(signingTime)));
+    std.put(attr.getAttrType(),attr);
+  }
+  if (!std.containsKey(CMSAttributes.messageDigest)) {
+    byte[] messageDigest=(byte[])parameters.get(CMSAttributeTableGenerator.DIGEST);
+    Attribute attr=new Attribute(CMSAttributes.messageDigest,new DERSet(new DEROctetString(messageDigest)));
+    std.put(attr.getAttrType(),attr);
+  }
+  return std;
+}

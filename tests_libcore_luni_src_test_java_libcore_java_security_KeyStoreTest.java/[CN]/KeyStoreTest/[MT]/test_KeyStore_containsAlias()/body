@@ -2,7 +2,7 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       keyStore.containsAlias(null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    KeyStoreException expected) {
     }
@@ -11,7 +11,7 @@
     keyStore.load(null,null);
     try {
       keyStore.containsAlias(null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
@@ -24,7 +24,12 @@
       assertFalse(keyStore.containsAlias(ALIAS_PRIVATE));
       continue;
     }
-    assertTrue(keyStore.containsAlias(ALIAS_PRIVATE));
+    if (isKeyPasswordSupported(keyStore)) {
+      assertTrue(keyStore.containsAlias(ALIAS_PRIVATE));
+    }
+ else     if (isNullPasswordAllowed(keyStore)) {
+      assertTrue(keyStore.containsAlias(ALIAS_NO_PASSWORD_PRIVATE));
+    }
     assertEquals(isSecretKeyEnabled(keyStore),keyStore.containsAlias(ALIAS_SECRET));
     assertEquals(isCertificateEnabled(keyStore),keyStore.containsAlias(ALIAS_CERTIFICATE));
     assertEquals(!isCaseSensitive(keyStore),keyStore.containsAlias(ALIAS_ALT_CASE_PRIVATE));

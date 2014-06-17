@@ -1,0 +1,54 @@
+{
+  ensureServerClosed();
+  java.nio.ByteBuffer[] writeBufArr=new java.nio.ByteBuffer[1];
+  writeBufArr[0]=java.nio.ByteBuffer.allocate(CAPACITY_NORMAL);
+  this.channel1.configureBlocking(true);
+  try {
+    this.channel1.finishConnect();
+    fail("Should throw NoConnectionPendingException");
+  }
+ catch (  NoConnectionPendingException e) {
+  }
+  try {
+    this.channel1.connect(localAddr1);
+    fail("Should throw ConnectException");
+  }
+ catch (  ConnectException e) {
+  }
+  try {
+    this.channel1.finishConnect();
+    fail("Should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+  assertFalse(this.channel1.isConnected());
+  assertFalse(this.channel1.isConnectionPending());
+  this.channel1=SocketChannel.open();
+  this.channel1.configureBlocking(false);
+  this.channel1.connect(localAddr1);
+  assertFalse(this.channel1.isConnected());
+  ensureServerOpen();
+  try {
+    assertFalse(this.channel1.finishConnect());
+    assertFalse(this.channel1.isBlocking());
+    assertFalse(this.channel1.isConnected());
+    assertTrue(this.channel1.isConnectionPending());
+    assertTrue(this.channel1.isOpen());
+    try {
+      this.channel1.connect(localAddr1);
+      fail("Should throw ConnectionPendingException");
+    }
+ catch (    ConnectionPendingException e) {
+    }
+    this.channel1.configureBlocking(true);
+    try {
+      this.channel1.connect(localAddr1);
+      fail("Should throw ConnectionPendingException");
+    }
+ catch (    ConnectionPendingException e) {
+    }
+    tryFinish();
+  }
+ catch (  ConnectException e) {
+  }
+}

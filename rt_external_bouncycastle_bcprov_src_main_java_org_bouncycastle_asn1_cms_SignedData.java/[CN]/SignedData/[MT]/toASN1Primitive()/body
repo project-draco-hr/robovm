@@ -1,0 +1,24 @@
+{
+  ASN1EncodableVector v=new ASN1EncodableVector();
+  v.add(version);
+  v.add(digestAlgorithms);
+  v.add(contentInfo);
+  if (certificates != null) {
+    if (certsBer) {
+      v.add(new BERTaggedObject(false,0,certificates));
+    }
+ else {
+      v.add(new DERTaggedObject(false,0,certificates));
+    }
+  }
+  if (crls != null) {
+    if (crlsBer) {
+      v.add(new BERTaggedObject(false,1,crls));
+    }
+ else {
+      v.add(new DERTaggedObject(false,1,crls));
+    }
+  }
+  v.add(signerInfos);
+  return new BERSequence(v);
+}

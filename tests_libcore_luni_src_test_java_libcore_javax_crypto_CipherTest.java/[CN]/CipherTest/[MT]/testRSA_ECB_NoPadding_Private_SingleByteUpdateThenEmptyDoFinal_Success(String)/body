@@ -1,0 +1,19 @@
+{
+  KeyFactory kf=KeyFactory.getInstance("RSA");
+  RSAPrivateKeySpec keySpec=new RSAPrivateKeySpec(RSA_2048_modulus,RSA_2048_privateExponent);
+  final PrivateKey privKey=kf.generatePrivate(keySpec);
+  Cipher c=Cipher.getInstance("RSA/ECB/NoPadding",provider);
+  c.init(Cipher.ENCRYPT_MODE,privKey);
+  int i;
+  for (i=0; i < RSA_2048_Vector1.length / 2; i++) {
+    c.update(RSA_2048_Vector1,i,1);
+  }
+  byte[] encrypted=c.doFinal(RSA_2048_Vector1,i,RSA_2048_Vector1.length - i);
+  assertTrue("Encrypted should match expected",Arrays.equals(RSA_Vector1_Encrypt_Private,encrypted));
+  c.init(Cipher.DECRYPT_MODE,privKey);
+  for (i=0; i < RSA_2048_Vector1.length / 2; i++) {
+    c.update(RSA_2048_Vector1,i,1);
+  }
+  encrypted=c.doFinal(RSA_2048_Vector1,i,RSA_2048_Vector1.length - i);
+  assertTrue("Encrypted should match expected",Arrays.equals(RSA_Vector1_Encrypt_Private,encrypted));
+}

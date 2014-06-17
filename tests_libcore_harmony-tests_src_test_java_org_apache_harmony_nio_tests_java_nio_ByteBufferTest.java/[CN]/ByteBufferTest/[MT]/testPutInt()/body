@@ -1,0 +1,33 @@
+{
+  if (buf.isReadOnly()) {
+    try {
+      buf.clear();
+      buf.putInt((int)1);
+      fail("Should throw Exception");
+    }
+ catch (    ReadOnlyBufferException e) {
+    }
+    return;
+  }
+  int nbytes=4;
+  byte bytes[]=new byte[nbytes];
+  int value=0;
+  buf.clear();
+  for (int i=0; buf.remaining() >= nbytes; i++) {
+    buf.order(i % 2 == 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
+    value=(int)i;
+    buf.mark();
+    buf.putInt(value);
+    assertEquals((i + 1) * nbytes,buf.position());
+    buf.reset();
+    buf.get(bytes);
+    assertTrue(Arrays.equals(int2bytes(value,buf.order()),bytes));
+  }
+  try {
+    buf.putInt(value);
+    fail("Should throw Exception");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  buf.order(ByteOrder.BIG_ENDIAN);
+}

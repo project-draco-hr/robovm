@@ -1,0 +1,30 @@
+{
+  this.fouts=new FileOutputStream(tmpFile);
+  WritableByteChannel wbChannel=Channels.newChannel(this.fouts);
+  Writer testWriter=Channels.newWriter(wbChannel,CODE_SET);
+  Writer testWriter_s=Channels.newWriter(wbChannel,Charset.forName(CODE_SET).newEncoder(),-1);
+  String writebuf="";
+  for (int val=0; val < this.writebufSize / 2; val++) {
+    writebuf=writebuf + ((char)(val + 64));
+  }
+  byte[] bit=new byte[1];
+  bit[0]=80;
+  this.fouts.write(bit);
+  this.assertFileSizeSame(tmpFile,1);
+  testWriter.write(writebuf);
+  testWriter.flush();
+  this.assertFileSizeSame(tmpFile,this.writebufSize / 2 + 1);
+  testWriter_s.write(writebuf);
+  testWriter.flush();
+  this.assertFileSizeSame(tmpFile,this.writebufSize / 2 + 1);
+  testWriter_s.write(writebuf);
+  testWriter.flush();
+  this.assertFileSizeSame(tmpFile,this.writebufSize / 2 + 1);
+  for (int val=0; val < this.writebufSize; val++) {
+    writebuf=writebuf + ((char)(val + 64));
+  }
+  this.fouts.close();
+  testWriter_s.write(writebuf);
+  testWriter.flush();
+  this.assertFileSizeSame(tmpFile,this.writebufSize / 2 + 1);
+}

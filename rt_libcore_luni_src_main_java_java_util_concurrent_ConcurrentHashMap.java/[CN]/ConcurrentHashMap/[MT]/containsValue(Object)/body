@@ -1,39 +1,39 @@
 {
   if (value == null)   throw new NullPointerException();
   final Segment<K,V>[] segments=this.segments;
-  int[] mc=new int[segments.length];
-  for (int k=0; k < RETRIES_BEFORE_LOCK; ++k) {
-    int sum=0;
-    int mcsum=0;
-    for (int i=0; i < segments.length; ++i) {
-      int c=segments[i].count;
-      mcsum+=mc[i]=segments[i].modCount;
-      if (segments[i].containsValue(value))       return true;
-    }
-    boolean cleanSweep=true;
-    if (mcsum != 0) {
-      for (int i=0; i < segments.length; ++i) {
-        int c=segments[i].count;
-        if (mc[i] != segments[i].modCount) {
-          cleanSweep=false;
-          break;
+  long previousSum=0L;
+  int lockCount=0;
+  try {
+    for (int retries=-1; ; retries++) {
+      long sum=0L;
+      for (int j=0; j < segments.length; j++) {
+        Segment<K,V> segment;
+        if (retries == RETRIES_BEFORE_LOCK) {
+          segment=ensureSegment(j);
+          segment.lock();
+          lockCount++;
+        }
+ else {
+          segment=segmentAt(segments,j);
+          if (segment == null)           continue;
+        }
+        HashEntry<K,V>[] tab=segment.table;
+        if (tab != null) {
+          for (int i=0; i < tab.length; i++) {
+            HashEntry<K,V> e;
+            for (e=entryAt(tab,i); e != null; e=e.next) {
+              V v=e.value;
+              if (v != null && value.equals(v))               return true;
+            }
+          }
+          sum+=segment.modCount;
         }
       }
-    }
-    if (cleanSweep)     return false;
-  }
-  for (int i=0; i < segments.length; ++i)   segments[i].lock();
-  boolean found=false;
-  try {
-    for (int i=0; i < segments.length; ++i) {
-      if (segments[i].containsValue(value)) {
-        found=true;
-        break;
-      }
+      if ((retries >= 0 && sum == previousSum) || lockCount > 0)       return false;
+      previousSum=sum;
     }
   }
   finally {
-    for (int i=0; i < segments.length; ++i)     segments[i].unlock();
+    for (int j=0; j < lockCount; j++)     segments[j].unlock();
   }
-  return found;
 }

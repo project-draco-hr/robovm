@@ -1,0 +1,36 @@
+{
+  it.seek(indexOffset);
+  final int SIZEOF_TZNAME=40;
+  final int SIZEOF_TZINT=4;
+  byte[] idBytes=new byte[SIZEOF_TZNAME];
+  int indexSize=(dataOffset - indexOffset);
+  int entryCount=indexSize / (SIZEOF_TZNAME + 3 * SIZEOF_TZINT);
+  char[] idChars=new char[entryCount * SIZEOF_TZNAME];
+  int[] idEnd=new int[entryCount];
+  int idOffset=0;
+  byteOffsets=new int[entryCount];
+  rawUtcOffsets=new int[entryCount];
+  for (int i=0; i < entryCount; i++) {
+    it.readByteArray(idBytes,0,idBytes.length);
+    byteOffsets[i]=it.readInt();
+    byteOffsets[i]+=dataOffset;
+    int length=it.readInt();
+    if (length < 44) {
+      throw new AssertionError("length in index file < sizeof(tzhead)");
+    }
+    rawUtcOffsets[i]=it.readInt();
+    int len=idBytes.length;
+    for (int j=0; j < len; j++) {
+      if (idBytes[j] == 0) {
+        break;
+      }
+      idChars[idOffset++]=(char)(idBytes[j] & 0xFF);
+    }
+    idEnd[i]=idOffset;
+  }
+  String allIds=new String(idChars,0,idOffset);
+  ids=new String[entryCount];
+  for (int i=0; i < entryCount; i++) {
+    ids[i]=allIds.substring(i == 0 ? 0 : idEnd[i - 1],idEnd[i]);
+  }
+}

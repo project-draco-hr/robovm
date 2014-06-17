@@ -2,26 +2,20 @@
   TestSSLContext c=TestSSLContext.create();
   SSLSocket client=(SSLSocket)c.clientContext.getSocketFactory().createSocket(c.host,c.port);
   final SSLSocket server=(SSLSocket)c.serverSocket.accept();
-  Thread thread=new Thread(new Runnable(){
-    public void run(){
+  ExecutorService executor=Executors.newSingleThreadExecutor();
+  Future<Void> future=executor.submit(new Callable<Void>(){
+    @Override public Void call() throws Exception {
       try {
-        try {
-          server.startHandshake();
-          fail();
-        }
- catch (        SSLException expected) {
-        }
+        server.startHandshake();
+        fail();
       }
- catch (      RuntimeException e) {
-        throw e;
+ catch (      SSLException expected) {
       }
-catch (      Exception e) {
-        throw new RuntimeException(e);
-      }
+      return null;
     }
   }
 );
-  thread.start();
+  executor.shutdown();
   client.setEnableSessionCreation(false);
   try {
     client.startHandshake();
@@ -29,7 +23,7 @@ catch (      Exception e) {
   }
  catch (  SSLException expected) {
   }
-  thread.join();
+  future.get();
   client.close();
   server.close();
   c.close();

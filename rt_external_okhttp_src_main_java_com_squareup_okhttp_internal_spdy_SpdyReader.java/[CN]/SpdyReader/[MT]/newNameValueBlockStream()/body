@@ -1,0 +1,29 @@
+{
+  final InputStream throttleStream=new InputStream(){
+    @Override public int read() throws IOException {
+      return Util.readSingleByte(this);
+    }
+    @Override public int read(    byte[] buffer,    int offset,    int byteCount) throws IOException {
+      byteCount=Math.min(byteCount,compressedLimit);
+      int consumed=in.read(buffer,offset,byteCount);
+      compressedLimit-=consumed;
+      return consumed;
+    }
+    @Override public void close() throws IOException {
+      in.close();
+    }
+  }
+;
+  Inflater inflater=new Inflater(){
+    @Override public int inflate(    byte[] buffer,    int offset,    int count) throws DataFormatException {
+      int result=super.inflate(buffer,offset,count);
+      if (result == 0 && needsDictionary()) {
+        setDictionary(DICTIONARY);
+        result=super.inflate(buffer,offset,count);
+      }
+      return result;
+    }
+  }
+;
+  return new DataInputStream(new InflaterInputStream(throttleStream,inflater));
+}

@@ -1,8 +1,12 @@
 {
   TreeMap<String,Charset> charsets=new TreeMap<String,Charset>(String.CASE_INSENSITIVE_ORDER);
   for (  String charsetName : NativeConverter.getAvailableCharsetNames()) {
-    Charset charset=NativeConverter.charsetForName(charsetName);
-    charsets.put(charset.name(),charset);
+    try {
+      Charset charset=NativeConverter.charsetForName(charsetName);
+      charsets.put(charset.name(),charset);
+    }
+ catch (    IllegalCharsetNameException e) {
+    }
   }
   for (  CharsetProvider charsetProvider : ServiceLoader.load(CharsetProvider.class)) {
     Iterator<Charset> it=charsetProvider.charsets();

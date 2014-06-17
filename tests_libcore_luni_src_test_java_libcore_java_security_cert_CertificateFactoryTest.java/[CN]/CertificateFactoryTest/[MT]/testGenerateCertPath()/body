@@ -1,0 +1,54 @@
+{
+  KeyHolder ca=generateCertificate(true,null);
+  KeyHolder cert1=generateCertificate(true,ca);
+  KeyHolder cert2=generateCertificate(false,cert1);
+  KeyHolder cert3=generateCertificate(false,cert2);
+  List<X509Certificate> certs=new ArrayList<X509Certificate>();
+  certs.add(cert3.certificate);
+  certs.add(cert2.certificate);
+  certs.add(cert1.certificate);
+  List<X509Certificate> duplicatedCerts=new ArrayList<X509Certificate>(certs);
+  duplicatedCerts.add(cert2.certificate);
+  Provider[] providers=Security.getProviders("CertificateFactory.X509");
+  for (  Provider p : providers) {
+    final CertificateFactory cf=CertificateFactory.getInstance("X.509",p);
+{
+      final CertPath duplicatedPath=cf.generateCertPath(duplicatedCerts);
+      try {
+        duplicatedPath.getEncoded();
+        if (StandardNames.IS_RI) {
+          fail("duplicate certificates should cause failure: " + p.getName());
+        }
+      }
+ catch (      CertificateEncodingException expected) {
+        if (!StandardNames.IS_RI) {
+          fail("duplicate certificates should pass: " + p.getName());
+        }
+      }
+    }
+    testCertPathEncoding(cf,certs,null);
+    final Iterator<String> it1=cf.getCertPathEncodings();
+    final Iterator<String> it2=cf.generateCertPath(certs).getEncodings();
+    for (; ; ) {
+      assertEquals(p.getName(),it1.hasNext(),it2.hasNext());
+      if (!it1.hasNext()) {
+        break;
+      }
+      String encoding=it1.next();
+      assertEquals(p.getName(),encoding,it2.next());
+      try {
+        it1.remove();
+        fail("Should not be able to remove from iterator");
+      }
+ catch (      UnsupportedOperationException expected) {
+      }
+      try {
+        it2.remove();
+        fail("Should not be able to remove from iterator");
+      }
+ catch (      UnsupportedOperationException expected) {
+      }
+      testCertPathEncoding(cf,certs,encoding);
+    }
+  }
+}

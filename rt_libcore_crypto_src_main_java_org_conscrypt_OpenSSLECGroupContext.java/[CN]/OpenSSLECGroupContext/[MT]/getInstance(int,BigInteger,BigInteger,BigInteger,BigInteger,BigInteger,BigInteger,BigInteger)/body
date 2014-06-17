@@ -1,0 +1,12 @@
+{
+  final long ctx=NativeCrypto.EC_GROUP_new_curve(type,p.toByteArray(),a.toByteArray(),b.toByteArray());
+  if (ctx == 0) {
+    return null;
+  }
+  NativeCrypto.EC_GROUP_set_point_conversion_form(ctx,NativeCrypto.POINT_CONVERSION_UNCOMPRESSED);
+  OpenSSLECGroupContext group=new OpenSSLECGroupContext(ctx);
+  OpenSSLECPointContext generator=new OpenSSLECPointContext(group,NativeCrypto.EC_POINT_new(ctx));
+  NativeCrypto.EC_POINT_set_affine_coordinates(ctx,generator.getContext(),x.toByteArray(),y.toByteArray());
+  NativeCrypto.EC_GROUP_set_generator(ctx,generator.getContext(),n.toByteArray(),h.toByteArray());
+  return group;
+}

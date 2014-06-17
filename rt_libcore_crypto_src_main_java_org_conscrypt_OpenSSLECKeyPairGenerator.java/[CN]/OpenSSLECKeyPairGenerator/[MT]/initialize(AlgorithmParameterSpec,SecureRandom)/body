@@ -1,0 +1,18 @@
+{
+  if (param instanceof ECParameterSpec) {
+    ECParameterSpec ecParam=(ECParameterSpec)param;
+    group=OpenSSLECGroupContext.getInstance(ecParam);
+  }
+ else   if (param instanceof ECGenParameterSpec) {
+    ECGenParameterSpec ecParam=(ECGenParameterSpec)param;
+    final String curveName=ecParam.getName();
+    final OpenSSLECGroupContext possibleGroup=OpenSSLECGroupContext.getCurveByName(curveName);
+    if (possibleGroup == null) {
+      throw new InvalidAlgorithmParameterException("unknown curve name: " + curveName);
+    }
+    group=possibleGroup;
+  }
+ else {
+    throw new InvalidAlgorithmParameterException("parameter must be ECParameterSpec or ECGenParameterSpec");
+  }
+}

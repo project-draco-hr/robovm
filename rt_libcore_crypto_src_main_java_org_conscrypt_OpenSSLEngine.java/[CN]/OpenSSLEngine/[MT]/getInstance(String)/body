@@ -1,0 +1,14 @@
+{
+  if (engine == null) {
+    throw new NullPointerException("engine == null");
+  }
+  final long engineCtx;
+synchronized (mLoadingLock) {
+    engineCtx=NativeCrypto.ENGINE_by_id(engine);
+    if (engineCtx == 0) {
+      throw new IllegalArgumentException("Unknown ENGINE id: " + engine);
+    }
+    NativeCrypto.ENGINE_add(engineCtx);
+  }
+  return new OpenSSLEngine(engineCtx);
+}

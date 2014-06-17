@@ -1,0 +1,21 @@
+{
+  final String testStr="Hello World";
+  ByteBuffer readBuf=ByteBuffer.allocate(11);
+  ByteBuffer buf=ByteBuffer.wrap(testStr.getBytes());
+  ServerSocketChannel ssc=ServerSocketChannel.open();
+  ssc.socket().bind(localAddr2);
+  SocketChannel sc=SocketChannel.open();
+  sc.connect(localAddr2);
+  buf.position(2);
+  ssc.accept().write(buf);
+  assertEquals(9,sc.read(readBuf));
+  buf.flip();
+  readBuf.flip();
+  byte[] read=new byte[9];
+  byte[] write=new byte[11];
+  buf.get(write);
+  readBuf.get(read);
+  for (int i=0; i < 9; i++) {
+    assertEquals(read[i],write[i + 2]);
+  }
+}

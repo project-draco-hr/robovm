@@ -1,0 +1,42 @@
+{
+  SecretKey key=new SecretKeySpec(AES_128_KEY,"AES");
+  Cipher c=Cipher.getInstance("AES/ECB/PKCS5Padding",provider);
+  c.init(Cipher.ENCRYPT_MODE,key);
+  final byte[] fragmentOutput=c.update(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext);
+  if (fragmentOutput != null) {
+    assertEquals(0,fragmentOutput.length);
+  }
+{
+    try {
+      c.doFinal(null,0);
+      fail("Should throw NullPointerException on null output buffer");
+    }
+ catch (    NullPointerException expected) {
+    }
+catch (    IllegalArgumentException expected) {
+    }
+  }
+{
+    final byte[] output=new byte[c.getBlockSize() - 1];
+    try {
+      c.doFinal(output,0);
+      fail("Should throw ShortBufferException on short output buffer");
+    }
+ catch (    ShortBufferException expected) {
+    }
+  }
+{
+    final byte[] output=new byte[c.getBlockSize()];
+    try {
+      c.doFinal(output,1);
+      fail("Should throw ShortBufferException on short output buffer");
+    }
+ catch (    ShortBufferException expected) {
+    }
+  }
+{
+    final byte[] output=new byte[c.getBlockSize()];
+    assertEquals(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted.length,c.doFinal(output,0));
+    assertTrue(Arrays.equals(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted,output));
+  }
+}

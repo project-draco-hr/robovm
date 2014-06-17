@@ -1,0 +1,34 @@
+{
+  Platform platform=Platform.get();
+  if (requiresTunnel()) {
+    makeTunnel(tunnelRequest);
+  }
+  socket=route.address.sslSocketFactory.createSocket(socket,route.address.uriHost,route.address.uriPort,true);
+  SSLSocket sslSocket=(SSLSocket)socket;
+  if (route.modernTls) {
+    platform.enableTlsExtensions(sslSocket,route.address.uriHost);
+  }
+ else {
+    platform.supportTlsIntolerantServer(sslSocket);
+  }
+  boolean useNpn=route.modernTls && route.address.transports.contains("spdy/3");
+  if (useNpn) {
+    platform.setNpnProtocols(sslSocket,NPN_PROTOCOLS);
+  }
+  sslSocket.startHandshake();
+  if (!route.address.hostnameVerifier.verify(route.address.uriHost,sslSocket.getSession())) {
+    throw new IOException("Hostname '" + route.address.uriHost + "' was not verified");
+  }
+  out=sslSocket.getOutputStream();
+  in=sslSocket.getInputStream();
+  byte[] selectedProtocol;
+  if (useNpn && (selectedProtocol=platform.getNpnSelectedProtocol(sslSocket)) != null) {
+    if (Arrays.equals(selectedProtocol,SPDY3)) {
+      sslSocket.setSoTimeout(0);
+      spdyConnection=new SpdyConnection.Builder(route.address.getUriHost(),true,in,out).build();
+    }
+ else     if (!Arrays.equals(selectedProtocol,HTTP_11)) {
+      throw new IOException("Unexpected NPN transport " + new String(selectedProtocol,"ISO-8859-1"));
+    }
+  }
+}

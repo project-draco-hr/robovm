@@ -1,0 +1,34 @@
+{
+  List certs=certPath.getCertificates();
+  X509Certificate cert=(X509Certificate)certs.get(index);
+  NameConstraints nc=null;
+  try {
+    ASN1Sequence ncSeq=DERSequence.getInstance(CertPathValidatorUtilities.getExtensionValue(cert,RFC3280CertPathUtilities.NAME_CONSTRAINTS));
+    if (ncSeq != null) {
+      nc=NameConstraints.getInstance(ncSeq);
+    }
+  }
+ catch (  Exception e) {
+    throw new ExtCertPathValidatorException("Name constraints extension could not be decoded.",e,certPath,index);
+  }
+  if (nc != null) {
+    GeneralSubtree[] permitted=nc.getPermittedSubtrees();
+    if (permitted != null) {
+      try {
+        nameConstraintValidator.intersectPermittedSubtree(permitted);
+      }
+ catch (      Exception ex) {
+        throw new ExtCertPathValidatorException("Permitted subtrees cannot be build from name constraints extension.",ex,certPath,index);
+      }
+    }
+    GeneralSubtree[] excluded=nc.getExcludedSubtrees();
+    if (excluded != null) {
+      for (int i=0; i != excluded.length; i++)       try {
+        nameConstraintValidator.addExcludedSubtree(excluded[i]);
+      }
+ catch (      Exception ex) {
+        throw new ExtCertPathValidatorException("Excluded subtrees cannot be build from name constraints extension.",ex,certPath,index);
+      }
+    }
+  }
+}

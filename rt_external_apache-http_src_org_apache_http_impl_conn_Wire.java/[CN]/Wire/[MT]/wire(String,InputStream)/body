@@ -1,0 +1,30 @@
+{
+  StringBuilder buffer=new StringBuilder();
+  int ch;
+  while ((ch=instream.read()) != -1) {
+    if (ch == 13) {
+      buffer.append("[\\r]");
+    }
+ else     if (ch == 10) {
+      buffer.append("[\\n]\"");
+      buffer.insert(0,"\"");
+      buffer.insert(0,header);
+      log.debug(buffer.toString());
+      buffer.setLength(0);
+    }
+ else     if ((ch < 32) || (ch > 127)) {
+      buffer.append("[0x");
+      buffer.append(Integer.toHexString(ch));
+      buffer.append("]");
+    }
+ else {
+      buffer.append((char)ch);
+    }
+  }
+  if (buffer.length() > 0) {
+    buffer.append('\"');
+    buffer.insert(0,'\"');
+    buffer.insert(0,header);
+    log.debug(buffer.toString());
+  }
+}

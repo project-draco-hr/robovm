@@ -4,10 +4,11 @@
   final ReentrantLock lock=this.lock;
   lock.lock();
   try {
-    RunnableScheduledFuture first;
+    RunnableScheduledFuture<?> first;
     int n=0;
-    while ((first=pollExpired()) != null) {
+    while ((first=peekExpired()) != null) {
       c.add(first);
+      finishPoll(first);
       ++n;
     }
     return n;

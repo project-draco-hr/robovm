@@ -1,0 +1,32 @@
+{
+  final ByteArrayOutputStream errBuffer=new ByteArrayOutputStream();
+  PrintStream out=new PrintStream(errBuffer);
+  for (  Provider p : mX509Providers) {
+    try {
+      CertificateFactory f=CertificateFactory.getInstance("X.509",p);
+      isRevoked(f);
+      getType(f);
+      getEncoded(f);
+      getVersion(f);
+      hasUnsupportedCriticalExtension(f);
+      getSignature(f);
+      getTBSCertList(f);
+      getRevokedCertificates(f);
+      getThisUpdateNextUpdate(f);
+      getSigAlgName(f);
+      getSigAlgOID(f);
+      getSigAlgParams(f);
+      verify(f);
+      test_toString(f);
+      test_equals(f);
+    }
+ catch (    Throwable e) {
+      out.append("Error encountered checking " + p.getName() + "\n");
+      e.printStackTrace(out);
+    }
+  }
+  out.flush();
+  if (errBuffer.size() > 0) {
+    throw new Exception("Errors encountered:\n\n" + errBuffer.toString() + "\n\n");
+  }
+}

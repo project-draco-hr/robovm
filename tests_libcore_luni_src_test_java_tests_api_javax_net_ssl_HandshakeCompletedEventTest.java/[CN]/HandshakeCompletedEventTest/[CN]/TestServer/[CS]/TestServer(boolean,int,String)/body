@@ -3,4 +3,19 @@
   this.clientAuth=clientAuth;
   this.provideKeys=provideKeys;
   trustManager=new TestTrustManager();
+  KeyManager[] keyManagers=provideKeys ? getKeyManagers(keys) : null;
+  TrustManager[] trustManagers=new TrustManager[]{trustManager};
+  SSLContext sslContext=SSLContext.getInstance("TLS");
+  sslContext.init(keyManagers,trustManagers,null);
+  serverSocket=(SSLServerSocket)sslContext.getServerSocketFactory().createServerSocket();
+  if (clientAuth == CLIENT_AUTH_WANTED) {
+    serverSocket.setWantClientAuth(true);
+  }
+ else   if (clientAuth == CLIENT_AUTH_NEEDED) {
+    serverSocket.setNeedClientAuth(true);
+  }
+ else {
+    serverSocket.setWantClientAuth(false);
+  }
+  serverSocket.bind(new InetSocketAddress(0));
 }

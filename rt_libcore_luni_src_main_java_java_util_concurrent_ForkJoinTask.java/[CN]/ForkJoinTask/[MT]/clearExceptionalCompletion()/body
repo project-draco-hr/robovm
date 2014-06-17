@@ -1,0 +1,26 @@
+{
+  int h=System.identityHashCode(this);
+  final ReentrantLock lock=exceptionTableLock;
+  lock.lock();
+  try {
+    ExceptionNode[] t=exceptionTable;
+    int i=h & (t.length - 1);
+    ExceptionNode e=t[i];
+    ExceptionNode pred=null;
+    while (e != null) {
+      ExceptionNode next=e.next;
+      if (e.get() == this) {
+        if (pred == null)         t[i]=next;
+ else         pred.next=next;
+        break;
+      }
+      pred=e;
+      e=next;
+    }
+    expungeStaleExceptions();
+    status=0;
+  }
+  finally {
+    lock.unlock();
+  }
+}

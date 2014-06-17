@@ -1,0 +1,20 @@
+{
+  ks.load(null,null);
+  if (isReadOnly(ks)) {
+    try {
+      setPrivateKey(ks);
+      fail(ks.toString());
+    }
+ catch (    UnsupportedOperationException e) {
+    }
+    return true;
+  }
+  if (isPersistentStorage(ks)) {
+    Enumeration<String> aliases=ks.aliases();
+    while (aliases.hasMoreElements()) {
+      String alias=aliases.nextElement();
+      ks.deleteEntry(alias);
+    }
+  }
+  return false;
+}

@@ -1,36 +1,24 @@
 {
+  String[] commands={"cat","-"};
+  Process p=Runtime.getRuntime().exec(commands,null,null);
+  OutputStream os=p.getOutputStream();
+  String str1="Some data for testing communication between processes\n";
+  String str2="More data that serves the same purpose.\n";
+  String str3="Here is some more data.\n";
+  os.write(str1.getBytes());
   try {
-    String[] commands={"sleep","1"};
-    Process proc=Runtime.getRuntime().exec(commands,null,null);
-    OutputStream os=proc.getOutputStream();
-    String str1="Some data for testing communication between processes\n";
-    String str2="More data that serves the same purpose.\n";
-    String str3="Here is some more data.\n";
-    os.write(str1.getBytes());
-    try {
-      Thread.sleep(2000);
-    }
- catch (    InterruptedException e) {
-      e.printStackTrace();
-    }
-    os.close();
-    InputStream is=proc.getInputStream();
-    StringBuffer msg=new StringBuffer("");
-    while (true) {
-      int c=is.read();
-      if (c == -1)       break;
-      msg.append((char)c);
-    }
-    is.close();
-    proc.waitFor();
-    proc.destroy();
-    String org=str1;
-    String recvd=msg.toString();
+    Thread.sleep(1000);
   }
- catch (  IOException e) {
-    fail("IOException executing avail test: " + e);
+ catch (  InterruptedException e) {
+    e.printStackTrace();
   }
-catch (  InterruptedException e) {
-    fail("InterruptedException executing avail test: " + e);
-  }
+  os.write(str2.getBytes());
+  os.write(str3.getBytes());
+  os.close();
+  String received=readAndCloseStream(p.getInputStream());
+  assertEquals(str1 + str2 + str3,received);
+  String stderr=readAndCloseStream(p.getErrorStream());
+  assertEquals("",stderr);
+  p.waitFor();
+  p.destroy();
 }

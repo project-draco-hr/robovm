@@ -1,0 +1,17 @@
+{
+  if (enc.length > 1) {
+    return new ASN1Enumerated(Arrays.clone(enc));
+  }
+  if (enc.length == 0) {
+    throw new IllegalArgumentException("ENUMERATED has zero length");
+  }
+  int value=enc[0] & 0xff;
+  if (value >= cache.length) {
+    return new ASN1Enumerated(Arrays.clone(enc));
+  }
+  ASN1Enumerated possibleMatch=cache[value];
+  if (possibleMatch == null) {
+    possibleMatch=cache[value]=new ASN1Enumerated(Arrays.clone(enc));
+  }
+  return possibleMatch;
+}

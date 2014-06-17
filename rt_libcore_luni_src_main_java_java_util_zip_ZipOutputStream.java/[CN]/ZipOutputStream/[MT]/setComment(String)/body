@@ -1,6 +1,11 @@
 {
-  if (comment.length() > 0xFFFF) {
-    throw new IllegalArgumentException("Comment too long: " + comment.length() + " characters");
+  if (comment == null) {
+    this.commentBytes=null;
+    return;
   }
-  this.comment=comment;
+  byte[] newCommentBytes=comment.getBytes(StandardCharsets.UTF_8);
+  if (newCommentBytes.length > 0xffff) {
+    throw new IllegalArgumentException("Comment too long: " + newCommentBytes.length + " bytes");
+  }
+  this.commentBytes=newCommentBytes;
 }

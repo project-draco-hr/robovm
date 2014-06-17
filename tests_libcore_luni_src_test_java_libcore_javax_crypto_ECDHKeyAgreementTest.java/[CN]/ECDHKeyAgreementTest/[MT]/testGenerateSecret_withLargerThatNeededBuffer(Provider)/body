@@ -1,0 +1,15 @@
+{
+  KeyAgreement keyAgreement=getKeyAgreement(provider);
+  keyAgreement.init(KAT_PRIVATE_KEY1);
+  keyAgreement.doPhase(KAT_PUBLIC_KEY2,true);
+  byte[] buffer=new byte[KAT_SECRET.length + 2];
+  buffer[0]=(byte)0x85;
+  buffer[buffer.length - 1]=(byte)0x3b;
+  int secretLengthBytes=keyAgreement.generateSecret(buffer,1);
+  assertEquals(KAT_SECRET.length,secretLengthBytes);
+  assertEquals((byte)0x85,buffer[0]);
+  assertEquals((byte)0x3b,buffer[buffer.length - 1]);
+  byte[] secret=new byte[KAT_SECRET.length];
+  System.arraycopy(buffer,1,secret,0,secret.length);
+  assertTrue(Arrays.equals(KAT_SECRET,secret));
+}

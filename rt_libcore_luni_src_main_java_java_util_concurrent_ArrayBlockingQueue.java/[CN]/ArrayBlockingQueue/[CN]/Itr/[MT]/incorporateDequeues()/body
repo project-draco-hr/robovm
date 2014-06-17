@@ -1,0 +1,18 @@
+{
+  final int cycles=itrs.cycles;
+  final int takeIndex=ArrayBlockingQueue.this.takeIndex;
+  final int prevCycles=this.prevCycles;
+  final int prevTakeIndex=this.prevTakeIndex;
+  if (cycles != prevCycles || takeIndex != prevTakeIndex) {
+    final int len=items.length;
+    long dequeues=(cycles - prevCycles) * len + (takeIndex - prevTakeIndex);
+    if (invalidated(lastRet,prevTakeIndex,dequeues,len))     lastRet=REMOVED;
+    if (invalidated(nextIndex,prevTakeIndex,dequeues,len))     nextIndex=REMOVED;
+    if (invalidated(cursor,prevTakeIndex,dequeues,len))     cursor=takeIndex;
+    if (cursor < 0 && nextIndex < 0 && lastRet < 0)     detach();
+ else {
+      this.prevCycles=cycles;
+      this.prevTakeIndex=takeIndex;
+    }
+  }
+}

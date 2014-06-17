@@ -1,0 +1,14 @@
+{
+  byte[] sourceArray=new byte[CAPACITY_NORMAL];
+  byte[] targetArray=new byte[CAPACITY_NORMAL];
+  for (int i=0; i < sourceArray.length; i++) {
+    sourceArray[i]=(byte)i;
+  }
+  this.channel1.socket().bind(localAddr2);
+  this.channel1.connect(localAddr1);
+  this.channel2.connect(localAddr2);
+  ByteBuffer sourceBuf=ByteBuffer.wrap(sourceArray);
+  assertEquals(CAPACITY_NORMAL,this.channel1.write(sourceBuf));
+  ByteBuffer targetBuf=ByteBuffer.wrap(targetArray);
+  closeBlockedReaderChannel2(targetBuf);
+}

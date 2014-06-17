@@ -1,0 +1,17 @@
+{
+  final ByteArrayOutputStream errBuffer=new ByteArrayOutputStream();
+  PrintStream out=new PrintStream(errBuffer);
+  for (  CipherTestParam p : CIPHER_TEST_PARAMS) {
+    try {
+      checkCipher(p,provider);
+    }
+ catch (    Exception e) {
+      out.append("Error encountered checking " + p.mode + ", keySize="+ (p.key.length * 8)+ " with provider "+ provider+ "\n");
+      e.printStackTrace(out);
+    }
+  }
+  out.flush();
+  if (errBuffer.size() > 0) {
+    throw new Exception("Errors encountered:\n\n" + errBuffer.toString() + "\n\n");
+  }
+}

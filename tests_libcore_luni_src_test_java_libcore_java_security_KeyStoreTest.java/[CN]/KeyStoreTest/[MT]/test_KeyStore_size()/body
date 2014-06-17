@@ -2,27 +2,33 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       keyStore.aliases();
-      fail();
+      fail(keyStore.getType());
     }
  catch (    KeyStoreException expected) {
     }
   }
   for (  KeyStore keyStore : keyStores()) {
     keyStore.load(null,null);
-    if (hasDefaultContents(keyStore)) {
-      assertTrue(keyStore.size() > 0);
+    if (isPersistentStorage(keyStore)) {
+      assertTrue("Should successfully query size: " + keyStore.getType(),keyStore.size() >= 0);
+    }
+ else     if (hasDefaultContents(keyStore)) {
+      assertTrue("Should have non-empty store: " + keyStore.getType(),keyStore.size() > 0);
     }
  else {
-      assertEquals(0,keyStore.size());
+      assertEquals("Should have empty store: " + keyStore.getType(),0,keyStore.size());
     }
   }
   for (  KeyStore keyStore : keyStores()) {
     populate(keyStore);
     if (hasDefaultContents(keyStore)) {
-      assertTrue(keyStore.size() > 0);
+      assertTrue("Should have non-empty store: " + keyStore.getType(),keyStore.size() > 0);
       continue;
     }
-    int expected=1;
+    int expected=0;
+    if (isKeyPasswordSupported(keyStore)) {
+      expected++;
+    }
     if (isNullPasswordAllowed(keyStore)) {
       expected++;
     }

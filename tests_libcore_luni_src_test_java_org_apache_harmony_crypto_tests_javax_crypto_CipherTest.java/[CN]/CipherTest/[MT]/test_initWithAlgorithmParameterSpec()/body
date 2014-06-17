@@ -1,18 +1,12 @@
 {
-  SecureRandom sr=new SecureRandom();
-  Cipher cipher=null;
-  byte[] iv=null;
-  AlgorithmParameterSpec ap=null;
-  iv=new byte[8];
-  sr.nextBytes(iv);
-  ap=new IvParameterSpec(iv);
-  cipher=Cipher.getInstance(algorithm + "/CBC/PKCS5Padding");
-  cipher.init(Cipher.ENCRYPT_MODE,cipherKey,ap);
+  AlgorithmParameterSpec ap=new IvParameterSpec(IV);
+  Cipher cipher=Cipher.getInstance(ALGORITHM_3DES + "/CBC/PKCS5Padding");
+  cipher.init(Cipher.ENCRYPT_MODE,CIPHER_KEY_3DES,ap);
   byte[] cipherIV=cipher.getIV();
-  assertTrue("IVs differ",Arrays.equals(cipherIV,iv));
+  assertTrue("IVs differ",Arrays.equals(cipherIV,IV));
   cipher=Cipher.getInstance("DES/CBC/NoPadding");
   try {
-    cipher.init(Cipher.ENCRYPT_MODE,cipherKey,ap);
+    cipher.init(Cipher.ENCRYPT_MODE,CIPHER_KEY_3DES,ap);
     fail();
   }
  catch (  InvalidKeyException expected) {
@@ -20,7 +14,7 @@
   cipher=Cipher.getInstance("DES/CBC/NoPadding");
   ap=new RSAKeyGenParameterSpec(10,new BigInteger("10"));
   try {
-    cipher.init(Cipher.ENCRYPT_MODE,cipherKeyDES,ap);
+    cipher.init(Cipher.ENCRYPT_MODE,CIPHER_KEY_DES,ap);
     fail();
   }
  catch (  InvalidAlgorithmParameterException expected) {

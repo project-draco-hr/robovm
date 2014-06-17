@@ -1,0 +1,20 @@
+{
+  byte[] buffer=skipBuffer.getAndSet(null);
+  if (buffer == null) {
+    buffer=new byte[4096];
+  }
+  long skipped=0;
+  while (skipped < byteCount) {
+    int toRead=(int)Math.min(byteCount - skipped,buffer.length);
+    int read=in.read(buffer,0,toRead);
+    if (read == -1) {
+      break;
+    }
+    skipped+=read;
+    if (read < toRead) {
+      break;
+    }
+  }
+  skipBuffer.set(buffer);
+  return skipped;
+}

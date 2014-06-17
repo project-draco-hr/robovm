@@ -1,0 +1,23 @@
+{
+  this.uri=uri.toString();
+  this.varyHeaders=varyHeaders;
+  this.requestMethod=httpConnection.getRequestMethod();
+  this.responseHeaders=RawHeaders.fromMultimap(httpConnection.getHeaderFields(),true);
+  SSLSocket sslSocket=getSslSocket(httpConnection);
+  if (sslSocket != null) {
+    cipherSuite=sslSocket.getSession().getCipherSuite();
+    Certificate[] peerCertificatesNonFinal=null;
+    try {
+      peerCertificatesNonFinal=sslSocket.getSession().getPeerCertificates();
+    }
+ catch (    SSLPeerUnverifiedException ignored) {
+    }
+    peerCertificates=peerCertificatesNonFinal;
+    localCertificates=sslSocket.getSession().getLocalCertificates();
+  }
+ else {
+    cipherSuite=null;
+    peerCertificates=null;
+    localCertificates=null;
+  }
+}

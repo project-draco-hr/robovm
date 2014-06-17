@@ -1,0 +1,17 @@
+{
+  server.enqueue(new MockResponse().setBody("ABC"));
+  server.play();
+  URLConnection connection=server.getUrl("").openConnection();
+  connection.setReadTimeout(24 * 3600 * 1000);
+  InputStream input=connection.getInputStream();
+  assertEquals("ABC",readAscii(input,Integer.MAX_VALUE));
+  input.close();
+  try {
+    connection=server.getUrl("").openConnection();
+    connection.setReadTimeout(100);
+    connection.getInputStream();
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+}

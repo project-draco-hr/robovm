@@ -1,0 +1,63 @@
+{
+  buf.clear();
+  float array[]=new float[buf.capacity()];
+  try {
+    buf.put(new float[buf.capacity() + 1],0,buf.capacity() + 1);
+    fail("Should throw Exception");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  assertEquals(buf.position(),0);
+  try {
+    buf.put(array,-1,array.length);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    buf.put(array,array.length + 1,0);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  buf.put(array,array.length,0);
+  assertEquals(buf.position(),0);
+  try {
+    buf.put(array,0,-1);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    buf.put((float[])null,0,-1);
+    fail("Should throw Exception");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    buf.put(array,2,array.length);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    buf.put(array,Integer.MAX_VALUE,1);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    buf.put(array,1,Integer.MAX_VALUE);
+    fail("Should throw Exception");
+  }
+ catch (  BufferOverflowException expected) {
+  }
+catch (  IndexOutOfBoundsException expected) {
+  }
+  assertEquals(buf.position(),0);
+  loadTestData2(array,0,array.length);
+  FloatBuffer ret=buf.put(array,0,array.length);
+  assertEquals(buf.position(),buf.capacity());
+  assertContentEquals(buf,array,0,array.length);
+  assertSame(ret,buf);
+}

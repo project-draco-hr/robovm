@@ -1,0 +1,21 @@
+{
+  Selector selector=Selector.open();
+  ServerSocketChannel ssc=ServerSocketChannel.open();
+  try {
+    ssc.configureBlocking(false);
+    ssc.socket().bind(null);
+    SocketChannel sc=SocketChannel.open();
+    sc.connect(ssc.socket().getLocalSocketAddress());
+    sc.finishConnect();
+    sc.configureBlocking(false);
+    ssc.accept().write(ByteBuffer.allocate(128));
+    SelectionKey key=sc.register(selector,SelectionKey.OP_CONNECT | SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+    assertEquals(1,selector.select());
+    assertEquals(SelectionKey.OP_READ | SelectionKey.OP_WRITE,key.readyOps());
+    assertEquals(0,selector.select());
+  }
+  finally {
+    selector.close();
+    ssc.close();
+  }
+}

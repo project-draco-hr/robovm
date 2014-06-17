@@ -1,0 +1,29 @@
+{
+  if (o == this) {
+    return true;
+  }
+  if (!(o instanceof OpenSSLKey)) {
+    return false;
+  }
+  OpenSSLKey other=(OpenSSLKey)o;
+  if (ctx == other.getPkeyContext()) {
+    return true;
+  }
+  if (engine == null) {
+    if (other.getEngine() != null) {
+      return false;
+    }
+  }
+ else   if (!engine.equals(other.getEngine())) {
+    return false;
+  }
+ else {
+    if (alias != null) {
+      return alias.equals(other.getAlias());
+    }
+ else     if (other.getAlias() != null) {
+      return false;
+    }
+  }
+  return NativeCrypto.EVP_PKEY_cmp(ctx,other.getPkeyContext()) == 1;
+}

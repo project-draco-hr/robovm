@@ -1,0 +1,27 @@
+{
+  if (request == null) {
+    throw new IllegalStateException("Request must not be null.");
+  }
+  HttpRoute route=ConnRouteParams.getForcedRoute(request.getParams());
+  if (route != null)   return route;
+  if (target == null) {
+    throw new IllegalStateException("Target host must not be null.");
+  }
+  final InetAddress local=ConnRouteParams.getLocalAddress(request.getParams());
+  HttpHost proxy=(HttpHost)request.getParams().getParameter(ConnRoutePNames.DEFAULT_PROXY);
+  if (proxy == null) {
+    proxy=determineProxy(target,request,context);
+  }
+ else   if (ConnRouteParams.NO_HOST.equals(proxy)) {
+    proxy=null;
+  }
+  final Scheme schm=this.schemeRegistry.getScheme(target.getSchemeName());
+  final boolean secure=schm.isLayered();
+  if (proxy == null) {
+    route=new HttpRoute(target,local,secure);
+  }
+ else {
+    route=new HttpRoute(target,local,proxy,secure);
+  }
+  return route;
+}

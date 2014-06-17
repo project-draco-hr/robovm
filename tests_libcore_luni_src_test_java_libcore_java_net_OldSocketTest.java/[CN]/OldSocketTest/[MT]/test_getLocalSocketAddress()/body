@@ -1,14 +1,12 @@
 {
   int sport=startServer("SServer getLocSocketAddress");
-  int portNumber=Support_PortManager.getNextPort();
-  s=new Socket(InetAddress.getLocalHost(),sport,null,portNumber);
-  assertTrue("Returned incorrect InetSocketAddress(1):" + s.getLocalSocketAddress().toString() + "Expected: "+ (new InetSocketAddress(InetAddress.getLocalHost(),portNumber)).toString(),s.getLocalSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),portNumber)));
+  s=new Socket(InetAddress.getLocalHost(),sport,null,0);
+  assertEquals(new InetSocketAddress(InetAddress.getLocalHost(),s.getLocalPort()),s.getLocalSocketAddress());
   s.close();
   Socket theSocket=new Socket();
   assertNull("Returned incorrect InetSocketAddress -unbound socket- Expected null",theSocket.getLocalSocketAddress());
-  portNumber=Support_PortManager.getNextPort();
-  theSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(),portNumber));
-  assertTrue("Returned incorrect InetSocketAddress(2):" + theSocket.getLocalSocketAddress().toString() + "Expected: "+ (new InetSocketAddress(InetAddress.getLocalHost(),portNumber)).toString(),theSocket.getLocalSocketAddress().equals(new InetSocketAddress(InetAddress.getLocalHost(),portNumber)));
+  theSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(),0));
+  assertEquals(new InetSocketAddress(InetAddress.getLocalHost(),theSocket.getLocalPort()),theSocket.getLocalSocketAddress());
   theSocket.close();
   s=new Socket();
   s.bind(new InetSocketAddress(InetAddress.getByName("0.0.0.0"),0));

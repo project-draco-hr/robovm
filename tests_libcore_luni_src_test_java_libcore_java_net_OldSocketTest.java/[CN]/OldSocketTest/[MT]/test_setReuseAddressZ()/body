@@ -2,64 +2,40 @@
   try {
     InetAddress allAddresses[]=InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
     if (allAddresses.length > 1) {
-      InetSocketAddress theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
-      ServerSocket serverSocket=new ServerSocket();
-      serverSocket.bind(theAddress);
-      InetSocketAddress theLocalAddress=new InetSocketAddress((InetAddress)allAddresses[1],Support_PortManager.getNextPort());
+      ServerSocket serverSocket=new ServerSocket(0,5);
+      InetSocketAddress theLocalAddress=new InetSocketAddress((InetAddress)allAddresses[1],0);
       InetSocketAddress theOtherLocalAddress=new InetSocketAddress((InetAddress)allAddresses[0],theLocalAddress.getPort());
       Socket theSocket=new Socket();
       theSocket.setReuseAddress(false);
       theSocket.bind(theLocalAddress);
       Socket theSocket2=null;
       String platform=System.getProperty("os.name");
-      try {
-        theSocket2=new Socket();
-        theSocket2.setReuseAddress(false);
-        theSocket2.bind(theOtherLocalAddress);
-        if ((!platform.startsWith("Linux") && !platform.contains("iOS") && !platform.contains("Mac")) && ((!platform.startsWith("Windows")) || !((((InetAddress)allAddresses[0]) instanceof Inet4Address) && (((InetAddress)allAddresses[1]) instanceof Inet4Address)))) {
-          fail("No exception when setReuseAddress is false and we bind:" + theLocalAddress.toString() + ":"+ theOtherLocalAddress.toString());
-        }
-      }
- catch (      IOException ex) {
-        if ((platform.startsWith("Linux")) || ((platform.startsWith("Windows")) && ((((InetAddress)allAddresses[0]) instanceof Inet4Address) && (((InetAddress)allAddresses[1]) instanceof Inet4Address)))) {
-          fail("Got unexpected exception when binding with setReuseAddress false on windows platform:" + theAddress.toString() + ":"+ ex.toString());
-        }
+      theSocket2=new Socket();
+      theSocket2.setReuseAddress(false);
+      theSocket2.bind(theOtherLocalAddress);
+      if ((!platform.startsWith("Linux") && !platform.contains("iOS") && !platform.contains("Mac")) && ((!platform.startsWith("Windows")) || !((((InetAddress)allAddresses[0]) instanceof Inet4Address) && (((InetAddress)allAddresses[1]) instanceof Inet4Address)))) {
+        fail("No exception when setReuseAddress is false and we bind:" + theLocalAddress.toString() + ":"+ theOtherLocalAddress.toString());
       }
       theSocket.close();
       theSocket2.close();
-      theLocalAddress=new InetSocketAddress((InetAddress)allAddresses[0],Support_PortManager.getNextPort());
-      theOtherLocalAddress=new InetSocketAddress((InetAddress)allAddresses[1],theLocalAddress.getPort());
+      theLocalAddress=new InetSocketAddress((InetAddress)allAddresses[0],0);
       theSocket=new Socket();
       theSocket.setReuseAddress(true);
       theSocket.bind(theLocalAddress);
-      try {
-        theSocket2=new Socket();
-        theSocket2.setReuseAddress(true);
-        theSocket2.bind(theOtherLocalAddress);
-        theSocket2.close();
-      }
- catch (      IOException ex) {
-        fail("IOException when setReuseAddress is true and we bind :" + ex.toString());
-      }
+      theSocket2=new Socket();
+      theSocket2.setReuseAddress(true);
+      theOtherLocalAddress=new InetSocketAddress((InetAddress)allAddresses[1],theSocket.getLocalPort());
+      theSocket2.bind(theOtherLocalAddress);
+      theSocket2.close();
       theSocket.close();
       serverSocket.close();
-      theLocalAddress=new InetSocketAddress((InetAddress)allAddresses[0],Support_PortManager.getNextPort());
-      theOtherLocalAddress=new InetSocketAddress((InetAddress)allAddresses[1],theLocalAddress.getPort());
+      theLocalAddress=new InetSocketAddress((InetAddress)allAddresses[0],0);
       theSocket=new Socket();
       theSocket.bind(theLocalAddress);
-      try {
-        theSocket2=new Socket();
-        theSocket2.bind(theOtherLocalAddress);
-        theSocket2.close();
-        if ((!platform.startsWith("Linux") && !platform.contains("iOS") && !platform.contains("Mac")) && ((!platform.startsWith("Windows")) || !((((InetAddress)allAddresses[0]) instanceof Inet4Address) && (((InetAddress)allAddresses[1]) instanceof Inet4Address)))) {
-          fail("No exception when setReuseAddress is default and we bind:" + theLocalAddress.toString() + ":"+ theOtherLocalAddress.toString());
-        }
-      }
- catch (      IOException ex) {
-        if ((platform.startsWith("Linux") || platform.contains("iOS") || platform.contains("Mac")) || ((platform.startsWith("Windows")) && ((((InetAddress)allAddresses[0]) instanceof Inet4Address) && (((InetAddress)allAddresses[1]) instanceof Inet4Address)))) {
-          fail("Got unexpected exception when binding with setReuseAddress default on windows platform:" + theAddress.toString() + ":"+ ex.toString());
-        }
-      }
+      theSocket2=new Socket();
+      theOtherLocalAddress=new InetSocketAddress((InetAddress)allAddresses[1],theSocket.getLocalPort());
+      theSocket2.bind(theOtherLocalAddress);
+      theSocket2.close();
       theSocket.close();
       serverSocket.close();
       ensureExceptionThrownIfOptionIsUnsupportedOnOS(SO_REUSEADDR);

@@ -2,37 +2,31 @@
   TestSSLContext c=TestSSLContext.create(TestKeyStore.getClientCertificate(),TestKeyStore.getServer());
   SSLSocket client=(SSLSocket)c.clientContext.getSocketFactory().createSocket(c.host,c.port);
   final SSLSocket server=(SSLSocket)c.serverSocket.accept();
-  Thread thread=new Thread(new Runnable(){
-    public void run(){
-      try {
-        assertFalse(server.getWantClientAuth());
-        assertFalse(server.getNeedClientAuth());
-        server.setWantClientAuth(true);
-        assertTrue(server.getWantClientAuth());
-        assertFalse(server.getNeedClientAuth());
-        server.setNeedClientAuth(true);
-        assertFalse(server.getWantClientAuth());
-        assertTrue(server.getNeedClientAuth());
-        server.setWantClientAuth(true);
-        assertTrue(server.getWantClientAuth());
-        assertFalse(server.getNeedClientAuth());
-        server.startHandshake();
-      }
- catch (      RuntimeException e) {
-        throw e;
-      }
-catch (      Exception e) {
-        throw new RuntimeException(e);
-      }
+  ExecutorService executor=Executors.newSingleThreadExecutor();
+  Future<Void> future=executor.submit(new Callable<Void>(){
+    @Override public Void call() throws Exception {
+      assertFalse(server.getWantClientAuth());
+      assertFalse(server.getNeedClientAuth());
+      server.setWantClientAuth(true);
+      assertTrue(server.getWantClientAuth());
+      assertFalse(server.getNeedClientAuth());
+      server.setNeedClientAuth(true);
+      assertFalse(server.getWantClientAuth());
+      assertTrue(server.getNeedClientAuth());
+      server.setWantClientAuth(true);
+      assertTrue(server.getWantClientAuth());
+      assertFalse(server.getNeedClientAuth());
+      server.startHandshake();
+      return null;
     }
   }
 );
-  thread.start();
+  executor.shutdown();
   client.startHandshake();
   assertNotNull(client.getSession().getLocalCertificates());
   TestKeyStore.assertChainLength(client.getSession().getLocalCertificates());
   TestSSLContext.assertClientCertificateChain(c.clientTrustManager,client.getSession().getLocalCertificates());
-  thread.join();
+  future.get();
   client.close();
   server.close();
   c.close();

@@ -1,0 +1,52 @@
+{
+  Mac cMac=new CBCBlockCipherMac(cipher,macSize * 8);
+  cMac.init(keyParam);
+  byte[] b0=new byte[16];
+  if (hasAssociatedText()) {
+    b0[0]|=0x40;
+  }
+  b0[0]|=(((cMac.getMacSize() - 2) / 2) & 0x7) << 3;
+  b0[0]|=((15 - nonce.length) - 1) & 0x7;
+  System.arraycopy(nonce,0,b0,1,nonce.length);
+  int q=dataLen;
+  int count=1;
+  while (q > 0) {
+    b0[b0.length - count]=(byte)(q & 0xff);
+    q>>>=8;
+    count++;
+  }
+  cMac.update(b0,0,b0.length);
+  if (hasAssociatedText()) {
+    int extra;
+    int textLength=getAssociatedTextLength();
+    if (textLength < ((1 << 16) - (1 << 8))) {
+      cMac.update((byte)(textLength >> 8));
+      cMac.update((byte)textLength);
+      extra=2;
+    }
+ else {
+      cMac.update((byte)0xff);
+      cMac.update((byte)0xfe);
+      cMac.update((byte)(textLength >> 24));
+      cMac.update((byte)(textLength >> 16));
+      cMac.update((byte)(textLength >> 8));
+      cMac.update((byte)textLength);
+      extra=6;
+    }
+    if (initialAssociatedText != null) {
+      cMac.update(initialAssociatedText,0,initialAssociatedText.length);
+    }
+    if (associatedText.size() > 0) {
+      byte[] tmp=associatedText.toByteArray();
+      cMac.update(tmp,0,tmp.length);
+    }
+    extra=(extra + textLength) % 16;
+    if (extra != 0) {
+      for (int i=extra; i != 16; i++) {
+        cMac.update((byte)0x00);
+      }
+    }
+  }
+  cMac.update(data,dataOff,dataLen);
+  return cMac.doFinal(macBlock,0);
+}

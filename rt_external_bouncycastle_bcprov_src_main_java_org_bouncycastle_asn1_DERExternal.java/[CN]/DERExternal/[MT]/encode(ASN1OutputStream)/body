@@ -1,0 +1,15 @@
+{
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  if (directReference != null) {
+    baos.write(directReference.getEncoded(ASN1Encoding.DER));
+  }
+  if (indirectReference != null) {
+    baos.write(indirectReference.getEncoded(ASN1Encoding.DER));
+  }
+  if (dataValueDescriptor != null) {
+    baos.write(dataValueDescriptor.getEncoded(ASN1Encoding.DER));
+  }
+  DERTaggedObject obj=new DERTaggedObject(true,encoding,externalContent);
+  baos.write(obj.getEncoded(ASN1Encoding.DER));
+  out.writeEncoded(BERTags.CONSTRUCTED,BERTags.EXTERNAL,baos.toByteArray());
+}

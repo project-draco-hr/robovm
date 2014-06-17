@@ -1,0 +1,23 @@
+{
+  this.forEncryption=forEncryption;
+  if (params instanceof AEADParameters) {
+    AEADParameters param=(AEADParameters)params;
+    nonce=param.getNonce();
+    initialAssociatedText=param.getAssociatedText();
+    macSize=param.getMacSize() / 8;
+    keyParam=param.getKey();
+  }
+ else   if (params instanceof ParametersWithIV) {
+    ParametersWithIV param=(ParametersWithIV)params;
+    nonce=param.getIV();
+    initialAssociatedText=null;
+    macSize=macBlock.length / 2;
+    keyParam=param.getParameters();
+  }
+ else {
+    throw new IllegalArgumentException("invalid parameters passed to CCM");
+  }
+  if (nonce == null || nonce.length < 7 || nonce.length > 13) {
+    throw new IllegalArgumentException("nonce must have length from 7 to 13 octets");
+  }
+}

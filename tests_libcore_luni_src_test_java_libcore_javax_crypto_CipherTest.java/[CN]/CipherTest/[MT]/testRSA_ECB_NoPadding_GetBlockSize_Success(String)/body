@@ -1,0 +1,19 @@
+{
+  Cipher c=Cipher.getInstance("RSA/ECB/NoPadding",provider);
+  if (StandardNames.IS_RI) {
+    assertEquals(0,c.getBlockSize());
+  }
+ else {
+    try {
+      c.getBlockSize();
+      fail();
+    }
+ catch (    IllegalStateException expected) {
+    }
+  }
+  KeyFactory kf=KeyFactory.getInstance("RSA");
+  RSAPublicKeySpec pubKeySpec=new RSAPublicKeySpec(RSA_2048_modulus,RSA_2048_publicExponent);
+  final PublicKey pubKey=kf.generatePublic(pubKeySpec);
+  c.init(Cipher.ENCRYPT_MODE,pubKey);
+  assertEquals(getExpectedBlockSize("RSA",Cipher.ENCRYPT_MODE,provider),c.getBlockSize());
+}

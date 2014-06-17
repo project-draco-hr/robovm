@@ -1,0 +1,16 @@
+{
+  X509Certificate c=getCertificate(f,CERT_IPV6);
+  Collection<List<?>> col=c.getSubjectAlternativeNames();
+  assertNotNull(f.getProvider().getName(),col);
+  assertEquals(1,col.size());
+  List<?> item=col.iterator().next();
+  assertTrue(item.get(0) instanceof Integer);
+  assertTrue(7 == (Integer)item.get(0));
+  assertTrue(item.get(1) instanceof String);
+  if (StandardNames.IS_RI) {
+    assertEquals("2001:db8:0:0:0:ff00:42:8329",(String)item.get(1));
+  }
+ else {
+    assertEquals("2001:db8::ff00:42:8329",(String)item.get(1));
+  }
+}

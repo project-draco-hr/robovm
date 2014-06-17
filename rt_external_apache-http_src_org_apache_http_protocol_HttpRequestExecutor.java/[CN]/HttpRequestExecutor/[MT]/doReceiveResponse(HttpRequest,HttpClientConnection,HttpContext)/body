@@ -1,0 +1,21 @@
+{
+  if (request == null) {
+    throw new IllegalArgumentException("HTTP request may not be null");
+  }
+  if (conn == null) {
+    throw new IllegalArgumentException("HTTP connection may not be null");
+  }
+  if (context == null) {
+    throw new IllegalArgumentException("HTTP context may not be null");
+  }
+  HttpResponse response=null;
+  int statuscode=0;
+  while (response == null || statuscode < HttpStatus.SC_OK) {
+    response=conn.receiveResponseHeader();
+    if (canResponseHaveBody(request,response)) {
+      conn.receiveResponseEntity(response);
+    }
+    statuscode=response.getStatusLine().getStatusCode();
+  }
+  return response;
+}

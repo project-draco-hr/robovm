@@ -1,0 +1,44 @@
+{
+  String expectedFileComment="1 \u0666 2";
+  String expectedEntryComment="a \u0666 b";
+  File file=createTemporaryZipFile();
+  ZipOutputStream out=createZipOutputStream(file);
+  out.setComment(null);
+  out.setComment(makeString(0xffff,"a"));
+  try {
+    out.setComment(makeString(0xffff + 1,"a"));
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    out.setComment(makeString(0xffff,"\u0666"));
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  ZipEntry ze=new ZipEntry("a");
+  ze.setComment(null);
+  ze.setComment(makeString(0xffff,"a"));
+  try {
+    ze.setComment(makeString(0xffff + 1,"a"));
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    ze.setComment(makeString(0xffff,"\u0666"));
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  ze.setComment(expectedEntryComment);
+  out.putNextEntry(ze);
+  out.closeEntry();
+  out.setComment(expectedFileComment);
+  out.close();
+  ZipFile zipFile=new ZipFile(file);
+  assertEquals(expectedFileComment,zipFile.getComment());
+  assertEquals(expectedEntryComment,zipFile.getEntry("a").getComment());
+  zipFile.close();
+}

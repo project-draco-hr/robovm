@@ -1,0 +1,22 @@
+{
+  try {
+    return STANDARD_DATE_FORMAT.get().parse(value);
+  }
+ catch (  ParseException ignored) {
+  }
+synchronized (BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS) {
+    for (int i=0, count=BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS.length; i < count; i++) {
+      DateFormat format=BROWSER_COMPATIBLE_DATE_FORMATS[i];
+      if (format == null) {
+        format=new SimpleDateFormat(BROWSER_COMPATIBLE_DATE_FORMAT_STRINGS[i],Locale.US);
+        BROWSER_COMPATIBLE_DATE_FORMATS[i]=format;
+      }
+      try {
+        return format.parse(value);
+      }
+ catch (      ParseException ignored) {
+      }
+    }
+  }
+  return null;
+}

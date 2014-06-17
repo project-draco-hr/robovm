@@ -1,0 +1,38 @@
+{
+  PrivateKey originalPrivateKey=super.getPrivateKey(alias);
+  if (originalPrivateKey == null) {
+    return null;
+  }
+  PrivateKey result;
+  String keyAlgorithm=originalPrivateKey.getAlgorithm();
+  try {
+    KeyFactory keyFactory=KeyFactory.getInstance(keyAlgorithm);
+    if ("RSA".equals(keyAlgorithm)) {
+      RSAPrivateKeySpec originalKeySpec=keyFactory.getKeySpec(originalPrivateKey,RSAPrivateKeySpec.class);
+      int keyLengthBits=originalKeySpec.getModulus().bitLength();
+      String cacheKey=keyAlgorithm + "-" + keyLengthBits;
+      result=cachedKeys.get(cacheKey);
+      if (result == null) {
+        KeyPairGenerator keyPairGenerator=KeyPairGenerator.getInstance(keyAlgorithm);
+        keyPairGenerator.initialize(keyLengthBits);
+        result=keyPairGenerator.generateKeyPair().getPrivate();
+        cachedKeys.put(cacheKey,result);
+      }
+    }
+ else     if ("DSA".equals(keyAlgorithm)) {
+      DSAPrivateKeySpec originalKeySpec=keyFactory.getKeySpec(originalPrivateKey,DSAPrivateKeySpec.class);
+      KeyPairGenerator keyPairGenerator=KeyPairGenerator.getInstance(keyAlgorithm);
+      keyPairGenerator.initialize(new DSAParameterSpec(originalKeySpec.getP(),originalKeySpec.getQ(),originalKeySpec.getG()));
+      result=keyPairGenerator.generateKeyPair().getPrivate();
+    }
+ else {
+      Assert.fail("Unsupported key algorithm: " + originalPrivateKey.getAlgorithm());
+      result=null;
+    }
+  }
+ catch (  GeneralSecurityException e) {
+    Assert.fail("Failed to generate private key: " + e);
+    result=null;
+  }
+  return result;
+}

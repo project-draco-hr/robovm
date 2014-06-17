@@ -1,0 +1,31 @@
+{
+  if (key instanceof ECPrivateKey) {
+    ECPrivateKey k=(ECPrivateKey)key;
+    ECParameterSpec s=k.getParameters();
+    if (s == null) {
+      s=BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
+    }
+    return new ECPrivateKeyParameters(k.getD(),new ECDomainParameters(s.getCurve(),s.getG(),s.getN(),s.getH(),s.getSeed()));
+  }
+ else   if (key instanceof java.security.interfaces.ECPrivateKey) {
+    java.security.interfaces.ECPrivateKey privKey=(java.security.interfaces.ECPrivateKey)key;
+    ECParameterSpec s=EC5Util.convertSpec(privKey.getParams(),false);
+    return new ECPrivateKeyParameters(privKey.getS(),new ECDomainParameters(s.getCurve(),s.getG(),s.getN(),s.getH(),s.getSeed()));
+  }
+ else {
+    try {
+      byte[] bytes=key.getEncoded();
+      if (bytes == null) {
+        throw new InvalidKeyException("no encoding for EC private key");
+      }
+      PrivateKey privateKey=BouncyCastleProvider.getPrivateKey(PrivateKeyInfo.getInstance(bytes));
+      if (privateKey instanceof java.security.interfaces.ECPrivateKey) {
+        return ECUtil.generatePrivateKeyParameter(privateKey);
+      }
+    }
+ catch (    Exception e) {
+      throw new InvalidKeyException("cannot identify EC private key: " + e.toString());
+    }
+  }
+  throw new InvalidKeyException("can't identify EC private key.");
+}

@@ -1,8 +1,11 @@
 {
-  Parker parker=new Parker(false,1000);
+  CyclicBarrier barrier=new CyclicBarrier(2);
+  Parker parker=new Parker(barrier,false,1000);
   Thread parkerThread=new Thread(parker);
-  Thread waiterThread=new Thread(new WaitAndUnpark(300,parkerThread));
+  Thread waiterThread=new Thread(new WaitAndUnpark(barrier,300,parkerThread));
   parkerThread.start();
   waiterThread.start();
   parker.assertDurationIsInRange(300);
+  waiterThread.join();
+  parkerThread.join();
 }

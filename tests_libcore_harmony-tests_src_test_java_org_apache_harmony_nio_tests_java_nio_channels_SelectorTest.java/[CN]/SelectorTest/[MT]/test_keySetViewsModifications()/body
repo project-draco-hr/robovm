@@ -1,0 +1,15 @@
+{
+  Set<SelectionKey> keys=selector.keys();
+  SelectionKey key1=ssc.register(selector,SelectionKey.OP_ACCEPT);
+  assertTrue(keys.contains(key1));
+  SocketChannel sc=SocketChannel.open();
+  sc.configureBlocking(false);
+  SelectionKey key2=sc.register(selector,SelectionKey.OP_READ);
+  assertTrue(keys.contains(key1));
+  assertTrue(keys.contains(key2));
+  key1.cancel();
+  assertTrue(keys.contains(key1));
+  selector.selectNow();
+  assertFalse(keys.contains(key1));
+  assertTrue(keys.contains(key2));
+}

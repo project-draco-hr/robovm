@@ -1,0 +1,36 @@
+{
+  if (isDiagnosticsEnabled()) {
+    logDiagnostic("[ENV] Trying to get configuration for item " + property);
+  }
+  Object valueObj=getAttribute(property);
+  if (valueObj != null) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("[ENV] Found LogFactory attribute [" + valueObj + "] for "+ property);
+    }
+    return valueObj.toString();
+  }
+  if (isDiagnosticsEnabled()) {
+    logDiagnostic("[ENV] No LogFactory attribute found for " + property);
+  }
+  try {
+    String value=System.getProperty(property);
+    if (value != null) {
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic("[ENV] Found system property [" + value + "] for "+ property);
+      }
+      return value;
+    }
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("[ENV] No system property found for property " + property);
+    }
+  }
+ catch (  SecurityException e) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("[ENV] Security prevented reading system property " + property);
+    }
+  }
+  if (isDiagnosticsEnabled()) {
+    logDiagnostic("[ENV] No configuration defined for item " + property);
+  }
+  return null;
+}

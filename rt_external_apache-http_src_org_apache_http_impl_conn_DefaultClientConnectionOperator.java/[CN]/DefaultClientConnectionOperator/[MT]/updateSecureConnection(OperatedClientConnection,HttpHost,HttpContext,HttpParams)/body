@@ -1,0 +1,28 @@
+{
+  if (conn == null) {
+    throw new IllegalArgumentException("Connection must not be null.");
+  }
+  if (target == null) {
+    throw new IllegalArgumentException("Target host must not be null.");
+  }
+  if (params == null) {
+    throw new IllegalArgumentException("Parameters must not be null.");
+  }
+  if (!conn.isOpen()) {
+    throw new IllegalArgumentException("Connection must be open.");
+  }
+  final Scheme schm=schemeRegistry.getScheme(target.getSchemeName());
+  if (!(schm.getSocketFactory() instanceof LayeredSocketFactory)) {
+    throw new IllegalArgumentException("Target scheme (" + schm.getName() + ") must have layered socket factory.");
+  }
+  final LayeredSocketFactory lsf=(LayeredSocketFactory)schm.getSocketFactory();
+  final Socket sock;
+  try {
+    sock=lsf.createSocket(conn.getSocket(),target.getHostName(),schm.resolvePort(target.getPort()),true);
+  }
+ catch (  ConnectException ex) {
+    throw new HttpHostConnectException(target,ex);
+  }
+  prepareSocket(sock,context,params);
+  conn.update(sock,target,lsf.isSecure(sock),params);
+}

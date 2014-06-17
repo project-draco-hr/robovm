@@ -1,0 +1,118 @@
+{
+  s=new Scanner("1**2").useDelimiter("\\*");
+  assertEquals("1",s.next());
+  assertEquals("",s.next());
+  assertEquals("2",s.next());
+  s=new Scanner(" \t 1 \t 2").useDelimiter("\\s*");
+  assertEquals("1",s.next());
+  assertEquals("2",s.next());
+  try {
+    s.next();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("a").useDelimiter("a?");
+  try {
+    s.next();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("aa").useDelimiter("a?");
+  assertEquals("",s.next());
+  try {
+    s.next();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("word( )test( )").useDelimiter("\\( \\)");
+  assertEquals("word",s.next());
+  assertEquals("test",s.next());
+  s=new Scanner("? next  ").useDelimiter("( )");
+  assertEquals("?",s.next());
+  assertEquals("next",s.next());
+  assertEquals("",s.next());
+  s=new Scanner("word1 word2  ");
+  assertEquals("word1",s.next());
+  assertEquals("word2",s.next());
+  try {
+    s.next();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner(" ");
+  try {
+    s.next();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("");
+  try {
+    s.next();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("test");
+  assertEquals("test",s.next());
+  s=new Scanner("  test");
+  assertEquals("test",s.next());
+  s=new Scanner("  test  ");
+  assertEquals("test",s.next());
+  StringBuilder longSentence=new StringBuilder(1025);
+  for (int i=0; i < 11; i++) {
+    longSentence.append(" ");
+  }
+  for (int i=11; i < 1026; i++) {
+    longSentence.append("a");
+  }
+  s=new Scanner(longSentence.toString());
+  assertEquals(longSentence.toString().trim(),s.next());
+  s=new Scanner(" test test");
+  assertEquals("test",s.next());
+  assertEquals("test",s.next());
+  s=new Scanner("test\ntest").useDelimiter(Pattern.compile("^",Pattern.MULTILINE));
+  assertEquals("test\n",s.next());
+  assertEquals("test",s.next());
+  s=new Scanner("").useDelimiter(Pattern.compile("^",Pattern.MULTILINE));
+  try {
+    s.next();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("").useDelimiter(Pattern.compile("^*",Pattern.MULTILINE));
+  try {
+    s.next();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("test\ntest").useDelimiter(Pattern.compile("^*",Pattern.MULTILINE));
+  assertEquals("t",s.next());
+  assertEquals("e",s.next());
+  s=new Scanner("\ntest\ntest").useDelimiter(Pattern.compile("$",Pattern.MULTILINE));
+  assertEquals("\ntest",s.next());
+  assertEquals("\ntest",s.next());
+  for (int i=0; i < 1024; i++) {
+    os.write(" ".getBytes());
+  }
+  os.write("  1 2 ".getBytes());
+  s=new Scanner(client);
+  assertEquals("1",s.next());
+  assertEquals("2",s.next());
+  os.write("  1 2".getBytes());
+  serverSocket.close();
+  assertEquals("1",s.next());
+  assertEquals("2",s.next());
+  try {
+    s.next();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+}

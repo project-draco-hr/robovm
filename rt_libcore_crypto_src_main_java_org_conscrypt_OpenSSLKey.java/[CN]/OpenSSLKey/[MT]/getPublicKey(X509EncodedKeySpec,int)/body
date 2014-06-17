@@ -1,0 +1,19 @@
+{
+  X509EncodedKeySpec x509KeySpec=(X509EncodedKeySpec)keySpec;
+  final OpenSSLKey key;
+  try {
+    key=new OpenSSLKey(NativeCrypto.d2i_PUBKEY(x509KeySpec.getEncoded()));
+  }
+ catch (  Exception e) {
+    throw new InvalidKeySpecException(e);
+  }
+  if (NativeCrypto.EVP_PKEY_type(key.getPkeyContext()) != type) {
+    throw new InvalidKeySpecException("Unexpected key type");
+  }
+  try {
+    return key.getPublicKey();
+  }
+ catch (  NoSuchAlgorithmException e) {
+    throw new InvalidKeySpecException(e);
+  }
+}

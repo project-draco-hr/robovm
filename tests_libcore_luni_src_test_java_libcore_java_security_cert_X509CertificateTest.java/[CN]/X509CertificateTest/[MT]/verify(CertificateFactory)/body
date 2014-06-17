@@ -1,0 +1,24 @@
+{
+  X509Certificate c=getCertificate(f,CERT_RSA);
+  PublicKey signer=getRsaCertificatePublicKey();
+  c.verify(signer);
+  KeyPairGenerator kpg=KeyPairGenerator.getInstance("RSA");
+  KeyPair pair=kpg.generateKeyPair();
+  PublicKey invalidKey=pair.getPublic();
+  try {
+    c.verify(invalidKey);
+    fail("RSA signature should not verify");
+  }
+ catch (  SignatureException expected) {
+  }
+  Provider[] providers=Security.getProviders("Signature." + c.getSigAlgName());
+  for (  Provider p : providers) {
+    c.verify(signer,p.getName());
+    try {
+      c.verify(invalidKey,p.getName());
+      fail("RSA signature should not verify");
+    }
+ catch (    SignatureException expected) {
+    }
+  }
+}

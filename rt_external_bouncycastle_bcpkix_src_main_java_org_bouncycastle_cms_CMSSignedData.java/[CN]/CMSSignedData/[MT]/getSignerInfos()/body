@@ -1,0 +1,21 @@
+{
+  if (signerInfoStore == null) {
+    ASN1Set s=signedData.getSignerInfos();
+    List signerInfos=new ArrayList();
+    SignatureAlgorithmIdentifierFinder sigAlgFinder=new DefaultSignatureAlgorithmIdentifierFinder();
+    for (int i=0; i != s.size(); i++) {
+      SignerInfo info=SignerInfo.getInstance(s.getObjectAt(i));
+      ASN1ObjectIdentifier contentType=signedData.getEncapContentInfo().getContentType();
+      if (hashes == null) {
+        signerInfos.add(new SignerInformation(info,contentType,signedContent,null));
+      }
+ else {
+        Object obj=hashes.keySet().iterator().next();
+        byte[] hash=(obj instanceof String) ? (byte[])hashes.get(info.getDigestAlgorithm().getAlgorithm().getId()) : (byte[])hashes.get(info.getDigestAlgorithm().getAlgorithm());
+        signerInfos.add(new SignerInformation(info,contentType,null,hash));
+      }
+    }
+    signerInfoStore=new SignerInformationStore(signerInfos);
+  }
+  return signerInfoStore;
+}

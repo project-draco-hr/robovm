@@ -28,13 +28,30 @@
       assertEquals(testString.substring(i,i + length),mat2.group(1));
     }
   }
+  String string3="Brave new world";
   Pattern pat3=Pattern.compile("new");
-  Matcher mat3=pat3.matcher("Brave new world");
-  assertTrue(mat3.find(-1));
+  Matcher mat3=pat3.matcher(string3);
+  try {
+    mat3.find(-1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  assertFalse(mat3.find(string3.length()));
+  try {
+    mat3.find(string3.length() + 1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
   assertTrue(mat3.find(6));
   assertFalse(mat3.find(7));
   mat3.region(7,10);
-  assertFalse(mat3.find(3));
-  assertFalse(mat3.find(6));
+  assertFalse(mat3.find());
+  assertTrue(mat3.find(3));
+  assertTrue(mat3.find(6));
   assertFalse(mat3.find(7));
+  mat3.region(1,4);
+  assertFalse(mat3.find());
+  assertTrue(mat3.find(5));
 }

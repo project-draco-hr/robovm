@@ -1,0 +1,12 @@
+{
+  HeaderValueParser parser=BasicHeaderValueParser.DEFAULT;
+  ParserCursor cursor=new ParserCursor(pos,buffer.length());
+  HeaderElement[] elements=parser.parseElements(buffer,cursor);
+  if (elements.length == 0) {
+    throw new MalformedChallengeException("Authentication challenge is empty");
+  }
+  this.params=new HashMap<String,String>(elements.length);
+  for (  HeaderElement element : elements) {
+    this.params.put(element.getName(),element.getValue());
+  }
+}

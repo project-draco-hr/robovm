@@ -1,0 +1,84 @@
+{
+  try {
+    NativeCrypto.SSL_set_session(NULL,NULL);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+{
+    long c=NativeCrypto.SSL_CTX_new();
+    long s=NativeCrypto.SSL_new(c);
+    NativeCrypto.SSL_set_session(s,NULL);
+    NativeCrypto.SSL_free(s);
+    NativeCrypto.SSL_CTX_free(c);
+  }
+{
+    final long clientContext=NativeCrypto.SSL_CTX_new();
+    final long serverContext=NativeCrypto.SSL_CTX_new();
+    final ServerSocket listener=new ServerSocket(0);
+    final long[] clientSession=new long[]{NULL};
+    final long[] serverSession=new long[]{NULL};
+{
+      Hooks cHooks=new Hooks(){
+        @Override public long getContext() throws SSLException {
+          return clientContext;
+        }
+        @Override public void afterHandshake(        long session,        long s,        long c,        Socket sock,        FileDescriptor fd,        SSLHandshakeCallbacks callback) throws Exception {
+          super.afterHandshake(NULL,s,NULL,sock,fd,callback);
+          clientSession[0]=session;
+        }
+      }
+;
+      Hooks sHooks=new ServerHooks(getServerPrivateKey(),getServerCertificates()){
+        @Override public long getContext() throws SSLException {
+          return serverContext;
+        }
+        @Override public void afterHandshake(        long session,        long s,        long c,        Socket sock,        FileDescriptor fd,        SSLHandshakeCallbacks callback) throws Exception {
+          super.afterHandshake(NULL,s,NULL,sock,fd,callback);
+          serverSession[0]=session;
+        }
+      }
+;
+      Future<TestSSLHandshakeCallbacks> client=handshake(listener,0,true,cHooks,null,null);
+      Future<TestSSLHandshakeCallbacks> server=handshake(listener,0,false,sHooks,null,null);
+      client.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+      server.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+    }
+    assertEqualSessions(clientSession[0],serverSession[0]);
+{
+      Hooks cHooks=new Hooks(){
+        @Override public long getContext() throws SSLException {
+          return clientContext;
+        }
+        @Override public long beforeHandshake(        long c) throws SSLException {
+          long s=NativeCrypto.SSL_new(clientContext);
+          NativeCrypto.SSL_set_session(s,clientSession[0]);
+          return s;
+        }
+        @Override public void afterHandshake(        long session,        long s,        long c,        Socket sock,        FileDescriptor fd,        SSLHandshakeCallbacks callback) throws Exception {
+          assertEqualSessions(clientSession[0],session);
+          super.afterHandshake(NULL,s,NULL,sock,fd,callback);
+        }
+      }
+;
+      Hooks sHooks=new ServerHooks(getServerPrivateKey(),getServerCertificates()){
+        @Override public long getContext() throws SSLException {
+          return serverContext;
+        }
+        @Override public void afterHandshake(        long session,        long s,        long c,        Socket sock,        FileDescriptor fd,        SSLHandshakeCallbacks callback) throws Exception {
+          assertEqualSessions(serverSession[0],session);
+          super.afterHandshake(NULL,s,NULL,sock,fd,callback);
+        }
+      }
+;
+      Future<TestSSLHandshakeCallbacks> client=handshake(listener,0,true,cHooks,null,null);
+      Future<TestSSLHandshakeCallbacks> server=handshake(listener,0,false,sHooks,null,null);
+      client.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+      server.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+    }
+    NativeCrypto.SSL_SESSION_free(clientSession[0]);
+    NativeCrypto.SSL_SESSION_free(serverSession[0]);
+    NativeCrypto.SSL_CTX_free(serverContext);
+    NativeCrypto.SSL_CTX_free(clientContext);
+  }
+}

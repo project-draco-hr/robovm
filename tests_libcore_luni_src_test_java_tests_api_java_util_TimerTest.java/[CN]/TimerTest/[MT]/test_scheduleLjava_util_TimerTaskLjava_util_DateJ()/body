@@ -5,95 +5,75 @@
     TimerTestTask testTask=new TimerTestTask();
     Date d=new Date(System.currentTimeMillis() + 100);
     t.cancel();
-    boolean exception=false;
     try {
       t.schedule(testTask,d,100);
+      fail("Scheduling a task after Timer.cancel() should throw exception");
     }
- catch (    IllegalStateException e) {
-      exception=true;
+ catch (    IllegalStateException expected) {
     }
-    assertTrue("Scheduling a task after Timer.cancel() should throw exception",exception);
     t=new Timer();
     d=new Date(System.currentTimeMillis() + 100);
     testTask=new TimerTestTask();
     testTask.cancel();
-    exception=false;
     try {
       t.schedule(testTask,d,100);
+      fail("Scheduling a task after cancelling it should throw exception");
     }
- catch (    IllegalStateException e) {
-      exception=true;
+ catch (    IllegalStateException expected) {
     }
-    assertTrue("Scheduling a task after cancelling it should throw exception",exception);
     t.cancel();
     t=new Timer();
     d=new Date(-100);
     testTask=new TimerTestTask();
-    exception=false;
     try {
       t.schedule(testTask,d,100);
+      fail("Scheduling a task with negative delay should throw IllegalArgumentException");
     }
- catch (    IllegalArgumentException e) {
-      exception=true;
+ catch (    IllegalArgumentException expected) {
     }
-    assertTrue("Scheduling a task with negative delay should throw IllegalArgumentException",exception);
     t.cancel();
     t=new Timer();
     d=new Date(System.currentTimeMillis() + 100);
     testTask=new TimerTestTask();
-    exception=false;
     try {
       t.schedule(testTask,d,-100);
+      fail("Scheduling a task with negative period should throw IllegalArgumentException");
     }
- catch (    IllegalArgumentException e) {
-      exception=true;
+ catch (    IllegalArgumentException expected) {
     }
-    assertTrue("Scheduling a task with negative period should throw IllegalArgumentException",exception);
     t.cancel();
     t=new Timer();
     d=new Date(System.currentTimeMillis() + 100);
-    exception=false;
     try {
       t.schedule(null,d,10);
+      fail("Scheduling a null task should throw NullPointerException");
     }
- catch (    NullPointerException e) {
-      exception=true;
+ catch (    NullPointerException expected) {
     }
-    assertTrue("Scheduling a null task should throw NullPointerException",exception);
     t.cancel();
     t=new Timer();
     testTask=new TimerTestTask();
-    exception=false;
     try {
       t.schedule(testTask,null,10);
+      fail("Scheduling a null task should throw NullPointerException");
     }
- catch (    NullPointerException e) {
-      exception=true;
+ catch (    NullPointerException expected) {
     }
-    assertTrue("Scheduling a null task should throw NullPointerException",exception);
     t.cancel();
     t=new Timer();
     d=new Date(-100);
-    exception=false;
     try {
       t.schedule(null,d,10);
+      fail("Scheduling a null task with negative dates should throw IllegalArgumentException first");
     }
- catch (    NullPointerException e) {
+ catch (    IllegalArgumentException expected) {
     }
-catch (    IllegalArgumentException e) {
-      exception=true;
-    }
-    assertTrue("Scheduling a null task with negative dates should throw IllegalArgumentException first",exception);
     t.cancel();
     t=new Timer();
     d=new Date(System.currentTimeMillis() + 100);
     testTask=new TimerTestTask();
     t.schedule(testTask,d,100);
-    try {
-      Thread.sleep(800);
-    }
- catch (    InterruptedException e) {
-    }
+    Thread.sleep(800);
     assertTrue("TimerTask.run() method should have been called at least twice (" + testTask.wasRun() + ")",testTask.wasRun() >= 2);
     t.cancel();
     t=new Timer();
@@ -113,11 +93,7 @@ catch (    IllegalArgumentException e) {
     testTask.incrementCount(true);
     d=new Date(System.currentTimeMillis() + 100);
     t.schedule(testTask,d,200);
-    try {
-      Thread.sleep(3000);
-    }
- catch (    InterruptedException e) {
-    }
+    Thread.sleep(3000);
     assertTrue("Multiple tasks should have incremented counter 24 times not " + timerCounter,timerCounter >= 24);
     t.cancel();
   }

@@ -3,7 +3,7 @@
     keyStore.load(null,null);
     try {
       Builder.newInstance(keyStore,null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
@@ -11,7 +11,7 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       Builder.newInstance(keyStore.getType(),keyStore.getProvider(),null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
@@ -19,13 +19,13 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       Builder.newInstance(null,null,null,null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
     try {
       Builder.newInstance(keyStore.getType(),keyStore.getProvider(),null,null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
@@ -35,14 +35,14 @@
     Builder builder=Builder.newInstance(keyStore,PARAM_STORE);
     try {
       builder.getProtectionParameter(null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
     assertEquals(keyStore,builder.getKeyStore());
     try {
       builder.getProtectionParameter(null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
@@ -54,10 +54,10 @@
     OutputStream os=null;
     try {
       os=new FileOutputStream(file);
-      if (isReadOnly(keyStore)) {
+      if (isLoadStoreUnsupported(keyStore) || isReadOnly(keyStore)) {
         try {
           keyStore.store(os,PASSWORD_STORE);
-          fail();
+          fail(keyStore.getType());
         }
  catch (        UnsupportedOperationException expected) {
         }
@@ -72,11 +72,20 @@
       assertEqualsKeyStores(file,PASSWORD_STORE,keyStore);
     }
   finally {
-      IoUtils.closeQuietly(os);
+      try {
+        if (os != null) {
+          os.close();
+        }
+      }
+ catch (      IOException ignored) {
+      }
       file.delete();
     }
   }
   for (  KeyStore keyStore : keyStores()) {
+    if (isLoadStoreUnsupported(keyStore)) {
+      continue;
+    }
     Builder builder=Builder.newInstance(keyStore.getType(),keyStore.getProvider(),PARAM_STORE);
     assertEquals(keyStore.getType(),builder.getKeyStore().getType());
     assertEquals(keyStore.getProvider(),builder.getKeyStore().getProvider());

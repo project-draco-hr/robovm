@@ -1,0 +1,16 @@
+{
+  String replaceString="a";
+  Charset cs=Charset.forName("UTF-8");
+  MockMalformedDecoder decoder=new MockMalformedDecoder(cs);
+  decoder.onMalformedInput(CodingErrorAction.REPLACE);
+  decoder.replaceWith(replaceString);
+  CharBuffer out=CharBuffer.allocate(1);
+  ByteBuffer in=ByteBuffer.wrap(new byte[]{0x45,0x38,0x45,0x45});
+  CoderResult result=decoder.decode(in,out,false);
+  assertTrue(result.isOverflow());
+  out=CharBuffer.allocate(10);
+  result=decoder.decode(in,out,true);
+  out.flip();
+  assertTrue(result.isUnderflow());
+  assertEquals("bb",out.toString());
+}

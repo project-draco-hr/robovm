@@ -1,0 +1,20 @@
+{
+  try {
+    SignerInformationVerifier verifier;
+    if (sigProvider != null) {
+      if (!sigProvider.getName().equalsIgnoreCase("BC")) {
+        verifier=new JcaSignerInfoVerifierBuilder(new JcaDigestCalculatorProviderBuilder().build()).setProvider(sigProvider).build(key);
+      }
+ else {
+        verifier=new JcaSimpleSignerInfoVerifierBuilder().setProvider(sigProvider).build(key);
+      }
+    }
+ else {
+      verifier=new JcaSimpleSignerInfoVerifierBuilder().build(key);
+    }
+    return doVerify(verifier);
+  }
+ catch (  OperatorCreationException e) {
+    throw new CMSException("unable to create verifier: " + e.getMessage(),e);
+  }
+}

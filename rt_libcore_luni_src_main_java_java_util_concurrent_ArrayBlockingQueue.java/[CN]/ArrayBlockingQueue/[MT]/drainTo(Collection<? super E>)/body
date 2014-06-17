@@ -1,28 +1,3 @@
 {
-  checkNotNull(c);
-  if (c == this)   throw new IllegalArgumentException();
-  final Object[] items=this.items;
-  final ReentrantLock lock=this.lock;
-  lock.lock();
-  try {
-    int i=takeIndex;
-    int n=0;
-    int max=count;
-    while (n < max) {
-      c.add(this.<E>cast(items[i]));
-      items[i]=null;
-      i=inc(i);
-      ++n;
-    }
-    if (n > 0) {
-      count=0;
-      putIndex=0;
-      takeIndex=0;
-      notFull.signalAll();
-    }
-    return n;
-  }
-  finally {
-    lock.unlock();
-  }
+  return drainTo(c,Integer.MAX_VALUE);
 }

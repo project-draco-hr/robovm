@@ -1,0 +1,35 @@
+{
+  OpenSSLBIOInputStream bis=new OpenSSLBIOInputStream(inStream);
+  final boolean markable=inStream.markSupported();
+  if (markable) {
+    inStream.mark(PUSHBACK_SIZE);
+  }
+  final long[] certRefs;
+  try {
+    certRefs=NativeCrypto.ASN1_seq_unpack_X509_bio(bis.getBioContext());
+  }
+ catch (  Exception e) {
+    if (markable) {
+      try {
+        inStream.reset();
+      }
+ catch (      IOException ignored) {
+      }
+    }
+    throw new CertificateException(e);
+  }
+ finally {
+    NativeCrypto.BIO_free(bis.getBioContext());
+  }
+  if (certRefs == null) {
+    return new OpenSSLX509CertPath(Collections.<X509Certificate>emptyList());
+  }
+  final List<OpenSSLX509Certificate> certs=new ArrayList<OpenSSLX509Certificate>(certRefs.length);
+  for (int i=certRefs.length - 1; i >= 0; i--) {
+    if (certRefs[i] == 0) {
+      continue;
+    }
+    certs.add(new OpenSSLX509Certificate(certRefs[i]));
+  }
+  return new OpenSSLX509CertPath(certs);
+}

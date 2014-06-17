@@ -1,0 +1,23 @@
+{
+  String algorithm="RSA";
+  TestKeyStore intermediateCa=TestKeyStore.getIntermediateCa();
+  TestKeyStore leaf=new TestKeyStore.Builder().keyAlgorithms(new String[]{algorithm}).aliasPrefix("criticalCodeSigning").signer(intermediateCa.getPrivateKey("RSA","RSA")).rootCa(intermediateCa.getRootCertificate("RSA")).addExtendedKeyUsage(keyPurposeId,critical).build();
+  PrivateKeyEntry privateKeyEntry=leaf.getPrivateKey(algorithm,algorithm);
+  X509Certificate[] chain=(X509Certificate[])privateKeyEntry.getCertificateChain();
+  TestKeyStore rootCa=TestKeyStore.getRootCa();
+  X509TrustManager trustManager=(X509TrustManager)rootCa.trustManagers[0];
+  try {
+    trustManager.checkClientTrusted(chain,algorithm);
+    assertTrue(client);
+  }
+ catch (  Exception e) {
+    assertFalse(client);
+  }
+  try {
+    trustManager.checkServerTrusted(chain,algorithm);
+    assertTrue(server);
+  }
+ catch (  Exception e) {
+    assertFalse(server);
+  }
+}

@@ -1,0 +1,54 @@
+{
+  if (buf.isReadOnly()) {
+    try {
+      buf.compact();
+      fail("Should throw Exception");
+    }
+ catch (    ReadOnlyBufferException e) {
+    }
+    return;
+  }
+  buf.clear();
+  buf.mark();
+  loadTestData1(buf);
+  ByteBuffer ret=buf.compact();
+  assertSame(ret,buf);
+  assertEquals(buf.position(),buf.capacity());
+  assertEquals(buf.limit(),buf.capacity());
+  assertContentLikeTestData1(buf,0,(byte)0,buf.capacity());
+  try {
+    buf.reset();
+    fail("Should throw Exception");
+  }
+ catch (  InvalidMarkException e) {
+  }
+  buf.position(0);
+  buf.limit(0);
+  buf.mark();
+  ret=buf.compact();
+  assertSame(ret,buf);
+  assertEquals(buf.position(),0);
+  assertEquals(buf.limit(),buf.capacity());
+  assertContentLikeTestData1(buf,0,(byte)0,buf.capacity());
+  try {
+    buf.reset();
+    fail("Should throw Exception");
+  }
+ catch (  InvalidMarkException e) {
+  }
+  assertTrue(buf.capacity() > SMALL_TEST_LENGTH);
+  buf.position(1);
+  buf.limit(SMALL_TEST_LENGTH);
+  buf.mark();
+  ret=buf.compact();
+  assertSame(ret,buf);
+  assertEquals(buf.position(),4);
+  assertEquals(buf.limit(),buf.capacity());
+  assertContentLikeTestData1(buf,0,(byte)1,4);
+  try {
+    buf.reset();
+    fail("Should throw Exception");
+  }
+ catch (  InvalidMarkException e) {
+  }
+}

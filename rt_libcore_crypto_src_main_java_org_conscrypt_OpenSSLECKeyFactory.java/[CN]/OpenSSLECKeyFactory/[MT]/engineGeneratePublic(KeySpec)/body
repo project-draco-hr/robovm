@@ -1,0 +1,12 @@
+{
+  if (keySpec == null) {
+    throw new InvalidKeySpecException("keySpec == null");
+  }
+  if (keySpec instanceof ECPublicKeySpec) {
+    return new OpenSSLECPublicKey((ECPublicKeySpec)keySpec);
+  }
+ else   if (keySpec instanceof X509EncodedKeySpec) {
+    return OpenSSLKey.getPublicKey((X509EncodedKeySpec)keySpec,NativeCrypto.EVP_PKEY_EC);
+  }
+  throw new InvalidKeySpecException("Must use ECPublicKeySpec or X509EncodedKeySpec; was " + keySpec.getClass().getName());
+}

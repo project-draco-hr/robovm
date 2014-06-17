@@ -1,0 +1,50 @@
+{
+  Proxy selectedProxy=httpEngine.connection != null ? httpEngine.connection.getRoute().getProxy() : client.getProxy();
+  final int responseCode=getResponseCode();
+switch (responseCode) {
+case HTTP_PROXY_AUTH:
+    if (selectedProxy.type() != Proxy.Type.HTTP) {
+      throw new ProtocolException("Received HTTP_PROXY_AUTH (407) code while not using proxy");
+    }
+case HTTP_UNAUTHORIZED:
+  boolean credentialsFound=HttpAuthenticator.processAuthHeader(client.getAuthenticator(),getResponseCode(),httpEngine.getResponseHeaders().getHeaders(),rawRequestHeaders,selectedProxy,url);
+return credentialsFound ? Retry.SAME_CONNECTION : Retry.NONE;
+case HTTP_MULT_CHOICE:
+case HTTP_MOVED_PERM:
+case HTTP_MOVED_TEMP:
+case HTTP_SEE_OTHER:
+case HTTP_TEMP_REDIRECT:
+if (!getInstanceFollowRedirects()) {
+return Retry.NONE;
+}
+if (++redirectionCount > MAX_REDIRECTS) {
+throw new ProtocolException("Too many redirects: " + redirectionCount);
+}
+if (responseCode == HTTP_TEMP_REDIRECT && !method.equals("GET") && !method.equals("HEAD")) {
+return Retry.NONE;
+}
+String location=getHeaderField("Location");
+if (location == null) {
+return Retry.NONE;
+}
+URL previousUrl=url;
+url=new URL(previousUrl,location);
+if (!url.getProtocol().equals("https") && !url.getProtocol().equals("http")) {
+return Retry.NONE;
+}
+boolean sameProtocol=previousUrl.getProtocol().equals(url.getProtocol());
+if (!sameProtocol && !client.getFollowProtocolRedirects()) {
+return Retry.NONE;
+}
+boolean sameHost=previousUrl.getHost().equals(url.getHost());
+boolean samePort=getEffectivePort(previousUrl) == getEffectivePort(url);
+if (sameHost && samePort && sameProtocol) {
+return Retry.SAME_CONNECTION;
+}
+ else {
+return Retry.DIFFERENT_CONNECTION;
+}
+default :
+return Retry.NONE;
+}
+}

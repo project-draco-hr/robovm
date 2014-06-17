@@ -1,0 +1,26 @@
+{
+  if (s == null) {
+    return;
+  }
+  if (this.ascii) {
+    int off=0;
+    int remaining=s.length();
+    while (remaining > 0) {
+      int chunk=this.buffer.capacity() - this.buffer.length();
+      chunk=Math.min(chunk,remaining);
+      if (chunk > 0) {
+        this.buffer.append(s,off,chunk);
+      }
+      if (this.buffer.isFull()) {
+        flushBuffer();
+      }
+      off+=chunk;
+      remaining-=chunk;
+    }
+  }
+ else {
+    byte[] tmp=s.toString().getBytes(this.charset);
+    write(tmp);
+  }
+  write(CRLF);
+}

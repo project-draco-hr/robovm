@@ -1,0 +1,10 @@
+{
+  try {
+    OpenSSLECGroupContext group=OpenSSLECGroupContext.getInstance(ecPublicKey.getParams());
+    OpenSSLECPointContext pubKey=OpenSSLECPointContext.getInstance(NativeCrypto.get_EC_GROUP_type(group.getContext()),group,ecPublicKey.getW());
+    return new OpenSSLKey(NativeCrypto.EVP_PKEY_new_EC_KEY(group.getContext(),pubKey.getContext(),null));
+  }
+ catch (  Exception e) {
+    throw new InvalidKeyException(e);
+  }
+}

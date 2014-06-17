@@ -1,0 +1,65 @@
+{
+  if (inStream == null) {
+    throw new ParsingException("inStream == null");
+  }
+  try {
+    if (inStream.available() == 0) {
+      return Collections.emptyList();
+    }
+  }
+ catch (  IOException e) {
+    throw new ParsingException("Problem reading input stream",e);
+  }
+  final boolean markable=inStream.markSupported();
+  if (markable) {
+    inStream.mark(PUSHBACK_SIZE);
+  }
+  final PushbackInputStream pbis=new PushbackInputStream(inStream,PUSHBACK_SIZE);
+  try {
+    final byte[] buffer=new byte[PKCS7_MARKER.length];
+    final int len=pbis.read(buffer);
+    if (len < 0) {
+      throw new ParsingException("inStream is empty");
+    }
+    pbis.unread(buffer,0,len);
+    if (len == PKCS7_MARKER.length && Arrays.equals(PKCS7_MARKER,buffer)) {
+      return fromPkcs7PemInputStream(pbis);
+    }
+    if (buffer[4] == 0x06) {
+      return fromPkcs7DerInputStream(pbis);
+    }
+  }
+ catch (  Exception e) {
+    if (markable) {
+      try {
+        inStream.reset();
+      }
+ catch (      IOException ignored) {
+      }
+    }
+    throw new ParsingException(e);
+  }
+  final List<T> coll=new ArrayList<T>();
+  T c=null;
+  do {
+    if (markable) {
+      inStream.mark(PUSHBACK_SIZE);
+    }
+    try {
+      c=generateItem(pbis);
+      coll.add(c);
+    }
+ catch (    ParsingException e) {
+      if (markable) {
+        try {
+          inStream.reset();
+        }
+ catch (        IOException ignored) {
+        }
+      }
+      c=null;
+    }
+  }
+ while (c != null);
+  return coll;
+}

@@ -1,0 +1,26 @@
+{
+{
+    X509Certificate c=getCertificate(f,CERT_RSA);
+    if (StandardNames.IS_RI) {
+      assertNull(f.getProvider().getName(),c.getSigAlgParams());
+    }
+ else {
+      assertNotNull(f.getProvider().getName(),c.getSigAlgParams());
+    }
+  }
+{
+    X509Certificate c=getCertificate(f,CERT_DSA);
+    assertNull(f.getProvider().getName(),c.getSigAlgParams());
+  }
+{
+    X509Certificate c=getCertificate(f,CERT_EC);
+    assertNull(f.getProvider().getName(),c.getSigAlgParams());
+  }
+{
+    X509Certificate c=getCertificate(f,CERT_SIGOPT);
+    final byte[] expected=new byte[]{(byte)0x30,(byte)0x05,(byte)0xA2,(byte)0x03,(byte)0x02,(byte)0x01,(byte)0x01};
+    final byte[] params=c.getSigAlgParams();
+    assertNotNull(f.getProvider().getName(),params);
+    assertEquals(Arrays.toString(expected),Arrays.toString(params));
+  }
+}

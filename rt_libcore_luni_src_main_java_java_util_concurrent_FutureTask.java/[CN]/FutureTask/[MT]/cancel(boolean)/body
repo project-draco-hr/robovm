@@ -1,3 +1,18 @@
 {
-  return sync.innerCancel(mayInterruptIfRunning);
+  if (!(state == NEW && UNSAFE.compareAndSwapInt(this,stateOffset,NEW,mayInterruptIfRunning ? INTERRUPTING : CANCELLED)))   return false;
+  try {
+    if (mayInterruptIfRunning) {
+      try {
+        Thread t=runner;
+        if (t != null)         t.interrupt();
+      }
+  finally {
+        UNSAFE.putOrderedInt(this,stateOffset,INTERRUPTED);
+      }
+    }
+  }
+  finally {
+    finishCompletion();
+  }
+  return true;
 }

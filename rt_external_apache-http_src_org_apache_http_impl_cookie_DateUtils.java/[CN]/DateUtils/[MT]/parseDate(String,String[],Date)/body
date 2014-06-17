@@ -1,0 +1,24 @@
+{
+  if (dateValue == null) {
+    throw new IllegalArgumentException("dateValue is null");
+  }
+  if (dateFormats == null) {
+    dateFormats=DEFAULT_PATTERNS;
+  }
+  if (startDate == null) {
+    startDate=DEFAULT_TWO_DIGIT_YEAR_START;
+  }
+  if (dateValue.length() > 1 && dateValue.startsWith("'") && dateValue.endsWith("'")) {
+    dateValue=dateValue.substring(1,dateValue.length() - 1);
+  }
+  for (  String dateFormat : dateFormats) {
+    SimpleDateFormat dateParser=DateFormatHolder.formatFor(dateFormat);
+    dateParser.set2DigitYearStart(startDate);
+    try {
+      return dateParser.parse(dateValue);
+    }
+ catch (    ParseException pe) {
+    }
+  }
+  throw new DateParseException("Unable to parse the date " + dateValue);
+}

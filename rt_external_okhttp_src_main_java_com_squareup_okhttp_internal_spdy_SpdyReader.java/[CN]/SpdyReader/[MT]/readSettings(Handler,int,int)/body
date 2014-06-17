@@ -1,0 +1,15 @@
+{
+  int numberOfEntries=in.readInt();
+  if (length != 4 + 8 * numberOfEntries) {
+    throw ioException("TYPE_SETTINGS length: %d != 4 + 8 * %d",length,numberOfEntries);
+  }
+  Settings settings=new Settings();
+  for (int i=0; i < numberOfEntries; i++) {
+    int w1=in.readInt();
+    int value=in.readInt();
+    int idFlags=(w1 & 0xff000000) >>> 24;
+    int id=w1 & 0xffffff;
+    settings.set(id,idFlags,value);
+  }
+  handler.settings(flags,settings);
+}

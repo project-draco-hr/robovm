@@ -1,0 +1,50 @@
+{
+  table.clear();
+  if (stream == null) {
+    return;
+  }
+  DataInputStream dIn=new DataInputStream(stream);
+  int version=dIn.readInt();
+  if (version != STORE_VERSION) {
+    if (version != 0 && version != 1) {
+      throw new IOException("Wrong version of key store.");
+    }
+  }
+  int saltLength=dIn.readInt();
+  if (saltLength <= 0) {
+    throw new IOException("Invalid salt detected");
+  }
+  byte[] salt=new byte[saltLength];
+  dIn.readFully(salt);
+  int iterationCount=dIn.readInt();
+  HMac hMac=new HMac(new SHA1Digest());
+  if (password != null && password.length != 0) {
+    byte[] passKey=PBEParametersGenerator.PKCS12PasswordToBytes(password);
+    PBEParametersGenerator pbeGen=new PKCS12ParametersGenerator(new SHA1Digest());
+    pbeGen.init(passKey,salt,iterationCount);
+    CipherParameters macParams;
+    if (version != 2) {
+      macParams=pbeGen.generateDerivedMacParameters(hMac.getMacSize());
+    }
+ else {
+      macParams=pbeGen.generateDerivedMacParameters(hMac.getMacSize() * 8);
+    }
+    Arrays.fill(passKey,(byte)0);
+    hMac.init(macParams);
+    MacInputStream mIn=new MacInputStream(dIn,hMac);
+    loadStore(mIn);
+    byte[] mac=new byte[hMac.getMacSize()];
+    hMac.doFinal(mac,0);
+    byte[] oldMac=new byte[hMac.getMacSize()];
+    dIn.readFully(oldMac);
+    if (!Arrays.constantTimeAreEqual(mac,oldMac)) {
+      table.clear();
+      throw new IOException("KeyStore integrity check failed.");
+    }
+  }
+ else {
+    loadStore(dIn);
+    byte[] oldMac=new byte[hMac.getMacSize()];
+    dIn.readFully(oldMac);
+  }
+}

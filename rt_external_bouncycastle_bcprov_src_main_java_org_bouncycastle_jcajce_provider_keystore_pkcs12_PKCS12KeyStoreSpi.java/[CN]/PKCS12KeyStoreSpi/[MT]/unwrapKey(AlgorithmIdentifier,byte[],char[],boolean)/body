@@ -1,0 +1,30 @@
+{
+  ASN1ObjectIdentifier algorithm=algId.getAlgorithm();
+  try {
+    if (algorithm.on(PKCSObjectIdentifiers.pkcs_12PbeIds)) {
+      PKCS12PBEParams pbeParams=PKCS12PBEParams.getInstance(algId.getParameters());
+      PBEKeySpec pbeSpec=new PBEKeySpec(password);
+      PrivateKey out;
+      SecretKeyFactory keyFact=SecretKeyFactory.getInstance(algorithm.getId(),bcProvider);
+      PBEParameterSpec defParams=new PBEParameterSpec(pbeParams.getIV(),pbeParams.getIterations().intValue());
+      SecretKey k=keyFact.generateSecret(pbeSpec);
+      ((BCPBEKey)k).setTryWrongPKCS12Zero(wrongPKCS12Zero);
+      Cipher cipher=Cipher.getInstance(algorithm.getId(),bcProvider);
+      cipher.init(Cipher.UNWRAP_MODE,k,defParams);
+      return (PrivateKey)cipher.unwrap(data,"",Cipher.PRIVATE_KEY);
+    }
+ else     if (algorithm.equals(PKCSObjectIdentifiers.id_PBES2)) {
+      PBES2Parameters alg=PBES2Parameters.getInstance(algId.getParameters());
+      PBKDF2Params func=PBKDF2Params.getInstance(alg.getKeyDerivationFunc().getParameters());
+      SecretKeyFactory keyFact=SecretKeyFactory.getInstance(alg.getKeyDerivationFunc().getAlgorithm().getId(),bcProvider);
+      SecretKey k=keyFact.generateSecret(new PBEKeySpec(password,func.getSalt(),func.getIterationCount().intValue(),SecretKeyUtil.getKeySize(alg.getEncryptionScheme().getAlgorithm())));
+      Cipher cipher=Cipher.getInstance(alg.getEncryptionScheme().getAlgorithm().getId(),bcProvider);
+      cipher.init(Cipher.UNWRAP_MODE,k,new IvParameterSpec(ASN1OctetString.getInstance(alg.getEncryptionScheme().getParameters()).getOctets()));
+      return (PrivateKey)cipher.unwrap(data,"",Cipher.PRIVATE_KEY);
+    }
+  }
+ catch (  Exception e) {
+    throw new IOException("exception unwrapping private key - " + e.toString());
+  }
+  throw new IOException("exception unwrapping private key - cannot recognise: " + algorithm);
+}

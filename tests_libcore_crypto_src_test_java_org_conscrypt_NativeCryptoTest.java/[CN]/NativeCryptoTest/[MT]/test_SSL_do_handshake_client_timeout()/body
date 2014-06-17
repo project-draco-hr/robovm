@@ -1,0 +1,22 @@
+{
+  final ServerSocket listener=new ServerSocket(0);
+  Socket serverSocket=null;
+  try {
+    Hooks cHooks=new Hooks();
+    Hooks sHooks=new ServerHooks(getServerPrivateKey(),getServerCertificates());
+    Future<TestSSLHandshakeCallbacks> client=handshake(listener,1,true,cHooks,null,null);
+    Future<TestSSLHandshakeCallbacks> server=handshake(listener,-1,false,sHooks,null,null);
+    serverSocket=server.get(TIMEOUT_SECONDS,TimeUnit.SECONDS).getSocket();
+    client.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+    fail();
+  }
+ catch (  ExecutionException expected) {
+    if (SocketTimeoutException.class != expected.getCause().getClass()) {
+      expected.printStackTrace();
+    }
+    assertEquals(SocketTimeoutException.class,expected.getCause().getClass());
+  }
+ finally {
+    IoUtils.closeQuietly(serverSocket);
+  }
+}

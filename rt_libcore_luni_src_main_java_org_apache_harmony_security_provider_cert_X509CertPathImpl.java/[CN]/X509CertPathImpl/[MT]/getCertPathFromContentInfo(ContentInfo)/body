@@ -1,0 +1,15 @@
+{
+  final SignedData sd=contentInfo.getSignedData();
+  if (sd == null) {
+    throw new CertificateException("Incorrect PKCS7 encoded form: missing signed data");
+  }
+  List<Certificate> certs=sd.getCertificates();
+  if (certs == null) {
+    certs=Collections.emptyList();
+  }
+  final List<X509Certificate> result=new ArrayList<X509Certificate>(certs.size());
+  for (  Certificate cert : certs) {
+    result.add(new X509CertImpl(cert));
+  }
+  return new X509CertPathImpl(result,Encoding.PKCS7);
+}

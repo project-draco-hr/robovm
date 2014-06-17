@@ -1,0 +1,38 @@
+{
+  ByteBuffer[] readBuffers=new ByteBuffer[2];
+  readBuffers[0]=ByteBuffer.allocate(CAPACITY);
+  readBuffers[1]=ByteBuffer.allocate(CAPACITY);
+  try {
+    readOnlyFileChannel.read(readBuffers,2,1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  try {
+    readWriteFileChannel.read(null,-1,0);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+catch (  NullPointerException expected) {
+  }
+  try {
+    writeOnlyFileChannel.read(readBuffers,0,3);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  try {
+    readWriteFileChannel.read(readBuffers,-1,0);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  readWriteFileChannel.close();
+  try {
+    readWriteFileChannel.read(readBuffers,0,3);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+}

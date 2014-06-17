@@ -1,5 +1,12 @@
 {
   TestSSLContext c=TestSSLContext.create(testKeyStore,testKeyStore);
+  TestSSLContext cWithWrongPrivateKeys;
+{
+    KeyManager originalKeyManager=testKeyStore.keyManagers[0];
+    testKeyStore.keyManagers[0]=new RandomPrivateKeyX509ExtendedKeyManager(c.serverKeyManager);
+    cWithWrongPrivateKeys=TestSSLContext.create(testKeyStore,testKeyStore);
+    testKeyStore.keyManagers[0]=originalKeyManager;
+  }
   String[] cipherSuites=c.clientContext.createSSLEngine().getSupportedCipherSuites();
   for (  String cipherSuite : cipherSuites) {
     boolean errorExpected=StandardNames.IS_RI && cipherSuite.endsWith("_SHA256");
@@ -19,6 +26,21 @@
       }
 ));
       assertFalse(errorExpected);
+      if (!cipherSuite.contains("_anon_")) {
+        try {
+          TestSSLEnginePair p=TestSSLEnginePair.create(cWithWrongPrivateKeys,new TestSSLEnginePair.Hooks(){
+            @Override void beforeBeginHandshake(            SSLEngine client,            SSLEngine server){
+              client.setEnabledCipherSuites(cipherSuiteArray);
+              server.setEnabledCipherSuites(cipherSuiteArray);
+            }
+          }
+);
+          assertConnected(p);
+          fail("Handshake succeeded for " + cipherSuite + " despite server not having the correct private key");
+        }
+ catch (        IOException expected) {
+        }
+      }
     }
  catch (    Exception maybeExpected) {
       if (!errorExpected) {

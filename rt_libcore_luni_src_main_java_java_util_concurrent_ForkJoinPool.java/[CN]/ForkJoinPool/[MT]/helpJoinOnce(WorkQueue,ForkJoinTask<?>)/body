@@ -1,0 +1,20 @@
+{
+  int s;
+  if (joiner != null && task != null && (s=task.status) >= 0) {
+    ForkJoinTask<?> prevJoin=joiner.currentJoin;
+    joiner.currentJoin=task;
+    do {
+    }
+ while ((s=task.status) >= 0 && !joiner.isEmpty() && joiner.tryRemoveAndExec(task));
+    if (s >= 0 && (s=task.status) >= 0) {
+      helpSignal(task,joiner.poolIndex);
+      if ((s=task.status) >= 0 && (task instanceof CountedCompleter))       s=helpComplete(task,LIFO_QUEUE);
+    }
+    if (s >= 0 && joiner.isEmpty()) {
+      do {
+      }
+ while (task.status >= 0 && tryHelpStealer(joiner,task) > 0);
+    }
+    joiner.currentJoin=prevJoin;
+  }
+}

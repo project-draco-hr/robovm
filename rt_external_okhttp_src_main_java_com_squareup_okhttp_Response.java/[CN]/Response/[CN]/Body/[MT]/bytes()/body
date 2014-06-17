@@ -1,0 +1,18 @@
+{
+  long contentLength=contentLength();
+  if (contentLength > Integer.MAX_VALUE) {
+    throw new IOException("Cannot buffer entire body for content length: " + contentLength);
+  }
+  if (contentLength != -1) {
+    byte[] content=new byte[(int)contentLength];
+    InputStream in=byteStream();
+    Util.readFully(in,content);
+    if (in.read() != -1)     throw new IOException("Content-Length and stream length disagree");
+    return content;
+  }
+ else {
+    ByteArrayOutputStream out=new ByteArrayOutputStream();
+    Util.copy(byteStream(),out);
+    return out.toByteArray();
+  }
+}

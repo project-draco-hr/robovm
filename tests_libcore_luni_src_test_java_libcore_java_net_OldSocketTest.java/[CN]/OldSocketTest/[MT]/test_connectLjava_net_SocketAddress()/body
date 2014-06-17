@@ -21,7 +21,7 @@ class SocketCloser extends Thread {
       this.theSocket=theSocket;
     }
   }
-  int portNumber=Support_PortManager.getNextPort();
+  int portNumber=0;
   Socket theSocket=null;
   ServerSocket serverSocket=null;
   SocketAddress theAddress=null;
@@ -67,15 +67,8 @@ class SocketCloser extends Thread {
     assertTrue("Wrong exception when connecting to address nobody listening on: " + e.toString(),(e instanceof ConnectException));
   }
   theSocket=new Socket();
-  serverSocket=new ServerSocket();
-  serverSocket.bind(theAddress);
-  theSocket.connect(theAddress);
-  theSocket.close();
-  serverSocket.close();
-  theSocket=new Socket();
-  serverSocket=new ServerSocket();
-  serverSocket.bind(theAddress);
-  theSocket.connect(theAddress);
+  serverSocket=new ServerSocket(0,5);
+  theSocket.connect(serverSocket.getLocalSocketAddress());
   assertTrue("Socket did not returned connected when it is: ",theSocket.isConnected());
   assertFalse("Socket returned closed when it should be connected ",theSocket.isClosed());
   assertTrue("Socket returned not bound when it should be: ",theSocket.isBound());
@@ -86,10 +79,9 @@ class SocketCloser extends Thread {
   serverSocket.close();
   try {
     theSocket=new Socket();
-    serverSocket=new ServerSocket();
-    serverSocket.bind(theAddress);
-    theSocket.connect(theAddress);
-    theSocket.connect(theAddress);
+    serverSocket=new ServerSocket(0,5);
+    theSocket.connect(serverSocket.getLocalSocketAddress());
+    theSocket.connect(serverSocket.getLocalSocketAddress());
     theSocket.close();
     serverSocket.close();
     fail("No exception when we try to connect on a connected socket: ");
@@ -105,9 +97,8 @@ class SocketCloser extends Thread {
     }
   }
   theSocket=new Socket();
-  serverSocket=new ServerSocket();
-  serverSocket.bind(theAddress);
-  theSocket.connect(theAddress);
+  serverSocket=new ServerSocket(0,5);
+  theSocket.connect(serverSocket.getLocalSocketAddress());
   Socket servSock=serverSocket.accept();
   InputStream theInput=theSocket.getInputStream();
   OutputStream theOutput=servSock.getOutputStream();
@@ -142,9 +133,8 @@ class SocketCloser extends Thread {
   SocketChannel channel=SocketChannel.open();
   channel.configureBlocking(false);
   Socket socket=channel.socket();
-  int port=Support_PortManager.getNextPort();
   try {
-    socket.connect(new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort()));
+    socket.connect(serverSocket.getLocalSocketAddress());
     fail("IllegalBlockingModeException was not thrown.");
   }
  catch (  IllegalBlockingModeException expected) {

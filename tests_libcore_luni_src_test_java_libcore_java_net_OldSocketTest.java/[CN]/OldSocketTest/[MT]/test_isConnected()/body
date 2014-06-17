@@ -1,18 +1,14 @@
 {
-  InetAddress addr=InetAddress.getLocalHost();
-  int port=Support_PortManager.getNextPort();
-  ServerSocket serverSocket=new ServerSocket(port,5,addr);
-  Socket theSocket=new Socket(addr,port);
+  ServerSocket serverSocket=new ServerSocket(0,5);
+  Socket theSocket=new Socket(serverSocket.getInetAddress(),serverSocket.getLocalPort());
   Socket servSock=serverSocket.accept();
   assertTrue("Socket indicated  not connected when it should be",theSocket.isConnected());
   theSocket.close();
   serverSocket.close();
-  InetSocketAddress theAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
   theSocket=new Socket();
   assertFalse("Socket indicated connected when it was not",theSocket.isConnected());
-  serverSocket=new ServerSocket();
-  serverSocket.bind(theAddress);
-  theSocket.connect(theAddress);
+  serverSocket=new ServerSocket(0,5);
+  theSocket.connect(serverSocket.getLocalSocketAddress());
   servSock=serverSocket.accept();
   assertTrue("Socket indicated  not connected when it should be",theSocket.isConnected());
   theSocket.close();

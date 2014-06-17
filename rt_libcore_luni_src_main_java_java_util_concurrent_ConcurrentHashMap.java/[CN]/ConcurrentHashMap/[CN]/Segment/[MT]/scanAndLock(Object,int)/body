@@ -1,0 +1,20 @@
+{
+  HashEntry<K,V> first=entryForHash(this,hash);
+  HashEntry<K,V> e=first;
+  int retries=-1;
+  while (!tryLock()) {
+    HashEntry<K,V> f;
+    if (retries < 0) {
+      if (e == null || key.equals(e.key))       retries=0;
+ else       e=e.next;
+    }
+ else     if (++retries > MAX_SCAN_RETRIES) {
+      lock();
+      break;
+    }
+ else     if ((retries & 1) == 0 && (f=entryForHash(this,hash)) != first) {
+      e=first=f;
+      retries=-1;
+    }
+  }
+}

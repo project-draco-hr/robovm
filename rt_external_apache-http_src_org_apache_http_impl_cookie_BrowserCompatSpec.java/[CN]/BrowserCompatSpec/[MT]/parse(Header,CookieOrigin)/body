@@ -1,0 +1,48 @@
+{
+  if (header == null) {
+    throw new IllegalArgumentException("Header may not be null");
+  }
+  if (origin == null) {
+    throw new IllegalArgumentException("Cookie origin may not be null");
+  }
+  String headervalue=header.getValue();
+  boolean isNetscapeCookie=false;
+  int i1=headervalue.toLowerCase(Locale.ENGLISH).indexOf("expires=");
+  if (i1 != -1) {
+    i1+="expires=".length();
+    int i2=headervalue.indexOf(';',i1);
+    if (i2 == -1) {
+      i2=headervalue.length();
+    }
+    try {
+      DateUtils.parseDate(headervalue.substring(i1,i2),this.datepatterns);
+      isNetscapeCookie=true;
+    }
+ catch (    DateParseException e) {
+    }
+  }
+  HeaderElement[] elems=null;
+  if (isNetscapeCookie) {
+    NetscapeDraftHeaderParser parser=NetscapeDraftHeaderParser.DEFAULT;
+    CharArrayBuffer buffer;
+    ParserCursor cursor;
+    if (header instanceof FormattedHeader) {
+      buffer=((FormattedHeader)header).getBuffer();
+      cursor=new ParserCursor(((FormattedHeader)header).getValuePos(),buffer.length());
+    }
+ else {
+      String s=header.getValue();
+      if (s == null) {
+        throw new MalformedCookieException("Header value is null");
+      }
+      buffer=new CharArrayBuffer(s.length());
+      buffer.append(s);
+      cursor=new ParserCursor(0,buffer.length());
+    }
+    elems=new HeaderElement[]{parser.parseHeader(buffer,cursor)};
+  }
+ else {
+    elems=header.getElements();
+  }
+  return parse(elems,origin);
+}

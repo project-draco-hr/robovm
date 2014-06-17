@@ -1,0 +1,19 @@
+{
+  if (key == null) {
+    throw new SignatureException("Need RSA private key");
+  }
+  if (inputIsTooLong) {
+    throw new SignatureException("input length " + inputOffset + " != "+ inputBuffer.length+ " (modulus size)");
+  }
+  byte[] outputBuffer=new byte[inputBuffer.length];
+  try {
+    NativeCrypto.RSA_private_encrypt(inputOffset,inputBuffer,outputBuffer,key.getPkeyContext(),NativeCrypto.RSA_PKCS1_PADDING);
+    return outputBuffer;
+  }
+ catch (  Exception ex) {
+    throw new SignatureException(ex);
+  }
+ finally {
+    inputOffset=0;
+  }
+}

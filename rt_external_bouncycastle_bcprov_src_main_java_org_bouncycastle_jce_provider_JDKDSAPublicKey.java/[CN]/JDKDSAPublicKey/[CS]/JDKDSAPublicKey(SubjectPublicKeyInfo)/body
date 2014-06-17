@@ -1,0 +1,14 @@
+{
+  DERInteger derY;
+  try {
+    derY=(DERInteger)info.parsePublicKey();
+  }
+ catch (  IOException e) {
+    throw new IllegalArgumentException("invalid info structure in DSA public key");
+  }
+  this.y=derY.getValue();
+  if (isNotNull(info.getAlgorithm().getParameters())) {
+    DSAParameter params=DSAParameter.getInstance(info.getAlgorithm().getParameters());
+    this.dsaSpec=new DSAParameterSpec(params.getP(),params.getQ(),params.getG());
+  }
+}

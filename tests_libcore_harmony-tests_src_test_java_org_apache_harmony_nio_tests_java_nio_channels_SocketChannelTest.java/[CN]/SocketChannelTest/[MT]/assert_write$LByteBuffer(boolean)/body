@@ -1,0 +1,42 @@
+{
+  ByteBuffer writeContents[]=new ByteBuffer[2];
+  writeContents[0]=ByteBuffer.allocate(CAPACITY_NORMAL);
+  writeContents[1]=ByteBuffer.allocate(CAPACITY_NORMAL);
+  for (int i=0; i < CAPACITY_NORMAL; i++) {
+    writeContents[0].put((byte)i);
+  }
+  for (int i=CAPACITY_NORMAL; i < CAPACITY_NORMAL * 2; i++) {
+    writeContents[1].put((byte)i);
+  }
+  writeContents[0].flip();
+  writeContents[1].flip();
+  channel1.connect(localAddr1);
+  Socket acceptedSocket=server1.accept();
+  channel1.configureBlocking(isBlocking);
+  assertEquals(CAPACITY_NORMAL,channel1.write(writeContents,0,1));
+  assertEquals(CAPACITY_NORMAL,channel1.write(writeContents,1,1));
+  assertEquals(CAPACITY_NORMAL,writeContents[0].position());
+  assertEquals(CAPACITY_NORMAL,writeContents[1].position());
+  channel1.close();
+  InputStream in=acceptedSocket.getInputStream();
+  byte[] readContent=new byte[CAPACITY_NORMAL * 2 + 1];
+  int totalCount=0;
+  int count=0;
+  acceptedSocket.setSoTimeout(TIMEOUT);
+  while (totalCount <= CAPACITY_NORMAL) {
+    count=in.read(readContent,totalCount,readContent.length - totalCount);
+    if (EOF == count) {
+      break;
+    }
+    totalCount+=count;
+  }
+  assertEquals(CAPACITY_NORMAL * 2,totalCount);
+  writeContents[0].flip();
+  writeContents[1].flip();
+  for (int i=0; i < CAPACITY_NORMAL; i++) {
+    assertEquals(writeContents[0].get(),readContent[i]);
+  }
+  for (int i=CAPACITY_NORMAL; i < CAPACITY_NORMAL * 2; i++) {
+    assertEquals(writeContents[1].get(),readContent[i]);
+  }
+}

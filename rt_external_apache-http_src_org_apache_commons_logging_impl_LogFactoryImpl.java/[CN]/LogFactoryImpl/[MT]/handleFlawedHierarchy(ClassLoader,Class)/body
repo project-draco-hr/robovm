@@ -1,0 +1,62 @@
+{
+  boolean implementsLog=false;
+  String logInterfaceName=Log.class.getName();
+  Class interfaces[]=badClass.getInterfaces();
+  for (int i=0; i < interfaces.length; i++) {
+    if (logInterfaceName.equals(interfaces[i].getName())) {
+      implementsLog=true;
+      break;
+    }
+  }
+  if (implementsLog) {
+    if (isDiagnosticsEnabled()) {
+      try {
+        ClassLoader logInterfaceClassLoader=getClassLoader(Log.class);
+        logDiagnostic("Class '" + badClass.getName() + "' was found in classloader "+ objectId(badClassLoader)+ ". It is bound to a Log interface which is not"+ " the one loaded from classloader "+ objectId(logInterfaceClassLoader));
+      }
+ catch (      Throwable t) {
+        logDiagnostic("Error while trying to output diagnostics about" + " bad class '" + badClass + "'");
+      }
+    }
+    if (!allowFlawedHierarchy) {
+      StringBuffer msg=new StringBuffer();
+      msg.append("Terminating logging for this context ");
+      msg.append("due to bad log hierarchy. ");
+      msg.append("You have more than one version of '");
+      msg.append(Log.class.getName());
+      msg.append("' visible.");
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic(msg.toString());
+      }
+      throw new LogConfigurationException(msg.toString());
+    }
+    if (isDiagnosticsEnabled()) {
+      StringBuffer msg=new StringBuffer();
+      msg.append("Warning: bad log hierarchy. ");
+      msg.append("You have more than one version of '");
+      msg.append(Log.class.getName());
+      msg.append("' visible.");
+      logDiagnostic(msg.toString());
+    }
+  }
+ else {
+    if (!allowFlawedDiscovery) {
+      StringBuffer msg=new StringBuffer();
+      msg.append("Terminating logging for this context. ");
+      msg.append("Log class '");
+      msg.append(badClass.getName());
+      msg.append("' does not implement the Log interface.");
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic(msg.toString());
+      }
+      throw new LogConfigurationException(msg.toString());
+    }
+    if (isDiagnosticsEnabled()) {
+      StringBuffer msg=new StringBuffer();
+      msg.append("[WARNING] Log class '");
+      msg.append(badClass.getName());
+      msg.append("' does not implement the Log interface.");
+      logDiagnostic(msg.toString());
+    }
+  }
+}

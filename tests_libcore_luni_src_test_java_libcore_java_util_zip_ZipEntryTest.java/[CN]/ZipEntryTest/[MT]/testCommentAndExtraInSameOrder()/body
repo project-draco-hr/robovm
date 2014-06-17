@@ -1,0 +1,20 @@
+{
+  String comment=makeString(17,"z");
+  byte[] extra=makeString(11,"a").getBytes();
+  File f=createTemporaryZipFile();
+  ZipOutputStream out=createZipOutputStream(f);
+  ZipEntry ze=new ZipEntry("x");
+  ze.setExtra(extra);
+  ze.setComment(comment);
+  out.putNextEntry(ze);
+  out.closeEntry();
+  out.close();
+  ZipFile zipFile=new ZipFile(f);
+  try {
+    assertEquals(comment,zipFile.getEntry("x").getComment());
+    assertTrue(Arrays.equals(extra,zipFile.getEntry("x").getExtra()));
+  }
+  finally {
+    zipFile.close();
+  }
+}

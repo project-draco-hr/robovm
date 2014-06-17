@@ -1,0 +1,14 @@
+{
+  AuthScheme authScheme=authState.getAuthScheme();
+  if (authScheme == null) {
+    authScheme=authHandler.selectScheme(challenges,response,context);
+    authState.setAuthScheme(authScheme);
+  }
+  String id=authScheme.getSchemeName();
+  Header challenge=challenges.get(id.toLowerCase(Locale.ENGLISH));
+  if (challenge == null) {
+    throw new AuthenticationException(id + " authorization challenge expected, but not found");
+  }
+  authScheme.processChallenge(challenge);
+  this.log.debug("Authorization challenge processed");
+}

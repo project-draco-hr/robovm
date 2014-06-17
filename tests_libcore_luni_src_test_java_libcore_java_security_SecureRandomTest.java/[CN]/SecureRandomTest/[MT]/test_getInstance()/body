@@ -1,0 +1,30 @@
+{
+  Provider[] providers=Security.getProviders();
+  for (  Provider provider : providers) {
+    Set<Provider.Service> services=provider.getServices();
+    for (    Provider.Service service : services) {
+      String type=service.getType();
+      if (!type.equals("SecureRandom")) {
+        continue;
+      }
+      String algorithm=service.getAlgorithm();
+      try {
+        SecureRandom sr1=SecureRandom.getInstance(algorithm);
+        assertEquals(algorithm,sr1.getAlgorithm());
+        test_SecureRandom(sr1);
+        SecureRandom sr2=SecureRandom.getInstance(algorithm,provider);
+        assertEquals(algorithm,sr2.getAlgorithm());
+        assertEquals(provider,sr2.getProvider());
+        test_SecureRandom(sr2);
+        SecureRandom sr3=SecureRandom.getInstance(algorithm,provider.getName());
+        assertEquals(algorithm,sr3.getAlgorithm());
+        assertEquals(provider,sr3.getProvider());
+        test_SecureRandom(sr3);
+        System.out.println("SecureRandomTest " + algorithm + " and provider "+ provider.getName());
+      }
+ catch (      Exception e) {
+        throw new Exception("Problem testing SecureRandom." + algorithm + ", provider: "+ provider.getName(),e);
+      }
+    }
+  }
+}

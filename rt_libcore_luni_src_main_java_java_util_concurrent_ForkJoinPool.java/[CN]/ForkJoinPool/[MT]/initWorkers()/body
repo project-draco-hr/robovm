@@ -1,0 +1,19 @@
+{
+  WorkQueue[] ws, nws;
+  int ps;
+  int p=config & SMASK;
+  int n=(p > 1) ? p - 1 : 1;
+  n|=n >>> 1;
+  n|=n >>> 2;
+  n|=n >>> 4;
+  n|=n >>> 8;
+  n|=n >>> 16;
+  n=(n + 1) << 1;
+  if ((ws=workQueues) == null || ws.length == 0)   nws=new WorkQueue[n];
+ else   nws=null;
+  if (((ps=plock) & PL_LOCK) != 0 || !U.compareAndSwapInt(this,PLOCK,ps,ps+=PL_LOCK))   ps=acquirePlock();
+  if (((ws=workQueues) == null || ws.length == 0) && nws != null)   workQueues=nws;
+  int nps=(ps & SHUTDOWN) | ((ps + PL_LOCK) & ~SHUTDOWN);
+  if (!U.compareAndSwapInt(this,PLOCK,ps,nps))   releasePlock(nps);
+  tryAddWorker();
+}

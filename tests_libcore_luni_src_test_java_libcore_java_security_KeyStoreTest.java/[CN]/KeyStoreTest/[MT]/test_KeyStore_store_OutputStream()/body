@@ -2,7 +2,7 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       keyStore.store(null,null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    KeyStoreException expected) {
     }
@@ -10,10 +10,10 @@
   for (  KeyStore keyStore : keyStores()) {
     keyStore.load(null,null);
     ByteArrayOutputStream out=new ByteArrayOutputStream();
-    if (isReadOnly(keyStore)) {
+    if (isLoadStoreUnsupported(keyStore) || isReadOnly(keyStore)) {
       try {
         keyStore.store(out,null);
-        fail();
+        fail(keyStore.getType());
       }
  catch (      UnsupportedOperationException expected) {
       }
@@ -26,7 +26,7 @@
     }
     try {
       keyStore.store(out,null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    Exception e) {
       if (e.getClass() != IllegalArgumentException.class && e.getClass() != NullPointerException.class) {
@@ -37,12 +37,12 @@
   for (  KeyStore keyStore : keyStores()) {
     populate(keyStore);
     ByteArrayOutputStream out=new ByteArrayOutputStream();
-    if (isReadOnly(keyStore)) {
+    if (isLoadStoreUnsupported(keyStore) || isReadOnly(keyStore)) {
       try {
         keyStore.store(out,null);
-        fail();
+        fail(keyStore.getType());
       }
- catch (      UnsupportedOperationException e) {
+ catch (      UnsupportedOperationException expected) {
       }
     }
  else     if (isNullPasswordAllowed(keyStore)) {
@@ -52,7 +52,7 @@
  else {
       try {
         keyStore.store(out,null);
-        fail();
+        fail(keyStore.getType());
       }
  catch (      Exception e) {
         if (e.getClass() != IllegalArgumentException.class && e.getClass() != NullPointerException.class) {
@@ -64,10 +64,10 @@
   for (  KeyStore keyStore : keyStores()) {
     keyStore.load(null,null);
     ByteArrayOutputStream out=new ByteArrayOutputStream();
-    if (isReadOnly(keyStore)) {
+    if (isLoadStoreUnsupported(keyStore) || isReadOnly(keyStore)) {
       try {
         keyStore.store(out,PASSWORD_STORE);
-        fail();
+        fail(keyStore.getType());
       }
  catch (      UnsupportedOperationException e) {
       }
@@ -79,10 +79,10 @@
   for (  KeyStore keyStore : keyStores()) {
     populate(keyStore);
     ByteArrayOutputStream out=new ByteArrayOutputStream();
-    if (isReadOnly(keyStore)) {
+    if (isLoadStoreUnsupported(keyStore) || isReadOnly(keyStore)) {
       try {
         keyStore.store(out,PASSWORD_STORE);
-        fail();
+        fail(keyStore.getType());
       }
  catch (      UnsupportedOperationException e) {
       }

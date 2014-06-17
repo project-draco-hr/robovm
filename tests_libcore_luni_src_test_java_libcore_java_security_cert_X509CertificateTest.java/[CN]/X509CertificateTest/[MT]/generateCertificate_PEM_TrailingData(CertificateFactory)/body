@@ -1,0 +1,10 @@
+{
+  byte[] certsBytes=getResourceAsBytes(CERTS_X509_PEM);
+  byte[] certsTwice=new byte[certsBytes.length * 2];
+  System.arraycopy(certsBytes,0,certsTwice,0,certsBytes.length);
+  System.arraycopy(certsBytes,0,certsTwice,certsBytes.length,certsBytes.length);
+  ByteArrayInputStream bais=new ByteArrayInputStream(certsTwice);
+  assertEquals(certsBytes.length * 2,bais.available());
+  X509Certificate cert1=(X509Certificate)f.generateCertificate(bais);
+  assertTrue(certsBytes.length < bais.available());
+}

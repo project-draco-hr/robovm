@@ -1,0 +1,23 @@
+{
+  assertTrue(this.serverChannel.isBlocking());
+  ServerSocket gotSocket=this.serverChannel.socket();
+  gotSocket.bind(localAddr1);
+  new Thread(){
+    public void run(){
+      try {
+        Thread.sleep(TIME_UNIT);
+        ServerSocketChannelTest.this.serverChannel.close();
+      }
+ catch (      Exception e) {
+        fail("Fail to close the server channel because of" + e.getClass().getName());
+      }
+    }
+  }
+.start();
+  try {
+    this.serverChannel.accept();
+    fail("Should throw a AsynchronousCloseException");
+  }
+ catch (  AsynchronousCloseException e) {
+  }
+}

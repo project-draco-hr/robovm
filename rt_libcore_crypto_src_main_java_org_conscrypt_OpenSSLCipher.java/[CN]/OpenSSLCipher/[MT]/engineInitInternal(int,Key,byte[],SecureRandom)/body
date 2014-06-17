@@ -1,0 +1,48 @@
+{
+  if (opmode == Cipher.ENCRYPT_MODE || opmode == Cipher.WRAP_MODE) {
+    encrypting=true;
+  }
+ else   if (opmode == Cipher.DECRYPT_MODE || opmode == Cipher.UNWRAP_MODE) {
+    encrypting=false;
+  }
+ else {
+    throw new InvalidParameterException("Unsupported opmode " + opmode);
+  }
+  if (!(key instanceof SecretKey)) {
+    throw new InvalidKeyException("Only SecretKey is supported");
+  }
+  final byte[] encodedKey=key.getEncoded();
+  if (encodedKey == null) {
+    throw new InvalidKeyException("key.getEncoded() == null");
+  }
+  checkSupportedKeySize(encodedKey.length);
+  final long cipherType=NativeCrypto.EVP_get_cipherbyname(getCipherName(encodedKey.length,mode));
+  if (cipherType == 0) {
+    throw new InvalidAlgorithmParameterException("Cannot find name for key length = " + (encodedKey.length * 8) + " and mode = "+ mode);
+  }
+  final int ivLength=NativeCrypto.EVP_CIPHER_iv_length(cipherType);
+  if (iv == null && ivLength != 0) {
+    iv=new byte[ivLength];
+    if (encrypting) {
+      if (random == null) {
+        random=new SecureRandom();
+      }
+      random.nextBytes(iv);
+    }
+  }
+ else   if (iv != null && iv.length != ivLength) {
+    throw new InvalidAlgorithmParameterException("expected IV length of " + ivLength);
+  }
+  this.iv=iv;
+  if (supportsVariableSizeKey()) {
+    NativeCrypto.EVP_CipherInit_ex(cipherCtx.getContext(),cipherType,null,null,encrypting);
+    NativeCrypto.EVP_CIPHER_CTX_set_key_length(cipherCtx.getContext(),encodedKey.length);
+    NativeCrypto.EVP_CipherInit_ex(cipherCtx.getContext(),0,encodedKey,iv,encrypting);
+  }
+ else {
+    NativeCrypto.EVP_CipherInit_ex(cipherCtx.getContext(),cipherType,encodedKey,iv,encrypting);
+  }
+  NativeCrypto.EVP_CIPHER_CTX_set_padding(cipherCtx.getContext(),padding == Padding.PKCS5PADDING);
+  modeBlockSize=NativeCrypto.EVP_CIPHER_CTX_block_size(cipherCtx.getContext());
+  calledUpdate=false;
+}

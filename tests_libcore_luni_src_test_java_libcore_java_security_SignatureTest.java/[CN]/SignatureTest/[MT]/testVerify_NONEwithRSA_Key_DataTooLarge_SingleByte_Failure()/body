@@ -1,0 +1,12 @@
+{
+  KeyFactory kf=KeyFactory.getInstance("RSA");
+  RSAPublicKeySpec pubKeySpec=new RSAPublicKeySpec(RSA_2048_modulus,RSA_2048_publicExponent);
+  PublicKey pubKey=kf.generatePublic(pubKeySpec);
+  Signature sig=Signature.getInstance("NONEwithRSA");
+  sig.initVerify(pubKey);
+  final int tooBig=RSA_2048_modulus.bitLength() * 2;
+  for (int i=0; i < tooBig; i++) {
+    sig.update((byte)Vector1Data[i % Vector1Data.length]);
+  }
+  assertFalse("Should not verify when signature is too large",sig.verify(NONEwithRSA_Vector1Signature));
+}

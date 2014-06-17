@@ -1,0 +1,37 @@
+{
+  if (!cert.getType().equals("X.509")) {
+    throw new RuntimeException("X.509 CRL used with non X.509 Cert");
+  }
+  TBSCertList.CRLEntry[] certs=c.getRevokedCertificates();
+  X500Name caName=c.getIssuer();
+  if (certs != null) {
+    BigInteger serial=((X509Certificate)cert).getSerialNumber();
+    for (int i=0; i < certs.length; i++) {
+      if (isIndirect && certs[i].hasExtensions()) {
+        Extension currentCaName=certs[i].getExtensions().getExtension(Extension.certificateIssuer);
+        if (currentCaName != null) {
+          caName=X500Name.getInstance(GeneralNames.getInstance(currentCaName.getParsedValue()).getNames()[0].getName());
+        }
+      }
+      if (certs[i].getUserCertificate().getValue().equals(serial)) {
+        X500Name issuer;
+        if (cert instanceof X509Certificate) {
+          issuer=X500Name.getInstance(((X509Certificate)cert).getIssuerX500Principal().getEncoded());
+        }
+ else {
+          try {
+            issuer=org.bouncycastle.asn1.x509.Certificate.getInstance(cert.getEncoded()).getIssuer();
+          }
+ catch (          CertificateEncodingException e) {
+            throw new RuntimeException("Cannot process certificate");
+          }
+        }
+        if (!caName.equals(issuer)) {
+          return false;
+        }
+        return true;
+      }
+    }
+  }
+  return false;
+}

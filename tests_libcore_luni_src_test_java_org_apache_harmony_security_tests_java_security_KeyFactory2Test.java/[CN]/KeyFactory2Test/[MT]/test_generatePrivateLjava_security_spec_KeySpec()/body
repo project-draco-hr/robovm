@@ -1,29 +1,18 @@
 {
   for (int i=0; i < keyfactAlgs.length; i++) {
-    try {
-      KeyFactory fact=KeyFactory.getInstance(keyfactAlgs[i],providerName);
-      KeyPairGenerator keyGen=KeyPairGenerator.getInstance(keyfactAlgs[i]);
-      SecureRandom random=new SecureRandom();
-      keyGen.initialize(StandardNames.getMinimumKeySize(keyfactAlgs[i]),random);
-      KeepAlive keepalive=createKeepAlive(keyfactAlgs[i]);
-      KeyPair keys=keyGen.generateKeyPair();
-      if (keepalive != null) {
-        keepalive.interrupt();
-      }
-      KeySpec privateKeySpec=fact.getKeySpec(keys.getPrivate(),StandardNames.getPrivateKeySpecClass(keyfactAlgs[i]));
-      PrivateKey privateKey=fact.generatePrivate(privateKeySpec);
-      boolean samePrivate=Arrays.equals(keys.getPrivate().getEncoded(),privateKey.getEncoded());
-      assertTrue("generatePrivate generated different key for algorithm " + keyfactAlgs[i],samePrivate);
-      fact.generatePrivate(new PKCS8EncodedKeySpec(keys.getPrivate().getEncoded()));
+    KeyFactory fact=KeyFactory.getInstance(keyfactAlgs[i],providerName);
+    KeyPairGenerator keyGen=KeyPairGenerator.getInstance(keyfactAlgs[i]);
+    SecureRandom random=new SecureRandom();
+    keyGen.initialize(StandardNames.getMinimumKeySize(keyfactAlgs[i]),random);
+    KeepAlive keepalive=createKeepAlive(keyfactAlgs[i]);
+    KeyPair keys=keyGen.generateKeyPair();
+    if (keepalive != null) {
+      keepalive.interrupt();
     }
- catch (    InvalidKeySpecException e) {
-      fail("invalid key spec for algorithm " + keyfactAlgs[i]);
-    }
-catch (    NoSuchAlgorithmException e) {
-      fail("getInstance did not find algorithm " + keyfactAlgs[i]);
-    }
-catch (    NoSuchProviderException e) {
-      fail("getInstance did not find provider " + providerName);
-    }
+    KeySpec privateKeySpec=fact.getKeySpec(keys.getPrivate(),StandardNames.getPrivateKeySpecClass(keyfactAlgs[i]));
+    PrivateKey privateKey=fact.generatePrivate(privateKeySpec);
+    assertEquals("generatePrivate generated different key for algorithm " + keyfactAlgs[i],Arrays.toString(keys.getPrivate().getEncoded()),Arrays.toString(privateKey.getEncoded()));
+    privateKey=fact.generatePrivate(new PKCS8EncodedKeySpec(keys.getPrivate().getEncoded()));
+    assertEquals("generatePrivate generated different key for algorithm " + keyfactAlgs[i],Arrays.toString(keys.getPrivate().getEncoded()),Arrays.toString(privateKey.getEncoded()));
   }
 }

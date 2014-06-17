@@ -1,0 +1,13 @@
+{
+  String maxLengthComment=makeString(65535,"z");
+  File f=createTemporaryZipFile();
+  ZipOutputStream out=createZipOutputStream(f);
+  ZipEntry ze=new ZipEntry("x");
+  ze.setComment(maxLengthComment);
+  out.putNextEntry(ze);
+  out.closeEntry();
+  out.close();
+  ZipFile zipFile=new ZipFile(f);
+  assertEquals(maxLengthComment,zipFile.getEntry("x").getComment());
+  zipFile.close();
+}

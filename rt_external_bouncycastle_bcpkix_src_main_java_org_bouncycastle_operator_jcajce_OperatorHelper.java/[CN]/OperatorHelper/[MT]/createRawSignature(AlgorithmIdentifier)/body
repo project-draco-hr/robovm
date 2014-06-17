@@ -1,0 +1,18 @@
+{
+  Signature sig;
+  try {
+    String algName=getSignatureName(algorithm);
+    algName="NONE" + algName.substring(algName.indexOf("WITH"));
+    sig=helper.createSignature(algName);
+    if (algorithm.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS)) {
+      AlgorithmParameters params=helper.createAlgorithmParameters(algName);
+      params.init(algorithm.getParameters().toASN1Primitive().getEncoded(),"ASN.1");
+      PSSParameterSpec spec=(PSSParameterSpec)params.getParameterSpec(PSSParameterSpec.class);
+      sig.setParameter(spec);
+    }
+  }
+ catch (  Exception e) {
+    return null;
+  }
+  return sig;
+}

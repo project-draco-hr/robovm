@@ -1,0 +1,21 @@
+{
+  if (!isIndirect) {
+    return null;
+  }
+  Extension ext=getExtension(Extension.certificateIssuer);
+  if (ext == null) {
+    return previousCertificateIssuer;
+  }
+  try {
+    GeneralName[] names=GeneralNames.getInstance(ext.getParsedValue()).getNames();
+    for (int i=0; i < names.length; i++) {
+      if (names[i].getTagNo() == GeneralName.directoryName) {
+        return X500Name.getInstance(names[i].getName());
+      }
+    }
+    return null;
+  }
+ catch (  Exception e) {
+    return null;
+  }
+}

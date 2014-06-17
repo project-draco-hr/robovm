@@ -1,0 +1,41 @@
+{
+  String dest;
+  try {
+    dest=System.getProperty(DIAGNOSTICS_DEST_PROPERTY);
+    if (dest == null) {
+      return;
+    }
+  }
+ catch (  SecurityException ex) {
+    return;
+  }
+  if (dest.equals("STDOUT")) {
+    diagnosticsStream=System.out;
+  }
+ else   if (dest.equals("STDERR")) {
+    diagnosticsStream=System.err;
+  }
+ else {
+    try {
+      FileOutputStream fos=new FileOutputStream(dest,true);
+      diagnosticsStream=new PrintStream(fos);
+    }
+ catch (    IOException ex) {
+      return;
+    }
+  }
+  String classLoaderName;
+  try {
+    ClassLoader classLoader=thisClassLoader;
+    if (thisClassLoader == null) {
+      classLoaderName="BOOTLOADER";
+    }
+ else {
+      classLoaderName=objectId(classLoader);
+    }
+  }
+ catch (  SecurityException e) {
+    classLoaderName="UNKNOWN";
+  }
+  diagnosticPrefix="[LogFactory from " + classLoaderName + "] ";
+}

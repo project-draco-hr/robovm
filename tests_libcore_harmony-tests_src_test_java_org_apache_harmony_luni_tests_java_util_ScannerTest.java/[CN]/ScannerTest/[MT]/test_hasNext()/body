@@ -1,0 +1,62 @@
+{
+  s=new Scanner("1##2").useDelimiter("\\#");
+  assertTrue(s.hasNext());
+  assertEquals("1",s.next());
+  assertEquals("",s.next());
+  assertEquals("2",s.next());
+  assertFalse(s.hasNext());
+  s.close();
+  try {
+    s.hasNext();
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+  s=new Scanner("1( )2( )").useDelimiter("\\( \\)");
+  assertTrue(s.hasNext());
+  assertTrue(s.hasNext());
+  assertEquals("1",s.next());
+  assertEquals("2",s.next());
+  s=new Scanner("1 2  ").useDelimiter("( )");
+  assertEquals("1",s.next());
+  assertEquals("2",s.next());
+  assertTrue(s.hasNext());
+  assertEquals("",s.next());
+  s=new Scanner("1\n2  ");
+  assertEquals("1",s.next());
+  assertTrue(s.hasNext());
+  assertEquals("2",s.next());
+  assertFalse(s.hasNext());
+  try {
+    s.next();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("1'\n'2  ");
+  assertEquals("1'",s.next());
+  assertTrue(s.hasNext());
+  assertEquals("'2",s.next());
+  assertFalse(s.hasNext());
+  try {
+    s.next();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("  ");
+  assertFalse(s.hasNext());
+  os.write("1 2".getBytes());
+  serverSocket.close();
+  s=new Scanner(client);
+  assertEquals("1",s.next());
+  assertTrue(s.hasNext());
+  assertEquals("2",s.next());
+  assertFalse(s.hasNext());
+  try {
+    s.next();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+}

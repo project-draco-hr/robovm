@@ -1,0 +1,37 @@
+{
+  if (host == null) {
+    throw new IllegalArgumentException("Target host may not be null.");
+  }
+  if (params == null) {
+    throw new IllegalArgumentException("Parameters may not be null.");
+  }
+  if (sock == null)   sock=createSocket();
+  if ((localAddress != null) || (localPort > 0)) {
+    if (localPort < 0)     localPort=0;
+    InetSocketAddress isa=new InetSocketAddress(localAddress,localPort);
+    sock.bind(isa);
+  }
+  int timeout=HttpConnectionParams.getConnectionTimeout(params);
+  InetAddress[] inetadrs=InetAddress.getAllByName(host);
+  List<InetAddress> addresses=new ArrayList<InetAddress>(inetadrs.length);
+  addresses.addAll(Arrays.asList(inetadrs));
+  Collections.shuffle(addresses);
+  IOException lastEx=null;
+  for (  InetAddress address : addresses) {
+    try {
+      sock.connect(new InetSocketAddress(address,port),timeout);
+      break;
+    }
+ catch (    SocketTimeoutException ex) {
+      throw ex;
+    }
+catch (    IOException ex) {
+      sock=new Socket();
+      lastEx=ex;
+    }
+  }
+  if (lastEx != null) {
+    throw lastEx;
+  }
+  return sock;
+}

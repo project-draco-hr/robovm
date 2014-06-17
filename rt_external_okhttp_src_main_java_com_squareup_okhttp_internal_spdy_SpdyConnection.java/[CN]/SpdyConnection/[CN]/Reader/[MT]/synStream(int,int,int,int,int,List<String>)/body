@@ -1,0 +1,28 @@
+{
+  final SpdyStream synStream;
+  final SpdyStream previous;
+synchronized (SpdyConnection.this) {
+    synStream=new SpdyStream(streamId,SpdyConnection.this,flags,priority,slot,nameValueBlock,settings);
+    if (shutdown) {
+      return;
+    }
+    lastGoodStreamId=streamId;
+    previous=streams.put(streamId,synStream);
+  }
+  if (previous != null) {
+    previous.closeLater(SpdyStream.RST_PROTOCOL_ERROR);
+    removeStream(streamId);
+    return;
+  }
+  executor.submit(new NamedRunnable("OkHttp SPDY Callback %s stream %d",hostName,streamId){
+    @Override public void execute(){
+      try {
+        handler.receive(synStream);
+      }
+ catch (      IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
+);
+}

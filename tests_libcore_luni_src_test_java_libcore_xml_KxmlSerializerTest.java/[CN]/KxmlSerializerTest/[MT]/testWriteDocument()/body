@@ -1,0 +1,15 @@
+{
+  StringWriter stringWriter=new StringWriter();
+  XmlSerializer serializer=new KXmlSerializer();
+  serializer.setOutput(stringWriter);
+  serializer.startDocument("UTF-8",null);
+  serializer.startTag(NAMESPACE,"foo");
+  serializer.attribute(NAMESPACE,"quux","abc");
+  serializer.startTag(NAMESPACE,"bar");
+  serializer.endTag(NAMESPACE,"bar");
+  serializer.startTag(NAMESPACE,"baz");
+  serializer.endTag(NAMESPACE,"baz");
+  serializer.endTag(NAMESPACE,"foo");
+  serializer.endDocument();
+  assertXmlEquals("<foo quux=\"abc\"><bar /><baz /></foo>",stringWriter.toString());
+}

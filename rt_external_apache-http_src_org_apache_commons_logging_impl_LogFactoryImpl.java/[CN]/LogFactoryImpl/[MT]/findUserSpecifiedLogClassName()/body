@@ -1,0 +1,42 @@
+{
+  if (isDiagnosticsEnabled()) {
+    logDiagnostic("Trying to get log class from attribute '" + LOG_PROPERTY + "'");
+  }
+  String specifiedClass=(String)getAttribute(LOG_PROPERTY);
+  if (specifiedClass == null) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("Trying to get log class from attribute '" + LOG_PROPERTY_OLD + "'");
+    }
+    specifiedClass=(String)getAttribute(LOG_PROPERTY_OLD);
+  }
+  if (specifiedClass == null) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("Trying to get log class from system property '" + LOG_PROPERTY + "'");
+    }
+    try {
+      specifiedClass=System.getProperty(LOG_PROPERTY);
+    }
+ catch (    SecurityException e) {
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic("No access allowed to system property '" + LOG_PROPERTY + "' - "+ e.getMessage());
+      }
+    }
+  }
+  if (specifiedClass == null) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("Trying to get log class from system property '" + LOG_PROPERTY_OLD + "'");
+    }
+    try {
+      specifiedClass=System.getProperty(LOG_PROPERTY_OLD);
+    }
+ catch (    SecurityException e) {
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic("No access allowed to system property '" + LOG_PROPERTY_OLD + "' - "+ e.getMessage());
+      }
+    }
+  }
+  if (specifiedClass != null) {
+    specifiedClass=specifiedClass.trim();
+  }
+  return specifiedClass;
+}

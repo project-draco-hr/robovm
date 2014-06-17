@@ -1,0 +1,46 @@
+{
+  StringBuffer vBuf=new StringBuffer();
+  if (value instanceof ASN1String && !(value instanceof DERUniversalString)) {
+    String v=((ASN1String)value).getString();
+    if (v.length() > 0 && v.charAt(0) == '#') {
+      vBuf.append("\\" + v);
+    }
+ else {
+      vBuf.append(v);
+    }
+  }
+ else {
+    try {
+      vBuf.append("#" + bytesToString(Hex.encode(value.toASN1Primitive().getEncoded(ASN1Encoding.DER))));
+    }
+ catch (    IOException e) {
+      throw new IllegalArgumentException("Other value has no encoded form");
+    }
+  }
+  int end=vBuf.length();
+  int index=0;
+  if (vBuf.length() >= 2 && vBuf.charAt(0) == '\\' && vBuf.charAt(1) == '#') {
+    index+=2;
+  }
+  while (index != end) {
+    if ((vBuf.charAt(index) == ',') || (vBuf.charAt(index) == '"') || (vBuf.charAt(index) == '\\')|| (vBuf.charAt(index) == '+')|| (vBuf.charAt(index) == '=')|| (vBuf.charAt(index) == '<')|| (vBuf.charAt(index) == '>')|| (vBuf.charAt(index) == ';')) {
+      vBuf.insert(index,"\\");
+      index++;
+      end++;
+    }
+    index++;
+  }
+  int start=0;
+  if (vBuf.length() > 0) {
+    while (vBuf.charAt(start) == ' ') {
+      vBuf.insert(start,"\\");
+      start+=2;
+    }
+  }
+  int endBuf=vBuf.length() - 1;
+  while (endBuf >= 0 && vBuf.charAt(endBuf) == ' ') {
+    vBuf.insert(endBuf,'\\');
+    endBuf--;
+  }
+  return vBuf.toString();
+}

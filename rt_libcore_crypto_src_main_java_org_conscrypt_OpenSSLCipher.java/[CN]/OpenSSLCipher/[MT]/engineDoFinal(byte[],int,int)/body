@@ -1,0 +1,24 @@
+{
+  if (!encrypting && !calledUpdate && inputLen == 0) {
+    reset();
+    return null;
+  }
+  final int maximumLen=getOutputSize(inputLen);
+  final byte[] output=new byte[maximumLen];
+  final int bytesWritten;
+  try {
+    bytesWritten=doFinalInternal(input,inputOffset,inputLen,output,0,maximumLen);
+  }
+ catch (  ShortBufferException e) {
+    throw new RuntimeException("our calculated buffer was too small",e);
+  }
+  if (bytesWritten == output.length) {
+    return output;
+  }
+ else   if (bytesWritten == 0) {
+    return EmptyArray.BYTE;
+  }
+ else {
+    return Arrays.copyOfRange(output,0,bytesWritten);
+  }
+}

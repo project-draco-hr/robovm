@@ -1,0 +1,17 @@
+{
+  writeDataToFile(fileOfReadOnlyFileChannel);
+  pipe=Pipe.open();
+  final int OFFSET=2;
+  final int LENGTH=4;
+  long result=readOnlyFileChannel.transferTo(OFFSET,LENGTH,pipe.sink());
+  assertEquals(LENGTH,result);
+  assertEquals(0,readOnlyFileChannel.position());
+  readOnlyFileChannel.close();
+  ByteBuffer readBuffer=ByteBuffer.allocate(LENGTH);
+  result=pipe.source().read(readBuffer);
+  assertEquals(LENGTH,result);
+  readBuffer.flip();
+  for (int i=OFFSET; i < OFFSET + LENGTH; i++) {
+    assertEquals(CONTENT_AS_BYTES[i],readBuffer.get());
+  }
+}

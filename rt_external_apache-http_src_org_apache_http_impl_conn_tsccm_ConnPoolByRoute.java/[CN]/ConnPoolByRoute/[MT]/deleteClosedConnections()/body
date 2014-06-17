@@ -1,0 +1,16 @@
+{
+  poolLock.lock();
+  try {
+    Iterator<BasicPoolEntry> iter=freeConnections.iterator();
+    while (iter.hasNext()) {
+      BasicPoolEntry entry=iter.next();
+      if (!entry.getConnection().isOpen()) {
+        iter.remove();
+        deleteEntry(entry);
+      }
+    }
+  }
+  finally {
+    poolLock.unlock();
+  }
+}

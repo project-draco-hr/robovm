@@ -1,0 +1,17 @@
+{
+  if (credentials == null) {
+    throw new IllegalArgumentException("Credentials may not be null");
+  }
+  if (request == null) {
+    throw new IllegalArgumentException("HTTP request may not be null");
+  }
+  getParameters().put("methodname",request.getRequestLine().getMethod());
+  getParameters().put("uri",request.getRequestLine().getUri());
+  String charset=getParameter("charset");
+  if (charset == null) {
+    charset=AuthParams.getCredentialCharset(request.getParams());
+    getParameters().put("charset",charset);
+  }
+  String digest=createDigest(credentials);
+  return createDigestHeader(credentials,digest);
+}

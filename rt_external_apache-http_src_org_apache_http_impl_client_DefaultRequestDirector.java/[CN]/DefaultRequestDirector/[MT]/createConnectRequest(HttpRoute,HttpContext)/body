@@ -1,0 +1,17 @@
+{
+  HttpHost target=route.getTargetHost();
+  String host=target.getHostName();
+  int port=target.getPort();
+  if (port < 0) {
+    Scheme scheme=connManager.getSchemeRegistry().getScheme(target.getSchemeName());
+    port=scheme.getDefaultPort();
+  }
+  StringBuilder buffer=new StringBuilder(host.length() + 6);
+  buffer.append(host);
+  buffer.append(':');
+  buffer.append(Integer.toString(port));
+  String authority=buffer.toString();
+  ProtocolVersion ver=HttpProtocolParams.getVersion(params);
+  HttpRequest req=new BasicHttpRequest("CONNECT",authority,ver);
+  return req;
+}

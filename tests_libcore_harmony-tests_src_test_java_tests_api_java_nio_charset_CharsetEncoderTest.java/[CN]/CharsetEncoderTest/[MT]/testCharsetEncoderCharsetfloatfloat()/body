@@ -1,0 +1,46 @@
+{
+  encoder=new MockCharsetEncoder(cs,(float)AVER_BYTES,MAX_BYTES);
+  assertSame(encoder.charset(),cs);
+  assertTrue(encoder.averageBytesPerChar() == AVER_BYTES);
+  assertTrue(encoder.maxBytesPerChar() == MAX_BYTES);
+  assertEquals(CodingErrorAction.REPORT,encoder.malformedInputAction());
+  assertEquals(CodingErrorAction.REPORT,encoder.unmappableCharacterAction());
+  assertEquals(new String(encoder.replacement()),new String(defaultReplacement));
+  assertSame(encoder,encoder.onMalformedInput(CodingErrorAction.IGNORE));
+  assertSame(encoder,encoder.onUnmappableCharacter(CodingErrorAction.IGNORE));
+  CharsetEncoder ec=new MockCharsetEncoder(cs,1,MAX_BYTES);
+  assertSame(ec.charset(),cs);
+  assertEquals(1.0,ec.averageBytesPerChar(),0);
+  assertTrue(ec.maxBytesPerChar() == MAX_BYTES);
+  try {
+    ec=new MockCharsetEncoder(null,1,MAX_BYTES);
+    fail("should throw null pointer exception");
+  }
+ catch (  NullPointerException e) {
+  }
+  ec=new MockCharsetEncoder(new MockCharset("mock",new String[0]),1,MAX_BYTES);
+  try {
+    ec=new MockCharsetEncoder(cs,0,MAX_BYTES);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    ec=new MockCharsetEncoder(cs,1,0);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    ec=new MockCharsetEncoder(cs,-1,MAX_BYTES);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    ec=new MockCharsetEncoder(cs,1,-1);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

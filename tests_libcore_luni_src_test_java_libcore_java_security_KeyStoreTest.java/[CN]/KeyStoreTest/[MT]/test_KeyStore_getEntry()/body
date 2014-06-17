@@ -2,7 +2,7 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       keyStore.getEntry(null,null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
@@ -11,13 +11,13 @@
     populate(keyStore);
     try {
       keyStore.getEntry(null,null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
     try {
       keyStore.getEntry(null,PARAM_KEY);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
@@ -27,7 +27,12 @@
       assertNull(keyStore.getEntry(ALIAS_PRIVATE,PARAM_KEY));
     }
  else {
-      assertPrivateKey(keyStore.getEntry(ALIAS_PRIVATE,PARAM_KEY));
+      if (isKeyPasswordSupported(keyStore)) {
+        assertPrivateKey(keyStore.getEntry(ALIAS_PRIVATE,PARAM_KEY));
+      }
+ else       if (isNullPasswordAllowed(keyStore)) {
+        assertPrivateKey(keyStore.getEntry(ALIAS_NO_PASSWORD_PRIVATE,null));
+      }
       if (isSecretKeyEnabled(keyStore)) {
         assertSecretKey(keyStore.getEntry(ALIAS_SECRET,PARAM_KEY));
       }
@@ -65,13 +70,13 @@
  else     if (isNullPasswordAllowed(keyStore)) {
       assertPrivateKey(keyStore.getEntry(ALIAS_NO_PASSWORD_PRIVATE,null));
     }
- else     if (isKeyPasswordIgnored(keyStore)) {
+ else     if (isKeyPasswordSupported(keyStore) && isKeyPasswordIgnored(keyStore)) {
       assertPrivateKey(keyStore.getEntry(ALIAS_PRIVATE,null));
     }
- else {
+ else     if (isKeyPasswordIgnored(keyStore)) {
       try {
         keyStore.getEntry(ALIAS_PRIVATE,null);
-        fail();
+        fail(keyStore.getType());
       }
  catch (      Exception e) {
         if (e.getClass() != UnrecoverableKeyException.class && e.getClass() != IllegalArgumentException.class) {
@@ -85,7 +90,7 @@
  else     if (isSecretKeyEnabled(keyStore)) {
       try {
         keyStore.getEntry(ALIAS_SECRET,null);
-        fail();
+        fail(keyStore.getType());
       }
  catch (      Exception e) {
         if (e.getClass() != UnrecoverableKeyException.class && e.getClass() != IllegalArgumentException.class) {
@@ -96,13 +101,13 @@
     if (isReadOnly(keyStore)) {
       assertNull(keyStore.getEntry(ALIAS_PRIVATE,PARAM_BAD));
     }
- else     if (isKeyPasswordIgnored(keyStore)) {
+ else     if (isKeyPasswordSupported(keyStore) && isKeyPasswordIgnored(keyStore)) {
       assertPrivateKey(keyStore.getEntry(ALIAS_PRIVATE,PARAM_BAD));
     }
- else {
+ else     if (isKeyPasswordSupported(keyStore)) {
       try {
         keyStore.getEntry(ALIAS_PRIVATE,PARAM_BAD);
-        fail();
+        fail(keyStore.getType());
       }
  catch (      UnrecoverableKeyException expected) {
       }
@@ -113,7 +118,7 @@
  else     if (isSecretKeyEnabled(keyStore)) {
       try {
         keyStore.getEntry(ALIAS_SECRET,PARAM_BAD);
-        fail();
+        fail(keyStore.getType());
       }
  catch (      UnrecoverableKeyException expected) {
       }

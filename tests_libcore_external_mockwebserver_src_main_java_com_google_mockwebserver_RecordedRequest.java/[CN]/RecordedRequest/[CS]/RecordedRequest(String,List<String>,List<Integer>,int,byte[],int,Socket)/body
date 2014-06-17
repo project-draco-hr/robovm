@@ -1,0 +1,25 @@
+{
+  this.requestLine=requestLine;
+  this.headers=headers;
+  this.chunkSizes=chunkSizes;
+  this.bodySize=bodySize;
+  this.body=body;
+  this.sequenceNumber=sequenceNumber;
+  if (socket instanceof SSLSocket) {
+    SSLSocket sslSocket=(SSLSocket)socket;
+    sslProtocol=sslSocket.getSession().getProtocol();
+  }
+ else {
+    sslProtocol=null;
+  }
+  if (requestLine != null) {
+    int methodEnd=requestLine.indexOf(' ');
+    int pathEnd=requestLine.indexOf(' ',methodEnd + 1);
+    this.method=requestLine.substring(0,methodEnd);
+    this.path=requestLine.substring(methodEnd + 1,pathEnd);
+  }
+ else {
+    this.method=null;
+    this.path=null;
+  }
+}

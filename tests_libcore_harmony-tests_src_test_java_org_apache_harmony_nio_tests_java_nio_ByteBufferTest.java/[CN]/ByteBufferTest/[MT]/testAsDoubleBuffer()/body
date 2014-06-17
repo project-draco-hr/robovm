@@ -1,0 +1,51 @@
+{
+  DoubleBuffer doubleBuffer;
+  byte bytes[]=new byte[8];
+  double value;
+  buf.clear();
+  buf.order(ByteOrder.BIG_ENDIAN);
+  doubleBuffer=buf.asDoubleBuffer();
+  assertSame(ByteOrder.BIG_ENDIAN,doubleBuffer.order());
+  while (doubleBuffer.remaining() > 0) {
+    buf.get(bytes);
+    value=doubleBuffer.get();
+    if (!(Double.isNaN(bytes2double(bytes,buf.order())) && Double.isNaN(value))) {
+      assertEquals(bytes2double(bytes,buf.order()),value,0.00);
+    }
+  }
+  buf.clear();
+  buf.order(ByteOrder.LITTLE_ENDIAN);
+  doubleBuffer=buf.asDoubleBuffer();
+  assertSame(ByteOrder.LITTLE_ENDIAN,doubleBuffer.order());
+  while (doubleBuffer.remaining() > 0) {
+    buf.get(bytes);
+    value=doubleBuffer.get();
+    if (!(Double.isNaN(bytes2double(bytes,buf.order())) && Double.isNaN(value))) {
+      assertEquals(bytes2double(bytes,buf.order()),value,0.00);
+    }
+  }
+  if (!buf.isReadOnly()) {
+    buf.clear();
+    buf.order(ByteOrder.BIG_ENDIAN);
+    doubleBuffer=buf.asDoubleBuffer();
+    assertSame(ByteOrder.BIG_ENDIAN,doubleBuffer.order());
+    while (doubleBuffer.remaining() > 0) {
+      value=(double)doubleBuffer.remaining();
+      doubleBuffer.put(value);
+      buf.get(bytes);
+      assertTrue(Arrays.equals(bytes,double2bytes(value,buf.order())));
+    }
+    buf.clear();
+    buf.order(ByteOrder.LITTLE_ENDIAN);
+    doubleBuffer=buf.asDoubleBuffer();
+    assertSame(ByteOrder.LITTLE_ENDIAN,doubleBuffer.order());
+    while (doubleBuffer.remaining() > 0) {
+      value=(double)doubleBuffer.remaining();
+      doubleBuffer.put(value);
+      buf.get(bytes);
+      assertTrue(Arrays.equals(bytes,double2bytes(value,buf.order())));
+    }
+  }
+  buf.clear();
+  buf.order(ByteOrder.BIG_ENDIAN);
+}

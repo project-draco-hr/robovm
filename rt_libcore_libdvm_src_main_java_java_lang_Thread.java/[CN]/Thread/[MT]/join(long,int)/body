@@ -1,0 +1,34 @@
+{
+  if (millis < 0 || nanos < 0 || nanos >= NANOS_PER_MILLI) {
+    throw new IllegalArgumentException("bad timeout: millis=" + millis + ",nanos="+ nanos);
+  }
+  boolean overflow=millis >= (Long.MAX_VALUE - nanos) / NANOS_PER_MILLI;
+  boolean forever=(millis | nanos) == 0;
+  if (forever | overflow) {
+    join();
+    return;
+  }
+  if (threadPtr == 0) {
+    return;
+  }
+synchronized (lock) {
+    if (!isAlive()) {
+      return;
+    }
+    long nanosToWait=millis * NANOS_PER_MILLI + nanos;
+    long start=System.nanoTime();
+    while (true) {
+      lock.wait(millis,nanos);
+      if (!isAlive()) {
+        break;
+      }
+      long nanosElapsed=System.nanoTime() - start;
+      long nanosRemaining=nanosToWait - nanosElapsed;
+      if (nanosRemaining <= 0) {
+        break;
+      }
+      millis=nanosRemaining / NANOS_PER_MILLI;
+      nanos=(int)(nanosRemaining - millis * NANOS_PER_MILLI);
+    }
+  }
+}

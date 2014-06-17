@@ -1,0 +1,22 @@
+{
+  try {
+    fd=IoBridge.open(absolutePath,O_RDONLY);
+  }
+ catch (  FileNotFoundException fnfe) {
+    throw fnfe;
+  }
+  int capacity;
+  try {
+    final StructStat stat=Libcore.os.fstat(fd);
+    capacity=(int)stat.st_size;
+    if (capacity == 0) {
+      unknownLength=true;
+      capacity=8192;
+    }
+  }
+ catch (  ErrnoException exception) {
+    closeQuietly(fd);
+    throw exception.rethrowAsIOException();
+  }
+  bytes=new byte[capacity];
+}

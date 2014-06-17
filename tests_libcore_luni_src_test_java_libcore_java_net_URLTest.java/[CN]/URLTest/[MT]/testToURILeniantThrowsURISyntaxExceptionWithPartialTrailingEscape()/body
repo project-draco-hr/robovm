@@ -1,0 +1,15 @@
+{
+  URL[] badUrls=new URL[]{new URL("http://example.com/?foo=%%bar"),new URL("http://example.com/?foo=%%bar%"),new URL("http://example.com/?foo=%%bar%2"),new URL("http://example.com/?foo=%%bar%%"),new URL("http://example.com/?foo=%%bar%%%"),new URL("http://example.com/?foo=%%bar%%%%")};
+  for (  URL badUrl : badUrls) {
+    try {
+      badUrl.toURILenient();
+      fail();
+    }
+ catch (    URISyntaxException expected) {
+    }
+  }
+  String[] goodUrls=new String[]{"http://example.com/?foo=bar","http://example.com/?foo=bar%20"};
+  for (  String goodUrl : goodUrls) {
+    assertEquals(new URI(goodUrl),new URL(goodUrl).toURILenient());
+  }
+}

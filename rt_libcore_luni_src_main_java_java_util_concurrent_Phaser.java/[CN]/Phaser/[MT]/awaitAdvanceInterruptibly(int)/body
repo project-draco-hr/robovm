@@ -1,0 +1,12 @@
+{
+  final Phaser root=this.root;
+  long s=(root == this) ? state : reconcileState();
+  int p=(int)(s >>> PHASE_SHIFT);
+  if (phase < 0)   return phase;
+  if (p == phase) {
+    QNode node=new QNode(this,phase,true,false,0L);
+    p=root.internalAwaitAdvance(phase,node);
+    if (node.wasInterrupted)     throw new InterruptedException();
+  }
+  return p;
+}

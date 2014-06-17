@@ -1,0 +1,57 @@
+{
+  buf.clear();
+  short array[]=new short[buf.capacity()];
+  try {
+    buf.get(new short[buf.capacity() + 1],0,buf.capacity() + 1);
+    fail("Should throw Exception");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  assertEquals(buf.position(),0);
+  try {
+    buf.get(array,-1,array.length);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  buf.get(array,array.length,0);
+  try {
+    buf.get(array,array.length + 1,1);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  assertEquals(buf.position(),0);
+  try {
+    buf.get((short[])null,2,-1);
+    fail("Should throw Exception");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    buf.get(array,2,array.length);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    buf.get(array,1,Integer.MAX_VALUE);
+    fail("Should throw Exception");
+  }
+ catch (  BufferUnderflowException expected) {
+  }
+catch (  IndexOutOfBoundsException expected) {
+  }
+  try {
+    buf.get(array,Integer.MAX_VALUE,1);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  assertEquals(buf.position(),0);
+  buf.clear();
+  ShortBuffer ret=buf.get(array,0,array.length);
+  assertEquals(buf.position(),buf.capacity());
+  assertContentEquals(buf,array,0,array.length);
+  assertSame(ret,buf);
+}

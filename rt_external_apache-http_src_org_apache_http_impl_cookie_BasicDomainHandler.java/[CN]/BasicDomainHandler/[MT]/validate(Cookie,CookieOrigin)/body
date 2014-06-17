@@ -1,0 +1,28 @@
+{
+  if (cookie == null) {
+    throw new IllegalArgumentException("Cookie may not be null");
+  }
+  if (origin == null) {
+    throw new IllegalArgumentException("Cookie origin may not be null");
+  }
+  String host=origin.getHost();
+  String domain=cookie.getDomain();
+  if (domain == null) {
+    throw new MalformedCookieException("Cookie domain may not be null");
+  }
+  if (host.contains(".")) {
+    if (!host.endsWith(domain)) {
+      if (domain.startsWith(".")) {
+        domain=domain.substring(1,domain.length());
+      }
+      if (!host.equals(domain)) {
+        throw new MalformedCookieException("Illegal domain attribute \"" + domain + "\". Domain of origin: \""+ host+ "\"");
+      }
+    }
+  }
+ else {
+    if (!host.equals(domain)) {
+      throw new MalformedCookieException("Illegal domain attribute \"" + domain + "\". Domain of origin: \""+ host+ "\"");
+    }
+  }
+}

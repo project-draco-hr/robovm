@@ -1,0 +1,37 @@
+{
+  try {
+    if (inStream == null || inStream.available() == 0) {
+      return new OpenSSLX509CertPath(Collections.<X509Certificate>emptyList());
+    }
+  }
+ catch (  IOException e) {
+    throw new CertificateException("Problem reading input stream",e);
+  }
+  final boolean markable=inStream.markSupported();
+  if (markable) {
+    inStream.mark(PUSHBACK_SIZE);
+  }
+  final PushbackInputStream pbis=new PushbackInputStream(inStream,PUSHBACK_SIZE);
+  try {
+    final byte[] buffer=new byte[PKCS7_MARKER.length];
+    final int len=pbis.read(buffer);
+    if (len < 0) {
+      throw new ParsingException("inStream is empty");
+    }
+    pbis.unread(buffer,0,len);
+    if (len == PKCS7_MARKER.length && Arrays.equals(PKCS7_MARKER,buffer)) {
+      return new OpenSSLX509CertPath(OpenSSLX509Certificate.fromPkcs7PemInputStream(pbis));
+    }
+    return new OpenSSLX509CertPath(OpenSSLX509Certificate.fromPkcs7DerInputStream(pbis));
+  }
+ catch (  Exception e) {
+    if (markable) {
+      try {
+        inStream.reset();
+      }
+ catch (      IOException ignored) {
+      }
+    }
+    throw new CertificateException(e);
+  }
+}

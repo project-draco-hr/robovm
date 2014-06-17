@@ -1,0 +1,20 @@
+{
+  SocketChannel socketChannel2=SocketChannel.open();
+  socketChannel2.configureBlocking(false);
+  Selector sel3=Selector.open();
+  SelectionKey mkey3=socketChannel2.register(sel3,SelectionKey.OP_WRITE);
+  assertEquals(1,sel3.select(100));
+  assertEquals(false,mkey3.isConnectable());
+  assertEquals(false,socketChannel2.isConnected());
+  assertEquals(true,mkey3.isWritable());
+  Selector sel4=Selector.open();
+  SelectionKey mkey4=socketChannel2.register(sel4,SelectionKey.OP_CONNECT);
+  assertEquals(1,sel4.select(100));
+  assertEquals(false,mkey4.isWritable());
+  assertEquals(true,mkey4.isConnectable());
+  Selector sel5=Selector.open();
+  SelectionKey mkey5=socketChannel2.register(sel5,SelectionKey.OP_CONNECT | SelectionKey.OP_WRITE);
+  assertEquals(1,sel5.select(100));
+  assertEquals(true,mkey5.isWritable());
+  assertEquals(true,mkey5.isConnectable());
+}

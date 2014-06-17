@@ -1,0 +1,21 @@
+{
+  poolLock.lock();
+  try {
+    if (isShutDown)     return;
+    if (refWorker != null)     refWorker.shutdown();
+    Iterator<BasicPoolEntryRef> iter=issuedConnections.iterator();
+    while (iter.hasNext()) {
+      BasicPoolEntryRef per=iter.next();
+      iter.remove();
+      BasicPoolEntry entry=per.get();
+      if (entry != null) {
+        closeConnection(entry.getConnection());
+      }
+    }
+    idleConnHandler.removeAll();
+    isShutDown=true;
+  }
+  finally {
+    poolLock.unlock();
+  }
+}

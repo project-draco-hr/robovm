@@ -1,0 +1,12 @@
+{
+  TBSCertList.CRLEntry[] entries=x509CRL.getRevokedCertificates();
+  List l=new ArrayList(entries.length);
+  GeneralNames currentCA=issuerName;
+  for (Enumeration en=x509CRL.getRevokedCertificateEnumeration(); en.hasMoreElements(); ) {
+    TBSCertList.CRLEntry entry=(TBSCertList.CRLEntry)en.nextElement();
+    X509CRLEntryHolder crlEntry=new X509CRLEntryHolder(entry,isIndirect,currentCA);
+    l.add(crlEntry);
+    currentCA=crlEntry.getCertificateIssuer();
+  }
+  return l;
+}

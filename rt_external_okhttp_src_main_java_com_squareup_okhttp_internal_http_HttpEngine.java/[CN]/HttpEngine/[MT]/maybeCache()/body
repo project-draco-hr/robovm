@@ -1,0 +1,11 @@
+{
+  if (!policy.getUseCaches())   return;
+  OkResponseCache responseCache=client.getOkResponseCache();
+  if (responseCache == null)   return;
+  HttpURLConnection connectionToCache=policy.getHttpConnectionToCache();
+  if (!responseHeaders.isCacheable(requestHeaders)) {
+    responseCache.maybeRemove(connectionToCache.getRequestMethod(),uri);
+    return;
+  }
+  cacheRequest=responseCache.put(uri,connectionToCache);
+}

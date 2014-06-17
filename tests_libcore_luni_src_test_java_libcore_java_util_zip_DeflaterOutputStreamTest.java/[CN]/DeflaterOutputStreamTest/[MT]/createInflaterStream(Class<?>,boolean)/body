@@ -1,0 +1,35 @@
+{
+  ExecutorService executor=Executors.newSingleThreadExecutor();
+  final PipedOutputStream pout=new PipedOutputStream();
+  PipedInputStream pin=new PipedInputStream(pout);
+  executor.submit(new Callable<Void>(){
+    public Void call() throws Exception {
+      OutputStream out;
+      if (c == DeflaterOutputStream.class) {
+        out=new DeflaterOutputStream(pout,flushing);
+      }
+ else       if (c == GZIPOutputStream.class) {
+        out=new GZIPOutputStream(pout,flushing);
+      }
+ else {
+        throw new AssertionError();
+      }
+      out.write(1);
+      out.write(2);
+      out.write(3);
+      out.flush();
+      return null;
+    }
+  }
+).get();
+  executor.shutdown();
+  if (c == DeflaterOutputStream.class) {
+    return new InflaterInputStream(pin);
+  }
+ else   if (c == GZIPOutputStream.class) {
+    return new GZIPInputStream(pin);
+  }
+ else {
+    throw new AssertionError();
+  }
+}

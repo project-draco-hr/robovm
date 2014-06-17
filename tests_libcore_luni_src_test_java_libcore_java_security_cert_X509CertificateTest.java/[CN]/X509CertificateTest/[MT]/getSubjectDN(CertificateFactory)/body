@@ -1,0 +1,17 @@
+{
+  X509Certificate c=getCertificate(f,CERT_RSA);
+  Principal princ=c.getSubjectDN();
+  if (StandardNames.IS_RI) {
+    assertEquals("OU=NetOps, O=Genius.com Inc, L=San Mateo, ST=California, C=US",princ.getName());
+  }
+ else {
+    if ("BC".equals(f.getProvider().getName())) {
+      assertEquals(f.getProvider().getName(),"C=US,ST=California,L=San Mateo,O=Genius.com Inc,OU=NetOps",princ.getName());
+    }
+ else {
+      assertEquals("OU=NetOps,O=Genius.com Inc,L=San Mateo,ST=California,C=US",princ.getName());
+    }
+  }
+  X509Certificate c2=getCertificate(f,CERT_RSA);
+  assertEquals(princ,c2.getSubjectDN());
+}

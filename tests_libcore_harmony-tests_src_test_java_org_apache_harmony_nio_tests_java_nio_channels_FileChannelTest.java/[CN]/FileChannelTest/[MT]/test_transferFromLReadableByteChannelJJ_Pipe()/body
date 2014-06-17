@@ -1,0 +1,18 @@
+{
+  writeDataToFile(fileOfWriteOnlyFileChannel);
+  pipe=Pipe.open();
+  ByteBuffer writeBuffer=ByteBuffer.wrap(CONTENT_AS_BYTES);
+  pipe.sink().write(writeBuffer);
+  final int OFFSET=2;
+  final int LENGTH=4;
+  long result=writeOnlyFileChannel.transferFrom(pipe.source(),OFFSET,LENGTH);
+  assertEquals(LENGTH,result);
+  writeOnlyFileChannel.close();
+  fis=new FileInputStream(fileOfWriteOnlyFileChannel);
+  byte[] resultBytes=new byte[OFFSET + LENGTH];
+  fis.read(resultBytes);
+  byte[] expectedBytes=new byte[OFFSET + LENGTH];
+  System.arraycopy(CONTENT_AS_BYTES,0,expectedBytes,0,OFFSET);
+  System.arraycopy(CONTENT_AS_BYTES,0,expectedBytes,OFFSET,LENGTH);
+  assertTrue(Arrays.equals(expectedBytes,resultBytes));
+}

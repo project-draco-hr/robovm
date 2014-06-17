@@ -1,0 +1,40 @@
+{
+  int res=getByte(pos);
+  pos++;
+  if (res < 128) {
+    return (char)res;
+  }
+ else   if (res >= 192 && res <= 247) {
+    int count;
+    if (res <= 223) {
+      count=1;
+      res=res & 0x1F;
+    }
+ else     if (res <= 239) {
+      count=2;
+      res=res & 0x0F;
+    }
+ else {
+      count=3;
+      res=res & 0x07;
+    }
+    int b;
+    for (int i=0; i < count; i++) {
+      pos++;
+      if (pos == length || chars[pos] != '\\') {
+        return 0x3F;
+      }
+      pos++;
+      b=getByte(pos);
+      pos++;
+      if ((b & 0xC0) != 0x80) {
+        return 0x3F;
+      }
+      res=(res << 6) + (b & 0x3F);
+    }
+    return (char)res;
+  }
+ else {
+    return 0x3F;
+  }
+}

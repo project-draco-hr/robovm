@@ -1,0 +1,82 @@
+{
+  HttpHost proxy=route.getProxyHost();
+  HttpHost target=route.getTargetHost();
+  HttpResponse response=null;
+  boolean done=false;
+  while (!done) {
+    done=true;
+    if (!this.managedConn.isOpen()) {
+      this.managedConn.open(route,context,this.params);
+    }
+    HttpRequest connect=createConnectRequest(route,context);
+    String agent=HttpProtocolParams.getUserAgent(params);
+    if (agent != null) {
+      connect.addHeader(HTTP.USER_AGENT,agent);
+    }
+    connect.addHeader(HTTP.TARGET_HOST,target.toHostString());
+    AuthScheme authScheme=this.proxyAuthState.getAuthScheme();
+    AuthScope authScope=this.proxyAuthState.getAuthScope();
+    Credentials creds=this.proxyAuthState.getCredentials();
+    if (creds != null) {
+      if (authScope != null || !authScheme.isConnectionBased()) {
+        try {
+          connect.addHeader(authScheme.authenticate(creds,connect));
+        }
+ catch (        AuthenticationException ex) {
+          if (this.log.isErrorEnabled()) {
+            this.log.error("Proxy authentication error: " + ex.getMessage());
+          }
+        }
+      }
+    }
+    response=requestExec.execute(connect,this.managedConn,context);
+    int status=response.getStatusLine().getStatusCode();
+    if (status < 200) {
+      throw new HttpException("Unexpected response to CONNECT request: " + response.getStatusLine());
+    }
+    CredentialsProvider credsProvider=(CredentialsProvider)context.getAttribute(ClientContext.CREDS_PROVIDER);
+    if (credsProvider != null && HttpClientParams.isAuthenticating(params)) {
+      if (this.proxyAuthHandler.isAuthenticationRequested(response,context)) {
+        this.log.debug("Proxy requested authentication");
+        Map<String,Header> challenges=this.proxyAuthHandler.getChallenges(response,context);
+        try {
+          processChallenges(challenges,this.proxyAuthState,this.proxyAuthHandler,response,context);
+        }
+ catch (        AuthenticationException ex) {
+          if (this.log.isWarnEnabled()) {
+            this.log.warn("Authentication error: " + ex.getMessage());
+            break;
+          }
+        }
+        updateAuthState(this.proxyAuthState,proxy,credsProvider);
+        if (this.proxyAuthState.getCredentials() != null) {
+          done=false;
+          if (this.reuseStrategy.keepAlive(response,context)) {
+            this.log.debug("Connection kept alive");
+            HttpEntity entity=response.getEntity();
+            if (entity != null) {
+              entity.consumeContent();
+            }
+          }
+ else {
+            this.managedConn.close();
+          }
+        }
+      }
+ else {
+        this.proxyAuthState.setAuthScope(null);
+      }
+    }
+  }
+  int status=response.getStatusLine().getStatusCode();
+  if (status > 299) {
+    HttpEntity entity=response.getEntity();
+    if (entity != null) {
+      response.setEntity(new BufferedHttpEntity(entity));
+    }
+    this.managedConn.close();
+    throw new TunnelRefusedException("CONNECT refused by proxy: " + response.getStatusLine(),response);
+  }
+  this.managedConn.markReusable();
+  return false;
+}

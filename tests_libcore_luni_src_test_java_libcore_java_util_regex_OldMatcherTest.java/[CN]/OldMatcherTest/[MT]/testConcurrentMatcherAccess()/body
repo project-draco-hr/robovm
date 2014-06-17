@@ -1,0 +1,32 @@
+{
+  final Pattern p=Pattern.compile("(^|\\W)([a-z])");
+  final Matcher m=p.matcher("");
+  ArrayList<Thread> threads=new ArrayList<Thread>();
+  for (int i=0; i < 10; ++i) {
+    Thread t=new Thread(new Runnable(){
+      public void run(){
+        for (int i=0; i < 4096; ++i) {
+          String s="some example text";
+          m.reset(s);
+          try {
+            StringBuffer sb=new StringBuffer(s.length());
+            while (m.find()) {
+              m.appendReplacement(sb,m.group(1) + m.group(2));
+            }
+            m.appendTail(sb);
+          }
+ catch (          Exception expected) {
+          }
+        }
+      }
+    }
+);
+    threads.add(t);
+  }
+  for (  Thread t : threads) {
+    t.start();
+  }
+  for (  Thread t : threads) {
+    t.join();
+  }
+}

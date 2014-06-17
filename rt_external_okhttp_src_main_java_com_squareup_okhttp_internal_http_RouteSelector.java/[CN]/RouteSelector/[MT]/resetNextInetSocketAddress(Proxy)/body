@@ -1,0 +1,19 @@
+{
+  socketAddresses=null;
+  String socketHost;
+  if (proxy.type() == Proxy.Type.DIRECT) {
+    socketHost=uri.getHost();
+    socketPort=getEffectivePort(uri);
+  }
+ else {
+    SocketAddress proxyAddress=proxy.address();
+    if (!(proxyAddress instanceof InetSocketAddress)) {
+      throw new IllegalArgumentException("Proxy.address() is not an " + "InetSocketAddress: " + proxyAddress.getClass());
+    }
+    InetSocketAddress proxySocketAddress=(InetSocketAddress)proxyAddress;
+    socketHost=proxySocketAddress.getHostName();
+    socketPort=proxySocketAddress.getPort();
+  }
+  socketAddresses=dns.getAllByName(socketHost);
+  nextSocketAddressIndex=0;
+}

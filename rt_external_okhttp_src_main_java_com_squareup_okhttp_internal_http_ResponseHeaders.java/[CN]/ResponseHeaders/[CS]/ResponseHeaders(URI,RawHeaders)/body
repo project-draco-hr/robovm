@@ -1,0 +1,84 @@
+{
+  this.uri=uri;
+  this.headers=headers;
+  HeaderParser.CacheControlHandler handler=new HeaderParser.CacheControlHandler(){
+    @Override public void handle(    String directive,    String parameter){
+      if ("no-cache".equalsIgnoreCase(directive)) {
+        noCache=true;
+      }
+ else       if ("no-store".equalsIgnoreCase(directive)) {
+        noStore=true;
+      }
+ else       if ("max-age".equalsIgnoreCase(directive)) {
+        maxAgeSeconds=HeaderParser.parseSeconds(parameter);
+      }
+ else       if ("s-maxage".equalsIgnoreCase(directive)) {
+        sMaxAgeSeconds=HeaderParser.parseSeconds(parameter);
+      }
+ else       if ("public".equalsIgnoreCase(directive)) {
+        isPublic=true;
+      }
+ else       if ("must-revalidate".equalsIgnoreCase(directive)) {
+        mustRevalidate=true;
+      }
+    }
+  }
+;
+  for (int i=0; i < headers.length(); i++) {
+    String fieldName=headers.getFieldName(i);
+    String value=headers.getValue(i);
+    if ("Cache-Control".equalsIgnoreCase(fieldName)) {
+      HeaderParser.parseCacheControl(value,handler);
+    }
+ else     if ("Date".equalsIgnoreCase(fieldName)) {
+      servedDate=HttpDate.parse(value);
+    }
+ else     if ("Expires".equalsIgnoreCase(fieldName)) {
+      expires=HttpDate.parse(value);
+    }
+ else     if ("Last-Modified".equalsIgnoreCase(fieldName)) {
+      lastModified=HttpDate.parse(value);
+    }
+ else     if ("ETag".equalsIgnoreCase(fieldName)) {
+      etag=value;
+    }
+ else     if ("Pragma".equalsIgnoreCase(fieldName)) {
+      if ("no-cache".equalsIgnoreCase(value)) {
+        noCache=true;
+      }
+    }
+ else     if ("Age".equalsIgnoreCase(fieldName)) {
+      ageSeconds=HeaderParser.parseSeconds(value);
+    }
+ else     if ("Vary".equalsIgnoreCase(fieldName)) {
+      if (varyFields.isEmpty()) {
+        varyFields=new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+      }
+      for (      String varyField : value.split(",")) {
+        varyFields.add(varyField.trim());
+      }
+    }
+ else     if ("Content-Encoding".equalsIgnoreCase(fieldName)) {
+      contentEncoding=value;
+    }
+ else     if ("Transfer-Encoding".equalsIgnoreCase(fieldName)) {
+      transferEncoding=value;
+    }
+ else     if ("Content-Length".equalsIgnoreCase(fieldName)) {
+      try {
+        contentLength=Integer.parseInt(value);
+      }
+ catch (      NumberFormatException ignored) {
+      }
+    }
+ else     if ("Connection".equalsIgnoreCase(fieldName)) {
+      connection=value;
+    }
+ else     if (SENT_MILLIS.equalsIgnoreCase(fieldName)) {
+      sentRequestMillis=Long.parseLong(value);
+    }
+ else     if (RECEIVED_MILLIS.equalsIgnoreCase(fieldName)) {
+      receivedResponseMillis=Long.parseLong(value);
+    }
+  }
+}

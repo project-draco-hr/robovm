@@ -1,0 +1,24 @@
+{
+  assertTrue(buf.capacity() > SMALL_TEST_LENGTH);
+  buf.position(1);
+  buf.limit(buf.capacity() - 1);
+  ByteBuffer slice=buf.slice();
+  assertEquals(buf.isReadOnly(),slice.isReadOnly());
+  assertEquals(buf.isDirect(),slice.isDirect());
+  assertEquals(buf.order(),slice.order());
+  assertEquals(slice.position(),0);
+  assertEquals(slice.limit(),buf.remaining());
+  assertEquals(slice.capacity(),buf.remaining());
+  try {
+    slice.reset();
+    fail("Should throw Exception");
+  }
+ catch (  InvalidMarkException e) {
+  }
+  if (!slice.isReadOnly()) {
+    loadTestData1(slice);
+    assertContentLikeTestData1(buf,1,(byte)0,slice.capacity());
+    buf.put(2,(byte)100);
+    assertEquals(slice.get(1),100);
+  }
+}

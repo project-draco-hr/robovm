@@ -1,0 +1,21 @@
+{
+  OpenSSLBIOInputStream bis=new OpenSSLBIOInputStream(is);
+  final long[] certRefs;
+  try {
+    certRefs=NativeCrypto.PEM_read_bio_PKCS7(bis.getBioContext(),NativeCrypto.PKCS7_CRLS);
+  }
+ catch (  Exception e) {
+    throw new ParsingException(e);
+  }
+ finally {
+    NativeCrypto.BIO_free(bis.getBioContext());
+  }
+  final List<OpenSSLX509CRL> certs=new ArrayList<OpenSSLX509CRL>(certRefs.length);
+  for (int i=0; i < certRefs.length; i++) {
+    if (certRefs[i] == 0) {
+      continue;
+    }
+    certs.add(new OpenSSLX509CRL(certRefs[i]));
+  }
+  return certs;
+}

@@ -1,0 +1,29 @@
+{
+  ensureServerOpen();
+  java.nio.ByteBuffer writeBuf=java.nio.ByteBuffer.allocate(CAPACITY_NORMAL);
+  java.nio.ByteBuffer[] writeBufArr=new java.nio.ByteBuffer[1];
+  writeBufArr[0]=java.nio.ByteBuffer.allocate(CAPACITY_NORMAL);
+  assertFalse(this.channel1.isRegistered());
+  assertTrue(this.channel1.isBlocking());
+  this.channel1.configureBlocking(false);
+  this.channel1.connect(localAddr1);
+  assertFalse(this.channel1.isBlocking());
+  boolean connected=channel1.isConnected();
+  if (!connected) {
+    assertTrue(this.channel1.isConnectionPending());
+    assertTrue(this.channel1.isOpen());
+  }
+  if (tryFinish()) {
+    assertEquals(CAPACITY_NORMAL,this.channel1.write(writeBuf));
+    assertEquals(CAPACITY_NORMAL,this.channel1.write(writeBufArr,0,1));
+    this.channel1.configureBlocking(false);
+    try {
+      this.channel1.connect(localAddr1);
+      fail("Should throw AlreadyConnectedException");
+    }
+ catch (    AlreadyConnectedException e) {
+    }
+  }
+  assertFalse(this.channel1.isRegistered());
+  tryFinish();
+}

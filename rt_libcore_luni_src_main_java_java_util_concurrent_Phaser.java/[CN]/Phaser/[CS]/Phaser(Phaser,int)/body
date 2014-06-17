@@ -1,0 +1,18 @@
+{
+  if (parties >>> PARTIES_SHIFT != 0)   throw new IllegalArgumentException("Illegal number of parties");
+  int phase=0;
+  this.parent=parent;
+  if (parent != null) {
+    final Phaser root=parent.root;
+    this.root=root;
+    this.evenQ=root.evenQ;
+    this.oddQ=root.oddQ;
+    if (parties != 0)     phase=parent.doRegister(1);
+  }
+ else {
+    this.root=this;
+    this.evenQ=new AtomicReference<QNode>();
+    this.oddQ=new AtomicReference<QNode>();
+  }
+  this.state=(parties == 0) ? (long)EMPTY : ((long)phase << PHASE_SHIFT) | ((long)parties << PARTIES_SHIFT) | ((long)parties);
+}

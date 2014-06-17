@@ -1,0 +1,18 @@
+{
+  if (key == null) {
+    throw new NullPointerException("Null keys are not allowed");
+  }
+  if (value == null) {
+    throw new NullPointerException("Null values are not allowed");
+  }
+  if (changeCount++ > MAX_CHANGES_BEFORE_PURGE) {
+    purge();
+    changeCount=0;
+  }
+ else   if ((changeCount % PARTIAL_PURGE_COUNT) == 0) {
+    purgeOne();
+  }
+  Object result=null;
+  Referenced keyRef=new Referenced(key,queue);
+  return super.put(keyRef,value);
+}

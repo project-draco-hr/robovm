@@ -1,0 +1,36 @@
+{
+  SocketFactory sf=SocketFactory.getDefault();
+  int sport=new ServerSocket(0).getLocalPort();
+  int[] invalidPorts={Integer.MIN_VALUE,-1,65536,Integer.MAX_VALUE};
+  Socket s=sf.createSocket(InetAddress.getLocalHost(),sport,InetAddress.getLocalHost(),0);
+  assertNotNull(s);
+  assertTrue("1: Failed to create socket",s.getPort() == sport);
+  int portNumber=s.getLocalPort();
+  for (int i=0; i < invalidPorts.length; i++) {
+    try {
+      sf.createSocket(InetAddress.getLocalHost(),invalidPorts[i],InetAddress.getLocalHost(),portNumber);
+      fail("IllegalArgumentException wasn't thrown for " + invalidPorts[i]);
+    }
+ catch (    IllegalArgumentException expected) {
+    }
+    try {
+      sf.createSocket(InetAddress.getLocalHost(),sport,InetAddress.getLocalHost(),invalidPorts[i]);
+      fail("IllegalArgumentException wasn't thrown for " + invalidPorts[i]);
+    }
+ catch (    IllegalArgumentException expected) {
+    }
+  }
+  try {
+    sf.createSocket(InetAddress.getLocalHost(),sport,InetAddress.getLocalHost(),portNumber);
+    fail("IOException wasn't thrown");
+  }
+ catch (  IOException expected) {
+  }
+  SocketFactory f=SocketFactory.getDefault();
+  try {
+    f.createSocket(InetAddress.getLocalHost(),8081,InetAddress.getLocalHost(),8082);
+    fail("IOException wasn't thrown ...");
+  }
+ catch (  IOException expected) {
+  }
+}

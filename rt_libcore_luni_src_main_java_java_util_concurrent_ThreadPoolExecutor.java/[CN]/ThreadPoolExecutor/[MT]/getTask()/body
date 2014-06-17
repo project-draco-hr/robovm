@@ -1,20 +1,17 @@
 {
   boolean timedOut=false;
-  retry:   for (; ; ) {
+  for (; ; ) {
     int c=ctl.get();
     int rs=runStateOf(c);
     if (rs >= SHUTDOWN && (rs >= STOP || workQueue.isEmpty())) {
       decrementWorkerCount();
       return null;
     }
-    boolean timed;
-    for (; ; ) {
-      int wc=workerCountOf(c);
-      timed=allowCoreThreadTimeOut || wc > corePoolSize;
-      if (wc <= maximumPoolSize && !(timedOut && timed))       break;
+    int wc=workerCountOf(c);
+    boolean timed=allowCoreThreadTimeOut || wc > corePoolSize;
+    if ((wc > maximumPoolSize || (timed && timedOut)) && (wc > 1 || workQueue.isEmpty())) {
       if (compareAndDecrementWorkerCount(c))       return null;
-      c=ctl.get();
-      if (runStateOf(c) != rs)       continue retry;
+      continue;
     }
     try {
       Runnable r=timed ? workQueue.poll(keepAliveTime,TimeUnit.NANOSECONDS) : workQueue.take();

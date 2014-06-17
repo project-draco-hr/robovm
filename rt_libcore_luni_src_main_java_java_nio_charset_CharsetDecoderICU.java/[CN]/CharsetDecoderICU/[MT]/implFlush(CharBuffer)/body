@@ -5,18 +5,15 @@
     data[INPUT_OFFSET]=0;
     data[OUTPUT_OFFSET]=getArray(out);
     data[INVALID_BYTES]=0;
-    ec=NativeConverter.decode(converterHandle,input,inEnd,output,outEnd,data,true);
-    if (ErrorCode.isFailure(ec)) {
-      if (ec == ErrorCode.U_BUFFER_OVERFLOW_ERROR) {
+    int error=NativeConverter.decode(converterHandle,input,inEnd,output,outEnd,data,true);
+    if (ICU.U_FAILURE(error)) {
+      if (error == ICU.U_BUFFER_OVERFLOW_ERROR) {
         return CoderResult.OVERFLOW;
       }
- else       if (ec == ErrorCode.U_TRUNCATED_CHAR_FOUND) {
+ else       if (error == ICU.U_TRUNCATED_CHAR_FOUND) {
         if (data[INPUT_OFFSET] > 0) {
           return CoderResult.malformedForLength(data[INPUT_OFFSET]);
         }
-      }
- else {
-        throw ErrorCode.throwException(ec);
       }
     }
     return CoderResult.UNDERFLOW;

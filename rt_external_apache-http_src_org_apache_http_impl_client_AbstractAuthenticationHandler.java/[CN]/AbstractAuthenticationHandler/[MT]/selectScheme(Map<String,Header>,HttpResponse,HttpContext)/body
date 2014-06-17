@@ -1,0 +1,41 @@
+{
+  AuthSchemeRegistry registry=(AuthSchemeRegistry)context.getAttribute(ClientContext.AUTHSCHEME_REGISTRY);
+  if (registry == null) {
+    throw new IllegalStateException("AuthScheme registry not set in HTTP context");
+  }
+  List<?> authPrefs=(List<?>)context.getAttribute(ClientContext.AUTH_SCHEME_PREF);
+  if (authPrefs == null) {
+    authPrefs=getAuthPreferences();
+  }
+  if (this.log.isDebugEnabled()) {
+    this.log.debug("Authentication schemes in the order of preference: " + authPrefs);
+  }
+  AuthScheme authScheme=null;
+  for (int i=0; i < authPrefs.size(); i++) {
+    String id=(String)authPrefs.get(i);
+    Header challenge=challenges.get(id.toLowerCase(Locale.ENGLISH));
+    if (challenge != null) {
+      if (this.log.isDebugEnabled()) {
+        this.log.debug(id + " authentication scheme selected");
+      }
+      try {
+        authScheme=registry.getAuthScheme(id,response.getParams());
+        break;
+      }
+ catch (      IllegalStateException e) {
+        if (this.log.isWarnEnabled()) {
+          this.log.warn("Authentication scheme " + id + " not supported");
+        }
+      }
+    }
+ else {
+      if (this.log.isDebugEnabled()) {
+        this.log.debug("Challenge for " + id + " authentication scheme not available");
+      }
+    }
+  }
+  if (authScheme == null) {
+    throw new AuthenticationException("Unable to respond to any of these challenges: " + challenges);
+  }
+  return authScheme;
+}

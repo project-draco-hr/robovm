@@ -1,0 +1,16 @@
+{
+  if (log.isDebugEnabled()) {
+    log.debug("Creating new connection [" + rospl.getRoute() + "]");
+  }
+  BasicPoolEntry entry=new BasicPoolEntry(op,rospl.getRoute(),refQueue);
+  poolLock.lock();
+  try {
+    rospl.createdEntry(entry);
+    numConnections++;
+    issuedConnections.add(entry.getWeakRef());
+  }
+  finally {
+    poolLock.unlock();
+  }
+  return entry;
+}

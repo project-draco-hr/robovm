@@ -6,7 +6,7 @@
     throw new IOException();
   }
   if (isConnected() && !connectAddress.equals(isa)) {
-    throw new IllegalArgumentException();
+    throw new IllegalArgumentException("Connected to " + connectAddress + ", not "+ socketAddress);
   }
 synchronized (writeLock) {
     int sendCount=0;
@@ -17,6 +17,7 @@ synchronized (writeLock) {
       if (sendCount > 0) {
         source.position(oldPosition + sendCount);
       }
+      isBound=true;
     }
   finally {
       end(sendCount >= 0);

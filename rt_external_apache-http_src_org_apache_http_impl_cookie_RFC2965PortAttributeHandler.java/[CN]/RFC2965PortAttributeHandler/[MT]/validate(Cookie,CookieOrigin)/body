@@ -1,0 +1,14 @@
+{
+  if (cookie == null) {
+    throw new IllegalArgumentException("Cookie may not be null");
+  }
+  if (origin == null) {
+    throw new IllegalArgumentException("Cookie origin may not be null");
+  }
+  int port=origin.getPort();
+  if (cookie instanceof ClientCookie && ((ClientCookie)cookie).containsAttribute(ClientCookie.PORT_ATTR)) {
+    if (!portMatch(port,cookie.getPorts())) {
+      throw new MalformedCookieException("Port attribute violates RFC 2965: " + "Request port not found in cookie's port list.");
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  Cipher c=Cipher.getInstance("AES/ECB/NoPadding");
+  c.init(Cipher.ENCRYPT_MODE,new SecretKeySpec(new byte[128 / 8],"AES"));
+  try {
+    c.updateAAD((byte[])null);
+    fail("should not be able to call updateAAD with null input");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    c.updateAAD((ByteBuffer)null);
+    fail("should not be able to call updateAAD with null input");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    c.updateAAD(null,0,8);
+    fail("should not be able to call updateAAD with null input");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    c.updateAAD(new byte[8],-1,7);
+    fail("should not be able to call updateAAD with invalid offset");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    c.updateAAD(new byte[8],0,-1);
+    fail("should not be able to call updateAAD with negative length");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    c.updateAAD(new byte[8],0,8 + 1);
+    fail("should not be able to call updateAAD with too large length");
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+}

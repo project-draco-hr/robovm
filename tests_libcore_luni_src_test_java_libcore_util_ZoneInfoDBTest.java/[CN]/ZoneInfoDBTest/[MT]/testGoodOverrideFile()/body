@@ -1,0 +1,20 @@
+{
+  RandomAccessFile in=new RandomAccessFile(TZDATA_IN_ROOT,"r");
+  byte[] content=new byte[(int)in.length()];
+  in.readFully(content);
+  content[6]='9';
+  content[7]='9';
+  content[8]='9';
+  content[9]='9';
+  content[10]='z';
+  in.close();
+  String goodFile=makeTemporaryFile(content);
+  try {
+    ZoneInfoDB.TzData data=new ZoneInfoDB.TzDataAndroid(goodFile,TZDATA_IN_DATA,TZDATA_IN_ROOT);
+    assertEquals("9999z",data.getVersion());
+    assertEquals(TimeZone.getAvailableIDs().length,data.getAvailableIDs().length);
+  }
+  finally {
+    new File(goodFile).delete();
+  }
+}

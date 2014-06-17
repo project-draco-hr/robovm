@@ -1,6 +1,6 @@
 {
   checkClosed();
-  Arrays.checkOffsetAndCount(buffer.length,offset,byteCount);
+  Arrays.checkOffsetAndCount(buffer.length,byteOffset,byteCount);
   if (inf.finished() || currentEntry == null) {
     return -1;
   }
@@ -21,10 +21,10 @@
     if ((csize - inRead) < toRead) {
       toRead=csize - inRead;
     }
-    System.arraycopy(buf,lastRead,buffer,offset,toRead);
+    System.arraycopy(buf,lastRead,buffer,byteOffset,toRead);
     lastRead+=toRead;
     inRead+=toRead;
-    crc.update(buffer,offset,toRead);
+    crc.update(buffer,byteOffset,toRead);
     return toRead;
   }
   if (inf.needsInput()) {
@@ -35,7 +35,7 @@
   }
   int read;
   try {
-    read=inf.inflate(buffer,offset,byteCount);
+    read=inf.inflate(buffer,byteOffset,byteCount);
   }
  catch (  DataFormatException e) {
     throw new ZipException(e.getMessage());
@@ -43,6 +43,6 @@
   if (read == 0 && inf.finished()) {
     return -1;
   }
-  crc.update(buffer,offset,read);
+  crc.update(buffer,byteOffset,read);
   return read;
 }

@@ -1,0 +1,21 @@
+{
+  String name1="test_file_name1";
+  String name2="test_file_name2";
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  ZipOutputStream out=new ZipOutputStream(baos);
+  out.putNextEntry(new ZipEntry(name2));
+  out.closeEntry();
+  out.putNextEntry(new ZipEntry(name1));
+  out.closeEntry();
+  out.close();
+  byte[] buffer=baos.toByteArray();
+  replaceBytes(buffer,name2.getBytes(),name1.getBytes());
+  File badZip=createTemporaryZipFile();
+  writeBytes(badZip,buffer);
+  try {
+    ZipFile bad=new ZipFile(badZip);
+    fail();
+  }
+ catch (  ZipException expected) {
+  }
+}

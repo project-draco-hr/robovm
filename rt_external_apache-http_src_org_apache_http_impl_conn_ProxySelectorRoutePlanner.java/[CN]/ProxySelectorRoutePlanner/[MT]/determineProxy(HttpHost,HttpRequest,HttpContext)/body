@@ -1,0 +1,23 @@
+{
+  ProxySelector psel=this.proxySelector;
+  if (psel == null)   psel=ProxySelector.getDefault();
+  if (psel == null)   return null;
+  URI targetURI=null;
+  try {
+    targetURI=new URI(target.toURI());
+  }
+ catch (  URISyntaxException usx) {
+    throw new HttpException("Cannot convert host to URI: " + target,usx);
+  }
+  List<Proxy> proxies=psel.select(targetURI);
+  Proxy p=chooseProxy(proxies,target,request,context);
+  HttpHost result=null;
+  if (p.type() == Proxy.Type.HTTP) {
+    if (!(p.address() instanceof InetSocketAddress)) {
+      throw new HttpException("Unable to handle non-Inet proxy address: " + p.address());
+    }
+    final InetSocketAddress isa=(InetSocketAddress)p.address();
+    result=new HttpHost(getHost(isa),isa.getPort());
+  }
+  return result;
+}

@@ -1,0 +1,19 @@
+{
+  if (parameters.getEnableSessionCreation()) {
+    isResuming=false;
+    session=new SSLSessionImpl(parameters.getSecureRandom());
+    if (engineOwner != null) {
+      session.setPeer(engineOwner.getPeerHost(),engineOwner.getPeerPort());
+    }
+ else {
+      session.setPeer(socketOwner.getPeerHostName(),socketOwner.getPeerPort());
+    }
+    session.protocol=ProtocolVersion.getLatestVersion(parameters.getEnabledProtocols());
+    recordProtocol.setVersion(session.protocol.version);
+    startSession();
+  }
+ else {
+    status=NOT_HANDSHAKING;
+    sendWarningAlert(AlertProtocol.NO_RENEGOTIATION);
+  }
+}

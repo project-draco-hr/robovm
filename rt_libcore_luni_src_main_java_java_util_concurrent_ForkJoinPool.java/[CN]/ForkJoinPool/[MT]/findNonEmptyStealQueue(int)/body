@@ -1,0 +1,17 @@
+{
+  for (WorkQueue[] ws; ; ) {
+    int ps=plock, m, n;
+    if ((ws=workQueues) == null || (m=ws.length - 1) < 1)     return null;
+    for (int j=(m + 1) << 2; ; ) {
+      WorkQueue q=ws[(((r + j) << 1) | 1) & m];
+      if (q != null && (n=q.base - q.top) < 0) {
+        if (n < -1)         signalWork(q);
+        return q;
+      }
+ else       if (--j < 0) {
+        if (plock == ps)         return null;
+        break;
+      }
+    }
+  }
+}

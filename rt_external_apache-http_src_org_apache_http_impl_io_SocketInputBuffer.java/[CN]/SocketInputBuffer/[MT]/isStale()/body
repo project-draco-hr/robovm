@@ -1,0 +1,19 @@
+{
+  if (hasBufferedData()) {
+    return false;
+  }
+  int oldTimeout=this.socket.getSoTimeout();
+  try {
+    this.socket.setSoTimeout(1);
+    return fillBuffer() == -1;
+  }
+ catch (  SocketTimeoutException e) {
+    return false;
+  }
+catch (  IOException e) {
+    return true;
+  }
+ finally {
+    this.socket.setSoTimeout(oldTimeout);
+  }
+}

@@ -1,0 +1,17 @@
+{
+  GeneralNames name;
+  if (form instanceof V2Form) {
+    name=((V2Form)form).getIssuerName();
+  }
+ else {
+    name=(GeneralNames)form;
+  }
+  GeneralName[] names=name.getNames();
+  List l=new ArrayList(names.length);
+  for (int i=0; i != names.length; i++) {
+    if (names[i].getTagNo() == GeneralName.directoryName) {
+      l.add(X500Name.getInstance(names[i].getName()));
+    }
+  }
+  return (X500Name[])l.toArray(new X500Name[l.size()]);
+}

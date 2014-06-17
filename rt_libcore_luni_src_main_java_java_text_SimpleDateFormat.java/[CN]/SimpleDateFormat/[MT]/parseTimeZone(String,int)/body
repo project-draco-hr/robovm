@@ -35,20 +35,26 @@
     calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
     return offset;
   }
-  String[][] zones=formatData.internalZoneStrings();
-  for (  String[] element : zones) {
-    for (int j=TimeZones.LONG_NAME; j < TimeZones.NAME_COUNT; j++) {
-      if (string.regionMatches(true,offset,element[j],0,element[j].length())) {
-        TimeZone zone=TimeZone.getTimeZone(element[TimeZones.OLSON_NAME]);
+  for (  String[] row : formatData.internalZoneStrings()) {
+    for (int i=TimeZoneNames.LONG_NAME; i < TimeZoneNames.NAME_COUNT; ++i) {
+      if (row[i] == null) {
+        continue;
+      }
+      if (string.regionMatches(true,offset,row[i],0,row[i].length())) {
+        TimeZone zone=TimeZone.getTimeZone(row[TimeZoneNames.OLSON_NAME]);
         if (zone == null) {
           return -offset - 1;
         }
         int raw=zone.getRawOffset();
-        if (j == TimeZones.LONG_NAME_DST || j == TimeZones.SHORT_NAME_DST) {
-          raw+=3600000;
+        if (i == TimeZoneNames.LONG_NAME_DST || i == TimeZoneNames.SHORT_NAME_DST) {
+          int dstSavings=zone.getDSTSavings();
+          if (dstSavings == 0) {
+            dstSavings=3600000;
+          }
+          raw+=dstSavings;
         }
         calendar.setTimeZone(new SimpleTimeZone(raw,""));
-        return offset + element[j].length();
+        return offset + row[i].length();
       }
     }
   }

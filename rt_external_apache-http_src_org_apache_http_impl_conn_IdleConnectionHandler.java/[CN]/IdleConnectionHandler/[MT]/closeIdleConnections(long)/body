@@ -1,0 +1,24 @@
+{
+  long idleTimeout=System.currentTimeMillis() - idleTime;
+  if (log.isDebugEnabled()) {
+    log.debug("Checking for connections, idleTimeout: " + idleTimeout);
+  }
+  Iterator<HttpConnection> connectionIter=connectionToTimes.keySet().iterator();
+  while (connectionIter.hasNext()) {
+    HttpConnection conn=connectionIter.next();
+    TimeValues times=connectionToTimes.get(conn);
+    Long connectionTime=times.timeAdded;
+    if (connectionTime.longValue() <= idleTimeout) {
+      if (log.isDebugEnabled()) {
+        log.debug("Closing connection, connection time: " + connectionTime);
+      }
+      connectionIter.remove();
+      try {
+        conn.close();
+      }
+ catch (      IOException ex) {
+        log.debug("I/O error closing connection",ex);
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  if (!isAlgIdEqual(c.getSignatureAlgorithm(),c.getTBSCertificate().getSignature())) {
+    throw new CertificateException("signature algorithm in TBS cert not same as outer cert");
+  }
+  ASN1Encodable params=c.getSignatureAlgorithm().getParameters();
+  X509SignatureUtil.setSignatureParameters(signature,params);
+  signature.initVerify(key);
+  signature.update(this.getTBSCertificate());
+  if (!signature.verify(this.getSignature())) {
+    throw new SignatureException("certificate does not verify with supplied key");
+  }
+}

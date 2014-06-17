@@ -1,0 +1,19 @@
+{
+  String encOID=null;
+  if (key instanceof RSAPrivateKey || "RSA".equalsIgnoreCase(key.getAlgorithm())) {
+    encOID=ENCRYPTION_RSA;
+  }
+ else   if (key instanceof DSAPrivateKey || "DSA".equalsIgnoreCase(key.getAlgorithm())) {
+    encOID=ENCRYPTION_DSA;
+    if (!digestOID.equals(DIGEST_SHA1)) {
+      throw new IllegalArgumentException("can't mix DSA with anything but SHA1");
+    }
+  }
+ else   if ("ECDSA".equalsIgnoreCase(key.getAlgorithm()) || "EC".equalsIgnoreCase(key.getAlgorithm())) {
+    encOID=(String)EC_ALGORITHMS.get(digestOID);
+    if (encOID == null) {
+      throw new IllegalArgumentException("can't mix ECDSA with anything but SHA family digests");
+    }
+  }
+  return encOID;
+}

@@ -1,0 +1,19 @@
+{
+  try {
+    NativeCrypto.SSL_use_PrivateKey(NULL,NULL);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  long c=NativeCrypto.SSL_CTX_new();
+  long s=NativeCrypto.SSL_new(c);
+  try {
+    NativeCrypto.SSL_use_PrivateKey(s,NULL);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  NativeCrypto.SSL_use_PrivateKey(s,getServerPrivateKey().getPkeyContext());
+  NativeCrypto.SSL_free(s);
+  NativeCrypto.SSL_CTX_free(c);
+}

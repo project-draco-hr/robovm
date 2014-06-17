@@ -3,7 +3,9 @@
   TestSSLContext testSSLContext=TestSSLContext.create();
   initResponseCache();
   server.useHttps(testSSLContext.serverContext.getSocketFactory(),true);
-  server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.UPGRADE_TO_SSL_AT_END).clearHeaders().setBody("bogus proxy connect response content"));
+  MockResponse badProxyResponse=new MockResponse().setSocketPolicy(SocketPolicy.UPGRADE_TO_SSL_AT_END).clearHeaders().setBody("bogus proxy connect response content");
+  server.enqueue(badProxyResponse);
+  server.enqueue(badProxyResponse);
   server.play();
   URL url=new URL("https://android.com/foo");
   HttpsURLConnection connection=(HttpsURLConnection)proxyConfig.connect(server,url);
@@ -12,7 +14,7 @@
     connection.connect();
     fail();
   }
- catch (  IOException expected) {
+ catch (  SSLHandshakeException expected) {
   }
   RecordedRequest connect=server.takeRequest();
   assertEquals("Connect line failure on proxy","CONNECT android.com:443 HTTP/1.1",connect.getRequestLine());

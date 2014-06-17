@@ -1,0 +1,28 @@
+{
+  int read;
+  int capacity=bytes.length;
+  try {
+    while ((read=Libcore.os.read(fd,bytes,count,capacity - count)) != 0) {
+      count+=read;
+      if (count == capacity) {
+        if (unknownLength) {
+          final int newCapacity=capacity * 2;
+          byte[] newBytes=new byte[newCapacity];
+          System.arraycopy(bytes,0,newBytes,0,capacity);
+          bytes=newBytes;
+          capacity=newCapacity;
+        }
+ else {
+          break;
+        }
+      }
+    }
+    return this;
+  }
+ catch (  ErrnoException e) {
+    throw e.rethrowAsIOException();
+  }
+ finally {
+    closeQuietly(fd);
+  }
+}

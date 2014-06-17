@@ -4,7 +4,14 @@
   final ReentrantLock lock=this.lock;
   lock.lock();
   try {
-    for (int i=takeIndex, k=count; k > 0; i=inc(i), k--)     if (o.equals(items[i]))     return true;
+    if (count > 0) {
+      final int putIndex=this.putIndex;
+      int i=takeIndex;
+      do {
+        if (o.equals(items[i]))         return true;
+      }
+ while ((i=inc(i)) != putIndex);
+    }
     return false;
   }
   finally {

@@ -1,0 +1,18 @@
+{
+  X509Certificate c=getCertificate(f,CERT_ALT_DIRNAME);
+  Collection<List<?>> col=c.getSubjectAlternativeNames();
+  assertNotNull(f.getProvider().getName(),col);
+  assertEquals(1,col.size());
+  List<?> item=col.iterator().next();
+  assertTrue(item.get(0) instanceof Integer);
+  assertTrue(String.valueOf((Integer)item.get(0)),4 == (Integer)item.get(0));
+  assertTrue(item.get(1) instanceof String);
+  if ("BC".equals(f.getProvider().getName())) {
+    byte[] bytes="CN=?????,OU=??ber Fr??ends,O=Awesome Dudes,C=US".getBytes("UTF-8");
+    String string=new String(bytes,0);
+    assertEquals(string,(String)item.get(1));
+  }
+ else {
+    assertEquals("CN=?????,OU=??ber Fr??ends,O=Awesome Dudes,C=US",(String)item.get(1));
+  }
+}

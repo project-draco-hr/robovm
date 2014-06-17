@@ -1,0 +1,13 @@
+{
+  while (isRunning()) {
+    Object object=waitForObject();
+    if (object == null) {
+      continue;
+    }
+    boolean finalized=waitForFinalization(object);
+    if (!finalized && !VMRuntime.getRuntime().isDebuggerActive()) {
+      finalizerTimedOut(object);
+      break;
+    }
+  }
+}

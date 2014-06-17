@@ -1,0 +1,62 @@
+{
+  this.forEncryption=forEncryption;
+  this.macBlock=null;
+  KeyParameter keyParam;
+  if (params instanceof AEADParameters) {
+    AEADParameters param=(AEADParameters)params;
+    nonce=param.getNonce();
+    initialAssociatedText=param.getAssociatedText();
+    int macSizeBits=param.getMacSize();
+    if (macSizeBits < 96 || macSizeBits > 128 || macSizeBits % 8 != 0) {
+      throw new IllegalArgumentException("Invalid value for MAC size: " + macSizeBits);
+    }
+    macSize=macSizeBits / 8;
+    keyParam=param.getKey();
+  }
+ else   if (params instanceof ParametersWithIV) {
+    ParametersWithIV param=(ParametersWithIV)params;
+    nonce=param.getIV();
+    initialAssociatedText=null;
+    macSize=16;
+    keyParam=(KeyParameter)param.getParameters();
+  }
+ else {
+    throw new IllegalArgumentException("invalid parameters passed to GCM");
+  }
+  int bufLength=forEncryption ? BLOCK_SIZE : (BLOCK_SIZE + macSize);
+  this.bufBlock=new byte[bufLength];
+  if (nonce == null || nonce.length < 1) {
+    throw new IllegalArgumentException("IV must be at least 1 byte");
+  }
+  if (keyParam != null) {
+    cipher.init(true,keyParam);
+    this.H=new byte[BLOCK_SIZE];
+    cipher.processBlock(H,0,H,0);
+    multiplier.init(H);
+    exp=null;
+  }
+  this.J0=new byte[BLOCK_SIZE];
+  if (nonce.length == 12) {
+    System.arraycopy(nonce,0,J0,0,nonce.length);
+    this.J0[BLOCK_SIZE - 1]=0x01;
+  }
+ else {
+    gHASH(J0,nonce,nonce.length);
+    byte[] X=new byte[BLOCK_SIZE];
+    Pack.longToBigEndian((long)nonce.length * 8,X,8);
+    gHASHBlock(J0,X);
+  }
+  this.S=new byte[BLOCK_SIZE];
+  this.S_at=new byte[BLOCK_SIZE];
+  this.S_atPre=new byte[BLOCK_SIZE];
+  this.atBlock=new byte[BLOCK_SIZE];
+  this.atBlockPos=0;
+  this.atLength=0;
+  this.atLengthPre=0;
+  this.counter=Arrays.clone(J0);
+  this.bufOff=0;
+  this.totalLength=0;
+  if (initialAssociatedText != null) {
+    processAADBytes(initialAssociatedText,0,initialAssociatedText.length);
+  }
+}

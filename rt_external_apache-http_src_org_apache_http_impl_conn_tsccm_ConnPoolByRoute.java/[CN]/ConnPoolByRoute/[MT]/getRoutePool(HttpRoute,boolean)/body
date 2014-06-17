@@ -1,0 +1,15 @@
+{
+  RouteSpecificPool rospl=null;
+  poolLock.lock();
+  try {
+    rospl=routeToPool.get(route);
+    if ((rospl == null) && create) {
+      rospl=newRouteSpecificPool(route);
+      routeToPool.put(route,rospl);
+    }
+  }
+  finally {
+    poolLock.unlock();
+  }
+  return rospl;
+}

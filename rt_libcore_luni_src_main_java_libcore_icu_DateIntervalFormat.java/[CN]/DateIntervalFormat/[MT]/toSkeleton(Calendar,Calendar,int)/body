@@ -1,0 +1,67 @@
+{
+  if ((flags & FORMAT_ABBREV_ALL) != 0) {
+    flags|=FORMAT_ABBREV_MONTH | FORMAT_ABBREV_TIME | FORMAT_ABBREV_WEEKDAY;
+  }
+  String monthPart="MMMM";
+  if ((flags & FORMAT_NUMERIC_DATE) != 0) {
+    monthPart="M";
+  }
+ else   if ((flags & FORMAT_ABBREV_MONTH) != 0) {
+    monthPart="MMM";
+  }
+  String weekPart="EEEE";
+  if ((flags & FORMAT_ABBREV_WEEKDAY) != 0) {
+    weekPart="EEE";
+  }
+  String timePart="j";
+  if ((flags & FORMAT_24HOUR) != 0) {
+    timePart="H";
+  }
+ else   if ((flags & FORMAT_12HOUR) != 0) {
+    timePart="h";
+  }
+  if ((flags & FORMAT_ABBREV_TIME) == 0 || (flags & FORMAT_24HOUR) != 0) {
+    timePart+="m";
+  }
+ else {
+    if (!(onTheHour(startCalendar) && onTheHour(endCalendar))) {
+      timePart=timePart + "m";
+    }
+  }
+  if (fallOnDifferentDates(startCalendar,endCalendar)) {
+    flags|=FORMAT_SHOW_DATE;
+  }
+  if (fallInSameMonth(startCalendar,endCalendar) && (flags & FORMAT_NO_MONTH_DAY) != 0) {
+    flags&=(~FORMAT_SHOW_WEEKDAY);
+    flags&=(~FORMAT_SHOW_TIME);
+  }
+  if ((flags & (FORMAT_SHOW_DATE | FORMAT_SHOW_TIME | FORMAT_SHOW_WEEKDAY)) == 0) {
+    flags|=FORMAT_SHOW_DATE;
+  }
+  if ((flags & FORMAT_SHOW_DATE) != 0) {
+    if ((flags & FORMAT_SHOW_YEAR) != 0) {
+    }
+ else     if ((flags & FORMAT_NO_YEAR) != 0) {
+    }
+ else     if (!fallInSameYear(startCalendar,endCalendar) || !isThisYear(startCalendar)) {
+      flags|=FORMAT_SHOW_YEAR;
+    }
+  }
+  StringBuilder builder=new StringBuilder();
+  if ((flags & (FORMAT_SHOW_DATE | FORMAT_NO_MONTH_DAY)) != 0) {
+    if ((flags & FORMAT_SHOW_YEAR) != 0) {
+      builder.append("y");
+    }
+    builder.append(monthPart);
+    if ((flags & FORMAT_NO_MONTH_DAY) == 0) {
+      builder.append("d");
+    }
+  }
+  if ((flags & FORMAT_SHOW_WEEKDAY) != 0) {
+    builder.append(weekPart);
+  }
+  if ((flags & FORMAT_SHOW_TIME) != 0) {
+    builder.append(timePart);
+  }
+  return builder.toString();
+}

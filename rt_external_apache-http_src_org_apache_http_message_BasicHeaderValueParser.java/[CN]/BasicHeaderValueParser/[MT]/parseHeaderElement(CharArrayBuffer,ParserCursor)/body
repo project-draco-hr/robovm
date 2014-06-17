@@ -1,0 +1,17 @@
+{
+  if (buffer == null) {
+    throw new IllegalArgumentException("Char array buffer may not be null");
+  }
+  if (cursor == null) {
+    throw new IllegalArgumentException("Parser cursor may not be null");
+  }
+  NameValuePair nvp=parseNameValuePair(buffer,cursor);
+  NameValuePair[] params=null;
+  if (!cursor.atEnd()) {
+    char ch=buffer.charAt(cursor.getPos() - 1);
+    if (ch != ELEM_DELIMITER) {
+      params=parseParameters(buffer,cursor);
+    }
+  }
+  return createHeaderElement(nvp.getName(),nvp.getValue(),params);
+}

@@ -1,0 +1,28 @@
+{
+synchronized (cache) {
+    AnnotationMember[] desc=cache.get(annotationType);
+    if (desc != null) {
+      return desc;
+    }
+  }
+  if (!annotationType.isAnnotation()) {
+    throw new IllegalArgumentException("Type is not annotation: " + annotationType.getName());
+  }
+  Method[] declaredMethods=annotationType.getDeclaredMethods();
+  AnnotationMember[] desc=new AnnotationMember[declaredMethods.length];
+  for (int i=0; i < declaredMethods.length; ++i) {
+    Method element=declaredMethods[i];
+    String name=element.getName();
+    Class<?> type=element.getReturnType();
+    try {
+      desc[i]=new AnnotationMember(name,element.getDefaultValue(),type,element);
+    }
+ catch (    Throwable t) {
+      desc[i]=new AnnotationMember(name,t,type,element);
+    }
+  }
+synchronized (cache) {
+    cache.put(annotationType,desc);
+  }
+  return desc;
+}

@@ -1,0 +1,53 @@
+{
+  if (keyTypes == null || keyTypes.length == 0) {
+    return null;
+  }
+  List<Principal> issuersList=(issuers == null) ? null : Arrays.asList(issuers);
+  ArrayList<String> found=new ArrayList<String>();
+  for (Enumeration<String> aliases=hash.keys(); aliases.hasMoreElements(); ) {
+    final String alias=aliases.nextElement();
+    final KeyStore.PrivateKeyEntry entry=hash.get(alias);
+    final Certificate[] chain=entry.getCertificateChain();
+    final Certificate cert=chain[0];
+    final String certKeyAlg=cert.getPublicKey().getAlgorithm();
+    final String certSigAlg=(cert instanceof X509Certificate ? ((X509Certificate)cert).getSigAlgName().toUpperCase(Locale.US) : null);
+    for (    String keyAlgorithm : keyTypes) {
+      if (keyAlgorithm == null) {
+        continue;
+      }
+      final String sigAlgorithm;
+      int index=keyAlgorithm.indexOf('_');
+      if (index == -1) {
+        sigAlgorithm=null;
+      }
+ else {
+        sigAlgorithm=keyAlgorithm.substring(index + 1);
+        keyAlgorithm=keyAlgorithm.substring(0,index);
+      }
+      if (!certKeyAlg.equals(keyAlgorithm)) {
+        continue;
+      }
+      if (sigAlgorithm != null && certSigAlg != null && !certSigAlg.contains(sigAlgorithm)) {
+        continue;
+      }
+      if (issuers == null || issuers.length == 0) {
+        found.add(alias);
+        continue;
+      }
+      for (      Certificate certFromChain : chain) {
+        if (!(certFromChain instanceof X509Certificate)) {
+          continue;
+        }
+        X509Certificate xcertFromChain=(X509Certificate)certFromChain;
+        X500Principal issuerFromChain=xcertFromChain.getIssuerX500Principal();
+        if (issuersList.contains(issuerFromChain)) {
+          found.add(alias);
+        }
+      }
+    }
+  }
+  if (!found.isEmpty()) {
+    return found.toArray(new String[found.size()]);
+  }
+  return null;
+}

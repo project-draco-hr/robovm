@@ -1,0 +1,18 @@
+{
+  if (byteCount <= 0) {
+    throw new IllegalArgumentException("Too few bytes requested: " + byteCount);
+  }
+  BlockGuard.Policy originalPolicy=BlockGuard.getThreadPolicy();
+  try {
+    BlockGuard.setThreadPolicy(BlockGuard.LAX_POLICY);
+    byte[] result=new byte[byteCount];
+    Streams.readFully(devURandom,result,0,byteCount);
+    return result;
+  }
+ catch (  Exception ex) {
+    throw new ProviderException("Couldn't read " + byteCount + " random bytes",ex);
+  }
+ finally {
+    BlockGuard.setThreadPolicy(originalPolicy);
+  }
+}

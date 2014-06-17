@@ -1,0 +1,18 @@
+{
+  super();
+  if (algorithm == null) {
+    algorithm=TLS;
+  }
+  KeyManager[] keymanagers=null;
+  if (keystore != null) {
+    keymanagers=createKeyManagers(keystore,keystorePassword);
+  }
+  TrustManager[] trustmanagers=null;
+  if (truststore != null) {
+    trustmanagers=createTrustManagers(truststore);
+  }
+  this.sslcontext=SSLContext.getInstance(algorithm);
+  this.sslcontext.init(keymanagers,trustmanagers,random);
+  this.socketfactory=this.sslcontext.getSocketFactory();
+  this.nameResolver=nameResolver;
+}

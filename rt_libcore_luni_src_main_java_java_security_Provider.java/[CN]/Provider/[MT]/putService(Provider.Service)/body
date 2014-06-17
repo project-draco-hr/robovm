@@ -1,21 +1,21 @@
 {
   if (s == null) {
-    throw new NullPointerException();
+    throw new NullPointerException("s == null");
   }
   if ("Provider".equals(s.getType())) {
     return;
   }
   servicesChanged();
   if (serviceTable == null) {
-    serviceTable=new TwoKeyHashMap<String,String,Service>(128);
+    serviceTable=new LinkedHashMap<String,Service>(128);
   }
-  serviceTable.put(s.type,s.algorithm.toUpperCase(Locale.US),s);
+  serviceTable.put(key(s.type,s.algorithm),s);
   if (s.aliases != null) {
     if (aliasTable == null) {
-      aliasTable=new TwoKeyHashMap<String,String,Service>(256);
+      aliasTable=new LinkedHashMap<String,Service>(256);
     }
     for (    String alias : s.getAliases()) {
-      aliasTable.put(s.type,alias.toUpperCase(Locale.US),s);
+      aliasTable.put(key(s.type,alias),s);
     }
   }
   serviceInfoToProperties(s);

@@ -1,5 +1,5 @@
 {
-  Arrays.checkOffsetAndCount(bytes.length,offset,byteCount);
+  Arrays.checkOffsetAndCount(bytes.length,byteOffset,byteCount);
   if (byteCount == 0) {
     return 0;
   }
@@ -24,13 +24,13 @@
     }
   }
  catch (  InterruptedException e) {
-    throw new InterruptedIOException();
+    IoUtils.throwInterruptedIoException();
   }
   int totalCopied=0;
   if (out >= in) {
     int leftInBuffer=buffer.length - out;
     int length=leftInBuffer < byteCount ? leftInBuffer : byteCount;
-    System.arraycopy(buffer,out,bytes,offset,length);
+    System.arraycopy(buffer,out,bytes,byteOffset,length);
     out+=length;
     if (out == buffer.length) {
       out=0;
@@ -45,7 +45,7 @@
     int leftInBuffer=in - out;
     int leftToCopy=byteCount - totalCopied;
     int length=leftToCopy < leftInBuffer ? leftToCopy : leftInBuffer;
-    System.arraycopy(buffer,out,bytes,offset + totalCopied,length);
+    System.arraycopy(buffer,out,bytes,byteOffset + totalCopied,length);
     out+=length;
     if (out == in) {
       in=-1;

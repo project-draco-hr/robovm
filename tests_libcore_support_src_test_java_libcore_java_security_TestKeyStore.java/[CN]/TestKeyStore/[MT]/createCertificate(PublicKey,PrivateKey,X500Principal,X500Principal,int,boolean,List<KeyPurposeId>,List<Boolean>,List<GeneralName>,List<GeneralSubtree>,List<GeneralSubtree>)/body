@@ -1,0 +1,62 @@
+{
+  long millisPerDay=24 * 60 * 60* 1000;
+  long now=System.currentTimeMillis();
+  Date start=new Date(now - millisPerDay);
+  Date end=new Date(now + millisPerDay);
+  BigInteger serial=BigInteger.valueOf(1);
+  String keyAlgorithm=privateKey.getAlgorithm();
+  String signatureAlgorithm;
+  if (keyAlgorithm.equals("RSA")) {
+    signatureAlgorithm="sha1WithRSA";
+  }
+ else   if (keyAlgorithm.equals("DSA")) {
+    signatureAlgorithm="sha1WithDSA";
+  }
+ else   if (keyAlgorithm.equals("EC")) {
+    signatureAlgorithm="sha1WithECDSA";
+  }
+ else   if (keyAlgorithm.equals("EC_RSA")) {
+    signatureAlgorithm="sha1WithRSA";
+  }
+ else {
+    throw new IllegalArgumentException("Unknown key algorithm " + keyAlgorithm);
+  }
+  X509V3CertificateGenerator x509cg=new X509V3CertificateGenerator();
+  x509cg.setSubjectDN(subject);
+  x509cg.setIssuerDN(issuer);
+  x509cg.setNotBefore(start);
+  x509cg.setNotAfter(end);
+  x509cg.setPublicKey(publicKey);
+  x509cg.setSignatureAlgorithm(signatureAlgorithm);
+  x509cg.setSerialNumber(serial);
+  if (keyUsage != 0) {
+    x509cg.addExtension(X509Extensions.KeyUsage,true,new KeyUsage(keyUsage));
+  }
+  if (ca) {
+    x509cg.addExtension(X509Extensions.BasicConstraints,true,new BasicConstraints(true));
+  }
+  for (int i=0; i < extendedKeyUsages.size(); i++) {
+    KeyPurposeId keyPurposeId=extendedKeyUsages.get(i);
+    boolean critical=criticalExtendedKeyUsages.get(i);
+    x509cg.addExtension(X509Extensions.ExtendedKeyUsage,critical,new ExtendedKeyUsage(keyPurposeId));
+  }
+  for (  GeneralName subjectAltName : subjectAltNames) {
+    x509cg.addExtension(X509Extensions.SubjectAlternativeName,false,new GeneralNames(subjectAltName).getEncoded());
+  }
+  if (!permittedNameConstraints.isEmpty() || !excludedNameConstraints.isEmpty()) {
+    x509cg.addExtension(X509Extensions.NameConstraints,true,new NameConstraints(permittedNameConstraints.toArray(new GeneralSubtree[permittedNameConstraints.size()]),excludedNameConstraints.toArray(new GeneralSubtree[excludedNameConstraints.size()])));
+  }
+  if (privateKey instanceof ECPrivateKey) {
+    KeyFactory kf=KeyFactory.getInstance(keyAlgorithm,"BC");
+    PKCS8EncodedKeySpec ks=new PKCS8EncodedKeySpec(privateKey.getEncoded());
+    privateKey=kf.generatePrivate(ks);
+  }
+  X509Certificate x509c=x509cg.generateX509Certificate(privateKey);
+  if (StandardNames.IS_RI) {
+    CertificateFactory cf=CertificateFactory.getInstance("X.509");
+    ByteArrayInputStream bais=new ByteArrayInputStream(x509c.getEncoded());
+    Certificate c=cf.generateCertificate(bais);
+    x509c=(X509Certificate)c;
+  }
+  return x509c;
+}

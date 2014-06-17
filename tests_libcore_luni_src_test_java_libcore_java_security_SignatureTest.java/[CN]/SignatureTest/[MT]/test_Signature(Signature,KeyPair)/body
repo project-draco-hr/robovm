@@ -2,9 +2,22 @@
   sig.initSign(keyPair.getPrivate());
   sig.update(DATA);
   byte[] signature=sig.sign();
-  assertNotNull(signature);
-  assertTrue(signature.length > 0);
+  assertNotNull(sig.getAlgorithm(),signature);
+  assertTrue(sig.getAlgorithm(),signature.length > 0);
   sig.initVerify(keyPair.getPublic());
   sig.update(DATA);
-  assertTrue(sig.verify(signature));
+  assertTrue(sig.getAlgorithm(),sig.verify(signature));
+  sig.update(DATA);
+  assertTrue(sig.getAlgorithm(),sig.verify(signature));
+  if (StandardNames.IS_RI && "NONEwithDSA".equalsIgnoreCase(sig.getAlgorithm())) {
+    try {
+      sig.verify(signature);
+      fail("Expected RI to have a NONEwithDSA bug");
+    }
+ catch (    SignatureException bug) {
+    }
+  }
+ else {
+    sig.verify(signature);
+  }
 }

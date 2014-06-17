@@ -1,0 +1,50 @@
+{
+  int r=0;
+  for (Submitter z=submitters.get(); ; ) {
+    WorkQueue[] ws;
+    WorkQueue q;
+    int ps, m, k;
+    if (z == null) {
+      if (U.compareAndSwapInt(this,INDEXSEED,r=indexSeed,r+=SEED_INCREMENT) && r != 0)       submitters.set(z=new Submitter(r));
+    }
+ else     if (r == 0) {
+      r=z.seed;
+      r^=r << 13;
+      r^=r >>> 17;
+      z.seed=r ^ (r << 5);
+    }
+ else     if ((ps=plock) < 0)     throw new RejectedExecutionException();
+ else     if (ps == 0 || (ws=workQueues) == null || (m=ws.length - 1) < 0)     initWorkers();
+ else     if ((q=ws[k=r & m & SQMASK]) != null) {
+      if (q.qlock == 0 && U.compareAndSwapInt(q,QLOCK,0,1)) {
+        ForkJoinTask<?>[] a=q.array;
+        int s=q.top;
+        boolean submitted=false;
+        try {
+          if ((a != null && a.length > s + 1 - q.base) || (a=q.growArray()) != null) {
+            int j=(((a.length - 1) & s) << ASHIFT) + ABASE;
+            U.putOrderedObject(a,j,task);
+            q.top=s + 1;
+            submitted=true;
+          }
+        }
+  finally {
+          q.qlock=0;
+        }
+        if (submitted) {
+          signalWork(q);
+          return;
+        }
+      }
+      r=0;
+    }
+ else     if (((ps=plock) & PL_LOCK) == 0) {
+      q=new WorkQueue(this,null,SHARED_QUEUE,r);
+      if (((ps=plock) & PL_LOCK) != 0 || !U.compareAndSwapInt(this,PLOCK,ps,ps+=PL_LOCK))       ps=acquirePlock();
+      if ((ws=workQueues) != null && k < ws.length && ws[k] == null)       ws[k]=q;
+      int nps=(ps & SHUTDOWN) | ((ps + PL_LOCK) & ~SHUTDOWN);
+      if (!U.compareAndSwapInt(this,PLOCK,ps,nps))       releasePlock(nps);
+    }
+ else     r=0;
+  }
+}

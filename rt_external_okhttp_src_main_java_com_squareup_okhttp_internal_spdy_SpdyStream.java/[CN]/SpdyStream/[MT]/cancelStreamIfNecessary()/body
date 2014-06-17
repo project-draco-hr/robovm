@@ -1,0 +1,15 @@
+{
+  assert(!Thread.holdsLock(SpdyStream.this));
+  boolean open;
+  boolean cancel;
+synchronized (this) {
+    cancel=!in.finished && in.closed && (out.finished || out.closed);
+    open=isOpen();
+  }
+  if (cancel) {
+    SpdyStream.this.close(RST_CANCEL);
+  }
+ else   if (!open) {
+    connection.removeStream(id);
+  }
+}

@@ -1,0 +1,28 @@
+{
+  CharBuffer in=CharBuffer.wrap("aaa");
+  encoder.encode(in);
+  in.rewind();
+  encoder.encode(in);
+  in.rewind();
+  assertSame(encoder,encoder.reset());
+  encoder.canEncode("\ud902\udc00");
+  encoder.encode(in);
+  in.rewind();
+  assertSame(encoder,encoder.reset());
+  encoder.canEncode('\ud902');
+  encoder.encode(in);
+  in.rewind();
+  assertSame(encoder,encoder.reset());
+  encoder.encode(CharBuffer.wrap("testCanEncodeIllegalState2"),ByteBuffer.allocate(30),true);
+  encoder.encode(in);
+  in.rewind();
+  assertSame(encoder,encoder.reset());
+  encoder.encode(CharBuffer.wrap("testCanEncodeIllegalState3"),ByteBuffer.allocate(30),false);
+  encoder.encode(in);
+  in.rewind();
+  assertSame(encoder,encoder.reset());
+  encoder.encode(CharBuffer.wrap("testCanEncodeIllegalState4"),ByteBuffer.allocate(30),true);
+  encoder.flush(ByteBuffer.allocate(10));
+  encoder.encode(in);
+  in.rewind();
+}

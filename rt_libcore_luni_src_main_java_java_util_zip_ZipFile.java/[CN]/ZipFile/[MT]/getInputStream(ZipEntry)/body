@@ -3,20 +3,32 @@
   if (entry == null) {
     return null;
   }
-  RandomAccessFile raf=mRaf;
-synchronized (raf) {
-    RAFStream rafstrm=new RAFStream(raf,entry.mLocalHeaderRelOffset + 28);
-    DataInputStream is=new DataInputStream(rafstrm);
-    int localExtraLenOrWhatever=Short.reverseBytes(is.readShort());
+  RandomAccessFile localRaf=raf;
+synchronized (localRaf) {
+    RAFStream rafStream=new RAFStream(localRaf,entry.localHeaderRelOffset);
+    DataInputStream is=new DataInputStream(rafStream);
+    final int localMagic=Integer.reverseBytes(is.readInt());
+    if (localMagic != LOCSIG) {
+      throwZipException("Local File Header",localMagic);
+    }
+    is.skipBytes(2);
+    int gpbf=Short.reverseBytes(is.readShort()) & 0xffff;
+    if ((gpbf & ZipFile.GPBF_UNSUPPORTED_MASK) != 0) {
+      throw new ZipException("Invalid General Purpose Bit Flag: " + gpbf);
+    }
+    is.skipBytes(18);
+    int fileNameLength=Short.reverseBytes(is.readShort()) & 0xffff;
+    int extraFieldLength=Short.reverseBytes(is.readShort()) & 0xffff;
     is.close();
-    rafstrm.skip(entry.nameLength + localExtraLenOrWhatever);
-    rafstrm.mLength=rafstrm.mOffset + entry.compressedSize;
-    if (entry.compressionMethod == ZipEntry.DEFLATED) {
-      int bufSize=Math.max(1024,(int)Math.min(entry.getSize(),65535L));
-      return new ZipInflaterInputStream(rafstrm,new Inflater(true),bufSize,entry);
+    rafStream.skip(fileNameLength + extraFieldLength);
+    if (entry.compressionMethod == ZipEntry.STORED) {
+      rafStream.endOffset=rafStream.offset + entry.size;
+      return rafStream;
     }
  else {
-      return rafstrm;
+      rafStream.endOffset=rafStream.offset + entry.compressedSize;
+      int bufSize=Math.max(1024,(int)Math.min(entry.getSize(),65535L));
+      return new ZipInflaterInputStream(rafStream,new Inflater(true),bufSize,entry);
     }
   }
 }

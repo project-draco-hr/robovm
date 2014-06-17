@@ -1,0 +1,26 @@
+{
+  final int maximumLen=getOutputSize(inputLen);
+  final byte[] output;
+  if (maximumLen > 0) {
+    output=new byte[maximumLen];
+  }
+ else {
+    output=EmptyArray.BYTE;
+  }
+  final int bytesWritten;
+  try {
+    bytesWritten=updateInternal(input,inputOffset,inputLen,output,0,maximumLen);
+  }
+ catch (  ShortBufferException e) {
+    throw new RuntimeException("calculated buffer size was wrong: " + maximumLen);
+  }
+  if (output.length == bytesWritten) {
+    return output;
+  }
+ else   if (bytesWritten == 0) {
+    return EmptyArray.BYTE;
+  }
+ else {
+    return Arrays.copyOfRange(output,0,bytesWritten);
+  }
+}

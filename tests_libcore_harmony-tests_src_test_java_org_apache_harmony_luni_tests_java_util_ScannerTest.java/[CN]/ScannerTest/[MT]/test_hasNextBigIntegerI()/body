@@ -1,0 +1,117 @@
+{
+  s=new Scanner("123 456");
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("123"),s.nextBigInteger(10));
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("456"),s.nextBigInteger(10));
+  assertFalse(s.hasNextBigInteger(10));
+  try {
+    s.nextBigInteger(10);
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("123 456");
+  assertTrue(s.hasNextBigInteger(5));
+  assertEquals(new BigInteger("38"),s.nextBigInteger(5));
+  assertFalse(s.hasNextBigInteger(5));
+  try {
+    s.nextBigInteger(5);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("23,456 23,456");
+  s.useLocale(Locale.GERMANY);
+  assertFalse(s.hasNextBigInteger(10));
+  try {
+    s.nextBigInteger(10);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s.useLocale(Locale.ENGLISH);
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("23456"),s.nextBigInteger(10));
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("23456"),s.nextBigInteger(10));
+  s=new Scanner("23'456 23'456");
+  s.useLocale(Locale.GERMANY);
+  assertFalse(s.hasNextBigInteger(10));
+  try {
+    s.nextBigInteger(10);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s.useLocale(new Locale("it","CH"));
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("23456"),s.nextBigInteger(10));
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("23456"),s.nextBigInteger(10));
+  s=new Scanner("1\u06602 1\u06662");
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("102"),s.nextBigInteger(10));
+  assertFalse(s.hasNextBigInteger(5));
+  try {
+    s.nextBigInteger(5);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("162"),s.nextBigInteger(10));
+  s=new Scanner("23.45\u0666 23.456");
+  s.useLocale(Locale.CHINESE);
+  assertFalse(s.hasNextBigInteger(10));
+  try {
+    s.nextBigInteger(10);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s.useLocale(Locale.GERMANY);
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("23456"),s.nextBigInteger(10));
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("23456"),s.nextBigInteger(10));
+  s=new Scanner("03,456");
+  s.useLocale(Locale.ENGLISH);
+  assertFalse(s.hasNextBigInteger(10));
+  try {
+    s.nextBigInteger(10);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("03456");
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("3456"),s.nextBigInteger(10));
+  s=new Scanner("\u06603,456");
+  s.useLocale(Locale.ENGLISH);
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("3456"),s.nextBigInteger(10));
+  s=new Scanner("E34");
+  assertTrue(s.hasNextBigInteger(16));
+  assertEquals(new BigInteger("3636"),s.nextBigInteger(16));
+  s=new Scanner("12300");
+  s.useLocale(Locale.CHINESE);
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("12300"),s.nextBigInteger(10));
+  s=new Scanner("123\u0966\u0966");
+  s.useLocale(Locale.CHINESE);
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("12300"),s.nextBigInteger(10));
+  s=new Scanner("123\u0e50\u0e50");
+  s.useLocale(Locale.CHINESE);
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("12300"),s.nextBigInteger(10));
+  s=new Scanner("-123");
+  s.useLocale(new Locale("ar","AE"));
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("-123"),s.nextBigInteger(10));
+  s=new Scanner("-123");
+  s.useLocale(new Locale("mk","MK"));
+  assertTrue(s.hasNextBigInteger(10));
+  assertEquals(new BigInteger("-123"),s.nextBigInteger(10));
+}

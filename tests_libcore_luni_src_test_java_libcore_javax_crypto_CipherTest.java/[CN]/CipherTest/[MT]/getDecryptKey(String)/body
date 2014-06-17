@@ -1,0 +1,17 @@
+{
+  Key key=DECRYPT_KEYS.get(algorithm);
+  if (key != null) {
+    return key;
+  }
+  if (algorithm.startsWith("RSA")) {
+    KeyFactory kf=KeyFactory.getInstance("RSA");
+    RSAPublicKeySpec keySpec=new RSAPublicKeySpec(RSA_2048_modulus,RSA_2048_publicExponent);
+    key=kf.generatePublic(keySpec);
+  }
+ else {
+    assertFalse(algorithm,isAsymmetric(algorithm));
+    key=getEncryptKey(algorithm);
+  }
+  DECRYPT_KEYS.put(algorithm,key);
+  return key;
+}

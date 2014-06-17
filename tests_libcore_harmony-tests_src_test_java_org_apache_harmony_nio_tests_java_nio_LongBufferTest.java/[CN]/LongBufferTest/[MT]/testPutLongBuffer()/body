@@ -1,0 +1,30 @@
+{
+  LongBuffer other=LongBuffer.allocate(buf.capacity());
+  try {
+    buf.put(buf);
+    fail("Should throw Exception");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    buf.put(LongBuffer.allocate(buf.capacity() + 1));
+    fail("Should throw Exception");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  try {
+    buf.flip();
+    buf.put((LongBuffer)null);
+    fail("Should throw Exception");
+  }
+ catch (  NullPointerException e) {
+  }
+  loadTestData2(other);
+  other.clear();
+  buf.clear();
+  LongBuffer ret=buf.put(other);
+  assertEquals(other.position(),other.capacity());
+  assertEquals(buf.position(),buf.capacity());
+  assertContentEquals(other,buf);
+  assertSame(ret,buf);
+}

@@ -1,0 +1,23 @@
+{
+  if (!isDiagnosticsEnabled()) {
+    return;
+  }
+  try {
+    logDiagnostic("[ENV] Extension directories (java.ext.dir): " + System.getProperty("java.ext.dir"));
+    logDiagnostic("[ENV] Application classpath (java.class.path): " + System.getProperty("java.class.path"));
+  }
+ catch (  SecurityException ex) {
+    logDiagnostic("[ENV] Security setting prevent interrogation of system classpaths.");
+  }
+  String className=clazz.getName();
+  ClassLoader classLoader;
+  try {
+    classLoader=getClassLoader(clazz);
+  }
+ catch (  SecurityException ex) {
+    logDiagnostic("[ENV] Security forbids determining the classloader for " + className);
+    return;
+  }
+  logDiagnostic("[ENV] Class " + className + " was loaded via classloader "+ objectId(classLoader));
+  logHierarchy("[ENV] Ancestry of classloader which loaded " + className + " is ",classLoader);
+}

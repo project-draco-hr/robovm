@@ -1,0 +1,34 @@
+{
+  if (key instanceof ECPublicKey) {
+    ECPublicKey k=(ECPublicKey)key;
+    ECParameterSpec s=k.getParameters();
+    if (s == null) {
+      s=BouncyCastleProvider.CONFIGURATION.getEcImplicitlyCa();
+      return new ECPublicKeyParameters(((BCECPublicKey)k).engineGetQ(),new ECDomainParameters(s.getCurve(),s.getG(),s.getN(),s.getH(),s.getSeed()));
+    }
+ else {
+      return new ECPublicKeyParameters(k.getQ(),new ECDomainParameters(s.getCurve(),s.getG(),s.getN(),s.getH(),s.getSeed()));
+    }
+  }
+ else   if (key instanceof java.security.interfaces.ECPublicKey) {
+    java.security.interfaces.ECPublicKey pubKey=(java.security.interfaces.ECPublicKey)key;
+    ECParameterSpec s=EC5Util.convertSpec(pubKey.getParams(),false);
+    return new ECPublicKeyParameters(EC5Util.convertPoint(pubKey.getParams(),pubKey.getW(),false),new ECDomainParameters(s.getCurve(),s.getG(),s.getN(),s.getH(),s.getSeed()));
+  }
+ else {
+    try {
+      byte[] bytes=key.getEncoded();
+      if (bytes == null) {
+        throw new InvalidKeyException("no encoding for EC public key");
+      }
+      PublicKey publicKey=BouncyCastleProvider.getPublicKey(SubjectPublicKeyInfo.getInstance(bytes));
+      if (publicKey instanceof java.security.interfaces.ECPublicKey) {
+        return ECUtil.generatePublicKeyParameter(publicKey);
+      }
+    }
+ catch (    Exception e) {
+      throw new InvalidKeyException("cannot identify EC public key: " + e.toString());
+    }
+  }
+  throw new InvalidKeyException("cannot identify EC public key.");
+}

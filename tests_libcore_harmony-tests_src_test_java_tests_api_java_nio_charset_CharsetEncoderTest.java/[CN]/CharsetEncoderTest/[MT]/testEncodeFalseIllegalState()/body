@@ -1,0 +1,45 @@
+{
+  CharBuffer in=CharBuffer.wrap("aaa");
+  ByteBuffer out=ByteBuffer.allocate(5);
+  encoder.encode(in,out,false);
+  in.rewind();
+  out.rewind();
+  assertSame(encoder,encoder.reset());
+  encoder.encode(CharBuffer.wrap("testCanEncodeIllegalState1"));
+  try {
+    encoder.encode(in,out,false);
+    fail("should illegal state");
+  }
+ catch (  IllegalStateException e) {
+  }
+  assertSame(encoder,encoder.reset());
+  encoder.encode(CharBuffer.wrap("testCanEncodeIllegalState2"),ByteBuffer.allocate(30),true);
+  try {
+    encoder.encode(in,out,false);
+    fail("should illegal state");
+  }
+ catch (  IllegalStateException e) {
+  }
+  assertSame(encoder,encoder.reset());
+  encoder.encode(CharBuffer.wrap("testCanEncodeIllegalState3"),ByteBuffer.allocate(30),false);
+  encoder.encode(in,out,false);
+  in.rewind();
+  out.rewind();
+  assertSame(encoder,encoder.reset());
+  encoder.encode(CharBuffer.wrap("testCanEncodeIllegalState4"),ByteBuffer.allocate(30),true);
+  encoder.flush(ByteBuffer.allocate(10));
+  try {
+    encoder.encode(in,out,false);
+    fail("should illegal state");
+  }
+ catch (  IllegalStateException e) {
+  }
+  assertSame(encoder,encoder.reset());
+  encoder.canEncode("\ud906\udc00");
+  encoder.encode(in,out,false);
+  in.rewind();
+  out.rewind();
+  assertSame(encoder,encoder.reset());
+  encoder.canEncode('\ud905');
+  encoder.encode(in,out,false);
+}

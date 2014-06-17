@@ -1,0 +1,21 @@
+{
+  ForkJoinTask<?>[] a;
+  int b;
+  Object o;
+  outer:   while ((b=base) - top < 0 && (a=array) != null) {
+    long j=(((a.length - 1) & b) << ASHIFT) + ABASE;
+    if ((o=U.getObject(a,j)) == null || !(o instanceof CountedCompleter))     break;
+    for (CountedCompleter<?> t=(CountedCompleter<?>)o, r=t; ; ) {
+      if (r == root) {
+        if (base == b && U.compareAndSwapObject(a,j,t,null)) {
+          base=b + 1;
+          t.doExec();
+          return true;
+        }
+ else         break;
+      }
+      if ((r=r.completer) == null)       break outer;
+    }
+  }
+  return false;
+}

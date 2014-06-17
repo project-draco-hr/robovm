@@ -2,31 +2,21 @@
   TestSSLContext c=TestSSLContext.create();
   final Socket underlying=new Socket(c.host,c.port);
   final SSLSocket wrapping=(SSLSocket)c.clientContext.getSocketFactory().createSocket(underlying,c.host.getHostName(),c.port,false);
-  Thread clientThread=new Thread(new Runnable(){
-    public void run(){
-      try {
-        try {
-          wrapping.startHandshake();
-          wrapping.getOutputStream().write(42);
-          underlying.close();
-          wrapping.close();
-        }
- catch (        SSLException expected) {
-        }
-      }
- catch (      RuntimeException e) {
-        throw e;
-      }
-catch (      Exception e) {
-        throw new RuntimeException(e);
-      }
+  ExecutorService executor=Executors.newSingleThreadExecutor();
+  Future<Void> clientFuture=executor.submit(new Callable<Void>(){
+    @Override public Void call() throws Exception {
+      wrapping.startHandshake();
+      wrapping.getOutputStream().write(42);
+      underlying.close();
+      wrapping.close();
+      return null;
     }
   }
 );
-  clientThread.start();
+  executor.shutdown();
   SSLSocket server=(SSLSocket)c.serverSocket.accept();
   server.startHandshake();
   server.getInputStream().read();
-  clientThread.join();
+  clientFuture.get();
   server.close();
 }

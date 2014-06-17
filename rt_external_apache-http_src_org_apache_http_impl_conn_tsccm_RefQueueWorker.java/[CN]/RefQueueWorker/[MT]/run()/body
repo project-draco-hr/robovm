@@ -1,0 +1,16 @@
+{
+  if (this.workerThread == null) {
+    this.workerThread=Thread.currentThread();
+  }
+  while (this.workerThread == Thread.currentThread()) {
+    try {
+      Reference<?> ref=refQueue.remove();
+      refHandler.handleReference(ref);
+    }
+ catch (    InterruptedException e) {
+      if (log.isDebugEnabled()) {
+        log.debug(this.toString() + " interrupted",e);
+      }
+    }
+  }
+}

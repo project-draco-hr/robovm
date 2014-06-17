@@ -1,0 +1,35 @@
+{
+  boolean isConstructed=(tag & CONSTRUCTED) != 0;
+  DefiniteLengthInputStream defIn=new DefiniteLengthInputStream(this,length);
+  if ((tag & APPLICATION) != 0) {
+    return new DERApplicationSpecific(isConstructed,tagNo,defIn.toByteArray());
+  }
+  if ((tag & TAGGED) != 0) {
+    return new ASN1StreamParser(defIn).readTaggedObject(isConstructed,tagNo);
+  }
+  if (isConstructed) {
+switch (tagNo) {
+case OCTET_STRING:
+      ASN1EncodableVector v=buildDEREncodableVector(defIn);
+    ASN1OctetString[] strings=new ASN1OctetString[v.size()];
+  for (int i=0; i != strings.length; i++) {
+    strings[i]=(ASN1OctetString)v.get(i);
+  }
+return new BEROctetString(strings);
+case SEQUENCE:
+if (lazyEvaluate) {
+return new LazyEncodedSequence(defIn.toByteArray());
+}
+ else {
+return DERFactory.createSequence(buildDEREncodableVector(defIn));
+}
+case SET:
+return DERFactory.createSet(buildDEREncodableVector(defIn));
+case EXTERNAL:
+return new DERExternal(buildDEREncodableVector(defIn));
+default :
+throw new IOException("unknown tag " + tagNo + " encountered");
+}
+}
+return createPrimitiveDERObject(tagNo,defIn,tmpBuffers);
+}

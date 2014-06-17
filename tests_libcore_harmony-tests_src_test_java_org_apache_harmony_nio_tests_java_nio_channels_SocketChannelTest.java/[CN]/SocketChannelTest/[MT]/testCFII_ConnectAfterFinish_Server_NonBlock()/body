@@ -1,0 +1,31 @@
+{
+  connectServerNonBlock();
+  if (!this.channel1.isConnected()) {
+    System.err.println("Connection fail, testCFII_ConnectAfterFinish_Server_Block is not finished.");
+    return;
+  }
+  try {
+    this.channel1.connect(localAddr1);
+    fail("Should throw an AlreadyConnectedException or a ConnectionPendingException here.");
+  }
+ catch (  AlreadyConnectedException e) {
+  }
+  statusConnected_NotPending();
+  try {
+    this.channel1.connect(localAddr2);
+    fail("Should throw an AlreadyConnectedException here.");
+  }
+ catch (  AlreadyConnectedException e) {
+  }
+  statusConnected_NotPending();
+  ensureServerClosed();
+  try {
+    this.channel1.connect(localAddr1);
+    fail("Should throw an AlreadyConnectedException here.");
+  }
+ catch (  AlreadyConnectedException e) {
+  }
+  statusConnected_NotPending();
+  this.channel1.close();
+  statusChannelClosed();
+}

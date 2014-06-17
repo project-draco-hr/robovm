@@ -1,15 +1,14 @@
 {
   if (style != SHORT && style != LONG) {
-    throw new IllegalArgumentException();
+    throw new IllegalArgumentException("Bad style: " + style);
   }
-  boolean useDaylight=daylightTime && useDaylightTime();
-  String[][] zoneStrings=TimeZones.getZoneStrings(locale);
-  String result=TimeZones.getDisplayName(zoneStrings,getID(),daylightTime,style);
+  String[][] zoneStrings=TimeZoneNames.getZoneStrings(locale);
+  String result=TimeZoneNames.getDisplayName(zoneStrings,getID(),daylightTime,style);
   if (result != null) {
     return result;
   }
   int offset=getRawOffset();
-  if (useDaylight && this instanceof SimpleTimeZone) {
+  if (daylightTime) {
     offset+=getDSTSavings();
   }
   offset/=60000;

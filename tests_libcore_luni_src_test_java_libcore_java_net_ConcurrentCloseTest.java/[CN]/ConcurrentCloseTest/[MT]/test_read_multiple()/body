@@ -1,16 +1,5 @@
 {
-  final ServerSocket ss=new ServerSocket(0);
-  new Thread(new Runnable(){
-    public void run(){
-      try {
-        ss.accept();
-      }
- catch (      Exception ex) {
-        ex.printStackTrace();
-      }
-    }
-  }
-).start();
+  SilentServer ss=new SilentServer();
   final Socket s=new Socket();
   s.connect(ss.getLocalSocketAddress());
   final ArrayList<Thread> threads=new ArrayList<Thread>();
@@ -22,7 +11,7 @@
           try {
             System.err.println("read...");
             int i=s.getInputStream().read();
-            fail("read returned " + i);
+            fail("read returned: " + i);
           }
  catch (          SocketException expected) {
             assertEquals("Socket closed",expected.getMessage());
@@ -46,4 +35,5 @@
   for (  Throwable exception : thrownExceptions) {
     throw exception;
   }
+  ss.close();
 }

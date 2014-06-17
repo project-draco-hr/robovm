@@ -1,0 +1,10 @@
+{
+  ASN1Sequence seq=(ASN1Sequence)dIn.readObject();
+  if (seq.size() > 1 && seq.getObjectAt(0) instanceof ASN1ObjectIdentifier) {
+    if (seq.getObjectAt(0).equals(PKCSObjectIdentifiers.signedData)) {
+      sData=SignedData.getInstance(ASN1Sequence.getInstance((ASN1TaggedObject)seq.getObjectAt(1),true)).getCertificates();
+      return getCertificate();
+    }
+  }
+  return new X509CertificateObject(Certificate.getInstance(seq));
+}

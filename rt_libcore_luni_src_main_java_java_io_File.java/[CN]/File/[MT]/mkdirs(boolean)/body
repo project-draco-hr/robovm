@@ -1,0 +1,16 @@
+{
+  try {
+    mkdirErrno();
+    return true;
+  }
+ catch (  ErrnoException errnoException) {
+    if (errnoException.errno == ENOENT) {
+      File parent=getParentFile();
+      return parent != null && parent.mkdirs(true) && mkdir();
+    }
+ else     if (errnoException.errno == EEXIST) {
+      return resultIfExists;
+    }
+    return false;
+  }
+}

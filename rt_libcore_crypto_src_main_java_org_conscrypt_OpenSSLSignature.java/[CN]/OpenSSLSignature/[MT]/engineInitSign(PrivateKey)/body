@@ -1,0 +1,39 @@
+{
+  destroyContextIfExists();
+  if (privateKey instanceof OpenSSLKeyHolder) {
+    OpenSSLKey pkey=((OpenSSLKeyHolder)privateKey).getOpenSSLKey();
+    checkEngineType(pkey);
+    key=pkey;
+  }
+ else   if (privateKey instanceof RSAPrivateCrtKey) {
+    if (engineType != EngineType.RSA) {
+      throw new InvalidKeyException("Signature not initialized as RSA");
+    }
+    RSAPrivateCrtKey rsaPrivateKey=(RSAPrivateCrtKey)privateKey;
+    key=OpenSSLRSAPrivateCrtKey.getInstance(rsaPrivateKey);
+  }
+ else   if (privateKey instanceof RSAPrivateKey) {
+    if (engineType != EngineType.RSA) {
+      throw new InvalidKeyException("Signature not initialized as RSA");
+    }
+    RSAPrivateKey rsaPrivateKey=(RSAPrivateKey)privateKey;
+    key=OpenSSLRSAPrivateKey.getInstance(rsaPrivateKey);
+  }
+ else   if (privateKey instanceof DSAPrivateKey) {
+    if (engineType != EngineType.DSA) {
+      throw new InvalidKeyException("Signature not initialized as DSA");
+    }
+    DSAPrivateKey dsaPrivateKey=(DSAPrivateKey)privateKey;
+    key=OpenSSLDSAPrivateKey.getInstance(dsaPrivateKey);
+  }
+ else   if (privateKey instanceof ECPrivateKey) {
+    if (engineType != EngineType.EC) {
+      throw new InvalidKeyException("Signature not initialized as EC");
+    }
+    ECPrivateKey ecPrivateKey=(ECPrivateKey)privateKey;
+    key=OpenSSLECPrivateKey.getInstance(ecPrivateKey);
+  }
+ else {
+    throw new InvalidKeyException("Need DSA or RSA or EC private key");
+  }
+}

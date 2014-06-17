@@ -1,0 +1,38 @@
+{
+  int oldPosition=baseBuf.position();
+  int oldLimit=baseBuf.limit();
+  Buffer ret=baseBuf.limit(baseBuf.limit());
+  assertSame(ret,baseBuf);
+  baseBuf.mark();
+  baseBuf.limit(baseBuf.capacity());
+  assertEquals(baseBuf.limit(),baseBuf.capacity());
+  assertEquals(baseBuf.position(),oldPosition);
+  baseBuf.reset();
+  if (baseBuf.capacity() > 0) {
+    baseBuf.limit(baseBuf.capacity());
+    baseBuf.position(baseBuf.capacity());
+    baseBuf.mark();
+    baseBuf.limit(baseBuf.capacity() - 1);
+    assertEquals(baseBuf.position(),baseBuf.limit());
+    try {
+      baseBuf.reset();
+      fail("Should throw Exception");
+    }
+ catch (    InvalidMarkException e) {
+    }
+  }
+  try {
+    baseBuf.limit(-1);
+    fail("Should throw Exception");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    baseBuf.limit(baseBuf.capacity() + 1);
+    fail("Should throw Exception");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  baseBuf.limit(oldLimit);
+  baseBuf.position(oldPosition);
+}

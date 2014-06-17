@@ -1,0 +1,24 @@
+{
+  if (!bof) {
+    int cr=in.read();
+    int lf=in.read();
+    if ((cr != HTTP.CR) || (lf != HTTP.LF)) {
+      throw new MalformedChunkCodingException("CRLF expected at end of chunk");
+    }
+  }
+  this.buffer.clear();
+  int i=this.in.readLine(this.buffer);
+  if (i == -1) {
+    throw new MalformedChunkCodingException("Chunked stream ended unexpectedly");
+  }
+  int separator=this.buffer.indexOf(';');
+  if (separator < 0) {
+    separator=this.buffer.length();
+  }
+  try {
+    return Integer.parseInt(this.buffer.substringTrimmed(0,separator),16);
+  }
+ catch (  NumberFormatException e) {
+    throw new MalformedChunkCodingException("Bad chunk header");
+  }
+}

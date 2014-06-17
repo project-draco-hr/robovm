@@ -4,83 +4,63 @@
     t=new Timer();
     TimerTestTask testTask=new TimerTestTask();
     t.cancel();
-    boolean exception=false;
     Date d=new Date(System.currentTimeMillis() + 100);
     try {
       t.scheduleAtFixedRate(testTask,d,100);
+      fail("scheduleAtFixedRate after Timer.cancel() should throw exception");
     }
- catch (    IllegalStateException e) {
-      exception=true;
+ catch (    IllegalStateException expected) {
     }
-    assertTrue("scheduleAtFixedRate after Timer.cancel() should throw exception",exception);
     t=new Timer();
     testTask=new TimerTestTask();
-    exception=false;
     d=new Date(-100);
     try {
       t.scheduleAtFixedRate(testTask,d,100);
+      fail("scheduleAtFixedRate with negative Date should throw IllegalArgumentException");
     }
- catch (    IllegalArgumentException e) {
-      exception=true;
+ catch (    IllegalArgumentException expected) {
     }
-    assertTrue("scheduleAtFixedRate with negative Date should throw IllegalArgumentException",exception);
     t.cancel();
     t=new Timer();
     testTask=new TimerTestTask();
-    exception=false;
     try {
       t.scheduleAtFixedRate(testTask,d,-100);
+      fail("scheduleAtFixedRate with negative period should throw IllegalArgumentException");
     }
- catch (    IllegalArgumentException e) {
-      exception=true;
+ catch (    IllegalArgumentException expected) {
     }
-    assertTrue("scheduleAtFixedRate with negative period should throw IllegalArgumentException",exception);
     t.cancel();
     t=new Timer();
     testTask=new TimerTestTask();
-    exception=false;
     try {
       t.scheduleAtFixedRate(testTask,null,100);
+      fail("scheduleAtFixedRate with null date should throw NullPointerException");
     }
- catch (    NullPointerException e) {
-      exception=true;
+ catch (    NullPointerException expected) {
     }
-    assertTrue("scheduleAtFixedRate with null date should throw NullPointerException",exception);
     t.cancel();
     t=new Timer();
-    exception=false;
     d=new Date(-100);
     try {
       t.scheduleAtFixedRate(null,d,10);
+      fail("Scheduling a null task with negative date should throw IllegalArgumentException first");
     }
- catch (    NullPointerException e) {
+ catch (    IllegalArgumentException expected) {
     }
-catch (    IllegalArgumentException e) {
-      exception=true;
-    }
-    assertTrue("Scheduling a null task with negative date should throw IllegalArgumentException first",exception);
     t.cancel();
     t=new Timer();
-    exception=false;
     try {
       t.scheduleAtFixedRate(null,null,-10);
+      fail("Scheduling a null task & null date & negative period should throw IllegalArgumentException first");
     }
- catch (    NullPointerException e) {
+ catch (    IllegalArgumentException expected) {
     }
-catch (    IllegalArgumentException e) {
-      exception=true;
-    }
-    assertTrue("Scheduling a null task & null date & negative period should throw IllegalArgumentException first",exception);
     t.cancel();
     t=new Timer();
     testTask=new TimerTestTask();
     d=new Date(System.currentTimeMillis() + 100);
     t.scheduleAtFixedRate(testTask,d,100);
-    try {
-      Thread.sleep(400);
-    }
- catch (    InterruptedException e) {
-    }
+    Thread.sleep(400);
     assertTrue("TimerTask.run() method should have been called at least twice (" + testTask.wasRun() + ")",testTask.wasRun() >= 2);
     t.cancel();
 class SlowThenFastTask extends TimerTask {
@@ -96,6 +76,7 @@ class SlowThenFastTask extends TimerTask {
             Thread.sleep(200);
           }
  catch (          InterruptedException e) {
+            throw new RuntimeException(e);
           }
         }
       }
@@ -110,11 +91,7 @@ class SlowThenFastTask extends TimerTask {
     SlowThenFastTask slowThenFastTask=new SlowThenFastTask();
     d=new Date(System.currentTimeMillis() + 100);
     t.scheduleAtFixedRate(slowThenFastTask,d,100);
-    try {
-      Thread.sleep(1000);
-    }
- catch (    InterruptedException e) {
-    }
+    Thread.sleep(1000);
     long lastDelta=slowThenFastTask.lastDelta();
     assertTrue("Fixed Rate Schedule should catch up, but is off by " + lastDelta + " ms",lastDelta < 300);
     t.cancel();

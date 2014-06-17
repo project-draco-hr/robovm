@@ -1,0 +1,66 @@
+{
+  if (chain == null || chain.length == 0 || authType == null || authType.length() == 0) {
+    throw new IllegalArgumentException("null or zero-length parameter");
+  }
+  if (err != null) {
+    throw new CertificateException(err);
+  }
+  Set<TrustAnchor> trustAnchor=new HashSet<TrustAnchor>();
+  X509Certificate[] newChain=cleanupCertChainAndFindTrustAnchors(chain,trustAnchor);
+  List<X509Certificate> wholeChain=new ArrayList<X509Certificate>();
+  wholeChain.addAll(Arrays.asList(newChain));
+  for (  TrustAnchor trust : trustAnchor) {
+    wholeChain.add(trust.getTrustedCert());
+  }
+  X509Certificate last=wholeChain.get(wholeChain.size() - 1);
+  while (true) {
+    TrustAnchor cachedTrust=trustedCertificateIndex.findByIssuerAndSignature(last);
+    if (cachedTrust == null) {
+      break;
+    }
+    X509Certificate next=cachedTrust.getTrustedCert();
+    if (next != last) {
+      wholeChain.add(next);
+      last=next;
+    }
+ else {
+      break;
+    }
+  }
+  CertPath certPath=factory.generateCertPath(Arrays.asList(newChain));
+  if (host != null) {
+    boolean chainIsNotPinned=true;
+    try {
+      chainIsNotPinned=pinManager.chainIsNotPinned(host,wholeChain);
+    }
+ catch (    PinManagerException e) {
+      throw new CertificateException(e);
+    }
+    if (chainIsNotPinned) {
+      throw new CertificateException(new CertPathValidatorException("Certificate path is not properly pinned.",null,certPath,-1));
+    }
+  }
+  if (newChain.length == 0) {
+    return wholeChain;
+  }
+  if (trustAnchor.isEmpty()) {
+    throw new CertificateException(new CertPathValidatorException("Trust anchor for certification path not found.",null,certPath,-1));
+  }
+  ChainStrengthAnalyzer.check(newChain);
+  try {
+    PKIXParameters params=new PKIXParameters(trustAnchor);
+    params.setRevocationEnabled(false);
+    params.addCertPathChecker(new ExtendedKeyUsagePKIXCertPathChecker(clientAuth,newChain[0]));
+    validator.validate(certPath,params);
+    for (int i=1; i < newChain.length; i++) {
+      trustedCertificateIndex.index(newChain[i]);
+    }
+  }
+ catch (  InvalidAlgorithmParameterException e) {
+    throw new CertificateException(e);
+  }
+catch (  CertPathValidatorException e) {
+    throw new CertificateException(e);
+  }
+  return wholeChain;
+}

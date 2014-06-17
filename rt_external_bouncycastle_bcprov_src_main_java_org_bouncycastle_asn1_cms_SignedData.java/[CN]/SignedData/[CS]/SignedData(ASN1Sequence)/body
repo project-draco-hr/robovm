@@ -1,0 +1,27 @@
+{
+  Enumeration e=seq.getObjects();
+  version=ASN1Integer.getInstance(e.nextElement());
+  digestAlgorithms=((ASN1Set)e.nextElement());
+  contentInfo=ContentInfo.getInstance(e.nextElement());
+  while (e.hasMoreElements()) {
+    ASN1Primitive o=(ASN1Primitive)e.nextElement();
+    if (o instanceof ASN1TaggedObject) {
+      ASN1TaggedObject tagged=(ASN1TaggedObject)o;
+switch (tagged.getTagNo()) {
+case 0:
+        certsBer=tagged instanceof BERTaggedObject;
+      certificates=ASN1Set.getInstance(tagged,false);
+    break;
+case 1:
+  crlsBer=tagged instanceof BERTaggedObject;
+crls=ASN1Set.getInstance(tagged,false);
+break;
+default :
+throw new IllegalArgumentException("unknown tag value " + tagged.getTagNo());
+}
+}
+ else {
+signerInfos=(ASN1Set)o;
+}
+}
+}

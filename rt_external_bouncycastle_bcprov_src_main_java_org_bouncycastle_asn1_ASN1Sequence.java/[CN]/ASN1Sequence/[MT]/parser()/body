@@ -1,0 +1,27 @@
+{
+  final ASN1Sequence outer=this;
+  return new ASN1SequenceParser(){
+    private final int max=size();
+    private int index;
+    public ASN1Encodable readObject() throws IOException {
+      if (index == max) {
+        return null;
+      }
+      ASN1Encodable obj=getObjectAt(index++);
+      if (obj instanceof ASN1Sequence) {
+        return ((ASN1Sequence)obj).parser();
+      }
+      if (obj instanceof ASN1Set) {
+        return ((ASN1Set)obj).parser();
+      }
+      return obj;
+    }
+    public ASN1Primitive getLoadedObject(){
+      return outer;
+    }
+    public ASN1Primitive toASN1Primitive(){
+      return outer;
+    }
+  }
+;
+}

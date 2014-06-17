@@ -1,0 +1,14 @@
+{
+  int s;
+  if (Thread.interrupted())   throw new InterruptedException();
+  ForkJoinPool.externalHelpJoin(this);
+  while ((s=status) >= 0) {
+    if (U.compareAndSwapInt(this,STATUS,s,s | SIGNAL)) {
+synchronized (this) {
+        if (status >= 0)         wait();
+ else         notifyAll();
+      }
+    }
+  }
+  return s;
+}

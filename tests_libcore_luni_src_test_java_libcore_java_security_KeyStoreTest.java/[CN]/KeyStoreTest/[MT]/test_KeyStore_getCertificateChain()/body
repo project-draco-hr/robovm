@@ -2,7 +2,7 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       keyStore.getCertificateChain(null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    KeyStoreException expected) {
     }
@@ -11,7 +11,7 @@
     populate(keyStore);
     try {
       keyStore.getCertificateChain(null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    Exception e) {
       if (e.getClass() != NullPointerException.class && e.getClass() != IllegalArgumentException.class) {
@@ -22,8 +22,11 @@
     if (isReadOnly(keyStore)) {
       assertNull(keyStore.getCertificateChain(ALIAS_PRIVATE));
     }
- else {
+ else     if (isKeyPasswordSupported(keyStore)) {
       assertCertificateChain(keyStore.getCertificateChain(ALIAS_PRIVATE));
+    }
+ else     if (isNullPasswordAllowed(keyStore)) {
+      assertCertificateChain(keyStore.getCertificateChain(ALIAS_NO_PASSWORD_PRIVATE));
     }
     if (isReadOnly(keyStore) || isCaseSensitive(keyStore)) {
       assertNull(keyStore.getCertificateChain(ALIAS_ALT_CASE_PRIVATE));

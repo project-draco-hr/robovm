@@ -1,15 +1,13 @@
 {
   ReferenceQueue<Object> queue=new ReferenceQueue<Object>();
   r=newWeakReference(queue);
-  System.gc();
-  System.runFinalization();
+  FinalizationTester.induceFinalization();
   Reference ref=queue.remove(10 * 1000);
   assertNotNull("Object not enqueued.",ref);
   assertSame("Unexpected ref1",ref,r);
   assertNull("Object could not be reclaimed1.",r.get());
   r=newWeakReference(queue);
-  System.gc();
-  System.runFinalization();
+  FinalizationTester.induceFinalization();
   Thread.yield();
   Thread.sleep(200);
   ref=queue.poll();

@@ -1,27 +1,38 @@
 {
-  lock();
+  HashEntry<K,V> node=tryLock() ? null : scanAndLockForPut(key,hash,value);
+  V oldValue;
   try {
-    int c=count;
-    if (c++ > threshold)     rehash();
     HashEntry<K,V>[] tab=table;
-    int index=hash & (tab.length - 1);
-    HashEntry<K,V> first=tab[index];
-    HashEntry<K,V> e=first;
-    while (e != null && (e.hash != hash || !key.equals(e.key)))     e=e.next;
-    V oldValue;
-    if (e != null) {
-      oldValue=e.value;
-      if (!onlyIfAbsent)       e.value=value;
-    }
+    int index=(tab.length - 1) & hash;
+    HashEntry<K,V> first=entryAt(tab,index);
+    for (HashEntry<K,V> e=first; ; ) {
+      if (e != null) {
+        K k;
+        if ((k=e.key) == key || (e.hash == hash && key.equals(k))) {
+          oldValue=e.value;
+          if (!onlyIfAbsent) {
+            e.value=value;
+            ++modCount;
+          }
+          break;
+        }
+        e=e.next;
+      }
  else {
-      oldValue=null;
-      ++modCount;
-      tab[index]=new HashEntry<K,V>(key,hash,first,value);
-      count=c;
+        if (node != null)         node.setNext(first);
+ else         node=new HashEntry<K,V>(hash,key,value,first);
+        int c=count + 1;
+        if (c > threshold && tab.length < MAXIMUM_CAPACITY)         rehash(node);
+ else         setEntryAt(tab,index,node);
+        ++modCount;
+        count=c;
+        oldValue=null;
+        break;
+      }
     }
-    return oldValue;
   }
   finally {
     unlock();
   }
+  return oldValue;
 }

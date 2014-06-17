@@ -1,0 +1,49 @@
+{
+  X500NameTokenizer nTok=new X500NameTokenizer(name);
+  X500NameBuilder builder=new X500NameBuilder(x500Style);
+  while (nTok.hasMoreTokens()) {
+    String token=nTok.nextToken();
+    if (token.indexOf('+') > 0) {
+      X500NameTokenizer pTok=new X500NameTokenizer(token,'+');
+      X500NameTokenizer vTok=new X500NameTokenizer(pTok.nextToken(),'=');
+      String attr=vTok.nextToken();
+      if (!vTok.hasMoreTokens()) {
+        throw new IllegalArgumentException("badly formatted directory string");
+      }
+      String value=vTok.nextToken();
+      ASN1ObjectIdentifier oid=x500Style.attrNameToOID(attr.trim());
+      if (pTok.hasMoreTokens()) {
+        Vector oids=new Vector();
+        Vector values=new Vector();
+        oids.addElement(oid);
+        values.addElement(unescape(value));
+        while (pTok.hasMoreTokens()) {
+          vTok=new X500NameTokenizer(pTok.nextToken(),'=');
+          attr=vTok.nextToken();
+          if (!vTok.hasMoreTokens()) {
+            throw new IllegalArgumentException("badly formatted directory string");
+          }
+          value=vTok.nextToken();
+          oid=x500Style.attrNameToOID(attr.trim());
+          oids.addElement(oid);
+          values.addElement(unescape(value));
+        }
+        builder.addMultiValuedRDN(toOIDArray(oids),toValueArray(values));
+      }
+ else {
+        builder.addRDN(oid,unescape(value));
+      }
+    }
+ else {
+      X500NameTokenizer vTok=new X500NameTokenizer(token,'=');
+      String attr=vTok.nextToken();
+      if (!vTok.hasMoreTokens()) {
+        throw new IllegalArgumentException("badly formatted directory string");
+      }
+      String value=vTok.nextToken();
+      ASN1ObjectIdentifier oid=x500Style.attrNameToOID(attr.trim());
+      builder.addRDN(oid,unescape(value));
+    }
+  }
+  return builder.build().getRDNs();
+}

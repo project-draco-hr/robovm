@@ -1,0 +1,21 @@
+{
+  if (signedContent instanceof CMSTypedData) {
+    this.signedContent=(CMSTypedData)signedContent;
+  }
+ else {
+    this.signedContent=new CMSTypedData(){
+      public ASN1ObjectIdentifier getContentType(){
+        return signedData.getEncapContentInfo().getContentType();
+      }
+      public void write(      OutputStream out) throws IOException, CMSException {
+        signedContent.write(out);
+      }
+      public Object getContent(){
+        return signedContent.getContent();
+      }
+    }
+;
+  }
+  this.contentInfo=sigData;
+  this.signedData=getSignedData();
+}

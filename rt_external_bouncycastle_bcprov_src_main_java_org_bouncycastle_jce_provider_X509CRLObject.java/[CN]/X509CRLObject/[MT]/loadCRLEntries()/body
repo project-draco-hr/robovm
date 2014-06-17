@@ -1,0 +1,17 @@
+{
+  Set entrySet=new HashSet();
+  Enumeration certs=c.getRevokedCertificateEnumeration();
+  X500Name previousCertificateIssuer=null;
+  while (certs.hasMoreElements()) {
+    TBSCertList.CRLEntry entry=(TBSCertList.CRLEntry)certs.nextElement();
+    X509CRLEntryObject crlEntry=new X509CRLEntryObject(entry,isIndirect,previousCertificateIssuer);
+    entrySet.add(crlEntry);
+    if (isIndirect && entry.hasExtensions()) {
+      Extension currentCaName=entry.getExtensions().getExtension(Extension.certificateIssuer);
+      if (currentCaName != null) {
+        previousCertificateIssuer=X500Name.getInstance(GeneralNames.getInstance(currentCaName.getParsedValue()).getNames()[0].getName());
+      }
+    }
+  }
+  return entrySet;
+}

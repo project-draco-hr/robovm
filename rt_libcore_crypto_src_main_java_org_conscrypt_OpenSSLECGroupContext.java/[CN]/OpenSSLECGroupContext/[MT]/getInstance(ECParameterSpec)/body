@@ -1,0 +1,23 @@
+{
+  final String curveName=params.getCurveName();
+  if (curveName != null) {
+    return OpenSSLECGroupContext.getCurveByName(curveName);
+  }
+  final EllipticCurve curve=params.getCurve();
+  final ECField field=curve.getField();
+  final int type;
+  final BigInteger p;
+  if (field instanceof ECFieldFp) {
+    type=NativeCrypto.EC_CURVE_GFP;
+    p=((ECFieldFp)field).getP();
+  }
+ else   if (field instanceof ECFieldF2m) {
+    type=NativeCrypto.EC_CURVE_GF2M;
+    p=((ECFieldF2m)field).getReductionPolynomial();
+  }
+ else {
+    throw new InvalidParameterException("unhandled field class " + field.getClass().getName());
+  }
+  final ECPoint generator=params.getGenerator();
+  return OpenSSLECGroupContext.getInstance(type,p,curve.getA(),curve.getB(),generator.getAffineX(),generator.getAffineY(),params.getOrder(),BigInteger.valueOf(params.getCofactor()));
+}

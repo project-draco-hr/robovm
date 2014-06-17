@@ -1,0 +1,33 @@
+{
+  java.nio.ByteBuffer[] writeBuf=new java.nio.ByteBuffer[2];
+  writeBuf[0]=java.nio.ByteBuffer.allocateDirect(CAPACITY_NORMAL);
+  writeBuf[1]=java.nio.ByteBuffer.allocateDirect(CAPACITY_NORMAL);
+  assertFalse(this.channel1.isRegistered());
+  assertTrue(this.channel1.isBlocking());
+  assertFalse(this.channel1.isConnected());
+  assertFalse(this.channel1.isConnectionPending());
+  assertTrue(this.channel1.isOpen());
+  try {
+    channel1.write(writeBuf,0,1);
+    fail("Should throw NotYetConnectedException");
+  }
+ catch (  NotYetConnectedException e) {
+  }
+  this.channel1.connect(localAddr1);
+  assertTrue(this.channel1.isBlocking());
+  assertTrue(this.channel1.isConnected());
+  assertFalse(this.channel1.isConnectionPending());
+  assertTrue(this.channel1.isOpen());
+  assertEquals(CAPACITY_NORMAL,this.channel1.write(writeBuf,0,1));
+  assertEquals(CAPACITY_NORMAL,this.channel1.write(writeBuf,0,2));
+  writeBuf[0].flip();
+  writeBuf[1].flip();
+  assertEquals(CAPACITY_NORMAL * 2,this.channel1.write(writeBuf,0,2));
+  this.channel1.close();
+  try {
+    channel1.write(writeBuf);
+    fail("Should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+}

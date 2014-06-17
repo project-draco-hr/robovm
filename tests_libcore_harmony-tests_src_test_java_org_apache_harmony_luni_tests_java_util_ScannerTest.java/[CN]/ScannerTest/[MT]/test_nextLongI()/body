@@ -1,0 +1,98 @@
+{
+  s=new Scanner("123 456");
+  assertEquals(123,s.nextLong(10));
+  assertEquals(456,s.nextLong(10));
+  try {
+    s.nextLong(10);
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("123 456");
+  assertEquals(38,s.nextLong(5));
+  try {
+    s.nextLong(5);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("123456789123456789123456789123456789");
+  try {
+    s.nextLong(10);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("23,456 23,456");
+  s.useLocale(Locale.GERMANY);
+  try {
+    s.nextLong(10);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(23456,s.nextLong(10));
+  assertEquals(23456,s.nextLong(10));
+  s=new Scanner("23'456 23'456");
+  s.useLocale(Locale.GERMANY);
+  try {
+    s.nextLong(10);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s.useLocale(new Locale("it","CH"));
+  assertEquals(23456,s.nextLong(10));
+  assertEquals(23456,s.nextLong(10));
+  s=new Scanner("1\u06602 1\u06662");
+  assertEquals(102,s.nextLong(10));
+  try {
+    s.nextLong(5);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  assertEquals(162,s.nextLong(10));
+  s=new Scanner("23.45\u0666 23.456");
+  s.useLocale(Locale.CHINESE);
+  try {
+    s.nextLong(10);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s.useLocale(Locale.GERMANY);
+  assertEquals(23456,s.nextLong(10));
+  assertEquals(23456,s.nextLong(10));
+  s=new Scanner("03,456");
+  s.useLocale(Locale.ENGLISH);
+  try {
+    s.nextLong(10);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("03456");
+  assertEquals(3456,s.nextLong(10));
+  s=new Scanner("\u06603,456");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(3456,s.nextLong(10));
+  s=new Scanner("E34");
+  assertEquals(3636,s.nextLong(16));
+  s=new Scanner("12300");
+  s.useLocale(Locale.CHINESE);
+  assertEquals(12300,s.nextLong(10));
+  s=new Scanner("123\u0966\u0966");
+  s.useLocale(Locale.CHINESE);
+  assertEquals(12300,s.nextLong(10));
+  s=new Scanner("123\u0e50\u0e50");
+  s.useLocale(Locale.CHINESE);
+  assertEquals(12300,s.nextLong(10));
+  s=new Scanner("-123");
+  s.useLocale(new Locale("ar","AE"));
+  assertEquals(-123,s.nextLong(10));
+  s=new Scanner("-123");
+  s.useLocale(new Locale("mk","MK"));
+  assertEquals(-123,s.nextLong(10));
+}

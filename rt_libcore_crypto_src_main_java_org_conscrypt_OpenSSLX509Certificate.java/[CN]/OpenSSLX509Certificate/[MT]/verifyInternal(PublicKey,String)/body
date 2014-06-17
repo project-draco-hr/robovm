@@ -1,0 +1,18 @@
+{
+  String sigAlg=getSigAlgName();
+  if (sigAlg == null) {
+    sigAlg=getSigAlgOID();
+  }
+  final Signature sig;
+  if (sigProvider == null) {
+    sig=Signature.getInstance(sigAlg);
+  }
+ else {
+    sig=Signature.getInstance(sigAlg,sigProvider);
+  }
+  sig.initVerify(key);
+  sig.update(getTBSCertificate());
+  if (!sig.verify(getSignature())) {
+    throw new SignatureException("signature did not verify");
+  }
+}

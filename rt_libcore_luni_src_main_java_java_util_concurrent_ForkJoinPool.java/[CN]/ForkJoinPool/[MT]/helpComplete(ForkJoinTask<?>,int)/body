@@ -1,0 +1,16 @@
+{
+  WorkQueue[] ws;
+  WorkQueue q;
+  int m, n, s, u;
+  if (task != null && (ws=workQueues) != null && (m=ws.length - 1) >= 0) {
+    for (int j=1, origin=j; ; ) {
+      if ((s=task.status) < 0)       return s;
+      if ((q=ws[j & m]) != null && q.pollAndExecCC(task)) {
+        origin=j;
+        if (mode == SHARED_QUEUE && ((u=(int)(ctl >>> 32)) >= 0 || (u >> UAC_SHIFT) >= 0))         break;
+      }
+ else       if ((j=(j + 2) & m) == origin)       break;
+    }
+  }
+  return 0;
+}

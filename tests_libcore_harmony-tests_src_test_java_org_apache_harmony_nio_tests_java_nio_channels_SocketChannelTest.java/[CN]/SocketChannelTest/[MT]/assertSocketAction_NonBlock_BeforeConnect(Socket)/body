@@ -1,0 +1,31 @@
+{
+  assertFalse(this.channel1.isConnected());
+  this.server2=new ServerSocket(localAddr2.getPort());
+  try {
+    s.connect(localAddr2);
+    fail("Should throw IllegalBlockingModeException");
+  }
+ catch (  IllegalBlockingModeException e1) {
+  }
+  if (this.channel1.isConnectionPending()) {
+    try {
+      s.bind(localAddr2);
+      fail("Should throw ConnectionPendingException");
+    }
+ catch (    ConnectionPendingException e1) {
+    }
+  }
+ else {
+    try {
+      s.bind(localAddr2);
+      fail("Should throw BindException");
+    }
+ catch (    BindException e1) {
+    }
+  }
+  assertFalse(this.channel1.isConnected());
+  assertFalse(s.isConnected());
+  s.close();
+  assertTrue(s.isClosed());
+  assertFalse(this.channel1.isOpen());
+}

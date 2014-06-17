@@ -3,7 +3,7 @@
   if (localBuf == null) {
     throw streamClosed();
   }
-  Arrays.checkOffsetAndCount(buffer.length,offset,byteCount);
+  Arrays.checkOffsetAndCount(buffer.length,byteOffset,byteCount);
   if (byteCount == 0) {
     return 0;
   }
@@ -14,12 +14,12 @@
   int required;
   if (pos < count) {
     int copylength=count - pos >= byteCount ? byteCount : count - pos;
-    System.arraycopy(localBuf,pos,buffer,offset,copylength);
+    System.arraycopy(localBuf,pos,buffer,byteOffset,copylength);
     pos+=copylength;
     if (copylength == byteCount || localIn.available() == 0) {
       return copylength;
     }
-    offset+=copylength;
+    byteOffset+=copylength;
     required=byteCount - copylength;
   }
  else {
@@ -28,7 +28,7 @@
   while (true) {
     int read;
     if (markpos == -1 && required >= localBuf.length) {
-      read=localIn.read(buffer,offset,required);
+      read=localIn.read(buffer,byteOffset,required);
       if (read == -1) {
         return required == byteCount ? -1 : byteCount - required;
       }
@@ -44,7 +44,7 @@
         }
       }
       read=count - pos >= required ? required : count - pos;
-      System.arraycopy(localBuf,pos,buffer,offset,read);
+      System.arraycopy(localBuf,pos,buffer,byteOffset,read);
       pos+=read;
     }
     required-=read;
@@ -54,6 +54,6 @@
     if (localIn.available() == 0) {
       return byteCount - required;
     }
-    offset+=read;
+    byteOffset+=read;
   }
 }

@@ -6,21 +6,30 @@
   final ReentrantLock lock=this.lock;
   lock.lock();
   try {
-    int i=takeIndex;
-    int n=0;
-    int max=(maxElements < count) ? maxElements : count;
-    while (n < max) {
-      c.add(this.<E>cast(items[i]));
-      items[i]=null;
-      i=inc(i);
-      ++n;
+    int n=Math.min(maxElements,count);
+    int take=takeIndex;
+    int i=0;
+    try {
+      while (i < n) {
+        @SuppressWarnings("unchecked") E x=(E)items[take];
+        c.add(x);
+        items[take]=null;
+        take=inc(take);
+        i++;
+      }
+      return n;
     }
-    if (n > 0) {
-      count-=n;
-      takeIndex=i;
-      notFull.signalAll();
+  finally {
+      if (i > 0) {
+        count-=i;
+        takeIndex=take;
+        if (itrs != null) {
+          if (count == 0)           itrs.queueIsEmpty();
+ else           if (i > take)           itrs.takeIndexWrapped();
+        }
+        for (; i > 0 && lock.hasWaiters(notFull); i--)         notFull.signal();
+      }
     }
-    return n;
   }
   finally {
     lock.unlock();

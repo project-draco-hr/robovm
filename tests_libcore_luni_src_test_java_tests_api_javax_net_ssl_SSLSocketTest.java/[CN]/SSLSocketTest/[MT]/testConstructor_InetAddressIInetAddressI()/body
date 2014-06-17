@@ -1,0 +1,42 @@
+{
+  int sport=startServer("Cons InetAddress,I,InetAddress,I");
+  SSLSocket ssl=getSSLSocket(InetAddress.getLocalHost(),sport,InetAddress.getLocalHost(),0);
+  assertNotNull(ssl);
+  assertEquals(sport,ssl.getPort());
+  ssl.close();
+  try {
+    getSSLSocket(InetAddress.getLocalHost(),8081,InetAddress.getLocalHost(),8082);
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+  try {
+    getSSLSocket(InetAddress.getLocalHost(),-1,InetAddress.getLocalHost(),sport + 1);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    getSSLSocket(InetAddress.getLocalHost(),sport,InetAddress.getLocalHost(),-1);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  try {
+    getSSLSocket(InetAddress.getLocalHost(),Integer.MIN_VALUE,InetAddress.getLocalHost(),sport + 1);
+    fail();
+  }
+ catch (  IOException expectedOnRI) {
+    assertTrue(StandardNames.IS_RI);
+  }
+catch (  IllegalArgumentException expectedOnAndroid) {
+    assertFalse(StandardNames.IS_RI);
+  }
+  try {
+    getSSLSocket(InetAddress.getLocalHost(),sport,InetAddress.getLocalHost(),Integer.MAX_VALUE);
+    fail();
+  }
+ catch (  IllegalArgumentException expectedOnAndroid) {
+    assertFalse(StandardNames.IS_RI);
+  }
+}

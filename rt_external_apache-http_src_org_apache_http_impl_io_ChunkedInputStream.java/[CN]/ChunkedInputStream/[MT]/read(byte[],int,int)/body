@@ -1,0 +1,18 @@
+{
+  if (closed) {
+    throw new IOException("Attempted read from closed stream.");
+  }
+  if (eof) {
+    return -1;
+  }
+  if (pos >= chunkSize) {
+    nextChunk();
+    if (eof) {
+      return -1;
+    }
+  }
+  len=Math.min(len,chunkSize - pos);
+  int count=in.read(b,off,len);
+  pos+=count;
+  return count;
+}

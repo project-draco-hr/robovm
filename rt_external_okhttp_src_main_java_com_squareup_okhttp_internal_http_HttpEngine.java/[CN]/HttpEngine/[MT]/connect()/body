@@ -1,0 +1,32 @@
+{
+  if (connection != null) {
+    return;
+  }
+  if (routeSelector == null) {
+    String uriHost=uri.getHost();
+    if (uriHost == null) {
+      throw new UnknownHostException(uri.toString());
+    }
+    SSLSocketFactory sslSocketFactory=null;
+    HostnameVerifier hostnameVerifier=null;
+    if (uri.getScheme().equalsIgnoreCase("https")) {
+      sslSocketFactory=client.getSslSocketFactory();
+      hostnameVerifier=client.getHostnameVerifier();
+    }
+    Address address=new Address(uriHost,getEffectivePort(uri),sslSocketFactory,hostnameVerifier,client.getAuthenticator(),client.getProxy(),client.getTransports());
+    routeSelector=new RouteSelector(address,uri,client.getProxySelector(),client.getConnectionPool(),Dns.DEFAULT,client.getRoutesDatabase());
+  }
+  connection=routeSelector.next(method);
+  if (!connection.isConnected()) {
+    connection.connect(client.getConnectTimeout(),client.getReadTimeout(),getTunnelConfig());
+    client.getConnectionPool().maybeShare(connection);
+    client.getRoutesDatabase().connected(connection.getRoute());
+  }
+ else {
+    connection.updateReadTimeout(client.getReadTimeout());
+  }
+  connected(connection);
+  if (connection.getRoute().getProxy() != client.getProxy()) {
+    requestHeaders.getHeaders().setRequestLine(getRequestLine());
+  }
+}

@@ -1,0 +1,21 @@
+{
+  if (streamCancelled) {
+    return false;
+  }
+  if (requestBodyOut != null && !((AbstractOutputStream)requestBodyOut).isClosed()) {
+    return false;
+  }
+  if (httpEngine.requestHeaders.hasConnectionClose()) {
+    return false;
+  }
+  if (httpEngine.responseHeaders != null && httpEngine.responseHeaders.hasConnectionClose()) {
+    return false;
+  }
+  if (responseBodyIn instanceof UnknownLengthHttpInputStream) {
+    return false;
+  }
+  if (responseBodyIn != null) {
+    return discardStream(httpEngine,responseBodyIn);
+  }
+  return true;
+}

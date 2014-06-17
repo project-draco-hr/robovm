@@ -1,0 +1,33 @@
+{
+  if (mOpenSslPrivateKey == null) {
+    throw new IllegalStateException("Not initialized");
+  }
+  if (!lastPhase) {
+    throw new IllegalStateException("ECDH only has one phase");
+  }
+  if (key == null) {
+    throw new InvalidKeyException("key == null");
+  }
+  if (!(key instanceof PublicKey)) {
+    throw new InvalidKeyException("Not a public key: " + key.getClass());
+  }
+  OpenSSLKey openSslPublicKey=translateKeyToEcOpenSSLKey(key);
+  byte[] buffer=new byte[mExpectedResultLength];
+  int actualResultLength=NativeCrypto.ECDH_compute_key(buffer,0,openSslPublicKey.getPkeyContext(),mOpenSslPrivateKey.getPkeyContext());
+  byte[] result;
+  if (actualResultLength == -1) {
+    throw new RuntimeException("Engine returned " + actualResultLength);
+  }
+ else   if (actualResultLength == mExpectedResultLength) {
+    result=buffer;
+  }
+ else   if (actualResultLength < mExpectedResultLength) {
+    result=new byte[actualResultLength];
+    System.arraycopy(buffer,0,mResult,0,mResult.length);
+  }
+ else {
+    throw new RuntimeException("Engine produced a longer than expected result. Expected: " + mExpectedResultLength + ", actual: "+ actualResultLength);
+  }
+  mResult=result;
+  return null;
+}

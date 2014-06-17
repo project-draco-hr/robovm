@@ -1,0 +1,20 @@
+{
+  final ByteArrayOutputStream errBuffer=new ByteArrayOutputStream();
+  PrintStream out=new PrintStream(errBuffer);
+  for (int i=0; i < HARDCODED_ALIASES.length; i++) {
+    try {
+      assertEquals(HARDCODED_ALIASES[i][1].toUpperCase(Locale.US),AlgNameMapper.map2AlgName(HARDCODED_ALIASES[i][0]).toUpperCase(Locale.US));
+      assertEquals(HARDCODED_ALIASES[i][0],AlgNameMapper.map2OID(HARDCODED_ALIASES[i][1]));
+      assertEquals(HARDCODED_ALIASES[i][1].toUpperCase(Locale.US),AlgNameMapper.getStandardName(HARDCODED_ALIASES[i][1].toUpperCase(Locale.US)).toUpperCase(Locale.US));
+      assertTrue(AlgNameMapper.isOID(HARDCODED_ALIASES[i][0]));
+    }
+ catch (    Throwable e) {
+      out.append("Error encountered checking " + HARDCODED_ALIASES[i][1] + "\n");
+      e.printStackTrace(out);
+    }
+  }
+  out.flush();
+  if (errBuffer.size() > 0) {
+    throw new Exception("Errors encountered:\n\n" + errBuffer.toString() + "\n\n");
+  }
+}

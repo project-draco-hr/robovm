@@ -1,0 +1,19 @@
+{
+  ServerSocketChannel ssc=ServerSocketChannel.open();
+  ssc.socket().bind(null);
+  SocketChannel sc=SocketChannel.open();
+  sc.connect(ssc.socket().getLocalSocketAddress());
+  sc.configureBlocking(false);
+  assertFalse(sc.isBlocking());
+  ssc.accept().close();
+  ssc.close();
+  assertFalse(sc.isBlocking());
+  Scanner s=new Scanner(sc);
+  try {
+    s.hasNextInt();
+    fail();
+  }
+ catch (  IllegalBlockingModeException expected) {
+  }
+  sc.close();
+}

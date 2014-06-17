@@ -1,5 +1,6 @@
 {
-  long lastTime=System.nanoTime();
+  if (nanosTimeout <= 0L)   return false;
+  final long deadline=System.nanoTime() + nanosTimeout;
   final Node node=addWaiter(Node.EXCLUSIVE);
   boolean failed=true;
   try {
@@ -11,11 +12,9 @@
         failed=false;
         return true;
       }
-      if (nanosTimeout <= 0)       return false;
+      nanosTimeout=deadline - System.nanoTime();
+      if (nanosTimeout <= 0L)       return false;
       if (shouldParkAfterFailedAcquire(p,node) && nanosTimeout > spinForTimeoutThreshold)       LockSupport.parkNanos(this,nanosTimeout);
-      long now=System.nanoTime();
-      nanosTimeout-=now - lastTime;
-      lastTime=now;
       if (Thread.interrupted())       throw new InterruptedException();
     }
   }

@@ -1,0 +1,22 @@
+{
+  long midnight=0;
+  long teaTime=16 * HOUR;
+  int time12=FORMAT_12HOUR | FORMAT_SHOW_TIME;
+  int time24=FORMAT_24HOUR | FORMAT_SHOW_TIME;
+  int abbr12=time12 | FORMAT_ABBREV_ALL;
+  int abbr24=time24 | FORMAT_ABBREV_ALL;
+  Locale l=Locale.US;
+  TimeZone utc=TimeZone.getTimeZone("UTC");
+  assertEquals("00:00",formatDateRange(l,utc,midnight,midnight,time24));
+  assertEquals("12:00 AM",formatDateRange(l,utc,midnight,midnight,time12));
+  assertEquals("16:00",formatDateRange(l,utc,teaTime,teaTime,time24));
+  assertEquals("4:00 PM",formatDateRange(l,utc,teaTime,teaTime,time12));
+  assertEquals("00:00",formatDateRange(l,utc,midnight,midnight,abbr24));
+  assertEquals("12 AM",formatDateRange(l,utc,midnight,midnight,abbr12));
+  assertEquals("16:00",formatDateRange(l,utc,teaTime,teaTime,abbr24));
+  assertEquals("4 PM",formatDateRange(l,utc,teaTime,teaTime,abbr12));
+  assertEquals("00:00???16:00",formatDateRange(l,utc,midnight,teaTime,abbr24));
+  assertEquals("12 AM ??? 4 PM",formatDateRange(l,utc,midnight,teaTime,abbr12));
+  assertEquals("00:00???16:01",formatDateRange(l,utc,midnight,teaTime + MINUTE,abbr24));
+  assertEquals("12:00 AM ??? 4:01 PM",formatDateRange(l,utc,midnight,teaTime + MINUTE,abbr12));
+}

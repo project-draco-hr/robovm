@@ -1,0 +1,14 @@
+{
+synchronized (LIST_LOCK) {
+    for (FinalizerReference<?> r=head; r != null; r=r.next) {
+      if (r.referent == sentinel) {
+        FinalizerReference<Sentinel> sentinelReference=(FinalizerReference<Sentinel>)r;
+        sentinelReference.referent=null;
+        sentinelReference.zombie=sentinel;
+        sentinelReference.enqueueInternal();
+        return;
+      }
+    }
+  }
+  throw new AssertionError("newly-created live Sentinel not on list!");
+}

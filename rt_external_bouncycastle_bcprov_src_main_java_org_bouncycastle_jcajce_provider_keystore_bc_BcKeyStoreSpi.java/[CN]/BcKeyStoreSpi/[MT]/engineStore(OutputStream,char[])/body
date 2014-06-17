@@ -1,0 +1,29 @@
+{
+  DataOutputStream dOut=new DataOutputStream(stream);
+  byte[] salt=new byte[STORE_SALT_SIZE];
+  int iterationCount=MIN_ITERATIONS + (random.nextInt() & 0x3ff);
+  random.nextBytes(salt);
+  dOut.writeInt(version);
+  dOut.writeInt(salt.length);
+  dOut.write(salt);
+  dOut.writeInt(iterationCount);
+  HMac hMac=new HMac(new SHA1Digest());
+  MacOutputStream mOut=new MacOutputStream(hMac);
+  PBEParametersGenerator pbeGen=new PKCS12ParametersGenerator(new SHA1Digest());
+  byte[] passKey=PBEParametersGenerator.PKCS12PasswordToBytes(password);
+  pbeGen.init(passKey,salt,iterationCount);
+  if (version < 2) {
+    hMac.init(pbeGen.generateDerivedMacParameters(hMac.getMacSize()));
+  }
+ else {
+    hMac.init(pbeGen.generateDerivedMacParameters(hMac.getMacSize() * 8));
+  }
+  for (int i=0; i != passKey.length; i++) {
+    passKey[i]=0;
+  }
+  saveStore(new TeeOutputStream(dOut,mOut));
+  byte[] mac=new byte[hMac.getMacSize()];
+  hMac.doFinal(mac,0);
+  dOut.write(mac);
+  dOut.close();
+}

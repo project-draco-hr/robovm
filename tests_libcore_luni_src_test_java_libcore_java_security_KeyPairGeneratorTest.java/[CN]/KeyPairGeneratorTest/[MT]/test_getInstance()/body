@@ -8,17 +8,33 @@
         continue;
       }
       String algorithm=service.getAlgorithm();
+      if ("AndroidKeyStore".equals(provider.getName())) {
+        continue;
+      }
+      AlgorithmParameterSpec params=null;
+      if ("DH".equals(algorithm)) {
+        params=getDHParams();
+      }
       try {
         KeyPairGenerator kpg1=KeyPairGenerator.getInstance(algorithm);
         assertEquals(algorithm,kpg1.getAlgorithm());
+        if (params != null) {
+          kpg1.initialize(params);
+        }
         test_KeyPairGenerator(kpg1);
         KeyPairGenerator kpg2=KeyPairGenerator.getInstance(algorithm,provider);
         assertEquals(algorithm,kpg2.getAlgorithm());
         assertEquals(provider,kpg2.getProvider());
+        if (params != null) {
+          kpg2.initialize(params);
+        }
         test_KeyPairGenerator(kpg2);
         KeyPairGenerator kpg3=KeyPairGenerator.getInstance(algorithm,provider.getName());
         assertEquals(algorithm,kpg3.getAlgorithm());
         assertEquals(provider,kpg3.getProvider());
+        if (params != null) {
+          kpg3.initialize(params);
+        }
         test_KeyPairGenerator(kpg3);
       }
  catch (      Exception e) {

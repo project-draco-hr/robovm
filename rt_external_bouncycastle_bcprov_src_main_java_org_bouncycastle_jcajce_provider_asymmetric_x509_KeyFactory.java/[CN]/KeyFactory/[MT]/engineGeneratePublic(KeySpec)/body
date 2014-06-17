@@ -1,0 +1,16 @@
+{
+  if (keySpec instanceof X509EncodedKeySpec) {
+    try {
+      SubjectPublicKeyInfo info=SubjectPublicKeyInfo.getInstance(((X509EncodedKeySpec)keySpec).getEncoded());
+      PublicKey key=BouncyCastleProvider.getPublicKey(info);
+      if (key != null) {
+        return key;
+      }
+      throw new InvalidKeySpecException("no factory found for OID: " + info.getAlgorithm().getAlgorithm());
+    }
+ catch (    Exception e) {
+      throw new InvalidKeySpecException(e.toString());
+    }
+  }
+  throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+}

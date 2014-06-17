@@ -1,0 +1,25 @@
+{
+  String responseField;
+  String requestField;
+  if (responseCode == HTTP_UNAUTHORIZED) {
+    responseField="WWW-Authenticate";
+    requestField="Authorization";
+  }
+ else   if (responseCode == HTTP_PROXY_AUTH) {
+    responseField="Proxy-Authenticate";
+    requestField="Proxy-Authorization";
+  }
+ else {
+    throw new IllegalArgumentException();
+  }
+  List<Challenge> challenges=parseChallenges(responseHeaders,responseField);
+  if (challenges.isEmpty()) {
+    return false;
+  }
+  Credential credential=responseHeaders.getResponseCode() == HTTP_PROXY_AUTH ? authenticator.authenticateProxy(proxy,url,challenges) : authenticator.authenticate(proxy,url,challenges);
+  if (credential == null) {
+    return false;
+  }
+  successorRequestHeaders.set(requestField,credential.getHeaderValue());
+  return true;
+}

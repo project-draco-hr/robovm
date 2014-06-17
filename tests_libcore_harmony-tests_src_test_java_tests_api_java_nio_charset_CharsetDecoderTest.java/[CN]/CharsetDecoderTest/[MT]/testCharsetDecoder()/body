@@ -1,0 +1,36 @@
+{
+  decoder=new MockCharsetDecoder(cs,(float)AVER_BYTES,MAX_BYTES);
+  CharsetDecoder ec=new MockCharsetDecoder(cs,1,MAX_BYTES);
+  assertSame(ec.charset(),cs);
+  assertEquals(1.0,ec.averageCharsPerByte(),0.0);
+  assertTrue(ec.maxCharsPerByte() == MAX_BYTES);
+  ec=new MockCharsetDecoder(null,1,MAX_BYTES);
+  assertNull(ec.charset());
+  assertEquals(1.0,ec.averageCharsPerByte(),0.0);
+  assertTrue(ec.maxCharsPerByte() == MAX_BYTES);
+  ec=new MockCharsetDecoder(new CharsetEncoderTest.MockCharset("mock",new String[0]),1,MAX_BYTES);
+  try {
+    ec=new MockCharsetDecoder(cs,0,MAX_BYTES);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    ec=new MockCharsetDecoder(cs,1,0);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    ec=new MockCharsetDecoder(cs,-1,MAX_BYTES);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    ec=new MockCharsetDecoder(cs,1,-1);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

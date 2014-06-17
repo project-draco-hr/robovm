@@ -1,0 +1,36 @@
+{
+  Thread t=Thread.currentThread();
+  if (t instanceof ForkJoinWorkerThread) {
+    ForkJoinPool p=((ForkJoinWorkerThread)t).pool;
+    while (!blocker.isReleasable()) {
+      WorkQueue[] ws;
+      WorkQueue q;
+      int m, u;
+      if ((ws=p.workQueues) != null && (m=ws.length - 1) >= 0) {
+        for (int i=0; i <= m; ++i) {
+          if (blocker.isReleasable())           return;
+          if ((q=ws[i]) != null && q.base - q.top < 0) {
+            p.signalWork(q);
+            if ((u=(int)(p.ctl >>> 32)) >= 0 || (u >> UAC_SHIFT) >= 0)             break;
+          }
+        }
+      }
+      if (p.tryCompensate()) {
+        try {
+          do {
+          }
+ while (!blocker.isReleasable() && !blocker.block());
+        }
+  finally {
+          p.incrementActiveCount();
+        }
+        break;
+      }
+    }
+  }
+ else {
+    do {
+    }
+ while (!blocker.isReleasable() && !blocker.block());
+  }
+}

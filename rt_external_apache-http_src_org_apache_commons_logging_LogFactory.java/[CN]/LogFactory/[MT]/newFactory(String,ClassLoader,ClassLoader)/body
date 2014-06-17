@@ -1,0 +1,19 @@
+{
+  Object result=AccessController.doPrivileged(new PrivilegedAction(){
+    public Object run(){
+      return createFactory(factoryClass,classLoader);
+    }
+  }
+);
+  if (result instanceof LogConfigurationException) {
+    LogConfigurationException ex=(LogConfigurationException)result;
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("An error occurred while loading the factory class:" + ex.getMessage());
+    }
+    throw ex;
+  }
+  if (isDiagnosticsEnabled()) {
+    logDiagnostic("Created object " + objectId(result) + " to manage classloader "+ objectId(contextClassLoader));
+  }
+  return (LogFactory)result;
+}

@@ -1,0 +1,16 @@
+{
+  if (this.closed) {
+    throw new IOException("Attempted read from closed stream.");
+  }
+  if (this.eof) {
+    return -1;
+  }
+  if (this.pos >= this.chunkSize) {
+    nextChunk();
+    if (this.eof) {
+      return -1;
+    }
+  }
+  pos++;
+  return in.read();
+}

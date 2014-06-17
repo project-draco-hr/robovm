@@ -1,0 +1,21 @@
+{
+  Calendar startCalendar=Calendar.getInstance(tz);
+  startCalendar.setTimeInMillis(startMs);
+  Calendar endCalendar;
+  if (startMs == endMs) {
+    endCalendar=startCalendar;
+  }
+ else {
+    endCalendar=Calendar.getInstance(tz);
+    endCalendar.setTimeInMillis(endMs);
+  }
+  boolean endsAtMidnight=isMidnight(endCalendar);
+  if (startMs != endMs && endsAtMidnight && ((flags & FORMAT_SHOW_TIME) == 0 || julianDay(startCalendar) == julianDay(endCalendar))) {
+    endCalendar.roll(Calendar.DAY_OF_MONTH,false);
+    endMs-=DAY_IN_MS;
+  }
+  String skeleton=toSkeleton(startCalendar,endCalendar,flags);
+synchronized (CACHED_FORMATTERS) {
+    return formatDateInterval(getFormatter(skeleton,locale.toString(),tz.getID()),startMs,endMs);
+  }
+}

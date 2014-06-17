@@ -1,0 +1,12 @@
+{
+  if (keySpec == null) {
+    throw new InvalidKeySpecException("keySpec == null");
+  }
+  if (keySpec instanceof ECPrivateKeySpec) {
+    return new OpenSSLECPrivateKey((ECPrivateKeySpec)keySpec);
+  }
+ else   if (keySpec instanceof PKCS8EncodedKeySpec) {
+    return OpenSSLKey.getPrivateKey((PKCS8EncodedKeySpec)keySpec,NativeCrypto.EVP_PKEY_EC);
+  }
+  throw new InvalidKeySpecException("Must use ECPrivateKeySpec or PKCS8EncodedKeySpec; was " + keySpec.getClass().getName());
+}

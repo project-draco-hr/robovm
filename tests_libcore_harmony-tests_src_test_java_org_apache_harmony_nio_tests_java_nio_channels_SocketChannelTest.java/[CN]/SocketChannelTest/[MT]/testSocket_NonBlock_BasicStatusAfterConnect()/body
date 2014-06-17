@@ -1,0 +1,22 @@
+{
+  assertFalse(this.channel1.isConnected());
+  this.channel1.configureBlocking(false);
+  boolean connected=channel1.connect(localAddr1);
+  Socket s1=null;
+  Socket s2=null;
+  if (!connected) {
+    assertFalse(this.channel1.isConnected());
+    assertTrue(this.channel1.isConnectionPending());
+    s1=this.channel1.socket();
+    assertSocketBeforeConnect(s1);
+    s2=this.channel1.socket();
+    assertSame(s1,s2);
+  }
+  if (tryFinish()) {
+    assertTrue(this.channel1.isConnected());
+    s1=this.channel1.socket();
+    assertSocketAfterConnect(s1,localAddr1);
+    s2=this.channel1.socket();
+    assertSame(s1,s2);
+  }
+}

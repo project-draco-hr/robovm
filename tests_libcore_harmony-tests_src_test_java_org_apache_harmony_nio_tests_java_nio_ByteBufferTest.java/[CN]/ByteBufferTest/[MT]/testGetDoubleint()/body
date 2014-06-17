@@ -1,0 +1,34 @@
+{
+  int nbytes=8;
+  byte bytes[]=new byte[nbytes];
+  double value;
+  buf.clear();
+  for (int i=0; i <= buf.limit() - nbytes; i++) {
+    buf.order(i % 2 == 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
+    buf.position(i);
+    value=buf.getDouble(i);
+    assertEquals(i,buf.position());
+    buf.get(bytes);
+    if (!(Double.isNaN(bytes2double(bytes,buf.order())) && Double.isNaN(value))) {
+      assertEquals(bytes2double(bytes,buf.order()),value,0.00);
+    }
+  }
+  try {
+    buf.getDouble(-1);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    buf.getDouble(buf.limit() - nbytes + 1);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  buf.order(ByteOrder.BIG_ENDIAN);
+  try {
+    ByteBuffer.allocateDirect(16).getDouble(Integer.MAX_VALUE);
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+}

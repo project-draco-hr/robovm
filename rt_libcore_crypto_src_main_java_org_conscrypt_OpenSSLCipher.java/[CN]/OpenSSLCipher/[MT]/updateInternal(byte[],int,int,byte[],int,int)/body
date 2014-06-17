@@ -1,0 +1,10 @@
+{
+  final int intialOutputOffset=outputOffset;
+  final int bytesLeft=output.length - outputOffset;
+  if (bytesLeft < maximumLen) {
+    throw new ShortBufferException("output buffer too small during update: " + bytesLeft + " < "+ maximumLen);
+  }
+  outputOffset+=NativeCrypto.EVP_CipherUpdate(cipherCtx.getContext(),output,outputOffset,input,inputOffset,inputLen);
+  calledUpdate=true;
+  return outputOffset - intialOutputOffset;
+}

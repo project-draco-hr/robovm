@@ -1,0 +1,109 @@
+{
+  char[] ca=new char[2];
+  BufferedReader toRet=new BufferedReader(new InputStreamReader(new ByteArrayInputStream(new byte[0])));
+  try {
+    toRet.read(null,1,0);
+    fail("null buffer reading zero bytes should throw NPE");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    toRet.close();
+  }
+ catch (  IOException e) {
+    fail("unexpected 1: " + e);
+  }
+  try {
+    toRet.read(null,1,0);
+    fail("null buffer reading zero bytes on closed stream should throw IOException");
+  }
+ catch (  IOException e) {
+  }
+  try {
+    toRet.read(ca,0,0);
+    fail("Reading zero bytes on a closed reader should not work");
+  }
+ catch (  IOException e) {
+  }
+  try {
+    toRet.read(ca,1,5);
+    fail("IOException should have been thrown");
+  }
+ catch (  IOException e) {
+  }
+  toRet=new BufferedReader(new InputStreamReader(new ByteArrayInputStream(new byte[2])));
+  try {
+    assertEquals("Emptying the reader should return two bytes",2,toRet.read(ca,0,2));
+    assertEquals("EOF on a reader should be -1",-1,toRet.read(ca,0,2));
+    assertEquals("Reading zero bytes at EOF should work",0,toRet.read(ca,0,0));
+  }
+ catch (  IOException ex) {
+    fail("Unexpected IOException : " + ex.getLocalizedMessage());
+  }
+  try {
+    char[] buf=new char[testString.length()];
+    br=new BufferedReader(new Support_StringReader(testString));
+    br.read(buf,50,500);
+    assertTrue("Chars read improperly",new String(buf,50,500).equals(testString.substring(0,500)));
+  }
+ catch (  java.io.IOException e) {
+    fail("Exception during read test");
+  }
+  BufferedReader bufin=new BufferedReader(new Reader(){
+    int size=2, pos=0;
+    char[] contents=new char[size];
+    public int read() throws IOException {
+      if (pos >= size)       throw new IOException("Read past end of data");
+      return contents[pos++];
+    }
+    public int read(    char[] buf,    int off,    int len) throws IOException {
+      if (pos >= size)       throw new IOException("Read past end of data");
+      int toRead=len;
+      if (toRead > (size - pos))       toRead=size - pos;
+      System.arraycopy(contents,pos,buf,off,toRead);
+      pos+=toRead;
+      return toRead;
+    }
+    public boolean ready() throws IOException {
+      return size - pos > 0;
+    }
+    public void close() throws IOException {
+    }
+  }
+);
+  try {
+    bufin.read();
+    int result=bufin.read(new char[2],0,2);
+    assertTrue("Incorrect result: " + result,result == 1);
+  }
+ catch (  IOException e) {
+    fail("Unexpected: " + e);
+  }
+  try {
+    new BufferedReader(new PipedReader(),9).read(new char[]{},7,0);
+    fail("should throw IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  char[] ch={};
+  BufferedReader reader=new BufferedReader(new CharArrayReader(ch));
+  try {
+    reader.read(null,1,0);
+    fail("Assert 0: NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  reader.close();
+  try {
+    reader.read(null,1,0);
+    fail("Assert 1: IOException expected");
+  }
+ catch (  IOException e) {
+  }
+  try {
+    reader.read(ch,0,42);
+    fail("Assert 2: IOException expected");
+  }
+ catch (  IOException e) {
+  }
+}

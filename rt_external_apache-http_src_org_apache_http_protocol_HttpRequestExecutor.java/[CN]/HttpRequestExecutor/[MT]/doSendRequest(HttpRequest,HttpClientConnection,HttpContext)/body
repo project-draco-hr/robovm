@@ -1,0 +1,44 @@
+{
+  if (request == null) {
+    throw new IllegalArgumentException("HTTP request may not be null");
+  }
+  if (conn == null) {
+    throw new IllegalArgumentException("HTTP connection may not be null");
+  }
+  if (context == null) {
+    throw new IllegalArgumentException("HTTP context may not be null");
+  }
+  HttpResponse response=null;
+  context.setAttribute(ExecutionContext.HTTP_REQ_SENT,Boolean.FALSE);
+  conn.sendRequestHeader(request);
+  if (request instanceof HttpEntityEnclosingRequest) {
+    boolean sendentity=true;
+    final ProtocolVersion ver=request.getRequestLine().getProtocolVersion();
+    if (((HttpEntityEnclosingRequest)request).expectContinue() && !ver.lessEquals(HttpVersion.HTTP_1_0)) {
+      conn.flush();
+      int tms=request.getParams().getIntParameter(CoreProtocolPNames.WAIT_FOR_CONTINUE,2000);
+      if (conn.isResponseAvailable(tms)) {
+        response=conn.receiveResponseHeader();
+        if (canResponseHaveBody(request,response)) {
+          conn.receiveResponseEntity(response);
+        }
+        int status=response.getStatusLine().getStatusCode();
+        if (status < 200) {
+          if (status != HttpStatus.SC_CONTINUE) {
+            throw new ProtocolException("Unexpected response: " + response.getStatusLine());
+          }
+          response=null;
+        }
+ else {
+          sendentity=false;
+        }
+      }
+    }
+    if (sendentity) {
+      conn.sendRequestEntity((HttpEntityEnclosingRequest)request);
+    }
+  }
+  conn.flush();
+  context.setAttribute(ExecutionContext.HTTP_REQ_SENT,Boolean.TRUE);
+  return response;
+}

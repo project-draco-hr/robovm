@@ -1,0 +1,12 @@
+{
+  if (isBlocking()) {
+    return false;
+  }
+  if (e instanceof ConnectException) {
+    Throwable cause=e.getCause();
+    if (cause instanceof ErrnoException) {
+      return ((ErrnoException)cause).errno == EINPROGRESS;
+    }
+  }
+  return false;
+}

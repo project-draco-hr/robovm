@@ -1,0 +1,21 @@
+{
+  int shutdownStatusCode=GOAWAY_INTERNAL_ERROR;
+  int rstStatusCode=SpdyStream.RST_INTERNAL_ERROR;
+  try {
+    while (spdyReader.nextFrame(this)) {
+    }
+    shutdownStatusCode=GOAWAY_OK;
+    rstStatusCode=SpdyStream.RST_CANCEL;
+  }
+ catch (  IOException e) {
+    shutdownStatusCode=GOAWAY_PROTOCOL_ERROR;
+    rstStatusCode=SpdyStream.RST_PROTOCOL_ERROR;
+  }
+ finally {
+    try {
+      close(shutdownStatusCode,rstStatusCode);
+    }
+ catch (    IOException ignored) {
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  assert(!Thread.holdsLock(SpdyStream.this));
+  boolean protocolError=false;
+synchronized (this) {
+    if (responseHeaders != null) {
+      List<String> newHeaders=new ArrayList<String>();
+      newHeaders.addAll(responseHeaders);
+      newHeaders.addAll(headers);
+      this.responseHeaders=newHeaders;
+    }
+ else {
+      protocolError=true;
+    }
+  }
+  if (protocolError) {
+    closeLater(SpdyStream.RST_PROTOCOL_ERROR);
+  }
+}

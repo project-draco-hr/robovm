@@ -1,0 +1,17 @@
+{
+  KeyFactory kf=KeyFactory.getInstance("RSA");
+  RSAPrivateKeySpec keySpec=new RSAPrivateKeySpec(RSA_2048_modulus,RSA_2048_privateExponent);
+  PrivateKey privKey=kf.generatePrivate(keySpec);
+  Signature sig=Signature.getInstance("NONEwithRSA");
+  sig.initSign(privKey);
+  final int oneTooBig=RSA_2048_modulus.bitLength() - 10;
+  for (int i=0; i < oneTooBig; i++) {
+    sig.update((byte)i);
+  }
+  try {
+    sig.sign();
+    fail("Should throw exception when data is too large");
+  }
+ catch (  SignatureException expected) {
+  }
+}

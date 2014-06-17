@@ -1,0 +1,15 @@
+{
+  assert(!Thread.holdsLock(this));
+synchronized (this) {
+    if (this.rstStatusCode != -1) {
+      return false;
+    }
+    if (in.finished && out.finished) {
+      return false;
+    }
+    this.rstStatusCode=rstStatusCode;
+    notifyAll();
+  }
+  connection.removeStream(id);
+  return true;
+}

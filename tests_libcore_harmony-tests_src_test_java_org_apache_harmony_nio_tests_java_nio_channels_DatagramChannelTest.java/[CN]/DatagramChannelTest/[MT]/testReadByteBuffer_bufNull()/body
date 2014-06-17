@@ -1,0 +1,21 @@
+{
+  ByteBuffer readBuf=ByteBuffer.allocateDirect(0);
+  InetSocketAddress ipAddr=localAddr1;
+  try {
+    this.channel1.read(readBuf);
+    fail("should throw NotYetConnectedException");
+  }
+ catch (  NotYetConnectedException e) {
+  }
+  this.channel1.connect(ipAddr);
+  assertTrue(this.channel1.isConnected());
+  try {
+    channel1.read((ByteBuffer)null);
+    fail("should throw NPE");
+  }
+ catch (  NullPointerException e) {
+  }
+  this.channel1.configureBlocking(false);
+  assertEquals(0,this.channel1.read(readBuf));
+  datagramSocket1.close();
+}

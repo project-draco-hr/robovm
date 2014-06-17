@@ -1,19 +1,23 @@
 {
+  final E x=nextItem;
+  if (x == null)   throw new NoSuchElementException();
   final ReentrantLock lock=ArrayBlockingQueue.this.lock;
   lock.lock();
   try {
-    if (remaining <= 0)     throw new NoSuchElementException();
+    if (!isDetached())     incorporateDequeues();
     lastRet=nextIndex;
-    E x=itemAt(nextIndex);
-    if (x == null) {
-      x=nextItem;
-      lastItem=null;
+    final int cursor=this.cursor;
+    if (cursor >= 0) {
+      nextItem=itemAt(nextIndex=cursor);
+      this.cursor=incCursor(cursor);
     }
- else     lastItem=x;
-    while (--remaining > 0 && (nextItem=itemAt(nextIndex=inc(nextIndex))) == null)     ;
-    return x;
+ else {
+      nextIndex=NONE;
+      nextItem=null;
+    }
   }
   finally {
     lock.unlock();
   }
+  return x;
 }

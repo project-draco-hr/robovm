@@ -1,0 +1,30 @@
+{
+  if (buf.isReadOnly()) {
+    try {
+      buf.put(0,(byte)0);
+      fail("Should throw Exception");
+    }
+ catch (    ReadOnlyBufferException e) {
+    }
+    return;
+  }
+  buf.clear();
+  for (int i=0; i < buf.capacity(); i++) {
+    assertEquals(buf.position(),0);
+    ByteBuffer ret=buf.put(i,(byte)i);
+    assertEquals(buf.get(i),(byte)i);
+    assertSame(ret,buf);
+  }
+  try {
+    buf.put(-1,(byte)0);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    buf.put(buf.limit(),(byte)0);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+}

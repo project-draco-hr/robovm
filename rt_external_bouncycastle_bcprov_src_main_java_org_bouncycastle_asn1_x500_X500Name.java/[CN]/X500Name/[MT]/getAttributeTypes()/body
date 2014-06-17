@@ -1,0 +1,22 @@
+{
+  int count=0;
+  for (int i=0; i != rdns.length; i++) {
+    RDN rdn=rdns[i];
+    count+=rdn.size();
+  }
+  ASN1ObjectIdentifier[] res=new ASN1ObjectIdentifier[count];
+  count=0;
+  for (int i=0; i != rdns.length; i++) {
+    RDN rdn=rdns[i];
+    if (rdn.isMultiValued()) {
+      AttributeTypeAndValue[] attr=rdn.getTypesAndValues();
+      for (int j=0; j != attr.length; j++) {
+        res[count++]=attr[j].getType();
+      }
+    }
+ else     if (rdn.size() != 0) {
+      res[count++]=rdn.getFirst().getType();
+    }
+  }
+  return res;
+}

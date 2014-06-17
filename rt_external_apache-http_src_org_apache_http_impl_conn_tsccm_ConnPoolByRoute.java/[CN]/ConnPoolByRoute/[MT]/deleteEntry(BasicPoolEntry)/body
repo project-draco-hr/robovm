@@ -1,0 +1,20 @@
+{
+  HttpRoute route=entry.getPlannedRoute();
+  if (log.isDebugEnabled()) {
+    log.debug("Deleting connection" + " [" + route + "]["+ entry.getState()+ "]");
+  }
+  poolLock.lock();
+  try {
+    closeConnection(entry.getConnection());
+    RouteSpecificPool rospl=getRoutePool(route,true);
+    rospl.deleteEntry(entry);
+    numConnections--;
+    if (rospl.isUnused()) {
+      routeToPool.remove(route);
+    }
+    idleConnHandler.remove(entry.getConnection());
+  }
+  finally {
+    poolLock.unlock();
+  }
+}

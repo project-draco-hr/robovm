@@ -1,5 +1,5 @@
 {
-  checkClosed();
+  checkOpen();
   if (currentEntry == null) {
     return;
   }
@@ -25,8 +25,8 @@
   int flags=currentEntry.getMethod() == STORED ? 0 : ZipFile.GPBF_DATA_DESCRIPTOR_FLAG;
   flags|=ZipFile.GPBF_UTF8_FLAG;
   writeLong(cDir,CENSIG);
-  writeShort(cDir,ZIPLocalHeaderVersionNeeded);
-  writeShort(cDir,ZIPLocalHeaderVersionNeeded);
+  writeShort(cDir,ZIP_VERSION_2_0);
+  writeShort(cDir,ZIP_VERSION_2_0);
   writeShort(cDir,flags);
   writeShort(cDir,currentEntry.getMethod());
   writeShort(cDir,currentEntry.time);
@@ -47,13 +47,12 @@
  else {
     writeShort(cDir,0);
   }
-  String c;
-  if ((c=currentEntry.getComment()) != null) {
-    writeShort(cDir,c.length());
+  String comment=currentEntry.getComment();
+  byte[] commentBytes=EmptyArray.BYTE;
+  if (comment != null) {
+    commentBytes=comment.getBytes(StandardCharsets.UTF_8);
   }
- else {
-    writeShort(cDir,0);
-  }
+  writeShort(cDir,commentBytes.length);
   writeShort(cDir,0);
   writeShort(cDir,0);
   writeLong(cDir,0);
@@ -64,8 +63,8 @@
     cDir.write(currentEntry.extra);
   }
   offset+=curOffset;
-  if (c != null) {
-    cDir.write(c.getBytes());
+  if (commentBytes.length > 0) {
+    cDir.write(commentBytes);
   }
   currentEntry=null;
   crc.reset();

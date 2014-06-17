@@ -1,33 +1,30 @@
 {
-  SecureRandom sr=new SecureRandom();
-  byte[] iv=new byte[8];
-  sr.nextBytes(iv);
-  AlgorithmParameterSpec ap=new IvParameterSpec(iv);
+  AlgorithmParameterSpec ap=new IvParameterSpec(IV);
   Cipher c=Cipher.getInstance("DES/CBC/PKCS5Padding");
-  c.init(Cipher.WRAP_MODE,cipherKeyDES,ap,sr);
-  assertNotNull(c.wrap(cipherKeyDES));
-  assertNotNull(c.wrap(cipherKey));
+  c.init(Cipher.WRAP_MODE,CIPHER_KEY_DES,ap,new SecureRandom());
+  assertNotNull(c.wrap(CIPHER_KEY_DES));
+  assertNotNull(c.wrap(CIPHER_KEY_3DES));
   String certName=Support_Resources.getURL("test.cert");
   InputStream is=new URL(certName).openConnection().getInputStream();
   CertificateFactory cf=CertificateFactory.getInstance("X.509");
   Certificate cert=cf.generateCertificate(is);
   assertNotNull(c.wrap(cert.getPublicKey()));
   c=Cipher.getInstance("DES/CBC/NoPadding");
-  c.init(Cipher.WRAP_MODE,cipherKeyDES,ap,sr);
+  c.init(Cipher.WRAP_MODE,CIPHER_KEY_DES,ap,new SecureRandom());
   try {
     assertNotNull(c.wrap(cert.getPublicKey()));
     fail();
   }
  catch (  IllegalBlockSizeException expected) {
   }
-  c.init(Cipher.DECRYPT_MODE,cipherKeyDES,ap,sr);
+  c.init(Cipher.DECRYPT_MODE,CIPHER_KEY_DES,ap,new SecureRandom());
   try {
-    c.wrap(cipherKeyDES);
+    c.wrap(CIPHER_KEY_DES);
     fail();
   }
  catch (  IllegalStateException expected) {
   }
-  c.init(Cipher.WRAP_MODE,cipherKeyDES,ap,sr);
+  c.init(Cipher.WRAP_MODE,CIPHER_KEY_DES,ap,new SecureRandom());
   try {
     c.wrap(new Mock_Key());
     fail();

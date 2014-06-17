@@ -1,0 +1,38 @@
+{
+  final int SMALLEST_KEY_SIZE=40;
+  final int LARGEST_KEY_SIZE=1024;
+  SecretKey[] keys=new SecretKey[LARGEST_KEY_SIZE - SMALLEST_KEY_SIZE];
+{
+    KeyGenerator kg=KeyGenerator.getInstance("ARC4");
+    for (int keysize=SMALLEST_KEY_SIZE; keysize < LARGEST_KEY_SIZE; keysize++) {
+      final int index=keysize - SMALLEST_KEY_SIZE;
+      kg.init(keysize);
+      keys[index]=kg.generateKey();
+    }
+  }
+  String[] expected=new String[LARGEST_KEY_SIZE - SMALLEST_KEY_SIZE];
+  Map<String,String> filter=new HashMap<String,String>();
+  filter.put("Cipher.ARC4","");
+  Provider[] providers=Security.getProviders(filter);
+  assertTrue("There must be security providers of Cipher.ARC4",providers.length > 0);
+  String firstProvider=providers[0].getName();
+  for (  Provider p : providers) {
+    Cipher c=Cipher.getInstance("ARC4",p);
+    for (int keysize=SMALLEST_KEY_SIZE; keysize < LARGEST_KEY_SIZE; keysize++) {
+      final int index=keysize - SMALLEST_KEY_SIZE;
+      final SecretKey sk=keys[index];
+      c.init(Cipher.ENCRYPT_MODE,sk);
+      byte[] cipherText=c.doFinal(ORIGINAL_PLAIN_TEXT);
+      assertNotNull(cipherText);
+      if (expected[index] == null) {
+        expected[index]=Arrays.toString(cipherText);
+      }
+ else {
+        assertEquals(firstProvider + " should output the same as " + p.getName()+ " for key size "+ keysize,expected[index],Arrays.toString(cipherText));
+      }
+      c.init(Cipher.DECRYPT_MODE,sk);
+      byte[] actualPlaintext=c.doFinal(cipherText);
+      assertEquals("Key size: " + keysize,Arrays.toString(ORIGINAL_PLAIN_TEXT),Arrays.toString(actualPlaintext));
+    }
+  }
+}

@@ -1,13 +1,28 @@
 {
-  ServerThread server=new ServerThread();
+  Thread server=null;
   try {
+    final ServerSocketChannel ssc=ServerSocketChannel.open();
+    ssc.socket().bind(null,0);
+    server=new Thread(){
+      @Override public void run(){
+        try {
+          for (int i=0; i < 2; ++i) {
+            ByteBuffer buf=ByteBuffer.allocate(10);
+            buf.put(data);
+            buf.rewind();
+            ssc.accept().write(buf);
+          }
+        }
+ catch (        Exception ignored) {
+        }
+      }
+    }
+;
     server.start();
-    Thread.currentThread().sleep(1000);
-    InetSocketAddress address=new InetSocketAddress(InetAddress.getByName("localhost"),port);
     ByteBuffer buf=null;
     SocketChannel sc=SocketChannel.open();
     try {
-      sc.connect(address);
+      sc.connect(ssc.socket().getLocalSocketAddress());
       buf=ByteBuffer.allocate(data.length);
       buf.limit(data.length / 2);
       sc.read(buf);
@@ -21,7 +36,7 @@
     assertSameContent(data,buf);
     sc=SocketChannel.open();
     try {
-      sc.connect(address);
+      sc.connect(ssc.socket().getLocalSocketAddress());
       buf=ByteBuffer.allocateDirect(data.length);
       buf.limit(data.length / 2);
       sc.read(buf);

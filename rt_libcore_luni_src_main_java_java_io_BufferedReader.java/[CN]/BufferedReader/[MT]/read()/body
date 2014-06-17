@@ -1,9 +1,11 @@
 {
 synchronized (lock) {
     checkNotClosed();
-    if (pos < end || fillBuf() != -1) {
-      return buf[pos++];
+    int ch=readChar();
+    if (lastWasCR && ch == '\n') {
+      ch=readChar();
     }
-    return -1;
+    lastWasCR=false;
+    return ch;
   }
 }

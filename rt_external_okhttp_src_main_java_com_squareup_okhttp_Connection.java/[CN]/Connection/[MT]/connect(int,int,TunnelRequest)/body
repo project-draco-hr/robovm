@@ -1,0 +1,19 @@
+{
+  if (connected) {
+    throw new IllegalStateException("already connected");
+  }
+  connected=true;
+  socket=(route.proxy.type() != Proxy.Type.HTTP) ? new Socket(route.proxy) : new Socket();
+  Platform.get().connectSocket(socket,route.inetSocketAddress,connectTimeout);
+  socket.setSoTimeout(readTimeout);
+  in=socket.getInputStream();
+  out=socket.getOutputStream();
+  if (route.address.sslSocketFactory != null) {
+    upgradeToTls(tunnelRequest);
+  }
+  int mtu=Platform.get().getMtu(socket);
+  if (mtu < 1024)   mtu=1024;
+  if (mtu > 8192)   mtu=8192;
+  in=new BufferedInputStream(in,mtu);
+  out=new BufferedOutputStream(out,mtu);
+}

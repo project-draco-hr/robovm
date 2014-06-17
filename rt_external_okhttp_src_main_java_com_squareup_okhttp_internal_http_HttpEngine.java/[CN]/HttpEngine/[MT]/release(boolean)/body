@@ -1,0 +1,16 @@
+{
+  if (responseBodyIn == cachedResponseBody) {
+    Util.closeQuietly(responseBodyIn);
+  }
+  if (!connectionReleased && connection != null) {
+    connectionReleased=true;
+    if (transport == null || !transport.makeReusable(streamCancelled,requestBodyOut,responseTransferIn)) {
+      Util.closeQuietly(connection);
+      connection=null;
+    }
+ else     if (automaticallyReleaseConnectionToPool) {
+      client.getConnectionPool().recycle(connection);
+      connection=null;
+    }
+  }
+}

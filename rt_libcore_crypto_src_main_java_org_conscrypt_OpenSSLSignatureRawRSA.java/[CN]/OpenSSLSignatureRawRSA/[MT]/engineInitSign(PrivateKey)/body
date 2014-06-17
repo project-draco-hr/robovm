@@ -1,0 +1,20 @@
+{
+  if (privateKey instanceof OpenSSLRSAPrivateKey) {
+    OpenSSLRSAPrivateKey rsaPrivateKey=(OpenSSLRSAPrivateKey)privateKey;
+    key=rsaPrivateKey.getOpenSSLKey();
+  }
+ else   if (privateKey instanceof RSAPrivateCrtKey) {
+    RSAPrivateCrtKey rsaPrivateKey=(RSAPrivateCrtKey)privateKey;
+    key=OpenSSLRSAPrivateCrtKey.getInstance(rsaPrivateKey);
+  }
+ else   if (privateKey instanceof RSAPrivateKey) {
+    RSAPrivateKey rsaPrivateKey=(RSAPrivateKey)privateKey;
+    key=OpenSSLRSAPrivateKey.getInstance(rsaPrivateKey);
+  }
+ else {
+    throw new InvalidKeyException("Need RSA private key");
+  }
+  int maxSize=NativeCrypto.RSA_size(key.getPkeyContext());
+  inputBuffer=new byte[maxSize];
+  inputOffset=0;
+}

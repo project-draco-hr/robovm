@@ -1,0 +1,29 @@
+{
+  int nbytes=4;
+  byte bytes[]=new byte[nbytes];
+  float value;
+  buf.clear();
+  for (int i=0; i <= buf.limit() - nbytes; i++) {
+    buf.order(i % 2 == 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
+    buf.position(i);
+    value=buf.getFloat(i);
+    assertEquals(i,buf.position());
+    buf.get(bytes);
+    if (!(Float.isNaN(bytes2float(bytes,buf.order())) && Float.isNaN(value))) {
+      assertEquals(bytes2float(bytes,buf.order()),value,0.00);
+    }
+  }
+  try {
+    buf.getFloat(-1);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    buf.getFloat(buf.limit() - nbytes + 1);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  buf.order(ByteOrder.BIG_ENDIAN);
+}

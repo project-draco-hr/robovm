@@ -1,0 +1,17 @@
+{
+  if (params == null) {
+    throw new IllegalArgumentException("Parameters must not be null.");
+  }
+  if ((this.tracker == null) || !this.tracker.isConnected()) {
+    throw new IllegalStateException("Connection not open.");
+  }
+  if (!this.tracker.isTunnelled()) {
+    throw new IllegalStateException("Protocol layering without a tunnel not supported.");
+  }
+  if (this.tracker.isLayered()) {
+    throw new IllegalStateException("Multiple protocol layering not supported.");
+  }
+  final HttpHost target=tracker.getTargetHost();
+  connOperator.updateSecureConnection(this.connection,target,context,params);
+  this.tracker.layerProtocol(this.connection.isSecure());
+}

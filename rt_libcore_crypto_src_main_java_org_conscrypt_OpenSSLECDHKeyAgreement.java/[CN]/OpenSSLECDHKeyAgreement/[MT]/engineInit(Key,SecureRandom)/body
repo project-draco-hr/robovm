@@ -1,0 +1,12 @@
+{
+  if (key == null) {
+    throw new InvalidKeyException("key == null");
+  }
+  if (!(key instanceof PrivateKey)) {
+    throw new InvalidKeyException("Not a private key: " + key.getClass());
+  }
+  OpenSSLKey openSslKey=translateKeyToEcOpenSSLKey(key);
+  int fieldSizeBits=NativeCrypto.EC_GROUP_get_degree(NativeCrypto.EC_KEY_get0_group(openSslKey.getPkeyContext()));
+  mExpectedResultLength=(fieldSizeBits + 7) / 8;
+  mOpenSslPrivateKey=openSslKey;
+}

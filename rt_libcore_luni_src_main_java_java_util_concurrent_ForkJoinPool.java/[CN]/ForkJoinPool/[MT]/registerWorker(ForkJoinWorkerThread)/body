@@ -1,0 +1,37 @@
+{
+  Thread.UncaughtExceptionHandler handler;
+  WorkQueue[] ws;
+  int s, ps;
+  wt.setDaemon(true);
+  if ((handler=ueh) != null)   wt.setUncaughtExceptionHandler(handler);
+  do {
+  }
+ while (!U.compareAndSwapInt(this,INDEXSEED,s=indexSeed,s+=SEED_INCREMENT) || s == 0);
+  WorkQueue w=new WorkQueue(this,wt,config >>> 16,s);
+  if (((ps=plock) & PL_LOCK) != 0 || !U.compareAndSwapInt(this,PLOCK,ps,ps+=PL_LOCK))   ps=acquirePlock();
+  int nps=(ps & SHUTDOWN) | ((ps + PL_LOCK) & ~SHUTDOWN);
+  try {
+    if ((ws=workQueues) != null) {
+      int n=ws.length, m=n - 1;
+      int r=(s << 1) | 1;
+      if (ws[r&=m] != null) {
+        int probes=0;
+        int step=(n <= 4) ? 2 : ((n >>> 1) & EVENMASK) + 2;
+        while (ws[r=(r + step) & m] != null) {
+          if (++probes >= n) {
+            workQueues=ws=Arrays.copyOf(ws,n<<=1);
+            m=n - 1;
+            probes=0;
+          }
+        }
+      }
+      w.eventCount=w.poolIndex=r;
+      ws[r]=w;
+    }
+  }
+  finally {
+    if (!U.compareAndSwapInt(this,PLOCK,ps,nps))     releasePlock(nps);
+  }
+  wt.setName(workerNamePrefix.concat(Integer.toString(w.poolIndex)));
+  return w;
+}

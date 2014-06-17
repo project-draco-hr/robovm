@@ -1,0 +1,16 @@
+{
+  Thread t;
+  ForkJoinWorkerThread wt;
+  ForkJoinPool pool;
+  WorkQueue q;
+  if (((t=Thread.currentThread()) instanceof ForkJoinWorkerThread)) {
+    wt=(ForkJoinWorkerThread)t;
+    pool=wt.pool;
+    int p=pool.config & SMASK;
+    q=wt.workQueue;
+    int n=q.top - q.base;
+    int a=(int)(pool.ctl >> AC_SHIFT) + p;
+    return n - (a > (p>>>=1) ? 0 : a > (p>>>=1) ? 1 : a > (p>>>=1) ? 2 : a > (p>>>=1) ? 4 : 8);
+  }
+  return 0;
+}

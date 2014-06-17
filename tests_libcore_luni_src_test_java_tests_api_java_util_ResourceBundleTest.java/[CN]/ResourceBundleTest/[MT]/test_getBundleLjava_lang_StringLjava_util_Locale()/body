@@ -17,9 +17,14 @@
   Locale.setDefault(new Locale("de","US"));
   bundle=ResourceBundle.getBundle(name,new Locale("de","FR","var"));
   assertEquals("Wrong bundle de_FR_var 2","parentValue4",bundle.getString("parent4"));
-  Locale.setDefault(new Locale("en","US"));
   try {
-    ResourceBundle.getBundle(null,Locale.getDefault());
+    ResourceBundle.getBundle(null,Locale.US);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException ee) {
+  }
+  try {
+    ResourceBundle.getBundle("blah",(Locale)null);
     fail("NullPointerException expected");
   }
  catch (  NullPointerException ee) {
@@ -30,5 +35,4 @@
   }
  catch (  MissingResourceException ee) {
   }
-  Locale.setDefault(defLocale);
 }

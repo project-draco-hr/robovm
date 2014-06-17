@@ -1,0 +1,11 @@
+{
+  KeyFactory kf=KeyFactory.getInstance("RSA");
+  RSAPublicKeySpec pubKeySpec=new RSAPublicKeySpec(RSA_2048_modulus,RSA_2048_publicExponent);
+  final PublicKey pubKey=kf.generatePublic(pubKeySpec);
+  Cipher c=Cipher.getInstance("RSA/ECB/NoPadding",provider);
+  c.init(Cipher.ENCRYPT_MODE,pubKey);
+  final int modulusInBytes=RSA_2048_modulus.bitLength() / 8;
+  assertEquals(modulusInBytes,c.getOutputSize(RSA_2048_Vector1.length));
+  assertEquals(modulusInBytes,c.getOutputSize(RSA_2048_Vector1.length * 2));
+  assertEquals(modulusInBytes,c.getOutputSize(0));
+}

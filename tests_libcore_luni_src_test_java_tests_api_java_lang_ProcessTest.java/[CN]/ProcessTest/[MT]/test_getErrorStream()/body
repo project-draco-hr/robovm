@@ -1,0 +1,11 @@
+{
+  String[] commands={"cat","--no-such-option"};
+  Process p=Runtime.getRuntime().exec(commands,null,null);
+  p.getOutputStream().close();
+  String received=readAndCloseStream(p.getInputStream());
+  assertEquals("",received);
+  String stderr=readAndCloseStream(p.getErrorStream());
+  assertTrue(stderr,stderr.contains("unrecognized option") || stderr.contains("invalid option"));
+  p.waitFor();
+  p.destroy();
+}

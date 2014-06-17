@@ -2,24 +2,29 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       keyStore.aliases();
-      fail();
+      fail(keyStore.getType());
     }
  catch (    KeyStoreException expected) {
     }
   }
   for (  KeyStore keyStore : keyStores()) {
     keyStore.load(null,null);
-    if (hasDefaultContents(keyStore)) {
-      assertTrue(keyStore.aliases().hasMoreElements());
+    if (isPersistentStorage(keyStore)) {
+      assertNotNull("Should be able to query size: " + keyStore.getType(),keyStore.aliases());
+    }
+ else     if (hasDefaultContents(keyStore)) {
+      assertTrue("Should have more than one alias already: " + keyStore.getType(),keyStore.aliases().hasMoreElements());
     }
  else {
-      assertEquals(Collections.EMPTY_SET,new HashSet(Collections.list(keyStore.aliases())));
+      assertEquals("Should have no aliases:" + keyStore.getType(),Collections.EMPTY_SET,new HashSet(Collections.list(keyStore.aliases())));
     }
   }
   for (  KeyStore keyStore : keyStores()) {
     populate(keyStore);
     Set<String> expected=new HashSet<String>();
-    expected.add(ALIAS_PRIVATE);
+    if (isKeyPasswordSupported(keyStore)) {
+      expected.add(ALIAS_PRIVATE);
+    }
     if (isNullPasswordAllowed(keyStore)) {
       expected.add(ALIAS_NO_PASSWORD_PRIVATE);
     }
@@ -32,7 +37,10 @@
     if (isCertificateEnabled(keyStore)) {
       expected.add(ALIAS_CERTIFICATE);
     }
-    if (hasDefaultContents(keyStore)) {
+    if (isPersistentStorage(keyStore)) {
+      assertNotNull("Should be able to query size: " + keyStore.getType(),keyStore.aliases());
+    }
+ else     if (hasDefaultContents(keyStore)) {
       assertTrue(keyStore.aliases().hasMoreElements());
     }
  else {

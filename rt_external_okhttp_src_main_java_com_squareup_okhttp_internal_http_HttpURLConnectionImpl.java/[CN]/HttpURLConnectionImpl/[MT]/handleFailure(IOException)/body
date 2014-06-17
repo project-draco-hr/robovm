@@ -1,0 +1,17 @@
+{
+  RouteSelector routeSelector=httpEngine.routeSelector;
+  if (routeSelector != null && httpEngine.connection != null) {
+    routeSelector.connectFailed(httpEngine.connection,e);
+  }
+  OutputStream requestBody=httpEngine.getRequestBody();
+  boolean canRetryRequestBody=requestBody == null || requestBody instanceof RetryableOutputStream;
+  if (routeSelector == null && httpEngine.connection == null || routeSelector != null && !routeSelector.hasNext() || !isRecoverable(e) || !canRetryRequestBody) {
+    httpEngineFailure=e;
+    return false;
+  }
+  httpEngine.release(true);
+  RetryableOutputStream retryableOutputStream=(RetryableOutputStream)requestBody;
+  httpEngine=newHttpEngine(method,rawRequestHeaders,null,retryableOutputStream);
+  httpEngine.routeSelector=routeSelector;
+  return true;
+}

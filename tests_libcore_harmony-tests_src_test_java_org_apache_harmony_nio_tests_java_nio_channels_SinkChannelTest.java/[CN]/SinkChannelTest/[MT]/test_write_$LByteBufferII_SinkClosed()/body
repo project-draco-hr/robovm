@@ -1,0 +1,67 @@
+{
+  ByteBuffer[] bufArray={buffer};
+  sink.close();
+  try {
+    sink.write(bufArray,0,1);
+    fail();
+  }
+ catch (  ClosedChannelException expected) {
+  }
+  try {
+    sink.write(null,0,1);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    sink.write(new ByteBuffer[2],0,-1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  ByteBuffer nullBuf=null;
+  ByteBuffer[] nullBufArray={nullBuf};
+  try {
+    sink.write(nullBufArray,0,1);
+    fail("should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+  try {
+    sink.write(nullBufArray,0,-1);
+    fail("should throw IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  ByteBuffer[] bufArray2={buffer,nullBuf};
+  try {
+    sink.write(bufArray2,0,-1);
+    fail("should throw IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    sink.write(bufArray2,-1,0);
+    fail("should throw IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    sink.write(bufArray2,-1,1);
+    fail("should throw IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    sink.write(bufArray2,0,3);
+    fail("should throw IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    sink.write(bufArray2,0,2);
+    fail("should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+}

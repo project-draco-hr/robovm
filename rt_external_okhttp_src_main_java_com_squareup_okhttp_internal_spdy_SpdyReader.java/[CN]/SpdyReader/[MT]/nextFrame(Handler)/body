@@ -1,0 +1,60 @@
+{
+  int w1;
+  try {
+    w1=in.readInt();
+  }
+ catch (  IOException e) {
+    return false;
+  }
+  int w2=in.readInt();
+  boolean control=(w1 & 0x80000000) != 0;
+  int flags=(w2 & 0xff000000) >>> 24;
+  int length=(w2 & 0xffffff);
+  if (control) {
+    int version=(w1 & 0x7fff0000) >>> 16;
+    int type=(w1 & 0xffff);
+    if (version != 3) {
+      throw new ProtocolException("version != 3: " + version);
+    }
+switch (type) {
+case SpdyConnection.TYPE_SYN_STREAM:
+      readSynStream(handler,flags,length);
+    return true;
+case SpdyConnection.TYPE_SYN_REPLY:
+  readSynReply(handler,flags,length);
+return true;
+case SpdyConnection.TYPE_RST_STREAM:
+readRstStream(handler,flags,length);
+return true;
+case SpdyConnection.TYPE_SETTINGS:
+readSettings(handler,flags,length);
+return true;
+case SpdyConnection.TYPE_NOOP:
+if (length != 0) throw ioException("TYPE_NOOP length: %d != 0",length);
+handler.noop();
+return true;
+case SpdyConnection.TYPE_PING:
+readPing(handler,flags,length);
+return true;
+case SpdyConnection.TYPE_GOAWAY:
+readGoAway(handler,flags,length);
+return true;
+case SpdyConnection.TYPE_HEADERS:
+readHeaders(handler,flags,length);
+return true;
+case SpdyConnection.TYPE_WINDOW_UPDATE:
+readWindowUpdate(handler,flags,length);
+return true;
+case SpdyConnection.TYPE_CREDENTIAL:
+Util.skipByReading(in,length);
+throw new UnsupportedOperationException("TODO");
+default :
+throw new IOException("Unexpected frame");
+}
+}
+ else {
+int streamId=w1 & 0x7fffffff;
+handler.data(flags,streamId,in,length);
+return true;
+}
+}

@@ -1,0 +1,21 @@
+{
+  socketChannelReceiver=SocketChannel.open();
+  serverSocketChannel=ServerSocketChannel.open();
+  serverSocketChannel.socket().bind(new InetSocketAddress(InetAddress.getLocalHost(),0));
+  socketChannelReceiver.socket().setSoTimeout(TIME_OUT);
+  socketChannelReceiver.connect(serverSocketChannel.socket().getLocalSocketAddress());
+  serverSocketChannel.socket().setSoTimeout(TIME_OUT);
+  socketChannelSender=serverSocketChannel.accept();
+  socketChannelSender.socket().setSoTimeout(TIME_OUT);
+  ByteBuffer writeBuffer=ByteBuffer.wrap(CONTENT_AS_BYTES);
+  socketChannelSender.write(writeBuffer);
+  long result=readWriteFileChannel.transferFrom(socketChannelReceiver,0,CONTENT_AS_BYTES_LENGTH);
+  assertEquals(CONTENT_AS_BYTES_LENGTH,result);
+  assertEquals(0,readWriteFileChannel.position());
+  readWriteFileChannel.close();
+  fis=new FileInputStream(fileOfReadWriteFileChannel);
+  assertEquals(CONTENT_AS_BYTES_LENGTH,fileOfReadWriteFileChannel.length());
+  byte[] resultContent=new byte[CONTENT_AS_BYTES_LENGTH];
+  fis.read(resultContent);
+  assertTrue(Arrays.equals(CONTENT_AS_BYTES,resultContent));
+}

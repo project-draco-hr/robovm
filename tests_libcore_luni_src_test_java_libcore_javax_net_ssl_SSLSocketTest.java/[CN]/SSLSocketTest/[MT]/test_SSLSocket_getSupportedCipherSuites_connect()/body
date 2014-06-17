@@ -1,12 +1,16 @@
 {
   TestKeyStore testKeyStore=new TestKeyStore.Builder().keyAlgorithms("RSA","DSA","EC","EC_RSA").aliasPrefix("rsa-dsa-ec").ca(true).build();
+  StringBuilder error=new StringBuilder();
   if (StandardNames.IS_RI) {
-    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,StandardNames.JSSE_PROVIDER_NAME,StandardNames.JSSE_PROVIDER_NAME,true,true);
+    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,StandardNames.JSSE_PROVIDER_NAME,StandardNames.JSSE_PROVIDER_NAME,true,true,error);
   }
  else {
-    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,"HarmonyJSSE","HarmonyJSSE",false,false);
-    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,"AndroidOpenSSL","AndroidOpenSSL",true,true);
-    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,"HarmonyJSSE","AndroidOpenSSL",false,true);
-    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,"AndroidOpenSSL","HarmonyJSSE",true,false);
+    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,"HarmonyJSSE","HarmonyJSSE",false,false,error);
+    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,"AndroidOpenSSL","AndroidOpenSSL",true,true,error);
+    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,"HarmonyJSSE","AndroidOpenSSL",false,true,error);
+    test_SSLSocket_getSupportedCipherSuites_connect(testKeyStore,"AndroidOpenSSL","HarmonyJSSE",true,false,error);
+  }
+  if (error.length() > 0) {
+    throw new Exception("One or more problems in " + "test_SSLSocket_getSupportedCipherSuites_connect:\n" + error);
   }
 }

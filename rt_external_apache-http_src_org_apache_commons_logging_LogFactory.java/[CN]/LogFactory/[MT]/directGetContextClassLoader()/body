@@ -1,0 +1,24 @@
+{
+  ClassLoader classLoader=null;
+  try {
+    Method method=Thread.class.getMethod("getContextClassLoader",(Class[])null);
+    try {
+      classLoader=(ClassLoader)method.invoke(Thread.currentThread(),(Object[])null);
+    }
+ catch (    IllegalAccessException e) {
+      throw new LogConfigurationException("Unexpected IllegalAccessException",e);
+    }
+catch (    InvocationTargetException e) {
+      if (e.getTargetException() instanceof SecurityException) {
+        ;
+      }
+ else {
+        throw new LogConfigurationException("Unexpected InvocationTargetException",e.getTargetException());
+      }
+    }
+  }
+ catch (  NoSuchMethodException e) {
+    classLoader=getClassLoader(LogFactory.class);
+  }
+  return classLoader;
+}

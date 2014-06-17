@@ -1,0 +1,25 @@
+{
+  CMSSignedData cms=new CMSSignedData(signedData);
+  cms.signerInfoStore=signerInformationStore;
+  ASN1EncodableVector digestAlgs=new ASN1EncodableVector();
+  ASN1EncodableVector vec=new ASN1EncodableVector();
+  Iterator it=signerInformationStore.getSigners().iterator();
+  while (it.hasNext()) {
+    SignerInformation signer=(SignerInformation)it.next();
+    digestAlgs.add(CMSSignedHelper.INSTANCE.fixAlgID(signer.getDigestAlgorithmID()));
+    vec.add(signer.toASN1Structure());
+  }
+  ASN1Set digests=new DERSet(digestAlgs);
+  ASN1Set signers=new DERSet(vec);
+  ASN1Sequence sD=(ASN1Sequence)signedData.signedData.toASN1Primitive();
+  vec=new ASN1EncodableVector();
+  vec.add(sD.getObjectAt(0));
+  vec.add(digests);
+  for (int i=2; i != sD.size() - 1; i++) {
+    vec.add(sD.getObjectAt(i));
+  }
+  vec.add(signers);
+  cms.signedData=SignedData.getInstance(new BERSequence(vec));
+  cms.contentInfo=new ContentInfo(cms.contentInfo.getContentType(),cms.signedData);
+  return cms;
+}

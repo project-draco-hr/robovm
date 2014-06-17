@@ -1,0 +1,16 @@
+{
+  try {
+    while (responseHeaders == null && rstStatusCode == -1) {
+      wait();
+    }
+    if (responseHeaders != null) {
+      return responseHeaders;
+    }
+    throw new IOException("stream was reset: " + rstStatusString());
+  }
+ catch (  InterruptedException e) {
+    InterruptedIOException rethrow=new InterruptedIOException();
+    rethrow.initCause(e);
+    throw rethrow;
+  }
+}

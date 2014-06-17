@@ -1,0 +1,23 @@
+{
+  if (input == null) {
+    throw new NullPointerException("input == null");
+  }
+  int position=input.position();
+  int limit=input.limit();
+  if ((limit - position) <= 0) {
+    return;
+  }
+  byte[] bInput;
+  if (input.hasArray()) {
+    bInput=input.array();
+    int offset=input.arrayOffset();
+    engineUpdateAAD(bInput,offset + position,limit - position);
+    input.position(limit);
+  }
+ else {
+    int len=limit - position;
+    bInput=new byte[len];
+    input.get(bInput);
+    engineUpdateAAD(bInput,0,len);
+  }
+}

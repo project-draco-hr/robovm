@@ -1,0 +1,57 @@
+{
+  if (key == null) {
+    throw new InvalidKeyException("key == null");
+  }
+  if ((key instanceof OpenSSLECPublicKey) || (key instanceof OpenSSLECPrivateKey)) {
+    return key;
+  }
+ else   if (key instanceof ECPublicKey) {
+    ECPublicKey ecKey=(ECPublicKey)key;
+    ECPoint w=ecKey.getW();
+    ECParameterSpec params=ecKey.getParams();
+    try {
+      return engineGeneratePublic(new ECPublicKeySpec(w,params));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else   if (key instanceof ECPrivateKey) {
+    ECPrivateKey ecKey=(ECPrivateKey)key;
+    BigInteger s=ecKey.getS();
+    ECParameterSpec params=ecKey.getParams();
+    try {
+      return engineGeneratePrivate(new ECPrivateKeySpec(s,params));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else   if ((key instanceof PrivateKey) && ("PKCS#8".equals(key.getFormat()))) {
+    byte[] encoded=key.getEncoded();
+    if (encoded == null) {
+      throw new InvalidKeyException("Key does not support encoding");
+    }
+    try {
+      return engineGeneratePrivate(new PKCS8EncodedKeySpec(encoded));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else   if ((key instanceof PublicKey) && ("X.509".equals(key.getFormat()))) {
+    byte[] encoded=key.getEncoded();
+    if (encoded == null) {
+      throw new InvalidKeyException("Key does not support encoding");
+    }
+    try {
+      return engineGeneratePublic(new X509EncodedKeySpec(encoded));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else {
+    throw new InvalidKeyException("Key must be EC public or private key; was " + key.getClass().getName());
+  }
+}

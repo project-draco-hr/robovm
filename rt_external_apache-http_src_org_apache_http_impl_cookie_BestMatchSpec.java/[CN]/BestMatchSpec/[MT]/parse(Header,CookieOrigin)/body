@@ -1,0 +1,30 @@
+{
+  if (header == null) {
+    throw new IllegalArgumentException("Header may not be null");
+  }
+  if (origin == null) {
+    throw new IllegalArgumentException("Cookie origin may not be null");
+  }
+  HeaderElement[] helems=header.getElements();
+  boolean versioned=false;
+  boolean netscape=false;
+  for (  HeaderElement helem : helems) {
+    if (helem.getParameterByName("version") != null) {
+      versioned=true;
+    }
+    if (helem.getParameterByName("expires") != null) {
+      netscape=true;
+    }
+  }
+  if (netscape) {
+  }
+  if (versioned) {
+    return getStrict().parse(helems,origin);
+  }
+ else   if (netscape) {
+    return getNetscape().parse(header,origin);
+  }
+ else {
+    return getCompat().parse(helems,origin);
+  }
+}

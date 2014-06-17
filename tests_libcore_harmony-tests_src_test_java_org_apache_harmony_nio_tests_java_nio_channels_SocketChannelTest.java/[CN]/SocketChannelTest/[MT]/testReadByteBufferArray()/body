@@ -1,0 +1,30 @@
+{
+  java.nio.ByteBuffer[] byteBuf=null;
+  MockSocketChannel testMSChannelnull=new MockSocketChannel(null);
+  MockSocketChannel testMSChannel=new MockSocketChannel(SelectorProvider.provider());
+  ServerSocket testServer=new ServerSocket(Support_PortManager.getNextPort());
+  try {
+    try {
+      this.channel1.read(byteBuf);
+      fail("Should throw NPE");
+    }
+ catch (    NullPointerException e) {
+    }
+    byteBuf=new java.nio.ByteBuffer[CAPACITY_NORMAL];
+    try {
+      this.channel1.read(byteBuf);
+      fail("Should throw NotYetConnectedException");
+    }
+ catch (    NotYetConnectedException e) {
+    }
+    long readNum=CAPACITY_NORMAL;
+    readNum=testMSChannel.read(byteBuf);
+    assertEquals(0,readNum);
+    readNum=CAPACITY_NORMAL;
+    readNum=testMSChannelnull.read(byteBuf);
+    assertEquals(0,readNum);
+  }
+  finally {
+    testServer.close();
+  }
+}

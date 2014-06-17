@@ -1,0 +1,15 @@
+{
+  SoftReference<Map<String,SimpleDateFormat>> ref=THREADLOCAL_FORMATS.get();
+  Map<String,SimpleDateFormat> formats=ref.get();
+  if (formats == null) {
+    formats=new HashMap<String,SimpleDateFormat>();
+    THREADLOCAL_FORMATS.set(new SoftReference<Map<String,SimpleDateFormat>>(formats));
+  }
+  SimpleDateFormat format=formats.get(pattern);
+  if (format == null) {
+    format=new SimpleDateFormat(pattern,Locale.US);
+    format.setTimeZone(TimeZone.getTimeZone("GMT"));
+    formats.put(pattern,format);
+  }
+  return format;
+}

@@ -1,0 +1,15 @@
+{
+  if (key == null) {
+    throw new SignatureException("Need DSA or RSA public key");
+  }
+  try {
+    int result=NativeCrypto.EVP_VerifyFinal(ctx,sigBytes,0,sigBytes.length,key.getPkeyContext());
+    return result == 1;
+  }
+ catch (  Exception ex) {
+    return false;
+  }
+ finally {
+    destroyContextIfExists();
+  }
+}

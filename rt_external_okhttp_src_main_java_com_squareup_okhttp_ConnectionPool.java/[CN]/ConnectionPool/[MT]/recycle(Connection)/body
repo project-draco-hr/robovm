@@ -1,0 +1,22 @@
+{
+  if (connection.isSpdy()) {
+    return;
+  }
+  if (!connection.isAlive()) {
+    Util.closeQuietly(connection);
+    return;
+  }
+  try {
+    Platform.get().untagSocket(connection.getSocket());
+  }
+ catch (  SocketException e) {
+    Platform.get().logW("Unable to untagSocket(): " + e);
+    Util.closeQuietly(connection);
+    return;
+  }
+synchronized (this) {
+    connections.addFirst(connection);
+    connection.resetIdleStartTime();
+  }
+  executorService.submit(connectionsCleanupCallable);
+}

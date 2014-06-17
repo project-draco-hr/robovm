@@ -1,0 +1,13 @@
+{
+  ASN1Encodable params=sigAlgId.getParameters();
+  if (params != null && !DERNull.INSTANCE.equals(params)) {
+    if (sigAlgId.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS)) {
+      RSASSAPSSparams rsaParams=RSASSAPSSparams.getInstance(params);
+      return getDigestAlgName(rsaParams.getHashAlgorithm().getAlgorithm()) + "WITHRSAANDMGF1";
+    }
+  }
+  if (oids.containsKey(sigAlgId.getAlgorithm())) {
+    return (String)oids.get(sigAlgId.getAlgorithm());
+  }
+  return sigAlgId.getAlgorithm().getId();
+}

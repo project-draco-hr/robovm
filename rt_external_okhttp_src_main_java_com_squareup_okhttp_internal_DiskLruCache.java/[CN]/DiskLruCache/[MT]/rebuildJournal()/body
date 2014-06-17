@@ -1,0 +1,34 @@
+{
+  if (journalWriter != null) {
+    journalWriter.close();
+  }
+  Writer writer=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(journalFileTmp),Util.US_ASCII));
+  try {
+    writer.write(MAGIC);
+    writer.write("\n");
+    writer.write(VERSION_1);
+    writer.write("\n");
+    writer.write(Integer.toString(appVersion));
+    writer.write("\n");
+    writer.write(Integer.toString(valueCount));
+    writer.write("\n");
+    writer.write("\n");
+    for (    Entry entry : lruEntries.values()) {
+      if (entry.currentEditor != null) {
+        writer.write(DIRTY + ' ' + entry.key+ '\n');
+      }
+ else {
+        writer.write(CLEAN + ' ' + entry.key+ entry.getLengths()+ '\n');
+      }
+    }
+  }
+  finally {
+    writer.close();
+  }
+  if (journalFile.exists()) {
+    renameTo(journalFile,journalFileBackup,true);
+  }
+  renameTo(journalFileTmp,journalFile,false);
+  journalFileBackup.delete();
+  journalWriter=new BufferedWriter(new OutputStreamWriter(new FileOutputStream(journalFile,true),Util.US_ASCII));
+}

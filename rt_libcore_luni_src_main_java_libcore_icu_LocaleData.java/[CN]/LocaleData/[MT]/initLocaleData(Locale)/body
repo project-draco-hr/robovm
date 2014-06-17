@@ -1,13 +1,16 @@
 {
   LocaleData localeData=new LocaleData();
-  if (!ICU.initLocaleDataImpl(locale.toString(),localeData)) {
+  if (!ICU.initLocaleDataNative(locale.toString(),localeData)) {
     throw new AssertionError("couldn't initialize LocaleData for locale " + locale);
   }
+  localeData.timeFormat12=ICU.getBestDateTimePattern("hm",locale.toString());
+  localeData.timeFormat24=ICU.getBestDateTimePattern("Hm",locale.toString());
   if (localeData.fullTimeFormat != null) {
     localeData.fullTimeFormat=localeData.fullTimeFormat.replace('v','z');
   }
   if (localeData.numberPattern != null) {
     localeData.integerPattern=localeData.numberPattern.replaceAll("\\.[#,]*","");
   }
+  localeData.shortDateFormat4=localeData.shortDateFormat.replaceAll("\\byy\\b","y");
   return localeData;
 }

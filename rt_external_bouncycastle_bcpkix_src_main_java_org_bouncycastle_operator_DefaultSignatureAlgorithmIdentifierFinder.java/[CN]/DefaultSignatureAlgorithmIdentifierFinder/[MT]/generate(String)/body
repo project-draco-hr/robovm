@@ -1,0 +1,32 @@
+{
+  AlgorithmIdentifier sigAlgId;
+  AlgorithmIdentifier encAlgId;
+  AlgorithmIdentifier digAlgId;
+  String algorithmName=Strings.toUpperCase(signatureAlgorithm);
+  ASN1ObjectIdentifier sigOID=(ASN1ObjectIdentifier)algorithms.get(algorithmName);
+  if (sigOID == null) {
+    throw new IllegalArgumentException("Unknown signature type requested: " + algorithmName);
+  }
+  if (noParams.contains(sigOID)) {
+    sigAlgId=new AlgorithmIdentifier(sigOID);
+  }
+ else   if (params.containsKey(algorithmName)) {
+    sigAlgId=new AlgorithmIdentifier(sigOID,(ASN1Encodable)params.get(algorithmName));
+  }
+ else {
+    sigAlgId=new AlgorithmIdentifier(sigOID,DERNull.INSTANCE);
+  }
+  if (pkcs15RsaEncryption.contains(sigOID)) {
+    encAlgId=new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption,DERNull.INSTANCE);
+  }
+ else {
+    encAlgId=sigAlgId;
+  }
+  if (sigAlgId.getAlgorithm().equals(PKCSObjectIdentifiers.id_RSASSA_PSS)) {
+    digAlgId=((RSASSAPSSparams)sigAlgId.getParameters()).getHashAlgorithm();
+  }
+ else {
+    digAlgId=new AlgorithmIdentifier((ASN1ObjectIdentifier)digestOids.get(sigOID),DERNull.INSTANCE);
+  }
+  return sigAlgId;
+}

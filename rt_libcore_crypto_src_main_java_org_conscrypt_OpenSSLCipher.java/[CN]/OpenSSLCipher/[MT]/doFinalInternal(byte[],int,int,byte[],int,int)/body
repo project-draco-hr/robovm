@@ -1,0 +1,29 @@
+{
+  final int initialOutputOffset=outputOffset;
+  if (inputLen > 0) {
+    final int updateBytesWritten=updateInternal(input,inputOffset,inputLen,output,outputOffset,maximumLen);
+    outputOffset+=updateBytesWritten;
+    maximumLen-=updateBytesWritten;
+  }
+  if (!encrypting && !calledUpdate) {
+    return 0;
+  }
+  final int bytesLeft=output.length - outputOffset;
+  final int writtenBytes;
+  if (bytesLeft >= maximumLen) {
+    writtenBytes=NativeCrypto.EVP_CipherFinal_ex(cipherCtx.getContext(),output,outputOffset);
+  }
+ else {
+    final byte[] lastBlock=new byte[maximumLen];
+    writtenBytes=NativeCrypto.EVP_CipherFinal_ex(cipherCtx.getContext(),lastBlock,0);
+    if (writtenBytes > bytesLeft) {
+      throw new ShortBufferException("buffer is too short: " + writtenBytes + " > "+ bytesLeft);
+    }
+ else     if (writtenBytes > 0) {
+      System.arraycopy(lastBlock,0,output,outputOffset,writtenBytes);
+    }
+  }
+  outputOffset+=writtenBytes;
+  reset();
+  return outputOffset - initialOutputOffset;
+}

@@ -1,0 +1,28 @@
+{
+  try {
+    byte[] encoded=engineDoFinal(wrappedKey,0,wrappedKey.length);
+    if (wrappedKeyType == Cipher.PUBLIC_KEY) {
+      KeyFactory keyFactory=KeyFactory.getInstance(wrappedKeyAlgorithm);
+      return keyFactory.generatePublic(new X509EncodedKeySpec(encoded));
+    }
+ else     if (wrappedKeyType == Cipher.PRIVATE_KEY) {
+      KeyFactory keyFactory=KeyFactory.getInstance(wrappedKeyAlgorithm);
+      return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(encoded));
+    }
+ else     if (wrappedKeyType == Cipher.SECRET_KEY) {
+      return new SecretKeySpec(encoded,wrappedKeyAlgorithm);
+    }
+ else {
+      throw new UnsupportedOperationException("wrappedKeyType == " + wrappedKeyType);
+    }
+  }
+ catch (  IllegalBlockSizeException e) {
+    throw new InvalidKeyException(e);
+  }
+catch (  BadPaddingException e) {
+    throw new InvalidKeyException(e);
+  }
+catch (  InvalidKeySpecException e) {
+    throw new InvalidKeyException(e);
+  }
+}

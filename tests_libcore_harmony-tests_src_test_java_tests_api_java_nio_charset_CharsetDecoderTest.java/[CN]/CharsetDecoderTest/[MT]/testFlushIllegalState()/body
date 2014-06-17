@@ -1,0 +1,25 @@
+{
+  ByteBuffer in=ByteBuffer.wrap(new byte[]{98,98});
+  CharBuffer out=CharBuffer.allocate(5);
+  decoder.reset();
+  try {
+    decoder.flush(out);
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+  decoder.reset();
+  decoder.decode(in,out,true);
+  out.rewind();
+  CoderResult result=decoder.flush(out);
+  assertSame(result,CoderResult.UNDERFLOW);
+  decoder.flush(out);
+  decoder.reset();
+  decoder.decode(in,out,false);
+  try {
+    decoder.flush(out);
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+}

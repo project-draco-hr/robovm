@@ -1,0 +1,24 @@
+{
+  SocketAddress address=new InetSocketAddress("localhost",0);
+  ServerSocketChannel theServerChannel=ServerSocketChannel.open();
+  ServerSocket serversocket=theServerChannel.socket();
+  serversocket.setReuseAddress(true);
+  serversocket.bind(address);
+  boolean doneNonBlockingConnect=false;
+  while (!doneNonBlockingConnect) {
+    channel1=SocketChannel.open();
+    channel1.configureBlocking(false);
+    boolean connected=channel1.connect(new InetSocketAddress("localhost",serversocket.getLocalPort()));
+    if (!connected) {
+      channel1.configureBlocking(true);
+      doneNonBlockingConnect=channel1.finishConnect();
+    }
+    if (doneNonBlockingConnect) {
+      tryFinish();
+    }
+    channel1.close();
+  }
+  if (!serversocket.isClosed()) {
+    serversocket.close();
+  }
+}

@@ -38,21 +38,13 @@ class SocketConnector extends Thread {
       this.address=address;
     }
   }
-  int portNumber=Support_PortManager.getNextPort();
+  byte[] theBytes={0,0,0,0};
+  SocketAddress theAddress=new InetSocketAddress(InetAddress.getLocalHost(),0);
+  SocketAddress nonConnectableAddress=new InetSocketAddress(InetAddress.getByAddress(theBytes),0);
+  SocketAddress nonReachableAddress=new InetSocketAddress(InetAddress.getByName(Support_Configuration.ResolvedNotExistingHost),0);
+  SocketAddress invalidType=new mySocketAddress();
   Socket theSocket=null;
   ServerSocket serverSocket=null;
-  SocketAddress theAddress=null;
-  SocketAddress nonConnectableAddress=null;
-  SocketAddress nonReachableAddress=null;
-  SocketAddress nonListeningAddress=null;
-  SocketAddress invalidType=null;
-  byte[] theBytes={0,0,0,0};
-  theAddress=new InetSocketAddress(InetAddress.getLocalHost(),portNumber);
-  nonConnectableAddress=new InetSocketAddress(InetAddress.getByAddress(theBytes),portNumber);
-  nonReachableAddress=new InetSocketAddress(InetAddress.getByName(Support_Configuration.ResolvedNotExistingHost),portNumber);
-  Thread.sleep(7000);
-  nonListeningAddress=new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
-  invalidType=new mySocketAddress();
   try {
     theSocket=new Socket();
     theSocket.connect(theAddress,-100);
@@ -95,14 +87,13 @@ class SocketConnector extends Thread {
     assertTrue("No timeout:Wrong exception when connecting to address nobody listening on: " + e.toString(),(e instanceof ConnectException));
   }
   theSocket=new Socket();
-  serverSocket=new ServerSocket();
-  serverSocket.bind(theAddress);
-  theSocket.connect(theAddress,0);
+  serverSocket=new ServerSocket(0,5);
+  theSocket.connect(serverSocket.getLocalSocketAddress());
   theSocket.close();
   serverSocket.close();
   try {
     theSocket=new Socket();
-    theSocket.connect(nonListeningAddress,100000);
+    theSocket.connect(new InetSocketAddress(InetAddress.getLocalHost(),80),100000);
     theSocket.close();
     fail("No exception when connecting to address nobody listening on: ");
   }
@@ -127,11 +118,9 @@ class SocketConnector extends Thread {
  catch (  Exception e) {
     assertTrue("Wrong exception when connecting to address nobody listening on with short timeout 40: " + e.toString(),(e instanceof SocketTimeoutException));
   }
-  new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
   theSocket=new Socket();
-  serverSocket=new ServerSocket();
-  serverSocket.bind(theAddress);
-  theSocket.connect(theAddress,100000);
+  serverSocket=new ServerSocket(0,5);
+  theSocket.connect(serverSocket.getLocalSocketAddress());
   assertTrue("Socket did not returned connected when it is: ",theSocket.isConnected());
   assertFalse("Socket returned closed when it should be connected ",theSocket.isClosed());
   assertTrue("Socket returned not bound when it should be: ",theSocket.isBound());
@@ -141,7 +130,6 @@ class SocketConnector extends Thread {
   theSocket.close();
   serverSocket.close();
   try {
-    new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
     theSocket=new Socket();
     serverSocket=new ServerSocket();
     serverSocket.bind(theAddress);
@@ -161,11 +149,9 @@ class SocketConnector extends Thread {
  catch (    Exception e2) {
     }
   }
-  new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort());
   theSocket=new Socket();
-  serverSocket=new ServerSocket();
-  serverSocket.bind(theAddress);
-  theSocket.connect(theAddress,100000);
+  serverSocket=new ServerSocket(0,5);
+  theSocket.connect(serverSocket.getLocalSocketAddress());
   Socket servSock=serverSocket.accept();
   InputStream theInput=theSocket.getInputStream();
   OutputStream theOutput=servSock.getOutputStream();
@@ -211,9 +197,8 @@ class SocketConnector extends Thread {
   SocketChannel channel=SocketChannel.open();
   channel.configureBlocking(false);
   Socket socket=channel.socket();
-  int port=Support_PortManager.getNextPort();
   try {
-    socket.connect(new InetSocketAddress(InetAddress.getLocalHost(),Support_PortManager.getNextPort()),port);
+    socket.connect(serverSocket.getLocalSocketAddress());
     fail("IllegalBlockingModeException was not thrown.");
   }
  catch (  IllegalBlockingModeException expected) {

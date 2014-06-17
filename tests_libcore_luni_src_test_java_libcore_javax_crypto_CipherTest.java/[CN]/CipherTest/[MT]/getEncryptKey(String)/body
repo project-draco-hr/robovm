@@ -1,0 +1,21 @@
+{
+  Key key=ENCRYPT_KEYS.get(algorithm);
+  if (key != null) {
+    return key;
+  }
+  if (algorithm.startsWith("RSA")) {
+    KeyFactory kf=KeyFactory.getInstance("RSA");
+    RSAPrivateKeySpec keySpec=new RSAPrivateKeySpec(RSA_2048_modulus,RSA_2048_privateExponent);
+    key=kf.generatePrivate(keySpec);
+  }
+ else   if (isPBE(algorithm)) {
+    SecretKeyFactory skf=SecretKeyFactory.getInstance(algorithm);
+    key=skf.generateSecret(new PBEKeySpec("secret".toCharArray()));
+  }
+ else {
+    KeyGenerator kg=KeyGenerator.getInstance(getBaseAlgorithm(algorithm));
+    key=kg.generateKey();
+  }
+  ENCRYPT_KEYS.put(algorithm,key);
+  return key;
+}

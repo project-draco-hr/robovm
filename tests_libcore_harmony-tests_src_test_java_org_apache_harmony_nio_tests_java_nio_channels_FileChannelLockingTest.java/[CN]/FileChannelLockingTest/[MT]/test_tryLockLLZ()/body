@@ -1,0 +1,29 @@
+{
+  try {
+    readOnlyChannel.tryLock(0,99,false);
+    fail("Acquiring exclusive lock on read-only channel should fail");
+  }
+ catch (  NonWritableChannelException ex) {
+  }
+  try {
+    readOnlyChannel.tryLock(-99,0,true);
+    fail("Acquiring an illegal lock value should fail.");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  FileLock tmpLock=readOnlyChannel.tryLock(0,10,true);
+  assertTrue(tmpLock.isValid());
+  tmpLock.release();
+  FileLock lock=readOnlyChannel.tryLock(10,788,true);
+  assertTrue(lock.isValid());
+  try {
+    readOnlyChannel.tryLock(1,23,true);
+    fail("Acquiring an overlapping lock should fail.");
+  }
+ catch (  OverlappingFileLockException ex) {
+  }
+  FileLock adjacentLock=readOnlyChannel.tryLock(1,3,true);
+  assertTrue(adjacentLock.isValid());
+  adjacentLock.release();
+  lock.release();
+}

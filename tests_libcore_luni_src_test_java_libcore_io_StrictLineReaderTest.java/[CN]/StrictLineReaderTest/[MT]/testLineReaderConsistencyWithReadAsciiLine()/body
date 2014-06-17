@@ -1,0 +1,34 @@
+{
+  try {
+    StrictLineReader lineReader=new StrictLineReader(createTestInputStream(),32,StandardCharsets.US_ASCII);
+    InputStream refStream=createTestInputStream();
+    while (true) {
+      try {
+        String refLine=Streams.readAsciiLine(refStream);
+        try {
+          String line=lineReader.readLine();
+          if (!refLine.equals(line)) {
+            fail("line (\"" + line + "\") differs from expected (\""+ refLine+ "\").");
+          }
+        }
+ catch (        EOFException eof) {
+          fail("line reader threw EOFException too early.");
+        }
+      }
+ catch (      EOFException refEof) {
+        try {
+          lineReader.readLine();
+          fail("line reader didn't throw the expected EOFException.");
+        }
+ catch (        EOFException eof) {
+          break;
+        }
+      }
+    }
+    refStream.close();
+    lineReader.close();
+  }
+ catch (  IOException ioe) {
+    fail("Unexpected IOException " + ioe.toString());
+  }
+}

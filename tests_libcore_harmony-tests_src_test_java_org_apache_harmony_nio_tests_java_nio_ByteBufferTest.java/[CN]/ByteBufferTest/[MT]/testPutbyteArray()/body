@@ -1,0 +1,32 @@
+{
+  byte array[]=new byte[1];
+  if (buf.isReadOnly()) {
+    try {
+      buf.put(array);
+      fail("Should throw Exception");
+    }
+ catch (    ReadOnlyBufferException e) {
+    }
+    return;
+  }
+  buf.clear();
+  for (int i=0; i < buf.capacity(); i++) {
+    assertEquals(buf.position(),i);
+    array[0]=(byte)i;
+    ByteBuffer ret=buf.put(array);
+    assertEquals(buf.get(i),(byte)i);
+    assertSame(ret,buf);
+  }
+  try {
+    buf.put(array);
+    fail("Should throw Exception");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  try {
+    buf.put((byte[])null);
+    fail("Should throw Exception");
+  }
+ catch (  NullPointerException e) {
+  }
+}

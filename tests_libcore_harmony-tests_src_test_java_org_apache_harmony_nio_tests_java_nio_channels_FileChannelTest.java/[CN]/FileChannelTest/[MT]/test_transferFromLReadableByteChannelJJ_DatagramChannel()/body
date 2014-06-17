@@ -1,0 +1,22 @@
+{
+  datagramChannelReceiver=DatagramChannel.open();
+  datagramChannelReceiver.socket().bind(new InetSocketAddress(InetAddress.getLocalHost(),0));
+  datagramChannelSender=DatagramChannel.open();
+  datagramChannelSender.socket().bind(new InetSocketAddress(InetAddress.getLocalHost(),0));
+  datagramChannelReceiver.socket().setSoTimeout(TIME_OUT);
+  datagramChannelReceiver.connect(datagramChannelSender.socket().getLocalSocketAddress());
+  datagramChannelSender.socket().setSoTimeout(TIME_OUT);
+  ByteBuffer writeBuffer=ByteBuffer.wrap(CONTENT_AS_BYTES);
+  datagramChannelSender.socket().setSoTimeout(TIME_OUT);
+  datagramChannelSender.send(writeBuffer,datagramChannelReceiver.socket().getLocalSocketAddress());
+  datagramChannelReceiver.socket().setSoTimeout(TIME_OUT);
+  long result=writeOnlyFileChannel.transferFrom(datagramChannelReceiver,0,CONTENT_AS_BYTES_LENGTH);
+  assertEquals(CONTENT_AS_BYTES_LENGTH,result);
+  assertEquals(0,writeOnlyFileChannel.position());
+  writeOnlyFileChannel.close();
+  fis=new FileInputStream(fileOfWriteOnlyFileChannel);
+  assertEquals(CONTENT_AS_BYTES_LENGTH,fileOfWriteOnlyFileChannel.length());
+  byte[] resultContent=new byte[CONTENT_AS_BYTES_LENGTH];
+  fis.read(resultContent);
+  assertTrue(Arrays.equals(CONTENT_AS_BYTES,resultContent));
+}

@@ -1,0 +1,73 @@
+{
+  assertNotNull(col);
+{
+    try {
+      col.add(new ArrayList<Object>());
+      fail("should be an unmodifiable list");
+    }
+ catch (    UnsupportedOperationException expected) {
+    }
+  }
+  boolean[] typesFound=new boolean[9];
+  for (  List<?> item : col) {
+{
+      try {
+        item.remove(0);
+        fail("should be an unmodifiable list");
+      }
+ catch (      UnsupportedOperationException expected) {
+      }
+    }
+    assertTrue(item.get(0) instanceof Integer);
+    int type=(Integer)item.get(0);
+    typesFound[type]=true;
+switch (type) {
+case 0:
+      final byte[] der=getOIDTestBytes();
+    assertEquals(Arrays.toString(der),Arrays.toString((byte[])item.get(1)));
+  break;
+case 1:
+assertEquals("x509@example.com",(String)item.get(1));
+break;
+case 2:
+assertEquals("x509.example.com",(String)item.get(1));
+break;
+case 3:
+assertEquals("UNSUPPORTED",(String)item.get(1));
+break;
+case 4:
+if ("BC".equals(f.getProvider().getName())) {
+byte[] bytes="CN=?????,OU=??ber Fr??ends,O=Awesome Dudes,C=US".getBytes("UTF-8");
+String string=new String(bytes,0);
+assertEquals(string,(String)item.get(1));
+}
+ else {
+assertEquals("CN=?????,OU=??ber Fr??ends,O=Awesome Dudes,C=US",(String)item.get(1));
+}
+break;
+case 5:
+assertEquals("UNSUPPORTED",Arrays.toString((byte[])item.get(1)));
+break;
+case 6:
+assertEquals("http://www.example.com/?q=awesomeness",(String)item.get(1));
+break;
+case 7:
+assertEquals("192.168.0.1",(String)item.get(1));
+break;
+case 8:
+assertEquals("1.2.3.4",(String)item.get(1));
+break;
+}
+}
+Set<Integer> missing=new HashSet<Integer>();
+for (int i=0; i < typesFound.length; i++) {
+if (!typesFound[i]) {
+missing.add(i);
+}
+}
+missing.remove(3);
+missing.remove(5);
+if (!missing.isEmpty()) {
+fail("Missing types: " + Arrays.toString(missing.toArray(new Integer[missing.size()])));
+}
+}

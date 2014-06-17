@@ -1,0 +1,50 @@
+{
+  boolean otherCert=false;
+  boolean otherCrl=false;
+  boolean attrCertV1Found=false;
+  boolean attrCertV2Found=false;
+  if (certs != null) {
+    for (Enumeration en=certs.getObjects(); en.hasMoreElements(); ) {
+      Object obj=en.nextElement();
+      if (obj instanceof ASN1TaggedObject) {
+        ASN1TaggedObject tagged=ASN1TaggedObject.getInstance(obj);
+        if (tagged.getTagNo() == 1) {
+          attrCertV1Found=true;
+        }
+ else         if (tagged.getTagNo() == 2) {
+          attrCertV2Found=true;
+        }
+ else         if (tagged.getTagNo() == 3) {
+          otherCert=true;
+        }
+      }
+    }
+  }
+  if (otherCert) {
+    return new ASN1Integer(5);
+  }
+  if (crls != null) {
+    for (Enumeration en=crls.getObjects(); en.hasMoreElements(); ) {
+      Object obj=en.nextElement();
+      if (obj instanceof ASN1TaggedObject) {
+        otherCrl=true;
+      }
+    }
+  }
+  if (otherCrl) {
+    return VERSION_5;
+  }
+  if (attrCertV2Found) {
+    return VERSION_4;
+  }
+  if (attrCertV1Found) {
+    return VERSION_3;
+  }
+  if (checkForVersion3(signerInfs)) {
+    return VERSION_3;
+  }
+  if (!CMSObjectIdentifiers.data.equals(contentOid)) {
+    return VERSION_3;
+  }
+  return VERSION_1;
+}

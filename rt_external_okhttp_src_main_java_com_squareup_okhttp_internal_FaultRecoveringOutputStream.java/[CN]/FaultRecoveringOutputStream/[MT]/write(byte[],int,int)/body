@@ -1,0 +1,21 @@
+{
+  if (closed)   throw new IOException("stream closed");
+  checkOffsetAndCount(buffer.length,offset,count);
+  while (true) {
+    try {
+      out.write(buffer,offset,count);
+      if (replayBuffer != null) {
+        if (count + replayBuffer.size() > maxReplayBufferLength) {
+          replayBuffer=null;
+        }
+ else {
+          replayBuffer.write(buffer,offset,count);
+        }
+      }
+      return;
+    }
+ catch (    IOException e) {
+      if (!recover(e))       throw e;
+    }
+  }
+}

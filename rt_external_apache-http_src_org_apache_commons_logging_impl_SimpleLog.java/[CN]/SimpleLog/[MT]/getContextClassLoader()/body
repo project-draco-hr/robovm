@@ -1,0 +1,29 @@
+{
+  ClassLoader classLoader=null;
+  if (classLoader == null) {
+    try {
+      Method method=Thread.class.getMethod("getContextClassLoader",(Class[])null);
+      try {
+        classLoader=(ClassLoader)method.invoke(Thread.currentThread(),(Object[])null);
+      }
+ catch (      IllegalAccessException e) {
+        ;
+      }
+catch (      InvocationTargetException e) {
+        if (e.getTargetException() instanceof SecurityException) {
+          ;
+        }
+ else {
+          throw new LogConfigurationException("Unexpected InvocationTargetException",e.getTargetException());
+        }
+      }
+    }
+ catch (    NoSuchMethodException e) {
+      ;
+    }
+  }
+  if (classLoader == null) {
+    classLoader=SimpleLog.class.getClassLoader();
+  }
+  return classLoader;
+}

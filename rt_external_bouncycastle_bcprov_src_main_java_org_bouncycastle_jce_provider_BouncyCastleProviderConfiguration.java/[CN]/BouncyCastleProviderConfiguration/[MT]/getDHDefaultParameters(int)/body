@@ -1,0 +1,21 @@
+{
+  Object params=dhThreadSpec.get();
+  if (params == null) {
+    params=dhDefaultParams;
+  }
+  if (params instanceof DHParameterSpec) {
+    DHParameterSpec spec=(DHParameterSpec)params;
+    if (spec.getP().bitLength() == keySize) {
+      return spec;
+    }
+  }
+ else   if (params instanceof DHParameterSpec[]) {
+    DHParameterSpec[] specs=(DHParameterSpec[])params;
+    for (int i=0; i != specs.length; i++) {
+      if (specs[i].getP().bitLength() == keySize) {
+        return specs[i];
+      }
+    }
+  }
+  return null;
+}

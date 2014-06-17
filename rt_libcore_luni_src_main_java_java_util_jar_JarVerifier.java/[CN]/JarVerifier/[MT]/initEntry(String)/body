@@ -20,18 +20,13 @@
     return null;
   }
   Certificate[] certificatesArray=certs.toArray(new Certificate[certs.size()]);
-  String algorithms=attributes.getValue("Digest-Algorithms");
-  if (algorithms == null) {
-    algorithms="SHA SHA1";
-  }
-  StringTokenizer tokens=new StringTokenizer(algorithms);
-  while (tokens.hasMoreTokens()) {
-    String algorithm=tokens.nextToken();
-    String hash=attributes.getValue(algorithm + "-Digest");
+  for (int i=0; i < DIGEST_ALGORITHMS.length; i++) {
+    final String algorithm=DIGEST_ALGORITHMS[i];
+    final String hash=attributes.getValue(algorithm + "-Digest");
     if (hash == null) {
       continue;
     }
-    byte[] hashBytes=hash.getBytes(Charsets.ISO_8859_1);
+    byte[] hashBytes=hash.getBytes(StandardCharsets.ISO_8859_1);
     try {
       return new VerifierEntry(name,MessageDigest.getInstance(algorithm),hashBytes,certificatesArray);
     }

@@ -1,0 +1,20 @@
+{
+  int bufSize=10;
+  int readres=0;
+  byte[] byteArray=new byte[bufSize];
+  ByteBuffer byteBuf=ByteBuffer.allocate(bufSize);
+  this.fins=new FileInputStream(tmpFile);
+  readres=this.fins.read(byteArray);
+  assertEquals(bufSize,readres);
+  assertFalse(0 == this.fins.available());
+  ReadableByteChannel rbChannel=Channels.newChannel(this.fins);
+  assertFalse(0 == this.fins.available());
+  readres=this.fins.read(byteArray);
+  assertEquals(bufSize,readres);
+  assertNotNull(rbChannel);
+  readres=rbChannel.read(byteBuf);
+  assertEquals(bufSize,readres);
+  InputStream ins=Channels.newInputStream(rbChannel);
+  assertNotNull(ins);
+  assertEquals(0,ins.available());
+}

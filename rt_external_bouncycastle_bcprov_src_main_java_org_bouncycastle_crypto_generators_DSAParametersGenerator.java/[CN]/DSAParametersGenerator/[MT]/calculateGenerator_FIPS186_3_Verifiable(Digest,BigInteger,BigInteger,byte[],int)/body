@@ -1,0 +1,19 @@
+{
+  BigInteger e=p.subtract(ONE).divide(q);
+  byte[] ggen=Hex.decode("6767656E");
+  byte[] U=new byte[seed.length + ggen.length + 1+ 2];
+  System.arraycopy(seed,0,U,0,seed.length);
+  System.arraycopy(ggen,0,U,seed.length,ggen.length);
+  U[U.length - 3]=(byte)index;
+  byte[] w=new byte[d.getDigestSize()];
+  for (int count=1; count < (1 << 16); ++count) {
+    inc(U);
+    hash(d,U,w);
+    BigInteger W=new BigInteger(1,w);
+    BigInteger g=W.modPow(e,p);
+    if (g.compareTo(TWO) >= 0) {
+      return g;
+    }
+  }
+  return null;
+}

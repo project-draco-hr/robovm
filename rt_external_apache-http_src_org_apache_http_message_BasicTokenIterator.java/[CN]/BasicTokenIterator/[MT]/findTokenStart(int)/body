@@ -1,0 +1,31 @@
+{
+  if (from < 0) {
+    throw new IllegalArgumentException("Search position must not be negative: " + from);
+  }
+  boolean found=false;
+  while (!found && (this.currentHeader != null)) {
+    final int to=this.currentHeader.length();
+    while (!found && (from < to)) {
+      final char ch=this.currentHeader.charAt(from);
+      if (isTokenSeparator(ch) || isWhitespace(ch)) {
+        from++;
+      }
+ else       if (isTokenChar(this.currentHeader.charAt(from))) {
+        found=true;
+      }
+ else {
+        throw new ParseException("Invalid character before token (pos " + from + "): "+ this.currentHeader);
+      }
+    }
+    if (!found) {
+      if (this.headerIt.hasNext()) {
+        this.currentHeader=this.headerIt.nextHeader().getValue();
+        from=0;
+      }
+ else {
+        this.currentHeader=null;
+      }
+    }
+  }
+  return found ? from : -1;
+}

@@ -1,0 +1,16 @@
+{
+  SocketChannel channel=null;
+  try {
+    channel=SocketChannel.open();
+    channel.configureBlocking(false);
+    Selector selector=Selector.open();
+    channel.register(selector,SelectionKey.OP_CONNECT);
+    channel.connect(localAddress);
+    channel.finishConnect();
+    selector.select();
+    assertEquals(0,selector.selectedKeys().size());
+  }
+  finally {
+    channel.close();
+  }
+}

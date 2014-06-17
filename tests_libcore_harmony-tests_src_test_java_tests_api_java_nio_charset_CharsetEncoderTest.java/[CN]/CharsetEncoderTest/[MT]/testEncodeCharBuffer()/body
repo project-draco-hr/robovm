@@ -1,0 +1,21 @@
+{
+  try {
+    encoder.encode(null);
+    fail("should throw null pointer exception");
+  }
+ catch (  NullPointerException e) {
+  }
+  ByteBuffer out=encoder.encode(CharBuffer.wrap(""));
+  assertEquals(out.position(),0);
+  assertByteArray(out,new byte[0]);
+  out=encoder.encode(CharBuffer.wrap(unistr));
+  assertEquals(out.position(),0);
+  assertByteArray(out,addSurrogate(unibytes));
+  Charset cs=Charset.forName("UTF-8");
+  CharsetEncoder encoder=cs.newEncoder();
+  encoder.onMalformedInput(CodingErrorAction.REPLACE);
+  encoder=encoder.replaceWith(new byte[]{(byte)0xef,(byte)0xbf,(byte)0xbd});
+  CharBuffer in=CharBuffer.wrap("\ud800");
+  out=encoder.encode(in);
+  assertNotNull(out);
+}

@@ -1,0 +1,54 @@
+{
+  CharBuffer out;
+  ByteBuffer in;
+  String replaceStr=decoder.replacement() + getString();
+  decoder.onMalformedInput(CodingErrorAction.REPORT);
+  decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+  in=getMalformedByteBuffer();
+  if (in != null) {
+    try {
+      CharBuffer buffer=decoder.decode(in);
+      assertTrue(buffer.remaining() > 0);
+      fail("should throw MalformedInputException");
+    }
+ catch (    MalformedInputException e) {
+    }
+    decoder.reset();
+    in.rewind();
+    decoder.onMalformedInput(CodingErrorAction.IGNORE);
+    out=decoder.decode(in);
+    assertCharBufferValue(getString(),out);
+    decoder.reset();
+    in.rewind();
+    decoder.onMalformedInput(CodingErrorAction.REPLACE);
+    out=decoder.decode(in);
+    assertCharBufferValue(replaceStr,out);
+  }
+  decoder.onMalformedInput(CodingErrorAction.REPORT);
+  decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+  in=getUnmappedByteBuffer();
+  if (in != null) {
+    try {
+      decoder.decode(in);
+      fail("should throw UnmappableCharacterException");
+    }
+ catch (    UnmappableCharacterException e) {
+    }
+    decoder.reset();
+    in.rewind();
+    decoder.onUnmappableCharacter(CodingErrorAction.IGNORE);
+    out=decoder.decode(in);
+    assertCharBufferValue(getString(),out);
+    decoder.reset();
+    in.rewind();
+    decoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
+    out=decoder.decode(in);
+    assertCharBufferValue(replaceStr,out);
+  }
+  try {
+    decoder.decode(getExceptionByteArray());
+    fail("should throw runtime exception");
+  }
+ catch (  RuntimeException e) {
+  }
+}

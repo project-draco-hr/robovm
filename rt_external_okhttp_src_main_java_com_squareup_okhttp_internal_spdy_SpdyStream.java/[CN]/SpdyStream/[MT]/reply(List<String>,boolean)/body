@@ -1,0 +1,21 @@
+{
+  assert(!Thread.holdsLock(SpdyStream.this));
+  int flags=0;
+synchronized (this) {
+    if (responseHeaders == null) {
+      throw new NullPointerException("responseHeaders == null");
+    }
+    if (isLocallyInitiated()) {
+      throw new IllegalStateException("cannot reply to a locally initiated stream");
+    }
+    if (this.responseHeaders != null) {
+      throw new IllegalStateException("reply already sent");
+    }
+    this.responseHeaders=responseHeaders;
+    if (!out) {
+      this.out.finished=true;
+      flags|=SpdyConnection.FLAG_FIN;
+    }
+  }
+  connection.writeSynReply(id,flags,responseHeaders);
+}

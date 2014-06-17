@@ -1,0 +1,10 @@
+{
+  byte[] valid=VALID_CERTIFICATE_PEM.getBytes();
+  byte[] doubleCertificateData=new byte[valid.length * 2];
+  System.arraycopy(valid,0,doubleCertificateData,0,valid.length);
+  System.arraycopy(valid,0,doubleCertificateData,valid.length,valid.length);
+  MeasuredInputStream certStream=new MeasuredInputStream(new ByteArrayInputStream(doubleCertificateData));
+  Certificate certificate=cf.generateCertificate(certStream);
+  assertNotNull(certificate);
+  assertEquals(valid.length,certStream.getCount());
+}

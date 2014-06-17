@@ -1,0 +1,37 @@
+{
+  if (buffer == null) {
+    throw new IllegalArgumentException("Char array buffer may not be null");
+  }
+  if (cursor == null) {
+    throw new IllegalArgumentException("Parser cursor may not be null");
+  }
+  int indexFrom=cursor.getPos();
+  int indexTo=cursor.getUpperBound();
+  try {
+    skipWhitespace(buffer,cursor);
+    int i=cursor.getPos();
+    int blank=buffer.indexOf(' ',i,indexTo);
+    if (blank < 0) {
+      throw new ParseException("Invalid request line: " + buffer.substring(indexFrom,indexTo));
+    }
+    String method=buffer.substringTrimmed(i,blank);
+    cursor.updatePos(blank);
+    skipWhitespace(buffer,cursor);
+    i=cursor.getPos();
+    blank=buffer.indexOf(' ',i,indexTo);
+    if (blank < 0) {
+      throw new ParseException("Invalid request line: " + buffer.substring(indexFrom,indexTo));
+    }
+    String uri=buffer.substringTrimmed(i,blank);
+    cursor.updatePos(blank);
+    ProtocolVersion ver=parseProtocolVersion(buffer,cursor);
+    skipWhitespace(buffer,cursor);
+    if (!cursor.atEnd()) {
+      throw new ParseException("Invalid request line: " + buffer.substring(indexFrom,indexTo));
+    }
+    return createRequestLine(method,uri,ver);
+  }
+ catch (  IndexOutOfBoundsException e) {
+    throw new ParseException("Invalid request line: " + buffer.substring(indexFrom,indexTo));
+  }
+}

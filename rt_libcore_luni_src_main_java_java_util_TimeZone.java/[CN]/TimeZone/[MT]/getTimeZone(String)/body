@@ -2,15 +2,22 @@
   if (id == null) {
     throw new NullPointerException("id == null");
   }
-  TimeZone zone=ZoneInfoDB.getTimeZone(id);
-  if (zone != null) {
-    return zone;
+  if (id.length() == 3) {
+    if (id.equals("GMT")) {
+      return (TimeZone)GMT.clone();
+    }
+    if (id.equals("UTC")) {
+      return (TimeZone)UTC.clone();
+    }
+  }
+  TimeZone zone=null;
+  try {
+    zone=ZoneInfoDB.getInstance().makeTimeZone(id);
+  }
+ catch (  IOException ignored) {
   }
   if (zone == null && id.length() > 3 && id.startsWith("GMT")) {
     zone=getCustomTimeZone(id);
   }
-  if (zone == null) {
-    zone=(TimeZone)GMT.clone();
-  }
-  return zone;
+  return (zone != null) ? zone : (TimeZone)GMT.clone();
 }

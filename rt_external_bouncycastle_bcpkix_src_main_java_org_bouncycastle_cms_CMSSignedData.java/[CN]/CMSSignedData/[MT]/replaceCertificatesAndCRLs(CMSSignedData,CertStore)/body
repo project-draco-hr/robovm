@@ -1,0 +1,26 @@
+{
+  CMSSignedData cms=new CMSSignedData(signedData);
+  ASN1Set certs=null;
+  ASN1Set crls=null;
+  try {
+    ASN1Set set=CMSUtils.createBerSetFromList(CMSUtils.getCertificatesFromStore(certsAndCrls));
+    if (set.size() != 0) {
+      certs=set;
+    }
+  }
+ catch (  CertStoreException e) {
+    throw new CMSException("error getting certs from certStore",e);
+  }
+  try {
+    ASN1Set set=CMSUtils.createBerSetFromList(CMSUtils.getCRLsFromStore(certsAndCrls));
+    if (set.size() != 0) {
+      crls=set;
+    }
+  }
+ catch (  CertStoreException e) {
+    throw new CMSException("error getting crls from certStore",e);
+  }
+  cms.signedData=new SignedData(signedData.signedData.getDigestAlgorithms(),signedData.signedData.getEncapContentInfo(),certs,crls,signedData.signedData.getSignerInfos());
+  cms.contentInfo=new ContentInfo(cms.contentInfo.getContentType(),cms.signedData);
+  return cms;
+}

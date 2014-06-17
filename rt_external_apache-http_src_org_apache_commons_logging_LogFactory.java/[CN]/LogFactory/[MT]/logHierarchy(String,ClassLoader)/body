@@ -1,0 +1,39 @@
+{
+  if (!isDiagnosticsEnabled()) {
+    return;
+  }
+  ClassLoader systemClassLoader;
+  if (classLoader != null) {
+    final String classLoaderString=classLoader.toString();
+    logDiagnostic(prefix + objectId(classLoader) + " == '"+ classLoaderString+ "'");
+  }
+  try {
+    systemClassLoader=ClassLoader.getSystemClassLoader();
+  }
+ catch (  SecurityException ex) {
+    logDiagnostic(prefix + "Security forbids determining the system classloader.");
+    return;
+  }
+  if (classLoader != null) {
+    StringBuffer buf=new StringBuffer(prefix + "ClassLoader tree:");
+    for (; ; ) {
+      buf.append(objectId(classLoader));
+      if (classLoader == systemClassLoader) {
+        buf.append(" (SYSTEM) ");
+      }
+      try {
+        classLoader=classLoader.getParent();
+      }
+ catch (      SecurityException ex) {
+        buf.append(" --> SECRET");
+        break;
+      }
+      buf.append(" --> ");
+      if (classLoader == null) {
+        buf.append("BOOT");
+        break;
+      }
+    }
+    logDiagnostic(buf.toString());
+  }
+}

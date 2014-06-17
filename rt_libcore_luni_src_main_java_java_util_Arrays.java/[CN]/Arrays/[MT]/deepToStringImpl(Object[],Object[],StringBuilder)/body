@@ -1,2 +1,67 @@
 {
+  if (array == null) {
+    sb.append("null");
+    return;
+  }
+  sb.append('[');
+  for (int i=0; i < array.length; i++) {
+    if (i != 0) {
+      sb.append(", ");
+    }
+    Object elem=array[i];
+    if (elem == null) {
+      sb.append("null");
+    }
+ else {
+      Class<?> elemClass=elem.getClass();
+      if (elemClass.isArray()) {
+        Class<?> elemElemClass=elemClass.getComponentType();
+        if (elemElemClass.isPrimitive()) {
+          if (boolean.class.equals(elemElemClass)) {
+            sb.append(toString((boolean[])elem));
+          }
+ else           if (byte.class.equals(elemElemClass)) {
+            sb.append(toString((byte[])elem));
+          }
+ else           if (char.class.equals(elemElemClass)) {
+            sb.append(toString((char[])elem));
+          }
+ else           if (double.class.equals(elemElemClass)) {
+            sb.append(toString((double[])elem));
+          }
+ else           if (float.class.equals(elemElemClass)) {
+            sb.append(toString((float[])elem));
+          }
+ else           if (int.class.equals(elemElemClass)) {
+            sb.append(toString((int[])elem));
+          }
+ else           if (long.class.equals(elemElemClass)) {
+            sb.append(toString((long[])elem));
+          }
+ else           if (short.class.equals(elemElemClass)) {
+            sb.append(toString((short[])elem));
+          }
+ else {
+            throw new AssertionError();
+          }
+        }
+ else {
+          if (deepToStringImplContains(origArrays,elem)) {
+            sb.append("[...]");
+          }
+ else {
+            Object[] newArray=(Object[])elem;
+            Object[] newOrigArrays=new Object[origArrays.length + 1];
+            System.arraycopy(origArrays,0,newOrigArrays,0,origArrays.length);
+            newOrigArrays[origArrays.length]=newArray;
+            deepToStringImpl(newArray,newOrigArrays,sb);
+          }
+        }
+      }
+ else {
+        sb.append(array[i]);
+      }
+    }
+  }
+  sb.append(']');
 }

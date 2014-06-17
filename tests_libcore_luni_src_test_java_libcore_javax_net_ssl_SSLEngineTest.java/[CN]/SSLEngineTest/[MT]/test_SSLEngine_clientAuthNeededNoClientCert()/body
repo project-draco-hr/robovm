@@ -1,0 +1,18 @@
+{
+  boolean handshakeExceptionCaught=false;
+  TestSSLContext clientAuthContext=TestSSLContext.create(TestKeyStore.getClient(),TestKeyStore.getServer());
+  try {
+    TestSSLEnginePair.create(clientAuthContext,new TestSSLEnginePair.Hooks(){
+      @Override void beforeBeginHandshake(      SSLEngine client,      SSLEngine server){
+        server.setNeedClientAuth(true);
+      }
+    }
+);
+    fail();
+  }
+ catch (  SSLHandshakeException expected) {
+  }
+ finally {
+    clientAuthContext.close();
+  }
+}

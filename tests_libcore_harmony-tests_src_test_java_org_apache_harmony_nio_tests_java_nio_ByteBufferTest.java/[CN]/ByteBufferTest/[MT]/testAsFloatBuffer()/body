@@ -1,0 +1,51 @@
+{
+  FloatBuffer floatBuffer;
+  byte bytes[]=new byte[4];
+  float value;
+  buf.clear();
+  buf.order(ByteOrder.BIG_ENDIAN);
+  floatBuffer=buf.asFloatBuffer();
+  assertSame(ByteOrder.BIG_ENDIAN,floatBuffer.order());
+  while (floatBuffer.remaining() > 0) {
+    buf.get(bytes);
+    value=floatBuffer.get();
+    if (!(Float.isNaN(bytes2float(bytes,buf.order())) && Float.isNaN(value))) {
+      assertEquals(bytes2float(bytes,buf.order()),value,0.00);
+    }
+  }
+  buf.clear();
+  buf.order(ByteOrder.LITTLE_ENDIAN);
+  floatBuffer=buf.asFloatBuffer();
+  assertSame(ByteOrder.LITTLE_ENDIAN,floatBuffer.order());
+  while (floatBuffer.remaining() > 0) {
+    buf.get(bytes);
+    value=floatBuffer.get();
+    if (!(Float.isNaN(bytes2float(bytes,buf.order())) && Float.isNaN(value))) {
+      assertEquals(bytes2float(bytes,buf.order()),value,0.00);
+    }
+  }
+  if (!buf.isReadOnly()) {
+    buf.clear();
+    buf.order(ByteOrder.BIG_ENDIAN);
+    floatBuffer=buf.asFloatBuffer();
+    assertSame(ByteOrder.BIG_ENDIAN,floatBuffer.order());
+    while (floatBuffer.remaining() > 0) {
+      value=(float)floatBuffer.remaining();
+      floatBuffer.put(value);
+      buf.get(bytes);
+      assertTrue(Arrays.equals(bytes,float2bytes(value,buf.order())));
+    }
+    buf.clear();
+    buf.order(ByteOrder.LITTLE_ENDIAN);
+    floatBuffer=buf.asFloatBuffer();
+    assertSame(ByteOrder.LITTLE_ENDIAN,floatBuffer.order());
+    while (floatBuffer.remaining() > 0) {
+      value=(float)floatBuffer.remaining();
+      floatBuffer.put(value);
+      buf.get(bytes);
+      assertTrue(Arrays.equals(bytes,float2bytes(value,buf.order())));
+    }
+  }
+  buf.clear();
+  buf.order(ByteOrder.BIG_ENDIAN);
+}

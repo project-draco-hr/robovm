@@ -1,0 +1,7 @@
+{
+  stream.defaultReadObject();
+  byte[] encoded=(byte[])stream.readObject();
+  key=new OpenSSLKey(NativeCrypto.d2i_PKCS8_PRIV_KEY_INFO(encoded));
+  final long origGroup=NativeCrypto.EC_KEY_get0_group(key.getPkeyContext());
+  group=new OpenSSLECGroupContext(NativeCrypto.EC_GROUP_dup(origGroup));
+}

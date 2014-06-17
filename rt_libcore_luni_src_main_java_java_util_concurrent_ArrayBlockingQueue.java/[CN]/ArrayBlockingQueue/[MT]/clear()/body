@@ -3,11 +3,19 @@
   final ReentrantLock lock=this.lock;
   lock.lock();
   try {
-    for (int i=takeIndex, k=count; k > 0; i=inc(i), k--)     items[i]=null;
-    count=0;
-    putIndex=0;
-    takeIndex=0;
-    notFull.signalAll();
+    int k=count;
+    if (k > 0) {
+      final int putIndex=this.putIndex;
+      int i=takeIndex;
+      do {
+        items[i]=null;
+      }
+ while ((i=inc(i)) != putIndex);
+      takeIndex=putIndex;
+      count=0;
+      if (itrs != null)       itrs.queueIsEmpty();
+      for (; k > 0 && lock.hasWaiters(notFull); k--)       notFull.signal();
+    }
   }
   finally {
     lock.unlock();

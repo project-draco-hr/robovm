@@ -1,0 +1,17 @@
+{
+  File tmpFile=File.createTempFile("TestFileForScanner",".tmp");
+  FileOutputStream fos=new FileOutputStream(tmpFile);
+  FileChannel fc=fos.getChannel();
+  s=new Scanner(fc);
+  fos.write(12);
+  s.close();
+  assertFalse(fc.isOpen());
+  try {
+    fos.write(12);
+    fail();
+  }
+ catch (  IOException expected) {
+  }
+  s.close();
+  assertTrue(tmpFile.delete());
+}

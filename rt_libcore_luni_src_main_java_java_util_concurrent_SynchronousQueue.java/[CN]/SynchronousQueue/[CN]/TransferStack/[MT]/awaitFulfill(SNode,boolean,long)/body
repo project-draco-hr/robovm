@@ -1,17 +1,14 @@
 {
-  long lastTime=timed ? System.nanoTime() : 0;
+  final long deadline=timed ? System.nanoTime() + nanos : 0L;
   Thread w=Thread.currentThread();
-  SNode h=head;
   int spins=(shouldSpin(s) ? (timed ? maxTimedSpins : maxUntimedSpins) : 0);
   for (; ; ) {
     if (w.isInterrupted())     s.tryCancel();
     SNode m=s.match;
     if (m != null)     return m;
     if (timed) {
-      long now=System.nanoTime();
-      nanos-=now - lastTime;
-      lastTime=now;
-      if (nanos <= 0) {
+      nanos=deadline - System.nanoTime();
+      if (nanos <= 0L) {
         s.tryCancel();
         continue;
       }

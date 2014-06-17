@@ -1,18 +1,12 @@
 {
-  if (nextEntry != null && (nextEntry=nextEntry.next) != null)   return;
-  while (nextTableIndex >= 0) {
-    if ((nextEntry=currentTable[nextTableIndex--]) != null)     return;
-  }
-  while (nextSegmentIndex >= 0) {
-    Segment<K,V> seg=segments[nextSegmentIndex--];
-    if (seg.count != 0) {
-      currentTable=seg.table;
-      for (int j=currentTable.length - 1; j >= 0; --j) {
-        if ((nextEntry=currentTable[j]) != null) {
-          nextTableIndex=j - 1;
-          return;
-        }
-      }
+  for (; ; ) {
+    if (nextTableIndex >= 0) {
+      if ((nextEntry=entryAt(currentTable,nextTableIndex--)) != null)       break;
     }
+ else     if (nextSegmentIndex >= 0) {
+      Segment<K,V> seg=segmentAt(segments,nextSegmentIndex--);
+      if (seg != null && (currentTable=seg.table) != null)       nextTableIndex=currentTable.length - 1;
+    }
+ else     break;
   }
 }

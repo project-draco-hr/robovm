@@ -1,0 +1,31 @@
+{
+  SocketChannel sc=SocketChannel.open();
+  SocketChannel client=null;
+  try {
+    ssc.register(selector,SelectionKey.OP_ACCEPT);
+    sc.connect(localAddress);
+    int count=blockingSelect(type,timeout);
+    assertEquals(1,count);
+    Set<SelectionKey> selectedKeys=selector.selectedKeys();
+    assertEquals(1,selectedKeys.size());
+    SelectionKey key=selectedKeys.iterator().next();
+    assertEquals(ssc.keyFor(selector),key);
+    assertEquals(SelectionKey.OP_ACCEPT,key.readyOps());
+    count=selectOnce(type,timeout);
+    assertEquals(0,count);
+    assertSame(selectedKeys,selector.selectedKeys());
+    client=ssc.accept();
+    selectedKeys.clear();
+  }
+  finally {
+    try {
+      sc.close();
+    }
+ catch (    IOException e) {
+    }
+    if (null != client) {
+      client.close();
+    }
+  }
+  ssc.keyFor(selector).cancel();
+}

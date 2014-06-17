@@ -2,10 +2,10 @@
   if (algorithm == null) {
     throw new NoSuchAlgorithmException("Null algorithm name");
   }
-  Services.refresh();
+  int newCacheVersion=Services.getCacheVersion();
   Provider.Service service;
   ServiceCacheEntry cacheEntry=this.serviceCache;
-  if (cacheEntry != null && cacheEntry.algorithm.equalsIgnoreCase(algorithm) && Services.refreshNumber == cacheEntry.refreshNumber) {
+  if (cacheEntry != null && cacheEntry.algorithm.equalsIgnoreCase(algorithm) && newCacheVersion == cacheEntry.cacheVersion) {
     service=cacheEntry.service;
   }
  else {
@@ -17,7 +17,7 @@
     if (service == null) {
       throw notFound(serviceName,algorithm);
     }
-    this.serviceCache=new ServiceCacheEntry(algorithm,Services.refreshNumber,service);
+    this.serviceCache=new ServiceCacheEntry(algorithm,newCacheVersion,service);
   }
   return new SpiAndProvider(service.newInstance(param),service.getProvider());
 }

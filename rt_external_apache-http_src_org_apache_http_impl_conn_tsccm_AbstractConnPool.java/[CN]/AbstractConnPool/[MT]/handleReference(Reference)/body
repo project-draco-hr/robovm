@@ -1,0 +1,18 @@
+{
+  poolLock.lock();
+  try {
+    if (ref instanceof BasicPoolEntryRef) {
+      final boolean lost=issuedConnections.remove(ref);
+      if (lost) {
+        final HttpRoute route=((BasicPoolEntryRef)ref).getRoute();
+        if (log.isDebugEnabled()) {
+          log.debug("Connection garbage collected. " + route);
+        }
+        handleLostEntry(route);
+      }
+    }
+  }
+  finally {
+    poolLock.unlock();
+  }
+}

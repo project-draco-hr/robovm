@@ -1,0 +1,22 @@
+{
+  X509Certificate c=getCertificate(f,CERT_ALT_OTHER);
+  Collection<List<?>> col=c.getSubjectAlternativeNames();
+  assertNotNull(f.getProvider().getName(),col);
+  assertEquals(1,col.size());
+  List<?> item=col.iterator().next();
+  assertTrue(item.get(0) instanceof Integer);
+  assertTrue(0 == (Integer)item.get(0));
+  final byte[] der=getOIDTestBytes();
+  final byte[] actual=(byte[])item.get(1);
+  assertEquals(Arrays.toString(der),Arrays.toString(actual));
+{
+    actual[0]^=(byte)0xFF;
+    byte[] actual2=(byte[])c.getSubjectAlternativeNames().iterator().next().get(1);
+    if (!StandardNames.IS_RI) {
+      assertEquals(Arrays.toString(der),Arrays.toString(actual2));
+    }
+ else {
+      assertEquals(Arrays.toString(actual),Arrays.toString(actual2));
+    }
+  }
+}

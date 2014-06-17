@@ -1,0 +1,20 @@
+{
+  WorkQueue[] ws;
+  WorkQueue q;
+  Submitter z;
+  int m;
+  ForkJoinTask<?>[] a;
+  if ((z=submitters.get()) != null && plock > 0 && (ws=workQueues) != null && (m=(ws.length - 1)) >= 0 && (q=ws[m & z.seed & SQMASK]) != null && U.compareAndSwapInt(q,QLOCK,0,1)) {
+    int b=q.base, s=q.top, n, an;
+    if ((a=q.array) != null && (an=a.length) > (n=s + 1 - b)) {
+      int j=(((an - 1) & s) << ASHIFT) + ABASE;
+      U.putOrderedObject(a,j,task);
+      q.top=s + 1;
+      q.qlock=0;
+      if (n <= 2)       signalWork(q);
+      return;
+    }
+    q.qlock=0;
+  }
+  fullExternalPush(task);
+}

@@ -1,0 +1,12 @@
+{
+  writeDataToFile(fileOfReadWriteFileChannel);
+  MappedByteBuffer mapped=readWriteFileChannel.map(MapMode.READ_WRITE,10,CONTENT_LENGTH - 10);
+  assertEquals(CONTENT_LENGTH - 10,mapped.limit());
+  assertEquals(CONTENT.length() - 10,mapped.capacity());
+  assertEquals(0,mapped.position());
+  mapped.put(TEST_BYTES);
+  ByteBuffer checkBuffer=ByteBuffer.allocate(CONTENT_LENGTH);
+  readWriteFileChannel.read(checkBuffer);
+  String expected=CONTENT.substring(0,10) + "test" + CONTENT.substring(10 + "test".length());
+  assertEquals(expected,new String(checkBuffer.array(),"iso8859-1"));
+}

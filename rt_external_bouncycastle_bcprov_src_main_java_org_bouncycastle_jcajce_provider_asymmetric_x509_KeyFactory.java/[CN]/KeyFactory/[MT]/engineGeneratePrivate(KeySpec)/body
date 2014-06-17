@@ -1,0 +1,16 @@
+{
+  if (keySpec instanceof PKCS8EncodedKeySpec) {
+    try {
+      PrivateKeyInfo info=PrivateKeyInfo.getInstance(((PKCS8EncodedKeySpec)keySpec).getEncoded());
+      PrivateKey key=BouncyCastleProvider.getPrivateKey(info);
+      if (key != null) {
+        return key;
+      }
+      throw new InvalidKeySpecException("no factory found for OID: " + info.getPrivateKeyAlgorithm().getAlgorithm());
+    }
+ catch (    Exception e) {
+      throw new InvalidKeySpecException(e.toString());
+    }
+  }
+  throw new InvalidKeySpecException("Unknown KeySpec type: " + keySpec.getClass().getName());
+}

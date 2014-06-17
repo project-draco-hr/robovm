@@ -1,0 +1,17 @@
+{
+  if (classLoader == null) {
+    classLoader=ClassLoader.getSystemClassLoader();
+  }
+  Class<?> result;
+  try {
+    result=classForName(className,shouldInitialize,classLoader);
+  }
+ catch (  ClassNotFoundException e) {
+    Throwable cause=e.getCause();
+    if (cause instanceof ExceptionInInitializerError) {
+      throw (ExceptionInInitializerError)cause;
+    }
+    throw e;
+  }
+  return result;
+}

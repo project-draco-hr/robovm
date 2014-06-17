@@ -1,0 +1,25 @@
+{
+  if (pckg == null) {
+    throw new IllegalArgumentException("Package identifier must not be null.");
+  }
+  if (clsldr == null)   clsldr=Thread.currentThread().getContextClassLoader();
+  Properties vip=null;
+  try {
+    InputStream is=clsldr.getResourceAsStream(pckg.replace('.','/') + "/" + VERSION_PROPERTY_FILE);
+    if (is != null) {
+      try {
+        Properties props=new Properties();
+        props.load(is);
+        vip=props;
+      }
+  finally {
+        is.close();
+      }
+    }
+  }
+ catch (  IOException ex) {
+  }
+  VersionInfo result=null;
+  if (vip != null)   result=fromMap(pckg,vip,clsldr);
+  return result;
+}

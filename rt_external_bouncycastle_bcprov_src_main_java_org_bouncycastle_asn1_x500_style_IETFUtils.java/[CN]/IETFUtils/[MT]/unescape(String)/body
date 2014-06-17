@@ -1,0 +1,61 @@
+{
+  if (elt.length() == 0 || (elt.indexOf('\\') < 0 && elt.indexOf('"') < 0)) {
+    return elt.trim();
+  }
+  char[] elts=elt.toCharArray();
+  boolean escaped=false;
+  boolean quoted=false;
+  StringBuffer buf=new StringBuffer(elt.length());
+  int start=0;
+  if (elts[0] == '\\') {
+    if (elts[1] == '#') {
+      start=2;
+      buf.append("\\#");
+    }
+  }
+  boolean nonWhiteSpaceEncountered=false;
+  int lastEscaped=0;
+  char hex1=0;
+  for (int i=start; i != elts.length; i++) {
+    char c=elts[i];
+    if (c != ' ') {
+      nonWhiteSpaceEncountered=true;
+    }
+    if (c == '"') {
+      if (!escaped) {
+        quoted=!quoted;
+      }
+ else {
+        buf.append(c);
+      }
+      escaped=false;
+    }
+ else     if (c == '\\' && !(escaped || quoted)) {
+      escaped=true;
+      lastEscaped=buf.length();
+    }
+ else {
+      if (c == ' ' && !escaped && !nonWhiteSpaceEncountered) {
+        continue;
+      }
+      if (escaped && isHexDigit(c)) {
+        if (hex1 != 0) {
+          buf.append((char)(convertHex(hex1) * 16 + convertHex(c)));
+          escaped=false;
+          hex1=0;
+          continue;
+        }
+        hex1=c;
+        continue;
+      }
+      buf.append(c);
+      escaped=false;
+    }
+  }
+  if (buf.length() > 0) {
+    while (buf.charAt(buf.length() - 1) == ' ' && lastEscaped != (buf.length() - 1)) {
+      buf.setLength(buf.length() - 1);
+    }
+  }
+  return buf.toString();
+}

@@ -1,0 +1,12 @@
+{
+  int responseCode=connection.getResponseCode();
+  Response.Builder responseBuilder=new Response.Builder(request,responseCode);
+  for (int i=0; true; i++) {
+    String name=connection.getHeaderFieldKey(i);
+    if (name == null)     break;
+    String value=connection.getHeaderField(i);
+    responseBuilder.addHeader(name,value);
+  }
+  responseBuilder.body(new Dispatcher.RealResponseBody(connection,connection.getInputStream()));
+  return responseBuilder.build();
+}

@@ -1,0 +1,21 @@
+{
+  digest.doFinal(outputBuf,blockLength);
+  if (opadState != null) {
+    ((Memoable)digest).reset(opadState);
+    digest.update(outputBuf,blockLength,digest.getDigestSize());
+  }
+ else {
+    digest.update(outputBuf,0,outputBuf.length);
+  }
+  int len=digest.doFinal(out,outOff);
+  for (int i=blockLength; i < outputBuf.length; i++) {
+    outputBuf[i]=0;
+  }
+  if (ipadState != null) {
+    ((Memoable)digest).reset(ipadState);
+  }
+ else {
+    digest.update(inputPad,0,inputPad.length);
+  }
+  return len;
+}

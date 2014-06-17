@@ -1,0 +1,84 @@
+{
+  ZipOutputStream out=createZipOutputStream(createTemporaryZipFile());
+  CRC32 crc=new CRC32();
+  try {
+    ZipEntry ze=new ZipEntry("a");
+    ze.setMethod(ZipEntry.STORED);
+    out.putNextEntry(ze);
+    fail();
+  }
+ catch (  ZipException expected) {
+  }
+  try {
+    ZipEntry ze=new ZipEntry("a");
+    ze.setMethod(ZipEntry.STORED);
+    ze.setSize(0);
+    out.putNextEntry(ze);
+    fail();
+  }
+ catch (  ZipException expected) {
+  }
+  try {
+    ZipEntry ze=new ZipEntry("a");
+    ze.setMethod(ZipEntry.STORED);
+    ze.setSize(0);
+    ze.setCompressedSize(0);
+    out.putNextEntry(ze);
+    fail();
+  }
+ catch (  ZipException expected) {
+  }
+  try {
+    ZipEntry ze=new ZipEntry("a");
+    ze.setMethod(ZipEntry.STORED);
+    ze.setCrc(crc.getValue());
+    out.putNextEntry(ze);
+    fail();
+  }
+ catch (  ZipException expected) {
+  }
+{
+    ZipEntry ze=new ZipEntry("okay1");
+    ze.setMethod(ZipEntry.STORED);
+    ze.setCrc(crc.getValue());
+    assertEquals(-1,ze.getSize());
+    assertEquals(-1,ze.getCompressedSize());
+    ze.setCompressedSize(0);
+    assertEquals(-1,ze.getSize());
+    assertEquals(0,ze.getCompressedSize());
+    out.putNextEntry(ze);
+    assertEquals(0,ze.getSize());
+    assertEquals(0,ze.getCompressedSize());
+  }
+{
+    ZipEntry ze=new ZipEntry("okay2");
+    ze.setMethod(ZipEntry.STORED);
+    ze.setCrc(crc.getValue());
+    assertEquals(-1,ze.getSize());
+    assertEquals(-1,ze.getCompressedSize());
+    ze.setSize(0);
+    assertEquals(0,ze.getSize());
+    assertEquals(-1,ze.getCompressedSize());
+    out.putNextEntry(ze);
+    assertEquals(0,ze.getSize());
+    assertEquals(0,ze.getCompressedSize());
+  }
+  try {
+    ZipEntry ze=new ZipEntry("a");
+    ze.setMethod(ZipEntry.STORED);
+    ze.setCrc(crc.getValue());
+    ze.setCompressedSize(1);
+    ze.setSize(0);
+    out.putNextEntry(ze);
+    fail();
+  }
+ catch (  ZipException expected) {
+  }
+  ZipEntry ze=new ZipEntry("okay");
+  ze.setMethod(ZipEntry.STORED);
+  ze.setCrc(crc.getValue());
+  ze.setSize(0);
+  ze.setCompressedSize(0);
+  out.putNextEntry(ze);
+  out.close();
+}

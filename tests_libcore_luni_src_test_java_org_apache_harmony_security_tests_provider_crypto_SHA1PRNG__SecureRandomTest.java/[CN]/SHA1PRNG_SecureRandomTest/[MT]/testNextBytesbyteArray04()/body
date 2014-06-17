@@ -1,0 +1,48 @@
+{
+  SecureRandom sr1;
+  SecureRandom sr2;
+  byte[] myBytes;
+  byte[] myBytes1;
+  byte[] myBytes2;
+  for (int i=1; i < LENGTH / 2; i+=INCR) {
+    sr1=SecureRandom.getInstance(algorithm,provider);
+    sr2=SecureRandom.getInstance(algorithm,provider);
+    sr1.nextBytes(new byte[0]);
+    sr2.nextBytes(new byte[0]);
+    boolean flag=true;
+    myBytes1=new byte[i];
+    myBytes2=new byte[i];
+    sr1.nextBytes(myBytes1);
+    sr2.nextBytes(myBytes2);
+    for (int j=0; j < i; j++) {
+      flag&=myBytes1[j] == myBytes2[j];
+    }
+    sr1.nextBytes(myBytes1);
+    sr2.nextBytes(myBytes2);
+    for (int j=0; j < i; j++) {
+      flag&=myBytes1[j] == myBytes2[j];
+    }
+    if (flag) {
+      fail("TESTING RANDOM NUMBER GENERATOR QUALITY: IGNORE THIS FAILURE IF INTERMITTENT :: i=" + i);
+    }
+  }
+  myBytes=new byte[]{(byte)0};
+  for (int n=1; n < LENGTH; n+=INCR) {
+    byte[][] bytes1=new byte[2][n];
+    byte[][] bytes2=new byte[2][n];
+    sr1=SecureRandom.getInstance(algorithm,provider);
+    sr2=SecureRandom.getInstance(algorithm,provider);
+    sr1.setSeed(myBytes);
+    sr2.setSeed(myBytes);
+    sr1.nextBytes(bytes1[0]);
+    sr1.nextBytes(bytes1[1]);
+    sr2.nextBytes(bytes2[0]);
+    sr2.nextBytes(new byte[0]);
+    sr2.nextBytes(bytes2[1]);
+    for (int k=0; k < 2; k++) {
+      for (int j=0; j < n; j++) {
+        assertTrue("non-equality: k=" + k + " j="+ j+ " bytes1[k][j]="+ bytes1[k][j]+ " bytes2[k][j]="+ bytes2[k][j],bytes1[k][j] == bytes2[k][j]);
+      }
+    }
+  }
+}

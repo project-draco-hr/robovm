@@ -1,0 +1,30 @@
+{
+  writeDataToFile(fileOfReadOnlyFileChannel);
+  datagramChannelReceiver=DatagramChannel.open();
+  datagramChannelReceiver.socket().bind(new InetSocketAddress(InetAddress.getLocalHost(),0));
+  datagramChannelSender=DatagramChannel.open();
+  datagramChannelSender.socket().bind(new InetSocketAddress(InetAddress.getLocalHost(),0));
+  datagramChannelSender.socket().setSoTimeout(TIME_OUT);
+  datagramChannelSender.connect(datagramChannelReceiver.socket().getLocalSocketAddress());
+  datagramChannelReceiver.socket().setSoTimeout(TIME_OUT);
+  datagramChannelReceiver.connect(datagramChannelSender.socket().getLocalSocketAddress());
+  long result=readOnlyFileChannel.transferTo(0,CONTENT_AS_BYTES_LENGTH,datagramChannelSender);
+  assertEquals(CONTENT_AS_BYTES_LENGTH,result);
+  assertEquals(0,readOnlyFileChannel.position());
+  readOnlyFileChannel.close();
+  datagramChannelSender.close();
+  ByteBuffer readBuffer=ByteBuffer.allocate(CONTENT_AS_BYTES_LENGTH);
+  long beginTime=System.currentTimeMillis();
+  int totalRead=0;
+  while (totalRead < CONTENT_AS_BYTES_LENGTH) {
+    totalRead+=datagramChannelReceiver.read(readBuffer);
+    if (System.currentTimeMillis() - beginTime > TIME_OUT) {
+      break;
+    }
+  }
+  assertEquals(CONTENT_AS_BYTES_LENGTH,totalRead);
+  readBuffer.flip();
+  for (int i=0; i < CONTENT_AS_BYTES_LENGTH; i++) {
+    assertEquals(CONTENT_AS_BYTES[i],readBuffer.get());
+  }
+}

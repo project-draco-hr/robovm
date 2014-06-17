@@ -1,0 +1,15 @@
+{
+  final int pos=5;
+  ByteBuffer writeBuffer=ByteBuffer.wrap(CONTENT_AS_BYTES);
+  writeBuffer.position(pos);
+  int result=writeOnlyFileChannel.write(writeBuffer);
+  assertEquals(CONTENT_AS_BYTES_LENGTH - pos,result);
+  assertEquals(CONTENT_AS_BYTES_LENGTH,writeBuffer.position());
+  writeOnlyFileChannel.close();
+  assertEquals(CONTENT_AS_BYTES_LENGTH - pos,fileOfWriteOnlyFileChannel.length());
+  fis=new FileInputStream(fileOfWriteOnlyFileChannel);
+  byte[] inputBuffer=new byte[CONTENT_AS_BYTES_LENGTH - pos];
+  fis.read(inputBuffer);
+  String test=CONTENT.substring(pos);
+  assertTrue(Arrays.equals(test.getBytes("iso8859-1"),inputBuffer));
+}

@@ -1,0 +1,68 @@
+{
+  if (this == commonPool)   return false;
+  for (long c; ; ) {
+    if (((c=ctl) & STOP_BIT) != 0) {
+      if ((short)(c >>> TC_SHIFT) == -(config & SMASK)) {
+synchronized (this) {
+          notifyAll();
+        }
+      }
+      return true;
+    }
+    if (plock >= 0) {
+      int ps;
+      if (!enable)       return false;
+      if (((ps=plock) & PL_LOCK) != 0 || !U.compareAndSwapInt(this,PLOCK,ps,ps+=PL_LOCK))       ps=acquirePlock();
+      if (!U.compareAndSwapInt(this,PLOCK,ps,SHUTDOWN))       releasePlock(SHUTDOWN);
+    }
+    if (!now) {
+      if ((int)(c >> AC_SHIFT) != -(config & SMASK) || hasQueuedSubmissions())       return false;
+      WorkQueue[] ws=workQueues;
+      WorkQueue w;
+      if (ws != null) {
+        for (int i=1; i < ws.length; i+=2) {
+          if ((w=ws[i]) != null && w.eventCount >= 0)           return false;
+        }
+      }
+    }
+    if (U.compareAndSwapLong(this,CTL,c,c | STOP_BIT)) {
+      for (int pass=0; pass < 3; ++pass) {
+        WorkQueue[] ws=workQueues;
+        if (ws != null) {
+          WorkQueue w;
+          Thread wt;
+          int n=ws.length;
+          for (int i=0; i < n; ++i) {
+            if ((w=ws[i]) != null) {
+              w.qlock=-1;
+              if (pass > 0) {
+                w.cancelAll();
+                if (pass > 1 && (wt=w.owner) != null) {
+                  if (!wt.isInterrupted()) {
+                    try {
+                      wt.interrupt();
+                    }
+ catch (                    SecurityException ignore) {
+                    }
+                  }
+                  U.unpark(wt);
+                }
+              }
+            }
+          }
+          int i, e;
+          long cc;
+          Thread p;
+          while ((e=(int)(cc=ctl) & E_MASK) != 0 && (i=e & SMASK) < n && (w=ws[i]) != null) {
+            long nc=((long)(w.nextWait & E_MASK) | ((cc + AC_UNIT) & AC_MASK) | (cc & (TC_MASK | STOP_BIT)));
+            if (w.eventCount == (e | INT_SIGN) && U.compareAndSwapLong(this,CTL,cc,nc)) {
+              w.eventCount=(e + E_SEQ) & E_MASK;
+              w.qlock=-1;
+              if ((p=w.parker) != null)               U.unpark(p);
+            }
+          }
+        }
+      }
+    }
+  }
+}

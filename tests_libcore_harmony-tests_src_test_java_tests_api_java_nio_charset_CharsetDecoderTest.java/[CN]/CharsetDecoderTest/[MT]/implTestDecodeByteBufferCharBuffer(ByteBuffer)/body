@@ -1,0 +1,61 @@
+{
+  CharBuffer out=CharBuffer.allocate(100);
+  decoder.reset();
+  try {
+    decoder.decode(null,out,true);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    decoder.decode(in,null,true);
+    fail("NullPointerException expected");
+  }
+ catch (  NullPointerException e) {
+  }
+  decoder.reset();
+  in.rewind();
+  out.rewind();
+  assertSame(CoderResult.UNDERFLOW,decoder.decode(in,out,true));
+  assertEquals(out.limit(),100);
+  assertEquals(out.position(),getString().length());
+  assertEquals(out.remaining(),100 - getString().length());
+  assertEquals(out.capacity(),100);
+  assertCharBufferValue(getString(),out);
+  decoder.flush(out);
+  decoder.reset();
+  in.rewind();
+  out.clear();
+  assertSame(CoderResult.UNDERFLOW,decoder.decode(in,out,false));
+  assertEquals(out.limit(),100);
+  assertEquals(out.position(),getString().length());
+  assertEquals(out.remaining(),100 - getString().length());
+  assertEquals(out.capacity(),100);
+  assertCharBufferValue(getString(),out);
+  decoder.reset();
+  in.rewind();
+  out.clear();
+  assertSame(CoderResult.UNDERFLOW,decoder.decode(in,out,false));
+  in=getHeadlessByteBuffer();
+  assertSame(CoderResult.UNDERFLOW,decoder.decode(in,out,false));
+  in.rewind();
+  assertSame(CoderResult.UNDERFLOW,decoder.decode(in,out,true));
+  assertEquals(out.limit(),100);
+  assertTrue(out.position() > 0);
+  assertEquals(out.remaining(),out.capacity() - out.position());
+  assertEquals(out.capacity(),100);
+  assertCharBufferValue(getString() + getString() + getString(),out);
+  out=CharBuffer.allocate(4);
+  decoder.reset();
+  in=getByteBuffer();
+  out.rewind();
+  assertSame(CoderResult.OVERFLOW,decoder.decode(in,out,false));
+  assertCharBufferValue(getString().substring(0,4),out);
+  out=CharBuffer.allocate(100);
+  assertSame(CoderResult.UNDERFLOW,decoder.decode(in,out,false));
+  assertCharBufferValue(getString().substring(4),out);
+  in.rewind();
+  out=CharBuffer.allocate(100);
+  assertSame(CoderResult.UNDERFLOW,decoder.decode(in,out,true));
+  assertCharBufferValue(bom + getString(),out);
+}

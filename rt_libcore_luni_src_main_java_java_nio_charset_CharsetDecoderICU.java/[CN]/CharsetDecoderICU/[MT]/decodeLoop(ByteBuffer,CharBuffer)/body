@@ -5,15 +5,20 @@
   data[INPUT_OFFSET]=getArray(in);
   data[OUTPUT_OFFSET]=getArray(out);
   try {
-    ec=NativeConverter.decode(converterHandle,input,inEnd,output,outEnd,data,false);
-    if (ec == ErrorCode.U_BUFFER_OVERFLOW_ERROR) {
-      return CoderResult.OVERFLOW;
-    }
- else     if (ec == ErrorCode.U_INVALID_CHAR_FOUND) {
-      return CoderResult.unmappableForLength(data[INVALID_BYTES]);
-    }
- else     if (ec == ErrorCode.U_ILLEGAL_CHAR_FOUND) {
-      return CoderResult.malformedForLength(data[INVALID_BYTES]);
+    int error=NativeConverter.decode(converterHandle,input,inEnd,output,outEnd,data,false);
+    if (ICU.U_FAILURE(error)) {
+      if (error == ICU.U_BUFFER_OVERFLOW_ERROR) {
+        return CoderResult.OVERFLOW;
+      }
+ else       if (error == ICU.U_INVALID_CHAR_FOUND) {
+        return CoderResult.unmappableForLength(data[INVALID_BYTES]);
+      }
+ else       if (error == ICU.U_ILLEGAL_CHAR_FOUND) {
+        return CoderResult.malformedForLength(data[INVALID_BYTES]);
+      }
+ else {
+        throw new AssertionError(error);
+      }
     }
     return CoderResult.UNDERFLOW;
   }

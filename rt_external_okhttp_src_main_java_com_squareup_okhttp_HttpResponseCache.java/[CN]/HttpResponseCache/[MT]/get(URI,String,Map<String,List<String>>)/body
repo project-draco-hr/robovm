@@ -1,0 +1,20 @@
+{
+  String key=uriToKey(uri);
+  DiskLruCache.Snapshot snapshot;
+  Entry entry;
+  try {
+    snapshot=cache.get(key);
+    if (snapshot == null) {
+      return null;
+    }
+    entry=new Entry(snapshot.getInputStream(ENTRY_METADATA));
+  }
+ catch (  IOException e) {
+    return null;
+  }
+  if (!entry.matches(uri,requestMethod,requestHeaders)) {
+    snapshot.close();
+    return null;
+  }
+  return entry.isHttps() ? new EntrySecureCacheResponse(entry,snapshot) : new EntryCacheResponse(entry,snapshot);
+}

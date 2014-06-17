@@ -1,0 +1,19 @@
+{
+  List crls=new ArrayList();
+  try {
+    for (Iterator it=certStore.getCRLs(null).iterator(); it.hasNext(); ) {
+      X509CRL c=(X509CRL)it.next();
+      crls.add(CertificateList.getInstance(ASN1Primitive.fromByteArray(c.getEncoded())));
+    }
+    return crls;
+  }
+ catch (  IllegalArgumentException e) {
+    throw new CMSException("error processing crls",e);
+  }
+catch (  IOException e) {
+    throw new CMSException("error processing crls",e);
+  }
+catch (  CRLException e) {
+    throw new CMSException("error encoding crls",e);
+  }
+}

@@ -1,0 +1,21 @@
+{
+  try {
+    URI uri=request.getURI();
+    if (route.getProxyHost() != null && !route.isTunnelled()) {
+      if (!uri.isAbsolute()) {
+        HttpHost target=route.getTargetHost();
+        uri=URIUtils.rewriteURI(uri,target);
+        request.setURI(uri);
+      }
+    }
+ else {
+      if (uri.isAbsolute()) {
+        uri=URIUtils.rewriteURI(uri,null);
+        request.setURI(uri);
+      }
+    }
+  }
+ catch (  URISyntaxException ex) {
+    throw new ProtocolException("Invalid URI: " + request.getRequestLine().getUri(),ex);
+  }
+}

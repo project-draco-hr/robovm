@@ -1,0 +1,26 @@
+{
+  SecureRandom sr1;
+  SecureRandom sr2;
+  byte[] myBytes1;
+  byte[] myBytes2;
+  for (int i=1; i < LENGTH / 2; i+=INCR) {
+    sr1=SecureRandom.getInstance(algorithm,provider);
+    sr2=SecureRandom.getInstance(algorithm,provider);
+    boolean flag=true;
+    myBytes1=new byte[i];
+    myBytes2=new byte[i];
+    sr1.nextBytes(myBytes1);
+    sr2.nextBytes(myBytes2);
+    for (int j=0; j < i; j++) {
+      flag&=myBytes1[j] == myBytes2[j];
+    }
+    sr1.nextBytes(myBytes1);
+    sr2.nextBytes(myBytes2);
+    for (int j=0; j < i; j++) {
+      flag&=myBytes1[j] == myBytes2[j];
+    }
+    if (flag) {
+      fail("TESTING RANDOM NUMBER GENERATOR QUALITY: IGNORE THIS FAILURE IF INTERMITTENT :: i=" + i);
+    }
+  }
+}

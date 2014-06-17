@@ -1,0 +1,24 @@
+{
+  String line;
+  StringBuffer pemBuf=new StringBuffer();
+  while ((line=readLine(in)) != null) {
+    if (line.startsWith(_header1) || line.startsWith(_header2)) {
+      break;
+    }
+  }
+  while ((line=readLine(in)) != null) {
+    if (line.startsWith(_footer1) || line.startsWith(_footer2)) {
+      break;
+    }
+    pemBuf.append(line);
+  }
+  if (pemBuf.length() != 0) {
+    try {
+      return ASN1Sequence.getInstance(Base64.decode(pemBuf.toString()));
+    }
+ catch (    Exception e) {
+      throw new IOException("malformed PEM data encountered");
+    }
+  }
+  return null;
+}

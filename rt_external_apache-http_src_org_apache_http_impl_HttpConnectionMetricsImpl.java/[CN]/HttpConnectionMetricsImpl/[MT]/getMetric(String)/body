@@ -1,0 +1,31 @@
+{
+  Object value=null;
+  if (this.metricsCache != null) {
+    value=this.metricsCache.get(metricName);
+  }
+  if (value == null) {
+    if (REQUEST_COUNT.equals(metricName)) {
+      value=new Long(requestCount);
+    }
+ else     if (RESPONSE_COUNT.equals(metricName)) {
+      value=new Long(responseCount);
+    }
+ else     if (RECEIVED_BYTES_COUNT.equals(metricName)) {
+      if (this.inTransportMetric != null) {
+        return new Long(this.inTransportMetric.getBytesTransferred());
+      }
+ else {
+        return null;
+      }
+    }
+ else     if (SENT_BYTES_COUNT.equals(metricName)) {
+      if (this.outTransportMetric != null) {
+        return new Long(this.outTransportMetric.getBytesTransferred());
+      }
+ else {
+        return null;
+      }
+    }
+  }
+  return value;
+}

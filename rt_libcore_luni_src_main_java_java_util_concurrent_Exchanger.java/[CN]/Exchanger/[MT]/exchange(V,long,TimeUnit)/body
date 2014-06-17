@@ -1,9 +1,8 @@
 {
-  if (!Thread.interrupted()) {
-    Object v=doExchange((x == null) ? NULL_ITEM : x,true,unit.toNanos(timeout));
-    if (v == NULL_ITEM)     return null;
-    if (v != CANCEL)     return (V)v;
-    if (!Thread.interrupted())     throw new TimeoutException();
-  }
-  throw new InterruptedException();
+  Object v;
+  Object item=(x == null) ? NULL_ITEM : x;
+  long ns=unit.toNanos(timeout);
+  if ((arena != null || (v=slotExchange(item,true,ns)) == null) && ((Thread.interrupted() || (v=arenaExchange(item,true,ns)) == null)))   throw new InterruptedException();
+  if (v == TIMED_OUT)   throw new TimeoutException();
+  return (v == NULL_ITEM) ? null : (V)v;
 }

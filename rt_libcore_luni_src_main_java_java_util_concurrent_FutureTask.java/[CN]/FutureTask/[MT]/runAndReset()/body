@@ -1,3 +1,23 @@
 {
-  return sync.innerRunAndReset();
+  if (state != NEW || !UNSAFE.compareAndSwapObject(this,runnerOffset,null,Thread.currentThread()))   return false;
+  boolean ran=false;
+  int s=state;
+  try {
+    Callable<V> c=callable;
+    if (c != null && s == NEW) {
+      try {
+        c.call();
+        ran=true;
+      }
+ catch (      Throwable ex) {
+        setException(ex);
+      }
+    }
+  }
+  finally {
+    runner=null;
+    s=state;
+    if (s >= INTERRUPTING)     handlePossibleCancellationInterrupt(s);
+  }
+  return ran && s == NEW;
 }

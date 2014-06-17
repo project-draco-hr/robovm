@@ -1,0 +1,16 @@
+{
+  final ReentrantLock lock=ArrayBlockingQueue.this.lock;
+  lock.lock();
+  try {
+    if (!isDetached()) {
+      incorporateDequeues();
+      if (lastRet >= 0) {
+        lastItem=itemAt(lastRet);
+        detach();
+      }
+    }
+  }
+  finally {
+    lock.unlock();
+  }
+}

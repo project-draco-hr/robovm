@@ -1,0 +1,50 @@
+{
+  if (inStream == null) {
+    throw new ParsingException("inStream == null");
+  }
+  final boolean markable=inStream.markSupported();
+  if (markable) {
+    inStream.mark(PKCS7_MARKER.length);
+  }
+  final PushbackInputStream pbis=new PushbackInputStream(inStream,PUSHBACK_SIZE);
+  try {
+    final byte[] buffer=new byte[PKCS7_MARKER.length];
+    final int len=pbis.read(buffer);
+    if (len < 0) {
+      throw new ParsingException("inStream is empty");
+    }
+    pbis.unread(buffer,0,len);
+    if (buffer[0] == '-') {
+      if (len == PKCS7_MARKER.length && Arrays.equals(PKCS7_MARKER,buffer)) {
+        List<? extends T> items=fromPkcs7PemInputStream(pbis);
+        if (items.size() == 0) {
+          return null;
+        }
+        items.get(0);
+      }
+ else {
+        return fromX509PemInputStream(pbis);
+      }
+    }
+    if (buffer[4] == 0x06) {
+      List<? extends T> certs=fromPkcs7DerInputStream(pbis);
+      if (certs.size() == 0) {
+        return null;
+      }
+      return certs.get(0);
+    }
+ else {
+      return fromX509DerInputStream(pbis);
+    }
+  }
+ catch (  Exception e) {
+    if (markable) {
+      try {
+        inStream.reset();
+      }
+ catch (      IOException ignored) {
+      }
+    }
+    throw new ParsingException(e);
+  }
+}

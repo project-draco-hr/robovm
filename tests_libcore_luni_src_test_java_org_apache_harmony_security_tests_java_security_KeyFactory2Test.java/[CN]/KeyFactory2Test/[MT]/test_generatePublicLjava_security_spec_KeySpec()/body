@@ -1,28 +1,16 @@
 {
   for (int i=0; i < keyfactAlgs.length; i++) {
-    try {
-      KeyFactory fact=KeyFactory.getInstance(keyfactAlgs[i],providerName);
-      KeyPairGenerator keyGen=KeyPairGenerator.getInstance(keyfactAlgs[i]);
-      SecureRandom random=new SecureRandom();
-      keyGen.initialize(StandardNames.getMinimumKeySize(keyfactAlgs[i]),random);
-      KeepAlive keepalive=createKeepAlive(keyfactAlgs[i]);
-      KeyPair keys=keyGen.generateKeyPair();
-      if (keepalive != null) {
-        keepalive.interrupt();
-      }
-      KeySpec publicKeySpec=fact.getKeySpec(keys.getPublic(),StandardNames.getPublicKeySpecClass(keyfactAlgs[i]));
-      PublicKey publicKey=fact.generatePublic(publicKeySpec);
-      boolean samePublic=Arrays.equals(keys.getPublic().getEncoded(),publicKey.getEncoded());
-      assertTrue("generatePublic generated different key for algorithm " + keyfactAlgs[i],samePublic);
+    KeyFactory fact=KeyFactory.getInstance(keyfactAlgs[i],providerName);
+    KeyPairGenerator keyGen=KeyPairGenerator.getInstance(keyfactAlgs[i]);
+    SecureRandom random=new SecureRandom();
+    keyGen.initialize(StandardNames.getMinimumKeySize(keyfactAlgs[i]),random);
+    KeepAlive keepalive=createKeepAlive(keyfactAlgs[i]);
+    KeyPair keys=keyGen.generateKeyPair();
+    if (keepalive != null) {
+      keepalive.interrupt();
     }
- catch (    NoSuchAlgorithmException e) {
-      fail("getInstance did not find algorithm " + keyfactAlgs[i]);
-    }
-catch (    NoSuchProviderException e) {
-      fail("getInstance did not find provider " + providerName);
-    }
-catch (    InvalidKeySpecException e) {
-      fail("invalid key spec for algorithm " + keyfactAlgs[i]);
-    }
+    KeySpec publicKeySpec=fact.getKeySpec(keys.getPublic(),StandardNames.getPublicKeySpecClass(keyfactAlgs[i]));
+    PublicKey publicKey=fact.generatePublic(publicKeySpec);
+    assertEquals("generatePublic generated different key for algorithm " + keyfactAlgs[i] + " (provider="+ fact.getProvider().getName()+ ")",Arrays.toString(keys.getPublic().getEncoded()),Arrays.toString(publicKey.getEncoded()));
   }
 }

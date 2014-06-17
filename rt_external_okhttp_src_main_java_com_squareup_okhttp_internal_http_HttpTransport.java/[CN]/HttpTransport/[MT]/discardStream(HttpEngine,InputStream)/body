@@ -1,0 +1,20 @@
+{
+  Connection connection=httpEngine.connection;
+  if (connection == null)   return false;
+  Socket socket=connection.getSocket();
+  if (socket == null)   return false;
+  try {
+    int socketTimeout=socket.getSoTimeout();
+    socket.setSoTimeout(DISCARD_STREAM_TIMEOUT_MILLIS);
+    try {
+      Util.skipAll(responseBodyIn);
+      return true;
+    }
+  finally {
+      socket.setSoTimeout(socketTimeout);
+    }
+  }
+ catch (  IOException e) {
+    return false;
+  }
+}

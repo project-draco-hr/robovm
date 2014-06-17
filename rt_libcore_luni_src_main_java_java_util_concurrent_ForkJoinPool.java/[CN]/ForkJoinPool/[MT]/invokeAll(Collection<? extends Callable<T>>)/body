@@ -1,0 +1,17 @@
+{
+  ArrayList<Future<T>> futures=new ArrayList<Future<T>>(tasks.size());
+  boolean done=false;
+  try {
+    for (    Callable<T> t : tasks) {
+      ForkJoinTask<T> f=new ForkJoinTask.AdaptedCallable<T>(t);
+      futures.add(f);
+      externalPush(f);
+    }
+    for (int i=0, size=futures.size(); i < size; i++)     ((ForkJoinTask<?>)futures.get(i)).quietlyJoin();
+    done=true;
+    return futures;
+  }
+  finally {
+    if (!done)     for (int i=0, size=futures.size(); i < size; i++)     futures.get(i).cancel(false);
+  }
+}

@@ -1,0 +1,21 @@
+{
+  this.info=info;
+  this.contentType=contentType;
+  this.isCounterSignature=contentType == null;
+  SignerIdentifier s=info.getSID();
+  if (s.isTagged()) {
+    ASN1OctetString octs=ASN1OctetString.getInstance(s.getId());
+    sid=new SignerId(octs.getOctets());
+  }
+ else {
+    IssuerAndSerialNumber iAnds=IssuerAndSerialNumber.getInstance(s.getId());
+    sid=new SignerId(iAnds.getName(),iAnds.getSerialNumber().getValue());
+  }
+  this.digestAlgorithm=info.getDigestAlgorithm();
+  this.signedAttributeSet=info.getAuthenticatedAttributes();
+  this.unsignedAttributeSet=info.getUnauthenticatedAttributes();
+  this.encryptionAlgorithm=info.getDigestEncryptionAlgorithm();
+  this.signature=info.getEncryptedDigest().getOctets();
+  this.content=content;
+  this.resultDigest=resultDigest;
+}

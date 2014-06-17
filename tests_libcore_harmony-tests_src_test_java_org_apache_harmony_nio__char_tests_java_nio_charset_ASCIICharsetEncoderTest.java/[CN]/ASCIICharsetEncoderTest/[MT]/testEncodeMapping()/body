@@ -1,0 +1,30 @@
+{
+  encoder.reset();
+  for (int i=0; i <= MAXCODEPOINT; i++) {
+    char[] chars=Character.toChars(i);
+    CharBuffer cb=CharBuffer.wrap(chars);
+    ByteBuffer bb=encoder.encode(cb);
+    assertEquals(i,bb.get(0));
+  }
+  CharBuffer cb=CharBuffer.wrap("\u0080");
+  try {
+    encoder.encode(cb);
+  }
+ catch (  UnmappableCharacterException e) {
+  }
+  cb=CharBuffer.wrap("\ud800");
+  try {
+    encoder.encode(cb);
+  }
+ catch (  MalformedInputException e) {
+  }
+  ByteBuffer bb=ByteBuffer.allocate(0x10);
+  cb=CharBuffer.wrap("A");
+  encoder.reset();
+  encoder.encode(cb,bb,false);
+  try {
+    encoder.encode(cb);
+  }
+ catch (  IllegalStateException e) {
+  }
+}

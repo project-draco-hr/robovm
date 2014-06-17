@@ -1,0 +1,7 @@
+{
+  int s=(Thread.currentThread() instanceof ForkJoinWorkerThread) ? doJoin() : externalInterruptibleAwaitDone();
+  Throwable ex;
+  if ((s&=DONE_MASK) == CANCELLED)   throw new CancellationException();
+  if (s == EXCEPTIONAL && (ex=getThrowableException()) != null)   throw new ExecutionException(ex);
+  return getRawResult();
+}

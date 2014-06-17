@@ -1,0 +1,13 @@
+{
+  if (crlSet != null) {
+    List crlList=new ArrayList(crlSet.size());
+    for (Enumeration en=crlSet.getObjects(); en.hasMoreElements(); ) {
+      ASN1Primitive obj=((ASN1Encodable)en.nextElement()).toASN1Primitive();
+      if (obj instanceof ASN1Sequence) {
+        crlList.add(new X509CRLHolder(CertificateList.getInstance(obj)));
+      }
+    }
+    return new CollectionStore(crlList);
+  }
+  return new CollectionStore(new ArrayList());
+}

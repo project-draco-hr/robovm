@@ -1,0 +1,24 @@
+{
+  super();
+  if (usernamePassword == null) {
+    throw new IllegalArgumentException("Username:password string may not be null");
+  }
+  String username;
+  int atColon=usernamePassword.indexOf(':');
+  if (atColon >= 0) {
+    username=usernamePassword.substring(0,atColon);
+    this.password=usernamePassword.substring(atColon + 1);
+  }
+ else {
+    username=usernamePassword;
+    this.password=null;
+  }
+  int atSlash=username.indexOf('/');
+  if (atSlash >= 0) {
+    this.principal=new NTUserPrincipal(username.substring(0,atSlash).toUpperCase(Locale.ENGLISH),username.substring(atSlash + 1));
+  }
+ else {
+    this.principal=new NTUserPrincipal(null,username.substring(atSlash + 1));
+  }
+  this.workstation=null;
+}

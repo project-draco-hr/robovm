@@ -1,0 +1,89 @@
+{
+  if (isDiagnosticsEnabled()) {
+    logDiagnostic("Attempting to instantiate '" + logAdapterClassName + "'");
+  }
+  Object[] params={logCategory};
+  Log logAdapter=null;
+  Constructor constructor=null;
+  Class logAdapterClass=null;
+  ClassLoader currentCL=getBaseClassLoader();
+  for (; ; ) {
+    logDiagnostic("Trying to load '" + logAdapterClassName + "' from classloader "+ objectId(currentCL));
+    try {
+      if (isDiagnosticsEnabled()) {
+        URL url;
+        String resourceName=logAdapterClassName.replace('.','/') + ".class";
+        if (currentCL != null) {
+          url=currentCL.getResource(resourceName);
+        }
+ else {
+          url=ClassLoader.getSystemResource(resourceName + ".class");
+        }
+        if (url == null) {
+          logDiagnostic("Class '" + logAdapterClassName + "' ["+ resourceName+ "] cannot be found.");
+        }
+ else {
+          logDiagnostic("Class '" + logAdapterClassName + "' was found at '"+ url+ "'");
+        }
+      }
+      Class c=null;
+      try {
+        c=Class.forName(logAdapterClassName,true,currentCL);
+      }
+ catch (      ClassNotFoundException originalClassNotFoundException) {
+        String msg="" + originalClassNotFoundException.getMessage();
+        logDiagnostic("The log adapter '" + logAdapterClassName + "' is not available via classloader "+ objectId(currentCL)+ ": "+ msg.trim());
+        try {
+          c=Class.forName(logAdapterClassName);
+        }
+ catch (        ClassNotFoundException secondaryClassNotFoundException) {
+          msg="" + secondaryClassNotFoundException.getMessage();
+          logDiagnostic("The log adapter '" + logAdapterClassName + "' is not available via the LogFactoryImpl class classloader: "+ msg.trim());
+          break;
+        }
+      }
+      constructor=c.getConstructor(logConstructorSignature);
+      Object o=constructor.newInstance(params);
+      if (o instanceof Log) {
+        logAdapterClass=c;
+        logAdapter=(Log)o;
+        break;
+      }
+      handleFlawedHierarchy(currentCL,c);
+    }
+ catch (    NoClassDefFoundError e) {
+      String msg="" + e.getMessage();
+      logDiagnostic("The log adapter '" + logAdapterClassName + "' is missing dependencies when loaded via classloader "+ objectId(currentCL)+ ": "+ msg.trim());
+      break;
+    }
+catch (    ExceptionInInitializerError e) {
+      String msg="" + e.getMessage();
+      logDiagnostic("The log adapter '" + logAdapterClassName + "' is unable to initialize itself when loaded via classloader "+ objectId(currentCL)+ ": "+ msg.trim());
+      break;
+    }
+catch (    LogConfigurationException e) {
+      throw e;
+    }
+catch (    Throwable t) {
+      handleFlawedDiscovery(logAdapterClassName,currentCL,t);
+    }
+    if (currentCL == null) {
+      break;
+    }
+    currentCL=currentCL.getParent();
+  }
+  if ((logAdapter != null) && affectState) {
+    this.logClassName=logAdapterClassName;
+    this.logConstructor=constructor;
+    try {
+      this.logMethod=logAdapterClass.getMethod("setLogFactory",logMethodSignature);
+      logDiagnostic("Found method setLogFactory(LogFactory) in '" + logAdapterClassName + "'");
+    }
+ catch (    Throwable t) {
+      this.logMethod=null;
+      logDiagnostic("[INFO] '" + logAdapterClassName + "' from classloader "+ objectId(currentCL)+ " does not declare optional method "+ "setLogFactory(LogFactory)");
+    }
+    logDiagnostic("Log adapter '" + logAdapterClassName + "' from classloader "+ objectId(logAdapterClass.getClassLoader())+ " has been selected for use.");
+  }
+  return logAdapter;
+}

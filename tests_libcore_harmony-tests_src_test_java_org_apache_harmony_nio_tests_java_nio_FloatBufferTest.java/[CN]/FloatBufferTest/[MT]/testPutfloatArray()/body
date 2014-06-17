@@ -1,0 +1,24 @@
+{
+  float array[]=new float[1];
+  buf.clear();
+  for (int i=0; i < buf.capacity(); i++) {
+    assertEquals(buf.position(),i);
+    array[0]=(float)i;
+    FloatBuffer ret=buf.put(array);
+    assertEquals(buf.get(i),(float)i,0.0);
+    assertSame(ret,buf);
+  }
+  try {
+    buf.put(array);
+    fail("Should throw Exception");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  try {
+    buf.position(buf.limit());
+    buf.put((float[])null);
+    fail("Should throw Exception");
+  }
+ catch (  NullPointerException e) {
+  }
+}

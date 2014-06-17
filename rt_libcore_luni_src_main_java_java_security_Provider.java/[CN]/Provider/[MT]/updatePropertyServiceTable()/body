@@ -27,21 +27,21 @@
       serviceName=service_alias.substring(0,i);
       aliasName=service_alias.substring(i + 1);
       algorithm=value;
-      String algUp=algorithm.toUpperCase(Locale.US);
+      String propertyServiceTableKey=key(serviceName,algorithm);
       Object o=null;
       if (propertyServiceTable == null) {
-        propertyServiceTable=new TwoKeyHashMap<String,String,Service>(128);
+        propertyServiceTable=new LinkedHashMap<String,Service>(128);
       }
  else {
-        o=propertyServiceTable.get(serviceName,algUp);
+        o=propertyServiceTable.get(propertyServiceTableKey);
       }
       if (o != null) {
         s=(Provider.Service)o;
         s.addAlias(aliasName);
         if (propertyAliasTable == null) {
-          propertyAliasTable=new TwoKeyHashMap<String,String,Service>(256);
+          propertyAliasTable=new LinkedHashMap<String,Service>(256);
         }
-        propertyAliasTable.put(serviceName,aliasName.toUpperCase(Locale.US),s);
+        propertyAliasTable.put(key(serviceName,aliasName),s);
       }
  else {
         String className=(String)changedProperties.get(serviceName + "." + algorithm);
@@ -49,11 +49,11 @@
           List<String> l=new ArrayList<String>();
           l.add(aliasName);
           s=new Provider.Service(this,serviceName,algorithm,className,l,new HashMap<String,String>());
-          propertyServiceTable.put(serviceName,algUp,s);
+          propertyServiceTable.put(propertyServiceTableKey,s);
           if (propertyAliasTable == null) {
-            propertyAliasTable=new TwoKeyHashMap<String,String,Service>(256);
+            propertyAliasTable=new LinkedHashMap<String,Service>(256);
           }
-          propertyAliasTable.put(serviceName,aliasName.toUpperCase(Locale.US),s);
+          propertyAliasTable.put(key(serviceName,aliasName),s);
         }
       }
       continue;
@@ -66,10 +66,10 @@
     if (i == -1) {
       serviceName=key.substring(0,j);
       algorithm=key.substring(j + 1);
-      String alg=algorithm.toUpperCase(Locale.US);
+      String propertyServiceTableKey=key(serviceName,algorithm);
       Object o=null;
       if (propertyServiceTable != null) {
-        o=propertyServiceTable.get(serviceName,alg);
+        o=propertyServiceTable.get(propertyServiceTableKey);
       }
       if (o != null) {
         s=(Provider.Service)o;
@@ -78,19 +78,19 @@
  else {
         s=new Provider.Service(this,serviceName,algorithm,value,Collections.<String>emptyList(),Collections.<String,String>emptyMap());
         if (propertyServiceTable == null) {
-          propertyServiceTable=new TwoKeyHashMap<String,String,Service>(128);
+          propertyServiceTable=new LinkedHashMap<String,Service>(128);
         }
-        propertyServiceTable.put(serviceName,alg,s);
+        propertyServiceTable.put(propertyServiceTableKey,s);
       }
     }
  else {
       serviceName=key.substring(0,j);
       algorithm=key.substring(j + 1,i);
       String attribute=key.substring(i + 1);
-      String alg=algorithm.toUpperCase(Locale.US);
+      String propertyServiceTableKey=key(serviceName,algorithm);
       Object o=null;
       if (propertyServiceTable != null) {
-        o=propertyServiceTable.get(serviceName,alg);
+        o=propertyServiceTable.get(propertyServiceTableKey);
       }
       if (o != null) {
         s=(Provider.Service)o;
@@ -103,9 +103,9 @@
           m.put(attribute,value);
           s=new Provider.Service(this,serviceName,algorithm,className,new ArrayList<String>(),m);
           if (propertyServiceTable == null) {
-            propertyServiceTable=new TwoKeyHashMap<String,String,Service>(128);
+            propertyServiceTable=new LinkedHashMap<String,Service>(128);
           }
-          propertyServiceTable.put(serviceName,alg,s);
+          propertyServiceTable.put(propertyServiceTableKey,s);
         }
       }
     }

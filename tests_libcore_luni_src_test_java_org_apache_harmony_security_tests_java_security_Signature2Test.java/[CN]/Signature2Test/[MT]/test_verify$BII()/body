@@ -18,11 +18,17 @@
   }
  catch (  IllegalArgumentException expected) {
   }
-  try {
-    sig.verify(signature,signature.length,0);
-    fail();
+  if (StandardNames.IS_RI) {
+    try {
+      sig.verify(signature,signature.length,0);
+      fail();
+    }
+ catch (    SignatureException expected) {
+    }
   }
- catch (  SignatureException expected) {
+ else {
+    boolean verified=sig.verify(signature,signature.length,0);
+    assertFalse(verified);
   }
   try {
     sig.verify(signature,0,signature.length * 2);

@@ -1,0 +1,29 @@
+{
+  try {
+    String cipherName=null;
+    if (!extraAlgNames.isEmpty()) {
+      cipherName=(String)extraAlgNames.get(algorithm);
+    }
+    if (cipherName == null) {
+      cipherName=(String)asymmetricWrapperAlgNames.get(algorithm);
+    }
+    if (cipherName != null) {
+      try {
+        return helper.createCipher(cipherName);
+      }
+ catch (      NoSuchAlgorithmException e) {
+        if (cipherName.equals("RSA/ECB/PKCS1Padding")) {
+          try {
+            return helper.createCipher("RSA/NONE/PKCS1Padding");
+          }
+ catch (          NoSuchAlgorithmException ex) {
+          }
+        }
+      }
+    }
+    return helper.createCipher(algorithm.getId());
+  }
+ catch (  GeneralSecurityException e) {
+    throw new OperatorCreationException("cannot create cipher: " + e.getMessage(),e);
+  }
+}

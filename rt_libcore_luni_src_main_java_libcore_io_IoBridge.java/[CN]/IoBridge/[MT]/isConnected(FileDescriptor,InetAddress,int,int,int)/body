@@ -26,14 +26,8 @@
     }
   }
   String detail=connectDetail(inetAddress,port,timeoutMs,cause);
-  if (cause.errno == ECONNRESET || cause.errno == ECONNREFUSED || cause.errno == EADDRNOTAVAIL || cause.errno == EADDRINUSE || cause.errno == ENETUNREACH) {
-    throw new ConnectException(detail,cause);
-  }
- else   if (cause.errno == EACCES) {
-    throw new SecurityException(detail,cause);
-  }
- else   if (cause.errno == ETIMEDOUT) {
+  if (cause.errno == ETIMEDOUT) {
     throw new SocketTimeoutException(detail,cause);
   }
-  throw new SocketException(detail,cause);
+  throw new ConnectException(detail,cause);
 }

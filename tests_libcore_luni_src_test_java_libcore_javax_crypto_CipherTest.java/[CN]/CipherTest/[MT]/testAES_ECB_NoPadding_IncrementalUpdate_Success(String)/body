@@ -1,0 +1,15 @@
+{
+  SecretKey key=new SecretKeySpec(AES_128_KEY,"AES");
+  Cipher c=Cipher.getInstance("AES/ECB/NoPadding",provider);
+  c.init(Cipher.ENCRYPT_MODE,key);
+  for (int i=0; i < AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded.length - 1; i++) {
+    final byte[] outputFragment=c.update(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded,i,1);
+    if (outputFragment != null) {
+      assertEquals(0,outputFragment.length);
+    }
+  }
+  final byte[] output=c.doFinal(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded,AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded.length - 1,1);
+  assertNotNull(output);
+  assertEquals(AES_128_ECB_PKCS5Padding_TestVector_1_Plaintext_Padded.length,output.length);
+  assertTrue(Arrays.equals(AES_128_ECB_PKCS5Padding_TestVector_1_Encrypted,output));
+}

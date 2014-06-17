@@ -1,0 +1,22 @@
+{
+  if (this.bufferpos > 0) {
+    int len=this.bufferlen - this.bufferpos;
+    if (len > 0) {
+      System.arraycopy(this.buffer,this.bufferpos,this.buffer,0,len);
+    }
+    this.bufferpos=0;
+    this.bufferlen=len;
+  }
+  int l;
+  int off=this.bufferlen;
+  int len=this.buffer.length - off;
+  l=this.instream.read(this.buffer,off,len);
+  if (l == -1) {
+    return -1;
+  }
+ else {
+    this.bufferlen=off + l;
+    this.metrics.incrementBytesTransferred(l);
+    return l;
+  }
+}

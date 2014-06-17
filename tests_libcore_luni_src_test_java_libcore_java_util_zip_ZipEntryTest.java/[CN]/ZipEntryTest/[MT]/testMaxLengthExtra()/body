@@ -1,0 +1,13 @@
+{
+  byte[] maxLengthExtra=new byte[65535];
+  File f=createTemporaryZipFile();
+  ZipOutputStream out=createZipOutputStream(f);
+  ZipEntry ze=new ZipEntry("x");
+  ze.setExtra(maxLengthExtra);
+  out.putNextEntry(ze);
+  out.closeEntry();
+  out.close();
+  ZipFile zipFile=new ZipFile(f);
+  assertEquals(maxLengthExtra.length,zipFile.getEntry("x").getExtra().length);
+  zipFile.close();
+}

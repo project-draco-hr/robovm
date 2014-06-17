@@ -1,0 +1,19 @@
+{
+  try {
+    OpenSSLKey pkey=new OpenSSLKey(NativeCrypto.X509_get_pubkey(mContext));
+    return pkey.getPublicKey();
+  }
+ catch (  NoSuchAlgorithmException ignored) {
+  }
+  String oid=NativeCrypto.get_X509_pubkey_oid(mContext);
+  byte[] encoded=NativeCrypto.i2d_X509_PUBKEY(mContext);
+  try {
+    KeyFactory kf=KeyFactory.getInstance(oid);
+    return kf.generatePublic(new X509EncodedKeySpec(encoded));
+  }
+ catch (  NoSuchAlgorithmException ignored) {
+  }
+catch (  InvalidKeySpecException ignored) {
+  }
+  return new X509PublicKey(oid,encoded);
+}

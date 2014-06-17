@@ -1,0 +1,40 @@
+{
+  byte[] writeContent=new byte[CAPACITY_NORMAL * 2];
+  for (int i=0; i < CAPACITY_NORMAL * 2; i++) {
+    writeContent[i]=(byte)i;
+  }
+  ByteBuffer[] readContents=new ByteBuffer[2];
+  readContents[0]=ByteBuffer.allocate(CAPACITY_NORMAL);
+  readContents[1]=ByteBuffer.allocate(CAPACITY_NORMAL + 1);
+  channel1.connect(localAddr1);
+  Socket acceptedSocket=server1.accept();
+  OutputStream out=acceptedSocket.getOutputStream();
+  out.write(writeContent);
+  acceptedSocket.close();
+  channel1.configureBlocking(isBlocking);
+  long startTime=System.currentTimeMillis();
+  long totalRead=0;
+  long countRead=0;
+  while (totalRead <= CAPACITY_NORMAL * 2) {
+    countRead=channel1.read(readContents,0,2);
+    if (0 == countRead && !readContents[1].hasRemaining()) {
+      break;
+    }
+    if (EOF == countRead) {
+      break;
+    }
+    totalRead+=countRead;
+    assertTimeout(startTime,TIMEOUT);
+  }
+  assertEquals(CAPACITY_NORMAL * 2,totalRead);
+  assertEquals(CAPACITY_NORMAL,readContents[0].position());
+  assertEquals(CAPACITY_NORMAL,readContents[1].position());
+  readContents[0].flip();
+  readContents[1].flip();
+  for (int i=0; i < CAPACITY_NORMAL; i++) {
+    assertEquals(writeContent[i],readContents[0].get());
+  }
+  for (int i=CAPACITY_NORMAL; i < CAPACITY_NORMAL * 2; i++) {
+    assertEquals(writeContent[i],readContents[1].get());
+  }
+}

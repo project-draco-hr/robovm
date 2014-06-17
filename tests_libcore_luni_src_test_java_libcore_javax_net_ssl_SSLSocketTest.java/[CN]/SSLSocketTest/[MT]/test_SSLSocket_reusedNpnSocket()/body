@@ -1,0 +1,52 @@
+{
+  if (StandardNames.IS_RI) {
+    return;
+  }
+  byte[] npnProtocols=new byte[]{8,'h','t','t','p','/','1','.','1'};
+  final TestSSLContext c=TestSSLContext.create();
+  SSLSocket client=(SSLSocket)c.clientContext.getSocketFactory().createSocket();
+  String expectedClassName="com.android.org.conscrypt.OpenSSLSocketImpl";
+  Class<?> actualClass=client.getClass();
+  assertEquals(expectedClassName,actualClass.getName());
+  Method setNpnProtocols=actualClass.getMethod("setNpnProtocols",byte[].class);
+  ExecutorService executor=Executors.newSingleThreadExecutor();
+{
+    setNpnProtocols.invoke(client,npnProtocols);
+    client.connect(new InetSocketAddress(c.host,c.port));
+    final SSLSocket server=(SSLSocket)c.serverSocket.accept();
+    assertEquals(expectedClassName,server.getClass().getName());
+    setNpnProtocols.invoke(server,npnProtocols);
+    Future<Void> future=executor.submit(new Callable<Void>(){
+      @Override public Void call() throws Exception {
+        server.startHandshake();
+        return null;
+      }
+    }
+);
+    client.startHandshake();
+    future.get();
+    client.close();
+    server.close();
+  }
+{
+    SSLServerSocket serverSocket=(SSLServerSocket)c.serverContext.getServerSocketFactory().createServerSocket(0);
+    InetAddress host=InetAddress.getLocalHost();
+    int port=serverSocket.getLocalPort();
+    client=(SSLSocket)c.clientContext.getSocketFactory().createSocket();
+    client.connect(new InetSocketAddress(host,port));
+    final SSLSocket server=(SSLSocket)serverSocket.accept();
+    Future<Void> future=executor.submit(new Callable<Void>(){
+      @Override public Void call() throws Exception {
+        server.startHandshake();
+        return null;
+      }
+    }
+);
+    client.startHandshake();
+    future.get();
+    client.close();
+    server.close();
+    serverSocket.close();
+  }
+  c.close();
+}

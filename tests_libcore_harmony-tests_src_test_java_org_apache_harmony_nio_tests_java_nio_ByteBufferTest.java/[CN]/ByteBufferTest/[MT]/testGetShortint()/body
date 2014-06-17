@@ -1,0 +1,27 @@
+{
+  int nbytes=2;
+  byte bytes[]=new byte[nbytes];
+  short value;
+  buf.clear();
+  for (int i=0; i <= buf.limit() - nbytes; i++) {
+    buf.order(i % 2 == 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
+    buf.position(i);
+    value=buf.getShort(i);
+    assertEquals(i,buf.position());
+    buf.get(bytes);
+    assertEquals(bytes2short(bytes,buf.order()),value);
+  }
+  try {
+    buf.getShort(-1);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    buf.getShort(buf.limit() - nbytes + 1);
+    fail("Should throw Exception");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  buf.order(ByteOrder.BIG_ENDIAN);
+}

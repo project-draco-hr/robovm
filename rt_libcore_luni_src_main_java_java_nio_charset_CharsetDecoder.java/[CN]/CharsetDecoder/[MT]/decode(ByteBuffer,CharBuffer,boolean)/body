@@ -1,10 +1,10 @@
 {
-  if ((status == FLUSH) || (!endOfInput && status == END)) {
-    throw new IllegalStateException();
+  if (state != RESET && state != ONGOING && !(endOfInput && state == END_OF_INPUT)) {
+    throw illegalStateException();
   }
-  CoderResult result=null;
+  state=endOfInput ? END_OF_INPUT : ONGOING;
   while (true) {
-    CodingErrorAction action=null;
+    CoderResult result;
     try {
       result=decodeLoop(in,out);
     }
@@ -14,31 +14,26 @@
 catch (    BufferUnderflowException ex) {
       throw new CoderMalfunctionError(ex);
     }
-    if (result.isUnderflow()) {
-      int remaining=in.remaining();
-      status=endOfInput ? END : ONGOING;
-      if (endOfInput && remaining > 0) {
-        result=CoderResult.malformedForLength(remaining);
+    if (result == CoderResult.UNDERFLOW) {
+      if (endOfInput && in.hasRemaining()) {
+        result=CoderResult.malformedForLength(in.remaining());
       }
  else {
         return result;
       }
     }
-    if (result.isOverflow()) {
+ else     if (result == CoderResult.OVERFLOW) {
       return result;
     }
-    action=malformedInputAction;
-    if (result.isUnmappable()) {
-      action=unmappableCharacterAction;
+    CodingErrorAction action=result.isUnmappable() ? unmappableCharacterAction : malformedInputAction;
+    if (action == CodingErrorAction.REPORT) {
+      return result;
     }
-    if (action == CodingErrorAction.REPLACE) {
+ else     if (action == CodingErrorAction.REPLACE) {
       if (out.remaining() < replacementChars.length()) {
         return CoderResult.OVERFLOW;
       }
       out.put(replacementChars);
-    }
- else {
-      if (action != CodingErrorAction.IGNORE)       return result;
     }
     in.position(in.position() + result.length());
   }

@@ -1,0 +1,24 @@
+{
+  short array[]=new short[1];
+  buf.clear();
+  for (int i=0; i < buf.capacity(); i++) {
+    assertEquals(buf.position(),i);
+    array[0]=(short)i;
+    ShortBuffer ret=buf.put(array);
+    assertEquals(buf.get(i),(short)i);
+    assertSame(ret,buf);
+  }
+  try {
+    buf.put(array);
+    fail("Should throw Exception");
+  }
+ catch (  BufferOverflowException e) {
+  }
+  try {
+    buf.position(buf.limit());
+    buf.put((short[])null);
+    fail("Should throw Exception");
+  }
+ catch (  NullPointerException e) {
+  }
+}

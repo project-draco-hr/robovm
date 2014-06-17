@@ -1,0 +1,60 @@
+{
+  if (keyParam == null) {
+    throw new IllegalStateException("CCM cipher unitialized.");
+  }
+  int n=nonce.length;
+  int q=15 - n;
+  if (q < 4) {
+    int limitLen=1 << (8 * q);
+    if (inLen >= limitLen) {
+      throw new IllegalStateException("CCM packet too large for choice of q.");
+    }
+  }
+  byte[] iv=new byte[blockSize];
+  iv[0]=(byte)((q - 1) & 0x7);
+  System.arraycopy(nonce,0,iv,1,nonce.length);
+  BlockCipher ctrCipher=new SICBlockCipher(cipher);
+  ctrCipher.init(forEncryption,new ParametersWithIV(keyParam,iv));
+  int index=inOff;
+  int outOff=0;
+  byte[] output;
+  if (forEncryption) {
+    output=new byte[inLen + macSize];
+    calculateMac(in,inOff,inLen,macBlock);
+    ctrCipher.processBlock(macBlock,0,macBlock,0);
+    while (index < inLen - blockSize) {
+      ctrCipher.processBlock(in,index,output,outOff);
+      outOff+=blockSize;
+      index+=blockSize;
+    }
+    byte[] block=new byte[blockSize];
+    System.arraycopy(in,index,block,0,inLen - index);
+    ctrCipher.processBlock(block,0,block,0);
+    System.arraycopy(block,0,output,outOff,inLen - index);
+    outOff+=inLen - index;
+    System.arraycopy(macBlock,0,output,outOff,output.length - outOff);
+  }
+ else {
+    output=new byte[inLen - macSize];
+    System.arraycopy(in,inOff + inLen - macSize,macBlock,0,macSize);
+    ctrCipher.processBlock(macBlock,0,macBlock,0);
+    for (int i=macSize; i != macBlock.length; i++) {
+      macBlock[i]=0;
+    }
+    while (outOff < output.length - blockSize) {
+      ctrCipher.processBlock(in,index,output,outOff);
+      outOff+=blockSize;
+      index+=blockSize;
+    }
+    byte[] block=new byte[blockSize];
+    System.arraycopy(in,index,block,0,output.length - outOff);
+    ctrCipher.processBlock(block,0,block,0);
+    System.arraycopy(block,0,output,outOff,output.length - outOff);
+    byte[] calculatedMacBlock=new byte[blockSize];
+    calculateMac(output,0,output.length,calculatedMacBlock);
+    if (!Arrays.constantTimeAreEqual(macBlock,calculatedMacBlock)) {
+      throw new InvalidCipherTextException("mac check in CCM failed");
+    }
+  }
+  return output;
+}

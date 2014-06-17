@@ -1,0 +1,72 @@
+{
+  if (key == null) {
+    throw new InvalidKeyException("key == null");
+  }
+  if ((key instanceof OpenSSLRSAPublicKey) || (key instanceof OpenSSLRSAPrivateKey)) {
+    return key;
+  }
+ else   if (key instanceof RSAPublicKey) {
+    RSAPublicKey rsaKey=(RSAPublicKey)key;
+    try {
+      return engineGeneratePublic(new RSAPublicKeySpec(rsaKey.getModulus(),rsaKey.getPublicExponent()));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else   if (key instanceof RSAPrivateCrtKey) {
+    RSAPrivateCrtKey rsaKey=(RSAPrivateCrtKey)key;
+    BigInteger modulus=rsaKey.getModulus();
+    BigInteger publicExponent=rsaKey.getPublicExponent();
+    BigInteger privateExponent=rsaKey.getPrivateExponent();
+    BigInteger primeP=rsaKey.getPrimeP();
+    BigInteger primeQ=rsaKey.getPrimeQ();
+    BigInteger primeExponentP=rsaKey.getPrimeExponentP();
+    BigInteger primeExponentQ=rsaKey.getPrimeExponentQ();
+    BigInteger crtCoefficient=rsaKey.getCrtCoefficient();
+    try {
+      return engineGeneratePrivate(new RSAPrivateCrtKeySpec(modulus,publicExponent,privateExponent,primeP,primeQ,primeExponentP,primeExponentQ,crtCoefficient));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else   if (key instanceof RSAPrivateKey) {
+    RSAPrivateKey rsaKey=(RSAPrivateKey)key;
+    BigInteger modulus=rsaKey.getModulus();
+    BigInteger privateExponent=rsaKey.getPrivateExponent();
+    try {
+      return engineGeneratePrivate(new RSAPrivateKeySpec(modulus,privateExponent));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else   if ((key instanceof PrivateKey) && ("PKCS#8".equals(key.getFormat()))) {
+    byte[] encoded=key.getEncoded();
+    if (encoded == null) {
+      throw new InvalidKeyException("Key does not support encoding");
+    }
+    try {
+      return engineGeneratePrivate(new PKCS8EncodedKeySpec(encoded));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else   if ((key instanceof PublicKey) && ("X.509".equals(key.getFormat()))) {
+    byte[] encoded=key.getEncoded();
+    if (encoded == null) {
+      throw new InvalidKeyException("Key does not support encoding");
+    }
+    try {
+      return engineGeneratePublic(new X509EncodedKeySpec(encoded));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else {
+    throw new InvalidKeyException("Key must be an RSA public or private key; was " + key.getClass().getName());
+  }
+}

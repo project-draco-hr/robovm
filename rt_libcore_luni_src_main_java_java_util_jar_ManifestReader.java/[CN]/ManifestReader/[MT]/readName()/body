@@ -1,0 +1,23 @@
+{
+  int mark=pos;
+  while (pos < buf.length) {
+    if (buf[pos++] != ':') {
+      continue;
+    }
+    String nameString=new String(buf,mark,pos - mark - 1,StandardCharsets.US_ASCII);
+    if (buf[pos++] != ' ') {
+      throw new IOException(String.format("Invalid value for attribute '%s'",nameString));
+    }
+    try {
+      name=attributeNameCache.get(nameString);
+      if (name == null) {
+        name=new Attributes.Name(nameString);
+        attributeNameCache.put(nameString,name);
+      }
+    }
+ catch (    IllegalArgumentException e) {
+      throw new IOException(e.getMessage());
+    }
+    return;
+  }
+}

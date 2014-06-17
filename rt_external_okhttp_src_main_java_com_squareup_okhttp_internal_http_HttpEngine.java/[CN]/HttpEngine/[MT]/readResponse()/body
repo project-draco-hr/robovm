@@ -1,0 +1,47 @@
+{
+  if (hasResponse()) {
+    responseHeaders.setResponseSource(responseSource);
+    return;
+  }
+  if (responseSource == null) {
+    throw new IllegalStateException("readResponse() without sendRequest()");
+  }
+  if (!responseSource.requiresConnection()) {
+    return;
+  }
+  if (sentRequestMillis == -1) {
+    if (requestBodyOut instanceof RetryableOutputStream) {
+      int contentLength=((RetryableOutputStream)requestBodyOut).contentLength();
+      requestHeaders.setContentLength(contentLength);
+    }
+    transport.writeRequestHeaders();
+  }
+  if (requestBodyOut != null) {
+    requestBodyOut.close();
+    if (requestBodyOut instanceof RetryableOutputStream) {
+      transport.writeRequestBody((RetryableOutputStream)requestBodyOut);
+    }
+  }
+  transport.flushRequest();
+  responseHeaders=transport.readResponseHeaders();
+  responseHeaders.setLocalTimestamps(sentRequestMillis,System.currentTimeMillis());
+  responseHeaders.setResponseSource(responseSource);
+  if (responseSource == ResponseSource.CONDITIONAL_CACHE) {
+    if (cachedResponseHeaders.validate(responseHeaders)) {
+      release(false);
+      ResponseHeaders combinedHeaders=cachedResponseHeaders.combine(responseHeaders);
+      setResponse(combinedHeaders,cachedResponseBody);
+      OkResponseCache responseCache=client.getOkResponseCache();
+      responseCache.trackConditionalCacheHit();
+      responseCache.update(cacheResponse,policy.getHttpConnectionToCache());
+      return;
+    }
+ else {
+      Util.closeQuietly(cachedResponseBody);
+    }
+  }
+  if (hasResponseBody()) {
+    maybeCache();
+  }
+  initContentStream(transport.getTransferStream(cacheRequest));
+}

@@ -1,0 +1,51 @@
+{
+  assert(!Thread.holdsLock(this));
+  IOException thrown=null;
+  try {
+    shutdown(shutdownStatusCode);
+  }
+ catch (  IOException e) {
+    thrown=e;
+  }
+  SpdyStream[] streamsToClose=null;
+  Ping[] pingsToCancel=null;
+synchronized (this) {
+    if (!streams.isEmpty()) {
+      streamsToClose=streams.values().toArray(new SpdyStream[streams.size()]);
+      streams.clear();
+      setIdle(false);
+    }
+    if (pings != null) {
+      pingsToCancel=pings.values().toArray(new Ping[pings.size()]);
+      pings=null;
+    }
+  }
+  if (streamsToClose != null) {
+    for (    SpdyStream stream : streamsToClose) {
+      try {
+        stream.close(rstStatusCode);
+      }
+ catch (      IOException e) {
+        if (thrown != null)         thrown=e;
+      }
+    }
+  }
+  if (pingsToCancel != null) {
+    for (    Ping ping : pingsToCancel) {
+      ping.cancel();
+    }
+  }
+  try {
+    spdyReader.close();
+  }
+ catch (  IOException e) {
+    thrown=e;
+  }
+  try {
+    spdyWriter.close();
+  }
+ catch (  IOException e) {
+    if (thrown == null)     thrown=e;
+  }
+  if (thrown != null)   throw thrown;
+}

@@ -128,31 +128,25 @@
     format.parse("January 31 1970 7:52:34 AM PST");
     fail("ParseException was not thrown.");
   }
- catch (  ParseException pe) {
+ catch (  ParseException expected) {
   }
   try {
     format.parse("January 31 1970");
     fail("ParseException was not thrown.");
   }
- catch (  ParseException pe) {
+ catch (  ParseException expected) {
   }
   format=DateFormat.getDateTimeInstance(DateFormat.FULL,DateFormat.FULL,Locale.US);
-  try {
-    Date date=format.parse(format.format(current).toString());
-    assertEquals(current.getDate(),date.getDate());
-    assertEquals(current.getDay(),date.getDay());
-    assertEquals(current.getMonth(),date.getMonth());
-    assertEquals(current.getYear(),date.getYear());
-    assertEquals(current.getHours(),date.getHours());
-    assertEquals(current.getMinutes(),date.getMinutes());
-  }
- catch (  ParseException pe) {
-    fail("ParseException was thrown for current Date.");
+  String formatPattern=((SimpleDateFormat)format).toPattern();
+  String formattedCurrent=format.format(current);
+  Date date=format.parse(formattedCurrent);
+  if (date.getTime() / 1000 != current.getTime() / 1000) {
+    fail(date.getTime() + " != " + current.getTime()+ "; "+ formatPattern+ "; "+ formattedCurrent);
   }
   try {
     format.parse("January 16, 1970 8:03:52 PM CET");
     fail("ParseException was not thrown.");
   }
- catch (  ParseException pe) {
+ catch (  ParseException expected) {
   }
 }

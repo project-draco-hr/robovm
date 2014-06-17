@@ -1,0 +1,44 @@
+{
+  int probes=tryHarder ? LONG_SWEEP_PROBES : SHORT_SWEEP_PROBES;
+  Node o, p;
+  final Node sweeper=this.sweeper;
+  boolean passedGo;
+  if (sweeper == null) {
+    o=null;
+    p=head;
+    passedGo=true;
+  }
+ else {
+    o=sweeper;
+    p=o.next;
+    passedGo=false;
+  }
+  for (; probes > 0; probes--) {
+    if (p == null) {
+      if (passedGo)       break;
+      o=null;
+      p=head;
+      passedGo=true;
+    }
+    final Itr it=p.get();
+    final Node next=p.next;
+    if (it == null || it.isDetached()) {
+      probes=LONG_SWEEP_PROBES;
+      p.clear();
+      p.next=null;
+      if (o == null) {
+        head=next;
+        if (next == null) {
+          itrs=null;
+          return;
+        }
+      }
+ else       o.next=next;
+    }
+ else {
+      o=p;
+    }
+    p=next;
+  }
+  this.sweeper=(p == null) ? null : o;
+}

@@ -1,0 +1,22 @@
+{
+  final OpenSSLX509Certificate[] certs=new OpenSSLX509Certificate[mCertificates.size()];
+  final long[] certRefs=new long[certs.length];
+  for (int i=0, j=certs.length - 1; j >= 0; i++, j--) {
+    final X509Certificate cert=mCertificates.get(i);
+    if (cert instanceof OpenSSLX509Certificate) {
+      certs[j]=(OpenSSLX509Certificate)cert;
+    }
+ else {
+      certs[j]=OpenSSLX509Certificate.fromX509Der(cert.getEncoded());
+    }
+    certRefs[j]=certs[j].getContext();
+  }
+switch (encoding) {
+case PKI_PATH:
+    return NativeCrypto.ASN1_seq_pack_X509(certRefs);
+case PKCS7:
+  return NativeCrypto.i2d_PKCS7(certRefs);
+default :
+throw new CertificateEncodingException("Unknown encoding");
+}
+}

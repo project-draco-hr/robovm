@@ -1,0 +1,23 @@
+{
+  if (obj == null || obj instanceof ASN1Set) {
+    return (ASN1Set)obj;
+  }
+ else   if (obj instanceof ASN1SetParser) {
+    return ASN1Set.getInstance(((ASN1SetParser)obj).toASN1Primitive());
+  }
+ else   if (obj instanceof byte[]) {
+    try {
+      return ASN1Set.getInstance(ASN1Primitive.fromByteArray((byte[])obj));
+    }
+ catch (    IOException e) {
+      throw new IllegalArgumentException("failed to construct set from byte[]: " + e.getMessage());
+    }
+  }
+ else   if (obj instanceof ASN1Encodable) {
+    ASN1Primitive primitive=((ASN1Encodable)obj).toASN1Primitive();
+    if (primitive instanceof ASN1Set) {
+      return (ASN1Set)primitive;
+    }
+  }
+  throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
+}

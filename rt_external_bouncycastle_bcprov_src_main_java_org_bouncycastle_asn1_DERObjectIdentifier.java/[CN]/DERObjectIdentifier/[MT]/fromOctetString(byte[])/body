@@ -1,0 +1,42 @@
+{
+  if (enc.length < 3) {
+    return new ASN1ObjectIdentifier(enc);
+  }
+  int idx1=enc[enc.length - 2] & 0xff;
+  int idx2=enc[enc.length - 1] & 0x7f;
+  ASN1ObjectIdentifier possibleMatch;
+synchronized (cache) {
+    ASN1ObjectIdentifier[] first=cache[idx1];
+    if (first == null) {
+      first=cache[idx1]=new ASN1ObjectIdentifier[128];
+    }
+    possibleMatch=first[idx2];
+    if (possibleMatch == null) {
+      return first[idx2]=new ASN1ObjectIdentifier(enc);
+    }
+    if (Arrays.areEqual(enc,possibleMatch.getBody())) {
+      return possibleMatch;
+    }
+    idx1=(idx1 + 1) & 0xff;
+    first=cache[idx1];
+    if (first == null) {
+      first=cache[idx1]=new ASN1ObjectIdentifier[128];
+    }
+    possibleMatch=first[idx2];
+    if (possibleMatch == null) {
+      return first[idx2]=new ASN1ObjectIdentifier(enc);
+    }
+    if (Arrays.areEqual(enc,possibleMatch.getBody())) {
+      return possibleMatch;
+    }
+    idx2=(idx2 + 1) & 0x7f;
+    possibleMatch=first[idx2];
+    if (possibleMatch == null) {
+      return first[idx2]=new ASN1ObjectIdentifier(enc);
+    }
+  }
+  if (Arrays.areEqual(enc,possibleMatch.getBody())) {
+    return possibleMatch;
+  }
+  return new ASN1ObjectIdentifier(enc);
+}

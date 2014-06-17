@@ -1,0 +1,34 @@
+{
+  File tmpFile=File.createTempFile("TestFileForScanner",".tmp");
+  FileChannel fc=new FileOutputStream(tmpFile).getChannel();
+  s=new Scanner(fc,Charset.defaultCharset().name());
+  assertNotNull(s);
+  s.close();
+  fc=new FileOutputStream(tmpFile).getChannel();
+  try {
+    s=new Scanner(fc,"invalid charset");
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  fc.close();
+  assertTrue(tmpFile.delete());
+  try {
+    s=new Scanner((ReadableByteChannel)null,null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    s=new Scanner((ReadableByteChannel)null,"invalid");
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    s=new Scanner(fc,null);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+}

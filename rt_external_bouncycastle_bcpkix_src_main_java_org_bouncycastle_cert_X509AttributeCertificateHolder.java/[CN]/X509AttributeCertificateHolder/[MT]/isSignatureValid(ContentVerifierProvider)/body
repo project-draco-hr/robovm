@@ -1,0 +1,18 @@
+{
+  AttributeCertificateInfo acinfo=attrCert.getAcinfo();
+  if (!CertUtils.isAlgIdEqual(acinfo.getSignature(),attrCert.getSignatureAlgorithm())) {
+    throw new CertException("signature invalid - algorithm identifier mismatch");
+  }
+  ContentVerifier verifier;
+  try {
+    verifier=verifierProvider.get((acinfo.getSignature()));
+    OutputStream sOut=verifier.getOutputStream();
+    DEROutputStream dOut=new DEROutputStream(sOut);
+    dOut.writeObject(acinfo);
+    sOut.close();
+  }
+ catch (  Exception e) {
+    throw new CertException("unable to process signature: " + e.getMessage(),e);
+  }
+  return verifier.verify(attrCert.getSignatureValue().getBytes());
+}

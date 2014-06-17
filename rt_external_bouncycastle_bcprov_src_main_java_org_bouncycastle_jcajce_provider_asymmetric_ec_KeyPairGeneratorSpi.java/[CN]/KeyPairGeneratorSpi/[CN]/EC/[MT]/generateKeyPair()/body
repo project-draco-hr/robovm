@@ -1,0 +1,21 @@
+{
+  if (!initialised) {
+    initialize(strength,new SecureRandom());
+  }
+  AsymmetricCipherKeyPair pair=engine.generateKeyPair();
+  ECPublicKeyParameters pub=(ECPublicKeyParameters)pair.getPublic();
+  ECPrivateKeyParameters priv=(ECPrivateKeyParameters)pair.getPrivate();
+  if (ecParams instanceof ECParameterSpec) {
+    ECParameterSpec p=(ECParameterSpec)ecParams;
+    BCECPublicKey pubKey=new BCECPublicKey(algorithm,pub,p,configuration);
+    return new KeyPair(pubKey,new BCECPrivateKey(algorithm,priv,pubKey,p,configuration));
+  }
+ else   if (ecParams == null) {
+    return new KeyPair(new BCECPublicKey(algorithm,pub,configuration),new BCECPrivateKey(algorithm,priv,configuration));
+  }
+ else {
+    java.security.spec.ECParameterSpec p=(java.security.spec.ECParameterSpec)ecParams;
+    BCECPublicKey pubKey=new BCECPublicKey(algorithm,pub,p,configuration);
+    return new KeyPair(pubKey,new BCECPrivateKey(algorithm,priv,pubKey,p,configuration));
+  }
+}

@@ -1,0 +1,35 @@
+{
+  boolean complete=false;
+  MockInterruptibleChannel testChannel=new MockInterruptibleChannel();
+  try {
+    testChannel.superBegin();
+    complete=true;
+  }
+  finally {
+    testChannel.superEnd(complete);
+  }
+  try {
+    testChannel.superBegin();
+    complete=false;
+  }
+  finally {
+    testChannel.superEnd(complete);
+  }
+  try {
+    testChannel.superBegin();
+    complete=true;
+  }
+  finally {
+    testChannel.superEnd(complete);
+  }
+  testChannel.superBegin();
+  try {
+    testChannel.superBegin();
+    complete=true;
+  }
+  finally {
+    testChannel.superEnd(complete);
+  }
+  assertTrue(testChannel.isOpen());
+  testChannel.close();
+}

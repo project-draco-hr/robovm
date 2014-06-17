@@ -1,0 +1,30 @@
+{
+  final ConcurrentHashMap<Integer,Integer> m=new ConcurrentHashMap<Integer,Integer>();
+  final AtomicBoolean finished=new AtomicBoolean(false);
+  Thread reader=new Thread(new Runnable(){
+    @Override public void run(){
+      while (!finished.get()) {
+        m.values().toArray();
+        m.values().toArray(new Integer[m.size()]);
+      }
+    }
+  }
+);
+  Thread mutator=new Thread(new Runnable(){
+    @Override public void run(){
+      for (int i=0; i < 100; ++i) {
+        m.put(-i,-i);
+      }
+      for (int i=0; i < 4096; ++i) {
+        m.put(i,i);
+        m.remove(i);
+      }
+      finished.set(true);
+    }
+  }
+);
+  reader.start();
+  mutator.start();
+  reader.join();
+  mutator.join();
+}

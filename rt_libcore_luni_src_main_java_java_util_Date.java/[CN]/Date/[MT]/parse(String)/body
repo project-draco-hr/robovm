@@ -35,7 +35,7 @@
       nextState=NUMBERS;
     }
  else     if (!Character.isSpace(next) && ",+-:/".indexOf(next) == -1) {
-      throw new IllegalArgumentException();
+      throw parseError(string);
     }
     if (state == NUMBERS && nextState != NUMBERS) {
       int digit=Integer.parseInt(buffer.toString());
@@ -51,7 +51,7 @@
           sign=0;
         }
  else {
-          throw new IllegalArgumentException();
+          throw parseError(string);
         }
       }
  else       if (digit >= 70) {
@@ -59,7 +59,7 @@
           year=digit;
         }
  else {
-          throw new IllegalArgumentException();
+          throw parseError(string);
         }
       }
  else       if (next == ':') {
@@ -70,7 +70,7 @@
           minute=digit;
         }
  else {
-          throw new IllegalArgumentException();
+          throw parseError(string);
         }
       }
  else       if (next == '/') {
@@ -81,7 +81,7 @@
           date=digit;
         }
  else {
-          throw new IllegalArgumentException();
+          throw parseError(string);
         }
       }
  else       if (Character.isSpace(next) || next == ',' || next == '-' || next == '\r') {
@@ -98,28 +98,28 @@
           year=digit;
         }
  else {
-          throw new IllegalArgumentException();
+          throw parseError(string);
         }
       }
  else       if (year == -1 && month != -1 && date != -1) {
         year=digit;
       }
  else {
-        throw new IllegalArgumentException();
+        throw parseError(string);
       }
     }
  else     if (state == LETTERS && nextState != LETTERS) {
       String text=buffer.toString().toUpperCase(Locale.US);
       buffer.setLength(0);
       if (text.length() == 1) {
-        throw new IllegalArgumentException();
+        throw parseError(string);
       }
       if (text.equals("AM")) {
         if (hour == 12) {
           hour=0;
         }
  else         if (hour < 1 || hour > 12) {
-          throw new IllegalArgumentException();
+          throw parseError(string);
         }
       }
  else       if (text.equals("PM")) {
@@ -127,7 +127,7 @@
           hour=0;
         }
  else         if (hour < 1 || hour > 12) {
-          throw new IllegalArgumentException();
+          throw parseError(string);
         }
         hour+=12;
       }
@@ -148,7 +148,7 @@
           zoneOffset=value;
         }
  else {
-          throw new IllegalArgumentException();
+          throw parseError(string);
         }
       }
     }
@@ -173,7 +173,7 @@
     if (second == -1) {
       second=0;
     }
-    if (year < (creationYear - 80)) {
+    if (year < (CREATION_YEAR - 80)) {
       year+=2000;
     }
  else     if (year < 100) {
@@ -192,5 +192,5 @@
     }
     return new Date(year - 1900,month,date,hour,minute,second).getTime();
   }
-  throw new IllegalArgumentException();
+  throw parseError(string);
 }

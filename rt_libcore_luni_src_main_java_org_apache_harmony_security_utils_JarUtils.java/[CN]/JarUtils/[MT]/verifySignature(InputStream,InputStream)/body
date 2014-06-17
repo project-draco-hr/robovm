@@ -37,29 +37,46 @@
   if (certs[issuerSertIndex].hasUnsupportedCriticalExtension()) {
     throw new SecurityException("Can not recognize a critical extension");
   }
-  Signature sig=null;
-  String da=sigInfo.getDigestAlgorithm();
-  String dea=sigInfo.getDigestEncryptionAlgorithm();
+  final String daOid=sigInfo.getDigestAlgorithm();
+  final String daName=sigInfo.getDigestAlgorithmName();
+  final String deaOid=sigInfo.getDigestEncryptionAlgorithm();
   String alg=null;
-  if (da != null && dea != null) {
-    alg=da + "with" + dea;
+  Signature sig=null;
+  if (daOid != null && deaOid != null) {
+    alg=daOid + "with" + deaOid;
     try {
-      sig=Signature.getInstance(alg,OpenSSLProvider.PROVIDER_NAME);
+      sig=Signature.getInstance(alg);
     }
  catch (    NoSuchAlgorithmException e) {
+    }
+    if (sig == null) {
+      final String deaName=sigInfo.getDigestEncryptionAlgorithmName();
+      alg=daName + "with" + deaName;
+      try {
+        sig=Signature.getInstance(alg);
+      }
+ catch (      NoSuchAlgorithmException e) {
+      }
+    }
+  }
+  if (sig == null && daOid != null) {
+    alg=daOid;
+    try {
+      sig=Signature.getInstance(alg);
+    }
+ catch (    NoSuchAlgorithmException e) {
+    }
+    if (sig == null && daName != null) {
+      alg=daName;
+      try {
+        sig=Signature.getInstance(alg);
+      }
+ catch (      NoSuchAlgorithmException e) {
+      }
     }
   }
   if (sig == null) {
-    alg=da;
-    if (alg == null) {
-      return null;
-    }
-    try {
-      sig=Signature.getInstance(alg,OpenSSLProvider.PROVIDER_NAME);
-    }
- catch (    NoSuchAlgorithmException e) {
-      return null;
-    }
+    return null;
   }
   sig.initVerify(certs[issuerSertIndex]);
   List<AttributeTypeAndValue> atr=sigInfo.getAuthenticatedAttributes();
@@ -73,14 +90,32 @@
     byte[] existingDigest=null;
     for (    AttributeTypeAndValue a : atr) {
       if (Arrays.equals(a.getType().getOid(),MESSAGE_DIGEST_OID)) {
+        if (existingDigest != null) {
+          throw new SecurityException("Too many MessageDigest attributes");
+        }
+        Collection<?> entries=a.getValue().getValues(ASN1OctetString.getInstance());
+        if (entries.size() != 1) {
+          throw new SecurityException("Too many values for MessageDigest attribute");
+        }
+        existingDigest=(byte[])entries.iterator().next();
       }
     }
-    if (existingDigest != null) {
-      MessageDigest md=MessageDigest.getInstance(sigInfo.getDigestAlgorithm());
-      byte[] computedDigest=md.digest(sfBytes);
-      if (!Arrays.equals(existingDigest,computedDigest)) {
-        throw new SecurityException("Incorrect MD");
-      }
+    if (existingDigest == null) {
+      throw new SecurityException("Missing MessageDigest in Authenticated Attributes");
+    }
+    MessageDigest md=null;
+    if (daOid != null) {
+      md=MessageDigest.getInstance(daOid);
+    }
+    if (md == null && daName != null) {
+      md=MessageDigest.getInstance(daName);
+    }
+    if (md == null) {
+      return null;
+    }
+    byte[] computedDigest=md.digest(sfBytes);
+    if (!Arrays.equals(existingDigest,computedDigest)) {
+      throw new SecurityException("Incorrect MD");
     }
   }
   if (!sig.verify(sigInfo.getEncryptedDigest())) {

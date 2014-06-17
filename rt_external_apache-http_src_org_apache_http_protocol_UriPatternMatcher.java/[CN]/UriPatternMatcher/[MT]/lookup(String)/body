@@ -1,0 +1,23 @@
+{
+  if (requestURI == null) {
+    throw new IllegalArgumentException("Request URI may not be null");
+  }
+  int index=requestURI.indexOf("?");
+  if (index != -1) {
+    requestURI=requestURI.substring(0,index);
+  }
+  Object handler=this.handlerMap.get(requestURI);
+  if (handler == null) {
+    String bestMatch=null;
+    for (Iterator it=this.handlerMap.keySet().iterator(); it.hasNext(); ) {
+      String pattern=(String)it.next();
+      if (matchUriRequestPattern(pattern,requestURI)) {
+        if (bestMatch == null || (bestMatch.length() < pattern.length()) || (bestMatch.length() == pattern.length() && pattern.endsWith("*"))) {
+          handler=this.handlerMap.get(pattern);
+          bestMatch=pattern;
+        }
+      }
+    }
+  }
+  return handler;
+}

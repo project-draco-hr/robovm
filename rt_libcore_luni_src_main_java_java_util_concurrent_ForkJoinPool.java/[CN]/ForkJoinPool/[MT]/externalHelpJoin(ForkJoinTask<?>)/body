@@ -1,0 +1,26 @@
+{
+  ForkJoinPool p;
+  WorkQueue[] ws;
+  WorkQueue q, w;
+  Submitter z;
+  ForkJoinTask<?>[] a;
+  int m, s, n;
+  if (t != null && (z=submitters.get()) != null && (p=commonPool) != null && (ws=p.workQueues) != null && (m=ws.length - 1) >= 0 && (q=ws[m & z.seed & SQMASK]) != null && (a=q.array) != null) {
+    int am=a.length - 1;
+    if ((s=q.top) != q.base) {
+      long j=((am & (s - 1)) << ASHIFT) + ABASE;
+      if (U.getObject(a,j) == t && U.compareAndSwapInt(q,QLOCK,0,1)) {
+        if (q.array == a && q.top == s && U.compareAndSwapObject(a,j,t,null)) {
+          q.top=s - 1;
+          q.qlock=0;
+          t.doExec();
+        }
+ else         q.qlock=0;
+      }
+    }
+    if (t.status >= 0) {
+      if (t instanceof CountedCompleter)       p.externalHelpComplete(q,t);
+ else       p.helpSignal(t,q.poolIndex);
+    }
+  }
+}

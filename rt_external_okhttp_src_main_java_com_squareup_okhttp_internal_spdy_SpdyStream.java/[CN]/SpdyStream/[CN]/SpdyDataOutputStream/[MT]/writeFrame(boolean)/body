@@ -1,0 +1,16 @@
+{
+  assert(!Thread.holdsLock(SpdyStream.this));
+  int length=pos - DATA_FRAME_HEADER_LENGTH;
+synchronized (SpdyStream.this) {
+    waitUntilWritable(length,last);
+    unacknowledgedBytes+=length;
+  }
+  int flags=0;
+  if (last) {
+    flags|=SpdyConnection.FLAG_FIN;
+  }
+  pokeInt(buffer,0,id & 0x7fffffff,BIG_ENDIAN);
+  pokeInt(buffer,4,(flags & 0xff) << 24 | length & 0xffffff,BIG_ENDIAN);
+  connection.writeFrame(buffer,0,pos);
+  pos=DATA_FRAME_HEADER_LENGTH;
+}

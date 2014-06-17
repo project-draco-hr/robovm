@@ -1,0 +1,15 @@
+{
+  assert(!Thread.holdsLock(SpdyStream.this));
+  checkOffsetAndCount(bytes.length,offset,count);
+  checkNotClosed();
+  while (count > 0) {
+    if (pos == buffer.length) {
+      writeFrame(false);
+    }
+    int bytesToCopy=Math.min(count,buffer.length - pos);
+    System.arraycopy(bytes,offset,buffer,pos,bytesToCopy);
+    pos+=bytesToCopy;
+    offset+=bytesToCopy;
+    count-=bytesToCopy;
+  }
+}

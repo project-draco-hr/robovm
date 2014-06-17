@@ -1,0 +1,17 @@
+{
+  if (isDiagnosticsEnabled()) {
+    logDiagnostic("Releasing factory for all classloaders.");
+  }
+synchronized (factories) {
+    Enumeration elements=factories.elements();
+    while (elements.hasMoreElements()) {
+      LogFactory element=(LogFactory)elements.nextElement();
+      element.release();
+    }
+    factories.clear();
+    if (nullClassLoaderFactory != null) {
+      nullClassLoaderFactory.release();
+      nullClassLoaderFactory=null;
+    }
+  }
+}

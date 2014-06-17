@@ -1,0 +1,28 @@
+{
+  HttpRoute route=entry.getPlannedRoute();
+  if (log.isDebugEnabled()) {
+    log.debug("Freeing connection" + " [" + route + "]["+ entry.getState()+ "]");
+  }
+  poolLock.lock();
+  try {
+    if (isShutDown) {
+      closeConnection(entry.getConnection());
+      return;
+    }
+    issuedConnections.remove(entry.getWeakRef());
+    RouteSpecificPool rospl=getRoutePool(route,true);
+    if (reusable) {
+      rospl.freeEntry(entry);
+      freeConnections.add(entry);
+      idleConnHandler.add(entry.getConnection(),validDuration,timeUnit);
+    }
+ else {
+      rospl.dropEntry();
+      numConnections--;
+    }
+    notifyWaitingThread(rospl);
+  }
+  finally {
+    poolLock.unlock();
+  }
+}

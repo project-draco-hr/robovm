@@ -1,0 +1,15 @@
+{
+  if (keySpec == null) {
+    throw new InvalidKeySpecException("keySpec == null");
+  }
+  if (keySpec instanceof RSAPrivateCrtKeySpec) {
+    return new OpenSSLRSAPrivateCrtKey((RSAPrivateCrtKeySpec)keySpec);
+  }
+ else   if (keySpec instanceof RSAPrivateKeySpec) {
+    return new OpenSSLRSAPrivateKey((RSAPrivateKeySpec)keySpec);
+  }
+ else   if (keySpec instanceof PKCS8EncodedKeySpec) {
+    return OpenSSLKey.getPrivateKey((PKCS8EncodedKeySpec)keySpec,NativeCrypto.EVP_PKEY_RSA);
+  }
+  throw new InvalidKeySpecException("Must use RSAPublicKeySpec or PKCS8EncodedKeySpec; was " + keySpec.getClass().getName());
+}

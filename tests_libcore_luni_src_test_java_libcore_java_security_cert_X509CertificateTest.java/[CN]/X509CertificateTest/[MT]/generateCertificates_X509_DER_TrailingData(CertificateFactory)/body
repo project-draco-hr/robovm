@@ -1,0 +1,25 @@
+{
+  byte[] certBytes=getResourceAsBytes(CERTS_X509_DER);
+  byte[] certsPlusExtra=new byte[certBytes.length + 4096];
+  System.arraycopy(certBytes,0,certsPlusExtra,0,certBytes.length);
+  ByteArrayInputStream bais=new ByteArrayInputStream(certsPlusExtra);
+  assertEquals(certsPlusExtra.length,bais.available());
+  try {
+    Collection<? extends X509Certificate> certs=(Collection<? extends X509Certificate>)f.generateCertificates(bais);
+    if (StandardNames.IS_RI) {
+      fail("RI fails on this test.");
+    }
+  }
+ catch (  CertificateParsingException e) {
+    if (StandardNames.IS_RI) {
+      return;
+    }
+    throw e;
+  }
+  if ("BC".equals(f.getProvider().getName())) {
+    assertEquals(0,bais.available());
+  }
+ else {
+    assertEquals(4096,bais.available());
+  }
+}

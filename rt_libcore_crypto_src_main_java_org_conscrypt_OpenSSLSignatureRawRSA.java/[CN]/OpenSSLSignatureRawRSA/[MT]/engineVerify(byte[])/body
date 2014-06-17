@@ -1,0 +1,34 @@
+{
+  if (key == null) {
+    throw new SignatureException("Need RSA public key");
+  }
+  if (inputIsTooLong) {
+    return false;
+  }
+  byte[] outputBuffer=new byte[inputBuffer.length];
+  try {
+    final int resultSize;
+    try {
+      resultSize=NativeCrypto.RSA_public_decrypt(sigBytes.length,sigBytes,outputBuffer,key.getPkeyContext(),NativeCrypto.RSA_PKCS1_PADDING);
+    }
+ catch (    SignatureException e) {
+      throw e;
+    }
+catch (    Exception e) {
+      return false;
+    }
+    boolean matches=(resultSize == inputOffset);
+    for (int i=0; i < resultSize; i++) {
+      if (inputBuffer[i] != outputBuffer[i]) {
+        matches=false;
+      }
+    }
+    return matches;
+  }
+ catch (  Exception ex) {
+    throw new SignatureException(ex);
+  }
+ finally {
+    inputOffset=0;
+  }
+}

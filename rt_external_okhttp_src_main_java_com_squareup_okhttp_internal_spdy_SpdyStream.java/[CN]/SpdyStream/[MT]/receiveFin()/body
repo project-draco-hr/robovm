@@ -1,0 +1,12 @@
+{
+  assert(!Thread.holdsLock(SpdyStream.this));
+  boolean open;
+synchronized (this) {
+    this.in.finished=true;
+    open=isOpen();
+    notifyAll();
+  }
+  if (!open) {
+    connection.removeStream(id);
+  }
+}

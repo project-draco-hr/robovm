@@ -1,0 +1,29 @@
+{
+  String positiveTestString="ababababbaaabb";
+  for (int i=0; i < groupPatterns.length; i++) {
+    Pattern test=Pattern.compile(groupPatterns[i]);
+    Matcher mat=test.matcher(positiveTestString);
+    mat.matches();
+    try {
+      mat.group(i + 2);
+      fail("IndexOutBoundsException expected");
+      mat.group(i + 100);
+      fail("IndexOutBoundsException expected");
+      mat.group(-1);
+      fail("IndexOutBoundsException expected");
+      mat.group(-100);
+      fail("IndexOutBoundsException expected");
+    }
+ catch (    IndexOutOfBoundsException iobe) {
+    }
+  }
+  String[][] groupResults={{"a"},{"a","a"},{"ababababba","a","abb"},{"ababababba","a","a","b"},{"ababababba","a","a","b","b"},{"ababababba","a","a","b","abb","b"}};
+  for (int i=0; i < groupPatterns.length; i++) {
+    Pattern test=Pattern.compile(groupPatterns[i]);
+    Matcher mat=test.matcher(positiveTestString);
+    mat.matches();
+    for (int j=0; j < groupResults[i].length; j++) {
+      assertEquals("i: " + i + " j: "+ j,groupResults[i][j],mat.group(j + 1));
+    }
+  }
+}

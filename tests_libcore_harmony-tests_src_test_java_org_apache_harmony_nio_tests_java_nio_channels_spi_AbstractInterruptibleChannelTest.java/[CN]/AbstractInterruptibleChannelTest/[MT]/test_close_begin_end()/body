@@ -1,0 +1,35 @@
+{
+  boolean complete=false;
+  MockInterruptibleChannel testChannel=new MockInterruptibleChannel();
+  assertTrue(testChannel.isOpen());
+  try {
+    testChannel.superBegin();
+    complete=true;
+  }
+  finally {
+    testChannel.superEnd(complete);
+  }
+  assertTrue(testChannel.isOpen());
+  testChannel.close();
+  try {
+    testChannel.superBegin();
+    complete=false;
+  }
+  finally {
+    try {
+      testChannel.superEnd(complete);
+      fail("should throw AsynchronousCloseException");
+    }
+ catch (    AsynchronousCloseException e) {
+    }
+  }
+  assertFalse(testChannel.isOpen());
+  try {
+    testChannel.superBegin();
+    complete=true;
+  }
+  finally {
+    testChannel.superEnd(complete);
+  }
+  assertFalse(testChannel.isOpen());
+}

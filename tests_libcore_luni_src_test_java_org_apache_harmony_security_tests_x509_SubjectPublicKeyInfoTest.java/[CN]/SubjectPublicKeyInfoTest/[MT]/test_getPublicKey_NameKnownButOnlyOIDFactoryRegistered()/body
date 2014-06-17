@@ -1,0 +1,15 @@
+{
+  Security.addProvider(new MyTestProvider());
+  try {
+    AlgorithmIdentifier algid=new AlgorithmIdentifier(MY_TEST_KEY_OID,"UnknownKey");
+    SubjectPublicKeyInfo spki=new SubjectPublicKeyInfo(algid,ENCODED_BROKEN);
+    PublicKey pubKey=spki.getPublicKey();
+    assertNotNull(pubKey);
+    assertEquals(MyTestPublicKey.class,pubKey.getClass());
+    byte[] encoded=pubKey.getEncoded();
+    assertEquals(Arrays.toString(ENCODED_BROKEN),Arrays.toString(Arrays.copyOfRange(encoded,encoded.length - ENCODED_BROKEN.length,encoded.length)));
+  }
+  finally {
+    Security.removeProvider(MyTestProvider.NAME);
+  }
+}

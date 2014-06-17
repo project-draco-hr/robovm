@@ -1,0 +1,25 @@
+{
+  buf.clear();
+  buf.mark();
+  buf.position(buf.limit());
+  ShortBuffer duplicate=buf.duplicate();
+  assertNotSame(buf,duplicate);
+  assertEquals(buf.position(),duplicate.position());
+  assertEquals(buf.limit(),duplicate.limit());
+  assertEquals(buf.isReadOnly(),duplicate.isReadOnly());
+  assertEquals(buf.isDirect(),duplicate.isDirect());
+  assertEquals(buf.order(),duplicate.order());
+  assertContentEquals(buf,duplicate);
+  duplicate.reset();
+  assertEquals(duplicate.position(),0);
+  duplicate.clear();
+  assertEquals(buf.position(),buf.limit());
+  buf.reset();
+  assertEquals(buf.position(),0);
+  if (!duplicate.isReadOnly()) {
+    loadTestData1(buf);
+    assertContentEquals(buf,duplicate);
+    loadTestData2(duplicate);
+    assertContentEquals(buf,duplicate);
+  }
+}

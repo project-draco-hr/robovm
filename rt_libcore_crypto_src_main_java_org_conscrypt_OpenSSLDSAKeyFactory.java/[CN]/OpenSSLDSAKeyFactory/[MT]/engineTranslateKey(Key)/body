@@ -1,0 +1,63 @@
+{
+  if (key == null) {
+    throw new InvalidKeyException("key == null");
+  }
+  if ((key instanceof OpenSSLDSAPublicKey) || (key instanceof OpenSSLDSAPrivateKey)) {
+    return key;
+  }
+ else   if (key instanceof DSAPublicKey) {
+    DSAPublicKey dsaKey=(DSAPublicKey)key;
+    BigInteger y=dsaKey.getY();
+    DSAParams params=dsaKey.getParams();
+    BigInteger p=params.getP();
+    BigInteger q=params.getQ();
+    BigInteger g=params.getG();
+    try {
+      return engineGeneratePublic(new DSAPublicKeySpec(y,p,q,g));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else   if (key instanceof DSAPrivateKey) {
+    DSAPrivateKey dsaKey=(DSAPrivateKey)key;
+    BigInteger x=dsaKey.getX();
+    DSAParams params=dsaKey.getParams();
+    BigInteger p=params.getP();
+    BigInteger q=params.getQ();
+    BigInteger g=params.getG();
+    try {
+      return engineGeneratePrivate(new DSAPrivateKeySpec(x,p,q,g));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else   if ((key instanceof PrivateKey) && ("PKCS#8".equals(key.getFormat()))) {
+    byte[] encoded=key.getEncoded();
+    if (encoded == null) {
+      throw new InvalidKeyException("Key does not support encoding");
+    }
+    try {
+      return engineGeneratePrivate(new PKCS8EncodedKeySpec(encoded));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else   if ((key instanceof PublicKey) && ("X.509".equals(key.getFormat()))) {
+    byte[] encoded=key.getEncoded();
+    if (encoded == null) {
+      throw new InvalidKeyException("Key does not support encoding");
+    }
+    try {
+      return engineGeneratePublic(new X509EncodedKeySpec(encoded));
+    }
+ catch (    InvalidKeySpecException e) {
+      throw new InvalidKeyException(e);
+    }
+  }
+ else {
+    throw new InvalidKeyException("Key must be DSA public or private key; was " + key.getClass().getName());
+  }
+}

@@ -1,8 +1,9 @@
 {
   byte[] b={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
   byte[] b1=new byte[30];
+  AlgorithmParameterSpec ap=new IvParameterSpec(IV);
   Cipher c=Cipher.getInstance("DES/CBC/NoPadding");
-  c.init(Cipher.ENCRYPT_MODE,cipherKeyDES);
+  c.init(Cipher.ENCRYPT_MODE,CIPHER_KEY_DES,ap);
   try {
     c.doFinal(b,0,10,b1);
     fail();
@@ -17,14 +18,11 @@
  catch (  IllegalStateException expected) {
   }
   c=Cipher.getInstance("DES/CBC/NoPadding");
-  c.init(Cipher.ENCRYPT_MODE,cipherKeyDES);
-  c.doFinal(b,0,16,b1);
-  SecureRandom sr=new SecureRandom();
-  byte[] iv=new byte[8];
-  sr.nextBytes(iv);
-  AlgorithmParameterSpec ap=new IvParameterSpec(iv);
+  c.init(Cipher.ENCRYPT_MODE,CIPHER_KEY_DES,ap);
+  int len=c.doFinal(b,0,16,b1);
+  assertEquals(16,len);
   c=Cipher.getInstance("DES/CBC/PKCS5Padding");
-  c.init(Cipher.DECRYPT_MODE,cipherKeyDES,ap);
+  c.init(Cipher.DECRYPT_MODE,CIPHER_KEY_DES,ap);
   try {
     c.doFinal(b1,0,24,new byte[42]);
     fail();
@@ -33,7 +31,7 @@
   }
   b1=new byte[6];
   c=Cipher.getInstance("DESede");
-  c.init(Cipher.ENCRYPT_MODE,cipherKey);
+  c.init(Cipher.ENCRYPT_MODE,CIPHER_KEY_3DES);
   try {
     c.doFinal(b,3,6,b1);
     fail();

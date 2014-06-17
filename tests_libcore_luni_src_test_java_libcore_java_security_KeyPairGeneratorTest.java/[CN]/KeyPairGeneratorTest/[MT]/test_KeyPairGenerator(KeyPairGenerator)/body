@@ -14,4 +14,17 @@
     test_KeyPair(kpg,kpg.genKeyPair());
     test_KeyPair(kpg,kpg.generateKeyPair());
   }
+  if (("EC".equals(algorithm)) || ("ECDH".equals(algorithm)) || ("ECDSA".equals(algorithm))) {
+    for (    String curveName : EC_NAMED_CURVES) {
+      kpg.initialize(new ECGenParameterSpec(curveName));
+      test_KeyPair(kpg,kpg.genKeyPair());
+      test_KeyPair(kpg,kpg.generateKeyPair());
+      kpg.initialize(new ECGenParameterSpec(curveName),(SecureRandom)null);
+      test_KeyPair(kpg,kpg.genKeyPair());
+      test_KeyPair(kpg,kpg.generateKeyPair());
+      kpg.initialize(new ECGenParameterSpec(curveName),new SecureRandom());
+      test_KeyPair(kpg,kpg.genKeyPair());
+      test_KeyPair(kpg,kpg.generateKeyPair());
+    }
+  }
 }

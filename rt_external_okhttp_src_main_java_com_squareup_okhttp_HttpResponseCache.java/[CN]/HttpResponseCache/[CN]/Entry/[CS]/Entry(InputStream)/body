@@ -1,0 +1,35 @@
+{
+  try {
+    StrictLineReader reader=new StrictLineReader(in,US_ASCII);
+    uri=reader.readLine();
+    requestMethod=reader.readLine();
+    varyHeaders=new RawHeaders();
+    int varyRequestHeaderLineCount=reader.readInt();
+    for (int i=0; i < varyRequestHeaderLineCount; i++) {
+      varyHeaders.addLine(reader.readLine());
+    }
+    responseHeaders=new RawHeaders();
+    responseHeaders.setStatusLine(reader.readLine());
+    int responseHeaderLineCount=reader.readInt();
+    for (int i=0; i < responseHeaderLineCount; i++) {
+      responseHeaders.addLine(reader.readLine());
+    }
+    if (isHttps()) {
+      String blank=reader.readLine();
+      if (blank.length() > 0) {
+        throw new IOException("expected \"\" but was \"" + blank + "\"");
+      }
+      cipherSuite=reader.readLine();
+      peerCertificates=readCertArray(reader);
+      localCertificates=readCertArray(reader);
+    }
+ else {
+      cipherSuite=null;
+      peerCertificates=null;
+      localCertificates=null;
+    }
+  }
+  finally {
+    in.close();
+  }
+}

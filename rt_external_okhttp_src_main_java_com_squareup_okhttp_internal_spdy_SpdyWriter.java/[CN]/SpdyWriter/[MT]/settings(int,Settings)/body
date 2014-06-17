@@ -1,0 +1,15 @@
+{
+  int type=SpdyConnection.TYPE_SETTINGS;
+  int size=settings.size();
+  int length=4 + size * 8;
+  out.writeInt(0x80000000 | (SpdyConnection.VERSION & 0x7fff) << 16 | type & 0xffff);
+  out.writeInt((flags & 0xff) << 24 | length & 0xffffff);
+  out.writeInt(size);
+  for (int i=0; i <= Settings.COUNT; i++) {
+    if (!settings.isSet(i))     continue;
+    int settingsFlags=settings.flags(i);
+    out.writeInt((settingsFlags & 0xff) << 24 | (i & 0xffffff));
+    out.writeInt(settings.get(i));
+  }
+  out.flush();
+}

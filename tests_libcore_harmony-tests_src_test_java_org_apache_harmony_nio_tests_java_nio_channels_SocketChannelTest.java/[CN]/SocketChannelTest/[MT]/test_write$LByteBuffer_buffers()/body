@@ -1,0 +1,30 @@
+{
+  ServerSocketChannel server=ServerSocketChannel.open();
+  server.socket().bind(null);
+  SocketChannel client=SocketChannel.open();
+  client.connect(server.socket().getLocalSocketAddress());
+  SocketChannel worker=server.accept();
+  byte[] data="Hello world!".getBytes("UTF-8");
+  ByteBuffer[] buffers=new ByteBuffer[3];
+  buffers[0]=ByteBuffer.wrap(data,0,2);
+  assertFalse(buffers[0].isDirect());
+  assertTrue(buffers[0].hasArray());
+  buffers[1]=ByteBuffer.wrap(data,2,4).asReadOnlyBuffer();
+  assertFalse(buffers[1].isDirect());
+  assertFalse(buffers[1].hasArray());
+  buffers[2]=ByteBuffer.allocateDirect(42);
+  buffers[2].put(data,6,data.length - 6);
+  buffers[2].flip();
+  assertTrue(buffers[2].isDirect());
+  assertTrue(buffers[2].hasArray());
+  client.write(buffers);
+  client.close();
+  ByteBuffer readBuffer=ByteBuffer.allocate(1024);
+  while (EOF != worker.read(readBuffer)) {
+  }
+  ;
+  readBuffer.flip();
+  assertEquals(ByteBuffer.wrap(data),readBuffer);
+  worker.close();
+  server.close();
+}

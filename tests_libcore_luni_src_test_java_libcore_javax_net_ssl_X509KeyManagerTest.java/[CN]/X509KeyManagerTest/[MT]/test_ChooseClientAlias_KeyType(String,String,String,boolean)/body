@@ -1,0 +1,19 @@
+{
+  TestKeyStore ca=new TestKeyStore.Builder().keyAlgorithms(caKeyType).build();
+  TestKeyStore client=new TestKeyStore.Builder().keyAlgorithms(clientKeyType).signer(ca.getPrivateKey(caKeyType,caKeyType)).build();
+  KeyManagerFactory kmf=KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+  kmf.init(client.keyStore,client.keyPassword);
+  String[] keyTypes=new String[]{selectedKeyType};
+  KeyManager[] managers=kmf.getKeyManagers();
+  for (  KeyManager manager : managers) {
+    if (manager instanceof X509KeyManager) {
+      String alias=((X509KeyManager)manager).chooseClientAlias(keyTypes,null,null);
+      if (succeeds) {
+        assertNotNull(alias);
+      }
+ else {
+        assertNull(alias);
+      }
+    }
+  }
+}

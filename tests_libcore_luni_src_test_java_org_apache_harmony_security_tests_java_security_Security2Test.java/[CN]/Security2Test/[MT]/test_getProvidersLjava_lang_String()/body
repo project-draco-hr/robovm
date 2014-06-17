@@ -1,48 +1,39 @@
 {
-  Hashtable<String,Integer> allSupported=new Hashtable<String,Integer>();
+  Map<String,Integer> allSupported=new HashMap<String,Integer>();
   Provider[] allProviders=Security.getProviders();
-  for (int i=0; i < allProviders.length; i++) {
-    Provider provider=allProviders[i];
-    Iterator it=provider.entrySet().iterator();
-    while (it.hasNext()) {
-      Map.Entry entry=(Map.Entry)it.next();
-      String key=(String)entry.getKey();
+  for (  Provider provider : allProviders) {
+    for (    Object k : provider.keySet()) {
+      String key=(String)k;
       if (!isAlias(key) && !isProviderData(key)) {
         addOrIncrementTable(allSupported,key);
       }
     }
   }
-  for (int i=0; i < allProviders.length; i++) {
-    Provider provider=allProviders[i];
-    Iterator it=provider.entrySet().iterator();
-    while (it.hasNext()) {
-      Map.Entry entry=(Map.Entry)it.next();
+  for (  Provider provider : allProviders) {
+    for (    Map.Entry entry : provider.entrySet()) {
       String key=(String)entry.getKey();
       if (isAlias(key)) {
-        String aliasVal=key.substring("ALG.ALIAS.".length());
-        String aliasKey=aliasVal.substring(0,aliasVal.indexOf(".") + 1) + entry.getValue();
-        if (!aliasVal.equals(aliasKey)) {
-          if (allSupported.containsKey(aliasVal)) {
-            addOrIncrementTable(allSupported,aliasKey);
+        String aliasName=key.substring("ALG.ALIAS.".length()).toUpperCase();
+        String realName=aliasName.substring(0,aliasName.indexOf(".") + 1) + entry.getValue();
+        if (!aliasName.equalsIgnoreCase(realName)) {
+          if (allSupported.containsKey(aliasName)) {
+            addOrIncrementTable(allSupported,aliasName);
           }
         }
       }
     }
   }
-  Provider provTest[]=null;
-  Iterator it=allSupported.keySet().iterator();
-  while (it.hasNext()) {
-    String filterString=(String)it.next();
+  for (  String filterString : allSupported.keySet()) {
     try {
-      provTest=Security.getProviders(filterString);
-      int expected=((Integer)allSupported.get(filterString)).intValue();
-      assertEquals("Unexpected number of providers returned for filter " + filterString,expected,provTest.length);
+      Provider[] provTest=Security.getProviders(filterString);
+      int expected=allSupported.get(filterString);
+      assertEquals("Unexpected number of providers returned for filter " + filterString + ":\n"+ allSupported,expected,provTest.length);
     }
  catch (    InvalidParameterException e) {
     }
   }
   try {
-    provTest=Security.getProviders("Signature.SHA1withDSA :512");
+    Security.getProviders("Signature.SHA1withDSA :512");
     fail("InvalidParameterException should be thrown <Signature.SHA1withDSA :512>");
   }
  catch (  InvalidParameterException e) {

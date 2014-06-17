@@ -1,0 +1,36 @@
+{
+  if (!authState.isValid()) {
+    return;
+  }
+  String hostname=host.getHostName();
+  int port=host.getPort();
+  if (port < 0) {
+    Scheme scheme=connManager.getSchemeRegistry().getScheme(host);
+    port=scheme.getDefaultPort();
+  }
+  AuthScheme authScheme=authState.getAuthScheme();
+  AuthScope authScope=new AuthScope(hostname,port,authScheme.getRealm(),authScheme.getSchemeName());
+  if (this.log.isDebugEnabled()) {
+    this.log.debug("Authentication scope: " + authScope);
+  }
+  Credentials creds=authState.getCredentials();
+  if (creds == null) {
+    creds=credsProvider.getCredentials(authScope);
+    if (this.log.isDebugEnabled()) {
+      if (creds != null) {
+        this.log.debug("Found credentials");
+      }
+ else {
+        this.log.debug("Credentials not found");
+      }
+    }
+  }
+ else {
+    if (authScheme.isComplete()) {
+      this.log.debug("Authentication failed");
+      creds=null;
+    }
+  }
+  authState.setAuthScope(authScope);
+  authState.setCredentials(creds);
+}

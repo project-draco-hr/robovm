@@ -1,0 +1,37 @@
+{
+  int inPosition=in.position();
+  byte[] input=new byte[in.remaining()];
+  in.get(input);
+  String result;
+  try {
+    result=new String(input,"UTF-8");
+  }
+ catch (  UnsupportedEncodingException e) {
+    throw new AssertionError(e);
+  }
+  if (result.startsWith("malform")) {
+    in.position(inPosition);
+    return CoderResult.malformedForLength("malform".length());
+  }
+ else   if (result.startsWith("unmap")) {
+    in.position(inPosition);
+    return CoderResult.unmappableForLength("unmap".length());
+  }
+ else   if (result.startsWith("runtime")) {
+    in.position(0);
+    throw new RuntimeException("runtime");
+  }
+  int inLeft=input.length;
+  int outLeft=out.remaining();
+  CoderResult r=CoderResult.UNDERFLOW;
+  int length=inLeft;
+  if (outLeft < inLeft) {
+    r=CoderResult.OVERFLOW;
+    length=outLeft;
+    in.position(inPosition + outLeft);
+  }
+  for (int i=0; i < length; i++) {
+    out.put((char)input[i]);
+  }
+  return r;
+}

@@ -1,0 +1,82 @@
+{
+  ByteBuffer out=ByteBuffer.allocate(200);
+  CharBuffer in=CharBuffer.wrap(unistr);
+  try {
+    encoder.encode(null,out,true);
+    fail("should throw null pointer exception");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    encoder.encode(in,null,true);
+    fail("should throw null pointer exception");
+  }
+ catch (  NullPointerException e) {
+  }
+  assertSame(encoder,encoder.reset());
+  in.rewind();
+  out.rewind();
+  assertSame(CoderResult.UNDERFLOW,encoder.encode(in,out,true));
+  assertEquals(out.limit(),200);
+  assertTrue(out.position() > 0);
+  assertTrue(out.remaining() > 0);
+  assertEquals(out.capacity(),200);
+  assertByteArray(out,addSurrogate(unibytes));
+  in.rewind();
+  encoder.flush(out);
+  assertSame(encoder,encoder.reset());
+  in.rewind();
+  out=ByteBuffer.allocate(200);
+  assertSame(CoderResult.UNDERFLOW,encoder.encode(in,out,false));
+  assertEquals(out.limit(),200);
+  assertTrue(out.position() > 0);
+  assertTrue(out.remaining() > 0);
+  assertEquals(out.capacity(),200);
+  assertByteArray(out,addSurrogate(unibytes));
+  in.rewind();
+  assertSame(CoderResult.UNDERFLOW,encoder.encode(in,out,false));
+  in.rewind();
+  assertSame(CoderResult.UNDERFLOW,encoder.encode(in,out,true));
+  assertEquals(out.limit(),200);
+  assertTrue(out.position() > 0);
+  assertTrue(out.remaining() > 0);
+  assertEquals(out.capacity(),200);
+  assertByteArray(out,addSurrogate(duplicateByteArray(unibytes,3)));
+  out=ByteBuffer.allocate(4);
+  assertSame(encoder,encoder.reset());
+  in.rewind();
+  out.rewind();
+  assertSame(CoderResult.OVERFLOW,encoder.encode(in,out,true));
+  assertEquals(out.limit(),4);
+  assertEquals(out.position(),4);
+  assertEquals(out.remaining(),0);
+  assertEquals(out.capacity(),4);
+  ByteBuffer temp=ByteBuffer.allocate(200);
+  out.flip();
+  temp.put(out);
+  out=temp;
+  assertSame(CoderResult.UNDERFLOW,encoder.encode(in,out,true));
+  assertEquals(out.limit(),200);
+  assertTrue(out.position() > 0);
+  assertTrue(out.remaining() > 0);
+  assertEquals(out.capacity(),200);
+  assertByteArray(out,addSurrogate(unibytes));
+  assertSame(encoder,encoder.reset());
+  in.rewind();
+  out=ByteBuffer.allocate(4);
+  assertSame(CoderResult.OVERFLOW,encoder.encode(in,out,false));
+  assertEquals(out.limit(),4);
+  assertEquals(out.position(),4);
+  assertEquals(out.remaining(),0);
+  assertEquals(out.capacity(),4);
+  temp=ByteBuffer.allocate(200);
+  out.flip();
+  temp.put(out);
+  out=temp;
+  assertSame(CoderResult.UNDERFLOW,encoder.encode(in,out,false));
+  assertEquals(out.limit(),200);
+  assertTrue(out.position() > 0);
+  assertTrue(out.remaining() > 0);
+  assertEquals(out.capacity(),200);
+  assertByteArray(out,addSurrogate(unibytes));
+}

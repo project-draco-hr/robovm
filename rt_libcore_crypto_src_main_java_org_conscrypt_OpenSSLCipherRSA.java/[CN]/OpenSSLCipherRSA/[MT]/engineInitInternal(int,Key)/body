@@ -1,0 +1,41 @@
+{
+  if (opmode == Cipher.ENCRYPT_MODE || opmode == Cipher.WRAP_MODE) {
+    encrypting=true;
+  }
+ else   if (opmode == Cipher.DECRYPT_MODE || opmode == Cipher.UNWRAP_MODE) {
+    encrypting=false;
+  }
+ else {
+    throw new InvalidParameterException("Unsupported opmode " + opmode);
+  }
+  if (key instanceof OpenSSLRSAPrivateKey) {
+    OpenSSLRSAPrivateKey rsaPrivateKey=(OpenSSLRSAPrivateKey)key;
+    usingPrivateKey=true;
+    this.key=rsaPrivateKey.getOpenSSLKey();
+  }
+ else   if (key instanceof RSAPrivateCrtKey) {
+    RSAPrivateCrtKey rsaPrivateKey=(RSAPrivateCrtKey)key;
+    usingPrivateKey=true;
+    this.key=OpenSSLRSAPrivateCrtKey.getInstance(rsaPrivateKey);
+  }
+ else   if (key instanceof RSAPrivateKey) {
+    RSAPrivateKey rsaPrivateKey=(RSAPrivateKey)key;
+    usingPrivateKey=true;
+    this.key=OpenSSLRSAPrivateKey.getInstance(rsaPrivateKey);
+  }
+ else   if (key instanceof OpenSSLRSAPublicKey) {
+    OpenSSLRSAPublicKey rsaPublicKey=(OpenSSLRSAPublicKey)key;
+    usingPrivateKey=false;
+    this.key=rsaPublicKey.getOpenSSLKey();
+  }
+ else   if (key instanceof RSAPublicKey) {
+    RSAPublicKey rsaPublicKey=(RSAPublicKey)key;
+    usingPrivateKey=false;
+    this.key=OpenSSLRSAPublicKey.getInstance(rsaPublicKey);
+  }
+ else {
+    throw new InvalidKeyException("Need RSA private or public key");
+  }
+  buffer=new byte[NativeCrypto.RSA_size(this.key.getPkeyContext())];
+  inputTooLarge=false;
+}

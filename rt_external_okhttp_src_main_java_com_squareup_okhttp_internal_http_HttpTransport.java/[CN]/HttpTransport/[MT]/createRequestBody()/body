@@ -1,0 +1,30 @@
+{
+  boolean chunked=httpEngine.requestHeaders.isChunked();
+  if (!chunked && httpEngine.policy.getChunkLength() > 0 && httpEngine.connection.getHttpMinorVersion() != 0) {
+    httpEngine.requestHeaders.setChunked();
+    chunked=true;
+  }
+  if (chunked) {
+    int chunkLength=httpEngine.policy.getChunkLength();
+    if (chunkLength == -1) {
+      chunkLength=DEFAULT_CHUNK_LENGTH;
+    }
+    writeRequestHeaders();
+    return new ChunkedOutputStream(requestOut,chunkLength);
+  }
+  long fixedContentLength=httpEngine.policy.getFixedContentLength();
+  if (fixedContentLength != -1) {
+    httpEngine.requestHeaders.setContentLength(fixedContentLength);
+    writeRequestHeaders();
+    return new FixedLengthOutputStream(requestOut,fixedContentLength);
+  }
+  long contentLength=httpEngine.requestHeaders.getContentLength();
+  if (contentLength > Integer.MAX_VALUE) {
+    throw new IllegalArgumentException("Use setFixedLengthStreamingMode() or " + "setChunkedStreamingMode() for requests larger than 2 GiB.");
+  }
+  if (contentLength != -1) {
+    writeRequestHeaders();
+    return new RetryableOutputStream((int)contentLength);
+  }
+  return new RetryableOutputStream();
+}

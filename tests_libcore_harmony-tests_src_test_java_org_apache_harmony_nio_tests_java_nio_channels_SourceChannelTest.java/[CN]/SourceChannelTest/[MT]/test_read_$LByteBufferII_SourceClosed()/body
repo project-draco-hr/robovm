@@ -1,0 +1,90 @@
+{
+  ByteBuffer readBuf=ByteBuffer.allocate(BUFFER_SIZE);
+  ByteBuffer[] readBufArray={readBuf};
+  source.close();
+  try {
+    source.read(readBufArray,0,1);
+    fail("should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+  readBuf.position(BUFFER_SIZE);
+  try {
+    source.read(readBufArray,0,1);
+    fail("should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+  ByteBuffer[] nullBufArrayRef=null;
+  try {
+    source.read(nullBufArrayRef,0,1);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    source.read(nullBufArrayRef,0,-1);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+catch (  IndexOutOfBoundsException expected) {
+  }
+  try {
+    source.read(new ByteBuffer[0],0,-1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  try {
+    source.read(new ByteBuffer[0],-1,1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  ByteBuffer nullBuf=null;
+  ByteBuffer[] nullBufArray1={nullBuf};
+  try {
+    source.read(nullBufArray1,0,1);
+    fail("should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+  try {
+    source.read(nullBufArray1,0,-1);
+    fail("should throw IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    source.read(nullBufArray1,-1,0);
+    fail("should throw IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    source.read(nullBufArray1,-1,1);
+    fail("should throw IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  ByteBuffer[] nullBufArray2={buffer,nullBuf};
+  try {
+    source.read(nullBufArray1,1,-1);
+    fail("should throw IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    source.read(nullBufArray2,0,3);
+    fail("should throw IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  try {
+    source.read(nullBufArray2,0,2);
+    fail("should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+}

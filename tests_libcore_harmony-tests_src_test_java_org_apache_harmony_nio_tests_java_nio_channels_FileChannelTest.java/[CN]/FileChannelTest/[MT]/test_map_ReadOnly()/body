@@ -1,0 +1,21 @@
+{
+  MappedByteBuffer mapped=null;
+  writeDataToFile(fileOfReadOnlyFileChannel);
+  mapped=readOnlyFileChannel.map(MapMode.READ_ONLY,0,CONTENT_LENGTH);
+  try {
+    mapped.put(TEST_BYTES);
+    fail("should throw ReadOnlyBufferException.");
+  }
+ catch (  ReadOnlyBufferException ex) {
+  }
+  assertEquals(CONTENT_LENGTH,mapped.limit());
+  assertEquals(CONTENT_LENGTH,mapped.capacity());
+  assertEquals(0,mapped.position());
+  writeDataToFile(fileOfReadWriteFileChannel);
+  mapped=readWriteFileChannel.map(MapMode.READ_ONLY,0,CONTENT.length());
+  assertEquals(CONTENT_LENGTH,mapped.limit());
+  assertEquals(CONTENT_LENGTH,mapped.capacity());
+  assertEquals(0,mapped.position());
+  assertEquals(0,readOnlyFileChannel.position());
+  assertEquals(0,readWriteFileChannel.position());
+}

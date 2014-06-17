@@ -4,15 +4,16 @@
   lock.lockInterruptibly();
   try {
     for (; ; ) {
-      RunnableScheduledFuture first=queue[0];
+      RunnableScheduledFuture<?> first=queue[0];
       if (first == null) {
         if (nanos <= 0)         return null;
  else         nanos=available.awaitNanos(nanos);
       }
  else {
-        long delay=first.getDelay(TimeUnit.NANOSECONDS);
+        long delay=first.getDelay(NANOSECONDS);
         if (delay <= 0)         return finishPoll(first);
         if (nanos <= 0)         return null;
+        first=null;
         if (nanos < delay || leader != null)         nanos=available.awaitNanos(nanos);
  else {
           Thread thisThread=Thread.currentThread();

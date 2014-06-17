@@ -1,0 +1,15 @@
+{
+  checkPermission();
+  if (factory == null)   throw new NullPointerException();
+  if (parallelism <= 0 || parallelism > MAX_CAP)   throw new IllegalArgumentException();
+  this.factory=factory;
+  this.ueh=handler;
+  this.config=parallelism | (asyncMode ? (FIFO_QUEUE << 16) : 0);
+  long np=(long)(-parallelism);
+  this.ctl=((np << AC_SHIFT) & AC_MASK) | ((np << TC_SHIFT) & TC_MASK);
+  int pn=nextPoolId();
+  StringBuilder sb=new StringBuilder("ForkJoinPool-");
+  sb.append(Integer.toString(pn));
+  sb.append("-worker-");
+  this.workerNamePrefix=sb.toString();
+}

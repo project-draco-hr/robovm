@@ -2,7 +2,7 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       keyStore.setCertificateEntry(null,null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    KeyStoreException expected) {
     }
@@ -11,7 +11,7 @@
     populate(keyStore);
     try {
       keyStore.setCertificateEntry(null,null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    Exception e) {
       if (e.getClass() != NullPointerException.class && e.getClass() != KeyStoreException.class) {
@@ -22,7 +22,7 @@
       try {
         assertNull(keyStore.getCertificate(ALIAS_CERTIFICATE));
         keyStore.setCertificateEntry(ALIAS_CERTIFICATE,null);
-        fail();
+        fail(keyStore.getType());
       }
  catch (      UnsupportedOperationException expected) {
       }
@@ -33,20 +33,21 @@
       try {
         int size=keyStore.size();
         keyStore.setCertificateEntry(ALIAS_CERTIFICATE,null);
-        assertNull(keyStore.getCertificate(ALIAS_CERTIFICATE));
-        assertEquals(size,keyStore.size());
-        assertTrue(keyStore.isCertificateEntry(ALIAS_CERTIFICATE));
-        assertTrue(Collections.list(keyStore.aliases()).contains(ALIAS_CERTIFICATE));
+        assertNull(keyStore.getType(),keyStore.getCertificate(ALIAS_CERTIFICATE));
+        assertEquals(keyStore.getType(),size,keyStore.size());
+        assertTrue(keyStore.getType(),keyStore.isCertificateEntry(ALIAS_CERTIFICATE));
+        assertTrue(keyStore.getType(),Collections.list(keyStore.aliases()).contains(ALIAS_CERTIFICATE));
       }
  catch (      NullPointerException expectedSometimes) {
-        assertEquals("PKCS12",keyStore.getType());
-        assertEquals("BC",keyStore.getProvider().getName());
+        if (!("PKCS12".equalsIgnoreCase(keyStore.getType()) && "BC".equalsIgnoreCase(keyStore.getProvider().getName())) && !"AndroidKeyStore".equalsIgnoreCase(keyStore.getType())) {
+          throw expectedSometimes;
+        }
       }
     }
  else {
       try {
         keyStore.setCertificateEntry(ALIAS_CERTIFICATE,null);
-        fail();
+        fail(keyStore.getType());
       }
  catch (      KeyStoreException expected) {
       }
@@ -56,12 +57,12 @@
     if (!isCertificateEnabled(keyStore)) {
       continue;
     }
-    keyStore.load(null,null);
+    clearKeyStore(keyStore);
     assertNull(keyStore.getCertificate(ALIAS_CERTIFICATE));
     if (isReadOnly(keyStore)) {
       try {
         setCertificate(keyStore);
-        fail();
+        fail(keyStore.getType());
       }
  catch (      UnsupportedOperationException expected) {
       }
@@ -76,10 +77,8 @@
     }
     populate(keyStore);
     if (isReadOnly(keyStore)) {
-      assertNull(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
-      assertNull(keyStore.getKey(ALIAS_ALT_CASE_PRIVATE,PASSWORD_KEY));
-      assertNull(keyStore.getKey(ALIAS_SECRET,PASSWORD_KEY));
-      assertNull(keyStore.getKey(ALIAS_ALT_CASE_SECRET,PASSWORD_KEY));
+      assertNull(keyStore.getCertificate(ALIAS_CERTIFICATE));
+      assertNull(keyStore.getCertificate(ALIAS_ALT_CASE_CERTIFICATE));
     }
  else     if (isCaseSensitive(keyStore)) {
       assertCertificate(keyStore.getCertificate(ALIAS_CERTIFICATE));

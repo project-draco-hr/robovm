@@ -1,0 +1,16 @@
+{
+  @SuppressWarnings("resource") final OpenSSLBIOInputStream bis=new OpenSSLBIOInputStream(is);
+  try {
+    final long certCtx=NativeCrypto.d2i_X509_bio(bis.getBioContext());
+    if (certCtx == 0) {
+      return null;
+    }
+    return new OpenSSLX509Certificate(certCtx);
+  }
+ catch (  Exception e) {
+    throw new ParsingException(e);
+  }
+ finally {
+    NativeCrypto.BIO_free(bis.getBioContext());
+  }
+}

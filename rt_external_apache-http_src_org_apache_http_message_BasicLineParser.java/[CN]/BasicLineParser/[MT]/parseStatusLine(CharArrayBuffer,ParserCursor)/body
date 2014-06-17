@@ -1,0 +1,38 @@
+{
+  if (buffer == null) {
+    throw new IllegalArgumentException("Char array buffer may not be null");
+  }
+  if (cursor == null) {
+    throw new IllegalArgumentException("Parser cursor may not be null");
+  }
+  int indexFrom=cursor.getPos();
+  int indexTo=cursor.getUpperBound();
+  try {
+    ProtocolVersion ver=parseProtocolVersion(buffer,cursor);
+    skipWhitespace(buffer,cursor);
+    int i=cursor.getPos();
+    int blank=buffer.indexOf(' ',i,indexTo);
+    if (blank < 0) {
+      blank=indexTo;
+    }
+    int statusCode=0;
+    try {
+      statusCode=Integer.parseInt(buffer.substringTrimmed(i,blank));
+    }
+ catch (    NumberFormatException e) {
+      throw new ParseException("Unable to parse status code from status line: " + buffer.substring(indexFrom,indexTo));
+    }
+    i=blank;
+    String reasonPhrase=null;
+    if (i < indexTo) {
+      reasonPhrase=buffer.substringTrimmed(i,indexTo);
+    }
+ else {
+      reasonPhrase="";
+    }
+    return createStatusLine(ver,statusCode,reasonPhrase);
+  }
+ catch (  IndexOutOfBoundsException e) {
+    throw new ParseException("Invalid status line: " + buffer.substring(indexFrom,indexTo));
+  }
+}

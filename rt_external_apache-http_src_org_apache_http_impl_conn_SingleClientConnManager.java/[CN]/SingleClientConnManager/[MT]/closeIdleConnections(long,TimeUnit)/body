@@ -1,0 +1,17 @@
+{
+  assertStillUp();
+  if (tunit == null) {
+    throw new IllegalArgumentException("Time unit must not be null.");
+  }
+  if ((managedConn == null) && uniquePoolEntry.connection.isOpen()) {
+    final long cutoff=System.currentTimeMillis() - tunit.toMillis(idletime);
+    if (lastReleaseTime <= cutoff) {
+      try {
+        uniquePoolEntry.close();
+      }
+ catch (      IOException iox) {
+        log.debug("Problem closing idle connection.",iox);
+      }
+    }
+  }
+}

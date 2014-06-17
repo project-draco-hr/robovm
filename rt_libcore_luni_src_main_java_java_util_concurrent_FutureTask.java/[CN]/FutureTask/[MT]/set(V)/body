@@ -1,3 +1,7 @@
 {
-  sync.innerSet(v);
+  if (UNSAFE.compareAndSwapInt(this,stateOffset,NEW,COMPLETING)) {
+    outcome=v;
+    UNSAFE.putOrderedInt(this,stateOffset,NORMAL);
+    finishCompletion();
+  }
 }

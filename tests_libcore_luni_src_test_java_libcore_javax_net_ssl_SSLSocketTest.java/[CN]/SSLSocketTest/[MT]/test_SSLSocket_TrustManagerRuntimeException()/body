@@ -1,0 +1,38 @@
+{
+  TestSSLContext c=TestSSLContext.create();
+  SSLContext clientContext=SSLContext.getInstance("TLS");
+  X509TrustManager trustManager=new X509TrustManager(){
+    @Override public void checkClientTrusted(    X509Certificate[] chain,    String authType) throws CertificateException {
+      throw new AssertionError();
+    }
+    @Override public void checkServerTrusted(    X509Certificate[] chain,    String authType) throws CertificateException {
+      throw new RuntimeException();
+    }
+    @Override public X509Certificate[] getAcceptedIssuers(){
+      throw new AssertionError();
+    }
+  }
+;
+  clientContext.init(null,new TrustManager[]{trustManager},null);
+  SSLSocket client=(SSLSocket)clientContext.getSocketFactory().createSocket(c.host,c.port);
+  final SSLSocket server=(SSLSocket)c.serverSocket.accept();
+  ExecutorService executor=Executors.newSingleThreadExecutor();
+  Future<Void> future=executor.submit(new Callable<Void>(){
+    @Override public Void call() throws Exception {
+      server.startHandshake();
+      return null;
+    }
+  }
+);
+  executor.shutdown();
+  try {
+    client.startHandshake();
+    fail();
+  }
+ catch (  SSLHandshakeException expected) {
+  }
+  future.get();
+  client.close();
+  server.close();
+  c.close();
+}

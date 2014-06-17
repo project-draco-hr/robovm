@@ -1,0 +1,16 @@
+{
+  ClientSessionContext context=new ClientSessionContext();
+  context.setSessionCacheSize(2);
+  ValidSSLSession a=new ValidSSLSession("a");
+  ValidSSLSession b=new ValidSSLSession("b");
+  ValidSSLSession c=new ValidSSLSession("c");
+  ValidSSLSession d=new ValidSSLSession("d");
+  context.putSession(a);
+  assertSessionContextContents(context,new SSLSession[]{a},new SSLSession[]{b,c,d});
+  context.putSession(b);
+  assertSessionContextContents(context,new SSLSession[]{a,b},new SSLSession[]{c,d});
+  context.putSession(c);
+  assertSessionContextContents(context,new SSLSession[]{b,c},new SSLSession[]{a,d});
+  context.putSession(d);
+  assertSessionContextContents(context,new SSLSession[]{c,d},new SSLSession[]{a,b});
+}

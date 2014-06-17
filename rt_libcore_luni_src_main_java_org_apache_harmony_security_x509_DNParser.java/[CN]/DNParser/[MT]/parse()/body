@@ -4,27 +4,28 @@
   if (attType == null) {
     return list;
   }
+  ObjectIdentifier oid=AttributeTypeAndValue.getObjectIdentifier(attType);
   List<AttributeTypeAndValue> atav=new ArrayList<AttributeTypeAndValue>();
   while (true) {
     if (pos == chars.length) {
-      atav.add(new AttributeTypeAndValue(attType,new AttributeValue("",false)));
+      atav.add(new AttributeTypeAndValue(oid,new AttributeValue("",false,oid)));
       list.add(0,atav);
       return list;
     }
 switch (chars[pos]) {
 case '"':
-      atav.add(new AttributeTypeAndValue(attType,new AttributeValue(quotedAV(),hasQE)));
+      atav.add(new AttributeTypeAndValue(oid,new AttributeValue(quotedAV(),hasQE,oid)));
     break;
 case '#':
-  atav.add(new AttributeTypeAndValue(attType,new AttributeValue(hexAV(),encoded)));
+  atav.add(new AttributeTypeAndValue(oid,new AttributeValue(hexAV(),encoded)));
 break;
 case '+':
 case ',':
 case ';':
-atav.add(new AttributeTypeAndValue(attType,new AttributeValue("",false)));
+atav.add(new AttributeTypeAndValue(oid,new AttributeValue("",false,oid)));
 break;
 default :
-atav.add(new AttributeTypeAndValue(attType,new AttributeValue(escapedAV(),hasQE)));
+atav.add(new AttributeTypeAndValue(oid,new AttributeValue(escapedAV(),hasQE,oid)));
 }
 if (pos >= chars.length) {
 list.add(0,atav);
@@ -42,5 +43,6 @@ attType=nextAT();
 if (attType == null) {
 throw new IOException("Invalid distinguished name string");
 }
+oid=AttributeTypeAndValue.getObjectIdentifier(attType);
 }
 }

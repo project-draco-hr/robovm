@@ -1,0 +1,26 @@
+{
+  AttributeTable unsignedAttrTable=this.getUnsignedAttributes();
+  if (unsignedAttrTable != null && unsignedAttrTable.getAll(attrOID).size() > 0) {
+    throw new CMSException("The " + printableName + " attribute MUST NOT be an unsigned attribute");
+  }
+  AttributeTable signedAttrTable=this.getSignedAttributes();
+  if (signedAttrTable == null) {
+    return null;
+  }
+  ASN1EncodableVector v=signedAttrTable.getAll(attrOID);
+switch (v.size()) {
+case 0:
+    return null;
+case 1:
+{
+    Attribute t=(Attribute)v.get(0);
+    ASN1Set attrValues=t.getAttrValues();
+    if (attrValues.size() != 1) {
+      throw new CMSException("A " + printableName + " attribute MUST have a single attribute value");
+    }
+    return attrValues.getObjectAt(0).toASN1Primitive();
+  }
+default :
+throw new CMSException("The SignedAttributes in a signerInfo MUST NOT include multiple instances of the " + printableName + " attribute");
+}
+}

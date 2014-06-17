@@ -1,0 +1,13 @@
+{
+synchronized (SpdyConnection.this) {
+    shutdown=true;
+    for (Iterator<Map.Entry<Integer,SpdyStream>> i=streams.entrySet().iterator(); i.hasNext(); ) {
+      Map.Entry<Integer,SpdyStream> entry=i.next();
+      int streamId=entry.getKey();
+      if (streamId > lastGoodStreamId && entry.getValue().isLocallyInitiated()) {
+        entry.getValue().receiveRstStream(SpdyStream.RST_REFUSED_STREAM);
+        i.remove();
+      }
+    }
+  }
+}

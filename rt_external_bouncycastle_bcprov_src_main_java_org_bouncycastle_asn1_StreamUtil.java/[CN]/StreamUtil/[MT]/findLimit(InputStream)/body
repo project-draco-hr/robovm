@@ -1,0 +1,26 @@
+{
+  if (in instanceof LimitedInputStream) {
+    return ((LimitedInputStream)in).getRemaining();
+  }
+ else   if (in instanceof ASN1InputStream) {
+    return ((ASN1InputStream)in).getLimit();
+  }
+ else   if (in instanceof ByteArrayInputStream) {
+    return ((ByteArrayInputStream)in).available();
+  }
+ else   if (in instanceof FileInputStream) {
+    try {
+      FileChannel channel=((FileInputStream)in).getChannel();
+      long size=(channel != null) ? channel.size() : Integer.MAX_VALUE;
+      if (size < Integer.MAX_VALUE) {
+        return (int)size;
+      }
+    }
+ catch (    IOException e) {
+    }
+  }
+  if (MAX_MEMORY > Integer.MAX_VALUE) {
+    return Integer.MAX_VALUE;
+  }
+  return (int)MAX_MEMORY;
+}

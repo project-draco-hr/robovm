@@ -1,0 +1,34 @@
+{
+  ByteBuffer[] readBuf=new ByteBuffer[2];
+  readBuf[0]=ByteBuffer.allocateDirect(CAPACITY_NORMAL);
+  InetSocketAddress ipAddr=localAddr1;
+  try {
+    this.channel1.read(null,0,0);
+    fail("should throw NPE");
+  }
+ catch (  NullPointerException e) {
+  }
+  this.channel1.connect(ipAddr);
+  assertTrue(this.channel1.isConnected());
+  this.channel1.configureBlocking(false);
+  try {
+    this.channel1.read(null,0,0);
+    fail("should throw NPE");
+  }
+ catch (  NullPointerException e) {
+  }
+  assertEquals(0,this.channel1.read(readBuf,0,1));
+  try {
+    this.channel1.read(readBuf,0,2);
+    fail("should throw NPE");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    this.channel1.read(readBuf,0,3);
+    fail("should throw IndexOutOfBoundsException");
+  }
+ catch (  IndexOutOfBoundsException e) {
+  }
+  datagramSocket1.close();
+}

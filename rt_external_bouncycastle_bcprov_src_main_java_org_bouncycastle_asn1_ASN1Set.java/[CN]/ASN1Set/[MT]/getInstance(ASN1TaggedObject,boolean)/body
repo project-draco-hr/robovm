@@ -1,0 +1,33 @@
+{
+  if (explicit) {
+    if (!obj.isExplicit()) {
+      throw new IllegalArgumentException("object implicit - explicit expected.");
+    }
+    return (ASN1Set)obj.getObject();
+  }
+ else {
+    if (obj.isExplicit()) {
+      if (obj instanceof BERTaggedObject) {
+        return new BERSet(obj.getObject());
+      }
+ else {
+        return new DLSet(obj.getObject());
+      }
+    }
+ else {
+      if (obj.getObject() instanceof ASN1Set) {
+        return (ASN1Set)obj.getObject();
+      }
+      if (obj.getObject() instanceof ASN1Sequence) {
+        ASN1Sequence s=(ASN1Sequence)obj.getObject();
+        if (obj instanceof BERTaggedObject) {
+          return new BERSet(s.toArray());
+        }
+ else {
+          return new DLSet(s.toArray());
+        }
+      }
+    }
+  }
+  throw new IllegalArgumentException("unknown object in getInstance: " + obj.getClass().getName());
+}

@@ -1,0 +1,24 @@
+{
+  CharBuffer in=CharBuffer.wrap("aaa");
+  ByteBuffer out=ByteBuffer.allocate(5);
+  encoder.reset();
+  try {
+    encoder.flush(out);
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+  assertSame(encoder,encoder.reset());
+  encoder.encode(in,out,true);
+  out.rewind();
+  CoderResult result=encoder.flush(out);
+  encoder.flush(out);
+  assertSame(encoder,encoder.reset());
+  encoder.encode(in,out,false);
+  try {
+    encoder.flush(out);
+    fail();
+  }
+ catch (  IllegalStateException expected) {
+  }
+}

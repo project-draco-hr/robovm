@@ -1,0 +1,19 @@
+{
+  if (b == null) {
+    return 0;
+  }
+  int noRead=0;
+  while (!hasBufferedData()) {
+    noRead=fillBuffer();
+    if (noRead == -1) {
+      return -1;
+    }
+  }
+  int chunk=this.bufferlen - this.bufferpos;
+  if (chunk > len) {
+    chunk=len;
+  }
+  System.arraycopy(this.buffer,this.bufferpos,b,off,chunk);
+  this.bufferpos+=chunk;
+  return chunk;
+}

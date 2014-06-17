@@ -1,0 +1,45 @@
+{
+  buf.clear();
+  buf.mark();
+  loadTestData1(buf);
+  IntBuffer ret=buf.compact();
+  assertSame(ret,buf);
+  assertEquals(buf.position(),buf.capacity());
+  assertEquals(buf.limit(),buf.capacity());
+  assertContentLikeTestData1(buf,0,0,buf.capacity());
+  try {
+    buf.reset();
+    fail("Should throw Exception");
+  }
+ catch (  InvalidMarkException e) {
+  }
+  buf.position(0);
+  buf.limit(0);
+  buf.mark();
+  ret=buf.compact();
+  assertSame(ret,buf);
+  assertEquals(buf.position(),0);
+  assertEquals(buf.limit(),buf.capacity());
+  assertContentLikeTestData1(buf,0,0,buf.capacity());
+  try {
+    buf.reset();
+    fail("Should throw Exception");
+  }
+ catch (  InvalidMarkException e) {
+  }
+  assertTrue(buf.capacity() > 5);
+  buf.position(1);
+  buf.limit(5);
+  buf.mark();
+  ret=buf.compact();
+  assertSame(ret,buf);
+  assertEquals(buf.position(),4);
+  assertEquals(buf.limit(),buf.capacity());
+  assertContentLikeTestData1(buf,0,1,4);
+  try {
+    buf.reset();
+    fail("Should throw Exception");
+  }
+ catch (  InvalidMarkException e) {
+  }
+}

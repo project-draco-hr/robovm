@@ -1,0 +1,20 @@
+{
+  for (WaitNode q; (q=waiters) != null; ) {
+    if (UNSAFE.compareAndSwapObject(this,waitersOffset,q,null)) {
+      for (; ; ) {
+        Thread t=q.thread;
+        if (t != null) {
+          q.thread=null;
+          LockSupport.unpark(t);
+        }
+        WaitNode next=q.next;
+        if (next == null)         break;
+        q.next=null;
+        q=next;
+      }
+      break;
+    }
+  }
+  done();
+  callable=null;
+}

@@ -1,0 +1,32 @@
+{
+  super.processChallenge(header);
+  if (getParameter("realm") == null) {
+    throw new MalformedChallengeException("missing realm in challange");
+  }
+  if (getParameter("nonce") == null) {
+    throw new MalformedChallengeException("missing nonce in challange");
+  }
+  boolean unsupportedQop=false;
+  String qop=getParameter("qop");
+  if (qop != null) {
+    StringTokenizer tok=new StringTokenizer(qop,",");
+    while (tok.hasMoreTokens()) {
+      String variant=tok.nextToken().trim();
+      if (variant.equals("auth")) {
+        qopVariant=QOP_AUTH;
+        break;
+      }
+ else       if (variant.equals("auth-int")) {
+        qopVariant=QOP_AUTH_INT;
+      }
+ else {
+        unsupportedQop=true;
+      }
+    }
+  }
+  if (unsupportedQop && (qopVariant == QOP_MISSING)) {
+    throw new MalformedChallengeException("None of the qop methods is supported");
+  }
+  this.cnonce=null;
+  this.complete=true;
+}

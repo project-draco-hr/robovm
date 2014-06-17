@@ -1,0 +1,23 @@
+{
+  for (  String certName : VARIOUS_CERTS) {
+    X509Certificate expected=getCertificate(f,certName);
+    ByteArrayOutputStream baos=new ByteArrayOutputStream();
+    ObjectOutputStream oos=new ObjectOutputStream(baos);
+    try {
+      oos.writeObject(expected);
+    }
+  finally {
+      oos.close();
+    }
+    byte[] certBytes=baos.toByteArray();
+    ByteArrayInputStream bais=new ByteArrayInputStream(certBytes);
+    try {
+      ObjectInputStream ois=new ObjectInputStream(bais);
+      X509Certificate actual=(X509Certificate)ois.readObject();
+      assertEquals(certName,expected,actual);
+    }
+  finally {
+      bais.close();
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  if (responseSource != null) {
+    return;
+  }
+  prepareRawRequestHeaders();
+  initResponseSource();
+  OkResponseCache responseCache=client.getOkResponseCache();
+  if (responseCache != null) {
+    responseCache.trackResponse(responseSource);
+  }
+  if (requestHeaders.isOnlyIfCached() && responseSource.requiresConnection()) {
+    if (responseSource == ResponseSource.CONDITIONAL_CACHE) {
+      Util.closeQuietly(cachedResponseBody);
+    }
+    this.responseSource=ResponseSource.CACHE;
+    this.cacheResponse=GATEWAY_TIMEOUT_RESPONSE;
+    RawHeaders rawResponseHeaders=RawHeaders.fromMultimap(cacheResponse.getHeaders(),true);
+    setResponse(new ResponseHeaders(uri,rawResponseHeaders),cacheResponse.getBody());
+  }
+  if (responseSource.requiresConnection()) {
+    sendSocketRequest();
+  }
+ else   if (connection != null) {
+    client.getConnectionPool().recycle(connection);
+    connection=null;
+  }
+}

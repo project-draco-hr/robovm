@@ -1,0 +1,13 @@
+{
+  AtomicReference<QNode> head=(phase & 1) == 0 ? evenQ : oddQ;
+  for (; ; ) {
+    Thread t;
+    QNode q=head.get();
+    int p=(int)(root.state >>> PHASE_SHIFT);
+    if (q == null || ((t=q.thread) != null && q.phase == p))     return p;
+    if (head.compareAndSet(q,q.next) && t != null) {
+      q.thread=null;
+      LockSupport.unpark(t);
+    }
+  }
+}

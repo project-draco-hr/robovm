@@ -11,26 +11,36 @@
       if (runStateOf(c) != rs)       continue retry;
     }
   }
-  Worker w=new Worker(firstTask);
-  Thread t=w.thread;
-  final ReentrantLock mainLock=this.mainLock;
-  mainLock.lock();
+  boolean workerStarted=false;
+  boolean workerAdded=false;
+  Worker w=null;
   try {
-    int c=ctl.get();
-    int rs=runStateOf(c);
-    if (t == null || (rs >= SHUTDOWN && !(rs == SHUTDOWN && firstTask == null))) {
-      decrementWorkerCount();
-      tryTerminate();
-      return false;
+    w=new Worker(firstTask);
+    final Thread t=w.thread;
+    if (t != null) {
+      final ReentrantLock mainLock=this.mainLock;
+      mainLock.lock();
+      try {
+        int rs=runStateOf(ctl.get());
+        if (rs < SHUTDOWN || (rs == SHUTDOWN && firstTask == null)) {
+          if (t.isAlive())           throw new IllegalThreadStateException();
+          workers.add(w);
+          int s=workers.size();
+          if (s > largestPoolSize)           largestPoolSize=s;
+          workerAdded=true;
+        }
+      }
+  finally {
+        mainLock.unlock();
+      }
+      if (workerAdded) {
+        t.start();
+        workerStarted=true;
+      }
     }
-    workers.add(w);
-    int s=workers.size();
-    if (s > largestPoolSize)     largestPoolSize=s;
   }
   finally {
-    mainLock.unlock();
+    if (!workerStarted)     addWorkerFailed(w);
   }
-  t.start();
-  if (runStateOf(ctl.get()) == STOP && !t.isInterrupted())   t.interrupt();
-  return true;
+  return workerStarted;
 }

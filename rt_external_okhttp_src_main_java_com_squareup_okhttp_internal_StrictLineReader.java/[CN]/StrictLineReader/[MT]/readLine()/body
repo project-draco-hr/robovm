@@ -1,0 +1,44 @@
+{
+synchronized (in) {
+    if (buf == null) {
+      throw new IOException("LineReader is closed");
+    }
+    if (pos >= end) {
+      fillBuf();
+    }
+    for (int i=pos; i != end; ++i) {
+      if (buf[i] == LF) {
+        int lineEnd=(i != pos && buf[i - 1] == CR) ? i - 1 : i;
+        String res=new String(buf,pos,lineEnd - pos,charset.name());
+        pos=i + 1;
+        return res;
+      }
+    }
+    ByteArrayOutputStream out=new ByteArrayOutputStream(end - pos + 80){
+      @Override public String toString(){
+        int length=(count > 0 && buf[count - 1] == CR) ? count - 1 : count;
+        try {
+          return new String(buf,0,length,charset.name());
+        }
+ catch (        UnsupportedEncodingException e) {
+          throw new AssertionError(e);
+        }
+      }
+    }
+;
+    while (true) {
+      out.write(buf,pos,end - pos);
+      end=-1;
+      fillBuf();
+      for (int i=pos; i != end; ++i) {
+        if (buf[i] == LF) {
+          if (i != pos) {
+            out.write(buf,pos,i - pos);
+          }
+          pos=i + 1;
+          return out.toString();
+        }
+      }
+    }
+  }
+}

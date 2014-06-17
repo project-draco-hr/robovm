@@ -1,0 +1,31 @@
+{
+  NTCredentials ntcredentials=null;
+  try {
+    ntcredentials=(NTCredentials)credentials;
+  }
+ catch (  ClassCastException e) {
+    throw new InvalidCredentialsException("Credentials cannot be used for NTLM authentication: " + credentials.getClass().getName());
+  }
+  String response=null;
+  if (this.state == State.CHALLENGE_RECEIVED || this.state == State.FAILED) {
+    response=this.engine.generateType1Msg(ntcredentials.getDomain(),ntcredentials.getWorkstation());
+    this.state=State.MSG_TYPE1_GENERATED;
+  }
+ else   if (this.state == State.MSG_TYPE2_RECEVIED) {
+    response=this.engine.generateType3Msg(ntcredentials.getUserName(),ntcredentials.getPassword(),ntcredentials.getDomain(),ntcredentials.getWorkstation(),this.challenge);
+    this.state=State.MSG_TYPE3_GENERATED;
+  }
+ else {
+    throw new AuthenticationException("Unexpected state: " + this.state);
+  }
+  CharArrayBuffer buffer=new CharArrayBuffer(32);
+  if (isProxy()) {
+    buffer.append(AUTH.PROXY_AUTH_RESP);
+  }
+ else {
+    buffer.append(AUTH.WWW_AUTH_RESP);
+  }
+  buffer.append(": NTLM ");
+  buffer.append(response);
+  return new BufferedHeader(buffer);
+}

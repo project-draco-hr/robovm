@@ -1,0 +1,22 @@
+{
+  int nbytes=2;
+  byte bytes[]=new byte[nbytes];
+  short value;
+  buf.clear();
+  for (int i=0; buf.remaining() >= nbytes; i++) {
+    buf.order(i % 2 == 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
+    assertEquals(i * nbytes,buf.position());
+    buf.mark();
+    buf.get(bytes);
+    buf.reset();
+    value=buf.getShort();
+    assertEquals(bytes2short(bytes,buf.order()),value);
+  }
+  try {
+    buf.getShort();
+    fail("Should throw Exception");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  buf.order(ByteOrder.BIG_ENDIAN);
+}

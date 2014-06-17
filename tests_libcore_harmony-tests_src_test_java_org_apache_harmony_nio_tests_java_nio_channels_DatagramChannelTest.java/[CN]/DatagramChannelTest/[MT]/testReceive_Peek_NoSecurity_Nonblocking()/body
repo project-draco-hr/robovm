@@ -1,0 +1,11 @@
+{
+  String strHello="hello";
+  localAddr1=new InetSocketAddress("127.0.0.1",testPort);
+  this.channel1.socket().bind(localAddr1);
+  sendByChannel(strHello,localAddr1);
+  this.channel1.configureBlocking(false);
+  ByteBuffer buf=ByteBuffer.allocate(CAPACITY_NORMAL);
+  InetSocketAddress source=(InetSocketAddress)this.channel1.receive(buf);
+  assertEquals(localAddr1.getAddress(),source.getAddress());
+  assertAscii(buf,strHello);
+}

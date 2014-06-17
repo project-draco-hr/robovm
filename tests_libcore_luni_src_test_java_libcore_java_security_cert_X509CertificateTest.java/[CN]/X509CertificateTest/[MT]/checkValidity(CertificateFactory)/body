@@ -1,0 +1,47 @@
+{
+  X509Certificate c=getCertificate(f,CERT_RSA);
+  Calendar cal=Calendar.getInstance();
+  Date[] dates=getRsaCertificateDates();
+  Date now=new Date();
+  assertTrue(now.after(dates[0]));
+  assertTrue(now.before(dates[1]));
+  c.checkValidity();
+  cal.setTime(dates[0]);
+  cal.add(Calendar.DAY_OF_MONTH,1);
+  c.checkValidity(cal.getTime());
+  cal.setTime(dates[1]);
+  cal.add(Calendar.SECOND,-1);
+  c.checkValidity(cal.getTime());
+  try {
+    cal.setTime(dates[0]);
+    cal.add(Calendar.SECOND,-1);
+    c.checkValidity(cal.getTime());
+    fail();
+  }
+ catch (  CertificateNotYetValidException expected) {
+  }
+  try {
+    cal.setTime(dates[0]);
+    cal.add(Calendar.MONTH,-6);
+    c.checkValidity(cal.getTime());
+    fail();
+  }
+ catch (  CertificateNotYetValidException expected) {
+  }
+  try {
+    cal.setTime(dates[1]);
+    cal.add(Calendar.SECOND,1);
+    c.checkValidity(cal.getTime());
+    fail();
+  }
+ catch (  CertificateExpiredException expected) {
+  }
+  try {
+    cal.setTime(dates[1]);
+    cal.add(Calendar.YEAR,1);
+    c.checkValidity(cal.getTime());
+    fail();
+  }
+ catch (  CertificateExpiredException expected) {
+  }
+}

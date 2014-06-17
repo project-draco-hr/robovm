@@ -1,0 +1,23 @@
+{
+  if (alias == null) {
+    return;
+  }
+  PrivateKey privateKey=sslParameters.getKeyManager().getPrivateKey(alias);
+  if (privateKey == null) {
+    return;
+  }
+  X509Certificate[] certificates=sslParameters.getKeyManager().getCertificateChain(alias);
+  if (certificates == null) {
+    return;
+  }
+  byte[][] certificateBytes=NativeCrypto.encodeCertificates(certificates);
+  NativeCrypto.SSL_use_certificate(sslNativePointer,certificateBytes);
+  try {
+    final OpenSSLKey key=OpenSSLKey.fromPrivateKey(privateKey);
+    NativeCrypto.SSL_use_PrivateKey(sslNativePointer,key.getPkeyContext());
+  }
+ catch (  InvalidKeyException e) {
+    throw new SSLException(e);
+  }
+  NativeCrypto.SSL_check_private_key(sslNativePointer);
+}

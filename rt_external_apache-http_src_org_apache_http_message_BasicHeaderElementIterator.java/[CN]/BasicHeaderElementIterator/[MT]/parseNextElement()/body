@@ -1,0 +1,20 @@
+{
+  while (this.headerIt.hasNext() || this.cursor != null) {
+    if (this.cursor == null || this.cursor.atEnd()) {
+      bufferHeaderValue();
+    }
+    if (this.cursor != null) {
+      while (!this.cursor.atEnd()) {
+        HeaderElement e=this.parser.parseHeaderElement(this.buffer,this.cursor);
+        if (!(e.getName().length() == 0 && e.getValue() == null)) {
+          this.currentElement=e;
+          return;
+        }
+      }
+      if (this.cursor.atEnd()) {
+        this.cursor=null;
+        this.buffer=null;
+      }
+    }
+  }
+}

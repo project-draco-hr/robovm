@@ -1,0 +1,15 @@
+{
+  serverChannel.configureBlocking(false);
+  serverChannel.socket().bind(localAddr1);
+  ByteBuffer buf=ByteBuffer.allocate(CAPACITY_NORMAL);
+  for (int i=0; i < CAPACITY_NORMAL; i++) {
+    buf.put((byte)i);
+  }
+  buf.flip();
+  clientChannel.connect(localAddr1);
+  Socket serverSocket=serverChannel.accept().socket();
+  InputStream in=serverSocket.getInputStream();
+  clientChannel.write(buf);
+  clientChannel.close();
+  assertReadResult(in,CAPACITY_NORMAL);
+}

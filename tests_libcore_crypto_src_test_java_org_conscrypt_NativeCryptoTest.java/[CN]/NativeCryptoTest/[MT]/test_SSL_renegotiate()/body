@@ -1,0 +1,30 @@
+{
+  try {
+    NativeCrypto.SSL_renegotiate(NULL);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  final ServerSocket listener=new ServerSocket(0);
+  Hooks cHooks=new Hooks(){
+    @Override public void afterHandshake(    long session,    long s,    long c,    Socket sock,    FileDescriptor fd,    SSLHandshakeCallbacks callback) throws Exception {
+      byte[] buffer=new byte[1];
+      NativeCrypto.SSL_read(s,fd,callback,buffer,0,1,0);
+      assertEquals(42,buffer[0]);
+      super.afterHandshake(session,s,c,sock,fd,callback);
+    }
+  }
+;
+  Hooks sHooks=new ServerHooks(getServerPrivateKey(),getServerCertificates()){
+    @Override public void afterHandshake(    long session,    long s,    long c,    Socket sock,    FileDescriptor fd,    SSLHandshakeCallbacks callback) throws Exception {
+      NativeCrypto.SSL_renegotiate(s);
+      NativeCrypto.SSL_write(s,fd,callback,new byte[]{42},0,1,0);
+      super.afterHandshake(session,s,c,sock,fd,callback);
+    }
+  }
+;
+  Future<TestSSLHandshakeCallbacks> client=handshake(listener,0,true,cHooks,null,null);
+  Future<TestSSLHandshakeCallbacks> server=handshake(listener,0,false,sHooks,null,null);
+  client.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+  server.get(TIMEOUT_SECONDS,TimeUnit.SECONDS);
+}

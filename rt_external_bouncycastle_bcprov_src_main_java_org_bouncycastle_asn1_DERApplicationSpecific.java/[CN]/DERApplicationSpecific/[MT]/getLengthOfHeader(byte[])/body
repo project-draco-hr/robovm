@@ -1,0 +1,14 @@
+{
+  int length=data[1] & 0xff;
+  if (length == 0x80) {
+    return 2;
+  }
+  if (length > 127) {
+    int size=length & 0x7f;
+    if (size > 4) {
+      throw new IllegalStateException("DER length more than 4 bytes: " + size);
+    }
+    return size + 2;
+  }
+  return 2;
+}

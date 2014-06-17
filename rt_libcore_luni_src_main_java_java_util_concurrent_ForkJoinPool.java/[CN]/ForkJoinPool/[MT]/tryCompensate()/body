@@ -1,0 +1,40 @@
+{
+  int pc=config & SMASK, e, i, tc;
+  long c;
+  WorkQueue[] ws;
+  WorkQueue w;
+  Thread p;
+  if ((ws=workQueues) != null && (e=(int)(c=ctl)) >= 0) {
+    if (e != 0 && (i=e & SMASK) < ws.length && (w=ws[i]) != null && w.eventCount == (e | INT_SIGN)) {
+      long nc=((long)(w.nextWait & E_MASK) | (c & (AC_MASK | TC_MASK)));
+      if (U.compareAndSwapLong(this,CTL,c,nc)) {
+        w.eventCount=(e + E_SEQ) & E_MASK;
+        if ((p=w.parker) != null)         U.unpark(p);
+        return true;
+      }
+    }
+ else     if ((tc=(short)(c >>> TC_SHIFT)) >= 0 && (int)(c >> AC_SHIFT) + pc > 1) {
+      long nc=((c - AC_UNIT) & AC_MASK) | (c & ~AC_MASK);
+      if (U.compareAndSwapLong(this,CTL,c,nc))       return true;
+    }
+ else     if (tc + pc < MAX_CAP) {
+      long nc=((c + TC_UNIT) & TC_MASK) | (c & ~TC_MASK);
+      if (U.compareAndSwapLong(this,CTL,c,nc)) {
+        ForkJoinWorkerThreadFactory fac;
+        Throwable ex=null;
+        ForkJoinWorkerThread wt=null;
+        try {
+          if ((fac=factory) != null && (wt=fac.newThread(this)) != null) {
+            wt.start();
+            return true;
+          }
+        }
+ catch (        Throwable rex) {
+          ex=rex;
+        }
+        deregisterWorker(wt,ex);
+      }
+    }
+  }
+  return false;
+}

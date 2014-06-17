@@ -2,53 +2,55 @@
   if (currentEntry != null) {
     closeEntry();
   }
-  if (ze.getMethod() == STORED || (compressMethod == STORED && ze.getMethod() == -1)) {
-    if (ze.crc == -1) {
-      throw new ZipException("CRC mismatch");
+  int method=ze.getMethod();
+  if (method == -1) {
+    method=defaultCompressionMethod;
+  }
+  if (method == STORED) {
+    if (ze.getCompressedSize() == -1) {
+      ze.setCompressedSize(ze.getSize());
     }
-    if (ze.size == -1 && ze.compressedSize == -1) {
-      throw new ZipException("Size mismatch");
+ else     if (ze.getSize() == -1) {
+      ze.setSize(ze.getCompressedSize());
     }
-    if (ze.size != ze.compressedSize && ze.compressedSize != -1 && ze.size != -1) {
-      throw new ZipException("Size mismatch");
+    if (ze.getCrc() == -1) {
+      throw new ZipException("STORED entry missing CRC");
+    }
+    if (ze.getSize() == -1) {
+      throw new ZipException("STORED entry missing size");
+    }
+    if (ze.size != ze.compressedSize) {
+      throw new ZipException("STORED entry size/compressed size mismatch");
     }
   }
-  checkClosed();
+  checkOpen();
   if (entries.contains(ze.name)) {
     throw new ZipException("Entry already exists: " + ze.name);
   }
   if (entries.size() == 64 * 1024 - 1) {
     throw new ZipException("Too many entries for the zip file format's 16-bit entry count");
   }
-  nameBytes=ze.name.getBytes(Charsets.UTF_8);
+  nameBytes=ze.name.getBytes(StandardCharsets.UTF_8);
   nameLength=nameBytes.length;
   if (nameLength > 0xffff) {
     throw new IllegalArgumentException("Name too long: " + nameLength + " UTF-8 bytes");
   }
-  def.setLevel(compressLevel);
+  def.setLevel(compressionLevel);
+  ze.setMethod(method);
   currentEntry=ze;
   entries.add(currentEntry.name);
-  if (currentEntry.getMethod() == -1) {
-    currentEntry.setMethod(compressMethod);
-  }
-  int flags=currentEntry.getMethod() == STORED ? 0 : ZipFile.GPBF_DATA_DESCRIPTOR_FLAG;
+  int flags=(method == STORED) ? 0 : ZipFile.GPBF_DATA_DESCRIPTOR_FLAG;
   flags|=ZipFile.GPBF_UTF8_FLAG;
   writeLong(out,LOCSIG);
-  writeShort(out,ZIPLocalHeaderVersionNeeded);
+  writeShort(out,ZIP_VERSION_2_0);
   writeShort(out,flags);
-  writeShort(out,currentEntry.getMethod());
+  writeShort(out,method);
   if (currentEntry.getTime() == -1) {
     currentEntry.setTime(System.currentTimeMillis());
   }
   writeShort(out,currentEntry.time);
   writeShort(out,currentEntry.modDate);
-  if (currentEntry.getMethod() == STORED) {
-    if (currentEntry.size == -1) {
-      currentEntry.size=currentEntry.compressedSize;
-    }
- else     if (currentEntry.compressedSize == -1) {
-      currentEntry.compressedSize=currentEntry.size;
-    }
+  if (method == STORED) {
     writeLong(out,currentEntry.crc);
     writeLong(out,currentEntry.size);
     writeLong(out,currentEntry.size);

@@ -1,13 +1,15 @@
 {
+  Thread wt=Thread.currentThread();
   Runnable task=w.firstTask;
   w.firstTask=null;
+  w.unlock();
   boolean completedAbruptly=true;
   try {
     while (task != null || (task=getTask()) != null) {
       w.lock();
-      clearInterruptsForTaskRun();
+      if ((runStateAtLeast(ctl.get(),STOP) || (Thread.interrupted() && runStateAtLeast(ctl.get(),STOP))) && !wt.isInterrupted())       wt.interrupt();
       try {
-        beforeExecute(w.thread,task);
+        beforeExecute(wt,task);
         Throwable thrown=null;
         try {
           task.run();

@@ -1,0 +1,14 @@
+{
+  try {
+    sendRequest();
+    Response response=readResponse();
+    responseReceiver.onResponse(response);
+  }
+ catch (  IOException e) {
+    responseReceiver.onFailure(new Failure.Builder().request(request).exception(e).build());
+  }
+ finally {
+    connection.disconnect();
+    dispatcher.finished(this);
+  }
+}

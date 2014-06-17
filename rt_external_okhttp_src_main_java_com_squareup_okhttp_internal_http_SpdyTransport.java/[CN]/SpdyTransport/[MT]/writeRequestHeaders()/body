@@ -1,0 +1,14 @@
+{
+  if (stream != null) {
+    return;
+  }
+  httpEngine.writingRequestHeaders();
+  RawHeaders requestHeaders=httpEngine.requestHeaders.getHeaders();
+  String version=httpEngine.connection.getHttpMinorVersion() == 1 ? "HTTP/1.1" : "HTTP/1.0";
+  URL url=httpEngine.policy.getURL();
+  requestHeaders.addSpdyRequestHeaders(httpEngine.method,HttpEngine.requestPath(url),version,HttpEngine.getOriginAddress(url),httpEngine.uri.getScheme());
+  boolean hasRequestBody=httpEngine.hasRequestBody();
+  boolean hasResponseBody=true;
+  stream=spdyConnection.newStream(requestHeaders.toNameValueBlock(),hasRequestBody,hasResponseBody);
+  stream.setReadTimeout(httpEngine.client.getReadTimeout());
+}

@@ -1,3 +1,6 @@
 {
-  return sync.innerGet(unit.toNanos(timeout));
+  if (unit == null)   throw new NullPointerException();
+  int s=state;
+  if (s <= COMPLETING && (s=awaitDone(true,unit.toNanos(timeout))) <= COMPLETING)   throw new TimeoutException();
+  return report(s);
 }

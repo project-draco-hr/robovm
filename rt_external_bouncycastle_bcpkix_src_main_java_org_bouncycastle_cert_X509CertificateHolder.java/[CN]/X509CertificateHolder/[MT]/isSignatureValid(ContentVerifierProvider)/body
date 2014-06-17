@@ -1,0 +1,18 @@
+{
+  TBSCertificate tbsCert=x509Certificate.getTBSCertificate();
+  if (!CertUtils.isAlgIdEqual(tbsCert.getSignature(),x509Certificate.getSignatureAlgorithm())) {
+    throw new CertException("signature invalid - algorithm identifier mismatch");
+  }
+  ContentVerifier verifier;
+  try {
+    verifier=verifierProvider.get((tbsCert.getSignature()));
+    OutputStream sOut=verifier.getOutputStream();
+    DEROutputStream dOut=new DEROutputStream(sOut);
+    dOut.writeObject(tbsCert);
+    sOut.close();
+  }
+ catch (  Exception e) {
+    throw new CertException("unable to process signature: " + e.getMessage(),e);
+  }
+  return verifier.verify(x509Certificate.getSignature().getBytes());
+}

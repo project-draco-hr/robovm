@@ -1,6 +1,17 @@
 {
-  int i=super.read(buffer,off,nbytes);
-  if (i != -1) {
+  final int i;
+  try {
+    i=super.read(buffer,byteOffset,byteCount);
+  }
+ catch (  IOException e) {
+    throw new IOException("Error reading data for " + entry.getName() + " near offset "+ bytesRead,e);
+  }
+  if (i == -1) {
+    if (entry.size != bytesRead) {
+      throw new IOException("Size mismatch on inflated file: " + bytesRead + " vs "+ entry.size);
+    }
+  }
+ else {
     bytesRead+=i;
   }
   return i;

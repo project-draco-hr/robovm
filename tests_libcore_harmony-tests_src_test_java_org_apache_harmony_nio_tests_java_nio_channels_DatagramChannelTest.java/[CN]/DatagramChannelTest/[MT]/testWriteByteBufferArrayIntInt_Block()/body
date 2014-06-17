@@ -1,0 +1,16 @@
+{
+  ByteBuffer[] writeBuf=new ByteBuffer[2];
+  writeBuf[0]=ByteBuffer.allocateDirect(CAPACITY_NORMAL);
+  writeBuf[1]=ByteBuffer.allocateDirect(CAPACITY_NORMAL);
+  InetSocketAddress ipAddr=localAddr1;
+  try {
+    this.channel1.write(writeBuf,0,2);
+    fail("Should throw NotYetConnectedException.");
+  }
+ catch (  NotYetConnectedException e) {
+  }
+  this.channel1.connect(ipAddr);
+  assertTrue(this.channel1.isConnected());
+  assertEquals(CAPACITY_NORMAL * 2,this.channel1.write(writeBuf,0,2));
+  assertEquals(0,this.channel1.write(writeBuf,0,1));
+}

@@ -1,0 +1,27 @@
+{
+  try {
+    readOnlyChannel.lock(-1,10,true);
+    fail("Passing illegal args to lock should fail.");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  try {
+    writeOnlyChannel.lock(-1,10,false);
+    fail("Passing illegal args to lock should fail.");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  try {
+    readWriteChannel.lock(-1,10,false);
+    fail("Passing illegal args to lock should fail.");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  FileLock flock1=readWriteChannel.lock(22,110,true);
+  try {
+    readWriteChannel.lock(75,210,true);
+  }
+ catch (  OverlappingFileLockException exception) {
+    flock1.release();
+  }
+}

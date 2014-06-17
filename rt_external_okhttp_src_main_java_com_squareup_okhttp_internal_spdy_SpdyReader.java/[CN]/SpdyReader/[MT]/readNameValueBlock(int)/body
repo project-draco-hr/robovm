@@ -1,0 +1,26 @@
+{
+  this.compressedLimit+=length;
+  try {
+    int numberOfPairs=nameValueBlockIn.readInt();
+    if (numberOfPairs < 0) {
+      Logger.getLogger(getClass().getName()).warning("numberOfPairs < 0: " + numberOfPairs);
+      throw ioException("numberOfPairs < 0");
+    }
+    List<String> entries=new ArrayList<String>(numberOfPairs * 2);
+    for (int i=0; i < numberOfPairs; i++) {
+      String name=readString();
+      String values=readString();
+      if (name.length() == 0)       throw ioException("name.length == 0");
+      if (values.length() == 0)       throw ioException("values.length == 0");
+      entries.add(name);
+      entries.add(values);
+    }
+    if (compressedLimit != 0) {
+      Logger.getLogger(getClass().getName()).warning("compressedLimit > 0: " + compressedLimit);
+    }
+    return entries;
+  }
+ catch (  DataFormatException e) {
+    throw new IOException(e.getMessage());
+  }
+}

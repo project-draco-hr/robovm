@@ -1,15 +1,11 @@
 {
-  ks.load(null,null);
-  if (isReadOnly(ks)) {
-    try {
-      setPrivateKey(ks);
-      fail();
-    }
- catch (    UnsupportedOperationException e) {
-    }
+  boolean readOnly=clearKeyStore(ks);
+  if (readOnly) {
     return;
   }
-  setPrivateKey(ks);
+  if (isKeyPasswordSupported(ks)) {
+    setPrivateKey(ks);
+  }
   if (isNullPasswordAllowed(ks)) {
     ks.setKeyEntry(ALIAS_NO_PASSWORD_PRIVATE,getPrivateKey().getPrivateKey(),null,getPrivateKey().getCertificateChain());
   }

@@ -1,0 +1,14 @@
+{
+  SecretKey key=new SecretKeySpec(p.key,"AES");
+  Cipher c=Cipher.getInstance(p.mode + "/NoPadding",provider);
+  if (c.getBlockSize() == 0) {
+    return;
+  }
+  c.init(Cipher.ENCRYPT_MODE,key);
+  try {
+    c.doFinal(new byte[]{0x01,0x02,0x03});
+    fail("Should throw IllegalBlockSizeException on wrong-sized block");
+  }
+ catch (  IllegalBlockSizeException expected) {
+  }
+}

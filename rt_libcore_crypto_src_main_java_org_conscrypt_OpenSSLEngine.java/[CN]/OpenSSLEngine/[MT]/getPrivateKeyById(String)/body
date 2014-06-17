@@ -1,0 +1,16 @@
+{
+  if (id == null) {
+    throw new NullPointerException("id == null");
+  }
+  final long keyRef=NativeCrypto.ENGINE_load_private_key(ctx,id);
+  if (keyRef == 0) {
+    return null;
+  }
+  OpenSSLKey pkey=new OpenSSLKey(keyRef,this,id);
+  try {
+    return pkey.getPrivateKey();
+  }
+ catch (  NoSuchAlgorithmException e) {
+    throw new InvalidKeyException(e);
+  }
+}

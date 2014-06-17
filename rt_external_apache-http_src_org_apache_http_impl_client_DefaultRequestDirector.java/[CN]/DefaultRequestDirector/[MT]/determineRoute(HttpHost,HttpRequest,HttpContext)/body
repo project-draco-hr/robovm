@@ -1,0 +1,18 @@
+{
+  if (target == null) {
+    target=(HttpHost)request.getParams().getParameter(ClientPNames.DEFAULT_HOST);
+  }
+  if (target == null) {
+    String scheme=null;
+    String host=null;
+    String path=null;
+    URI uri;
+    if (request instanceof HttpUriRequest && (uri=((HttpUriRequest)request).getURI()) != null) {
+      scheme=uri.getScheme();
+      host=uri.getHost();
+      path=uri.getPath();
+    }
+    throw new IllegalStateException("Target host must not be null, or set in parameters." + " scheme=" + scheme + ", host="+ host+ ", path="+ path);
+  }
+  return this.routePlanner.determineRoute(target,request,context);
+}

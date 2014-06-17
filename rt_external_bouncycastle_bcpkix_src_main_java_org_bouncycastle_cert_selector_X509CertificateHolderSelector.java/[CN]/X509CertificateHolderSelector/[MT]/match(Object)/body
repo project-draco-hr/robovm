@@ -1,0 +1,21 @@
+{
+  if (obj instanceof X509CertificateHolder) {
+    X509CertificateHolder certHldr=(X509CertificateHolder)obj;
+    if (this.getSerialNumber() != null) {
+      IssuerAndSerialNumber iAndS=new IssuerAndSerialNumber(certHldr.toASN1Structure());
+      return iAndS.getName().equals(this.issuer) && iAndS.getSerialNumber().getValue().equals(this.serialNumber);
+    }
+ else     if (subjectKeyId != null) {
+      Extension ext=certHldr.getExtension(Extension.subjectKeyIdentifier);
+      if (ext == null) {
+        return Arrays.areEqual(subjectKeyId,MSOutlookKeyIdCalculator.calculateKeyId(certHldr.getSubjectPublicKeyInfo()));
+      }
+      byte[] subKeyID=ASN1OctetString.getInstance(ext.getParsedValue()).getOctets();
+      return Arrays.areEqual(subjectKeyId,subKeyID);
+    }
+  }
+ else   if (obj instanceof byte[]) {
+    return Arrays.areEqual(subjectKeyId,(byte[])obj);
+  }
+  return false;
+}

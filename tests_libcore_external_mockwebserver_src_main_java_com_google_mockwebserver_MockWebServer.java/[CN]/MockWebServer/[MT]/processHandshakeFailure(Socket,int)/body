@@ -1,0 +1,25 @@
+{
+  X509TrustManager untrusted=new X509TrustManager(){
+    @Override public void checkClientTrusted(    X509Certificate[] chain,    String authType) throws CertificateException {
+      throw new CertificateException();
+    }
+    @Override public void checkServerTrusted(    X509Certificate[] chain,    String authType){
+      throw new AssertionError();
+    }
+    @Override public X509Certificate[] getAcceptedIssuers(){
+      throw new AssertionError();
+    }
+  }
+;
+  SSLContext context=SSLContext.getInstance("TLS");
+  context.init(null,new TrustManager[]{untrusted},new java.security.SecureRandom());
+  SSLSocketFactory sslSocketFactory=context.getSocketFactory();
+  SSLSocket socket=(SSLSocket)sslSocketFactory.createSocket(raw,raw.getInetAddress().getHostAddress(),raw.getPort(),true);
+  try {
+    socket.startHandshake();
+    throw new AssertionError();
+  }
+ catch (  IOException expected) {
+  }
+  socket.close();
+}

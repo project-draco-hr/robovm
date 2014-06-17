@@ -1,0 +1,11 @@
+{
+  if (key instanceof OpenSSLKeyHolder) {
+    return ((OpenSSLKeyHolder)key).getOpenSSLKey();
+  }
+  if ("PKCS#8".equals(key.getFormat())) {
+    return new OpenSSLKey(NativeCrypto.d2i_PKCS8_PRIV_KEY_INFO(key.getEncoded()));
+  }
+ else {
+    throw new InvalidKeyException("Unknown key format " + key.getFormat());
+  }
+}

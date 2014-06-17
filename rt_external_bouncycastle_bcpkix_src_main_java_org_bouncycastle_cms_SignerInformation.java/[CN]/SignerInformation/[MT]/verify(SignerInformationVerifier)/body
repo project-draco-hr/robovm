@@ -1,0 +1,12 @@
+{
+  Time signingTime=getSigningTime();
+  if (verifier.hasAssociatedCertificate()) {
+    if (signingTime != null) {
+      X509CertificateHolder dcv=verifier.getAssociatedCertificate();
+      if (!dcv.isValidOn(signingTime.getDate())) {
+        throw new CMSVerifierCertificateNotValidException("verifier not valid at signingTime");
+      }
+    }
+  }
+  return doVerify(verifier);
+}

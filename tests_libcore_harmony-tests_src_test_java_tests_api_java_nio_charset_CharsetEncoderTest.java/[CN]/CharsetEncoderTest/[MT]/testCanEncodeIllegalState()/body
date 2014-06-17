@@ -1,0 +1,27 @@
+{
+  encoder.canEncode("\ud900\udc00");
+  encoder.canEncode('\ud900');
+  assertSame(encoder,encoder.reset());
+  encoder.encode(CharBuffer.wrap("testCanEncodeIllegalState2"),ByteBuffer.allocate(30),true);
+  try {
+    encoder.canEncode("\ud903\udc00");
+    fail("should throw illegal state exception");
+  }
+ catch (  IllegalStateException e) {
+  }
+  assertSame(encoder,encoder.reset());
+  encoder.encode(CharBuffer.wrap("testCanEncodeIllegalState3"),ByteBuffer.allocate(30),false);
+  try {
+    encoder.canEncode("\ud904\udc00");
+    fail("should throw illegal state exception");
+  }
+ catch (  IllegalStateException e) {
+  }
+  encoder.encode(CharBuffer.wrap("testCanEncodeIllegalState4"),ByteBuffer.allocate(30),true);
+  encoder.flush(ByteBuffer.allocate(10));
+  encoder.canEncode("\ud905\udc00");
+  encoder.canEncode('\ud906');
+  assertSame(encoder,encoder.reset());
+  encoder.canEncode("\ud906\udc00");
+  encoder.canEncode('\ud905');
+}

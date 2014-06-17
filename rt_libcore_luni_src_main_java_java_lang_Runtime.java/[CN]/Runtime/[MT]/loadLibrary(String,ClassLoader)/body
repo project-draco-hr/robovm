@@ -10,7 +10,7 @@
   if (loader != null) {
     String filename=loader.findLibrary(libraryName);
     if (filename == null) {
-      throw new UnsatisfiedLinkError("Couldn't load " + libraryName + ": "+ "findLibrary returned null");
+      throw new UnsatisfiedLinkError("Couldn't load " + libraryName + " from loader "+ loader+ ": findLibrary returned null");
     }
     nativeLoad(filename,loader);
     return;
@@ -21,7 +21,7 @@
   for (  String directory : mLibPaths) {
     String candidate=directory + filename;
     candidates.add(candidate);
-    if (new File(candidate).exists()) {
+    if (IoUtils.canOpenReadOnly(candidate)) {
       try {
         nativeLoad(candidate,loader);
         return;

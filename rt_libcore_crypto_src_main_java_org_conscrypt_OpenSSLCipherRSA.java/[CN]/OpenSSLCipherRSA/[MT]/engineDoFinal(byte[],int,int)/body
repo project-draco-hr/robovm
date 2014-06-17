@@ -1,0 +1,51 @@
+{
+  if (input != null) {
+    engineUpdate(input,inputOffset,inputLen);
+  }
+  if (inputTooLarge) {
+    throw new IllegalBlockSizeException("input must be under " + buffer.length + " bytes");
+  }
+  final byte[] tmpBuf;
+  if (bufferOffset != buffer.length) {
+    if (padding == NativeCrypto.RSA_NO_PADDING) {
+      tmpBuf=new byte[buffer.length];
+      System.arraycopy(buffer,0,tmpBuf,buffer.length - bufferOffset,bufferOffset);
+    }
+ else {
+      tmpBuf=Arrays.copyOf(buffer,bufferOffset);
+    }
+  }
+ else {
+    tmpBuf=buffer;
+  }
+  byte[] output=new byte[buffer.length];
+  int resultSize;
+  if (encrypting) {
+    if (usingPrivateKey) {
+      resultSize=NativeCrypto.RSA_private_encrypt(tmpBuf.length,tmpBuf,output,key.getPkeyContext(),padding);
+    }
+ else {
+      resultSize=NativeCrypto.RSA_public_encrypt(tmpBuf.length,tmpBuf,output,key.getPkeyContext(),padding);
+    }
+  }
+ else {
+    try {
+      if (usingPrivateKey) {
+        resultSize=NativeCrypto.RSA_private_decrypt(tmpBuf.length,tmpBuf,output,key.getPkeyContext(),padding);
+      }
+ else {
+        resultSize=NativeCrypto.RSA_public_decrypt(tmpBuf.length,tmpBuf,output,key.getPkeyContext(),padding);
+      }
+    }
+ catch (    SignatureException e) {
+      IllegalBlockSizeException newE=new IllegalBlockSizeException();
+      newE.initCause(e);
+      throw newE;
+    }
+  }
+  if (!encrypting && resultSize != output.length) {
+    output=Arrays.copyOf(output,resultSize);
+  }
+  bufferOffset=0;
+  return output;
+}

@@ -1,0 +1,33 @@
+{
+  DSAParametersGenerator pGen;
+  if (strength <= 1024) {
+    pGen=new DSAParametersGenerator();
+  }
+ else {
+    pGen=new DSAParametersGenerator(new SHA256Digest());
+  }
+  if (random == null) {
+    random=new SecureRandom();
+  }
+  if (strength == 1024) {
+    params=new DSAParameterGenerationParameters(1024,160,80,random);
+    pGen.init(params);
+  }
+ else   if (strength > 1024) {
+    params=new DSAParameterGenerationParameters(strength,256,80,random);
+    pGen.init(params);
+  }
+ else {
+    pGen.init(strength,20,random);
+  }
+  DSAParameters p=pGen.generateParameters();
+  AlgorithmParameters params;
+  try {
+    params=AlgorithmParameters.getInstance("DSA",BouncyCastleProvider.PROVIDER_NAME);
+    params.init(new DSAParameterSpec(p.getP(),p.getQ(),p.getG()));
+  }
+ catch (  Exception e) {
+    throw new RuntimeException(e.getMessage());
+  }
+  return params;
+}

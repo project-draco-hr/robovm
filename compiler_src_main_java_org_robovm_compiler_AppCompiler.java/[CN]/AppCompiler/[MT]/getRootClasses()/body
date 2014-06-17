@@ -4,7 +4,11 @@
     classes.addAll(getMatchingClasses(rootClassPattern));
   }
   for (  String rootClassName : ROOT_CLASSES) {
-    classes.add(config.getClazzes().load(rootClassName));
+    Clazz clazz=config.getClazzes().load(rootClassName);
+    if (clazz == null) {
+      throw new CompilerException("Root class " + rootClassName + " not found");
+    }
+    classes.add(clazz);
   }
   if (config.getMainClass() != null) {
     Clazz clazz=config.getClazzes().load(config.getMainClass().replace('.','/'));

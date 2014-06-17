@@ -1,9 +1,10 @@
 {
-  server.enqueue(new MockResponse().setBody("abc").setSocketPolicy(DISCONNECT_AT_END));
-  server.enqueue(new MockResponse().setBody("def"));
+  TestSSLContext testSSLContext=TestSSLContext.create();
+  server.useHttps(testSSLContext.serverContext.getSocketFactory(),false);
+  server.enqueue(new MockResponse().setBody("abc").setSocketPolicy(DISCONNECT_AFTER_READING_REQUEST));
   server.play();
-  assertContent("abc",server.getUrl("/a").openConnection());
-  HttpURLConnection connection=(HttpURLConnection)server.getUrl("/b").openConnection();
+  HttpsURLConnection connection=(HttpsURLConnection)server.getUrl("/a").openConnection();
+  connection.setSSLSocketFactory(testSSLContext.clientContext.getSocketFactory());
   connection.setDoOutput(true);
   connection.setFixedLengthStreamingMode(3);
   OutputStream out=connection.getOutputStream();

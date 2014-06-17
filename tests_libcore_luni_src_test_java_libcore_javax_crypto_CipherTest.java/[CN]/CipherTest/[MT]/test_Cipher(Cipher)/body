@@ -1,0 +1,91 @@
+{
+  String algorithm=c.getAlgorithm().toUpperCase(Locale.US);
+  String providerName=c.getProvider().getName();
+  if (!isSupported(algorithm,providerName)) {
+    return;
+  }
+  String cipherID=algorithm + ":" + providerName;
+  try {
+    c.getOutputSize(0);
+  }
+ catch (  IllegalStateException expected) {
+  }
+  Key encryptKey=getEncryptKey(algorithm);
+  final AlgorithmParameterSpec encryptSpec=getEncryptAlgorithmParameterSpec(algorithm);
+  int encryptMode=getEncryptMode(algorithm);
+  if (isPBE(algorithm) && !"BC".equals(providerName)) {
+    assertNotNull(cipherID + " getParameters()",c.getParameters());
+    assertNotNull(c.getParameters().getParameterSpec(PBEParameterSpec.class));
+  }
+ else {
+    assertNull(cipherID + " getParameters()",c.getParameters());
+  }
+  try {
+    assertNull(cipherID + " getIV()",c.getIV());
+  }
+ catch (  NullPointerException e) {
+    if (!("BC".equals(providerName) && isOnlyWrappingAlgorithm(algorithm))) {
+      throw e;
+    }
+  }
+  c.init(encryptMode,encryptKey,encryptSpec);
+  assertEquals(cipherID + " getBlockSize() encryptMode",getExpectedBlockSize(algorithm,encryptMode,providerName),c.getBlockSize());
+  assertEquals(cipherID + " getOutputSize(0) encryptMode",getExpectedOutputSize(algorithm,encryptMode,providerName),c.getOutputSize(0));
+  final AlgorithmParameterSpec decryptSpec=getDecryptAlgorithmParameterSpec(encryptSpec,c);
+  int decryptMode=getDecryptMode(algorithm);
+  c.init(decryptMode,encryptKey,decryptSpec);
+  assertEquals(cipherID + " getBlockSize() decryptMode",getExpectedBlockSize(algorithm,decryptMode,providerName),c.getBlockSize());
+  assertEquals(cipherID + " getOutputSize(0) decryptMode",getExpectedOutputSize(algorithm,decryptMode,providerName),c.getOutputSize(0));
+  if (isPBE(algorithm)) {
+    if (algorithm.endsWith("RC4")) {
+      assertNull(cipherID + " getIV()",c.getIV());
+    }
+ else {
+      assertNotNull(cipherID + " getIV()",c.getIV());
+    }
+  }
+ else   if (decryptSpec instanceof IvParameterSpec) {
+    assertEquals(cipherID + " getIV()",Arrays.toString(((IvParameterSpec)decryptSpec).getIV()),Arrays.toString(c.getIV()));
+  }
+ else {
+    try {
+      assertNull(cipherID + " getIV()",c.getIV());
+    }
+ catch (    NullPointerException e) {
+      if (!("BC".equals(providerName) && isOnlyWrappingAlgorithm(algorithm))) {
+        throw e;
+      }
+    }
+  }
+  AlgorithmParameters params=c.getParameters();
+  if (decryptSpec == null) {
+    assertNull(cipherID + " getParameters()",params);
+  }
+ else   if (decryptSpec instanceof IvParameterSpec) {
+    IvParameterSpec ivDecryptSpec=(IvParameterSpec)params.getParameterSpec(IvParameterSpec.class);
+    assertEquals(cipherID + " getIV()",Arrays.toString(((IvParameterSpec)decryptSpec).getIV()),Arrays.toString(ivDecryptSpec.getIV()));
+  }
+ else   if (decryptSpec instanceof PBEParameterSpec) {
+    if (!"BC".equals(providerName)) {
+      assertNotNull(cipherID + " getParameters()",params);
+    }
+  }
+  assertNull(cipherID,c.getExemptionMechanism());
+  if (isSupportedForWrapping(algorithm)) {
+    KeyGenerator kg=KeyGenerator.getInstance("AES");
+    kg.init(128);
+    SecretKey sk=kg.generateKey();
+    c.init(Cipher.WRAP_MODE,encryptKey,encryptSpec);
+    byte[] cipherText=c.wrap(sk);
+    c.init(Cipher.UNWRAP_MODE,getDecryptKey(algorithm),decryptSpec);
+    Key decryptedKey=c.unwrap(cipherText,sk.getAlgorithm(),Cipher.SECRET_KEY);
+    assertEquals(cipherID + " sk.getAlgorithm()=" + sk.getAlgorithm()+ " decryptedKey.getAlgorithm()="+ decryptedKey.getAlgorithm()+ " encryptKey.getEncoded()="+ Arrays.toString(sk.getEncoded())+ " decryptedKey.getEncoded()="+ Arrays.toString(decryptedKey.getEncoded()),sk,decryptedKey);
+  }
+  if (!isOnlyWrappingAlgorithm(algorithm)) {
+    c.init(Cipher.ENCRYPT_MODE,encryptKey,encryptSpec);
+    byte[] cipherText=c.doFinal(getActualPlainText(algorithm));
+    c.init(Cipher.DECRYPT_MODE,getDecryptKey(algorithm),decryptSpec);
+    byte[] decryptedPlainText=c.doFinal(cipherText);
+    assertEquals(cipherID,Arrays.toString(getExpectedPlainText(algorithm,providerName)),Arrays.toString(decryptedPlainText));
+  }
+}

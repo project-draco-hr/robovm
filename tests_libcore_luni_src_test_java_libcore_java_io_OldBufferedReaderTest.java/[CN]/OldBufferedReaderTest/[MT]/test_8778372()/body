@@ -1,0 +1,21 @@
+{
+  final PipedInputStream pis=new PipedInputStream();
+  final PipedOutputStream pos=new PipedOutputStream(pis);
+  final Thread t=new Thread(){
+    @Override public void run(){
+      PrintWriter pw=new PrintWriter(new OutputStreamWriter(pos));
+      pw.print("hello, world\r");
+      pw.flush();
+      try {
+        Thread.sleep(2 * 60 * 1000);
+      }
+ catch (      InterruptedException ex) {
+        fail();
+      }
+    }
+  }
+;
+  t.start();
+  BufferedReader br=new BufferedReader(new InputStreamReader(pis));
+  assertEquals("hello, world",br.readLine());
+}

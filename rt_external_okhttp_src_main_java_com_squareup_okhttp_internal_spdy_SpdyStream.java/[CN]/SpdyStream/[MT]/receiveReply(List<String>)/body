@@ -1,0 +1,21 @@
+{
+  assert(!Thread.holdsLock(SpdyStream.this));
+  boolean streamInUseError=false;
+  boolean open=true;
+synchronized (this) {
+    if (isLocallyInitiated() && responseHeaders == null) {
+      responseHeaders=strings;
+      open=isOpen();
+      notifyAll();
+    }
+ else {
+      streamInUseError=true;
+    }
+  }
+  if (streamInUseError) {
+    closeLater(SpdyStream.RST_STREAM_IN_USE);
+  }
+ else   if (!open) {
+    connection.removeStream(id);
+  }
+}

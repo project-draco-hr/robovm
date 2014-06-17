@@ -1,0 +1,17 @@
+{
+  String pinFileContents=readPinFile();
+  if (pinFileContents != null) {
+    for (    String entry : getPinFileEntries(pinFileContents)) {
+      try {
+        PinListEntry pin=new PinListEntry(entry,certStore);
+        entries.put(pin.getCommonName(),pin);
+      }
+ catch (      PinEntryException e) {
+        log("Pinlist contains a malformed pin: " + entry,e);
+      }
+    }
+    hostnameCache.evictAll();
+    lastModified=pinFile.lastModified();
+    initialized=true;
+  }
+}

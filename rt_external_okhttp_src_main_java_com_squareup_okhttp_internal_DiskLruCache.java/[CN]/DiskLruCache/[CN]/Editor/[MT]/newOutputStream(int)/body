@@ -1,0 +1,25 @@
+{
+synchronized (DiskLruCache.this) {
+    if (entry.currentEditor != this) {
+      throw new IllegalStateException();
+    }
+    if (!entry.readable) {
+      written[index]=true;
+    }
+    File dirtyFile=entry.getDirtyFile(index);
+    FileOutputStream outputStream;
+    try {
+      outputStream=new FileOutputStream(dirtyFile);
+    }
+ catch (    FileNotFoundException e) {
+      directory.mkdirs();
+      try {
+        outputStream=new FileOutputStream(dirtyFile);
+      }
+ catch (      FileNotFoundException e2) {
+        return NULL_OUTPUT_STREAM;
+      }
+    }
+    return new FaultHidingOutputStream(outputStream);
+  }
+}

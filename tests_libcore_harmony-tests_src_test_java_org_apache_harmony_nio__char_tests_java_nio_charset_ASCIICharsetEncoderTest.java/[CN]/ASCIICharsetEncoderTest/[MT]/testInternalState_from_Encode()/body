@@ -1,0 +1,37 @@
+{
+  CharsetEncoder newEncoder=cs.newEncoder();
+{
+    CharBuffer in=CharBuffer.wrap("A");
+    newEncoder.encode(in);
+    newEncoder.reset();
+  }
+{
+    CharBuffer in=CharBuffer.wrap("A");
+    newEncoder.encode(in);
+    ByteBuffer out=ByteBuffer.allocate(0x10);
+    try {
+      newEncoder.encode(in,out,false);
+      fail("Should throw IllegalStateException");
+    }
+ catch (    IllegalStateException e) {
+    }
+  }
+{
+    CharBuffer in=CharBuffer.wrap("A");
+    ByteBuffer out=ByteBuffer.allocate(0x10);
+    newEncoder.reset();
+    newEncoder.encode(in,out,false);
+    newEncoder.encode(in,out,true);
+  }
+{
+    CharBuffer in=CharBuffer.wrap("A");
+    ByteBuffer out=newEncoder.encode(in);
+    newEncoder.flush(out);
+  }
+{
+    CharBuffer in=CharBuffer.wrap("A");
+    newEncoder.encode(in);
+    in=CharBuffer.wrap("BC");
+    newEncoder.encode(in);
+  }
+}

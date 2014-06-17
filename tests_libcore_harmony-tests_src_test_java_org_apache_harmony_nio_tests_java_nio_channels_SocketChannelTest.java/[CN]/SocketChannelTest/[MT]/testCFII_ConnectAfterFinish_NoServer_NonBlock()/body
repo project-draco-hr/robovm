@@ -1,0 +1,39 @@
+{
+  ensureServerClosed();
+  this.channel1.configureBlocking(false);
+  statusNotConnected_NotPending();
+  assertFalse(this.channel1.connect(localAddr1));
+  statusNotConnected_Pending();
+  try {
+    assertFalse(this.channel1.finishConnect());
+    statusNotConnected_Pending();
+  }
+ catch (  ConnectException e) {
+  }
+  if (this.channel1.isOpen()) {
+    try {
+      this.channel1.connect(localAddr1);
+      fail("Should throw a ConnectionPendingException here.");
+    }
+ catch (    ConnectionPendingException e) {
+    }
+    statusNotConnected_Pending();
+    try {
+      this.channel1.connect(localAddr2);
+      fail("Should throw a ConnectionPendingException here.");
+    }
+ catch (    ConnectionPendingException e) {
+    }
+    statusNotConnected_Pending();
+    ensureServerClosed();
+    try {
+      this.channel1.connect(localAddr1);
+      fail("Should throw a ConnectionPendingException here.");
+    }
+ catch (    ConnectionPendingException e) {
+    }
+    statusNotConnected_Pending();
+    this.channel1.close();
+  }
+  statusChannelClosed();
+}

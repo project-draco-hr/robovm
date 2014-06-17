@@ -1,0 +1,14 @@
+{
+  writeDataToFile(fileOfReadOnlyFileChannel);
+  final int POSITION=4;
+  readOnlyFileChannel.position(POSITION);
+  ByteBuffer readBuffer=ByteBuffer.allocate(CONTENT_LENGTH);
+  int count=readOnlyFileChannel.read(readBuffer);
+  assertEquals(CONTENT_LENGTH - POSITION,count);
+  readBuffer.flip();
+  int i=POSITION;
+  while (readBuffer.hasRemaining()) {
+    assertEquals(CONTENT_AS_BYTES[i],readBuffer.get());
+    i++;
+  }
+}

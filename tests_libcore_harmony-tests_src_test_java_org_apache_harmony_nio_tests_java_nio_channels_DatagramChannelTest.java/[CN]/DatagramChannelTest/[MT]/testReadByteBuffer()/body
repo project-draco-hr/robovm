@@ -1,0 +1,20 @@
+{
+  ByteBuffer readBuf=ByteBuffer.allocateDirect(CAPACITY_NORMAL);
+  try {
+    this.channel1.read(readBuf);
+    fail("should throw NotYetConnectedException");
+  }
+ catch (  NotYetConnectedException e) {
+  }
+  this.channel1.connect(localAddr1);
+  assertTrue(this.channel1.isConnected());
+  this.channel1.configureBlocking(false);
+  assertEquals(0,this.channel1.read(readBuf));
+  this.channel1.close();
+  try {
+    this.channel1.read(readBuf);
+    fail("Should throw ClosedChannelException");
+  }
+ catch (  ClosedChannelException e) {
+  }
+}

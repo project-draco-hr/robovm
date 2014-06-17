@@ -1,0 +1,32 @@
+{
+  boolean stat=true, removed=false, empty=true;
+  ForkJoinTask<?>[] a;
+  int m, s, b, n;
+  if ((a=array) != null && (m=a.length - 1) >= 0 && (n=(s=top) - (b=base)) > 0) {
+    for (ForkJoinTask<?> t; ; ) {
+      int j=((--s & m) << ASHIFT) + ABASE;
+      t=(ForkJoinTask<?>)U.getObjectVolatile(a,j);
+      if (t == null)       break;
+ else       if (t == task) {
+        if (s + 1 == top) {
+          if (!U.compareAndSwapObject(a,j,task,null))           break;
+          top=s;
+          removed=true;
+        }
+ else         if (base == b)         removed=U.compareAndSwapObject(a,j,task,new EmptyTask());
+        break;
+      }
+ else       if (t.status >= 0)       empty=false;
+ else       if (s + 1 == top) {
+        if (U.compareAndSwapObject(a,j,t,null))         top=s;
+        break;
+      }
+      if (--n == 0) {
+        if (!empty && base == b)         stat=false;
+        break;
+      }
+    }
+  }
+  if (removed)   task.doExec();
+  return stat;
+}

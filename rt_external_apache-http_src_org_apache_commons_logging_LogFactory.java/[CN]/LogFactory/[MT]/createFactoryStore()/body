@@ -1,0 +1,25 @@
+{
+  Hashtable result=null;
+  String storeImplementationClass=System.getProperty(HASHTABLE_IMPLEMENTATION_PROPERTY);
+  if (storeImplementationClass == null) {
+    storeImplementationClass=WEAK_HASHTABLE_CLASSNAME;
+  }
+  try {
+    Class implementationClass=Class.forName(storeImplementationClass);
+    result=(Hashtable)implementationClass.newInstance();
+  }
+ catch (  Throwable t) {
+    if (!WEAK_HASHTABLE_CLASSNAME.equals(storeImplementationClass)) {
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic("[ERROR] LogFactory: Load of custom hashtable failed");
+      }
+ else {
+        System.err.println("[ERROR] LogFactory: Load of custom hashtable failed");
+      }
+    }
+  }
+  if (result == null) {
+    result=new Hashtable();
+  }
+  return result;
+}

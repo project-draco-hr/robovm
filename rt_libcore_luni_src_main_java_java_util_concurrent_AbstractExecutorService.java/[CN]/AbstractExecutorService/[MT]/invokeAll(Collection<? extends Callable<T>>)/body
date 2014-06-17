@@ -1,6 +1,6 @@
 {
   if (tasks == null)   throw new NullPointerException();
-  List<Future<T>> futures=new ArrayList<Future<T>>(tasks.size());
+  ArrayList<Future<T>> futures=new ArrayList<Future<T>>(tasks.size());
   boolean done=false;
   try {
     for (    Callable<T> t : tasks) {
@@ -8,7 +8,8 @@
       futures.add(f);
       execute(f);
     }
-    for (    Future<T> f : futures) {
+    for (int i=0, size=futures.size(); i < size; i++) {
+      Future<T> f=futures.get(i);
       if (!f.isDone()) {
         try {
           f.get();
@@ -23,6 +24,6 @@ catch (        ExecutionException ignore) {
     return futures;
   }
   finally {
-    if (!done)     for (    Future<T> f : futures)     f.cancel(true);
+    if (!done)     for (int i=0, size=futures.size(); i < size; i++)     futures.get(i).cancel(true);
   }
 }

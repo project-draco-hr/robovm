@@ -1,0 +1,26 @@
+{
+  PrivilegedAction action=new PrivilegedAction(){
+    public Object run(){
+      try {
+        if (loader != null) {
+          return loader.getResources(name);
+        }
+ else {
+          return ClassLoader.getSystemResources(name);
+        }
+      }
+ catch (      IOException e) {
+        if (isDiagnosticsEnabled()) {
+          logDiagnostic("Exception while trying to find configuration file " + name + ":"+ e.getMessage());
+        }
+        return null;
+      }
+catch (      NoSuchMethodError e) {
+        return null;
+      }
+    }
+  }
+;
+  Object result=AccessController.doPrivileged(action);
+  return (Enumeration)result;
+}

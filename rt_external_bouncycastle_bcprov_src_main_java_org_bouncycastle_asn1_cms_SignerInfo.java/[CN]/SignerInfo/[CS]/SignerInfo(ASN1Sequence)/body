@@ -1,0 +1,22 @@
+{
+  Enumeration e=seq.getObjects();
+  version=(ASN1Integer)e.nextElement();
+  sid=SignerIdentifier.getInstance(e.nextElement());
+  digAlgorithm=AlgorithmIdentifier.getInstance(e.nextElement());
+  Object obj=e.nextElement();
+  if (obj instanceof ASN1TaggedObject) {
+    authenticatedAttributes=ASN1Set.getInstance((ASN1TaggedObject)obj,false);
+    digEncryptionAlgorithm=AlgorithmIdentifier.getInstance(e.nextElement());
+  }
+ else {
+    authenticatedAttributes=null;
+    digEncryptionAlgorithm=AlgorithmIdentifier.getInstance(obj);
+  }
+  encryptedDigest=DEROctetString.getInstance(e.nextElement());
+  if (e.hasMoreElements()) {
+    unauthenticatedAttributes=ASN1Set.getInstance((ASN1TaggedObject)e.nextElement(),false);
+  }
+ else {
+    unauthenticatedAttributes=null;
+  }
+}

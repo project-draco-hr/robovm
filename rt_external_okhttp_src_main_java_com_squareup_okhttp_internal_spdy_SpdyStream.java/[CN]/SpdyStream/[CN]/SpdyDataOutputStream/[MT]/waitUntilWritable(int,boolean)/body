@@ -1,0 +1,19 @@
+{
+  try {
+    while (unacknowledgedBytes + count >= writeWindowSize) {
+      SpdyStream.this.wait();
+      if (!last && closed) {
+        throw new IOException("stream closed");
+      }
+ else       if (finished) {
+        throw new IOException("stream finished");
+      }
+ else       if (rstStatusCode != -1) {
+        throw new IOException("stream was reset: " + rstStatusString());
+      }
+    }
+  }
+ catch (  InterruptedException e) {
+    throw new InterruptedIOException();
+  }
+}

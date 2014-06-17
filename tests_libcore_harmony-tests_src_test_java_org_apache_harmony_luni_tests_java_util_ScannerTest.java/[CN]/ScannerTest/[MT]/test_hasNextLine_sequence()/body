@@ -1,0 +1,36 @@
+{
+  final PipedInputStream pis=new PipedInputStream();
+  final PipedOutputStream pos=new PipedOutputStream();
+  final Scanner scanner=new Scanner(pis);
+  pis.connect(pos);
+  final List<String> result=new ArrayList<String>();
+  Thread thread=new Thread(new Runnable(){
+    public void run(){
+      while (scanner.hasNextLine()) {
+        String line=scanner.nextLine();
+        result.add(line);
+      }
+    }
+  }
+);
+  thread.start();
+  for (int index=0; index < 5; index++) {
+    String line="line" + index + "\n";
+    pos.write(line.getBytes());
+    pos.flush();
+    try {
+      Thread.sleep(1000);
+    }
+ catch (    InterruptedException ignored) {
+    }
+    assertEquals(index + 1,result.size());
+  }
+  pis.close();
+  pos.close();
+  try {
+    thread.join(1000);
+  }
+ catch (  InterruptedException ignored) {
+  }
+  assertFalse(scanner.hasNextLine());
+}

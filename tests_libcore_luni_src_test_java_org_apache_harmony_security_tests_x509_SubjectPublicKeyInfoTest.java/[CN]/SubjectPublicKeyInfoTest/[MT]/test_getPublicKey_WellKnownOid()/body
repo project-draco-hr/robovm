@@ -1,0 +1,17 @@
+{
+  KeyPairGenerator kpg=KeyPairGenerator.getInstance("RSA");
+  KeyPair pair=kpg.generateKeyPair();
+  final RSAPublicKey rsaPubKey=(RSAPublicKey)pair.getPublic();
+  final ASN1Sequence rsaPubKeyInfo=new ASN1Sequence(new ASN1Type[]{ASN1Integer.getInstance(),ASN1Integer.getInstance()}){
+    @Override protected void getValues(    Object object,    Object[] values){
+      values[0]=rsaPubKey.getModulus().toByteArray();
+      values[1]=rsaPubKey.getPublicExponent().toByteArray();
+    }
+  }
+;
+  AlgorithmIdentifier algid=new AlgorithmIdentifier("1.2.840.113549.1.1.1");
+  SubjectPublicKeyInfo spki=new SubjectPublicKeyInfo(algid,rsaPubKeyInfo.encode(null));
+  PublicKey pubKey=spki.getPublicKey();
+  assertNotNull(pubKey);
+  assertTrue(pubKey instanceof RSAPublicKey);
+}

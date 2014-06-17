@@ -1,0 +1,13 @@
+{
+  if (certSet != null) {
+    List certList=new ArrayList(certSet.size());
+    for (Enumeration en=certSet.getObjects(); en.hasMoreElements(); ) {
+      ASN1Primitive obj=((ASN1Encodable)en.nextElement()).toASN1Primitive();
+      if (obj instanceof ASN1TaggedObject) {
+        certList.add(new X509AttributeCertificateHolder(AttributeCertificate.getInstance(((ASN1TaggedObject)obj).getObject())));
+      }
+    }
+    return new CollectionStore(certList);
+  }
+  return new CollectionStore(new ArrayList());
+}

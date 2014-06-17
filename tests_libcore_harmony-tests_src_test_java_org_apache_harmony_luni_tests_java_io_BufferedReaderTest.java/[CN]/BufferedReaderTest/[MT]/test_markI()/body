@@ -1,0 +1,59 @@
+{
+  char[] buf=null;
+  br=new BufferedReader(new Support_StringReader(testString));
+  br.skip(500);
+  br.mark(1000);
+  br.skip(250);
+  br.reset();
+  buf=new char[testString.length()];
+  br.read(buf,0,500);
+  assertTrue("Failed to set mark properly",testString.substring(500,1000).equals(new String(buf,0,500)));
+  try {
+    br=new BufferedReader(new Support_StringReader(testString),800);
+    br.skip(500);
+    br.mark(250);
+    br.read(buf,0,1000);
+    br.reset();
+    fail("Failed to invalidate mark properly");
+  }
+ catch (  IOException x) {
+  }
+  char[] chars=new char[256];
+  for (int i=0; i < 256; i++)   chars[i]=(char)i;
+  Reader in=new BufferedReader(new Support_StringReader(new String(chars)),12);
+  in.skip(6);
+  in.mark(14);
+  in.read(new char[14],0,14);
+  in.reset();
+  assertTrue("Wrong chars",in.read() == (char)6 && in.read() == (char)7);
+  in=new BufferedReader(new Support_StringReader(new String(chars)),12);
+  in.skip(6);
+  in.mark(8);
+  in.skip(7);
+  in.reset();
+  assertTrue("Wrong chars 2",in.read() == (char)6 && in.read() == (char)7);
+  BufferedReader br=new BufferedReader(new StringReader("01234"),2);
+  br.mark(3);
+  char[] carray=new char[3];
+  int result=br.read(carray);
+  assertEquals(3,result);
+  assertEquals("Assert 0:",'0',carray[0]);
+  assertEquals("Assert 1:",'1',carray[1]);
+  assertEquals("Assert 2:",'2',carray[2]);
+  assertEquals("Assert 3:",'3',br.read());
+  br=new BufferedReader(new StringReader("01234"),2);
+  br.mark(3);
+  carray=new char[4];
+  result=br.read(carray);
+  assertEquals("Assert 4:",4,result);
+  assertEquals("Assert 5:",'0',carray[0]);
+  assertEquals("Assert 6:",'1',carray[1]);
+  assertEquals("Assert 7:",'2',carray[2]);
+  assertEquals("Assert 8:",'3',carray[3]);
+  assertEquals("Assert 9:",'4',br.read());
+  assertEquals("Assert 10:",-1,br.read());
+  BufferedReader reader=new BufferedReader(new StringReader("01234"));
+  reader.mark(Integer.MAX_VALUE);
+  reader.read();
+  reader.close();
+}

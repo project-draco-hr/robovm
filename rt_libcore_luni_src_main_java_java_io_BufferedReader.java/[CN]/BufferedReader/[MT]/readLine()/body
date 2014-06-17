@@ -1,67 +1,33 @@
 {
 synchronized (lock) {
     checkNotClosed();
-    if (pos == end && fillBuf() == -1) {
-      return null;
-    }
-    for (int charPos=pos; charPos < end; charPos++) {
-      char ch=buf[charPos];
-      if (ch > '\r') {
-        continue;
-      }
-      if (ch == '\n') {
-        String res=new String(buf,pos,charPos - pos);
-        pos=charPos + 1;
-        return res;
-      }
- else       if (ch == '\r') {
-        String res=new String(buf,pos,charPos - pos);
-        pos=charPos + 1;
-        if (((pos < end) || (fillBuf() != -1)) && (buf[pos] == '\n')) {
-          pos++;
-        }
-        return res;
+    maybeSwallowLF();
+    for (int i=pos; i < end; ++i) {
+      char ch=buf[i];
+      if (ch == '\n' || ch == '\r') {
+        String line=new String(buf,pos,i - pos);
+        pos=i + 1;
+        lastWasCR=(ch == '\r');
+        return line;
       }
     }
-    char eol='\0';
-    StringBuilder result=new StringBuilder(80);
+    StringBuilder result=new StringBuilder(end - pos + 80);
     result.append(buf,pos,end - pos);
     while (true) {
       pos=end;
-      if (eol == '\n') {
-        return result.toString();
-      }
       if (fillBuf() == -1) {
-        return result.length() > 0 || eol != '\0' ? result.toString() : null;
+        return (result.length() > 0) ? result.toString() : null;
       }
-      for (int charPos=pos; charPos < end; charPos++) {
-        char c=buf[charPos];
-        if (eol == '\0') {
-          if ((c == '\n' || c == '\r')) {
-            eol=c;
-          }
-        }
- else         if (eol == '\r' && c == '\n') {
-          if (charPos > pos) {
-            result.append(buf,pos,charPos - pos - 1);
-          }
-          pos=charPos + 1;
-          return result.toString();
-        }
- else {
-          if (charPos > pos) {
-            result.append(buf,pos,charPos - pos - 1);
-          }
-          pos=charPos;
+      for (int i=pos; i < end; ++i) {
+        char ch=buf[i];
+        if (ch == '\n' || ch == '\r') {
+          result.append(buf,pos,i - pos);
+          pos=i + 1;
+          lastWasCR=(ch == '\r');
           return result.toString();
         }
       }
-      if (eol == '\0') {
-        result.append(buf,pos,end - pos);
-      }
- else {
-        result.append(buf,pos,end - pos - 1);
-      }
+      result.append(buf,pos,end - pos);
     }
   }
 }

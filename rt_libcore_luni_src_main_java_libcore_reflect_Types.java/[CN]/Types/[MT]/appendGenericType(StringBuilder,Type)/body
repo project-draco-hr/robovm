@@ -1,0 +1,59 @@
+{
+  if (type instanceof TypeVariable) {
+    out.append(((TypeVariable)type).getName());
+  }
+ else   if (type instanceof ParameterizedType) {
+    out.append(type.toString());
+  }
+ else   if (type instanceof GenericArrayType) {
+    Type simplified=((GenericArrayType)type).getGenericComponentType();
+    appendGenericType(out,simplified);
+    out.append("[]");
+  }
+ else   if (type instanceof Class) {
+    Class c=(Class<?>)type;
+    if (c.isArray()) {
+      String as[]=c.getName().split("\\[");
+      int len=as.length - 1;
+      if (as[len].length() > 1) {
+        out.append(as[len].substring(1,as[len].length() - 1));
+      }
+ else {
+        char ch=as[len].charAt(0);
+        if (ch == 'I') {
+          out.append("int");
+        }
+ else         if (ch == 'B') {
+          out.append("byte");
+        }
+ else         if (ch == 'J') {
+          out.append("long");
+        }
+ else         if (ch == 'F') {
+          out.append("float");
+        }
+ else         if (ch == 'D') {
+          out.append("double");
+        }
+ else         if (ch == 'S') {
+          out.append("short");
+        }
+ else         if (ch == 'C') {
+          out.append("char");
+        }
+ else         if (ch == 'Z') {
+          out.append("boolean");
+        }
+ else         if (ch == 'V') {
+          out.append("void");
+        }
+      }
+      for (int i=0; i < len; i++) {
+        out.append("[]");
+      }
+    }
+ else {
+      out.append(c.getName());
+    }
+  }
+}

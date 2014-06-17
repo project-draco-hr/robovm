@@ -1,0 +1,29 @@
+{
+  if (exception == null) {
+    throw new IllegalArgumentException("Exception parameter may not be null");
+  }
+  if (context == null) {
+    throw new IllegalArgumentException("HTTP context may not be null");
+  }
+  if (executionCount > this.retryCount) {
+    return false;
+  }
+  if (exception instanceof NoHttpResponseException) {
+    return true;
+  }
+  if (exception instanceof InterruptedIOException) {
+    return false;
+  }
+  if (exception instanceof UnknownHostException) {
+    return false;
+  }
+  if (exception instanceof SSLHandshakeException) {
+    return false;
+  }
+  Boolean b=(Boolean)context.getAttribute(ExecutionContext.HTTP_REQ_SENT);
+  boolean sent=(b != null && b.booleanValue());
+  if (!sent || this.requestSentRetryEnabled) {
+    return true;
+  }
+  return false;
+}

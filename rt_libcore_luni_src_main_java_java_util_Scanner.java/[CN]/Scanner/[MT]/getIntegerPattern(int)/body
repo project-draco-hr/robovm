@@ -1,13 +1,19 @@
 {
   checkRadix(radix);
-  decimalFormat=(DecimalFormat)NumberFormat.getInstance(locale);
-  String allAvailableDigits="0123456789abcdefghijklmnopqrstuvwxyz";
-  String ASCIIDigit=allAvailableDigits.substring(0,radix);
-  String nonZeroASCIIDigit=allAvailableDigits.substring(1,radix);
-  StringBuilder digit=new StringBuilder("((?i)[").append(ASCIIDigit).append("]|\\p{javaDigit})");
-  StringBuilder nonZeroDigit=new StringBuilder("((?i)[").append(nonZeroASCIIDigit).append("]|([\\p{javaDigit}&&[^0]]))");
-  StringBuilder numeral=getNumeral(digit,nonZeroDigit);
-  StringBuilder integer=new StringBuilder("(([-+]?(").append(numeral).append(")))|(").append(addPositiveSign(numeral)).append(")|(").append(addNegativeSign(numeral)).append(")");
-  Pattern integerPattern=Pattern.compile(integer.toString());
-  return integerPattern;
+  if (decimalFormat == null) {
+    decimalFormat=(DecimalFormat)NumberFormat.getInstance(locale);
+  }
+  if (cachedIntegerPatternRadix == radix) {
+    return cachedIntegerPattern;
+  }
+  String digits="0123456789abcdefghijklmnopqrstuvwxyz";
+  String ASCIIDigit=digits.substring(0,radix);
+  String nonZeroASCIIDigit=digits.substring(1,radix);
+  String digit="((?i)[" + ASCIIDigit + "]|\\p{javaDigit})";
+  String nonZeroDigit="((?i)[" + nonZeroASCIIDigit + "]|([\\p{javaDigit}&&[^0]]))";
+  String numeral=getNumeral(digit,nonZeroDigit);
+  String regex="(([-+]?(" + numeral + ")))|"+ "("+ addPositiveSign(numeral)+ ")|"+ "("+ addNegativeSign(numeral)+ ")";
+  cachedIntegerPatternRadix=radix;
+  cachedIntegerPattern=Pattern.compile(regex);
+  return cachedIntegerPattern;
 }

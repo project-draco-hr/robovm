@@ -1,0 +1,29 @@
+{
+  long qt=0L, qs=0L;
+  int rc=0;
+  long st=stealCount;
+  long c=ctl;
+  WorkQueue[] ws;
+  WorkQueue w;
+  if ((ws=workQueues) != null) {
+    for (int i=0; i < ws.length; ++i) {
+      if ((w=ws[i]) != null) {
+        int size=w.queueSize();
+        if ((i & 1) == 0)         qs+=size;
+ else {
+          qt+=size;
+          st+=w.nsteals;
+          if (w.isApparentlyUnblocked())           ++rc;
+        }
+      }
+    }
+  }
+  int pc=(config & SMASK);
+  int tc=pc + (short)(c >>> TC_SHIFT);
+  int ac=pc + (int)(c >> AC_SHIFT);
+  if (ac < 0)   ac=0;
+  String level;
+  if ((c & STOP_BIT) != 0)   level=(tc == 0) ? "Terminated" : "Terminating";
+ else   level=plock < 0 ? "Shutting down" : "Running";
+  return super.toString() + "[" + level+ ", parallelism = "+ pc+ ", size = "+ tc+ ", active = "+ ac+ ", running = "+ rc+ ", steals = "+ st+ ", tasks = "+ qt+ ", submissions = "+ qs+ "]";
+}

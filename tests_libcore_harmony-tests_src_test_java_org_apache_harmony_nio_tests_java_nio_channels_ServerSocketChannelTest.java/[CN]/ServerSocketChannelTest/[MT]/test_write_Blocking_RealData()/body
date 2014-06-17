@@ -1,0 +1,16 @@
+{
+  assertTrue(serverChannel.isBlocking());
+  ServerSocket serverSocket=serverChannel.socket();
+  serverSocket.bind(localAddr1);
+  byte[] writeContent=new byte[CAPACITY_NORMAL];
+  for (int i=0; i < writeContent.length; i++) {
+    writeContent[i]=(byte)i;
+  }
+  clientChannel.connect(localAddr1);
+  Socket socket=serverChannel.accept().socket();
+  OutputStream out=socket.getOutputStream();
+  out.write(writeContent);
+  out.flush();
+  socket.close();
+  assertWriteResult(CAPACITY_NORMAL);
+}

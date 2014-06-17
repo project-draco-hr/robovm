@@ -1,0 +1,17 @@
+{
+  SignerInfo sInfo=signerInformation.info;
+  AttributeTable unsignedAttr=signerInformation.getUnsignedAttributes();
+  ASN1EncodableVector v;
+  if (unsignedAttr != null) {
+    v=unsignedAttr.toASN1EncodableVector();
+  }
+ else {
+    v=new ASN1EncodableVector();
+  }
+  ASN1EncodableVector sigs=new ASN1EncodableVector();
+  for (Iterator it=counterSigners.getSigners().iterator(); it.hasNext(); ) {
+    sigs.add(((SignerInformation)it.next()).toASN1Structure());
+  }
+  v.add(new Attribute(CMSAttributes.counterSignature,new DERSet(sigs)));
+  return new SignerInformation(new SignerInfo(sInfo.getSID(),sInfo.getDigestAlgorithm(),sInfo.getAuthenticatedAttributes(),sInfo.getDigestEncryptionAlgorithm(),sInfo.getEncryptedDigest(),new DERSet(v)),signerInformation.contentType,signerInformation.content,null);
+}

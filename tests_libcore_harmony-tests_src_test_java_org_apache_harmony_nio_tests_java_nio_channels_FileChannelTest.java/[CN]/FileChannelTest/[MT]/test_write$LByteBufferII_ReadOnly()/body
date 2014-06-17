@@ -1,0 +1,25 @@
+{
+  ByteBuffer[] writeBuffers=new ByteBuffer[2];
+  writeBuffers[0]=ByteBuffer.allocate(CAPACITY);
+  writeBuffers[1]=ByteBuffer.allocate(CAPACITY);
+  try {
+    readOnlyFileChannel.write(writeBuffers,0,2);
+    fail();
+  }
+ catch (  NonWritableChannelException e) {
+  }
+  try {
+    readOnlyFileChannel.write(writeBuffers,0,-1);
+    fail();
+  }
+ catch (  IndexOutOfBoundsException expected) {
+  }
+  writeBuffers=null;
+  try {
+    readOnlyFileChannel.write(writeBuffers,0,1);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  readOnlyFileChannel.close();
+}

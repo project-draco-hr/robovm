@@ -1,0 +1,22 @@
+{
+  ensureServerClosed();
+  this.channel1.configureBlocking(false);
+  statusNotConnected_NotPending();
+  try {
+    this.channel1.finishConnect();
+    fail("Should throw NoConnectionPendingException");
+  }
+ catch (  NoConnectionPendingException e) {
+  }
+  statusNotConnected_NotPending();
+  assertFalse(this.channel1.connect(localAddr1));
+  statusNotConnected_Pending();
+  try {
+    assertFalse(this.channel1.finishConnect());
+    statusNotConnected_Pending();
+    this.channel1.close();
+  }
+ catch (  ConnectException e) {
+  }
+  statusChannelClosed();
+}

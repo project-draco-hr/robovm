@@ -1,0 +1,11 @@
+{
+  String message=object.getClass().getName() + ".finalize() timed out after " + (MAX_FINALIZE_NANOS / NANOS_PER_SECOND)+ " seconds";
+  Exception syntheticException=new TimeoutException(message);
+  syntheticException.setStackTrace(FinalizerDaemon.INSTANCE.getStackTrace());
+  Thread.UncaughtExceptionHandler h=Thread.getDefaultUncaughtExceptionHandler();
+  if (h == null) {
+    System.logE(message,syntheticException);
+    System.exit(2);
+  }
+  h.uncaughtException(Thread.currentThread(),syntheticException);
+}

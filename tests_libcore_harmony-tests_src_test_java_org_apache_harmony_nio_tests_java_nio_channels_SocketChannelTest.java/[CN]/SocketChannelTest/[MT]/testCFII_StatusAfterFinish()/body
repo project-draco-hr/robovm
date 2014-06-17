@@ -1,0 +1,37 @@
+{
+  ensureServerClosed();
+  assertTrue(this.channel1.isBlocking());
+  try {
+    channel1.connect(localAddr1);
+    fail("Should throw ConnectException");
+  }
+ catch (  ConnectException e) {
+  }
+  assertFalse(this.channel1.isOpen());
+  assertFalse(this.channel1.isOpen());
+  assertTrue(this.channel1.isBlocking());
+  assertFalse(this.channel1.isConnectionPending());
+  this.channel1=SocketChannel.open();
+  this.channel1.configureBlocking(false);
+  assertFalse(this.channel1.connect(localAddr1));
+  try {
+    assertFalse(this.channel1.finishConnect());
+    statusNotConnected_Pending();
+    this.channel1.close();
+  }
+ catch (  ConnectException e) {
+    System.out.println(e.getMessage());
+  }
+  ensureServerOpen();
+  this.channel1=SocketChannel.open();
+  assertTrue(this.channel1.isBlocking());
+  assertTrue(this.channel1.connect(localAddr1));
+  assertTrue(this.channel1.finishConnect());
+  statusConnected_NotPending();
+  this.channel1.close();
+  this.channel1=SocketChannel.open();
+  this.channel1.configureBlocking(false);
+  assertFalse(this.channel1.connect(localAddr1));
+  tryFinish();
+  this.channel1.close();
+}

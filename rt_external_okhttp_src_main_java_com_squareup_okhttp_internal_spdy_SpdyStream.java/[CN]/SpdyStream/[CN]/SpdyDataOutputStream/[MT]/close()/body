@@ -1,0 +1,14 @@
+{
+  assert(!Thread.holdsLock(SpdyStream.this));
+synchronized (SpdyStream.this) {
+    if (closed) {
+      return;
+    }
+    closed=true;
+  }
+  if (!out.finished) {
+    writeFrame(true);
+  }
+  connection.flush();
+  cancelStreamIfNecessary();
+}

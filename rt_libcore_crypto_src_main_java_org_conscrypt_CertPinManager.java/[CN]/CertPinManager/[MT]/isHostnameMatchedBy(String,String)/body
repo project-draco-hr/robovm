@@ -1,0 +1,29 @@
+{
+  if (hostName == null || hostName.isEmpty() || cn == null || cn.isEmpty()) {
+    return false;
+  }
+  cn=cn.toLowerCase(Locale.US);
+  if (!cn.contains("*")) {
+    return hostName.equals(cn);
+  }
+  if (cn.startsWith("*.") && hostName.regionMatches(0,cn,2,cn.length() - 2)) {
+    return true;
+  }
+  int asterisk=cn.indexOf('*');
+  int dot=cn.indexOf('.');
+  if (asterisk > dot) {
+    return false;
+  }
+  if (!hostName.regionMatches(0,cn,0,asterisk)) {
+    return false;
+  }
+  int suffixLength=cn.length() - (asterisk + 1);
+  int suffixStart=hostName.length() - suffixLength;
+  if (hostName.indexOf('.',asterisk) < suffixStart) {
+    return false;
+  }
+  if (!hostName.regionMatches(suffixStart,cn,asterisk + 1,suffixLength)) {
+    return false;
+  }
+  return true;
+}

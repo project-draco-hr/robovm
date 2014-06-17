@@ -1,0 +1,30 @@
+{
+  File tmpFile=File.createTempFile("TestFileForScanner",".tmp");
+  FileChannel fc=new FileOutputStream(tmpFile).getChannel();
+  s=new Scanner(fc);
+  assertNotNull(s);
+  s.close();
+  assertTrue(tmpFile.delete());
+  try {
+    s=new Scanner((ReadableByteChannel)null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  String sampleData="1 2 3 4 5 6 7 8 9 10";
+  File tempFile=File.createTempFile("harmony","test");
+  tempFile.deleteOnExit();
+  FileOutputStream os=new FileOutputStream(tempFile);
+  os.write(sampleData.getBytes());
+  os.close();
+  FileInputStream is=new FileInputStream(tempFile);
+  FileChannel channel=is.getChannel();
+  Scanner s=new Scanner(channel);
+  int count=0;
+  while (s.hasNextInt()) {
+    s.nextInt();
+    count++;
+  }
+  channel.close();
+  assertEquals(10,count);
+}

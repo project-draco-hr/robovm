@@ -1,54 +1,39 @@
 {
-  if (status == READY && finished && !endOfInput) {
-    throw new IllegalStateException();
+  if (state != RESET && state != ONGOING && !(endOfInput && state == END_OF_INPUT)) {
+    throw illegalStateException();
   }
-  if ((status == FLUSH) || (!endOfInput && status == END)) {
-    throw new IllegalStateException();
-  }
-  CoderResult result;
+  state=endOfInput ? END_OF_INPUT : ONGOING;
   while (true) {
+    CoderResult result;
     try {
       result=encodeLoop(in,out);
     }
- catch (    BufferOverflowException e) {
-      throw new CoderMalfunctionError(e);
+ catch (    BufferOverflowException ex) {
+      throw new CoderMalfunctionError(ex);
     }
-catch (    BufferUnderflowException e) {
-      throw new CoderMalfunctionError(e);
+catch (    BufferUnderflowException ex) {
+      throw new CoderMalfunctionError(ex);
     }
     if (result == CoderResult.UNDERFLOW) {
-      status=endOfInput ? END : ONGOING;
-      if (endOfInput) {
-        int remaining=in.remaining();
-        if (remaining > 0) {
-          result=CoderResult.malformedForLength(remaining);
-        }
- else {
-          return result;
-        }
+      if (endOfInput && in.hasRemaining()) {
+        result=CoderResult.malformedForLength(in.remaining());
       }
  else {
         return result;
       }
     }
  else     if (result == CoderResult.OVERFLOW) {
-      status=endOfInput ? END : ONGOING;
       return result;
     }
-    CodingErrorAction action=malformedInputAction;
-    if (result.isUnmappable()) {
-      action=unmappableCharacterAction;
+    CodingErrorAction action=result.isUnmappable() ? unmappableCharacterAction : malformedInputAction;
+    if (action == CodingErrorAction.REPORT) {
+      return result;
     }
-    if (action == CodingErrorAction.REPLACE) {
+ else     if (action == CodingErrorAction.REPLACE) {
       if (out.remaining() < replacementBytes.length) {
         return CoderResult.OVERFLOW;
       }
       out.put(replacementBytes);
-    }
- else {
-      if (action != CodingErrorAction.IGNORE) {
-        return result;
-      }
     }
     in.position(in.position() + result.length());
   }

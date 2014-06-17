@@ -1,0 +1,31 @@
+{
+  final int testNum=0;
+  long readres=testNum;
+  MockDatagramChannel testMock=new MockDatagramChannel(SelectorProvider.provider());
+  MockDatagramChannel testMocknull=new MockDatagramChannel(null);
+  int bufSize=10;
+  ByteBuffer[] readBuf=null;
+  try {
+    this.channel1.read(readBuf);
+    fail("Should throw NPE");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    readres=testMock.read(readBuf);
+    fail("Should throw NPE");
+  }
+ catch (  NullPointerException e) {
+  }
+  readBuf=new ByteBuffer[bufSize];
+  try {
+    readres=this.channel1.read(readBuf);
+    fail("Should throw NotYetConnectedException");
+  }
+ catch (  NotYetConnectedException e) {
+  }
+  readres=testMock.read(readBuf);
+  assertEquals(testNum,readres);
+  readres=testMocknull.read(readBuf);
+  assertEquals(testNum,readres);
+}

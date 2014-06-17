@@ -1,0 +1,31 @@
+{
+  initHttpEngine();
+  if (httpEngine.hasResponse()) {
+    return httpEngine;
+  }
+  while (true) {
+    if (!execute(true)) {
+      continue;
+    }
+    Retry retry=processResponseHeaders();
+    if (retry == Retry.NONE) {
+      httpEngine.automaticallyReleaseConnectionToPool();
+      return httpEngine;
+    }
+    String retryMethod=method;
+    OutputStream requestBody=httpEngine.getRequestBody();
+    int responseCode=getResponseCode();
+    if (responseCode == HTTP_MULT_CHOICE || responseCode == HTTP_MOVED_PERM || responseCode == HTTP_MOVED_TEMP || responseCode == HTTP_SEE_OTHER) {
+      retryMethod="GET";
+      requestBody=null;
+    }
+    if (requestBody != null && !(requestBody instanceof RetryableOutputStream)) {
+      throw new HttpRetryException("Cannot retry streamed HTTP body",httpEngine.getResponseCode());
+    }
+    if (retry == Retry.DIFFERENT_CONNECTION) {
+      httpEngine.automaticallyReleaseConnectionToPool();
+    }
+    httpEngine.release(false);
+    httpEngine=newHttpEngine(retryMethod,rawRequestHeaders,httpEngine.getConnection(),(RetryableOutputStream)requestBody);
+  }
+}

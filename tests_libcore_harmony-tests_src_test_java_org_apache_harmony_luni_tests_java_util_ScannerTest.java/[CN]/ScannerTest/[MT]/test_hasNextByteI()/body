@@ -1,0 +1,70 @@
+{
+  s=new Scanner("123 126");
+  assertTrue(s.hasNextByte(10));
+  assertEquals(123,s.nextByte(10));
+  assertTrue(s.hasNextByte(10));
+  assertEquals(126,s.nextByte(10));
+  assertFalse(s.hasNextByte(10));
+  try {
+    s.nextByte(10);
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("123 126");
+  assertTrue(s.hasNextByte(5));
+  assertEquals(38,s.nextByte(5));
+  assertFalse(s.hasNextByte(5));
+  try {
+    s.nextByte(5);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("1234");
+  assertFalse(s.hasNextByte(10));
+  try {
+    s.nextByte(10);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("1\u06602 12\u0666");
+  assertTrue(s.hasNextByte(10));
+  assertEquals(102,s.nextByte(10));
+  assertFalse(s.hasNextByte(5));
+  try {
+    s.nextByte(5);
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  assertTrue(s.hasNextByte(10));
+  assertEquals(126,s.nextByte(10));
+  s=new Scanner("012");
+  assertTrue(s.hasNextByte(10));
+  assertEquals(12,s.nextByte(10));
+  s=new Scanner("E");
+  assertTrue(s.hasNextByte(16));
+  assertEquals(14,s.nextByte(16));
+  s=new Scanner("100");
+  s.useLocale(Locale.CHINESE);
+  assertTrue(s.hasNextByte(10));
+  assertEquals(100,s.nextByte(10));
+  s=new Scanner("1\u0966\u0966");
+  s.useLocale(Locale.CHINESE);
+  assertTrue(s.hasNextByte(10));
+  assertEquals(100,s.nextByte(10));
+  s=new Scanner("1\u0e50\u0e50");
+  s.useLocale(Locale.CHINESE);
+  assertTrue(s.hasNextByte(10));
+  assertEquals(100,s.nextByte(10));
+  s=new Scanner("-123");
+  s.useLocale(new Locale("ar","AE"));
+  assertTrue(s.hasNextByte(10));
+  assertEquals(-123,s.nextByte(10));
+  s=new Scanner("-123");
+  s.useLocale(new Locale("mk","MK"));
+  assertTrue(s.hasNextByte(10));
+  assertEquals(-123,s.nextByte(10));
+}

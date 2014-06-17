@@ -1,0 +1,61 @@
+{
+  final String providerName=cf.getProvider().getName() + "[" + encoding+ "]";
+  final CertPath pathFromList=cf.generateCertPath(expectedCerts);
+  final byte[] encodedCopy;
+  if (encoding == null) {
+    encodedCopy=pathFromList.getEncoded();
+    assertNotNull(providerName,encodedCopy);
+    assertEquals(providerName,Arrays.toString(pathFromList.getEncoded()),Arrays.toString(encodedCopy));
+  }
+ else {
+    encodedCopy=pathFromList.getEncoded(encoding);
+    assertNotNull(providerName,encodedCopy);
+    assertEquals(providerName,Arrays.toString(pathFromList.getEncoded(encoding)),Arrays.toString(encodedCopy));
+  }
+  encodedCopy[0]^=(byte)0xFF;
+  final byte[] encoded;
+  if (encoding == null) {
+    encoded=pathFromList.getEncoded();
+    assertNotNull(providerName,encodedCopy);
+    assertEquals(providerName,Arrays.toString(pathFromList.getEncoded()),Arrays.toString(encoded));
+  }
+ else {
+    encoded=pathFromList.getEncoded(encoding);
+    assertNotNull(providerName,encodedCopy);
+    assertEquals(providerName,Arrays.toString(pathFromList.getEncoded(encoding)),Arrays.toString(encoded));
+  }
+  assertFalse(providerName,Arrays.toString(encoded).equals(Arrays.toString(encodedCopy)));
+  encodedCopy[0]^=(byte)0xFF;
+  assertEquals(providerName,Arrays.toString(encoded),Arrays.toString(encodedCopy));
+  final CertPath actualPath;
+  if (encoding == null) {
+    actualPath=cf.generateCertPath(new ByteArrayInputStream(encoded));
+  }
+ else {
+    actualPath=cf.generateCertPath(new ByteArrayInputStream(encoded),encoding);
+  }
+  final List<? extends Certificate> actualCerts;
+  if (!"PKCS7".equals(encoding)) {
+    actualCerts=actualPath.getCertificates();
+    assertEquals(providerName,expectedCerts,actualCerts);
+  }
+ else {
+    actualCerts=pathFromList.getCertificates();
+  }
+  try {
+    actualCerts.remove(0);
+    fail("List of certificate should be immutable");
+  }
+ catch (  UnsupportedOperationException expected) {
+  }
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  ObjectOutputStream oos=new ObjectOutputStream(baos);
+  oos.writeObject(actualPath);
+  oos.close();
+  byte[] serialized=baos.toByteArray();
+  ByteArrayInputStream bais=new ByteArrayInputStream(serialized);
+  ObjectInputStream ois=new ObjectInputStream(bais);
+  Object output=ois.readObject();
+  assertTrue(providerName,output instanceof CertPath);
+  assertEquals(providerName,actualPath,(CertPath)output);
+}

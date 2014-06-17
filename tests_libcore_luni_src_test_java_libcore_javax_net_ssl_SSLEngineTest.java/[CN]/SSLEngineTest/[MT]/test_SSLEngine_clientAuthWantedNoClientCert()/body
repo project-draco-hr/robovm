@@ -1,0 +1,11 @@
+{
+  TestSSLContext clientAuthContext=TestSSLContext.create(TestKeyStore.getClient(),TestKeyStore.getServer());
+  TestSSLEnginePair p=TestSSLEnginePair.create(clientAuthContext,new TestSSLEnginePair.Hooks(){
+    @Override void beforeBeginHandshake(    SSLEngine client,    SSLEngine server){
+      server.setWantClientAuth(true);
+    }
+  }
+);
+  assertConnected(p);
+  clientAuthContext.close();
+}

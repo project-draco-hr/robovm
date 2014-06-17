@@ -6,5 +6,26 @@
  else {
     cb=CharBuffer.wrap(sequence);
   }
-  return implCanEncode(cb);
+  if (state == FLUSHED) {
+    reset();
+  }
+  if (state != RESET) {
+    throw illegalStateException();
+  }
+  CodingErrorAction originalMalformedInputAction=malformedInputAction;
+  CodingErrorAction originalUnmappableCharacterAction=unmappableCharacterAction;
+  onMalformedInput(CodingErrorAction.REPORT);
+  onUnmappableCharacter(CodingErrorAction.REPORT);
+  try {
+    encode(cb);
+    return true;
+  }
+ catch (  CharacterCodingException e) {
+    return false;
+  }
+ finally {
+    onMalformedInput(originalMalformedInputAction);
+    onUnmappableCharacter(originalUnmappableCharacterAction);
+    reset();
+  }
 }

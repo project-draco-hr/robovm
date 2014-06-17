@@ -1,0 +1,58 @@
+{
+  s=new Scanner("123 45\u0666. 123.4 .123 ");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(123.0,s.nextDouble());
+  assertEquals(456.0,s.nextDouble());
+  assertEquals(123.4,s.nextDouble());
+  assertEquals(0.123,s.nextDouble());
+  try {
+    s.nextDouble();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("+123.4 -456.7 123,456.789 0.1\u06623,4");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(123.4,s.nextDouble());
+  assertEquals(-456.7,s.nextDouble());
+  assertEquals(123456.789,s.nextDouble());
+  try {
+    s.nextDouble();
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("+123.4E10 -456.7e+12 123,456.789E-10");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(1.234E12,s.nextDouble());
+  assertEquals(-4.567E14,s.nextDouble());
+  assertEquals(1.23456789E-5,s.nextDouble());
+  s=new Scanner("NaN Infinity -Infinity");
+  assertEquals(Double.NaN,s.nextDouble());
+  assertEquals(Double.POSITIVE_INFINITY,s.nextDouble());
+  assertEquals(Double.NEGATIVE_INFINITY,s.nextDouble());
+  s=new Scanner("\u221e");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(Double.POSITIVE_INFINITY,s.nextDouble());
+  String str=String.valueOf(Double.MAX_VALUE * 2);
+  s=new Scanner(str);
+  assertEquals(Double.POSITIVE_INFINITY,s.nextDouble());
+  s=new Scanner("23,456 23,456");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(23456.0,s.nextDouble());
+  s.useLocale(Locale.GERMANY);
+  assertEquals(23.456,s.nextDouble());
+  s=new Scanner("23.456 23.456");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(23.456,s.nextDouble());
+  s.useLocale(Locale.GERMANY);
+  assertEquals(23456.0,s.nextDouble());
+  s=new Scanner("23,456.7 23.456,7");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(23456.7,s.nextDouble());
+  s.useLocale(Locale.GERMANY);
+  assertEquals(23456.7,s.nextDouble());
+  s=new Scanner("-123.4");
+  s.useLocale(Locale.ENGLISH);
+  assertEquals(-123.4,s.nextDouble());
+}

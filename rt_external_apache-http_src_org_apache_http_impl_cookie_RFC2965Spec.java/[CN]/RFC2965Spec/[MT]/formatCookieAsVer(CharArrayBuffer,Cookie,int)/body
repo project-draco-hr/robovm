@@ -1,0 +1,22 @@
+{
+  super.formatCookieAsVer(buffer,cookie,version);
+  if (cookie instanceof ClientCookie) {
+    String s=((ClientCookie)cookie).getAttribute(ClientCookie.PORT_ATTR);
+    if (s != null) {
+      buffer.append("; $Port");
+      buffer.append("=\"");
+      if (s.trim().length() > 0) {
+        int[] ports=cookie.getPorts();
+        if (ports != null) {
+          for (int i=0, len=ports.length; i < len; i++) {
+            if (i > 0) {
+              buffer.append(",");
+            }
+            buffer.append(Integer.toString(ports[i]));
+          }
+        }
+      }
+      buffer.append("\"");
+    }
+  }
+}

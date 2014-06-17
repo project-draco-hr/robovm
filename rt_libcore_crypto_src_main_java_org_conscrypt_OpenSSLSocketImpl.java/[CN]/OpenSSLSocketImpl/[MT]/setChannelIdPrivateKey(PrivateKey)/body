@@ -1,0 +1,20 @@
+{
+  if (!getUseClientMode()) {
+    throw new IllegalStateException("Server mode");
+  }
+  if (handshakeStarted) {
+    throw new IllegalStateException("Could not change Channel ID private key after the initial handshake has" + " begun.");
+  }
+  if (privateKey == null) {
+    this.channelIdEnabled=false;
+    this.channelIdPrivateKey=null;
+  }
+ else {
+    this.channelIdEnabled=true;
+    try {
+      this.channelIdPrivateKey=OpenSSLKey.fromPrivateKey(privateKey);
+    }
+ catch (    InvalidKeyException e) {
+    }
+  }
+}

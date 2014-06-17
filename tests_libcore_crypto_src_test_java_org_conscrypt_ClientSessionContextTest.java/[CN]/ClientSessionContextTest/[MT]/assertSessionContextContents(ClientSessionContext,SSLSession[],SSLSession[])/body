@@ -1,0 +1,22 @@
+{
+  assertEquals(contains.length,context.size());
+  for (  SSLSession s : contains) {
+    assertSame(s.getPeerHost(),s,context.getSession(s.getId()));
+    assertSame(s.getPeerHost(),s,context.getSession(s.getPeerHost(),443));
+  }
+  for (  SSLSession s : exludes) {
+    assertNull(s.getPeerHost(),context.getSession(s.getId()));
+    assertNull(s.getPeerHost(),context.getSession(s.getPeerHost(),443));
+  }
+  Set<SSLSession> sessions=new HashSet<SSLSession>();
+  Enumeration<byte[]> ids=context.getIds();
+  while (ids.hasMoreElements()) {
+    byte[] id=ids.nextElement();
+    sessions.add(context.getSession(id));
+  }
+  Set<SSLSession> expected=new HashSet<SSLSession>();
+  for (  SSLSession s : sessions) {
+    expected.add(s);
+  }
+  assertEquals(expected,sessions);
+}

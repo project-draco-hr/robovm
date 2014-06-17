@@ -1,0 +1,128 @@
+{
+  s=new Scanner("123 456");
+  assertTrue(s.hasNextLong());
+  assertEquals(123,s.nextLong());
+  assertTrue(s.hasNextLong());
+  assertEquals(456,s.nextLong());
+  assertFalse(s.hasNextLong());
+  try {
+    s.nextLong();
+    fail();
+  }
+ catch (  NoSuchElementException expected) {
+  }
+  s=new Scanner("123 456");
+  s.useRadix(5);
+  assertTrue(s.hasNextLong());
+  assertEquals(38,s.nextLong());
+  assertFalse(s.hasNextLong());
+  try {
+    s.nextLong();
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("123456789123456789123456789123456789");
+  assertFalse(s.hasNextLong());
+  try {
+    s.nextLong();
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("23,456 23,456");
+  s.useLocale(Locale.GERMANY);
+  assertFalse(s.hasNextLong());
+  try {
+    s.nextLong();
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s.useLocale(Locale.ENGLISH);
+  assertTrue(s.hasNextLong());
+  assertEquals(23456,s.nextLong());
+  assertTrue(s.hasNextLong());
+  assertEquals(23456,s.nextLong());
+  s=new Scanner("23'456 23'456");
+  s.useLocale(Locale.GERMANY);
+  assertFalse(s.hasNextLong());
+  try {
+    s.nextLong();
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s.useLocale(new Locale("it","CH"));
+  assertTrue(s.hasNextLong());
+  assertEquals(23456,s.nextLong());
+  assertTrue(s.hasNextLong());
+  assertEquals(23456,s.nextLong());
+  s=new Scanner("1\u06602 1\u06662");
+  assertEquals(102,s.nextLong());
+  s.useRadix(5);
+  assertFalse(s.hasNextLong());
+  try {
+    s.nextLong();
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s.useRadix(10);
+  assertTrue(s.hasNextLong());
+  assertEquals(162,s.nextLong());
+  s=new Scanner("23.45\u0666 23.456");
+  s.useLocale(Locale.CHINESE);
+  assertFalse(s.hasNextLong());
+  try {
+    s.nextLong();
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s.useLocale(Locale.GERMANY);
+  assertTrue(s.hasNextLong());
+  assertEquals(23456,s.nextLong());
+  assertTrue(s.hasNextLong());
+  assertEquals(23456,s.nextLong());
+  s=new Scanner("03,456");
+  s.useLocale(Locale.ENGLISH);
+  assertFalse(s.hasNextLong());
+  try {
+    s.nextLong();
+    fail();
+  }
+ catch (  InputMismatchException expected) {
+  }
+  s=new Scanner("03456");
+  assertTrue(s.hasNextLong());
+  assertEquals(3456,s.nextLong());
+  s=new Scanner("\u06603,456");
+  s.useLocale(Locale.ENGLISH);
+  assertTrue(s.hasNextLong());
+  assertEquals(3456,s.nextLong());
+  s=new Scanner("E34");
+  s.useRadix(16);
+  assertTrue(s.hasNextLong());
+  assertEquals(3636,s.nextLong());
+  s=new Scanner("12300");
+  s.useLocale(Locale.CHINESE);
+  assertTrue(s.hasNextLong());
+  assertEquals(12300,s.nextLong());
+  s=new Scanner("123\u0966\u0966");
+  s.useLocale(Locale.CHINESE);
+  assertTrue(s.hasNextLong());
+  assertEquals(12300,s.nextLong());
+  s=new Scanner("123\u0e50\u0e50");
+  s.useLocale(Locale.CHINESE);
+  assertTrue(s.hasNextLong());
+  assertEquals(12300,s.nextLong());
+  s=new Scanner("-123");
+  s.useLocale(new Locale("ar","AE"));
+  assertTrue(s.hasNextLong());
+  assertEquals(-123,s.nextLong());
+  s=new Scanner("-123");
+  s.useLocale(new Locale("mk","MK"));
+  assertTrue(s.hasNextLong());
+  assertEquals(-123,s.nextLong());
+}

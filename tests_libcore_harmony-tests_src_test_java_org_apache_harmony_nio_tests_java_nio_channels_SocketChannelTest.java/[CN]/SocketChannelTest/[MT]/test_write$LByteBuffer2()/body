@@ -1,0 +1,23 @@
+{
+  ServerSocketChannel server=ServerSocketChannel.open();
+  server.socket().bind(null);
+  SocketChannel client=SocketChannel.open();
+  client.connect(server.socket().getLocalSocketAddress());
+  SocketChannel worker=server.accept();
+  byte[] data="Hello world!".getBytes("UTF-8");
+  ByteBuffer[] buffers=new ByteBuffer[3];
+  buffers[0]=ByteBuffer.wrap(data,0,6);
+  buffers[1]=ByteBuffer.wrap(data,6,data.length - 6);
+  buffers[2]=ByteBuffer.wrap(data);
+  client.write(buffers);
+  client.close();
+  ByteBuffer readBuffer=ByteBuffer.allocate(1024);
+  while (EOF != worker.read(readBuffer)) {
+  }
+  ;
+  readBuffer.flip();
+  Buffer expected=ByteBuffer.allocate(1024).put(data).put(data).flip();
+  assertEquals(expected,readBuffer);
+  worker.close();
+  server.close();
+}

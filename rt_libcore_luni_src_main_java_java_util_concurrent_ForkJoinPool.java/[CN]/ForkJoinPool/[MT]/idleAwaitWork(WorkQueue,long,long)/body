@@ -1,0 +1,22 @@
+{
+  if (w != null && w.eventCount < 0 && !tryTerminate(false,false) && (int)prevCtl != 0) {
+    int dc=-(short)(currentCtl >>> TC_SHIFT);
+    long parkTime=dc < 0 ? FAST_IDLE_TIMEOUT : (dc + 1) * IDLE_TIMEOUT;
+    long deadline=System.nanoTime() + parkTime - TIMEOUT_SLOP;
+    Thread wt=Thread.currentThread();
+    while (ctl == currentCtl) {
+      Thread.interrupted();
+      U.putObject(wt,PARKBLOCKER,this);
+      w.parker=wt;
+      if (ctl == currentCtl)       U.park(false,parkTime);
+      w.parker=null;
+      U.putObject(wt,PARKBLOCKER,null);
+      if (ctl != currentCtl)       break;
+      if (deadline - System.nanoTime() <= 0L && U.compareAndSwapLong(this,CTL,currentCtl,prevCtl)) {
+        w.eventCount=(w.eventCount + E_SEQ) | E_MASK;
+        w.qlock=-1;
+        break;
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  if (o == this) {
+    return true;
+  }
+  if (!(o instanceof SecretKey)) {
+    return false;
+  }
+  SecretKey other=(SecretKey)o;
+  if (!algorithm.equals(other.getAlgorithm())) {
+    return false;
+  }
+  if (o instanceof OpenSSLSecretKey) {
+    OpenSSLSecretKey otherOpenSSL=(OpenSSLSecretKey)o;
+    return key.equals(otherOpenSSL.getOpenSSLKey());
+  }
+ else   if (key.isEngineBased()) {
+    return false;
+  }
+  if (!getFormat().equals(other.getFormat())) {
+    return false;
+  }
+  return Arrays.equals(encoded,other.getEncoded());
+}

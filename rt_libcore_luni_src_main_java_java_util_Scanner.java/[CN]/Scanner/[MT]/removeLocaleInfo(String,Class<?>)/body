@@ -1,0 +1,48 @@
+{
+  DecimalFormatSymbols dfs=decimalFormat.getDecimalFormatSymbols();
+  StringBuilder tokenBuilder=new StringBuilder(token);
+  boolean negative=removeLocaleSign(tokenBuilder);
+  String groupSeparator=String.valueOf(dfs.getGroupingSeparator());
+  int separatorIndex=-1;
+  while ((separatorIndex=tokenBuilder.indexOf(groupSeparator)) != -1) {
+    tokenBuilder.delete(separatorIndex,separatorIndex + 1);
+  }
+  String decimalSeparator=String.valueOf(dfs.getDecimalSeparator());
+  separatorIndex=tokenBuilder.indexOf(decimalSeparator);
+  StringBuilder result=new StringBuilder("");
+  if (type == int.class) {
+    for (int i=0; i < tokenBuilder.length(); i++) {
+      if (Character.digit(tokenBuilder.charAt(i),Character.MAX_RADIX) != -1) {
+        result.append(tokenBuilder.charAt(i));
+      }
+    }
+  }
+ else   if (type == float.class) {
+    if (tokenBuilder.toString().equals(dfs.getNaN())) {
+      result.append("NaN");
+    }
+ else     if (tokenBuilder.toString().equals(dfs.getInfinity())) {
+      result.append("Infinity");
+    }
+ else {
+      for (int i=0; i < tokenBuilder.length(); i++) {
+        if (Character.digit(tokenBuilder.charAt(i),10) != -1) {
+          result.append(Character.digit(tokenBuilder.charAt(i),10));
+        }
+      }
+    }
+  }
+ else {
+    throw new AssertionError("Unsupported type: " + type);
+  }
+  if (result.length() == 0) {
+    result=tokenBuilder;
+  }
+  if (separatorIndex != -1) {
+    result.insert(separatorIndex,".");
+  }
+  if (negative) {
+    result.insert(0,'-');
+  }
+  return result.toString();
+}

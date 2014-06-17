@@ -1,0 +1,19 @@
+{
+  if (!(cert instanceof X509Certificate)) {
+    return false;
+  }
+  final OpenSSLX509Certificate osslCert;
+  if (cert instanceof OpenSSLX509Certificate) {
+    osslCert=(OpenSSLX509Certificate)cert;
+  }
+ else {
+    try {
+      osslCert=OpenSSLX509Certificate.fromX509DerInputStream(new ByteArrayInputStream(cert.getEncoded()));
+    }
+ catch (    Exception e) {
+      throw new RuntimeException("cannot convert certificate",e);
+    }
+  }
+  final long x509RevokedRef=NativeCrypto.X509_CRL_get0_by_cert(mContext,osslCert.getContext());
+  return x509RevokedRef != 0;
+}

@@ -1,0 +1,19 @@
+{
+  ForkJoinTask<?>[] oldA=array;
+  int size=oldA != null ? oldA.length << 1 : INITIAL_QUEUE_CAPACITY;
+  if (size > MAXIMUM_QUEUE_CAPACITY)   throw new RejectedExecutionException("Queue capacity exceeded");
+  int oldMask, t, b;
+  ForkJoinTask<?>[] a=array=new ForkJoinTask<?>[size];
+  if (oldA != null && (oldMask=oldA.length - 1) >= 0 && (t=top) - (b=base) > 0) {
+    int mask=size - 1;
+    do {
+      ForkJoinTask<?> x;
+      int oldj=((b & oldMask) << ASHIFT) + ABASE;
+      int j=((b & mask) << ASHIFT) + ABASE;
+      x=(ForkJoinTask<?>)U.getObjectVolatile(oldA,oldj);
+      if (x != null && U.compareAndSwapObject(oldA,oldj,x,null))       U.putObjectVolatile(a,j,x);
+    }
+ while (++b != t);
+  }
+  return a;
+}

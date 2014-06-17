@@ -1,0 +1,30 @@
+{
+  if (!(in instanceof BufferedInputStream)) {
+    return true;
+  }
+  if (isSpdy()) {
+    return true;
+  }
+  BufferedInputStream bufferedInputStream=(BufferedInputStream)in;
+  try {
+    int readTimeout=socket.getSoTimeout();
+    try {
+      socket.setSoTimeout(1);
+      bufferedInputStream.mark(1);
+      if (bufferedInputStream.read() == -1) {
+        return false;
+      }
+      bufferedInputStream.reset();
+      return true;
+    }
+  finally {
+      socket.setSoTimeout(readTimeout);
+    }
+  }
+ catch (  SocketTimeoutException ignored) {
+    return true;
+  }
+catch (  IOException e) {
+    return false;
+  }
+}

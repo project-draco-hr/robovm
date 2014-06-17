@@ -1,0 +1,12 @@
+{
+  SpdyStream dataStream=getStream(streamId);
+  if (dataStream == null) {
+    writeSynResetLater(streamId,SpdyStream.RST_INVALID_STREAM);
+    Util.skipByReading(in,length);
+    return;
+  }
+  dataStream.receiveData(in,length);
+  if ((flags & SpdyConnection.FLAG_FIN) != 0) {
+    dataStream.receiveFin();
+  }
+}

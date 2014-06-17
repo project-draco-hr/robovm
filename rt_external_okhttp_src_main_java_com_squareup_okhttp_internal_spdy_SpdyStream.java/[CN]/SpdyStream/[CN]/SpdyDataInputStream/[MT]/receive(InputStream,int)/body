@@ -1,0 +1,47 @@
+{
+  assert(!Thread.holdsLock(SpdyStream.this));
+  if (byteCount == 0) {
+    return;
+  }
+  int pos;
+  int limit;
+  int firstNewByte;
+  boolean finished;
+  boolean flowControlError;
+synchronized (SpdyStream.this) {
+    finished=this.finished;
+    pos=this.pos;
+    firstNewByte=this.limit;
+    limit=this.limit;
+    flowControlError=byteCount > buffer.length - available();
+  }
+  if (flowControlError) {
+    Util.skipByReading(in,byteCount);
+    closeLater(SpdyStream.RST_FLOW_CONTROL_ERROR);
+    return;
+  }
+  if (finished) {
+    Util.skipByReading(in,byteCount);
+    return;
+  }
+  if (pos < limit) {
+    int firstCopyCount=Math.min(byteCount,buffer.length - limit);
+    Util.readFully(in,buffer,limit,firstCopyCount);
+    limit+=firstCopyCount;
+    byteCount-=firstCopyCount;
+    if (limit == buffer.length) {
+      limit=0;
+    }
+  }
+  if (byteCount > 0) {
+    Util.readFully(in,buffer,limit,byteCount);
+    limit+=byteCount;
+  }
+synchronized (SpdyStream.this) {
+    this.limit=limit;
+    if (this.pos == -1) {
+      this.pos=firstNewByte;
+      SpdyStream.this.notifyAll();
+    }
+  }
+}

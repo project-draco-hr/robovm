@@ -1,0 +1,20 @@
+{
+  if (isDiagnosticsEnabled()) {
+    logDiagnostic("Releasing factory for classloader " + objectId(classLoader));
+  }
+synchronized (factories) {
+    if (classLoader == null) {
+      if (nullClassLoaderFactory != null) {
+        nullClassLoaderFactory.release();
+        nullClassLoaderFactory=null;
+      }
+    }
+ else {
+      LogFactory factory=(LogFactory)factories.get(classLoader);
+      if (factory != null) {
+        factory.release();
+        factories.remove(classLoader);
+      }
+    }
+  }
+}

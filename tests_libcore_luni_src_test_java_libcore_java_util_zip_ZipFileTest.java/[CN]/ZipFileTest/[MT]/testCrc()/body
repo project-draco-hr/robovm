@@ -1,0 +1,20 @@
+{
+  ZipEntry ze=new ZipEntry("test");
+  ze.setMethod(ZipEntry.STORED);
+  ze.setSize(4);
+  try {
+    ze.setCrc(-1);
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  ze.setCrc(0xffffffffL);
+  assertEquals(0xffffffffL,ze.getCrc());
+  ZipOutputStream out=createZipOutputStream(createTemporaryZipFile());
+  out.putNextEntry(ze);
+  out.write(-1);
+  out.write(-1);
+  out.write(-1);
+  out.write(-1);
+  out.closeEntry();
+  out.close();
+}

@@ -1,0 +1,11 @@
+{
+  final String requestLine=request.getRequestLine();
+  if (requestLine != null && requestLine.equals("GET /favicon.ico HTTP/1.1")) {
+    System.out.println("served " + requestLine);
+    return new MockResponse().setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
+  }
+  if (failFastResponse != null && responseQueue.peek() == null) {
+    return failFastResponse;
+  }
+  return responseQueue.take();
+}

@@ -4,19 +4,23 @@
   for (int i=0; i < values.length; ++i) {
     swappedValues[i]=Integer.reverseBytes(values[i]);
   }
-  int scale=4;
+  int scale=SizeOf.INT;
   VMRuntime runtime=VMRuntime.getRuntime();
-  byte[] array=(byte[])runtime.newNonMovableArray(byte.class,scale * values.length);
-  int ptr=(int)runtime.addressOf(array);
-  Memory.pokeIntArray(ptr,values,0,values.length,false);
-  assertIntsEqual(values,ptr,false);
-  assertIntsEqual(swappedValues,ptr,true);
-  Memory.pokeIntArray(ptr,values,0,values.length,true);
-  assertIntsEqual(values,ptr,true);
-  assertIntsEqual(swappedValues,ptr,false);
-  for (int i=0; i < values.length; ++i) {
-    Memory.pokeIntArray(ptr + i * scale,values,i,1,true);
+  byte[] array=(byte[])runtime.newNonMovableArray(byte.class,scale * values.length + 1);
+  int base_ptr=(int)runtime.addressOf(array);
+  for (int ptr_offset=0; ptr_offset < 2; ++ptr_offset) {
+    int ptr=base_ptr + ptr_offset;
+    Arrays.fill(array,(byte)0);
+    Memory.pokeIntArray(ptr,values,0,values.length,false);
+    assertIntsEqual(values,ptr,false);
+    assertIntsEqual(swappedValues,ptr,true);
+    Memory.pokeIntArray(ptr,values,0,values.length,true);
+    assertIntsEqual(values,ptr,true);
+    assertIntsEqual(swappedValues,ptr,false);
+    for (int i=0; i < values.length; ++i) {
+      Memory.pokeIntArray(ptr + i * scale,values,i,1,true);
+    }
+    assertIntsEqual(values,ptr,true);
+    assertIntsEqual(swappedValues,ptr,false);
   }
-  assertIntsEqual(values,ptr,true);
-  assertIntsEqual(swappedValues,ptr,false);
 }

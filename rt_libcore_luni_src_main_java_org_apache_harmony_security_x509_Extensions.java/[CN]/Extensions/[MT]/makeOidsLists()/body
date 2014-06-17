@@ -3,18 +3,22 @@
     return;
   }
   int size=extensions.size();
-  critical=new HashSet<String>(size);
-  noncritical=new HashSet<String>(size);
+  Set<String> localCritical=new HashSet<String>(size);
+  Set<String> localNoncritical=new HashSet<String>(size);
+  Boolean localHasUnsupported=Boolean.FALSE;
   for (  Extension extension : extensions) {
     String oid=extension.getExtnID();
     if (extension.getCritical()) {
       if (!SUPPORTED_CRITICAL.contains(oid)) {
-        hasUnsupported=true;
+        localHasUnsupported=Boolean.TRUE;
       }
-      critical.add(oid);
+      localCritical.add(oid);
     }
  else {
-      noncritical.add(oid);
+      localNoncritical.add(oid);
     }
   }
+  this.critical=localCritical;
+  this.noncritical=localNoncritical;
+  this.hasUnsupported=localHasUnsupported;
 }

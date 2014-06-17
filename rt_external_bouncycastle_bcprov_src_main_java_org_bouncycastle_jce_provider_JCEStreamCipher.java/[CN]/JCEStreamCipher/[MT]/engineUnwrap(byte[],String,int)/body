@@ -1,0 +1,51 @@
+{
+  byte[] encoded;
+  try {
+    encoded=engineDoFinal(wrappedKey,0,wrappedKey.length);
+  }
+ catch (  BadPaddingException e) {
+    throw new InvalidKeyException(e.getMessage());
+  }
+catch (  IllegalBlockSizeException e2) {
+    throw new InvalidKeyException(e2.getMessage());
+  }
+  if (wrappedKeyType == Cipher.SECRET_KEY) {
+    return new SecretKeySpec(encoded,wrappedKeyAlgorithm);
+  }
+ else   if (wrappedKeyAlgorithm.equals("") && wrappedKeyType == Cipher.PRIVATE_KEY) {
+    try {
+      PrivateKeyInfo in=PrivateKeyInfo.getInstance(encoded);
+      PrivateKey privKey=BouncyCastleProvider.getPrivateKey(in);
+      if (privKey != null) {
+        return privKey;
+      }
+ else {
+        throw new InvalidKeyException("algorithm " + in.getPrivateKeyAlgorithm().getAlgorithm() + " not supported");
+      }
+    }
+ catch (    Exception e) {
+      throw new InvalidKeyException("Invalid key encoding.");
+    }
+  }
+ else {
+    try {
+      KeyFactory kf=KeyFactory.getInstance(wrappedKeyAlgorithm,BouncyCastleProvider.PROVIDER_NAME);
+      if (wrappedKeyType == Cipher.PUBLIC_KEY) {
+        return kf.generatePublic(new X509EncodedKeySpec(encoded));
+      }
+ else       if (wrappedKeyType == Cipher.PRIVATE_KEY) {
+        return kf.generatePrivate(new PKCS8EncodedKeySpec(encoded));
+      }
+    }
+ catch (    NoSuchProviderException e) {
+      throw new InvalidKeyException("Unknown key type " + e.getMessage());
+    }
+catch (    NoSuchAlgorithmException e) {
+      throw new InvalidKeyException("Unknown key type " + e.getMessage());
+    }
+catch (    InvalidKeySpecException e2) {
+      throw new InvalidKeyException("Unknown key type " + e2.getMessage());
+    }
+    throw new InvalidKeyException("Unknown key type " + wrappedKeyType);
+  }
+}

@@ -1,0 +1,28 @@
+{
+  StackTraceElement[] stackTrace=Thread.currentThread().getStackTrace();
+  String callingMethodName=null;
+  for (int i=0; i < stackTrace.length; i++) {
+    if ("invokeCallingMethodForEachKeyAgreementProvider".equals(stackTrace[i].getMethodName())) {
+      callingMethodName=stackTrace[i + 1].getMethodName();
+    }
+  }
+  if (callingMethodName == null) {
+    throw new RuntimeException("Failed to deduce calling method name from stack trace");
+  }
+  String invokedMethodName=callingMethodName;
+  Method method;
+  try {
+    method=getClass().getDeclaredMethod(invokedMethodName,Provider.class);
+  }
+ catch (  NoSuchMethodError e) {
+    throw new AssertionFailedError("Failed to find per-Provider test method " + getClass().getSimpleName() + "."+ invokedMethodName+ "(Provider)");
+  }
+  for (  Provider provider : getKeyAgreementProviders()) {
+    try {
+      method.invoke(this,provider);
+    }
+ catch (    InvocationTargetException e) {
+      throw new RuntimeException(getClass().getSimpleName() + "." + invokedMethodName+ "(provider: "+ provider.getName()+ ") failed",e.getCause());
+    }
+  }
+}

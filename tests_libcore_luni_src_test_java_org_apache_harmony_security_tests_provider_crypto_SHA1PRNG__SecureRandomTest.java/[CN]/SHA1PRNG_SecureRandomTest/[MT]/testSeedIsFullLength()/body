@@ -1,0 +1,17 @@
+{
+  Class<?> srClass=Class.forName("org.apache.harmony.security.provider.crypto.SHA1PRNG_SecureRandomImpl");
+  Field seedField=srClass.getDeclaredField("seed");
+  seedField.setAccessible(true);
+  Method nextBytesMethod=srClass.getDeclaredMethod("engineNextBytes",byte[].class);
+  nextBytesMethod.setAccessible(true);
+  byte[] bytes=new byte[1];
+  for (int i=0; i < 8; i++) {
+    Object sr=srClass.newInstance();
+    nextBytesMethod.invoke(sr,bytes);
+    int[] seed=(int[])seedField.get(sr);
+    if (seed[0] != 0) {
+      return;
+    }
+  }
+  fail("Fallback SHA1PRNG_SecureRandomImpl should not clobber seed internally");
+}

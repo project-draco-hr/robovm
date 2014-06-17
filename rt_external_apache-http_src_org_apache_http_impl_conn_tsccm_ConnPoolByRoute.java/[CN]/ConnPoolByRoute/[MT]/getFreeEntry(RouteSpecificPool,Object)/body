@@ -1,0 +1,37 @@
+{
+  BasicPoolEntry entry=null;
+  poolLock.lock();
+  try {
+    boolean done=false;
+    while (!done) {
+      entry=rospl.allocEntry(state);
+      if (entry != null) {
+        if (log.isDebugEnabled()) {
+          log.debug("Getting free connection" + " [" + rospl.getRoute() + "]["+ state+ "]");
+        }
+        freeConnections.remove(entry);
+        boolean valid=idleConnHandler.remove(entry.getConnection());
+        if (!valid) {
+          if (log.isDebugEnabled())           log.debug("Closing expired free connection" + " [" + rospl.getRoute() + "]["+ state+ "]");
+          closeConnection(entry.getConnection());
+          rospl.dropEntry();
+          numConnections--;
+        }
+ else {
+          issuedConnections.add(entry.getWeakRef());
+          done=true;
+        }
+      }
+ else {
+        done=true;
+        if (log.isDebugEnabled()) {
+          log.debug("No free connections" + " [" + rospl.getRoute() + "]["+ state+ "]");
+        }
+      }
+    }
+  }
+  finally {
+    poolLock.unlock();
+  }
+  return entry;
+}

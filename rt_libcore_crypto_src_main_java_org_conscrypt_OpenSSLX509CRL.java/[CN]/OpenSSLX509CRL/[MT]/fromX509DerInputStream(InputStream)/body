@@ -1,0 +1,16 @@
+{
+  final OpenSSLBIOInputStream bis=new OpenSSLBIOInputStream(is);
+  try {
+    final long crlCtx=NativeCrypto.d2i_X509_CRL_bio(bis.getBioContext());
+    if (crlCtx == 0) {
+      return null;
+    }
+    return new OpenSSLX509CRL(crlCtx);
+  }
+ catch (  Exception e) {
+    throw new ParsingException(e);
+  }
+ finally {
+    NativeCrypto.BIO_free(bis.getBioContext());
+  }
+}

@@ -1,0 +1,17 @@
+{
+  ByteBuffer buf=ByteBuffer.allocate(size + 1);
+  int count=0;
+  int total=0;
+  long beginTime=System.currentTimeMillis();
+  while ((count=clientChannel.read(buf)) != -1) {
+    total=total + count;
+    if (System.currentTimeMillis() - beginTime > 10000) {
+      break;
+    }
+  }
+  assertEquals(total,size);
+  buf.flip();
+  for (int i=0; i < count; i++) {
+    assertEquals((byte)i,buf.get(i));
+  }
+}

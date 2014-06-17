@@ -1,0 +1,24 @@
+{
+  InetSocketAddress localAddr=new InetSocketAddress("localhost",0);
+  serverChannel.socket().bind(localAddr);
+  new Thread(){
+    public void run(){
+      try {
+        Thread.sleep(TIME_UNIT);
+        serverChannel.configureBlocking(false);
+        serverChannel.close();
+      }
+ catch (      Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+.start();
+  try {
+    serverChannel.accept();
+    fail("should throw AsynchronousCloseException");
+  }
+ catch (  AsynchronousCloseException e) {
+  }
+  serverChannel.close();
+}

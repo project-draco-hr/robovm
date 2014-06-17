@@ -1,0 +1,27 @@
+{
+  String digestName=CMSSignedHelper.INSTANCE.getDigestAlgName(digestOID);
+  String signatureName=digestName + "with" + CMSSignedHelper.INSTANCE.getEncryptionAlgName(encOID);
+  JcaSignerInfoGeneratorBuilder builder=new JcaSignerInfoGeneratorBuilder(new BcDigestCalculatorProvider());
+  if (addDefaultAttributes) {
+    builder.setSignedAttributeGenerator(sAttr);
+  }
+  builder.setDirectSignature(!addDefaultAttributes);
+  builder.setUnsignedAttributeGenerator(unsAttr);
+  JcaContentSignerBuilder signerBuilder;
+  try {
+    signerBuilder=new JcaContentSignerBuilder(signatureName).setSecureRandom(random);
+  }
+ catch (  IllegalArgumentException e) {
+    throw new NoSuchAlgorithmException(e.getMessage());
+  }
+  if (sigProvider != null) {
+    signerBuilder.setProvider(sigProvider);
+  }
+  ContentSigner contentSigner=signerBuilder.build(key);
+  if (signerIdentifier instanceof X509Certificate) {
+    return builder.build(contentSigner,(X509Certificate)signerIdentifier);
+  }
+ else {
+    return builder.build(contentSigner,(byte[])signerIdentifier);
+  }
+}

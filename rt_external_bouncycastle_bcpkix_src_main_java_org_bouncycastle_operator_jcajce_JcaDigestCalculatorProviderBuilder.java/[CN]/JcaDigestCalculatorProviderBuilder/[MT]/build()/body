@@ -1,0 +1,27 @@
+{
+  return new DigestCalculatorProvider(){
+    public DigestCalculator get(    final AlgorithmIdentifier algorithm) throws OperatorCreationException {
+      final DigestOutputStream stream;
+      try {
+        MessageDigest dig=helper.createDigest(algorithm);
+        stream=new DigestOutputStream(dig);
+      }
+ catch (      GeneralSecurityException e) {
+        throw new OperatorCreationException("exception on setup: " + e,e);
+      }
+      return new DigestCalculator(){
+        public AlgorithmIdentifier getAlgorithmIdentifier(){
+          return algorithm;
+        }
+        public OutputStream getOutputStream(){
+          return stream;
+        }
+        public byte[] getDigest(){
+          return stream.getDigest();
+        }
+      }
+;
+    }
+  }
+;
+}

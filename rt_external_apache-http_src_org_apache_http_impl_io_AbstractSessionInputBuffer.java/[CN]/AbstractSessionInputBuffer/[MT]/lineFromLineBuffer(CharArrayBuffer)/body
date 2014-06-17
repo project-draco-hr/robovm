@@ -1,0 +1,24 @@
+{
+  int l=this.linebuffer.length();
+  if (l > 0) {
+    if (this.linebuffer.byteAt(l - 1) == HTTP.LF) {
+      l--;
+      this.linebuffer.setLength(l);
+    }
+    if (l > 0) {
+      if (this.linebuffer.byteAt(l - 1) == HTTP.CR) {
+        l--;
+        this.linebuffer.setLength(l);
+      }
+    }
+  }
+  l=this.linebuffer.length();
+  if (this.ascii) {
+    charbuffer.append(this.linebuffer,0,l);
+  }
+ else {
+    String s=new String(this.linebuffer.buffer(),0,l,this.charset);
+    charbuffer.append(s);
+  }
+  return l;
+}

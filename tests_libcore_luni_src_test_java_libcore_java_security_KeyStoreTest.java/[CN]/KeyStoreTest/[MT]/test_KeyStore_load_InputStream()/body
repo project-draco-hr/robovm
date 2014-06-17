@@ -1,20 +1,29 @@
 {
   for (  KeyStore keyStore : keyStores()) {
     keyStore.load(null,null);
-    if (hasDefaultContents(keyStore)) {
-      assertTrue(keyStore.size() > 0);
+    if (isPersistentStorage(keyStore)) {
+      assertTrue("Should be able to query size: " + keyStore.getType(),keyStore.size() >= 0);
+    }
+ else     if (hasDefaultContents(keyStore)) {
+      assertTrue("Should have non-empty store: " + keyStore.getType(),keyStore.size() > 0);
     }
  else {
-      assertEquals(0,keyStore.size());
+      assertEquals("Should have empty store: " + keyStore.getType(),0,keyStore.size());
     }
   }
   for (  KeyStore keyStore : keyStores()) {
+    if (isLoadStoreUnsupported(keyStore)) {
+      continue;
+    }
     keyStore.load(null,PASSWORD_STORE);
-    if (hasDefaultContents(keyStore)) {
-      assertTrue(keyStore.size() > 0);
+    if (isPersistentStorage(keyStore)) {
+      assertTrue("Should be able to query size: " + keyStore.getType(),keyStore.size() >= 0);
+    }
+ else     if (hasDefaultContents(keyStore)) {
+      assertTrue("Should have non-empty store: " + keyStore.getType(),keyStore.size() > 0);
     }
  else {
-      assertEquals(0,keyStore.size());
+      assertEquals("Should have empty store: " + keyStore.getType(),0,keyStore.size());
     }
   }
 }

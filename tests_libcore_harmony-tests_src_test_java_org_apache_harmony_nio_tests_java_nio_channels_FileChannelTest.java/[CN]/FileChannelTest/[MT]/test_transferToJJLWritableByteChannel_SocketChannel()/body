@@ -1,0 +1,36 @@
+{
+  writeDataToFile(fileOfReadOnlyFileChannel);
+  socketChannelReceiver=SocketChannel.open();
+  socketChannelReceiver.socket().bind(new InetSocketAddress(InetAddress.getLocalHost(),0));
+  serverSocketChannel=ServerSocketChannel.open();
+  serverSocketChannel.socket().bind(new InetSocketAddress(InetAddress.getLocalHost(),0));
+  socketChannelReceiver.socket().setSoTimeout(TIME_OUT);
+  socketChannelReceiver.connect(serverSocketChannel.socket().getLocalSocketAddress());
+  serverSocketChannel.socket().setSoTimeout(TIME_OUT);
+  socketChannelSender=serverSocketChannel.accept();
+  socketChannelSender.socket().setSoTimeout(TIME_OUT);
+  final int POSITION=10;
+  readOnlyFileChannel.position(POSITION);
+  final int OFFSET=2;
+  long result=readOnlyFileChannel.transferTo(OFFSET,CONTENT_AS_BYTES_LENGTH * 2,socketChannelSender);
+  final int LENGTH=CONTENT_AS_BYTES_LENGTH - OFFSET;
+  assertEquals(LENGTH,result);
+  assertEquals(POSITION,readOnlyFileChannel.position());
+  readOnlyFileChannel.close();
+  socketChannelSender.close();
+  ByteBuffer readBuffer=ByteBuffer.allocate(LENGTH + 1);
+  int totalRead=0;
+  int countRead=0;
+  long beginTime=System.currentTimeMillis();
+  while ((countRead=socketChannelReceiver.read(readBuffer)) != -1) {
+    totalRead+=countRead;
+    if (System.currentTimeMillis() - beginTime > TIME_OUT) {
+      break;
+    }
+  }
+  assertEquals(LENGTH,totalRead);
+  readBuffer.flip();
+  for (int i=OFFSET; i < CONTENT_AS_BYTES_LENGTH; i++) {
+    assertEquals(CONTENT_AS_BYTES[i],readBuffer.get());
+  }
+}

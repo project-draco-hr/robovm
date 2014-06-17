@@ -1,0 +1,11 @@
+{
+  final Phaser root=this.root;
+  long s;
+  while ((s=root.state) >= 0) {
+    if (UNSAFE.compareAndSwapLong(root,stateOffset,s,s | TERMINATION_BIT)) {
+      releaseWaiters(0);
+      releaseWaiters(1);
+      return;
+    }
+  }
+}

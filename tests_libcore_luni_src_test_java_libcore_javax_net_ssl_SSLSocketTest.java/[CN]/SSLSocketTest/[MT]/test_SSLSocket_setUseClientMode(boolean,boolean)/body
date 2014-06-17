@@ -2,44 +2,35 @@
   TestSSLContext c=TestSSLContext.create();
   SSLSocket client=(SSLSocket)c.clientContext.getSocketFactory().createSocket(c.host,c.port);
   final SSLSocket server=(SSLSocket)c.serverSocket.accept();
-  final SSLHandshakeException[] sslHandshakeException=new SSLHandshakeException[1];
-  final SocketTimeoutException[] socketTimeoutException=new SocketTimeoutException[1];
-  Thread thread=new Thread(new Runnable(){
-    public void run(){
+  ExecutorService executor=Executors.newSingleThreadExecutor();
+  Future<IOException> future=executor.submit(new Callable<IOException>(){
+    @Override public IOException call() throws Exception {
       try {
         if (!serverClientMode) {
           server.setSoTimeout(1 * 1000);
         }
         server.setUseClientMode(serverClientMode);
         server.startHandshake();
+        return null;
       }
  catch (      SSLHandshakeException e) {
-        sslHandshakeException[0]=e;
+        return e;
       }
 catch (      SocketTimeoutException e) {
-        socketTimeoutException[0]=e;
-      }
-catch (      RuntimeException e) {
-        throw e;
-      }
-catch (      Exception e) {
-        throw new RuntimeException(e);
+        return e;
       }
     }
   }
 );
-  thread.start();
+  executor.shutdown();
   if (!clientClientMode) {
     client.setSoTimeout(1 * 1000);
   }
   client.setUseClientMode(clientClientMode);
   client.startHandshake();
-  thread.join();
-  if (sslHandshakeException[0] != null) {
-    throw sslHandshakeException[0];
-  }
-  if (socketTimeoutException[0] != null) {
-    throw socketTimeoutException[0];
+  IOException ioe=future.get();
+  if (ioe != null) {
+    throw ioe;
   }
   client.close();
   server.close();

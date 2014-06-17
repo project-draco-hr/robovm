@@ -1,0 +1,25 @@
+{
+  super();
+  if (request == null) {
+    throw new IllegalArgumentException("HTTP request may not be null");
+  }
+  this.original=request;
+  setParams(request.getParams());
+  if (request instanceof HttpUriRequest) {
+    this.uri=((HttpUriRequest)request).getURI();
+    this.method=((HttpUriRequest)request).getMethod();
+    this.version=null;
+  }
+ else {
+    RequestLine requestLine=request.getRequestLine();
+    try {
+      this.uri=new URI(requestLine.getUri());
+    }
+ catch (    URISyntaxException ex) {
+      throw new ProtocolException("Invalid request URI: " + requestLine.getUri(),ex);
+    }
+    this.method=requestLine.getMethod();
+    this.version=request.getProtocolVersion();
+  }
+  this.execCount=0;
+}

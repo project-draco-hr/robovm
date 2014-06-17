@@ -1,0 +1,19 @@
+{
+  final long ctx=NativeCrypto.EVP_CIPHER_CTX_new();
+  try {
+    final long evpCipher=NativeCrypto.EVP_get_cipherbyname("aes-128-ecb");
+    try {
+      NativeCrypto.EVP_CipherInit_ex(NULL,evpCipher,null,null,true);
+      fail("Null context should throw NullPointerException");
+    }
+ catch (    NullPointerException expected) {
+    }
+    NativeCrypto.EVP_CipherInit_ex(ctx,evpCipher,null,null,true);
+    NativeCrypto.EVP_CipherInit_ex(ctx,NULL,null,null,true);
+    NativeCrypto.EVP_CipherInit_ex(ctx,evpCipher,null,null,false);
+    NativeCrypto.EVP_CipherInit_ex(ctx,NULL,null,null,false);
+  }
+  finally {
+    NativeCrypto.EVP_CIPHER_CTX_cleanup(ctx);
+  }
+}

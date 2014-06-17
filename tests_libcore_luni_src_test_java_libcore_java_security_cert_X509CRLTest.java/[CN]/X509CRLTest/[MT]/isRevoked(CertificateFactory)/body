@@ -1,0 +1,21 @@
+{
+  X509Certificate rsaCert=getCertificate(f,CERT_RSA);
+  X509Certificate dsaCert=getCertificate(f,CERT_DSA);
+  X509CRL crlRsa=getCRL(f,CRL_RSA);
+  X509CRL crlRsaDsa=getCRL(f,CRL_RSA_DSA);
+  assertTrue(crlRsa.isRevoked(rsaCert));
+  assertFalse(crlRsa.isRevoked(dsaCert));
+  assertTrue(crlRsaDsa.isRevoked(rsaCert));
+  assertTrue(crlRsaDsa.isRevoked(dsaCert));
+  try {
+    assertFalse(crlRsa.isRevoked(null));
+    if ("BC".equals(f.getProvider().getName())) {
+      fail("BouncyCastle throws on null input");
+    }
+  }
+ catch (  NullPointerException e) {
+    if (!"BC".equals(f.getProvider().getName())) {
+      fail("Should not throw on null input");
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  if (from < 0) {
+    throw new IllegalArgumentException("Search position must not be negative: " + from);
+  }
+  boolean found=false;
+  final int to=this.currentHeader.length();
+  while (!found && (from < to)) {
+    final char ch=this.currentHeader.charAt(from);
+    if (isTokenSeparator(ch)) {
+      found=true;
+    }
+ else     if (isWhitespace(ch)) {
+      from++;
+    }
+ else     if (isTokenChar(ch)) {
+      throw new ParseException("Tokens without separator (pos " + from + "): "+ this.currentHeader);
+    }
+ else {
+      throw new ParseException("Invalid character after token (pos " + from + "): "+ this.currentHeader);
+    }
+  }
+  return from;
+}

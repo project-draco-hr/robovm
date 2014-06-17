@@ -1,8 +1,13 @@
 {
+  long t0=System.currentTimeMillis() / 1000;
   TestSSLSessions s=TestSSLSessions.create();
+  long t1=System.currentTimeMillis() / 1000;
   assertTrue(s.invalid.getCreationTime() > 0);
-  assertTrue(s.server.getCreationTime() > 0);
-  assertTrue(s.client.getCreationTime() > 0);
-  assertTrue(Math.abs(s.server.getCreationTime() - s.client.getCreationTime()) < 1 * 1000);
+  long sTime=s.server.getCreationTime() / 1000;
+  assertTrue(sTime + " >= " + t0,sTime >= t0);
+  assertTrue(sTime + " <= " + t1,sTime <= t1);
+  long cTime=s.client.getCreationTime() / 1000;
+  assertTrue(cTime + " >= " + t0,cTime >= t0);
+  assertTrue(cTime + " <= " + t1,cTime <= t1);
   s.close();
 }

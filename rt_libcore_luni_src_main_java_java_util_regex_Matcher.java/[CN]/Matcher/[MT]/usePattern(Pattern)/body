@@ -1,13 +1,15 @@
 {
   if (pattern == null) {
-    throw new IllegalArgumentException();
+    throw new IllegalArgumentException("pattern == null");
   }
   this.pattern=pattern;
-  if (address != 0) {
-    closeImpl(address);
-    address=0;
+synchronized (this) {
+    if (address != 0) {
+      closeImpl(address);
+      address=0;
+    }
+    address=openImpl(pattern.address);
   }
-  address=openImpl(pattern.address);
   if (input != null) {
     resetForInput();
   }

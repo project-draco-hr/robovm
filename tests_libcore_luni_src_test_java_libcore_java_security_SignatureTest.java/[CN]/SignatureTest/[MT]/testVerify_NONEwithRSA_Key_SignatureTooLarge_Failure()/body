@@ -1,0 +1,17 @@
+{
+  KeyFactory kf=KeyFactory.getInstance("RSA");
+  RSAPublicKeySpec pubKeySpec=new RSAPublicKeySpec(RSA_2048_modulus,RSA_2048_publicExponent);
+  PublicKey pubKey=kf.generatePublic(pubKeySpec);
+  Signature sig=Signature.getInstance("NONEwithRSA");
+  sig.initVerify(pubKey);
+  sig.update(Vector1Data);
+  byte[] invalidSignature=new byte[NONEwithRSA_Vector1Signature.length * 2];
+  System.arraycopy(NONEwithRSA_Vector1Signature,0,invalidSignature,0,NONEwithRSA_Vector1Signature.length);
+  System.arraycopy(NONEwithRSA_Vector1Signature,0,invalidSignature,NONEwithRSA_Vector1Signature.length,NONEwithRSA_Vector1Signature.length);
+  try {
+    sig.verify(invalidSignature);
+    fail("Should throw exception when signature is too large");
+  }
+ catch (  SignatureException expected) {
+  }
+}

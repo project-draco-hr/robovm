@@ -1,0 +1,22 @@
+{
+  byte[] serverWBuf=new byte[CAPACITY_NORMAL];
+  for (int i=0; i < serverWBuf.length; i++) {
+    serverWBuf[i]=(byte)i;
+  }
+  java.nio.ByteBuffer buf=java.nio.ByteBuffer.allocate(CAPACITY_NORMAL + 1);
+  channel1.connect(localAddr1);
+  server1.accept();
+  Socket sock=this.channel1.socket();
+  channel1.configureBlocking(false);
+  assertFalse(channel1.isBlocking());
+  OutputStream channelSocketOut=sock.getOutputStream();
+  try {
+    channelSocketOut.write(buf.array());
+    fail("Non-Blocking mode should cause IllegalBlockingModeException");
+  }
+ catch (  IllegalBlockingModeException e) {
+  }
+  channel1.configureBlocking(true);
+  assertTrue(channel1.isBlocking());
+  channelSocketOut.write(buf.array());
+}

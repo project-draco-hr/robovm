@@ -1,0 +1,19 @@
+{
+  X509CRL crl1=getCRL(f,CRL_RSA);
+  final byte[] sigAlgParams=crl1.getSigAlgParams();
+  if (StandardNames.IS_RI) {
+    assertNull(f.getProvider().getName(),sigAlgParams);
+  }
+ else {
+    assertNotNull(f.getProvider().getName(),sigAlgParams);
+    final byte[] expected=new byte[]{0x05,0x00};
+    assertEquals(f.getProvider().getName(),Arrays.toString(expected),Arrays.toString(sigAlgParams));
+  }
+{
+    X509CRL crlSigOpt=getCRL(f,CRL_RSA_DSA_SIGOPT);
+    final byte[] expected=new byte[]{(byte)0x30,(byte)0x05,(byte)0xA2,(byte)0x03,(byte)0x02,(byte)0x01,(byte)0x01};
+    final byte[] params=crlSigOpt.getSigAlgParams();
+    assertNotNull(f.getProvider().getName(),params);
+    assertEquals(Arrays.toString(expected),Arrays.toString(params));
+  }
+}

@@ -1,0 +1,46 @@
+{
+  buf.clear();
+  buf.mark();
+  buf.position(buf.limit());
+  CharBuffer duplicate=buf.duplicate();
+  assertNotSame(buf,duplicate);
+  assertEquals(buf.position(),duplicate.position());
+  assertEquals(buf.limit(),duplicate.limit());
+  assertEquals(buf.isReadOnly(),duplicate.isReadOnly());
+  assertEquals(buf.isDirect(),duplicate.isDirect());
+  assertEquals(buf.order(),duplicate.order());
+  assertEquals(buf.capacity(),duplicate.capacity());
+  assertContentEquals(buf,duplicate);
+  duplicate.reset();
+  assertEquals(duplicate.position(),0);
+  duplicate.clear();
+  assertEquals(buf.position(),buf.limit());
+  buf.reset();
+  assertEquals(buf.position(),0);
+  buf.clear();
+  int originalPosition=(buf.position() + buf.limit()) / 2;
+  buf.position(originalPosition);
+  buf.mark();
+  buf.position(buf.limit());
+  duplicate=buf.duplicate();
+  assertNotSame(buf,duplicate);
+  assertEquals(buf.position(),duplicate.position());
+  assertEquals(buf.limit(),duplicate.limit());
+  assertEquals(buf.isReadOnly(),duplicate.isReadOnly());
+  assertEquals(buf.isDirect(),duplicate.isDirect());
+  assertEquals(buf.order(),duplicate.order());
+  assertEquals(buf.capacity(),duplicate.capacity());
+  assertContentEquals(buf,duplicate);
+  duplicate.reset();
+  assertEquals(duplicate.position(),originalPosition);
+  duplicate.clear();
+  assertEquals(buf.position(),buf.limit());
+  buf.reset();
+  assertEquals(buf.position(),originalPosition);
+  if (!duplicate.isReadOnly()) {
+    loadTestData1(buf);
+    assertContentEquals(buf,duplicate);
+    loadTestData2(duplicate);
+    assertContentEquals(buf,duplicate);
+  }
+}

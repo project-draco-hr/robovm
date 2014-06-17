@@ -1,0 +1,31 @@
+{
+  responseSource=ResponseSource.NETWORK;
+  if (!policy.getUseCaches())   return;
+  OkResponseCache responseCache=client.getOkResponseCache();
+  if (responseCache == null)   return;
+  CacheResponse candidate=responseCache.get(uri,method,requestHeaders.getHeaders().toMultimap(false));
+  if (candidate == null)   return;
+  Map<String,List<String>> responseHeadersMap=candidate.getHeaders();
+  cachedResponseBody=candidate.getBody();
+  if (!acceptCacheResponseType(candidate) || responseHeadersMap == null || cachedResponseBody == null) {
+    Util.closeQuietly(cachedResponseBody);
+    return;
+  }
+  RawHeaders rawResponseHeaders=RawHeaders.fromMultimap(responseHeadersMap,true);
+  cachedResponseHeaders=new ResponseHeaders(uri,rawResponseHeaders);
+  long now=System.currentTimeMillis();
+  this.responseSource=cachedResponseHeaders.chooseResponseSource(now,requestHeaders);
+  if (responseSource == ResponseSource.CACHE) {
+    this.cacheResponse=candidate;
+    setResponse(cachedResponseHeaders,cachedResponseBody);
+  }
+ else   if (responseSource == ResponseSource.CONDITIONAL_CACHE) {
+    this.cacheResponse=candidate;
+  }
+ else   if (responseSource == ResponseSource.NETWORK) {
+    Util.closeQuietly(cachedResponseBody);
+  }
+ else {
+    throw new AssertionError();
+  }
+}

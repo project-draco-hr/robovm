@@ -1,0 +1,45 @@
+{
+synchronized (handshakeLock) {
+    if (!handshakeStarted) {
+      handshakeStarted=true;
+synchronized (this) {
+        free();
+        if (socket != this) {
+          if (autoClose && !socket.isClosed())           socket.close();
+        }
+ else {
+          if (!super.isClosed())           super.close();
+        }
+      }
+      return;
+    }
+  }
+synchronized (this) {
+    NativeCrypto.SSL_interrupt(sslNativePointer);
+synchronized (writeLock) {
+synchronized (readLock) {
+        try {
+          if (handshakeStarted) {
+            BlockGuard.getThreadPolicy().onNetwork();
+            NativeCrypto.SSL_shutdown(sslNativePointer,socket.getFileDescriptor$(),this);
+          }
+        }
+ catch (        IOException ignored) {
+        }
+ finally {
+          free();
+          if (socket != this) {
+            if (autoClose && !socket.isClosed()) {
+              socket.close();
+            }
+          }
+ else {
+            if (!super.isClosed()) {
+              super.close();
+            }
+          }
+        }
+      }
+    }
+  }
+}

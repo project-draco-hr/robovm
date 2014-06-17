@@ -1,0 +1,54 @@
+{
+  int stat=0, steps=0;
+  if (joiner != null && task != null) {
+    restart:     for (; ; ) {
+      ForkJoinTask<?> subtask=task;
+      for (WorkQueue j=joiner, v; ; ) {
+        WorkQueue[] ws;
+        int m, s, h;
+        if ((s=task.status) < 0) {
+          stat=s;
+          break restart;
+        }
+        if ((ws=workQueues) == null || (m=ws.length - 1) <= 0)         break restart;
+        if ((v=ws[h=(j.hint | 1) & m]) == null || v.currentSteal != subtask) {
+          for (int origin=h; ; ) {
+            if (((h=(h + 2) & m) & 15) == 1 && (subtask.status < 0 || j.currentJoin != subtask))             continue restart;
+            if ((v=ws[h]) != null && v.currentSteal == subtask) {
+              j.hint=h;
+              break;
+            }
+            if (h == origin)             break restart;
+          }
+        }
+        for (; ; ) {
+          ForkJoinTask[] a;
+          int b;
+          if (subtask.status < 0)           continue restart;
+          if ((b=v.base) - v.top < 0 && (a=v.array) != null) {
+            int i=(((a.length - 1) & b) << ASHIFT) + ABASE;
+            ForkJoinTask<?> t=(ForkJoinTask<?>)U.getObjectVolatile(a,i);
+            if (subtask.status < 0 || j.currentJoin != subtask || v.currentSteal != subtask)             continue restart;
+            stat=1;
+            if (t != null && v.base == b && U.compareAndSwapObject(a,i,t,null)) {
+              v.base=b + 1;
+              joiner.runSubtask(t);
+            }
+ else             if (v.base == b && ++steps == MAX_HELP)             break restart;
+          }
+ else {
+            ForkJoinTask<?> next=v.currentJoin;
+            if (subtask.status < 0 || j.currentJoin != subtask || v.currentSteal != subtask)             continue restart;
+ else             if (next == null || ++steps == MAX_HELP)             break restart;
+ else {
+              subtask=next;
+              j=v;
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+  return stat;
+}

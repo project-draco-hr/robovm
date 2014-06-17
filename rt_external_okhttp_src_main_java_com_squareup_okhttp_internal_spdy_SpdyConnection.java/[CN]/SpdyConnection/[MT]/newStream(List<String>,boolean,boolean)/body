@@ -1,0 +1,24 @@
+{
+  int flags=(out ? 0 : FLAG_FIN) | (in ? 0 : FLAG_UNIDIRECTIONAL);
+  int associatedStreamId=0;
+  int priority=0;
+  int slot=0;
+  SpdyStream stream;
+  int streamId;
+synchronized (spdyWriter) {
+synchronized (this) {
+      if (shutdown) {
+        throw new IOException("shutdown");
+      }
+      streamId=nextStreamId;
+      nextStreamId+=2;
+      stream=new SpdyStream(streamId,this,flags,priority,slot,requestHeaders,settings);
+      if (stream.isOpen()) {
+        streams.put(streamId,stream);
+        setIdle(false);
+      }
+    }
+    spdyWriter.synStream(flags,streamId,associatedStreamId,priority,slot,requestHeaders);
+  }
+  return stream;
+}

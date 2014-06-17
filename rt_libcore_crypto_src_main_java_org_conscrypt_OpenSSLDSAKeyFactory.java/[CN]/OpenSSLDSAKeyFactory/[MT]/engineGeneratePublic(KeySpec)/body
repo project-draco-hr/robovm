@@ -1,0 +1,12 @@
+{
+  if (keySpec == null) {
+    throw new InvalidKeySpecException("keySpec == null");
+  }
+  if (keySpec instanceof DSAPublicKeySpec) {
+    return new OpenSSLDSAPublicKey((DSAPublicKeySpec)keySpec);
+  }
+ else   if (keySpec instanceof X509EncodedKeySpec) {
+    return OpenSSLKey.getPublicKey((X509EncodedKeySpec)keySpec,NativeCrypto.EVP_PKEY_DSA);
+  }
+  throw new InvalidKeySpecException("Must use DSAPublicKeySpec or X509EncodedKeySpec; was " + keySpec.getClass().getName());
+}

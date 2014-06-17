@@ -1,0 +1,17 @@
+{
+  Provider prov=Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
+  if (prov != null) {
+    String algName=prov.getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
+    if (algName != null) {
+      return algName;
+    }
+  }
+  Provider[] provs=Security.getProviders();
+  for (int i=0; i != provs.length; i++) {
+    String algName=provs[i].getProperty("Alg.Alias.Signature." + this.getSigAlgOID());
+    if (algName != null) {
+      return algName;
+    }
+  }
+  return this.getSigAlgOID();
+}

@@ -1,0 +1,18 @@
+{
+  int writeres=this.testNum;
+  ByteBuffer writebuf=ByteBuffer.allocate(this.writebufSize);
+  for (int val=0; val < this.writebufSize / 2; val++) {
+    writebuf.putChar((char)(val + 64));
+  }
+  this.fouts=null;
+  try {
+    WritableByteChannel rbChannel=Channels.newChannel(this.fouts);
+    writeres=rbChannel.write(writebuf);
+    assertEquals(0,writeres);
+    writebuf.flip();
+    writeres=rbChannel.write(writebuf);
+    fail("Should throw NPE.");
+  }
+ catch (  NullPointerException expected) {
+  }
+}

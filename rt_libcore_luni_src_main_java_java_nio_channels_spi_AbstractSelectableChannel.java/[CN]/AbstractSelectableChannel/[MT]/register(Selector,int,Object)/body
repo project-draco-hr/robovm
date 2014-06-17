@@ -3,7 +3,7 @@
     throw new ClosedChannelException();
   }
   if (!((interestSet & ~validOps()) == 0)) {
-    throw new IllegalArgumentException();
+    throw new IllegalArgumentException("no valid ops in interest set: " + interestSet);
   }
 synchronized (blockingLock) {
     if (isBlocking) {
@@ -13,7 +13,7 @@ synchronized (blockingLock) {
       if (interestSet == 0) {
         throw new IllegalSelectorException();
       }
-      throw new NullPointerException();
+      throw new NullPointerException("selector not open");
     }
     SelectionKey key=keyFor(selector);
     if (key == null) {

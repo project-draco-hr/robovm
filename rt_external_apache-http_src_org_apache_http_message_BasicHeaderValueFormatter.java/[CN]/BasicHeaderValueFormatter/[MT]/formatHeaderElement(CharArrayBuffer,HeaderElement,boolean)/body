@@ -1,0 +1,26 @@
+{
+  if (elem == null) {
+    throw new IllegalArgumentException("Header element must not be null.");
+  }
+  int len=estimateHeaderElementLen(elem);
+  if (buffer == null) {
+    buffer=new CharArrayBuffer(len);
+  }
+ else {
+    buffer.ensureCapacity(len);
+  }
+  buffer.append(elem.getName());
+  final String value=elem.getValue();
+  if (value != null) {
+    buffer.append('=');
+    doFormatValue(buffer,value,quote);
+  }
+  final int parcnt=elem.getParameterCount();
+  if (parcnt > 0) {
+    for (int i=0; i < parcnt; i++) {
+      buffer.append("; ");
+      formatNameValuePair(buffer,elem.getParameter(i),quote);
+    }
+  }
+  return buffer;
+}

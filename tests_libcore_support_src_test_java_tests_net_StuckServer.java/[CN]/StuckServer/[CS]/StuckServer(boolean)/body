@@ -1,0 +1,24 @@
+{
+  if (useBacklog) {
+    this.serverSocket=new ServerSocket(0,1);
+    this.address=(InetSocketAddress)serverSocket.getLocalSocketAddress();
+    if (DEBUG) {
+      System.err.println("StuckServer: " + serverSocket);
+    }
+    int clientCount=4;
+    if (System.getProperty("os.name").contains("iOS") || System.getProperty("os.name").contains("Mac")) {
+      clientCount=1;
+    }
+    for (int i=0; i < clientCount; ++i) {
+      Socket client=new Socket(serverSocket.getInetAddress(),serverSocket.getLocalPort());
+      clients.add(client);
+      if (DEBUG) {
+        System.err.println("StuckServer client " + i + " - "+ client);
+      }
+    }
+  }
+ else {
+    InetAddress testNet1=InetAddress.getByAddress(new byte[]{(byte)192,0,2,0});
+    this.address=new InetSocketAddress(testNet1,80);
+  }
+}

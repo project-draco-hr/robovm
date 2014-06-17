@@ -1,0 +1,33 @@
+{
+  ServerSocket listening=new ServerSocket(0);
+  Socket underlying=new Socket(listening.getInetAddress(),listening.getLocalPort());
+  Socket server=listening.accept();
+  SSLSocketFactory sf=(SSLSocketFactory)SSLSocketFactory.getDefault();
+  Socket clientWrapping=sf.createSocket(underlying,null,-1,true);
+  final Socket toRead=(readUnderlying) ? underlying : clientWrapping;
+  final Socket toClose=(closeUnderlying) ? underlying : clientWrapping;
+  ExecutorService executor=Executors.newSingleThreadExecutor();
+  Future<Void> future=executor.submit(new Callable<Void>(){
+    @Override public Void call() throws Exception {
+      Thread.sleep(1 * 1000);
+      toClose.close();
+      return null;
+    }
+  }
+);
+  executor.shutdown();
+  try {
+    toRead.setSoTimeout(5 * 1000);
+    toRead.getInputStream().read();
+    fail();
+  }
+ catch (  SocketTimeoutException e) {
+    throw e;
+  }
+catch (  SocketException expected) {
+  }
+  future.get();
+  server.close();
+  underlying.close();
+  listening.close();
+}

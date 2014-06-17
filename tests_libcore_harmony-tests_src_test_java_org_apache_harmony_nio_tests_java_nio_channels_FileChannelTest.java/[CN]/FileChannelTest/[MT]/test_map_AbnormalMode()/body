@@ -1,0 +1,87 @@
+{
+  try {
+    writeOnlyFileChannel.map(MapMode.READ_ONLY,0,CONTENT_LENGTH);
+    fail("should throw NonReadableChannelException.");
+  }
+ catch (  NonReadableChannelException ex) {
+  }
+  try {
+    writeOnlyFileChannel.map(MapMode.READ_WRITE,0,CONTENT_LENGTH);
+    fail("should throw NonReadableChannelException.");
+  }
+ catch (  NonReadableChannelException ex) {
+  }
+  try {
+    writeOnlyFileChannel.map(MapMode.PRIVATE,0,CONTENT_LENGTH);
+    fail("should throw NonReadableChannelException.");
+  }
+ catch (  NonReadableChannelException ex) {
+  }
+  writeOnlyFileChannel.close();
+  try {
+    writeOnlyFileChannel.map(MapMode.READ_WRITE,0,-1);
+    fail("should throw ClosedChannelException.");
+  }
+ catch (  ClosedChannelException ex) {
+  }
+  try {
+    readOnlyFileChannel.map(MapMode.READ_WRITE,0,CONTENT_LENGTH);
+    fail("should throw NonWritableChannelException .");
+  }
+ catch (  NonWritableChannelException ex) {
+  }
+  try {
+    readOnlyFileChannel.map(MapMode.PRIVATE,0,CONTENT_LENGTH);
+    fail("should throw NonWritableChannelException .");
+  }
+ catch (  NonWritableChannelException ex) {
+  }
+  try {
+    readOnlyFileChannel.map(MapMode.READ_WRITE,-1,CONTENT_LENGTH);
+    fail("should throw IAE.");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  try {
+    readOnlyFileChannel.map(MapMode.READ_WRITE,0,-1);
+    fail("should throw IAE.");
+  }
+ catch (  IllegalArgumentException ex) {
+  }
+  try {
+    readOnlyFileChannel.map(MapMode.READ_ONLY,0,CONTENT_LENGTH + 1);
+    fail();
+  }
+ catch (  NonWritableChannelException expected) {
+  }
+catch (  IOException expected) {
+  }
+  try {
+    readOnlyFileChannel.map(MapMode.READ_ONLY,2,CONTENT_LENGTH - 1);
+    fail();
+  }
+ catch (  NonWritableChannelException expected) {
+  }
+catch (  IOException expected) {
+  }
+  readOnlyFileChannel.close();
+  try {
+    readOnlyFileChannel.map(MapMode.READ_WRITE,0,-1);
+    fail("should throw ClosedChannelException.");
+  }
+ catch (  ClosedChannelException ex) {
+  }
+  try {
+    readOnlyFileChannel.map(MapMode.READ_ONLY,2,CONTENT_LENGTH - 1);
+    fail("should throw IOException.");
+  }
+ catch (  IOException ex) {
+  }
+  readWriteFileChannel.close();
+  try {
+    readWriteFileChannel.map(MapMode.READ_WRITE,0,-1);
+    fail("should throw ClosedChannelException.");
+  }
+ catch (  ClosedChannelException ex) {
+  }
+}

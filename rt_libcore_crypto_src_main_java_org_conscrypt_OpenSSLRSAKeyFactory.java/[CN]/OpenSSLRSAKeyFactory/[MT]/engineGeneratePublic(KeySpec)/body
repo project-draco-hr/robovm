@@ -1,0 +1,12 @@
+{
+  if (keySpec == null) {
+    throw new InvalidKeySpecException("keySpec == null");
+  }
+  if (keySpec instanceof RSAPublicKeySpec) {
+    return new OpenSSLRSAPublicKey((RSAPublicKeySpec)keySpec);
+  }
+ else   if (keySpec instanceof X509EncodedKeySpec) {
+    return OpenSSLKey.getPublicKey((X509EncodedKeySpec)keySpec,NativeCrypto.EVP_PKEY_RSA);
+  }
+  throw new InvalidKeySpecException("Must use RSAPublicKeySpec or X509EncodedKeySpec; was " + keySpec.getClass().getName());
+}

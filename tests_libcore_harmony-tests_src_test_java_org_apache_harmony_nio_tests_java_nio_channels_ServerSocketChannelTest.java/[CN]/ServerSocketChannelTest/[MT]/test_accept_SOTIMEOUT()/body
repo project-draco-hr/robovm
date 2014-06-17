@@ -1,0 +1,17 @@
+{
+  final int SO_TIMEOUT=10;
+  ServerSocketChannel sc=ServerSocketChannel.open();
+  try {
+    ServerSocket ss=sc.socket();
+    ss.bind(localAddr1);
+    sc.configureBlocking(false);
+    ss.setSoTimeout(SO_TIMEOUT);
+    SocketChannel client=sc.accept();
+    assertNull(client);
+    int soTimeout=ss.getSoTimeout();
+    assertEquals(SO_TIMEOUT,soTimeout);
+  }
+  finally {
+    sc.close();
+  }
+}

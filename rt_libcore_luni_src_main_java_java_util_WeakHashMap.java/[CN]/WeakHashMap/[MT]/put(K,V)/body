@@ -3,7 +3,7 @@
   int index=0;
   Entry<K,V> entry;
   if (key != null) {
-    index=(key.hashCode() & 0x7FFFFFFF) % elementData.length;
+    index=(Collections.secondaryHash(key) & 0x7FFFFFFF) % elementData.length;
     entry=elementData[index];
     while (entry != null && !key.equals(entry.get())) {
       entry=entry.next;
@@ -19,7 +19,7 @@
     modCount++;
     if (++elementCount > threshold) {
       rehash();
-      index=key == null ? 0 : (key.hashCode() & 0x7FFFFFFF) % elementData.length;
+      index=key == null ? 0 : (Collections.secondaryHash(key) & 0x7FFFFFFF) % elementData.length;
     }
     entry=new Entry<K,V>(key,value,referenceQueue);
     entry.next=elementData[index];

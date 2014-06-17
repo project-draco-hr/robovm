@@ -12,11 +12,15 @@
     nl=new MockNodeChangeListener();
     pref.addNodeChangeListener(nl);
     child1=pref.node("mock1");
-    nl.waitForEvent();
+    nl.waitForEvent(1);
     assertEquals(1,nl.getAdded());
     nl.reset();
     pref.node("mock1");
-    nl.waitForEvent();
+    try {
+      Thread.sleep(1000);
+    }
+ catch (    InterruptedException ignored) {
+    }
     assertEquals(0,nl.getAdded());
     nl.reset();
   }
@@ -29,7 +33,7 @@
     pref.addNodeChangeListener(nl);
     pref.addNodeChangeListener(nl);
     child1=pref.node("mock2");
-    nl.waitForEvent();
+    nl.waitForEvent(2);
     assertEquals(2,nl.getAdded());
     nl.reset();
   }
@@ -43,7 +47,7 @@
     pref.addNodeChangeListener(nl);
     child1=pref.node("mock3");
     child1.removeNode();
-    nl.waitForEvent();
+    nl.waitForEvent(2);
     assertEquals(1,nl.getRemoved());
     nl.reset();
   }
@@ -56,7 +60,7 @@
     pref.addNodeChangeListener(nl);
     child1=pref.node("mock6");
     child1.removeNode();
-    nl.waitForEvent();
+    nl.waitForEvent(4);
     assertEquals(2,nl.getRemoved());
     nl.reset();
   }
@@ -70,23 +74,31 @@
     child1=pref.node("mock4");
     child1.addNodeChangeListener(nl);
     pref.node("mock4/mock5");
-    nl.waitForEvent();
+    nl.waitForEvent(1);
     assertEquals(1,nl.getAdded());
     nl.reset();
     child3=pref.node("mock4/mock5/mock6");
-    nl.waitForEvent();
+    try {
+      Thread.sleep(1000);
+    }
+ catch (    InterruptedException ignored) {
+    }
     assertEquals(0,nl.getAdded());
     nl.reset();
     child3.removeNode();
-    nl.waitForEvent();
+    try {
+      Thread.sleep(1000);
+    }
+ catch (    InterruptedException ignored) {
+    }
     assertEquals(0,nl.getRemoved());
     nl.reset();
     pref.node("mock4/mock7");
-    nl.waitForEvent();
+    nl.waitForEvent(1);
     assertEquals(1,nl.getAdded());
     nl.reset();
     child1.removeNode();
-    nl.waitForEvent();
+    nl.waitForEvent(2);
     assertEquals(2,nl.getRemoved());
     nl.reset();
   }

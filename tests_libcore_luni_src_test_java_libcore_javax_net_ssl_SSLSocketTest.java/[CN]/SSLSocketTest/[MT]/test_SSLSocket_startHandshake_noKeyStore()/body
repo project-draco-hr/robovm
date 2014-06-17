@@ -3,30 +3,27 @@
   SSLSocket client=(SSLSocket)c.clientContext.getSocketFactory().createSocket(c.host,c.port);
   if (StandardNames.IS_RI) {
     final SSLSocket server=(SSLSocket)c.serverSocket.accept();
-    Thread thread=new Thread(new Runnable(){
-      public void run(){
+    ExecutorService executor=Executors.newSingleThreadExecutor();
+    Future<Void> future=executor.submit(new Callable<Void>(){
+      @Override public Void call() throws Exception {
         try {
           server.startHandshake();
+          fail();
         }
  catch (        SSLHandshakeException expected) {
         }
-catch (        RuntimeException e) {
-          throw e;
-        }
-catch (        Exception e) {
-          throw new RuntimeException(e);
-        }
+        return null;
       }
     }
 );
-    thread.start();
+    executor.shutdown();
     try {
       client.startHandshake();
       fail();
     }
  catch (    SSLHandshakeException expected) {
     }
-    thread.join();
+    future.get();
     server.close();
   }
  else {

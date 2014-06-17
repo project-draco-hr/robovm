@@ -1,0 +1,30 @@
+{
+  ClassLoader thisClassLoader=getClassLoader(LogFactoryImpl.class);
+  if (useTCCL == false) {
+    return thisClassLoader;
+  }
+  ClassLoader contextClassLoader=getContextClassLoader();
+  ClassLoader baseClassLoader=getLowestClassLoader(contextClassLoader,thisClassLoader);
+  if (baseClassLoader == null) {
+    if (allowFlawedContext) {
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic("[WARNING] the context classloader is not part of a" + " parent-child relationship with the classloader that" + " loaded LogFactoryImpl.");
+      }
+      return contextClassLoader;
+    }
+ else {
+      throw new LogConfigurationException("Bad classloader hierarchy; LogFactoryImpl was loaded via" + " a classloader that is not related to the current context" + " classloader.");
+    }
+  }
+  if (baseClassLoader != contextClassLoader) {
+    if (allowFlawedContext) {
+      if (isDiagnosticsEnabled()) {
+        logDiagnostic("Warning: the context classloader is an ancestor of the" + " classloader that loaded LogFactoryImpl; it should be" + " the same or a descendant. The application using"+ " commons-logging should ensure the context classloader"+ " is used correctly.");
+      }
+    }
+ else {
+      throw new LogConfigurationException("Bad classloader hierarchy; LogFactoryImpl was loaded via" + " a classloader that is not related to the current context" + " classloader.");
+    }
+  }
+  return baseClassLoader;
+}

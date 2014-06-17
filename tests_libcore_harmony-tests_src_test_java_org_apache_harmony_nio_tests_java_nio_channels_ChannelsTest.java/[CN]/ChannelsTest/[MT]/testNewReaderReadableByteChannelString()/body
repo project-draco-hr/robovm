@@ -1,0 +1,25 @@
+{
+  int bufSize=this.testNum;
+  int readres=0;
+  CharBuffer charBuf=CharBuffer.allocate(bufSize);
+  this.fins=new FileInputStream(tmpFile);
+  ReadableByteChannel rbChannel=Channels.newChannel(this.fins);
+  Reader testReader=Channels.newReader(rbChannel,Charset.forName(CODE_SET).newDecoder(),-1);
+  Reader testReader_s=Channels.newReader(rbChannel,CODE_SET);
+  assertEquals(this.fileSize,this.fins.available());
+  assertFalse(testReader.ready());
+  assertFalse(testReader_s.ready());
+  readres=testReader.read(charBuf);
+  assertEquals(bufSize,readres);
+  assertEquals(0,this.fins.available());
+  try {
+    readres=testReader.read((CharBuffer)null);
+    fail();
+  }
+ catch (  NullPointerException e) {
+  }
+  readres=testReader_s.read(charBuf);
+  assertEquals(0,readres);
+  assertTrue(testReader.ready());
+  assertFalse(testReader_s.ready());
+}

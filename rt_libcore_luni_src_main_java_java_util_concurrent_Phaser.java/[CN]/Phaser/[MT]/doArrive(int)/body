@@ -1,0 +1,32 @@
+{
+  final Phaser root=this.root;
+  for (; ; ) {
+    long s=(root == this) ? state : reconcileState();
+    int phase=(int)(s >>> PHASE_SHIFT);
+    if (phase < 0)     return phase;
+    int counts=(int)s;
+    int unarrived=(counts == EMPTY) ? 0 : (counts & UNARRIVED_MASK);
+    if (unarrived <= 0)     throw new IllegalStateException(badArrive(s));
+    if (UNSAFE.compareAndSwapLong(this,stateOffset,s,s-=adjust)) {
+      if (unarrived == 1) {
+        long n=s & PARTIES_MASK;
+        int nextUnarrived=(int)n >>> PARTIES_SHIFT;
+        if (root == this) {
+          if (onAdvance(phase,nextUnarrived))           n|=TERMINATION_BIT;
+ else           if (nextUnarrived == 0)           n|=EMPTY;
+ else           n|=nextUnarrived;
+          int nextPhase=(phase + 1) & MAX_PHASE;
+          n|=(long)nextPhase << PHASE_SHIFT;
+          UNSAFE.compareAndSwapLong(this,stateOffset,s,n);
+          releaseWaiters(phase);
+        }
+ else         if (nextUnarrived == 0) {
+          phase=parent.doArrive(ONE_DEREGISTER);
+          UNSAFE.compareAndSwapLong(this,stateOffset,s,s | EMPTY);
+        }
+ else         phase=parent.doArrive(ONE_ARRIVAL);
+      }
+      return phase;
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  if (isDiagnosticsEnabled()) {
+    logDiagnostic("Discovering a Log implementation...");
+  }
+  initConfiguration();
+  Log result=null;
+  String specifiedLogClassName=findUserSpecifiedLogClassName();
+  if (specifiedLogClassName != null) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("Attempting to load user-specified log class '" + specifiedLogClassName + "'...");
+    }
+    result=createLogFromClass(specifiedLogClassName,logCategory,true);
+    if (result == null) {
+      StringBuffer messageBuffer=new StringBuffer("User-specified log class '");
+      messageBuffer.append(specifiedLogClassName);
+      messageBuffer.append("' cannot be found or is not useable.");
+      if (specifiedLogClassName != null) {
+        informUponSimilarName(messageBuffer,specifiedLogClassName,LOGGING_IMPL_LOG4J_LOGGER);
+        informUponSimilarName(messageBuffer,specifiedLogClassName,LOGGING_IMPL_JDK14_LOGGER);
+        informUponSimilarName(messageBuffer,specifiedLogClassName,LOGGING_IMPL_LUMBERJACK_LOGGER);
+        informUponSimilarName(messageBuffer,specifiedLogClassName,LOGGING_IMPL_SIMPLE_LOGGER);
+      }
+      throw new LogConfigurationException(messageBuffer.toString());
+    }
+    return result;
+  }
+  if (isDiagnosticsEnabled()) {
+    logDiagnostic("No user-specified Log implementation; performing discovery" + " using the standard supported logging implementations...");
+  }
+  for (int i=0; (i < classesToDiscover.length) && (result == null); ++i) {
+    result=createLogFromClass(classesToDiscover[i],logCategory,true);
+  }
+  if (result == null) {
+    throw new LogConfigurationException("No suitable Log implementation");
+  }
+  return result;
+}

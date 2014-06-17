@@ -2,7 +2,10 @@
   encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
   decoder.onMalformedInput(CodingErrorAction.REPORT);
   CharBuffer inputCB=CharBuffer.allocate(65536);
-  for (int code=32; code <= 65533; code++) {
+  for (int code=32; code <= 65533; ++code) {
+    if (code >= 0xd800 && code <= 0xdfff) {
+      continue;
+    }
     if (encoder.canEncode((char)code)) {
       inputCB.put((char)code);
     }

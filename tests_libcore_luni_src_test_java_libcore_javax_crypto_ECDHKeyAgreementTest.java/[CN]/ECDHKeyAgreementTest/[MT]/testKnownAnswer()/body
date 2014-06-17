@@ -1,0 +1,18 @@
+{
+  for (  Provider keyFactoryProvider1 : getKeyFactoryProviders()) {
+    ECPrivateKey privateKey1=getPrivateKey(KAT_PRIVATE_KEY1_PKCS8,keyFactoryProvider1);
+    ECPublicKey publicKey1=getPublicKey(KAT_PUBLIC_KEY1_X509,keyFactoryProvider1);
+    for (    Provider keyFactoryProvider2 : getKeyFactoryProviders()) {
+      ECPrivateKey privateKey2=getPrivateKey(KAT_PRIVATE_KEY2_PKCS8,keyFactoryProvider2);
+      ECPublicKey publicKey2=getPublicKey(KAT_PUBLIC_KEY2_X509,keyFactoryProvider2);
+      for (      Provider keyAgreementProvider : getKeyAgreementProviders()) {
+        try {
+          testKnownAnswer(publicKey1,privateKey1,publicKey2,privateKey2,keyAgreementProvider);
+        }
+ catch (        Throwable e) {
+          throw new RuntimeException(getClass().getSimpleName() + ".testKnownAnswer(" + keyFactoryProvider1.getName()+ ", "+ keyFactoryProvider2.getName()+ ", "+ keyAgreementProvider.getName()+ ")",e);
+        }
+      }
+    }
+  }
+}

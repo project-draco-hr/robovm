@@ -1,0 +1,19 @@
+{
+  if (o == this) {
+    return true;
+  }
+  if (o instanceof OpenSSLECPrivateKey) {
+    OpenSSLECPrivateKey other=(OpenSSLECPrivateKey)o;
+    return key.equals(other.key);
+  }
+  if (!(o instanceof ECPrivateKey)) {
+    return false;
+  }
+  final ECPrivateKey other=(ECPrivateKey)o;
+  if (!getPrivateKey().equals(other.getS())) {
+    return false;
+  }
+  final ECParameterSpec spec=getParams();
+  final ECParameterSpec otherSpec=other.getParams();
+  return spec.getCurve().equals(otherSpec.getCurve()) && spec.getGenerator().equals(otherSpec.getGenerator()) && spec.getOrder().equals(otherSpec.getOrder())&& spec.getCofactor() == otherSpec.getCofactor();
+}

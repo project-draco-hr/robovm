@@ -1,0 +1,16 @@
+{
+  GeneralNames currentCA=issuerName;
+  for (Enumeration en=x509CRL.getRevokedCertificateEnumeration(); en.hasMoreElements(); ) {
+    TBSCertList.CRLEntry entry=(TBSCertList.CRLEntry)en.nextElement();
+    if (entry.getUserCertificate().getValue().equals(serialNumber)) {
+      return new X509CRLEntryHolder(entry,isIndirect,currentCA);
+    }
+    if (isIndirect && entry.hasExtensions()) {
+      Extension currentCaName=entry.getExtensions().getExtension(Extension.certificateIssuer);
+      if (currentCaName != null) {
+        currentCA=GeneralNames.getInstance(currentCaName.getParsedValue());
+      }
+    }
+  }
+  return null;
+}

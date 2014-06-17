@@ -1,0 +1,15 @@
+{
+  CloseGuardGuard guard=new CloseGuardGuard();
+  try {
+    server.enqueue(new MockResponse().setBody(gzip("ABCABCABC".getBytes("UTF-8"))).addHeader("Content-Encoding: gzip"));
+    server.play();
+    HttpURLConnection connection=(HttpURLConnection)server.getUrl("/").openConnection();
+    assertEquals(200,connection.getResponseCode());
+    connection.disconnect();
+    connection=null;
+    assertFalse(guard.wasCloseGuardCalled());
+  }
+  finally {
+    guard.close();
+  }
+}

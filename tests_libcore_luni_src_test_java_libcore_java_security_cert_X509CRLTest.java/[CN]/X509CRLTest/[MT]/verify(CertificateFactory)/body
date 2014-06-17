@@ -1,0 +1,12 @@
+{
+  X509CRL crlRsa=getCRL(f,CRL_RSA);
+  X509Certificate caCert=getCertificate(f,CERT_CRL_CA);
+  crlRsa.verify(caCert.getPublicKey());
+  X509Certificate dsaCert=getCertificate(f,CERT_DSA);
+  try {
+    crlRsa.verify(dsaCert.getPublicKey());
+    fail("should not verify using incorrect key type");
+  }
+ catch (  InvalidKeyException expected) {
+  }
+}

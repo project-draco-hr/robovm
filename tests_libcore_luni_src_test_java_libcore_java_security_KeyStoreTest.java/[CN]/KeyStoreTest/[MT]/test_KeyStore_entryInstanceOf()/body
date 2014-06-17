@@ -2,7 +2,7 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       keyStore.entryInstanceOf(null,null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
@@ -11,19 +11,19 @@
     keyStore.load(null,null);
     try {
       keyStore.entryInstanceOf(null,null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
     try {
       keyStore.entryInstanceOf(null,Entry.class);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
     try {
       keyStore.entryInstanceOf("",null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    NullPointerException expected) {
     }
@@ -47,9 +47,12 @@
       assertFalse(keyStore.entryInstanceOf(ALIAS_CERTIFICATE,SecretKeyEntry.class));
       continue;
     }
-    assertTrue(keyStore.entryInstanceOf(ALIAS_PRIVATE,PrivateKeyEntry.class));
+    assertEquals(isKeyPasswordSupported(keyStore),keyStore.entryInstanceOf(ALIAS_PRIVATE,PrivateKeyEntry.class));
     assertFalse(keyStore.entryInstanceOf(ALIAS_PRIVATE,SecretKeyEntry.class));
     assertFalse(keyStore.entryInstanceOf(ALIAS_PRIVATE,TrustedCertificateEntry.class));
+    assertEquals(isNullPasswordAllowed(keyStore),keyStore.entryInstanceOf(ALIAS_NO_PASSWORD_PRIVATE,PrivateKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_NO_PASSWORD_PRIVATE,SecretKeyEntry.class));
+    assertFalse(keyStore.entryInstanceOf(ALIAS_NO_PASSWORD_PRIVATE,TrustedCertificateEntry.class));
     assertEquals(isSecretKeyEnabled(keyStore),keyStore.entryInstanceOf(ALIAS_SECRET,SecretKeyEntry.class));
     assertFalse(keyStore.entryInstanceOf(ALIAS_SECRET,PrivateKeyEntry.class));
     assertFalse(keyStore.entryInstanceOf(ALIAS_SECRET,TrustedCertificateEntry.class));

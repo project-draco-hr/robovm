@@ -1,0 +1,33 @@
+{
+  Node r, b;
+  if ((r=lastRet) != null && !r.isMatched())   lastPred=r;
+ else   if ((b=lastPred) == null || b.isMatched())   lastPred=null;
+ else {
+    Node s, n;
+    while ((s=b.next) != null && s != b && s.isMatched() && (n=s.next) != null && n != s)     b.casNext(s,n);
+  }
+  this.lastRet=prev;
+  for (Node p=prev, s, n; ; ) {
+    s=(p == null) ? head : p.next;
+    if (s == null)     break;
+ else     if (s == p) {
+      p=null;
+      continue;
+    }
+    Object item=s.item;
+    if (s.isData) {
+      if (item != null && item != s) {
+        nextItem=LinkedTransferQueue.<E>cast(item);
+        nextNode=s;
+        return;
+      }
+    }
+ else     if (item == null)     break;
+    if (p == null)     p=s;
+ else     if ((n=s.next) == null)     break;
+ else     if (s == n)     p=null;
+ else     p.casNext(s,n);
+  }
+  nextNode=null;
+  nextItem=null;
+}

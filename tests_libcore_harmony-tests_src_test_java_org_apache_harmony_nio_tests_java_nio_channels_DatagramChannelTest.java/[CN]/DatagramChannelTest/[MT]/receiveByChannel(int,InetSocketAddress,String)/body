@@ -1,0 +1,24 @@
+{
+  try {
+    ByteBuffer buf=ByteBuffer.wrap(new byte[bufSize]);
+    InetSocketAddress returnAddr=null;
+    long startTime=System.currentTimeMillis();
+    do {
+      returnAddr=(InetSocketAddress)this.channel1.receive(buf);
+      if (channel1.isBlocking() || null != returnAddr) {
+        break;
+      }
+      assertTimeout(startTime,10000);
+    }
+ while (true);
+    int length=returnAddr.getAddress().getAddress().length;
+    for (int i=0; i < length; i++) {
+      assertEquals(returnAddr.getAddress().getAddress()[i],InetAddress.getByName("127.0.0.1").getAddress()[i]);
+    }
+    assertFalse(returnAddr.getPort() == address.getPort());
+    assertEquals(new String(buf.array(),0,bufSize).trim(),expectedString);
+  }
+  finally {
+    this.channel1.close();
+  }
+}

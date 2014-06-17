@@ -1,0 +1,26 @@
+{
+  assertNotNull(provider,actualDataWithPadding);
+  int expectedOutputSize=getExpectedOutputSize("RSA",Cipher.DECRYPT_MODE,provider);
+  assertEquals(provider,expectedOutputSize,actualDataWithPadding.length);
+  int expectedBlockTypeOffset;
+  if (provider.equals("BC")) {
+    expectedBlockTypeOffset=0;
+  }
+ else {
+    expectedBlockTypeOffset=1;
+    assertEquals(provider,0,actualDataWithPadding[0]);
+  }
+  byte actualBlockType=actualDataWithPadding[expectedBlockTypeOffset];
+  assertEquals(provider,expectedBlockType,actualBlockType);
+  int actualDataOffset=actualDataWithPadding.length - expectedData.length;
+  if (actualBlockType == 1) {
+    int expectedDataOffset=expectedBlockTypeOffset + 1;
+    for (int i=expectedDataOffset; i < actualDataOffset - 1; i++) {
+      assertEquals(provider,(byte)0xFF,actualDataWithPadding[i]);
+    }
+  }
+  assertEquals(provider,0x00,actualDataWithPadding[actualDataOffset - 1]);
+  byte[] actualData=new byte[expectedData.length];
+  System.arraycopy(actualDataWithPadding,actualDataOffset,actualData,0,actualData.length);
+  assertEquals(provider,Arrays.toString(expectedData),Arrays.toString(actualData));
+}

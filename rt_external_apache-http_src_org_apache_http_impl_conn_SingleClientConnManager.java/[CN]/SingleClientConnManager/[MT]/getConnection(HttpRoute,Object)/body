@@ -1,0 +1,41 @@
+{
+  if (route == null) {
+    throw new IllegalArgumentException("Route may not be null.");
+  }
+  assertStillUp();
+  if (log.isDebugEnabled()) {
+    log.debug("Get connection for route " + route);
+  }
+  if (managedConn != null)   revokeConnection();
+  boolean recreate=false;
+  boolean shutdown=false;
+  closeExpiredConnections();
+  if (uniquePoolEntry.connection.isOpen()) {
+    RouteTracker tracker=uniquePoolEntry.tracker;
+    shutdown=(tracker == null || !tracker.toRoute().equals(route));
+  }
+ else {
+    recreate=true;
+  }
+  if (shutdown) {
+    recreate=true;
+    try {
+      uniquePoolEntry.shutdown();
+    }
+ catch (    IOException iox) {
+      log.debug("Problem shutting down connection.",iox);
+    }
+  }
+  if (recreate)   uniquePoolEntry=new PoolEntry();
+  try {
+    final Socket socket=uniquePoolEntry.connection.getSocket();
+    if (socket != null) {
+      SocketTagger.get().tag(socket);
+    }
+  }
+ catch (  IOException iox) {
+    log.debug("Problem tagging socket.",iox);
+  }
+  managedConn=new ConnAdapter(uniquePoolEntry,route);
+  return managedConn;
+}

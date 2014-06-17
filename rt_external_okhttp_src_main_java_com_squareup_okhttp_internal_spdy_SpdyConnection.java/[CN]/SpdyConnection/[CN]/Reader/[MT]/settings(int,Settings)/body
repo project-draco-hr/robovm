@@ -1,0 +1,23 @@
+{
+  SpdyStream[] streamsToNotify=null;
+synchronized (SpdyConnection.this) {
+    if (settings == null || (flags & Settings.FLAG_CLEAR_PREVIOUSLY_PERSISTED_SETTINGS) != 0) {
+      settings=newSettings;
+    }
+ else {
+      settings.merge(newSettings);
+    }
+    if (!streams.isEmpty()) {
+      streamsToNotify=streams.values().toArray(new SpdyStream[streams.size()]);
+    }
+  }
+  if (streamsToNotify != null) {
+    for (    SpdyStream stream : streamsToNotify) {
+synchronized (stream) {
+synchronized (SpdyConnection.this) {
+          stream.receiveSettings(settings);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  int nbytes=8;
+  byte bytes[]=new byte[nbytes];
+  double value;
+  buf.clear();
+  for (int i=0; buf.remaining() >= nbytes; i++) {
+    buf.order(i % 2 == 0 ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
+    assertEquals(i * nbytes,buf.position());
+    buf.mark();
+    buf.get(bytes);
+    buf.reset();
+    value=buf.getDouble();
+    if (!(Double.isNaN(bytes2double(bytes,buf.order())) && Double.isNaN(value))) {
+      assertEquals(bytes2double(bytes,buf.order()),value,0.00);
+    }
+  }
+  try {
+    buf.getDouble();
+    fail("Should throw Exception");
+  }
+ catch (  BufferUnderflowException e) {
+  }
+  buf.order(ByteOrder.BIG_ENDIAN);
+}

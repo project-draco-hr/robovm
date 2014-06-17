@@ -1,17 +1,17 @@
 {
-  for (  Provider.Service serv : p.getServices()) {
-    String type=serv.getType();
-    if (secureRandom == null && type.equals("SecureRandom")) {
-      secureRandom=serv;
+  for (  Provider.Service service : p.getServices()) {
+    String type=service.getType();
+    if (cachedSecureRandomService == null && type.equals("SecureRandom")) {
+      cachedSecureRandomService=service;
     }
-    String key=type + "." + serv.getAlgorithm().toUpperCase(Locale.US);
+    String key=type + "." + service.getAlgorithm().toUpperCase(Locale.US);
     if (!services.containsKey(key)) {
-      services.put(key,serv);
+      services.put(key,service);
     }
-    for (    String alias : Engine.door.getAliases(serv)) {
+    for (    String alias : Engine.door.getAliases(service)) {
       key=type + "." + alias.toUpperCase(Locale.US);
       if (!services.containsKey(key)) {
-        services.put(key,serv);
+        services.put(key,service);
       }
     }
   }

@@ -1,0 +1,17 @@
+{
+  if (seq.size() < 3 || seq.size() > 5) {
+    throw new IllegalArgumentException("Bad sequence size: " + seq.size());
+  }
+  Enumeration e=seq.getObjects();
+  this.p=ASN1Integer.getInstance(e.nextElement());
+  this.g=ASN1Integer.getInstance(e.nextElement());
+  this.q=ASN1Integer.getInstance(e.nextElement());
+  ASN1Encodable next=getNext(e);
+  if (next != null && next instanceof ASN1Integer) {
+    this.j=ASN1Integer.getInstance(next);
+    next=getNext(e);
+  }
+  if (next != null) {
+    this.validationParms=DHValidationParms.getInstance(next.toASN1Primitive());
+  }
+}

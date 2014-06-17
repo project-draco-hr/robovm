@@ -1,9 +1,27 @@
 {
+  lastRet=NONE;
   final ReentrantLock lock=ArrayBlockingQueue.this.lock;
   lock.lock();
   try {
-    lastRet=-1;
-    if ((remaining=count) > 0)     nextItem=itemAt(nextIndex=takeIndex);
+    if (count == 0) {
+      cursor=NONE;
+      nextIndex=NONE;
+      prevTakeIndex=DETACHED;
+    }
+ else {
+      final int takeIndex=ArrayBlockingQueue.this.takeIndex;
+      prevTakeIndex=takeIndex;
+      nextItem=itemAt(nextIndex=takeIndex);
+      cursor=incCursor(takeIndex);
+      if (itrs == null) {
+        itrs=new Itrs(this);
+      }
+ else {
+        itrs.register(this);
+        itrs.doSomeSweeping(false);
+      }
+      prevCycles=itrs.cycles;
+    }
   }
   finally {
     lock.unlock();

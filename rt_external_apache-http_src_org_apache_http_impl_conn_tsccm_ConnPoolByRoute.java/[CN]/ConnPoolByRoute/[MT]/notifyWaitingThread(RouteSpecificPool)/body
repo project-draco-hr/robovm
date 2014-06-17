@@ -1,0 +1,27 @@
+{
+  WaitingThread waitingThread=null;
+  poolLock.lock();
+  try {
+    if ((rospl != null) && rospl.hasThread()) {
+      if (log.isDebugEnabled()) {
+        log.debug("Notifying thread waiting on pool" + " [" + rospl.getRoute() + "]");
+      }
+      waitingThread=rospl.nextThread();
+    }
+ else     if (!waitingThreads.isEmpty()) {
+      if (log.isDebugEnabled()) {
+        log.debug("Notifying thread waiting on any pool");
+      }
+      waitingThread=waitingThreads.remove();
+    }
+ else     if (log.isDebugEnabled()) {
+      log.debug("Notifying no-one, there are no waiting threads");
+    }
+    if (waitingThread != null) {
+      waitingThread.wakeup();
+    }
+  }
+  finally {
+    poolLock.unlock();
+  }
+}

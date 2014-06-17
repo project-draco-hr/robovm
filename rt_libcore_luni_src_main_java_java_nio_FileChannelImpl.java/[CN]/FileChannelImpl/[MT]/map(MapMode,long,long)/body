@@ -19,12 +19,19 @@
     try {
       Libcore.os.ftruncate(fd,position + size);
     }
- catch (    ErrnoException errnoException) {
-      throw errnoException.rethrowAsIOException();
+ catch (    ErrnoException ftruncateException) {
+      try {
+        if (S_ISREG(Libcore.os.fstat(fd).st_mode) || ftruncateException.errno != EINVAL) {
+          throw ftruncateException.rethrowAsIOException();
+        }
+      }
+ catch (      ErrnoException fstatException) {
+        throw fstatException.rethrowAsIOException();
+      }
     }
   }
   long alignment=position - position % Libcore.os.sysconf(_SC_PAGE_SIZE);
   int offset=(int)(position - alignment);
   MemoryBlock block=MemoryBlock.mmap(fd,alignment,size + offset,mapMode);
-  return new MappedByteBufferAdapter(block,(int)size,offset,mapMode);
+  return new DirectByteBuffer(block,(int)size,offset,(mapMode == MapMode.READ_ONLY),mapMode);
 }

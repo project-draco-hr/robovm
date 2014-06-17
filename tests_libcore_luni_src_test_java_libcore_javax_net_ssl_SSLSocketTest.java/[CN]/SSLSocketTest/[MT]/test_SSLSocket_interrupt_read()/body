@@ -1,0 +1,27 @@
+{
+  TestSSLContext c=TestSSLContext.create();
+  final Socket underlying=new Socket(c.host,c.port);
+  final SSLSocket wrapping=(SSLSocket)c.clientContext.getSocketFactory().createSocket(underlying,c.host.getHostName(),c.port,false);
+  ExecutorService executor=Executors.newSingleThreadExecutor();
+  Future<Void> clientFuture=executor.submit(new Callable<Void>(){
+    @Override public Void call() throws Exception {
+      try {
+        wrapping.startHandshake();
+        assertFalse(StandardNames.IS_RI);
+        wrapping.setSoTimeout(5 * 1000);
+        assertEquals(-1,wrapping.getInputStream().read());
+      }
+ catch (      Exception e) {
+        assertTrue(StandardNames.IS_RI);
+      }
+      return null;
+    }
+  }
+);
+  executor.shutdown();
+  SSLSocket server=(SSLSocket)c.serverSocket.accept();
+  server.startHandshake();
+  wrapping.close();
+  clientFuture.get();
+  server.close();
+}

@@ -1,0 +1,56 @@
+{
+  byte[] ba=getLegalByteArray();
+  CharsetEncoder ec=new MockCharsetEncoder(cs,1,MAX_BYTES,ba);
+  assertSame(ec.charset(),cs);
+  assertEquals(1.0,ec.averageBytesPerChar(),0.0);
+  assertTrue(ec.maxBytesPerChar() == MAX_BYTES);
+  assertSame(ba,ec.replacement());
+  try {
+    ec=new MockCharsetEncoder(null,1,MAX_BYTES,ba);
+    fail("should throw null pointer exception");
+  }
+ catch (  NullPointerException e) {
+  }
+  try {
+    ec=new MockCharsetEncoder(cs,1,MAX_BYTES,null);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    ec=new MockCharsetEncoder(cs,1,MAX_BYTES,new byte[0]);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    ec=new MockCharsetEncoder(cs,1,MAX_BYTES,new byte[]{1,2,MAX_BYTES,4});
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    ec=new MockCharsetEncoder(cs,0,MAX_BYTES,ba);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    ec=new MockCharsetEncoder(cs,1,0,ba);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    ec=new MockCharsetEncoder(cs,-1,MAX_BYTES,ba);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+  try {
+    ec=new MockCharsetEncoder(cs,1,-1,ba);
+    fail("should throw IllegalArgumentException");
+  }
+ catch (  IllegalArgumentException e) {
+  }
+}

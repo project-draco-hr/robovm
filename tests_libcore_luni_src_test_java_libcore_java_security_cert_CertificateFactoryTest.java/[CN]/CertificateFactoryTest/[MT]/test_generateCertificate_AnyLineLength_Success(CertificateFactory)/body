@@ -1,0 +1,35 @@
+{
+  if (StandardNames.IS_RI) {
+    return;
+  }
+  int lineLength=1;
+  int maxLineLength=VALID_CERTIFICATE_PEM_DATA.length;
+  ByteArrayOutputStream baos=new ByteArrayOutputStream();
+  baos.write(VALID_CERTIFICATE_PEM_HEADER);
+  int offset=0;
+  while (lineLength < (maxLineLength - 4)) {
+    int end=offset + lineLength;
+    if (end > VALID_CERTIFICATE_PEM_DATA.length) {
+      end=VALID_CERTIFICATE_PEM_DATA.length;
+    }
+    baos.write(Arrays.copyOfRange(VALID_CERTIFICATE_PEM_DATA,offset,end));
+    baos.write('\n');
+    offset+=lineLength;
+    if (offset >= maxLineLength) {
+      baos.write(VALID_CERTIFICATE_PEM_FOOTER);
+      try {
+        Certificate c=cf.generateCertificate(new ByteArrayInputStream(baos.toByteArray()));
+        assertNotNull(c);
+      }
+ catch (      Exception e) {
+        throw new Exception("Fail at line length " + lineLength,e);
+      }
+      baos.reset();
+      baos.write(VALID_CERTIFICATE_PEM_HEADER);
+      offset=0;
+    }
+ else {
+      lineLength++;
+    }
+  }
+}

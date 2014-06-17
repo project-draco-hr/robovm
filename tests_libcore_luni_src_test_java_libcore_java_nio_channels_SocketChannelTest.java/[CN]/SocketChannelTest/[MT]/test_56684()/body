@@ -1,0 +1,18 @@
+{
+  mockOs.enqueueFault("connect",ENETUNREACH);
+  SocketChannel sc=SocketChannel.open();
+  sc.configureBlocking(false);
+  Selector selector=Selector.open();
+  SelectionKey selectionKey=sc.register(selector,SelectionKey.OP_CONNECT);
+  try {
+    sc.connect(new InetSocketAddress(InetAddress.getByAddress(new byte[]{0,0,0,0}),0));
+    fail();
+  }
+ catch (  ConnectException ex) {
+  }
+  try {
+    sc.finishConnect();
+  }
+ catch (  ClosedChannelException expected) {
+  }
+}

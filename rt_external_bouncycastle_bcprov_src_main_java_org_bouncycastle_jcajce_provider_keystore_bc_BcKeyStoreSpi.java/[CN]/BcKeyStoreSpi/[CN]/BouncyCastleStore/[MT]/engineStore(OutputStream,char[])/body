@@ -1,0 +1,18 @@
+{
+  Cipher cipher;
+  DataOutputStream dOut=new DataOutputStream(stream);
+  byte[] salt=new byte[STORE_SALT_SIZE];
+  int iterationCount=MIN_ITERATIONS + (random.nextInt() & 0x3ff);
+  random.nextBytes(salt);
+  dOut.writeInt(version);
+  dOut.writeInt(salt.length);
+  dOut.write(salt);
+  dOut.writeInt(iterationCount);
+  cipher=this.makePBECipher(STORE_CIPHER,Cipher.ENCRYPT_MODE,password,salt,iterationCount);
+  CipherOutputStream cOut=new CipherOutputStream(dOut,cipher);
+  DigestOutputStream dgOut=new DigestOutputStream(new SHA1Digest());
+  this.saveStore(new TeeOutputStream(cOut,dgOut));
+  byte[] dig=dgOut.getDigest();
+  cOut.write(dig);
+  cOut.close();
+}

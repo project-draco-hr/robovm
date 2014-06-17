@@ -1,0 +1,12 @@
+{
+  String msg="normal string in testReceiveSend_Normal_S2S";
+  this.datagramSocket1=new DatagramSocket(testPort);
+  DatagramPacket rdp=new DatagramPacket(msg.getBytes(),msg.length(),localAddr2);
+  datagramSocket2=new DatagramSocket(localAddr2.getPort());
+  this.datagramSocket1.send(rdp);
+  byte[] buf=new byte[CAPACITY_NORMAL];
+  this.datagramSocket2.setSoTimeout(TIME_UNIT);
+  rdp=new DatagramPacket(buf,buf.length);
+  this.datagramSocket2.receive(rdp);
+  assertEquals(new String(buf,0,CAPACITY_NORMAL).trim(),msg);
+}

@@ -1,0 +1,18 @@
+{
+  checkOffsetAndCount(buffer.length,offset,count);
+  checkNotClosed();
+  if (bytesRemaining == 0) {
+    return -1;
+  }
+  int read=in.read(buffer,offset,Math.min(count,bytesRemaining));
+  if (read == -1) {
+    unexpectedEndOfInput();
+    throw new ProtocolException("unexpected end of stream");
+  }
+  bytesRemaining-=read;
+  cacheWrite(buffer,offset,read);
+  if (bytesRemaining == 0) {
+    endOfInput(false);
+  }
+  return read;
+}

@@ -1,0 +1,28 @@
+{
+  StringBuilder sb=new StringBuilder(80);
+  initGenericTypes();
+  int modifier=getModifiers();
+  if (modifier != 0) {
+    sb.append(Modifier.toString(modifier & ~Modifier.VARARGS)).append(' ');
+  }
+  if (formalTypeParameters != null && formalTypeParameters.length > 0) {
+    sb.append('<');
+    for (int i=0; i < formalTypeParameters.length; i++) {
+      appendGenericType(sb,formalTypeParameters[i]);
+      if (i < formalTypeParameters.length - 1) {
+        sb.append(",");
+      }
+    }
+    sb.append("> ");
+  }
+  appendTypeName(sb,getDeclaringClass());
+  sb.append('(');
+  appendArrayGenericType(sb,Types.getTypeArray(genericParameterTypes,false));
+  sb.append(')');
+  Type[] genericExceptionTypeArray=Types.getTypeArray(genericExceptionTypes,false);
+  if (genericExceptionTypeArray.length > 0) {
+    sb.append(" throws ");
+    appendArrayGenericType(sb,genericExceptionTypeArray);
+  }
+  return sb.toString();
+}

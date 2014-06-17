@@ -1,0 +1,28 @@
+{
+  boolean oldEncrypting=this.encrypting;
+  this.encrypting=encrypting;
+  if (params instanceof ParametersWithIV) {
+    ParametersWithIV ivParam=(ParametersWithIV)params;
+    byte[] iv=ivParam.getIV();
+    if (iv.length != blockSize) {
+      throw new IllegalArgumentException("initialisation vector must be the same length as block size");
+    }
+    System.arraycopy(iv,0,IV,0,iv.length);
+    reset();
+    if (ivParam.getParameters() != null) {
+      cipher.init(encrypting,ivParam.getParameters());
+    }
+ else     if (oldEncrypting != encrypting) {
+      throw new IllegalArgumentException("cannot change encrypting state without providing key.");
+    }
+  }
+ else {
+    reset();
+    if (params != null) {
+      cipher.init(encrypting,params);
+    }
+ else     if (oldEncrypting != encrypting) {
+      throw new IllegalArgumentException("cannot change encrypting state without providing key.");
+    }
+  }
+}

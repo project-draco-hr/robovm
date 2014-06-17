@@ -1,0 +1,30 @@
+{
+  ByteBuffer[] bufArray={buffer,positionedBuffer};
+  boolean[] sinkBlockingMode={true,true,false,false};
+  boolean[] sourceBlockingMode={true,false,true,false};
+  int oldPosition;
+  int currentPosition;
+  for (int i=0; i < sinkBlockingMode.length; ++i) {
+    sink.configureBlocking(sinkBlockingMode[i]);
+    source.configureBlocking(sourceBlockingMode[i]);
+    boolean isBlocking=sinkBlockingMode[i] && sourceBlockingMode[i];
+    for (    ByteBuffer buf : bufArray) {
+      buf.mark();
+      oldPosition=buf.position();
+      sink.write(buf);
+      ByteBuffer readBuf=ByteBuffer.allocate(BUFFER_SIZE);
+      int totalCount=0;
+      do {
+        int count=source.read(readBuf);
+        if (count > 0) {
+          totalCount+=count;
+        }
+      }
+ while (totalCount != BUFFER_SIZE && !isBlocking);
+      currentPosition=buf.position();
+      assertEquals(BUFFER_SIZE,currentPosition - oldPosition);
+      assertEquals("bytes",new String(readBuf.array(),ISO8859_1));
+      buf.reset();
+    }
+  }
+}

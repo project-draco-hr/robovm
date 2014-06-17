@@ -1,0 +1,33 @@
+{
+  byte[] seed=new byte[LENGTH];
+  byte[] bytes1;
+  byte[] bytes2;
+  for (int i=0; i < seed.length; i++) {
+    seed[i]=(byte)i;
+  }
+  for (int i=0; i < LENGTH; i++) {
+    bytes1=new byte[i];
+    bytes2=new byte[i];
+    sr.setSeed(seed);
+    sr.setSeed(new byte[0]);
+    sr.nextBytes(bytes1);
+    sr2.setSeed(seed);
+    sr2.nextBytes(bytes2);
+    for (int j=0; j < bytes1.length; j++) {
+      assertEquals("bytes1[j] != bytes2[j] :: j=" + j,bytes1[j],bytes2[j]);
+    }
+  }
+  for (int i=1; i < LENGTH; i++) {
+    bytes1=new byte[i];
+    bytes2=new byte[i];
+    sr.setSeed(seed);
+    sr.nextBytes(bytes1);
+    sr.setSeed(new byte[0]);
+    sr.nextBytes(bytes2);
+    boolean b=true;
+    for (int j=0; j < bytes1.length; j++) {
+      b&=bytes1[j] == bytes2[j];
+    }
+    assertFalse("sequences are equal i=" + i,b);
+  }
+}

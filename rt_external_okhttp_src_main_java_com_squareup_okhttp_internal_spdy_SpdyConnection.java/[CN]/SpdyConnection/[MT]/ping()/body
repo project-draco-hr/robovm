@@ -1,0 +1,15 @@
+{
+  Ping ping=new Ping();
+  int pingId;
+synchronized (this) {
+    if (shutdown) {
+      throw new IOException("shutdown");
+    }
+    pingId=nextPingId;
+    nextPingId+=2;
+    if (pings == null)     pings=new HashMap<Integer,Ping>();
+    pings.put(pingId,ping);
+  }
+  writePing(pingId,ping);
+  return ping;
+}

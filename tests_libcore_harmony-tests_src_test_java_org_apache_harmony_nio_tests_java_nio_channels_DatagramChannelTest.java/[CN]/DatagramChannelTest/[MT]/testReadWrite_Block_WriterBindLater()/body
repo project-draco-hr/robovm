@@ -1,0 +1,40 @@
+{
+  byte[] targetArray=new byte[CAPACITY_NORMAL];
+  this.channel2.socket().bind(localAddr1);
+  this.channel2.connect(localAddr2);
+  ByteBuffer targetBuf=ByteBuffer.wrap(targetArray);
+  new Thread(){
+    public void run(){
+      try {
+        Thread.sleep(TIME_UNIT);
+        byte[] sourceArray=new byte[CAPACITY_NORMAL];
+        for (int i=0; i < sourceArray.length; i++) {
+          sourceArray[i]=(byte)i;
+        }
+        channel1.socket().bind(localAddr2);
+        channel1.connect(localAddr1);
+        ByteBuffer sourceBuf=ByteBuffer.wrap(sourceArray);
+        assertEquals(CAPACITY_NORMAL,channel1.write(sourceBuf));
+      }
+ catch (      Exception e) {
+      }
+    }
+  }
+.start();
+  int count=0;
+  int total=0;
+  long beginTime=System.currentTimeMillis();
+  while (total < CAPACITY_NORMAL && (count=channel2.read(targetBuf)) != -1) {
+    total=total + count;
+    if (System.currentTimeMillis() - beginTime > 3000) {
+      break;
+    }
+  }
+  assertEquals(CAPACITY_NORMAL,total);
+  assertEquals(targetBuf.position(),total);
+  targetBuf.flip();
+  targetArray=targetBuf.array();
+  for (int i=0; i < targetArray.length; i++) {
+    assertEquals(targetArray[i],(byte)i);
+  }
+}

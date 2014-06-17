@@ -1,0 +1,52 @@
+{
+  File tmpFile=File.createTempFile("TestFileForScanner",".tmp");
+  s=new Scanner(tmpFile,Charset.defaultCharset().name());
+  assertNotNull(s);
+  s.close();
+  assertTrue(tmpFile.delete());
+  try {
+    s=new Scanner(tmpFile,Charset.defaultCharset().name());
+    fail();
+  }
+ catch (  FileNotFoundException expected) {
+  }
+  try {
+    s=new Scanner(tmpFile,null);
+    fail();
+  }
+ catch (  FileNotFoundException expected) {
+  }
+  tmpFile=File.createTempFile("TestFileForScanner",".tmp");
+  try {
+    s=new Scanner(tmpFile,"invalid charset");
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+  assertTrue(tmpFile.delete());
+  try {
+    s=new Scanner((File)null,null);
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    s=new Scanner((File)null,"UTF-8");
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    s=new Scanner((File)null,"invalid");
+    fail();
+  }
+ catch (  NullPointerException expected) {
+  }
+  try {
+    File f=File.createTempFile("test",".tmp");
+    s=new Scanner(f,null);
+    fail();
+  }
+ catch (  IllegalArgumentException expected) {
+  }
+}

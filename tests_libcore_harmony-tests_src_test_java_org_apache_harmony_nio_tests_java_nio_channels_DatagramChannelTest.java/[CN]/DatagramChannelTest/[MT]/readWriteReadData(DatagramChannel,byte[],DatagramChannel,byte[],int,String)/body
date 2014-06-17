@@ -1,0 +1,21 @@
+{
+  ByteBuffer sourceBuf=ByteBuffer.wrap(sourceArray);
+  assertEquals(dataSize,sender.write(sourceBuf));
+  ByteBuffer targetBuf=ByteBuffer.wrap(targetArray);
+  int count=0;
+  int total=0;
+  long beginTime=System.currentTimeMillis();
+  while (total < dataSize && (count=receiver.read(targetBuf)) != -1) {
+    total=total + count;
+    if (System.currentTimeMillis() - beginTime > 3000) {
+      break;
+    }
+  }
+  assertEquals(dataSize,total);
+  assertEquals(targetBuf.position(),total);
+  targetBuf.flip();
+  targetArray=targetBuf.array();
+  for (int i=0; i < targetArray.length; i++) {
+    assertEquals(targetArray[i],(byte)i);
+  }
+}

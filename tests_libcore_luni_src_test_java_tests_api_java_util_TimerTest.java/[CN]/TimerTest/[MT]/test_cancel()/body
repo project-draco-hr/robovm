@@ -4,54 +4,30 @@
     t=new Timer();
     TimerTestTask testTask=new TimerTestTask();
     t.cancel();
-    boolean exception=false;
     try {
       t.schedule(testTask,100,200);
+      fail("Scheduling a task after Timer.cancel() should throw exception");
     }
- catch (    IllegalStateException e) {
-      exception=true;
+ catch (    IllegalStateException expected) {
     }
-    assertTrue("Scheduling a task after Timer.cancel() should throw exception",exception);
     t=new Timer();
     testTask=new TimerTestTask();
     t.schedule(testTask,100,500);
-synchronized (sync) {
-      try {
-        sync.wait(1000);
-      }
- catch (      InterruptedException e) {
-      }
-    }
-    assertEquals("TimerTask.run() method not called after 200ms",1,testTask.wasRun());
+    awaitRun(testTask);
     t.cancel();
 synchronized (sync) {
-      try {
-        sync.wait(500);
-      }
- catch (      InterruptedException e) {
-      }
+      sync.wait(500);
     }
     assertEquals("TimerTask.run() method should not have been called after cancel",1,testTask.wasRun());
     t=new Timer();
     testTask=new TimerTestTask();
     t.schedule(testTask,100,500);
-synchronized (sync) {
-      try {
-        sync.wait(500);
-      }
- catch (      InterruptedException e) {
-      }
-    }
-    assertEquals("TimerTask.run() method not called after 200ms",1,testTask.wasRun());
+    awaitRun(testTask);
     t.cancel();
     t.cancel();
     t.cancel();
 synchronized (sync) {
-      try {
-        sync.wait(500);
-      }
- catch (      InterruptedException e) {
-      }
+      sync.wait(500);
     }
     assertEquals("TimerTask.run() method should not have been called after cancel",1,testTask.wasRun());
     t=new Timer();
@@ -60,24 +36,21 @@ synchronized (sync) {
     testTask.terminateCount(5);
     t.schedule(testTask,100,100);
 synchronized (sync) {
-      try {
-        sync.wait(200);
-        sync.wait(200);
-        sync.wait(200);
-        sync.wait(200);
-        sync.wait(200);
-        sync.wait(200);
-      }
- catch (      InterruptedException e) {
-      }
+      sync.wait(200);
+      assertEquals(1,testTask.wasRun());
+      sync.wait(200);
+      assertEquals(2,testTask.wasRun());
+      sync.wait(200);
+      assertEquals(3,testTask.wasRun());
+      sync.wait(200);
+      assertEquals(4,testTask.wasRun());
+      sync.wait(200);
+      assertEquals(5,testTask.wasRun());
+      sync.wait(200);
+      assertEquals(5,testTask.wasRun());
     }
-    assertTrue("TimerTask.run() method should be called 5 times not " + testTask.wasRun(),testTask.wasRun() == 5);
     t.cancel();
-    try {
-      Thread.sleep(200);
-    }
- catch (    InterruptedException e) {
-    }
+    Thread.sleep(200);
   }
   finally {
     if (t != null)     t.cancel();

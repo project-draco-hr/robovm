@@ -1,0 +1,37 @@
+{
+  SelectionKey key=ssc.register(selector,SelectionKey.OP_ACCEPT);
+  Set<SelectionKey> keySet=selector.keys();
+  Set<SelectionKey> keySet2=selector.keys();
+  assertSame(keySet,keySet2);
+  assertEquals(1,keySet.size());
+  SelectionKey key2=keySet.iterator().next();
+  assertEquals(key,key2);
+  SocketChannel sc=SocketChannel.open();
+  sc.configureBlocking(false);
+  SelectionKey key3=sc.register(selector,SelectionKey.OP_READ);
+  try {
+    keySet2.add(key3);
+    fail("should throw UnsupportedOperationException");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  try {
+    keySet2.remove(key3);
+    fail("should throw UnsupportedOperationException");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  try {
+    keySet2.clear();
+    fail("should throw UnsupportedOperationException");
+  }
+ catch (  UnsupportedOperationException e) {
+  }
+  selector.close();
+  try {
+    selector.keys();
+    fail("should throw ClosedSelectorException");
+  }
+ catch (  ClosedSelectorException e) {
+  }
+}

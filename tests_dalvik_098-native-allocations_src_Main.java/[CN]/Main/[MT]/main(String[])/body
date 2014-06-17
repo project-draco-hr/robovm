@@ -1,0 +1,15 @@
+{
+  Class<?> vm_runtime=Class.forName("dalvik.system.VMRuntime");
+  Method get_runtime=vm_runtime.getDeclaredMethod("getRuntime");
+  runtime=get_runtime.invoke(null);
+  register_native_allocation=vm_runtime.getDeclaredMethod("registerNativeAllocation",Integer.TYPE);
+  register_native_free=vm_runtime.getDeclaredMethod("registerNativeFree",Integer.TYPE);
+  int count=16;
+  int size=512 * 0x400;
+  int allocation_count=256;
+  NativeAllocation[] allocations=new NativeAllocation[count];
+  for (int i=0; i < allocation_count; ++i) {
+    allocations[i % count]=new NativeAllocation(size);
+  }
+  System.out.println("Test complete");
+}

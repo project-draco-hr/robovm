@@ -1,0 +1,42 @@
+{
+  final FileDescriptor serverFd=Libcore.os.socket(AF_UNIX,SOCK_STREAM,0);
+  Libcore.os.bind(serverFd,address,0);
+  Libcore.os.listen(serverFd,5);
+  checkSockName(serverFd,isAbstract,address);
+  Thread server=new Thread(new Runnable(){
+    public void run(){
+      try {
+        InetSocketAddress peerAddress=new InetSocketAddress();
+        FileDescriptor clientFd=Libcore.os.accept(serverFd,peerAddress);
+        checkSockName(clientFd,isAbstract,address);
+        checkNoName(peerAddress);
+        checkNoPeerName(clientFd);
+        StructUcred credentials=Libcore.os.getsockoptUcred(clientFd,SOL_SOCKET,SO_PEERCRED);
+        assertEquals(Libcore.os.getpid(),credentials.pid);
+        assertEquals(Libcore.os.getuid(),credentials.uid);
+        assertEquals(Libcore.os.getgid(),credentials.gid);
+        byte[] request=new byte[256];
+        int requestLength=Libcore.os.read(clientFd,request,0,request.length);
+        String s=new String(request,"UTF-8");
+        byte[] response=s.toUpperCase(Locale.ROOT).getBytes("UTF-8");
+        Libcore.os.write(clientFd,response,0,response.length);
+        Libcore.os.close(clientFd);
+      }
+ catch (      Exception ex) {
+        throw new RuntimeException(ex);
+      }
+    }
+  }
+);
+  server.start();
+  FileDescriptor clientFd=Libcore.os.socket(AF_UNIX,SOCK_STREAM,0);
+  Libcore.os.connect(clientFd,address,0);
+  checkNoSockName(clientFd);
+  String string="hello, world!";
+  byte[] request=string.getBytes("UTF-8");
+  assertEquals(request.length,Libcore.os.write(clientFd,request,0,request.length));
+  byte[] response=new byte[request.length];
+  assertEquals(response.length,Libcore.os.read(clientFd,response,0,response.length));
+  assertEquals(string.toUpperCase(Locale.ROOT),new String(response,"UTF-8"));
+  Libcore.os.close(clientFd);
+}

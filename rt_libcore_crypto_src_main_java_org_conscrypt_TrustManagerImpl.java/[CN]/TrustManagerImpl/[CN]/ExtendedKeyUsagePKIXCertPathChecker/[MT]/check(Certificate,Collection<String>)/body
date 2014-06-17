@@ -1,0 +1,47 @@
+{
+  if (c != leaf) {
+    return;
+  }
+  List<String> ekuOids;
+  try {
+    ekuOids=leaf.getExtendedKeyUsage();
+  }
+ catch (  CertificateParsingException e) {
+    throw new CertPathValidatorException(e);
+  }
+  if (ekuOids == null) {
+    return;
+  }
+  boolean goodExtendedKeyUsage=false;
+  for (  String ekuOid : ekuOids) {
+    if (ekuOid.equals(EKU_anyExtendedKeyUsage)) {
+      goodExtendedKeyUsage=true;
+      break;
+    }
+    if (clientAuth) {
+      if (ekuOid.equals(EKU_clientAuth)) {
+        goodExtendedKeyUsage=true;
+        break;
+      }
+      continue;
+    }
+    if (ekuOid.equals(EKU_serverAuth)) {
+      goodExtendedKeyUsage=true;
+      break;
+    }
+    if (ekuOid.equals(EKU_nsSGC)) {
+      goodExtendedKeyUsage=true;
+      break;
+    }
+    if (ekuOid.equals(EKU_msSGC)) {
+      goodExtendedKeyUsage=true;
+      break;
+    }
+  }
+  if (goodExtendedKeyUsage) {
+    unresolvedCritExts.remove(EKU_OID);
+  }
+ else {
+    throw new CertPathValidatorException("End-entity certificate does not have a valid " + "extendedKeyUsage.");
+  }
+}

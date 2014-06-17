@@ -1,0 +1,53 @@
+{
+  final boolean[] keyEntryWasSet=new boolean[1];
+  KeyStoreSpi ksSpi=new MyKeyStoreSpi(){
+    @Override public void engineSetKeyEntry(    String alias,    Key key,    char[] password,    Certificate[] chain) throws KeyStoreException {
+      keyEntryWasSet[0]=true;
+    }
+  }
+;
+  BadKeyStoreEntry badEntry=new BadKeyStoreEntry();
+  BadKeyStoreProtectionParameter badParameter=new BadKeyStoreProtectionParameter();
+  KeyStore.SecretKeyEntry dummyEntry=new KeyStore.SecretKeyEntry(new SecretKey(){
+    @Override public String getAlgorithm(){
+      return null;
+    }
+    @Override public String getFormat(){
+      return null;
+    }
+    @Override public byte[] getEncoded(){
+      return null;
+    }
+  }
+);
+  try {
+    ksSpi.engineStore(null);
+  }
+ catch (  UnsupportedOperationException expected) {
+  }
+  assertNull("Not null entry",ksSpi.engineGetEntry("aaa",null));
+  assertNull("Not null entry",ksSpi.engineGetEntry(null,badParameter));
+  assertNull("Not null entry",ksSpi.engineGetEntry("aaa",badParameter));
+  try {
+    ksSpi.engineSetEntry("",null,null);
+    fail("KeyStoreException or NullPointerException must be thrown");
+  }
+ catch (  KeyStoreException expected) {
+  }
+catch (  NullPointerException expected) {
+  }
+  try {
+    ksSpi.engineSetEntry("",new KeyStore.TrustedCertificateEntry(new MyCertificate("type",new byte[0])),null);
+    fail("KeyStoreException must be thrown");
+  }
+ catch (  KeyStoreException expected) {
+  }
+  try {
+    ksSpi.engineSetEntry("aaa",badEntry,null);
+    fail("KeyStoreException must be thrown");
+  }
+ catch (  KeyStoreException expected) {
+  }
+  ksSpi.engineSetEntry("aaa",dummyEntry,null);
+  assertTrue(keyEntryWasSet[0]);
+}

@@ -1,17 +1,11 @@
 {
-  if (keyFactoryAlgorithm.isEmpty()) {
-    System.err.println(getName() + ": skipped - no KeyFactory algorithms available");
-    return;
-  }
- else {
-  }
-  for (Iterator<String> i=keyFactoryAlgorithm.iterator(); i.hasNext(); ) {
-    KeyRepChild kr=new KeyRepChild(KeyRep.Type.PUBLIC,i.next(),"X.509",new byte[]{1,2,3});
+  for (  String algorithm : keyFactoryAlgorithms) {
+    KeyRepChild kr=new KeyRepChild(KeyRep.Type.PUBLIC,algorithm,"X.509",new byte[]{1,2,3});
     try {
       kr.readResolve();
-      fail("NotSerializableException has not been thrown (no format)");
+      fail("NotSerializableException has not been thrown (no format) " + algorithm);
     }
- catch (    NotSerializableException ok) {
+ catch (    NotSerializableException expected) {
     }
   }
 }

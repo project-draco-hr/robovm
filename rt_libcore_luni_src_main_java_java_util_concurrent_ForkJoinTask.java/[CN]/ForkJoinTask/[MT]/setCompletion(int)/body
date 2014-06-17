@@ -1,0 +1,11 @@
+{
+  for (int s; ; ) {
+    if ((s=status) < 0)     return s;
+    if (U.compareAndSwapInt(this,STATUS,s,s | completion)) {
+      if ((s >>> 16) != 0) synchronized (this) {
+        notifyAll();
+      }
+      return completion;
+    }
+  }
+}

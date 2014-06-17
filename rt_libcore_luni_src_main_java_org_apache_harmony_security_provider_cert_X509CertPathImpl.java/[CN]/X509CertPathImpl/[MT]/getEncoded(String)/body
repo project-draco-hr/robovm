@@ -1,16 +1,7 @@
 {
-  if (!encodings.contains(encoding)) {
-    throw new CertificateEncodingException("Unsupported encoding");
+  final Encoding encType=Encoding.findByApiName(encoding);
+  if (encType == null) {
+    throw new CertificateEncodingException("Unsupported encoding: " + encoding);
   }
-  if (encodingsArr[0].equals(encoding)) {
-    return getEncoded();
-  }
- else {
-    if (pkcs7Encoding == null) {
-      pkcs7Encoding=PKCS7_SIGNED_DATA_OBJECT.encode(this);
-    }
-    byte[] result=new byte[pkcs7Encoding.length];
-    System.arraycopy(pkcs7Encoding,0,result,0,pkcs7Encoding.length);
-    return result;
-  }
+  return getEncoded(encType);
 }

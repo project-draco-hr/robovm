@@ -1,0 +1,21 @@
+{
+  return new ContentVerifierProvider(){
+    public boolean hasAssociatedCertificate(){
+      return false;
+    }
+    public X509CertificateHolder getAssociatedCertificate(){
+      return null;
+    }
+    public ContentVerifier get(    AlgorithmIdentifier algorithm) throws OperatorCreationException {
+      SignatureOutputStream stream=createSignatureStream(algorithm,publicKey);
+      Signature rawSig=createRawSig(algorithm,publicKey);
+      if (rawSig != null) {
+        return new RawSigVerifier(algorithm,stream,rawSig);
+      }
+ else {
+        return new SigVerifier(algorithm,stream);
+      }
+    }
+  }
+;
+}

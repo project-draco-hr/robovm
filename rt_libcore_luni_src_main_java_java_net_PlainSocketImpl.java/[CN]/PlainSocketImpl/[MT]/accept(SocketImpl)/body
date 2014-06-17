@@ -6,7 +6,8 @@
   }
   try {
     int timeout=(Integer)getOption(SO_TIMEOUT);
-    if (timeout > 0) {
+    int flags=Libcore.os.fcntlVoid(fd,F_GETFL);
+    if (timeout > 0 && (flags & O_NONBLOCK) == 0) {
       StructPollfd pfd=new StructPollfd();
       pfd.fd=fd;
       pfd.events=(short)(POLLIN | POLLERR);
@@ -38,7 +39,7 @@
     newImpl.port=peerAddress.getPort();
   }
  catch (  ErrnoException errnoException) {
-    if (errnoException.errno == EAGAIN || errnoException.errno == EWOULDBLOCK) {
+    if (errnoException.errno == EAGAIN) {
       throw new SocketTimeoutException(errnoException);
     }
     throw errnoException.rethrowAsSocketException();

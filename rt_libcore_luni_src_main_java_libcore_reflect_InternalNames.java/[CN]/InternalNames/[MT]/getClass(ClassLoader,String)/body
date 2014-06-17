@@ -1,0 +1,44 @@
+{
+  if (internalName.startsWith("[")) {
+    Class<?> componentClass=getClass(classLoader,internalName.substring(1));
+    return Array.newInstance(componentClass,0).getClass();
+  }
+ else   if (internalName.equals("Z")) {
+    return boolean.class;
+  }
+ else   if (internalName.equals("B")) {
+    return byte.class;
+  }
+ else   if (internalName.equals("S")) {
+    return short.class;
+  }
+ else   if (internalName.equals("I")) {
+    return int.class;
+  }
+ else   if (internalName.equals("J")) {
+    return long.class;
+  }
+ else   if (internalName.equals("F")) {
+    return float.class;
+  }
+ else   if (internalName.equals("D")) {
+    return double.class;
+  }
+ else   if (internalName.equals("C")) {
+    return char.class;
+  }
+ else   if (internalName.equals("V")) {
+    return void.class;
+  }
+ else {
+    String name=internalName.substring(1,internalName.length() - 1).replace('/','.');
+    try {
+      return classLoader.loadClass(name);
+    }
+ catch (    ClassNotFoundException e) {
+      NoClassDefFoundError error=new NoClassDefFoundError(name);
+      error.initCause(e);
+      throw error;
+    }
+  }
+}

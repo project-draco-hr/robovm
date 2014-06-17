@@ -1,0 +1,26 @@
+{
+  Selector sel0=Selector.open();
+  Selector sel1=Selector.open();
+  Server server=new Server();
+  SelectionKey mkey0=server.serverChannel.register(sel0,SelectionKey.OP_ACCEPT);
+  server.serverChannel.register(sel1,SelectionKey.OP_ACCEPT);
+  assertEquals(1,sel0.select(100));
+  assertEquals(true,sel0.selectedKeys().contains(mkey0));
+  server.initialize();
+  assertEquals(0,sel1.select(100));
+  server.accept();
+  Thread.sleep(1000);
+  SocketChannel socketChannel=SocketChannel.open();
+  socketChannel.configureBlocking(false);
+  Selector sel2=Selector.open();
+  socketChannel.register(sel2,SelectionKey.OP_WRITE);
+  boolean isConnected=socketChannel.connect(server.socket.getLocalSocketAddress());
+  if (!isConnected) {
+    socketChannel.finishConnect();
+  }
+  assertEquals(true,socketChannel.isConnected());
+  server.close();
+  Thread.sleep(3000);
+  assertEquals(true,socketChannel.isConnected());
+  assertEquals(1,sel2.select(100));
+}

@@ -1,0 +1,35 @@
+{
+  for (boolean active=true; ; ) {
+    ForkJoinTask<?> localTask;
+    while ((localTask=w.nextLocalTask()) != null)     localTask.doExec();
+    WorkQueue q=findNonEmptyStealQueue(w.nextSeed());
+    if (q != null) {
+      ForkJoinTask<?> t;
+      int b;
+      if (!active) {
+        long c;
+        active=true;
+        do {
+        }
+ while (!U.compareAndSwapLong(this,CTL,c=ctl,c + AC_UNIT));
+      }
+      if ((b=q.base) - q.top < 0 && (t=q.pollAt(b)) != null)       w.runSubtask(t);
+    }
+ else {
+      long c;
+      if (active) {
+        active=false;
+        do {
+        }
+ while (!U.compareAndSwapLong(this,CTL,c=ctl,c-=AC_UNIT));
+      }
+ else       c=ctl;
+      if ((int)(c >> AC_SHIFT) + (config & SMASK) == 0) {
+        do {
+        }
+ while (!U.compareAndSwapLong(this,CTL,c=ctl,c + AC_UNIT));
+        break;
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  if (buffer == null) {
+    throw new IllegalArgumentException("Char array buffer may not be null");
+  }
+  if (cursor == null) {
+    throw new IllegalArgumentException("Parser cursor may not be null");
+  }
+  int pos=cursor.getPos();
+  int indexTo=cursor.getUpperBound();
+  while (pos < indexTo) {
+    char ch=buffer.charAt(pos);
+    if (HTTP.isWhitespace(ch)) {
+      pos++;
+    }
+ else {
+      break;
+    }
+  }
+  cursor.updatePos(pos);
+  if (cursor.atEnd()) {
+    return new NameValuePair[]{};
+  }
+  List params=new ArrayList();
+  while (!cursor.atEnd()) {
+    NameValuePair param=parseNameValuePair(buffer,cursor);
+    params.add(param);
+    char ch=buffer.charAt(cursor.getPos() - 1);
+    if (ch == ELEM_DELIMITER) {
+      break;
+    }
+  }
+  return (NameValuePair[])params.toArray(new NameValuePair[params.size()]);
+}

@@ -1,0 +1,26 @@
+{
+  ClientConnectionRequest localRequest;
+  ConnectionReleaseTrigger localTrigger;
+  this.abortLock.lock();
+  try {
+    if (this.aborted) {
+      return;
+    }
+    this.aborted=true;
+    localRequest=connRequest;
+    localTrigger=releaseTrigger;
+  }
+  finally {
+    this.abortLock.unlock();
+  }
+  if (localRequest != null) {
+    localRequest.abortRequest();
+  }
+  if (localTrigger != null) {
+    try {
+      localTrigger.abortConnection();
+    }
+ catch (    IOException ex) {
+    }
+  }
+}

@@ -2,7 +2,7 @@
   for (  KeyStore keyStore : keyStores()) {
     try {
       keyStore.deleteEntry(null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    KeyStoreException expected) {
     }
@@ -12,7 +12,7 @@
     if (isReadOnly(keyStore)) {
       try {
         keyStore.deleteEntry(null);
-        fail();
+        fail(keyStore.getType());
       }
  catch (      UnsupportedOperationException expected) {
       }
@@ -20,7 +20,7 @@
     }
     try {
       keyStore.deleteEntry(null);
-      fail();
+      fail(keyStore.getType());
     }
  catch (    Exception e) {
       if (e.getClass() != NullPointerException.class && e.getClass() != KeyStoreException.class) {
@@ -39,10 +39,18 @@
       }
       continue;
     }
-    assertPrivateKey(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
-    assertCertificateChain(keyStore.getCertificateChain(ALIAS_PRIVATE));
-    keyStore.deleteEntry(ALIAS_PRIVATE);
-    assertNull(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
+    if (isKeyPasswordSupported(keyStore)) {
+      assertPrivateKey(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
+      assertCertificateChain(keyStore.getCertificateChain(ALIAS_PRIVATE));
+      keyStore.deleteEntry(ALIAS_PRIVATE);
+      assertNull(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
+    }
+    if (isNullPasswordAllowed(keyStore)) {
+      assertPrivateKey(keyStore.getKey(ALIAS_NO_PASSWORD_PRIVATE,null));
+      assertCertificateChain(keyStore.getCertificateChain(ALIAS_NO_PASSWORD_PRIVATE));
+      keyStore.deleteEntry(ALIAS_NO_PASSWORD_PRIVATE);
+      assertNull(keyStore.getKey(ALIAS_NO_PASSWORD_PRIVATE,null));
+    }
     if (isSecretKeyEnabled(keyStore)) {
       assertSecretKey(keyStore.getKey(ALIAS_SECRET,PASSWORD_KEY));
       keyStore.deleteEntry(ALIAS_SECRET);
@@ -63,9 +71,16 @@
   for (  KeyStore keyStore : keyStores()) {
     populate(keyStore);
     if (isCaseSensitive(keyStore)) {
-      assertPrivateKey(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
-      keyStore.deleteEntry(ALIAS_ALT_CASE_PRIVATE);
-      assertPrivateKey(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
+      if (isKeyPasswordSupported(keyStore)) {
+        assertPrivateKey(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
+        keyStore.deleteEntry(ALIAS_ALT_CASE_PRIVATE);
+        assertPrivateKey(keyStore.getKey(ALIAS_PRIVATE,PASSWORD_KEY));
+      }
+      if (isNullPasswordAllowed(keyStore)) {
+        assertPrivateKey(keyStore.getKey(ALIAS_NO_PASSWORD_PRIVATE,null));
+        keyStore.deleteEntry(ALIAS_ALT_CASE_NO_PASSWORD_PRIVATE);
+        assertPrivateKey(keyStore.getKey(ALIAS_NO_PASSWORD_PRIVATE,null));
+      }
       if (isSecretKeyEnabled(keyStore)) {
         assertSecretKey(keyStore.getKey(ALIAS_SECRET,PASSWORD_KEY));
         keyStore.deleteEntry(ALIAS_ALT_CASE_SECRET);

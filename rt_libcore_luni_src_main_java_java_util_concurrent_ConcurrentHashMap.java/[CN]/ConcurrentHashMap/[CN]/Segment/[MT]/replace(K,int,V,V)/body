@@ -1,16 +1,22 @@
 {
-  lock();
+  if (!tryLock())   scanAndLock(key,hash);
+  boolean replaced=false;
   try {
-    HashEntry<K,V> e=getFirst(hash);
-    while (e != null && (e.hash != hash || !key.equals(e.key)))     e=e.next;
-    boolean replaced=false;
-    if (e != null && oldValue.equals(e.value)) {
-      replaced=true;
-      e.value=newValue;
+    HashEntry<K,V> e;
+    for (e=entryForHash(this,hash); e != null; e=e.next) {
+      K k;
+      if ((k=e.key) == key || (e.hash == hash && key.equals(k))) {
+        if (oldValue.equals(e.value)) {
+          e.value=newValue;
+          ++modCount;
+          replaced=true;
+        }
+        break;
+      }
     }
-    return replaced;
   }
   finally {
     unlock();
   }
+  return replaced;
 }

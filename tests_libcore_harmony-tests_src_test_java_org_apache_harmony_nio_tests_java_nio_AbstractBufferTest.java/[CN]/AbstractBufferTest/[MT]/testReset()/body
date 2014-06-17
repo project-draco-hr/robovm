@@ -1,0 +1,23 @@
+{
+  int oldPosition=baseBuf.position();
+  int oldLimit=baseBuf.limit();
+  baseBuf.mark();
+  baseBuf.position(baseBuf.limit());
+  baseBuf.reset();
+  assertEquals(baseBuf.position(),oldPosition);
+  baseBuf.mark();
+  baseBuf.position(baseBuf.limit());
+  baseBuf.reset();
+  assertEquals(baseBuf.position(),oldPosition);
+  Buffer ret=baseBuf.reset();
+  assertSame(ret,baseBuf);
+  baseBuf.clear();
+  try {
+    baseBuf.reset();
+    fail("Should throw Exception");
+  }
+ catch (  InvalidMarkException e) {
+  }
+  baseBuf.limit(oldLimit);
+  baseBuf.position(oldPosition);
+}

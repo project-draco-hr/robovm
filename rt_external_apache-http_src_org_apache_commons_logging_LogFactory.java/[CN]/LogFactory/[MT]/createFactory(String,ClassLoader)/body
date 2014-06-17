@@ -1,0 +1,70 @@
+{
+  Class logFactoryClass=null;
+  try {
+    if (classLoader != null) {
+      try {
+        logFactoryClass=classLoader.loadClass(factoryClass);
+        if (LogFactory.class.isAssignableFrom(logFactoryClass)) {
+          if (isDiagnosticsEnabled()) {
+            logDiagnostic("Loaded class " + logFactoryClass.getName() + " from classloader "+ objectId(classLoader));
+          }
+        }
+ else {
+          if (isDiagnosticsEnabled()) {
+            logDiagnostic("Factory class " + logFactoryClass.getName() + " loaded from classloader "+ objectId(logFactoryClass.getClassLoader())+ " does not extend '"+ LogFactory.class.getName()+ "' as loaded by this classloader.");
+            logHierarchy("[BAD CL TREE] ",classLoader);
+          }
+        }
+        return (LogFactory)logFactoryClass.newInstance();
+      }
+ catch (      ClassNotFoundException ex) {
+        if (classLoader == thisClassLoader) {
+          if (isDiagnosticsEnabled()) {
+            logDiagnostic("Unable to locate any class called '" + factoryClass + "' via classloader "+ objectId(classLoader));
+          }
+          throw ex;
+        }
+      }
+catch (      NoClassDefFoundError e) {
+        if (classLoader == thisClassLoader) {
+          if (isDiagnosticsEnabled()) {
+            logDiagnostic("Class '" + factoryClass + "' cannot be loaded"+ " via classloader "+ objectId(classLoader)+ " - it depends on some other class that cannot"+ " be found.");
+          }
+          throw e;
+        }
+      }
+catch (      ClassCastException e) {
+        if (classLoader == thisClassLoader) {
+          final boolean implementsLogFactory=implementsLogFactory(logFactoryClass);
+          String msg="The application has specified that a custom LogFactory implementation should be used but " + "Class '" + factoryClass + "' cannot be converted to '"+ LogFactory.class.getName()+ "'. ";
+          if (implementsLogFactory) {
+            msg=msg + "The conflict is caused by the presence of multiple LogFactory classes in incompatible classloaders. " + "Background can be found in http://jakarta.apache.org/commons/logging/tech.html. "+ "If you have not explicitly specified a custom LogFactory then it is likely that "+ "the container has set one without your knowledge. "+ "In this case, consider using the commons-logging-adapters.jar file or "+ "specifying the standard LogFactory from the command line. ";
+          }
+ else {
+            msg=msg + "Please check the custom implementation. ";
+          }
+          msg=msg + "Help can be found @http://jakarta.apache.org/commons/logging/troubleshooting.html.";
+          if (isDiagnosticsEnabled()) {
+            logDiagnostic(msg);
+          }
+          ClassCastException ex=new ClassCastException(msg);
+          throw ex;
+        }
+      }
+    }
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("Unable to load factory class via classloader " + objectId(classLoader) + " - trying the classloader associated with this LogFactory.");
+    }
+    logFactoryClass=Class.forName(factoryClass);
+    return (LogFactory)logFactoryClass.newInstance();
+  }
+ catch (  Exception e) {
+    if (isDiagnosticsEnabled()) {
+      logDiagnostic("Unable to create LogFactory instance.");
+    }
+    if (logFactoryClass != null && !LogFactory.class.isAssignableFrom(logFactoryClass)) {
+      return new LogConfigurationException("The chosen LogFactory implementation does not extend LogFactory." + " Please check your configuration.",e);
+    }
+    return new LogConfigurationException(e);
+  }
+}

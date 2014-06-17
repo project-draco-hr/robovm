@@ -2,6 +2,10 @@
 synchronized (lock) {
     checkNotClosed();
     Arrays.checkOffsetAndCount(buffer.length,offset,length);
+    if (length == 0) {
+      return 0;
+    }
+    maybeSwallowLF();
     int outstanding=length;
     while (outstanding > 0) {
       int available=end - pos;
@@ -28,6 +32,9 @@ synchronized (lock) {
       }
     }
     int count=length - outstanding;
-    return (count > 0 || count == length) ? count : -1;
+    if (count > 0) {
+      return count;
+    }
+    return -1;
   }
 }

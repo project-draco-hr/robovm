@@ -5,10 +5,9 @@
   lock.lock();
   try {
     int n=0;
-    for (; ; ) {
-      E first=q.peek();
-      if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0)       break;
-      c.add(q.poll());
+    for (E e; (e=peekExpired()) != null; ) {
+      c.add(e);
+      q.poll();
       ++n;
     }
     return n;

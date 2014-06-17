@@ -1,0 +1,18 @@
+{
+  super.validate(cookie,origin);
+  String host=origin.getHost();
+  String domain=cookie.getDomain();
+  if (host.contains(".")) {
+    int domainParts=new StringTokenizer(domain,".").countTokens();
+    if (isSpecialDomain(domain)) {
+      if (domainParts < 2) {
+        throw new MalformedCookieException("Domain attribute \"" + domain + "\" violates the Netscape cookie specification for "+ "special domains");
+      }
+    }
+ else {
+      if (domainParts < 3) {
+        throw new MalformedCookieException("Domain attribute \"" + domain + "\" violates the Netscape cookie specification");
+      }
+    }
+  }
+}
