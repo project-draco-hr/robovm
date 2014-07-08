@@ -142,8 +142,8 @@
     if (selChanges.containsKey(unit)) {
       int sel=selChanges.get(unit);
       Variable selPtr=function.newVariable(new PointerType(I32));
-      function.add(new Getelementptr(selPtr,trycatchContext,0,1));
-      function.add(new Store(new IntegerConstant(sel),selPtr.ref()));
+      function.add(new Getelementptr(selPtr,trycatchContext,0,1)).attach(unit);
+      function.add(new Store(new IntegerConstant(sel),selPtr.ref())).attach(unit);
     }
     if (unit instanceof DefinitionStmt) {
       assign((DefinitionStmt)unit);
@@ -158,7 +158,7 @@
       if (!body.getTraps().isEmpty()) {
         trycatchLeave(function);
       }
-      returnVoid();
+      returnVoid((ReturnVoidStmt)unit);
     }
  else     if (unit instanceof IfStmt) {
       if_((IfStmt)unit);

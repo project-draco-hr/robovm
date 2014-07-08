@@ -10,7 +10,7 @@
   int i=0;
   for (  soot.Value sootArg : (List<soot.Value>)expr.getArgs()) {
     Value arg=immediate(stmt,(Immediate)sootArg);
-    args.add(narrowFromI32Value(getType(methodRef.parameterType(i)),arg));
+    args.add(narrowFromI32Value(stmt,getType(methodRef.parameterType(i)),arg));
     i++;
   }
   Value result=null;
@@ -50,9 +50,9 @@
       functionRef=trampoline.getFunctionRef();
     }
   }
-  result=call(functionRef,args.toArray(new Value[0]));
+  result=call(stmt,functionRef,args.toArray(new Value[0]));
   if (result != null) {
-    return widenToI32Value(result,methodRef.returnType().equals(CharType.v()));
+    return widenToI32Value(stmt,result,methodRef.returnType().equals(CharType.v()));
   }
  else {
     return null;

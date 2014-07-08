@@ -4,7 +4,7 @@
     Type type=getLocalType(v.getType());
     VariableRef var=new VariableRef(local.getName(),new PointerType(type));
     Variable tmp=function.newVariable(type);
-    function.add(new Load(tmp,var,!sootMethod.getActiveBody().getTraps().isEmpty()));
+    function.add(new Load(tmp,var,!sootMethod.getActiveBody().getTraps().isEmpty())).attach(unit);
     return new VariableRef(tmp);
   }
  else   if (v instanceof soot.jimple.IntConstant) {
@@ -26,14 +26,14 @@
     String s=((soot.jimple.StringConstant)v).value;
     Trampoline trampoline=new LdcString(className,s);
     trampolines.add(trampoline);
-    return call(trampoline.getFunctionRef(),env);
+    return call(unit,trampoline.getFunctionRef(),env);
   }
  else   if (v instanceof soot.jimple.ClassConstant) {
     String targetClassName=((soot.jimple.ClassConstant)v).getValue();
     if (isArray(targetClassName) && isPrimitiveComponentType(targetClassName)) {
       String primitiveDesc=targetClassName.substring(1);
       Variable result=function.newVariable(OBJECT_PTR);
-      function.add(new Load(result,new ConstantBitcast(new GlobalRef("array_" + primitiveDesc,CLASS_PTR),new PointerType(OBJECT_PTR))));
+      function.add(new Load(result,new ConstantBitcast(new GlobalRef("array_" + primitiveDesc,CLASS_PTR),new PointerType(OBJECT_PTR)))).attach(unit);
       return result.ref();
     }
  else {
@@ -46,7 +46,7 @@
         trampolines.add(trampoline);
         fn=trampoline.getFunctionRef();
       }
-      return call(fn,env);
+      return call(unit,fn,env);
     }
   }
   throw new IllegalArgumentException("Unknown Immediate type: " + v.getClass());
