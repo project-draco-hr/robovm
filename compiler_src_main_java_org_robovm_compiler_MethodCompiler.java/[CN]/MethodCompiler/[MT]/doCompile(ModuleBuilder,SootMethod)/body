@@ -15,6 +15,18 @@
   PackManager.v().getPack("jtp").apply(body);
   PackManager.v().getPack("jop").apply(body);
   PackManager.v().getPack("jap").apply(body);
+  sameLocals=new HashMap<>();
+  for (  Local local : body.getLocals()) {
+    if (local.getIndex() != -1) {
+      SameLocalKey key=new SameLocalKey(local.getIndex(),local.getType());
+      List<Local> l=sameLocals.get(key);
+      if (l == null) {
+        l=new ArrayList<>();
+        sameLocals.put(key,l);
+      }
+      l.add(local);
+    }
+  }
   PatchingChain<Unit> units=body.getUnits();
   Map<Unit,List<Unit>> branchTargets=getBranchTargets(body);
   Map<Unit,Integer> trapHandlers=getTrapHandlers(body);
@@ -26,7 +38,7 @@
     if (unit instanceof DefinitionStmt) {
       DefinitionStmt stmt=(DefinitionStmt)unit;
       if (stmt.getLeftOp() instanceof Local) {
-        Local local=(Local)stmt.getLeftOp();
+        Local local=getSameLocal((Local)stmt.getLeftOp());
         if (!locals.contains(local)) {
           Type type=getLocalType(local.getType());
           function.add(new Alloca(function.newVariable(local.getName(),type),type));
