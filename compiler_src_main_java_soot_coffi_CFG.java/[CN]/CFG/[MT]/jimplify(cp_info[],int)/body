@@ -242,4 +242,21 @@
       }
     }
   }
+  Code_attribute ca=method.locate_code_attribute();
+  LocalVariableTable_attribute la=ca.findLocalVariableTable();
+  if (la != null) {
+    for (    local_variable_table_entry entry : la.local_variable_table) {
+      if (!(constant_pool[entry.name_index] instanceof CONSTANT_Utf8_info)) {
+        throw new RuntimeException("What? A local variable table name_index isn't a UTF8 entry?");
+      }
+      String name=((CONSTANT_Utf8_info)(constant_pool[entry.name_index])).convert();
+      Stmt startStmt=instructionToFirstStmt.get(entry.start_inst);
+      Stmt endStmt=null;
+      if (entry.end_inst != null) {
+        endStmt=instructionToFirstStmt.get(entry.end_inst);
+      }
+      soot.LocalVariable lv=new LocalVariable(name,entry.index,startStmt,endStmt);
+      listBody.getLocalVariables().add(lv);
+    }
+  }
 }
