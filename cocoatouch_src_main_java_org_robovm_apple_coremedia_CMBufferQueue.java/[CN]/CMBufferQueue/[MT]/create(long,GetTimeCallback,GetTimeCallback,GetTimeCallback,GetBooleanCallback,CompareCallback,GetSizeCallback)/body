@@ -1,0 +1,22 @@
+{
+  long refconId=CMBufferQueue.refconId.getAndIncrement();
+  CMBufferCallbacks callbacks=new CMBufferCallbacks();
+  callbacks.refcon(refconId);
+  callbacks.getDecodeTimeStamp(new FunctionPtr(cbGetDecodeTimeStamp));
+  callbacks.getPresentationTimeStamp(new FunctionPtr(cbGetPresentationTimeStamp));
+  callbacks.getDuration(new FunctionPtr(cbGetDuration));
+  callbacks.isDataReady(new FunctionPtr(cbIsDataReady));
+  callbacks.compare(new FunctionPtr(cbCompare));
+  callbacks.getSize(new FunctionPtr(cbGetSize));
+  CMBufferQueuePtr ptr=new CMBufferQueuePtr();
+  create(null,capacity,callbacks,ptr);
+synchronized (getDecodeTimeStampCallbacks) {
+    getDecodeTimeStampCallbacks.put(refconId,getDecodeTimeStampCallback);
+    getPresentationTimeStampCallbacks.put(refconId,getPresentationTimeStampCallback);
+    getDurationCallbacks.put(refconId,getDurationCallback);
+    isDataReadyCallbacks.put(refconId,isDataReadyCallback);
+    compareCallbacks.put(refconId,compareCallback);
+    getSizeCallbacks.put(refconId,getSizeCallback);
+  }
+  return ptr.get();
+}
