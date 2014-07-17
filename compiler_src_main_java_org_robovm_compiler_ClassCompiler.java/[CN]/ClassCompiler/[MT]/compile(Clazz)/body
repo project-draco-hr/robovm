@@ -1,7 +1,5 @@
 {
   reset();
-  File oFile=config.getOFile(clazz);
-  oFile.getParentFile().mkdirs();
   Arch arch=config.getArch();
   OS os=config.getOs();
   try {
@@ -18,11 +16,22 @@
     }
     throw new RuntimeException(t);
   }
+  byte[] llData=output.toByteArray();
+  if (config.isDumpIntermediates()) {
+    File llFile=config.getLlFile(clazz);
+    llFile.getParentFile().mkdirs();
+    FileUtils.writeByteArrayToFile(llFile,llData);
+  }
   Context context=new Context();
-  Module module=Module.parseIR(context,output.toByteArray(),clazz.getClassName());
+  Module module=Module.parseIR(context,llData,clazz.getClassName());
   PassManager passManager=createPassManager();
   passManager.run(module);
   passManager.dispose();
+  if (config.isDumpIntermediates()) {
+    File bcFile=config.getBcFile(clazz);
+    bcFile.getParentFile().mkdirs();
+    module.writeBitcode(bcFile);
+  }
   String triple=config.getTriple();
   Target target=Target.lookupTarget(triple);
   TargetMachine targetMachine=target.createTargetMachine(triple,"generic",null,null,null,null);
@@ -38,6 +47,13 @@
   output.reset();
   patchAsmWithFunctionSizes(clazz,new ByteArrayInputStream(asm),output);
   asm=output.toByteArray();
+  if (config.isDumpIntermediates()) {
+    File sFile=config.getSFile(clazz);
+    sFile.getParentFile().mkdirs();
+    FileUtils.writeByteArrayToFile(sFile,asm);
+  }
+  File oFile=config.getOFile(clazz);
+  oFile.getParentFile().mkdirs();
   BufferedOutputStream oOut=new BufferedOutputStream(new FileOutputStream(oFile));
   targetMachine.assemble(asm,clazz.getClassName(),oOut);
   oOut.close();
