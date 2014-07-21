@@ -1,0 +1,19 @@
+{
+  ArrayList<SigningIdentity> ids=new ArrayList<SigningIdentity>();
+  Pattern pattern=Pattern.compile("^\\d+\\)\\s+([0-9A-F]+)\\s+\"([^\"]*)\"\\s*(.*)");
+  for (  String line : securityOutput.split("\n")) {
+    line=line.trim();
+    Matcher matcher=pattern.matcher(line);
+    if (!matcher.find()) {
+      break;
+    }
+    String name=matcher.group(2);
+    String fingerprint=matcher.group(1);
+    String flags=matcher.group(3);
+    if (flags == null || !flags.contains("CSSMERR_TP_CERT_")) {
+      ids.add(new SigningIdentity(name,fingerprint));
+    }
+  }
+  Collections.sort(ids);
+  return ids;
+}

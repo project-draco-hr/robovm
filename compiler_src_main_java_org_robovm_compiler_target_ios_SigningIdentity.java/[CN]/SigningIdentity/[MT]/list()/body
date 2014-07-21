@@ -1,18 +1,6 @@
 {
   try {
-    String out=new Executor(Logger.NULL_LOGGER,"security").args("find-identity","-v","-p","codesigning").execCapture();
-    ArrayList<SigningIdentity> ids=new ArrayList<SigningIdentity>();
-    Pattern pattern=Pattern.compile("^\\d+\\) ([0-9A-F]+) \"(.*)\"$");
-    for (    String line : out.split("\n")) {
-      line=line.trim();
-      Matcher matcher=pattern.matcher(line);
-      if (!matcher.find()) {
-        break;
-      }
-      ids.add(new SigningIdentity(matcher.group(2),matcher.group(1)));
-    }
-    Collections.sort(ids);
-    return ids;
+    return parse(new Executor(Logger.NULL_LOGGER,"security").args("find-identity","-v","-p","codesigning").execCapture());
   }
  catch (  IOException e) {
     throw new RuntimeException(e);
