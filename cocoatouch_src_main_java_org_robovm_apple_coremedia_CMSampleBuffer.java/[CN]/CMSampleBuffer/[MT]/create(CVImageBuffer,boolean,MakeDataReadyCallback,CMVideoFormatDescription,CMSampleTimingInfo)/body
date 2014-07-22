@@ -1,0 +1,14 @@
+{
+  long refconId=CMSampleBuffer.refconId.getAndIncrement();
+  CMSampleBufferPtr ptr=new CMSampleBufferPtr();
+  CMSampleBufferError err=createForImageBuffer(null,imageBuffer,dataReady,new FunctionPtr(cbMakeDataReady),refconId,formatDescription,sampleTiming,ptr);
+  if (err == CMSampleBufferError.No) {
+    CMSampleBuffer buffer=ptr.get();
+    buffer.localRefconId=refconId;
+synchronized (makeDataReadyCallbacks) {
+      makeDataReadyCallbacks.put(refconId,callback);
+    }
+    return buffer;
+  }
+  return null;
+}
