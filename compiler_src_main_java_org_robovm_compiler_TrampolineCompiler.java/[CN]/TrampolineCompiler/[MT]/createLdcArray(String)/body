@@ -2,11 +2,11 @@
   if (isPrimitiveComponentType(targetClass)) {
     throw new IllegalArgumentException();
   }
-  String fnName="array_" + mangleClass(targetClass) + "_ldc";
+  String fnName=Symbols.arrayldcSymbol(targetClass);
   FunctionRef fnRef=new FunctionRef(fnName,new FunctionType(OBJECT_PTR,ENV_PTR));
   if (!mb.hasSymbol(fnName)) {
     Function fn=new FunctionBuilder(fnRef).name(fnName).linkage(weak).build();
-    Global g=new Global("array_" + mangleClass(targetClass) + "_ptr",weak,new NullConstant(OBJECT_PTR));
+    Global g=new Global(Symbols.arrayPtrSymbol(targetClass),weak,new NullConstant(OBJECT_PTR));
     if (!mb.hasSymbol(g.getName())) {
       mb.addGlobal(g);
     }

@@ -1,16 +1,19 @@
 {
-  String fnName=mangleMethod(rm);
+  String fnName=null;
   if (t instanceof Invokeinterface) {
-    fnName+="_lookup";
+    fnName=Symbols.lookupWrapperSymbol(rm);
   }
  else   if (t instanceof Invokevirtual && !Modifier.isFinal(rm.getDeclaringClass().getModifiers()) && !Modifier.isFinal(rm.getModifiers())) {
-    fnName+="_lookup";
+    fnName=Symbols.lookupWrapperSymbol(rm);
   }
  else   if (rm.isSynchronized()) {
-    fnName+="_synchronized";
+    fnName=Symbols.synchronizedWrapperSymbol(rm);
+  }
+ else {
+    fnName=Symbols.methodSymbol(rm);
   }
   if (t.isStatic()) {
-    fnName+="_clinit";
+    fnName=Symbols.clinitWrapperSymbol(fnName);
   }
   alias(t,fnName);
 }

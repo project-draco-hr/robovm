@@ -1,22 +1,15 @@
 {
+  String labelPrefix=config.getOs().getFamily() == OS.Family.darwin ? "_" : "";
+  String localLabelPrefix=config.getOs().getFamily() == OS.Family.darwin ? "L" : ".L";
   Set<String> functionNames=new HashSet<String>();
   for (  SootMethod method : clazz.getSootClass().getMethods()) {
     if (!method.isAbstract()) {
-      String name=mangleMethod(method);
-      if (config.getOs().getFamily() == OS.Family.darwin) {
-        name="_" + name;
-      }
+      String name=labelPrefix + Symbols.methodSymbol(method);
       functionNames.add(name);
     }
   }
-  String localLabelPrefix=".L";
-  String prefix=mangleClass(clazz.getInternalName());
-  if (config.getOs().getFamily() == OS.Family.darwin) {
-    localLabelPrefix="L";
-    prefix="_" + prefix;
-  }
-  String infoStructLabel=prefix + "_info_struct";
-  Pattern methodImplPattern=Pattern.compile("\\s*\\.(?:quad|long)\\s+(" + Pattern.quote(prefix) + "[^\\s]+).*");
+  String infoStructLabel=labelPrefix + Symbols.infoStructSymbol(clazz.getInternalName());
+  Pattern methodImplPattern=Pattern.compile("\\s*\\.(?:quad|long)\\s+\"?(" + Pattern.quote(labelPrefix + Symbols.methodSymbolPrefix(clazz.getInternalName())) + "[^\\s\"]+)\"?.*");
   BufferedReader in=null;
   BufferedWriter out=null;
   try {
@@ -28,12 +21,12 @@
       if (currentFunction == null) {
         out.write(line);
         out.write('\n');
-        if (line.startsWith(prefix)) {
-          int colon=line.indexOf(':');
-          if (colon == -1) {
-            continue;
-          }
+        int colon=line.indexOf(':');
+        if (colon != -1) {
           String label=line.substring(0,colon);
+          if (label.startsWith("\"") && label.endsWith("\"")) {
+            label=label.substring(1,label.length() - 1);
+          }
           if (functionNames.contains(label)) {
             currentFunction=label;
           }
@@ -43,9 +36,10 @@
         }
       }
  else       if (line.trim().equals(".cfi_endproc") || line.trim().startsWith(".section") || line.trim().startsWith(".globl")) {
+        out.write("\"");
         out.write(localLabelPrefix);
         out.write(currentFunction);
-        out.write("_end:\n\n");
+        out.write("_end\":\n\n");
         currentFunction=null;
         out.write(line);
         out.write('\n');
@@ -58,21 +52,19 @@
     while ((line=in.readLine()) != null) {
       out.write(line);
       out.write('\n');
-      if (line.contains(prefix)) {
-        Matcher matcher=methodImplPattern.matcher(line);
-        if (matcher.matches()) {
-          String functionName=matcher.group(1);
-          if (functionNames.contains(functionName)) {
-            line=in.readLine();
-            if (line.contains(String.valueOf(DUMMY_METHOD_SIZE))) {
-              out.write("\t.long\t");
-              out.write(localLabelPrefix + functionName + "_end - "+ functionName);
-              out.write('\n');
-            }
+      Matcher matcher=methodImplPattern.matcher(line);
+      if (matcher.matches()) {
+        String functionName=matcher.group(1);
+        if (functionNames.contains(functionName)) {
+          line=in.readLine();
+          if (line.contains(String.valueOf(DUMMY_METHOD_SIZE))) {
+            out.write("\t.long\t");
+            out.write("\"" + localLabelPrefix + functionName+ "_end\" - \""+ functionName+ "\"");
+            out.write('\n');
+          }
  else {
-              out.write(line);
-              out.write('\n');
-            }
+            out.write(line);
+            out.write('\n');
           }
         }
       }

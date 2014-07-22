@@ -1,18 +1,6 @@
 {
   this.mb=mb;
   this.dependencies=new HashSet<String>();
-  if (t instanceof LdcString) {
-    byte[] modUtf8=stringToModifiedUtf8Z(t.getTarget());
-    Global g=new Global(getStringVarName(modUtf8) + "_ptr",weak,new NullConstant(OBJECT_PTR));
-    if (!mb.hasSymbol(g.getName())) {
-      mb.addGlobal(g);
-    }
-    Function f=new FunctionBuilder(t).linkage(weak).build();
-    mb.addFunction(f);
-    Value result=call(f,BC_LDC_STRING,f.getParameterRef(0),g.ref(),mb.getString(t.getTarget()),new IntegerConstant(t.getTarget().length()));
-    f.add(new Ret(result));
-    return;
-  }
   Function f=new FunctionBuilder(t).linkage(external).build();
   if (!checkClassExists(f,t) || !checkClassAccessible(f,t)) {
     mb.addFunction(f);
@@ -26,12 +14,12 @@
       mb.addFunction(f);
       return;
     }
-    String fnName=mangleClass(t.getTarget()) + "_allocator_clinit";
+    String fnName=Symbols.clinitWrapperSymbol(Symbols.allocatorSymbol(t.getTarget()));
     alias(t,fnName);
   }
  else   if (t instanceof Instanceof) {
     if (isArray(t.getTarget())) {
-      String fnName="array_" + mangleClass(t.getTarget()) + "_instanceof";
+      String fnName=Symbols.arrayinstanceofSymbol(t.getTarget());
       if (!mb.hasSymbol(fnName)) {
         Function fn=new FunctionBuilder(t).name(fnName).linkage(weak).build();
         Value arrayClass=callLdcArray(fn,t.getTarget());
@@ -42,13 +30,13 @@
       alias(t,fnName);
     }
  else {
-      String fnName=mangleClass(t.getTarget()) + "_instanceof";
+      String fnName=Symbols.instanceofSymbol(t.getTarget());
       alias(t,fnName);
     }
   }
  else   if (t instanceof Checkcast) {
     if (isArray(t.getTarget())) {
-      String fnName="array_" + mangleClass(t.getTarget()) + "_checkcast";
+      String fnName=Symbols.arraycheckcastSymbol(t.getTarget());
       if (!mb.hasSymbol(fnName)) {
         Function fn=new FunctionBuilder(t).name(fnName).linkage(weak).build();
         Value arrayClass=callLdcArray(fn,t.getTarget());
@@ -59,7 +47,7 @@
       alias(t,fnName);
     }
  else {
-      String fnName=mangleClass(t.getTarget()) + "_checkcast";
+      String fnName=Symbols.checkcastSymbol(t.getTarget());
       alias(t,fnName);
     }
   }
@@ -69,12 +57,12 @@
       alias(t,fn.getName());
     }
  else {
-      String fnName=mangleClass(t.getTarget()) + "_ldc_ext";
+      String fnName=Symbols.ldcExternalSymbol(t.getTarget());
       alias(t,fnName);
     }
   }
  else   if (t instanceof Anewarray) {
-    String fnName="array_" + mangleClass(t.getTarget()) + "_new";
+    String fnName=Symbols.anewarraySymbol(t.getTarget());
     if (!mb.hasSymbol(fnName)) {
       Function fn=new FunctionBuilder(t).name(fnName).linkage(weak).build();
       Value arrayClass=callLdcArray(fn,t.getTarget());
@@ -85,7 +73,7 @@
     alias(t,fnName);
   }
  else   if (t instanceof Multianewarray) {
-    String fnName="array_" + mangleClass(t.getTarget()) + "_multi";
+    String fnName=Symbols.multianewarraySymbol(t.getTarget());
     if (!mb.hasSymbol(fnName)) {
       Function fn=new FunctionBuilder(t).name(fnName).linkage(weak).build();
       Value arrayClass=callLdcArray(fn,t.getTarget());
@@ -120,7 +108,7 @@
       mb.addFunction(fn);
     }
  else {
-      Global g=new Global("native_" + mangleMethod(nc.getTarget(),nc.getMethodName(),nc.getMethodDesc()) + "_ptr",new NullConstant(I8_PTR));
+      Global g=new Global(Symbols.nativeMethodPtrSymbol(nc),new NullConstant(I8_PTR));
       mb.addGlobal(g);
       Function fn=new FunctionBuilder(nc).linkage(_private).attribs(alwaysinline,optsize).build();
       FunctionRef ldcFn=FunctionBuilder.ldcInternal(nc.getTarget()).ref();

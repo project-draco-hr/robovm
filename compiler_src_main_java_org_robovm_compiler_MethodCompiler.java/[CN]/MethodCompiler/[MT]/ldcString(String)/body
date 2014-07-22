@@ -1,0 +1,14 @@
+{
+  byte[] modUtf8=stringToModifiedUtf8Z(s);
+  FunctionRef fref=new FunctionRef(Symbols.ldcStringSymbol(modUtf8),new FunctionType(OBJECT_PTR,ENV_PTR));
+  if (moduleBuilder.hasSymbol(fref.getName())) {
+    return fref;
+  }
+  Global g=new Global(Symbols.ldcStringPtrSymbol(modUtf8),weak,new NullConstant(OBJECT_PTR));
+  moduleBuilder.addGlobal(g);
+  Function f=new FunctionBuilder(fref).linkage(weak).build();
+  moduleBuilder.addFunction(f);
+  Value result=Functions.call(f,BC_LDC_STRING,f.getParameterRef(0),g.ref(),moduleBuilder.getString(s),new IntegerConstant(s.length()));
+  f.add(new Ret(result));
+  return fref;
+}

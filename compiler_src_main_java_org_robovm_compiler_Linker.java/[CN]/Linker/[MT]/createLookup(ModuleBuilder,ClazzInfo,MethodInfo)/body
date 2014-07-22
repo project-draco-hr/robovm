@@ -1,9 +1,6 @@
 {
   Function function=FunctionBuilder.lookup(ci,mi,false);
-  String targetFnName=mangleMethod(ci.getInternalName(),mi.getName(),mi.getDesc());
-  if (mi.isSynchronized()) {
-    targetFnName+="_synchronized";
-  }
+  String targetFnName=mi.isSynchronized() ? Symbols.synchronizedWrapperSymbol(ci.getInternalName(),mi.getName(),mi.getDesc()) : Symbols.methodSymbol(ci.getInternalName(),mi.getName(),mi.getDesc());
   FunctionRef fn=new FunctionRef(targetFnName,function.getType());
   if (!mb.hasSymbol(fn.getName())) {
     mb.addFunctionDeclaration(new FunctionDeclaration(fn));

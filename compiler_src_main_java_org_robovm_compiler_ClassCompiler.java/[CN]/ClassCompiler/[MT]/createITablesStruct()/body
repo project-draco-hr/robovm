@@ -7,8 +7,8 @@
     for (    SootClass ifs : interfaces) {
       ITable itable=config.getITableCache().get(ifs);
       if (itable.size() > 0) {
-        String name=mangleClass(sootClass) + "_itable" + (i++);
-        String typeInfoName=mangleClass(ifs) + "_typeinfo";
+        String name=Symbols.itableSymbol(getInternalName(sootClass),i++);
+        String typeInfoName=Symbols.typeInfoSymbol(getInternalName(ifs));
         if (!mb.hasSymbol(typeInfoName)) {
           mb.addGlobal(new Global(typeInfoName,Linkage.external,I8_PTR,true));
         }
@@ -21,7 +21,7 @@
       return new NullConstant(I8_PTR);
     }
  else {
-      Global itablesStruct=new Global(mangleClass(sootClass) + "_itables",Linkage._private,new StructureConstantBuilder().add(new IntegerConstant((short)tables.size())).add(tables.get(0)).add(new ArrayConstantBuilder(I8_PTR).add(tables).build()).build());
+      Global itablesStruct=new Global(Symbols.itablesSymbol(getInternalName(sootClass)),Linkage._private,new StructureConstantBuilder().add(new IntegerConstant((short)tables.size())).add(tables.get(0)).add(new ArrayConstantBuilder(I8_PTR).add(tables).build()).build());
       mb.addGlobal(itablesStruct);
       return new ConstantBitcast(itablesStruct.ref(),I8_PTR);
     }

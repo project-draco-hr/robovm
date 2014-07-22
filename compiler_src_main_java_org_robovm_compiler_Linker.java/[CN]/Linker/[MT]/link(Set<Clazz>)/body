@@ -33,11 +33,11 @@
     StructureConstant infoErrorStruct=createClassInfoErrorStruct(mb,clazz.getClazzInfo());
     Global info=null;
     if (infoErrorStruct == null) {
-      info=new Global(mangleClass(clazz.getInternalName()) + "_info_struct",external,I8_PTR,false);
+      info=new Global(Symbols.infoStructSymbol(clazz.getInternalName()),external,I8_PTR,false);
     }
  else {
       typeInfo.error=true;
-      info=new Global(mangleClass(clazz.getInternalName()) + "_info_struct",infoErrorStruct);
+      info=new Global(Symbols.infoStructSymbol(clazz.getInternalName()),infoErrorStruct);
     }
     mb.addGlobal(info);
     if (clazz.isInBootClasspath()) {
@@ -81,7 +81,7 @@
     ClazzInfo ci=clazz.getClazzInfo();
     TypeInfo typeInfo=typeInfos.get(ci);
     if (typeInfo.error) {
-      mb.addGlobal(new Global(mangleClass(clazz.getInternalName()) + "_typeinfo",new StructureConstantBuilder().add(new IntegerConstant(typeInfo.id)).add(new IntegerConstant(0)).add(new IntegerConstant(-1)).add(new IntegerConstant(0)).add(new IntegerConstant(0)).build()));
+      mb.addGlobal(new Global(Symbols.typeInfoSymbol(clazz.getInternalName()),new StructureConstantBuilder().add(new IntegerConstant(typeInfo.id)).add(new IntegerConstant(0)).add(new IntegerConstant(-1)).add(new IntegerConstant(0)).add(new IntegerConstant(0)).build()));
     }
  else {
       int[] classIds=new int[typeInfo.classTypes.length];
@@ -92,7 +92,7 @@
       for (int i=0; i < typeInfo.interfaceTypes.length; i++) {
         interfaceIds[i]=typeInfo.interfaceTypes[i].id;
       }
-      mb.addGlobal(new Global(mangleClass(clazz.getInternalName()) + "_typeinfo",new StructureConstantBuilder().add(new IntegerConstant(typeInfo.id)).add(new IntegerConstant((typeInfo.classTypes.length - 1) * 4 + 5 * 4)).add(new IntegerConstant(-1)).add(new IntegerConstant(typeInfo.classTypes.length)).add(new IntegerConstant(typeInfo.interfaceTypes.length)).add(new ArrayConstantBuilder(I32).add(classIds).build()).add(new ArrayConstantBuilder(I32).add(interfaceIds).build()).build()));
+      mb.addGlobal(new Global(Symbols.typeInfoSymbol(clazz.getInternalName()),new StructureConstantBuilder().add(new IntegerConstant(typeInfo.id)).add(new IntegerConstant((typeInfo.classTypes.length - 1) * 4 + 5 * 4)).add(new IntegerConstant(-1)).add(new IntegerConstant(typeInfo.classTypes.length)).add(new IntegerConstant(typeInfo.interfaceTypes.length)).add(new ArrayConstantBuilder(I32).add(classIds).build()).add(new ArrayConstantBuilder(I32).add(interfaceIds).build()).build()));
       if (!config.isDebug() && !ci.isInterface() && !ci.isFinal()&& typeInfo.children.isEmpty()) {
         for (        MethodInfo mi : ci.getMethods()) {
           String name=mi.getName();

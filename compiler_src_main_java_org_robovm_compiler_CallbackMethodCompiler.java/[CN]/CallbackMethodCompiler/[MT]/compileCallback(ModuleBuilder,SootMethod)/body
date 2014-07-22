@@ -20,11 +20,8 @@
     callbackFn=callback(method,t);
   }
   moduleBuilder.addFunction(callbackFn);
-  moduleBuilder.addAlias(new Alias(mangleMethod(originalMethod) + "_callback_i8p",Linkage._private,new ConstantBitcast(callbackFn.ref(),I8_PTR_PTR)));
-  String targetName=mangleMethod(originalMethod);
-  if (originalMethod.isSynchronized()) {
-    targetName+="_synchronized";
-  }
+  moduleBuilder.addAlias(new Alias(Symbols.callbackPtrSymbol(originalMethod),Linkage._private,new ConstantBitcast(callbackFn.ref(),I8_PTR_PTR)));
+  String targetName=originalMethod.isSynchronized() ? Symbols.synchronizedWrapperSymbol(originalMethod) : Symbols.methodSymbol(originalMethod);
   FunctionRef targetFn=new FunctionRef(targetName,getFunctionType(originalMethod));
   Value env=call(callbackFn,BC_ATTACH_THREAD_FROM_CALLBACK);
   BasicBlockRef bbSuccess=callbackFn.newBasicBlockRef(new Label("success"));

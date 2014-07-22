@@ -78,10 +78,7 @@
       createLookupFunction(method);
     }
     if (method.isStatic()) {
-      String fnName=mangleMethod(method);
-      if (method.isSynchronized()) {
-        fnName+="_synchronized";
-      }
+      String fnName=method.isSynchronized() ? Symbols.synchronizedWrapperSymbol(method) : Symbols.methodSymbol(method);
       FunctionRef fn=new FunctionRef(fnName,getFunctionType(method));
       mb.addFunction(createClassInitWrapperFunction(fn));
     }
@@ -101,10 +98,10 @@
     if (!sootClass.isInterface()) {
       config.getVTableCache().get(sootClass);
     }
-    classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",Linkage.weak,createClassInfoStruct());
+    classInfoStruct=new Global(Symbols.infoStructSymbol(clazz.getInternalName()),Linkage.weak,createClassInfoStruct());
   }
  catch (  IllegalArgumentException e) {
-    classInfoStruct=new Global(mangleClass(sootClass) + "_info_struct",I8_PTR,true);
+    classInfoStruct=new Global(Symbols.infoStructSymbol(clazz.getInternalName()),I8_PTR,true);
   }
   mb.addGlobal(classInfoStruct);
   Function infoFn=FunctionBuilder.infoStruct(sootClass);
@@ -137,7 +134,7 @@
   ci.addDependencies(trampolineDependencies);
   ci.addDependencies(catches);
   for (  Trampoline t : trampolines) {
-    if (!(t instanceof LdcString)) {
+{
       String desc=t.getTarget();
       if (desc.charAt(0) == 'L' || desc.charAt(0) == '[') {
         addDependencyIfNeeded(clazz,desc);

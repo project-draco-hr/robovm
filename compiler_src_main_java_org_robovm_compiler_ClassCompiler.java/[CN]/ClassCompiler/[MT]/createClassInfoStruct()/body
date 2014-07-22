@@ -33,13 +33,13 @@
   header.add(getString(getInternalName(sootClass)));
   if (sootClass.declaresMethod("<clinit>",Collections.emptyList(),VoidType.v())) {
     SootMethod method=sootClass.getMethod("<clinit>",Collections.emptyList(),VoidType.v());
-    header.add(new FunctionRef(mangleMethod(method),getFunctionType(method)));
+    header.add(new FunctionRef(Symbols.methodSymbol(method),getFunctionType(method)));
   }
  else {
     header.add(new NullConstant(I8_PTR));
   }
-  mb.addGlobal(new Global(mangleClass(sootClass) + "_typeinfo",Linkage.external,I8_PTR,true));
-  header.add(new GlobalRef(mangleClass(sootClass) + "_typeinfo",I8_PTR));
+  mb.addGlobal(new Global(Symbols.typeInfoSymbol(getInternalName(sootClass)),Linkage.external,I8_PTR,true));
+  header.add(new GlobalRef(Symbols.typeInfoSymbol(getInternalName(sootClass)),I8_PTR));
   if (!sootClass.isInterface()) {
     header.add(createVTableStruct());
   }
@@ -257,25 +257,25 @@
       body.add(new ConstantBitcast(attributesEncoder.getMethodAttributes(m).ref(),I8_PTR));
     }
     if (!m.isAbstract()) {
-      body.add(new ConstantBitcast(new FunctionRef(mangleMethod(m),getFunctionType(m)),I8_PTR));
+      body.add(new ConstantBitcast(new FunctionRef(Symbols.methodSymbol(m),getFunctionType(m)),I8_PTR));
       body.add(new IntegerConstant(DUMMY_METHOD_SIZE));
       if (m.isSynchronized()) {
-        body.add(new ConstantBitcast(new FunctionRef(mangleMethod(m) + "_synchronized",getFunctionType(m)),I8_PTR));
+        body.add(new ConstantBitcast(new FunctionRef(Symbols.synchronizedWrapperSymbol(m),getFunctionType(m)),I8_PTR));
       }
     }
     if (hasBridgeAnnotation(m)) {
       if (!readBooleanElem(getAnnotation(m,BRIDGE),"dynamic",false)) {
-        body.add(new GlobalRef(BridgeMethodCompiler.getTargetFnPtrName(m),I8_PTR));
+        body.add(new GlobalRef(Symbols.bridgePtrSymbol(m),I8_PTR));
       }
  else {
         body.add(new NullConstant(I8_PTR));
       }
     }
  else     if (hasGlobalValueAnnotation(m)) {
-      body.add(new GlobalRef(GlobalValueMethodCompiler.getGlobalValuePtrName(m),I8_PTR));
+      body.add(new GlobalRef(Symbols.globalValuePtrSymbol(m),I8_PTR));
     }
     if (hasCallbackAnnotation(m)) {
-      body.add(new AliasRef(mangleMethod(m) + "_callback_i8p",I8_PTR));
+      body.add(new AliasRef(Symbols.callbackPtrSymbol(m),I8_PTR));
     }
   }
   return new StructureConstantBuilder().add(header.build()).add(body.build()).build();
