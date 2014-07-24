@@ -1,0 +1,25 @@
+{
+  Set<LocalVariable> lvs=new HashSet<>();
+  if (local.getIndex() != -1) {
+    for (    ValueBox box : web) {
+      LocalVariable lv=findLocalVariable(body,local.getIndex(),boxToUnit.get(box));
+      if (lv != null) {
+        lvs.add(lv);
+      }
+    }
+    if (lvs.size() > 1) {
+      String name=null;
+      for (      LocalVariable lv : lvs) {
+        if (name == null) {
+          name=lv.getName();
+        }
+ else {
+          if (!lv.getName().equals(name)) {
+            throw new IllegalStateException("Found LocalVariables do " + "not refer to a variable with the same name: " + lvs);
+          }
+        }
+      }
+    }
+  }
+  return lvs;
+}
