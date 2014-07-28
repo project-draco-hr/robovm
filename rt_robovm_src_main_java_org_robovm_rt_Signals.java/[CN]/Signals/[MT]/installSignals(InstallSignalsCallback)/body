@@ -1,0 +1,17 @@
+{
+  if (callback == null) {
+    throw new NullPointerException("callback");
+  }
+  if (called) {
+    throw new IllegalStateException(Signals.class.getSimpleName() + ".installSignals() called twice");
+  }
+  long state=saveSignals();
+  try {
+    callback.install();
+  }
+  finally {
+    called=true;
+    installChainingSignals();
+    reinstallSavedSignals(state);
+  }
+}

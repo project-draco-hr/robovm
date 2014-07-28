@@ -1,0 +1,60 @@
+{
+  final long handlerPtr=VM.getCallbackMethodImpl(SignalsTest.class.getDeclaredMethod("handler",int.class,long.class,long.class));
+  long oldSigactionSigbus=VM.malloc(512);
+  long oldSigactionSigsegv=VM.malloc(512);
+  try {
+    if (sigaction(SIGBUS,0,oldSigactionSigbus) != 0) {
+      fail("sigaction");
+    }
+    if (sigaction(SIGSEGV,0,oldSigactionSigsegv) != 0) {
+      fail("sigaction");
+    }
+    try {
+      Signals.installSignals(new InstallSignalsCallback(){
+        @Override public void install(){
+          if (Bro.IS_DARWIN) {
+            oldHandlerSigbus=signal(SIGBUS,handlerPtr);
+          }
+          oldHandlerSigsegv=signal(SIGSEGV,handlerPtr);
+        }
+      }
+);
+      try {
+        nullObj.hashCode();
+        fail("NullPointerException expected");
+      }
+ catch (      NullPointerException e) {
+      }
+      try {
+        triggerSOE();
+        fail("StackOverflowError expected");
+      }
+ catch (      StackOverflowError e) {
+      }
+      if (Bro.IS_DARWIN) {
+        assertNotEquals(handlerPtr,currentHandler(SIGBUS));
+        assertNotEquals(oldHandlerSigbus,currentHandler(SIGBUS));
+      }
+      assertNotEquals(handlerPtr,currentHandler(SIGSEGV));
+      assertNotEquals(oldHandlerSigsegv,currentHandler(SIGSEGV));
+      try {
+        Signals.installSignals(new InstallSignalsCallback(){
+          @Override public void install(){
+          }
+        }
+);
+        fail("IllegalStateException expected");
+      }
+ catch (      IllegalStateException e) {
+      }
+    }
+  finally {
+      sigaction(SIGBUS,oldSigactionSigbus,0);
+      sigaction(SIGSEGV,oldSigactionSigsegv,0);
+    }
+  }
+  finally {
+    VM.free(oldSigactionSigbus);
+    VM.free(oldSigactionSigsegv);
+  }
+}
