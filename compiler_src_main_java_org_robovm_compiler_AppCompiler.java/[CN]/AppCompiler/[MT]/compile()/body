@@ -1,14 +1,59 @@
 {
   updateCheck();
+  config.getLogger().debug("Compiling classes using %d threads",config.getThreads());
+  final Executor executor=(config.getThreads() <= 1) ? SAME_THREAD_EXECUTOR : Executors.newFixedThreadPool(config.getThreads());
+class HandleFailureCallback implements CompilationCallback {
+    volatile Throwable t;
+    @Override public void success(    Clazz clazz){
+    }
+    @Override public void failure(    Clazz clazz,    Throwable t){
+      this.t=t;
+      if (executor instanceof ExecutorService) {
+        ((ExecutorService)executor).shutdown();
+      }
+    }
+  }
+  ;
+  HandleFailureCallback callback=new HandleFailureCallback();
+  long start=System.currentTimeMillis();
+  int compiledCount=0;
   TreeSet<Clazz> compileQueue=getRootClasses();
   Set<Clazz> linkClasses=new HashSet<Clazz>();
   while (!compileQueue.isEmpty() && !Thread.currentThread().isInterrupted()) {
     Clazz clazz=compileQueue.pollFirst();
     if (!linkClasses.contains(clazz)) {
-      compile(clazz,compileQueue,linkClasses);
+      if (compile(executor,callback,clazz,compileQueue,linkClasses)) {
+        compiledCount++;
+        if (callback.t != null) {
+          break;
+        }
+      }
       linkClasses.add(clazz);
     }
   }
+  if (executor instanceof ExecutorService) {
+    ExecutorService executorService=(ExecutorService)executor;
+    executorService.shutdown();
+    try {
+      executorService.awaitTermination(Long.MAX_VALUE,TimeUnit.DAYS);
+    }
+ catch (    InterruptedException e) {
+    }
+  }
+  if (callback.t != null) {
+    if (callback.t instanceof IOException) {
+      throw (IOException)callback.t;
+    }
+    if (callback.t instanceof RuntimeException) {
+      throw (RuntimeException)callback.t;
+    }
+    if (callback.t instanceof Error) {
+      throw (Error)callback.t;
+    }
+    throw new CompilerException(callback.t);
+  }
+  long duration=System.currentTimeMillis() - start;
+  config.getLogger().debug("Compiled %d classes in %.2f seconds",compiledCount,duration / 1000.0);
   if (Thread.currentThread().isInterrupted()) {
     return;
   }
@@ -17,5 +62,8 @@
       config.addResourcesPath(config.getClazzes().createResourcesBootclasspathPath(config.getHome().getCacertsPath(config.getCacerts())));
     }
   }
+  start=System.currentTimeMillis();
   linker.link(linkClasses);
+  duration=System.currentTimeMillis() - start;
+  config.getLogger().debug("Linked %d classes in %.2f seconds",linkClasses.size(),duration / 1000.0);
 }

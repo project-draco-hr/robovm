@@ -1,6 +1,8 @@
 {
+  boolean result=false;
   if (config.isClean() || classCompiler.mustCompile(clazz)) {
-    classCompiler.compile(clazz);
+    classCompiler.compile(clazz,executor,callback);
+    result=true;
   }
   for (  Dependency dep : clazz.getClazzInfo().getDependencies()) {
     Clazz depClazz=config.getClazzes().load(dep.getClassName());
@@ -8,4 +10,5 @@
       compileQueue.add(depClazz);
     }
   }
+  return result;
 }

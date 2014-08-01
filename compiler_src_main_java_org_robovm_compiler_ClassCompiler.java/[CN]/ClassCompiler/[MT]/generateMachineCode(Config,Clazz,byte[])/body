@@ -1,22 +1,5 @@
 {
-  reset();
-  Arch arch=config.getArch();
-  OS os=config.getOs();
-  try {
-    config.getLogger().debug("Compiling %s (%s %s %s)",clazz,os,arch,config.isDebug() ? "debug" : "release");
-    output.reset();
-    compile(clazz,output);
-  }
- catch (  Throwable t) {
-    if (t instanceof IOException) {
-      throw (IOException)t;
-    }
-    if (t instanceof RuntimeException) {
-      throw (RuntimeException)t;
-    }
-    throw new RuntimeException(t);
-  }
-  byte[] llData=output.toByteArray();
+  ByteArrayOutputStream output=new ByteArrayOutputStream(256 * 1024);
   if (config.isDumpIntermediates()) {
     File llFile=config.getLlFile(clazz);
     llFile.getParentFile().mkdirs();
@@ -24,7 +7,7 @@
   }
   Context context=new Context();
   Module module=Module.parseIR(context,llData,clazz.getClassName());
-  PassManager passManager=createPassManager();
+  PassManager passManager=createPassManager(config);
   passManager.run(module);
   passManager.dispose();
   if (config.isDumpIntermediates()) {
@@ -45,7 +28,7 @@
   context.dispose();
   byte[] asm=output.toByteArray();
   output.reset();
-  patchAsmWithFunctionSizes(clazz,new ByteArrayInputStream(asm),output);
+  patchAsmWithFunctionSizes(config,clazz,new ByteArrayInputStream(asm),output);
   asm=output.toByteArray();
   if (config.isDumpIntermediates()) {
     File sFile=config.getSFile(clazz);
