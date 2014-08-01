@@ -1,0 +1,59 @@
+{
+  for (  URL g : includes) {
+    InputStream in=null;
+    try {
+      in=g.openStream();
+      IOUtils.copy(in,writer,"UTF-8");
+    }
+ catch (    IOException e) {
+      throw new RuntimeException(e);
+    }
+ finally {
+      IOUtils.closeQuietly(in);
+    }
+    writer.write("\n");
+  }
+  writer.write("\n");
+  for (  String s : asm) {
+    writer.write("module asm \"");
+    writer.write(s);
+    writer.write("\"\n");
+  }
+  writer.write("\n");
+  for (  UserType type : types) {
+    writer.write(type.getAlias());
+    writer.write(" = type ");
+    writer.write(type.getDefinition());
+    writer.write("\n");
+  }
+  writer.write("\n");
+  for (  FunctionDeclaration fd : functionDeclarations) {
+    writer.write(fd.toString());
+    writer.write("\n");
+  }
+  writer.write("\n");
+  for (  Global g : globals) {
+    writer.write(g.getDefinition());
+    writer.write("\n");
+  }
+  writer.write("\n");
+  for (  Alias a : aliases) {
+    writer.write(a.getDefinition());
+    writer.write("\n");
+  }
+  writer.write("\n");
+  for (  Function f : functions) {
+    writer.write(f.toString());
+    writer.write("\n");
+  }
+  writer.write("\n");
+  for (  NamedMetadata md : namedMetadata) {
+    writer.write(md.toString());
+    writer.write("\n");
+  }
+  writer.write("\n");
+  for (  UnnamedMetadata md : unnamedMetadata) {
+    writer.write(md.getDefinition());
+    writer.write("\n");
+  }
+}

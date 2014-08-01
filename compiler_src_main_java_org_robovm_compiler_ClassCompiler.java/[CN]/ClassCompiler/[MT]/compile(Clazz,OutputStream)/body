@@ -110,7 +110,9 @@
   for (  CompilerPlugin compilerPlugin : config.getCompilerPlugins()) {
     compilerPlugin.afterClass(config,clazz,mb);
   }
-  out.write(mb.build().toString().getBytes("UTF-8"));
+  OutputStreamWriter writer=new OutputStreamWriter(out,"UTF-8");
+  mb.build().write(writer);
+  writer.flush();
   ci.setCatchNames(catches);
   ci.setTrampolines(trampolines);
   ci.addDependency("java/lang/Object");
