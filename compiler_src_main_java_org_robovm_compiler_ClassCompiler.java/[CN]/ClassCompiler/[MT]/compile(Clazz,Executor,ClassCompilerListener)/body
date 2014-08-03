@@ -1,0 +1,20 @@
+{
+  reset();
+  Arch arch=config.getArch();
+  OS os=config.getOs();
+  try {
+    config.getLogger().debug("Compiling %s (%s %s %s)",clazz,os,arch,config.isDebug() ? "debug" : "release");
+    output.reset();
+    compile(clazz,output);
+  }
+ catch (  Throwable t) {
+    if (t instanceof IOException) {
+      throw (IOException)t;
+    }
+    if (t instanceof RuntimeException) {
+      throw (RuntimeException)t;
+    }
+    throw new RuntimeException(t);
+  }
+  scheduleMachineCodeGeneration(executor,listener,config,clazz,output.toByteArray());
+}

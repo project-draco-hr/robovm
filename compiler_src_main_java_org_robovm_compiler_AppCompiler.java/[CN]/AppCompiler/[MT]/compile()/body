@@ -1,14 +1,6 @@
 {
   updateCheck();
-  TreeSet<Clazz> compileQueue=getRootClasses();
-  Set<Clazz> linkClasses=new HashSet<Clazz>();
-  while (!compileQueue.isEmpty() && !Thread.currentThread().isInterrupted()) {
-    Clazz clazz=compileQueue.pollFirst();
-    if (!linkClasses.contains(clazz)) {
-      compile(clazz,compileQueue,linkClasses);
-      linkClasses.add(clazz);
-    }
-  }
+  Set<Clazz> linkClasses=compile(getRootClasses(),true,null);
   if (Thread.currentThread().isInterrupted()) {
     return;
   }
@@ -17,5 +9,8 @@
       config.addResourcesPath(config.getClazzes().createResourcesBootclasspathPath(config.getHome().getCacertsPath(config.getCacerts())));
     }
   }
+  long start=System.currentTimeMillis();
   linker.link(linkClasses);
+  long duration=System.currentTimeMillis() - start;
+  config.getLogger().debug("Linked %d classes in %.2f seconds",linkClasses.size(),duration / 1000.0);
 }

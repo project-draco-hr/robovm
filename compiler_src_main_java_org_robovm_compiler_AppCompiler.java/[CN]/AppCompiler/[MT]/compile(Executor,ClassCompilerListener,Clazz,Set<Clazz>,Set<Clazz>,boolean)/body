@@ -1,0 +1,16 @@
+{
+  boolean result=false;
+  if (config.isClean() || classCompiler.mustCompile(clazz)) {
+    classCompiler.compile(clazz,executor,listener);
+    result=true;
+  }
+  if (compileDependencies) {
+    for (    Dependency dep : clazz.getClazzInfo().getDependencies()) {
+      Clazz depClazz=config.getClazzes().load(dep.getClassName());
+      if (depClazz != null && !compiled.contains(depClazz)) {
+        compileQueue.add(depClazz);
+      }
+    }
+  }
+  return result;
+}
