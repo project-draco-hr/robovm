@@ -1,6 +1,15 @@
 {
-  release();
+  long handle=getHandle();
+  if (handle != 0) {
+    doDispose();
+    setHandle(0);
+  }
   if (finalizing) {
-    super.finalize();
+    try {
+      super.finalize();
+    }
+ catch (    Throwable e) {
+      throw new RuntimeException(e);
+    }
   }
 }
