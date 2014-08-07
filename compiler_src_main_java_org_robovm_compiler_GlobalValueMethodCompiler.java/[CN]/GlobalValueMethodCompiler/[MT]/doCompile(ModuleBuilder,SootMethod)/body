@@ -1,7 +1,8 @@
 {
-  validateGlobalValueMethod(method);
   AnnotationTag globalValueAnnotation=getAnnotation(method,GLOBAL_VALUE);
+  validateGlobalValueMethod(method,globalValueAnnotation);
   boolean optional=readBooleanElem(globalValueAnnotation,"optional",false);
+  boolean dereference=readBooleanElem(globalValueAnnotation,"dereference",true);
   Function fn=FunctionBuilder.method(method);
   moduleBuilder.addFunction(fn);
   Type valueType=getStructMemberType(method);
@@ -20,7 +21,7 @@
   fn.add(new Unreachable());
   fn.newBasicBlock(notNullLabel);
   if (method.getParameterCount() == 0) {
-    Value result=loadValueForGetter(method,fn,valueType,valuePtr.ref(),env,MarshalerFlags.CALL_TYPE_GLOBAL_VALUE);
+    Value result=loadValueForGetter(method,fn,valueType,valuePtr.ref(),env,dereference,MarshalerFlags.CALL_TYPE_GLOBAL_VALUE);
     fn.add(new Ret(result));
   }
  else {
