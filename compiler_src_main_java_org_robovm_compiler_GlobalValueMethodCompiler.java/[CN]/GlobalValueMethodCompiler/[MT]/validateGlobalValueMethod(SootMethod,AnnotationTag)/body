@@ -8,4 +8,10 @@
   if (!(method.getReturnType() != VoidType.v() && method.getParameterCount() == 0 || method.getReturnType() == VoidType.v() && method.getParameterCount() == 1)) {
     throw new IllegalArgumentException("Invalid signature for " + "@GlobalValue annotated method " + method + ". It should either take 0 arguments and return a non-void "+ "type or take 1 argument and return void");
   }
+  if (method.getReturnType() == VoidType.v()) {
+    boolean dereference=readBooleanElem(globalValueAnnotation,"dereference",true);
+    if (!dereference) {
+      throw new IllegalArgumentException("Only @GlobalValue getter methods " + "are allowed to have dereference=false");
+    }
+  }
 }

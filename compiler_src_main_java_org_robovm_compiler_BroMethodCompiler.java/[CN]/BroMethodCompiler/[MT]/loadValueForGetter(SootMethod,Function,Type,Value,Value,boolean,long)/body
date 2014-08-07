@@ -7,9 +7,14 @@
  else   if (memberType instanceof ArrayType) {
     result=memberPtr;
   }
- else {
+ else   if (dereference) {
     Variable tmp=fn.newVariable(memberType);
     fn.add(new Load(tmp,memberPtr));
+    result=tmp.ref();
+  }
+ else {
+    Variable tmp=fn.newVariable(memberType);
+    fn.add(new Bitcast(tmp,memberPtr,tmp.getType()));
     result=tmp.ref();
   }
   if (needsMarshaler(type)) {
