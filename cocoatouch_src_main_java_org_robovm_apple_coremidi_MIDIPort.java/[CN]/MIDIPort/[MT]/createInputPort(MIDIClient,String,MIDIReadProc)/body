@@ -1,0 +1,14 @@
+{
+  long refconId=MIDIPort.refconId.getAndIncrement();
+  MIDIPortPtr ptr=new MIDIPortPtr();
+  MIDIError err=createInputPort(client,portName,new FunctionPtr(cbReadProc),refconId,ptr);
+  if (err == MIDIError.No) {
+synchronized (readProcs) {
+      readProcs.put(refconId,readProc);
+    }
+    MIDIPort port=ptr.get();
+    port.localRefconId=refconId;
+    return port;
+  }
+  return null;
+}
