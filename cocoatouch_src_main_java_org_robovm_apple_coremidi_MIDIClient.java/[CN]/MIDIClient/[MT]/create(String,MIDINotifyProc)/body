@@ -1,0 +1,12 @@
+{
+  long refconId=MIDIClient.refconId.getAndIncrement();
+  MIDIClientPtr ptr=new MIDIClientPtr();
+  MIDIError err=create(name,new FunctionPtr(cbNotifyProc),refconId,ptr);
+  if (err == MIDIError.No) {
+synchronized (notifyProcs) {
+      notifyProcs.put(refconId,notifyProc);
+    }
+    return ptr.get();
+  }
+  return null;
+}

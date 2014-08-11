@@ -1,0 +1,12 @@
+{
+  long refconId=MIDIEndpoint.refconId.getAndIncrement();
+  MIDIEndpointPtr ptr=new MIDIEndpointPtr();
+  MIDIError err=createDestination(client,name,new FunctionPtr(cbReadProc),refconId,ptr);
+  if (err == MIDIError.No) {
+synchronized (readProcs) {
+      readProcs.put(refconId,readProc);
+    }
+    return ptr.get();
+  }
+  return null;
+}
