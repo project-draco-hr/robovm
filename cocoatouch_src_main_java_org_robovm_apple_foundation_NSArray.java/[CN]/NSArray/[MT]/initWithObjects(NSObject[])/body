@@ -1,10 +1,13 @@
 {
-  VoidPtr.VoidPtrPtr ptr=Struct.allocate(VoidPtr.VoidPtrPtr.class,objects.length);
-  for (int i=0; i < objects.length; i++) {
-    checkNull(objects[i]);
-    ptr.set(objects[i].getHandle());
-    ptr=ptr.next();
+  VoidPtr.VoidPtrPtr ptr=null;
+  if (objects.length > 0) {
+    ptr=Struct.allocate(VoidPtr.VoidPtrPtr.class,objects.length);
+    for (int i=0; i < objects.length; i++) {
+      checkNull(objects[i]);
+      ptr.set(objects[i].getHandle());
+      ptr=ptr.next();
+    }
+    ptr=ptr.previous(objects.length);
   }
-  ptr=ptr.previous(objects.length);
-  initObject(initWithObjects$count$(ptr.getHandle(),objects.length));
+  initObject(initWithObjects$count$(ptr != null ? ptr.getHandle() : 0,objects.length));
 }
