@@ -1,0 +1,11 @@
+{
+  long refconId=CFNetServiceMonitor.refconId.getAndIncrement();
+  CFNetServiceClientContext context=new CFNetServiceClientContext();
+  context.info(refconId);
+synchronized (callbacks) {
+    callbacks.put(refconId,clientCB);
+  }
+  CFNetServiceMonitor service=create(null,theService,new FunctionPtr(cbInvoke),context);
+  if (service != null)   service.localRefconId=refconId;
+  return service;
+}

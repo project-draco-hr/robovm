@@ -1,0 +1,13 @@
+{
+  long refconId=CFProxySupport.refconId.getAndIncrement();
+  CFStreamClientContext context=new CFStreamClientContext();
+  context.info(refconId);
+  CFRunLoopSource source=executeProxyAutoConfigurationURL(proxyAutoConfigURL,targetURL,new FunctionPtr(cbInvoke),context);
+  if (source != null) {
+synchronized (callbacks) {
+      callbacks.put(refconId,callback);
+    }
+    return source;
+  }
+  return null;
+}
