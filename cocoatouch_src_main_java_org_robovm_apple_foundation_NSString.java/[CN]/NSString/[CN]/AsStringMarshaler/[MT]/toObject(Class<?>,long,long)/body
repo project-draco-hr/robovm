@@ -1,11 +1,12 @@
 {
-  NSString o=ObjCObject.toObjCObject(NSString.class,handle);
-  try {
-    return o != null ? o.toString() : null;
-  }
-  finally {
-    if (o != null) {
-      o.dispose();
+  if (handle != 0) {
+    long length=length(handle,sel_length);
+    if (length == 0) {
+      return EMPTY_STRING;
     }
+    char[] chars=new char[(int)length];
+    getCharacters$range$(handle,sel_getCharacters$range$,VM.getArrayValuesAddress(chars),new NSRange(0,length));
+    return VM.newStringNoCopy(chars,0,(int)length);
   }
+  return null;
 }

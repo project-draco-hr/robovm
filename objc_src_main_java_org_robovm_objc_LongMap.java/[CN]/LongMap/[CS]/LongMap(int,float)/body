@@ -1,0 +1,14 @@
+{
+  if (initialCapacity < 0)   throw new IllegalArgumentException("initialCapacity must be >= 0: " + initialCapacity);
+  if (initialCapacity > 1 << 30)   throw new IllegalArgumentException("initialCapacity is too large: " + initialCapacity);
+  capacity=nextPowerOfTwo(initialCapacity);
+  if (loadFactor <= 0)   throw new IllegalArgumentException("loadFactor must be > 0: " + loadFactor);
+  this.loadFactor=loadFactor;
+  threshold=(int)(capacity * loadFactor);
+  mask=capacity - 1;
+  hashShift=63 - Long.numberOfTrailingZeros(capacity);
+  stashCapacity=Math.max(3,(int)Math.ceil(Math.log(capacity)) * 2);
+  pushIterations=Math.max(Math.min(capacity,8),(int)Math.sqrt(capacity) / 8);
+  keyTable=new long[capacity + stashCapacity];
+  valueTable=(V[])new Object[keyTable.length];
+}
