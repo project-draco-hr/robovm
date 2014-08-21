@@ -1,0 +1,26 @@
+{
+  long refconId=SCNetworkReachability.refconId.getAndIncrement();
+  Struct<?> l;
+  Struct<?> r;
+  if (localAddress.getAddress() instanceof java.net.Inet4Address) {
+    l=new sockaddr_in(localAddress);
+  }
+ else   if (localAddress.getAddress() instanceof java.net.Inet6Address) {
+    l=new sockaddr_in6(localAddress);
+  }
+ else {
+    throw new IllegalArgumentException("localAddress is not a valid IPv4 or IPv6 address!");
+  }
+  if (remoteAddress.getAddress() instanceof java.net.Inet4Address) {
+    r=new sockaddr_in(remoteAddress);
+  }
+ else   if (remoteAddress.getAddress() instanceof java.net.Inet6Address) {
+    r=new sockaddr_in6(remoteAddress);
+  }
+ else {
+    throw new IllegalArgumentException("remoteAddress is not a valid IPv4 or IPv6 address!");
+  }
+  SCNetworkReachability reachability=create(null,l,r);
+  reachability.localRefconId=refconId;
+  return reachability;
+}

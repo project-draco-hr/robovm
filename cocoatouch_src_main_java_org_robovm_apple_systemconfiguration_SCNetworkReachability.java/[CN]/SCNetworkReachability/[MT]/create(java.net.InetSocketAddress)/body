@@ -1,0 +1,16 @@
+{
+  long refconId=SCNetworkReachability.refconId.getAndIncrement();
+  SCNetworkReachability reachability;
+  java.net.InetAddress addr=address.getAddress();
+  if (addr instanceof java.net.Inet4Address) {
+    reachability=create(null,new sockaddr_in(address));
+  }
+ else   if (addr instanceof java.net.Inet6Address) {
+    reachability=create(null,new sockaddr_in6(address));
+  }
+ else {
+    throw new IllegalArgumentException("address is not a valid IPv4 or IPv6 address!");
+  }
+  reachability.localRefconId=refconId;
+  return reachability;
+}
