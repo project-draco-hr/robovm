@@ -1,0 +1,14 @@
+{
+  Thread.setDefaultUncaughtExceptionHandler(new java.lang.Thread.UncaughtExceptionHandler(){
+    @Override public void uncaughtException(    Thread thread,    Throwable ex){
+      StringWriter sw=new StringWriter();
+      PrintWriter pw=new PrintWriter(sw);
+      ex.printStackTrace(pw);
+      pw.flush();
+      Foundation.log(sw.toString());
+      NSException exception=new NSException(ex.getClass().getName(),sw.toString(),new NSDictionary<>());
+      exception.raise();
+    }
+  }
+);
+}
