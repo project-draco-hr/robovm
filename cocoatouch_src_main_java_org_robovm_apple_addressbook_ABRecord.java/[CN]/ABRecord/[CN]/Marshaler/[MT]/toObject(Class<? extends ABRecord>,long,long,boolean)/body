@@ -1,0 +1,25 @@
+{
+  if (handle == 0) {
+    return null;
+  }
+  int recordType=getRecordType(handle);
+  Class<? extends ABRecord> subcls=null;
+switch (recordType) {
+case 0:
+    subcls=ABPerson.class;
+  break;
+case 1:
+subcls=ABGroup.class;
+break;
+case 2:
+subcls=ABSource.class;
+break;
+default :
+throw new Error("Unrecognized record type " + recordType);
+}
+ABRecord o=(ABRecord)NativeObject.Marshaler.toObject(subcls,handle,flags);
+if (retain) {
+retain(handle);
+}
+return o;
+}
