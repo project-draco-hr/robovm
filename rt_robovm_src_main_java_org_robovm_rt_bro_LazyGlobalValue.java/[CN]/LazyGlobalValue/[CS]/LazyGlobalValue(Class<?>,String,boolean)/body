@@ -1,0 +1,19 @@
+{
+  if (owner == null) {
+    throw new NullPointerException("owner");
+  }
+  if (getterName == null) {
+    throw new NullPointerException("getterName");
+  }
+  this.constant=constant;
+  try {
+    this.getter=owner.getDeclaredMethod(getterName);
+    this.getter.setAccessible(true);
+  }
+ catch (  NoSuchMethodException e) {
+    throw new IllegalArgumentException("@GlobalValue getter method named " + getterName + " not found in class "+ owner.getName(),e);
+  }
+  if (this.getter.getAnnotation(GlobalValue.class) == null) {
+    throw new IllegalArgumentException("Method " + this.getter + " is not a @GlobalValue method");
+  }
+}
