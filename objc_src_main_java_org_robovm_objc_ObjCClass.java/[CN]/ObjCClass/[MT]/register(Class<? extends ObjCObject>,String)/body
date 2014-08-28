@@ -7,6 +7,10 @@
   for (  Entry<String,Method> entry : getCallbacks(type).entrySet()) {
     String selName=entry.getKey();
     Method method=entry.getValue();
+    boolean isClassMethod=method.getParameterTypes()[0] == ObjCClass.class;
+    if (isClassMethod && method.getDeclaringClass() != type) {
+      continue;
+    }
     Selector selector=Selector.register(selName);
     String encoding=null;
     TypeEncoding typeEncoding=method.getAnnotation(TypeEncoding.class);
@@ -14,7 +18,7 @@
       encoding=typeEncoding.value();
     }
  else {
-      long methodPtr=ObjCRuntime.class_getInstanceMethod(superclass.getHandle(),selector.getHandle());
+      long methodPtr=isClassMethod ? ObjCRuntime.class_getClassMethod(superclass.getHandle(),selector.getHandle()) : ObjCRuntime.class_getInstanceMethod(superclass.getHandle(),selector.getHandle());
       if (methodPtr != 0L) {
         long encodingPtr=ObjCRuntime.method_getTypeEncoding(methodPtr);
         if (encodingPtr != 0L) {
@@ -23,7 +27,8 @@
       }
     }
     long impl=VM.getCallbackMethodImpl(method);
-    if (!ObjCRuntime.class_addMethod(handle,selector.getHandle(),impl,encoding != null ? VM.getStringUTFChars(encoding) : 0L)) {
+    long ownerHandle=isClassMethod ? ObjCRuntime.object_getClass(handle) : handle;
+    if (!ObjCRuntime.class_addMethod(ownerHandle,selector.getHandle(),impl,encoding != null ? VM.getStringUTFChars(encoding) : 0L)) {
       throw new ObjCClassNotFoundException("Failed to add method " + selName + " to custom Objective-C class for Java class: "+ type);
     }
   }
