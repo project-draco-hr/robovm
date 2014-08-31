@@ -1,0 +1,11 @@
+{
+  CTRunDelegateCallbacks callbacks=new CTRunDelegateCallbacks();
+  callbacks.getAscent(new FunctionPtr(cbGetAscent));
+  callbacks.getDescent(new FunctionPtr(cbGetDescent));
+  callbacks.getWidth(new FunctionPtr(cbGetWidth));
+  long refconId=CTRunDelegate.refconId.getAndIncrement();
+  delegate=CTRunDelegateIntern.create(callbacks,refconId);
+synchronized (runCallbacks) {
+    runCallbacks.put(refconId,this);
+  }
+}
