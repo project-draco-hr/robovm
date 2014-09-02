@@ -1,0 +1,34 @@
+{
+  String buildPart="1";
+  long buildType=700;
+  if (v.endsWith("-SNAPSHOT")) {
+    buildPart="";
+    v=v.substring(0,v.indexOf("-SNAPSHOT"));
+    buildType=0;
+  }
+ else   if (v.contains("-alpha-")) {
+    buildPart=v.substring(v.lastIndexOf('-') + 1);
+    v=v.substring(0,v.indexOf("-alpha-"));
+    buildType=100;
+  }
+ else   if (v.contains("-beta-")) {
+    buildPart=v.substring(v.lastIndexOf('-') + 1);
+    v=v.substring(0,v.indexOf("-beta-"));
+    buildType=300;
+  }
+ else   if (v.contains("-rc-")) {
+    buildPart=v.substring(v.lastIndexOf('-') + 1);
+    v=v.substring(0,v.indexOf("-rc-"));
+    buildType=500;
+  }
+  String[] parts=v.split("\\.");
+  if (parts.length > 3) {
+    throw new IllegalArgumentException("Illegal version number: " + v);
+  }
+  long major=parts.length > 0 ? Long.parseLong(parts[0]) : 0;
+  long minor=parts.length > 1 ? Long.parseLong(parts[1]) : 0;
+  long rev=parts.length > 2 ? Long.parseLong(parts[2]) : 0;
+  long build=buildPart.isEmpty() ? 0 : Long.parseLong(buildPart);
+  long result=(((major * 1000 + minor) * 1000 + rev) * 1000) + build + buildType;
+  return result;
+}
