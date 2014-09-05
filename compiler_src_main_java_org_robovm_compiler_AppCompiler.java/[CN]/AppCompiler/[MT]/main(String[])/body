@@ -1,5 +1,6 @@
 {
   AppCompiler compiler=null;
+  Config.Builder builder=null;
   boolean verbose=false;
   boolean run=false;
   boolean createIpa=false;
@@ -7,7 +8,8 @@
   List<String> runArgs=new ArrayList<String>();
   List<String> launchArgs=new ArrayList<String>();
   try {
-    Config.Builder builder=new Config.Builder();
+    builder=new Config.Builder();
+    Map<String,CompilerPluginArgument> pluginArguments=builder.fetchPluginArguments();
     int i=0;
     while (i < args.length) {
       if ("-cp".equals(args[i]) || "-classpath".equals(args[i])) {
@@ -96,7 +98,7 @@
         builder.clean(true);
       }
  else       if ("-help".equals(args[i]) || "-?".equals(args[i])) {
-        printUsageAndExit(null);
+        printUsageAndExit(null,builder.getCompilerPlugins());
       }
  else       if ("-version".equals(args[i])) {
         printVersionAndExit();
@@ -204,7 +206,17 @@
         runArgs.add(args[i]);
       }
  else       if (args[i].startsWith("-")) {
-        throw new IllegalArgumentException("Unrecognized option: " + args[i]);
+        String argName=args[i].substring(1,args[i].length());
+        CompilerPluginArgument arg=pluginArguments.get(argName);
+        if (arg != null) {
+          builder.addCompilerPluginArgument(argName);
+          if (arg.hasValue()) {
+            builder.addCompilerPluginArgument(args[++i]);
+          }
+        }
+ else {
+          throw new IllegalArgumentException("Unrecognized option: " + args[i]);
+        }
       }
  else {
         builder.mainClass(args[i++]);
@@ -249,7 +261,7 @@
     if (verbose && !(t instanceof StringIndexOutOfBoundsException) && !(t instanceof IllegalArgumentException)) {
       t.printStackTrace();
     }
-    printUsageAndExit(message);
+    printUsageAndExit(message,builder.getCompilerPlugins());
   }
   try {
     compiler.compile();
@@ -303,6 +315,6 @@
     if (verbose && !(t instanceof ExecuteException)) {
       t.printStackTrace();
     }
-    printUsageAndExit(message);
+    printUsageAndExit(message,builder.getCompilerPlugins());
   }
 }
