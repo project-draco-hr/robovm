@@ -1,0 +1,21 @@
+{
+  if (config.getPluginArguments() == null) {
+    return Collections.<String,String>emptyMap();
+  }
+  PluginArguments declaredArgs=getArguments();
+  Map<String,String> args=new HashMap<>();
+  for (  String arg : config.getPluginArguments()) {
+    String[] tokens=arg.split("=");
+    String[] argNameParts=tokens[0].split(":");
+    String prefix=argNameParts[0];
+    String argName=argNameParts[1];
+    String value="";
+    if (tokens.length == 2) {
+      value=tokens[1];
+    }
+    if (declaredArgs.getPrefix().equals(prefix) && declaredArgs.hasArgument(argName)) {
+      args.put(argName,value);
+    }
+  }
+  return args;
+}
