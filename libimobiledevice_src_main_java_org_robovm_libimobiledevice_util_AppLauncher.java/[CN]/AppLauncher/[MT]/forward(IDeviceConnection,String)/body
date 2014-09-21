@@ -1,0 +1,52 @@
+{
+  boolean wasInterrupted=false;
+  Socket clientSocket=null;
+  try (ServerSocket serverSocket=new ServerSocket(localPort)){
+    log("App path: " + appPath);
+    log("Waiting for GDB remote connection at http://127.0.0.1:" + localPort);
+    clientSocket=serverSocket.accept();
+    log("GDB remote client connected");
+  }
+   try {
+    final InputStream in=clientSocket.getInputStream();
+    final OutputStream out=clientSocket.getOutputStream();
+    while (true) {
+      try {
+        if (in.available() > 0) {
+          byte[] buffer=new byte[in.available()];
+          int readBytes=in.read(buffer);
+          conn.send(buffer,0,readBytes);
+          debugGdb("Sending packet (client): " + new String(buffer,"ASCII"));
+        }
+        try {
+          String response=receiveGdbPacket(conn,10);
+          writeMessage(out,response);
+          String payload=decode(response);
+          if (payload.length() > 0) {
+            if (payload.charAt(0) == 'W') {
+              int exitCode=Integer.parseInt(payload.substring(1),16);
+              return exitCode;
+            }
+ else             if (payload.charAt(0) == 'O') {
+              stdout.write(fromHex(payload.substring(1)));
+            }
+          }
+        }
+ catch (        TimeoutException e) {
+        }
+      }
+ catch (      InterruptedIOException e) {
+        wasInterrupted=Thread.currentThread().isInterrupted();
+        kill(conn);
+      }
+    }
+  }
+  finally {
+    if (clientSocket != null) {
+      clientSocket.close();
+    }
+    if (wasInterrupted) {
+      Thread.currentThread().interrupt();
+    }
+  }
+}
