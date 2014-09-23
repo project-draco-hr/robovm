@@ -1,0 +1,38 @@
+{
+  BooleanPtr p=Struct.allocate(BooleanPtr.class,5);
+  try {
+    p.get(new boolean[1],0,5);
+    fail("ArrayIndexOutOfBoundsException expected");
+  }
+ catch (  ArrayIndexOutOfBoundsException e) {
+  }
+  try {
+    p.get(new boolean[1],2,1);
+    fail("ArrayIndexOutOfBoundsException expected");
+  }
+ catch (  ArrayIndexOutOfBoundsException e) {
+  }
+  boolean[] array=new boolean[5];
+  p.get(array);
+  assertTrue(Arrays.equals(new boolean[5],array));
+  VM.setByte(p.getHandle(),(byte)1);
+  VM.setByte(p.getHandle() + 2,(byte)2);
+  VM.setByte(p.getHandle() + 4,(byte)3);
+  p.get(array);
+  assertTrue(Arrays.equals(new boolean[]{true,false,true,false,true},array));
+  Arrays.fill(array,false);
+  p.set(array);
+  p.get(array);
+  assertTrue(Arrays.equals(new boolean[5],array));
+  array[0]=false;
+  array[1]=true;
+  array[2]=false;
+  array[3]=true;
+  array[4]=false;
+  p.set(array);
+  assertEquals(0,VM.getByte(p.getHandle()));
+  assertEquals(1,VM.getByte(p.getHandle() + 1));
+  assertEquals(0,VM.getByte(p.getHandle() + 2));
+  assertEquals(1,VM.getByte(p.getHandle() + 3));
+  assertEquals(0,VM.getByte(p.getHandle() + 4));
+}
