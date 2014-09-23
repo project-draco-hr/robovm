@@ -187,7 +187,7 @@
         builder.iosSdkVersion(args[++i]);
       }
  else       if ("-printdevicetypes".equals(args[i])) {
-        printDeviceTypesAndExit();
+        printDeviceTypesAndExit(Home.find());
       }
  else       if ("-devicetype".equals(args[i])) {
         builder.iosDeviceType(args[++i]);
@@ -266,9 +266,9 @@
       LaunchParameters launchParameters=compiler.config.getTarget().createLaunchParameters();
       if (launchParameters instanceof IOSSimulatorLaunchParameters) {
         IOSSimulatorLaunchParameters simParams=(IOSSimulatorLaunchParameters)launchParameters;
-        DeviceType type=SDK.getDeviceType(compiler.config,compiler.config.getIosDeviceType());
+        DeviceType type=DeviceType.getDeviceType(compiler.config.getHome(),compiler.config.getIosDeviceType());
         if (type == null) {
-          simParams.setDeviceType(SDK.getBestDeviceType(compiler.config));
+          simParams.setDeviceType(DeviceType.getBestDeviceType(compiler.config.getHome()));
         }
  else {
           simParams.setDeviceType(type);
