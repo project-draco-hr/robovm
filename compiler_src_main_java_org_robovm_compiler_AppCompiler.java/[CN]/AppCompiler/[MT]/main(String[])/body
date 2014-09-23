@@ -6,7 +6,6 @@
   boolean createIpa=false;
   String dumpConfigFile=null;
   List<String> runArgs=new ArrayList<String>();
-  List<String> launchArgs=new ArrayList<String>();
   try {
     builder=new Config.Builder();
     Map<String,PluginArgument> pluginArguments=builder.fetchPluginArguments();
@@ -187,13 +186,11 @@
  else       if ("-sdk".equals(args[i])) {
         builder.iosSdkVersion(args[++i]);
       }
- else       if ("-ios-sim-family".equals(args[i])) {
-        launchArgs.add(args[i++]);
-        launchArgs.add(args[i]);
+ else       if ("-printdevicetypes".equals(args[i])) {
+        printDeviceTypesAndExit();
       }
- else       if ("-ios-sim-sdk".equals(args[i])) {
-        launchArgs.add(args[i++]);
-        launchArgs.add(args[i]);
+ else       if ("-devicetype".equals(args[i])) {
+        builder.iosDeviceType(args[++i]);
       }
  else       if ("-createipa".equals(args[i])) {
         createIpa=true;
@@ -267,37 +264,15 @@
     compiler.compile();
     if (run) {
       LaunchParameters launchParameters=compiler.config.getTarget().createLaunchParameters();
-      for (int i=0; i < launchArgs.size(); i++) {
-        String arg=launchArgs.get(i++);
-        if (arg.equals("-ios-sim-family")) {
-          if (launchParameters instanceof IOSSimulatorLaunchParameters) {
-            String name=launchArgs.get(i++);
-            try {
-              if (name.equals("iphone")) {
-                name=Family.iPhoneRetina4Inch.name();
-              }
- else               if (name.equals("ipad")) {
-                name=Family.iPadRetina.name();
-              }
-              ((IOSSimulatorLaunchParameters)launchParameters).setFamily(Family.valueOf(name));
-            }
- catch (            IllegalArgumentException e) {
-              throw new IllegalArgumentException("Illegal -ios-sim-family value: " + name);
-            }
-            continue;
-          }
+      if (launchParameters instanceof IOSSimulatorLaunchParameters) {
+        IOSSimulatorLaunchParameters simParams=(IOSSimulatorLaunchParameters)launchParameters;
+        DeviceType type=SDK.getDeviceType(compiler.config,compiler.config.getIosDeviceType());
+        if (type == null) {
+          simParams.setDeviceType(SDK.getBestDeviceType(compiler.config));
         }
-        if (arg.equals("-ios-sim-sdk")) {
-          if (launchParameters instanceof IOSSimulatorLaunchParameters) {
-            String value=launchArgs.get(i++);
-            if (!value.matches("\\d+\\.\\d+(\\.\\d+)?")) {
-              throw new IllegalArgumentException("Illegal -ios-sim-sdk value: " + value);
-            }
-            ((IOSSimulatorLaunchParameters)launchParameters).setSdk(value);
-            continue;
-          }
+ else {
+          simParams.setDeviceType(type);
         }
-        throw new IllegalArgumentException("Unsupported launch argument for the specified target: " + arg);
       }
       launchParameters.setArguments(runArgs);
       launch(compiler,launchParameters);
