@@ -1,0 +1,25 @@
+{
+  try {
+    String capture=new Executor(Logger.NULL_LOGGER,new File(home.getBinDir(),"ios-sim")).args("showdevicetypes").execCapture();
+    List<DeviceType> types=new ArrayList<DeviceType>();
+    String[] deviceTypeIds=capture.split("\n");
+    List<SDK> sdks=SDK.listSimulatorSDKs();
+    Map<String,SDK> sdkMap=new HashMap<>();
+    for (    SDK sdk : sdks) {
+      sdkMap.put(sdk.getVersion(),sdk);
+    }
+    for (    String deviceTypeId : deviceTypeIds) {
+      String[] tokens=deviceTypeId.split(",");
+      tokens[0]=tokens[0].trim();
+      tokens[1]=tokens[1].trim();
+      SDK sdk=sdkMap.get(tokens[1]);
+      if (sdk != null) {
+        types.add(new DeviceType(tokens[0],sdk));
+      }
+    }
+    return types;
+  }
+ catch (  IOException e) {
+    return Collections.<DeviceType>emptyList();
+  }
+}
