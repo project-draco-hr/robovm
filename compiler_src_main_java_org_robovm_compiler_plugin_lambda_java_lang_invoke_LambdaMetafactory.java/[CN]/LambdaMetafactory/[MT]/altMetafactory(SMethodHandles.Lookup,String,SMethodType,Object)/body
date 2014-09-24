@@ -1,0 +1,35 @@
+{
+  SMethodType samMethodType=(SMethodType)args[0];
+  SMethodHandle implMethod=(SMethodHandle)args[1];
+  SMethodType instantiatedMethodType=(SMethodType)args[2];
+  int flags=(Integer)args[3];
+  SClass<?>[] markerInterfaces;
+  SMethodType[] bridges;
+  int argIndex=4;
+  if ((flags & FLAG_MARKERS) != 0) {
+    int markerCount=(Integer)args[argIndex++];
+    markerInterfaces=new SClass<?>[markerCount];
+    System.arraycopy(args,argIndex,markerInterfaces,0,markerCount);
+    argIndex+=markerCount;
+  }
+ else   markerInterfaces=EMPTY_CLASS_ARRAY;
+  if ((flags & FLAG_BRIDGES) != 0) {
+    int bridgeCount=(Integer)args[argIndex++];
+    bridges=new SMethodType[bridgeCount];
+    System.arraycopy(args,argIndex,bridges,0,bridgeCount);
+    argIndex+=bridgeCount;
+  }
+ else   bridges=EMPTY_MT_ARRAY;
+  boolean isSerializable=((flags & FLAG_SERIALIZABLE) != 0);
+  if (isSerializable) {
+    boolean foundSerializableSupertype=SClass.SerializableClass.isAssignableFrom(invokedType.returnType());
+    for (    SClass<?> c : markerInterfaces)     foundSerializableSupertype|=SClass.SerializableClass.isAssignableFrom(c);
+    if (!foundSerializableSupertype) {
+      markerInterfaces=Arrays.copyOf(markerInterfaces,markerInterfaces.length + 1);
+      markerInterfaces[markerInterfaces.length - 1]=SClass.SerializableClass;
+    }
+  }
+  AbstractValidatingLambdaMetafactory mf=new InnerClassLambdaMetafactory(caller,invokedType,invokedName,samMethodType,implMethod,instantiatedMethodType,isSerializable,markerInterfaces,bridges);
+  mf.validateMetafactoryArgs();
+  return mf.buildCallSite();
+}

@@ -1,0 +1,31 @@
+{
+  if (clazz.isInterface()) {
+    throw new IllegalArgumentException("Expected a class got an interface: " + clazz.getName());
+  }
+  ArrayConstantBuilder table=new ArrayConstantBuilder(I8_PTR);
+  for (  Entry entry : entries) {
+    ResolvedEntry resolvedEntry=entry.resolve(clazz);
+    if (resolvedEntry == null) {
+      FunctionRef defaultFunctionRef=entry.getFunctionRef();
+      if (defaultFunctionRef != null) {
+        if (!mb.hasSymbol(defaultFunctionRef.getName())) {
+          mb.addFunctionDeclaration(new FunctionDeclaration(defaultFunctionRef));
+        }
+        table.add(new ConstantBitcast(defaultFunctionRef,I8_PTR));
+      }
+ else {
+        table.add(new ConstantBitcast(BC_ABSTRACT_METHOD_CALLED,I8_PTR));
+      }
+    }
+ else     if (Modifier.isAbstract(resolvedEntry.getModifiers())) {
+      table.add(new ConstantBitcast(BC_ABSTRACT_METHOD_CALLED,I8_PTR));
+    }
+ else     if (!Modifier.isPublic(resolvedEntry.getModifiers())) {
+      table.add(new ConstantBitcast(BC_NON_PUBLIC_METHOD_CALLED,I8_PTR));
+    }
+ else {
+      table.add(new ConstantBitcast(resolvedEntry.getFunctionRef(),I8_PTR));
+    }
+  }
+  return new StructureConstantBuilder().add(new IntegerConstant((short)entries.length)).add(table.build()).build();
+}

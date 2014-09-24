@@ -1,0 +1,33 @@
+{
+  if (this == that) {
+    return true;
+  }
+  String thisDescriptor=this.getDescriptor();
+  String thatDescriptor=that.getDescriptor();
+  if (thisDescriptor.equals(thatDescriptor)) {
+    return true;
+  }
+  if (this.isPrimitive() || that.isPrimitive()) {
+    return false;
+  }
+  if (ObjectClass.getDescriptor().equals(thisDescriptor)) {
+    return true;
+  }
+  if (this.isArray()) {
+    if (!that.isArray()) {
+      return false;
+    }
+    return this.getComponentType().isAssignableFrom(that.getComponentType());
+  }
+  if (this.isInterface()) {
+    return that.implementsInterface(this);
+  }
+  SClass<?> superclass=this.getSuperclass();
+  while (superclass != null) {
+    if (superclass.getDescriptor().equals(thatDescriptor)) {
+      return true;
+    }
+    superclass=this.getSuperclass();
+  }
+  return false;
+}
