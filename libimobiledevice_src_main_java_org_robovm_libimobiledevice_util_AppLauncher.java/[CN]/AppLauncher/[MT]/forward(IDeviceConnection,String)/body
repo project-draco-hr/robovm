@@ -15,7 +15,10 @@
         if (in.available() > 0) {
           byte[] buffer=new byte[in.available()];
           int readBytes=in.read(buffer);
-          conn.send(buffer,0,readBytes);
+          int sent=0;
+          while (sent != readBytes) {
+            sent+=conn.send(buffer,sent,readBytes - sent);
+          }
           debugGdb("Sending packet (client): " + new String(buffer,"ASCII"));
         }
         try {
