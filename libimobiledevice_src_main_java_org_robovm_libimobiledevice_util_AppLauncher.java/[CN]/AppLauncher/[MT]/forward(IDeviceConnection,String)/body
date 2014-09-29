@@ -7,35 +7,33 @@
     clientSocket=serverSocket.accept();
     log("GDB remote client connected");
   }
-   try {
+   try (FileOutputStream fileOut=new FileOutputStream("/tmp/dbgout")){
     final InputStream in=clientSocket.getInputStream();
     final OutputStream out=clientSocket.getOutputStream();
+    byte[] buffer=new byte[4096];
+    GdbRemoteParser lldbParser=new GdbRemoteParser();
+    GdbRemoteParser debugServerParser=new GdbRemoteParser();
     while (true) {
       try {
         if (in.available() > 0) {
-          byte[] buffer=new byte[in.available()];
           int readBytes=in.read(buffer);
           int sent=0;
           while (sent != readBytes) {
             sent+=conn.send(buffer,sent,readBytes - sent);
           }
-          debugGdb("Sending packet (client): " + new String(buffer,"ASCII"));
+          List<byte[]> messages=lldbParser.parse(buffer,0,readBytes);
+          debugForward(fileOut,"lldb->debugserver: ",messages);
         }
         try {
-          String response=receiveGdbPacket(conn,10);
-          writeMessage(out,response);
-          String payload=decode(response);
-          if (payload.length() > 0) {
-            if (payload.charAt(0) == 'W') {
-              int exitCode=Integer.parseInt(payload.substring(1),16);
-              return exitCode;
-            }
- else             if (payload.charAt(0) == 'O') {
-              stdout.write(fromHex(payload.substring(1)));
-            }
+          int readBytes=conn.receive(buffer,0,buffer.length,1);
+          if (readBytes > 0) {
+            out.write(buffer,0,readBytes);
+            out.flush();
+            List<byte[]> messages=debugServerParser.parse(buffer,0,readBytes);
+            debugForward(fileOut,"debugserver->lldb: ",messages);
           }
         }
- catch (        TimeoutException e) {
+ catch (        Exception e) {
         }
       }
  catch (      InterruptedIOException e) {

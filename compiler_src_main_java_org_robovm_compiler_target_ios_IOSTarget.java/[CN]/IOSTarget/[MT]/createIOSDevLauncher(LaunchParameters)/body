@@ -1,5 +1,7 @@
 {
-  String deviceId=((IOSDeviceLaunchParameters)launchParameters).getDeviceId();
+  IOSDeviceLaunchParameters deviceLaunchParameters=(IOSDeviceLaunchParameters)launchParameters;
+  String deviceId=deviceLaunchParameters.getDeviceId();
+  int forwardPort=deviceLaunchParameters.getForwardPort();
   if (deviceId == null) {
     String[] udids=IDevice.listUdids();
     if (udids.length == 0) {
@@ -27,7 +29,7 @@
       config.getLogger().debug(s,args);
     }
   }
-.stdout(out).closeOutOnExit(true).args(launchParameters.getArguments().toArray(new String[0])).env(env).xcodePath(ToolchainUtil.findXcodePath()).uploadProgressCallback(new UploadProgressCallback(){
+.stdout(out).closeOutOnExit(true).args(launchParameters.getArguments().toArray(new String[0])).env(env).debug(config.isDebug()).forward(forwardPort).xcodePath(ToolchainUtil.findXcodePath()).uploadProgressCallback(new UploadProgressCallback(){
     boolean first=true;
     public void success(){
       config.getLogger().debug("[100%%] Upload complete");
