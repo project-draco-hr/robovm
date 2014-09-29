@@ -30,6 +30,15 @@
             out.write(buffer,0,readBytes);
             out.flush();
             List<byte[]> messages=debugServerParser.parse(buffer,0,readBytes);
+            for (            byte[] message : messages) {
+              if (message[1] == 'W') {
+                int exitCode=Integer.parseInt(new String(message,2,message.length - 2 - 3,"ASCII"),16);
+                return exitCode;
+              }
+ else               if (message[1] == 'O') {
+                stdout.write(fromHex(message,2,message.length - 2 - 3));
+              }
+            }
             debugForward(fileOut,"debugserver->lldb: ",messages);
           }
         }
