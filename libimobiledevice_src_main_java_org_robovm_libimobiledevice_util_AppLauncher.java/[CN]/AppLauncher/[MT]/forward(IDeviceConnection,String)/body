@@ -2,37 +2,46 @@
   boolean wasInterrupted=false;
   Socket clientSocket=null;
   try (ServerSocket serverSocket=new ServerSocket(localPort)){
-    log("App path: " + appPath);
     log("Waiting for GDB remote connection at http://127.0.0.1:" + localPort);
     clientSocket=serverSocket.accept();
     log("GDB remote client connected");
   }
-   try {
+   try (FileOutputStream fileOut=new FileOutputStream("/tmp/dbgout")){
     final InputStream in=clientSocket.getInputStream();
     final OutputStream out=clientSocket.getOutputStream();
+    byte[] buffer=new byte[4096];
+    GdbRemoteParser lldbParser=new GdbRemoteParser();
+    GdbRemoteParser debugServerParser=new GdbRemoteParser();
     while (true) {
       try {
         if (in.available() > 0) {
-          byte[] buffer=new byte[in.available()];
           int readBytes=in.read(buffer);
-          conn.send(buffer,0,readBytes);
-          debugGdb("Sending packet (client): " + new String(buffer,"ASCII"));
+          int sent=0;
+          while (sent != readBytes) {
+            sent+=conn.send(buffer,sent,readBytes - sent);
+          }
+          List<byte[]> messages=lldbParser.parse(buffer,0,readBytes);
+          debugForward(fileOut,"lldb->debugserver: ",messages);
         }
         try {
-          String response=receiveGdbPacket(conn,10);
-          writeMessage(out,response);
-          String payload=decode(response);
-          if (payload.length() > 0) {
-            if (payload.charAt(0) == 'W') {
-              int exitCode=Integer.parseInt(payload.substring(1),16);
-              return exitCode;
+          int readBytes=conn.receive(buffer,0,buffer.length,1);
+          if (readBytes > 0) {
+            out.write(buffer,0,readBytes);
+            out.flush();
+            List<byte[]> messages=debugServerParser.parse(buffer,0,readBytes);
+            for (            byte[] message : messages) {
+              if (message[1] == 'W') {
+                int exitCode=Integer.parseInt(new String(message,2,message.length - 2 - 3,"ASCII"),16);
+                return exitCode;
+              }
+ else               if (message[1] == 'O') {
+                stdout.write(fromHex(message,2,message.length - 2 - 3));
+              }
             }
- else             if (payload.charAt(0) == 'O') {
-              stdout.write(fromHex(payload.substring(1)));
-            }
+            debugForward(fileOut,"debugserver->lldb: ",messages);
           }
         }
- catch (        TimeoutException e) {
+ catch (        Exception e) {
         }
       }
  catch (      InterruptedIOException e) {
