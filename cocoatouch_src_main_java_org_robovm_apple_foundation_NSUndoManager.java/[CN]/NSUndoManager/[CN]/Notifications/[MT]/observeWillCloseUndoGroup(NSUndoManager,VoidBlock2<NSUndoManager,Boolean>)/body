@@ -1,0 +1,14 @@
+{
+  return NSNotificationCenter.getDefaultCenter().addObserver(WillCloseUndoGroupNotification(),object,NSOperationQueue.getMainQueue(),new VoidBlock1<NSNotification>(){
+    @Override public void invoke(    NSNotification a){
+      boolean b=false;
+      NSDictionary<NSString,NSObject> data=a.getUserInfo();
+      if (data.containsKey(GroupIsDiscardableKey())) {
+        NSNumber val=(NSNumber)data.get(GroupIsDiscardableKey());
+        b=val.booleanValue();
+      }
+      block.invoke((NSUndoManager)a.getObject(),b);
+    }
+  }
+);
+}

@@ -1,0 +1,14 @@
+{
+  return NSNotificationCenter.getDefaultCenter().addObserver(DidLoadNotification(),object,NSOperationQueue.getMainQueue(),new VoidBlock1<NSNotification>(){
+    @SuppressWarnings("unchecked") @Override public void invoke(    NSNotification a){
+      List<String> classes=null;
+      NSDictionary<NSString,NSObject> data=a.getUserInfo();
+      if (data.containsKey(LoadedClassesKey())) {
+        NSArray<NSString> val=(NSArray<NSString>)data.get(LoadedClassesKey());
+        classes=val.asStringList();
+      }
+      block.invoke((NSBundle)a.getObject(),classes);
+    }
+  }
+);
+}
