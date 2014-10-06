@@ -23,6 +23,10 @@
           List<byte[]> messages=lldbParser.parse(buffer,0,readBytes);
           debugForward(fileOut,"lldb->debugserver: ",messages);
         }
+        if (killed || Thread.currentThread().isInterrupted()) {
+          killed=true;
+          throw new InterruptedIOException();
+        }
         try {
           int readBytes=conn.receive(buffer,0,buffer.length,1);
           if (readBytes > 0) {
@@ -42,6 +46,9 @@
           }
         }
  catch (        Exception e) {
+          if (e instanceof LibIMobileDeviceException) {
+            throw new InterruptedIOException(e.getMessage());
+          }
         }
       }
  catch (      InterruptedIOException e) {
