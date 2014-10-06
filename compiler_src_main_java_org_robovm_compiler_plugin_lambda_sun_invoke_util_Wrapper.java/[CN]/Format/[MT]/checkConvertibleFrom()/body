@@ -1,0 +1,39 @@
+{
+  for (  Wrapper w : values()) {
+    assert(w.isConvertibleFrom(w));
+    assert(VOID.isConvertibleFrom(w));
+    if (w != VOID) {
+      assert(OBJECT.isConvertibleFrom(w));
+      assert(!w.isConvertibleFrom(VOID));
+    }
+    if (w != CHAR) {
+      assert(!CHAR.isConvertibleFrom(w));
+      if (!w.isConvertibleFrom(INT))       assert(!w.isConvertibleFrom(CHAR));
+    }
+    if (w != BOOLEAN) {
+      assert(!BOOLEAN.isConvertibleFrom(w));
+      if (w != VOID && w != OBJECT)       assert(!w.isConvertibleFrom(BOOLEAN));
+    }
+    if (w.isSigned()) {
+      for (      Wrapper x : values()) {
+        if (w == x)         continue;
+        if (x.isFloating())         assert(!w.isConvertibleFrom(x));
+ else         if (x.isSigned()) {
+          if (w.compareTo(x) < 0)           assert(!w.isConvertibleFrom(x));
+ else           assert(w.isConvertibleFrom(x));
+        }
+      }
+    }
+    if (w.isFloating()) {
+      for (      Wrapper x : values()) {
+        if (w == x)         continue;
+        if (x.isSigned())         assert(w.isConvertibleFrom(x));
+ else         if (x.isFloating()) {
+          if (w.compareTo(x) < 0)           assert(!w.isConvertibleFrom(x));
+ else           assert(w.isConvertibleFrom(x));
+        }
+      }
+    }
+  }
+  return true;
+}

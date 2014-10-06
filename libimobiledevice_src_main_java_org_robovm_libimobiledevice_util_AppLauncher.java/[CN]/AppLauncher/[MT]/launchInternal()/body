@@ -4,6 +4,9 @@
   String appPath=null;
   try (LockdowndClient lockdowndClient=new LockdowndClient(device,getClass().getSimpleName(),true)){
     appPath=getAppPath(lockdowndClient,appId);
+    if (appPathCallback != null) {
+      appPathCallback.setRemoteAppPath(appPath);
+    }
     LockdowndServiceDescriptor debugService=null;
     try {
       debugService=lockdowndClient.startService(DEBUG_SERVER_SERVICE_NAME);
@@ -20,7 +23,8 @@
     conn=device.connect(debugService.getPort());
     log("Debug server port: " + debugService.getPort());
   }
-   log("Launching app...");
+   log("Remote app path: " + appPath);
+  log("Launching app...");
   try {
     if (localPort == -1) {
       return pipeStdOut(conn,appPath);

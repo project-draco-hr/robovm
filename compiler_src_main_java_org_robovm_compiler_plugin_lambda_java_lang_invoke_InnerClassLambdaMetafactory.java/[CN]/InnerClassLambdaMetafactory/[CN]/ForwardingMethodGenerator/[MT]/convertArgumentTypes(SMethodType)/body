@@ -1,0 +1,19 @@
+{
+  int lvIndex=0;
+  boolean samIncludesReceiver=implIsInstanceMethod && invokedType.parameterCount() == 0;
+  int samReceiverLength=samIncludesReceiver ? 1 : 0;
+  if (samIncludesReceiver) {
+    SClass<?> rcvrType=samType.parameterType(0);
+    visitVarInsn(getLoadOpcode(rcvrType),lvIndex + 1);
+    lvIndex+=getParameterSize(rcvrType);
+    convertType(rcvrType,implDefiningClass,instantiatedMethodType.parameterType(0));
+  }
+  int samParametersLength=samType.parameterCount();
+  int argOffset=implMethodType.parameterCount() - samParametersLength;
+  for (int i=samReceiverLength; i < samParametersLength; i++) {
+    SClass<?> argType=samType.parameterType(i);
+    visitVarInsn(getLoadOpcode(argType),lvIndex + 1);
+    lvIndex+=getParameterSize(argType);
+    convertType(argType,implMethodType.parameterType(argOffset + i),instantiatedMethodType.parameterType(i));
+  }
+}

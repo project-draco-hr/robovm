@@ -1,0 +1,39 @@
+{
+  String[] interfaces;
+  String samIntf=samBase.getName().replace('.','/');
+  boolean accidentallySerializable=!isSerializable && SClass.SerializableClass.isAssignableFrom(samBase);
+  if (markerInterfaces.length == 0) {
+    interfaces=new String[]{samIntf};
+  }
+ else {
+    Set<String> itfs=new LinkedHashSet<>(markerInterfaces.length + 1);
+    itfs.add(samIntf);
+    for (    SClass<?> markerInterface : markerInterfaces) {
+      itfs.add(markerInterface.getName().replace('.','/'));
+      accidentallySerializable|=!isSerializable && SClass.SerializableClass.isAssignableFrom(markerInterface);
+    }
+    interfaces=itfs.toArray(new String[itfs.size()]);
+  }
+  cw.visit(CLASSFILE_VERSION,ACC_SUPER + ACC_FINAL + ACC_SYNTHETIC,lambdaClassName,null,JAVA_LANG_OBJECT,interfaces);
+  for (int i=0; i < argDescs.length; i++) {
+    FieldVisitor fv=cw.visitField(ACC_PRIVATE + ACC_FINAL,argNames[i],argDescs[i],null,null);
+    fv.visitEnd();
+  }
+  generateConstructor();
+  if (invokedType.parameterCount() != 0) {
+    generateFactory();
+  }
+  MethodVisitor mv=cw.visitMethod(ACC_PUBLIC,samMethodName,samMethodType.toMethodDescriptorString(),null,null);
+  new ForwardingMethodGenerator(mv).generate(samMethodType);
+  if (additionalBridges != null) {
+    for (    SMethodType mt : additionalBridges) {
+      mv=cw.visitMethod(ACC_PUBLIC | ACC_BRIDGE,samMethodName,mt.toMethodDescriptorString(),null,null);
+      new ForwardingMethodGenerator(mv).generate(mt);
+    }
+  }
+  if (isSerializable)   generateSerializationFriendlyMethods();
+ else   if (accidentallySerializable)   generateSerializationHostileMethods();
+  cw.visitEnd();
+  final byte[] classBytes=cw.toByteArray();
+  return classBytes;
+}

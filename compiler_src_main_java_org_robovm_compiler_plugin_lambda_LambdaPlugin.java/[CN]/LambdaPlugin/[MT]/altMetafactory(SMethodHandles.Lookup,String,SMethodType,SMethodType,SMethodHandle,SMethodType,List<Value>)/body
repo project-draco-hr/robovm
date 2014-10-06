@@ -1,0 +1,24 @@
+{
+  int flags=((IntConstant)bsmArgs.get(3)).value;
+  List<Object> args=new ArrayList<>();
+  args.add(samMethodType);
+  args.add(implMethod);
+  args.add(instantiatedMethodType);
+  args.add(flags);
+  int bsmArgsIdx=4;
+  if ((flags & LambdaMetafactory.FLAG_MARKERS) > 0) {
+    int count=((IntConstant)bsmArgs.get(bsmArgsIdx++)).value;
+    args.add(count);
+    for (int i=0; i < count; i++) {
+      args.add(SootSClass.forType((soot.Type)bsmArgs.get(bsmArgsIdx++)));
+    }
+  }
+  if ((flags & LambdaMetafactory.FLAG_BRIDGES) > 0) {
+    int count=((IntConstant)bsmArgs.get(bsmArgsIdx++)).value;
+    args.add(count);
+    for (int i=0; i < count; i++) {
+      args.add(toSMethodType((SootMethodType)bsmArgs.get(bsmArgsIdx++)));
+    }
+  }
+  return LambdaMetafactory.altMetafactory(caller,invokedName,invokedType,args.toArray());
+}

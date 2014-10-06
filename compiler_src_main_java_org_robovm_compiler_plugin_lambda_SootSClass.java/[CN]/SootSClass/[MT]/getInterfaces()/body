@@ -1,0 +1,15 @@
+{
+  if (isPrimitive()) {
+    return null;
+  }
+  if (isArray()) {
+    return new SClass[]{SClass.CloneableClass,SClass.SerializableClass};
+  }
+  RefType refType=(RefType)type;
+  SootClass sc=refType.getSootClass();
+  List<SClass<?>> result=new ArrayList<>();
+  for (  SootClass ifs : sc.getInterfaces()) {
+    result.add(forType(ifs.getType()));
+  }
+  return result.toArray(new SClass[result.size()]);
+}

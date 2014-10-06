@@ -1,0 +1,16 @@
+{
+  MethodVisitor m=cw.visitMethod(ACC_STATIC,NAME_FACTORY,invokedType.toMethodDescriptorString(),null,null);
+  m.visitCode();
+  m.visitTypeInsn(NEW,lambdaClassName);
+  m.visitInsn(Opcodes.DUP);
+  int parameterCount=invokedType.parameterCount();
+  for (int typeIndex=0, varIndex=0; typeIndex < parameterCount; typeIndex++) {
+    SClass<?> argType=invokedType.parameterType(typeIndex);
+    m.visitVarInsn(getLoadOpcode(argType),varIndex);
+    varIndex+=getParameterSize(argType);
+  }
+  m.visitMethodInsn(INVOKESPECIAL,lambdaClassName,NAME_CTOR,constructorType.toMethodDescriptorString());
+  m.visitInsn(ARETURN);
+  m.visitMaxs(-1,-1);
+  m.visitEnd();
+}

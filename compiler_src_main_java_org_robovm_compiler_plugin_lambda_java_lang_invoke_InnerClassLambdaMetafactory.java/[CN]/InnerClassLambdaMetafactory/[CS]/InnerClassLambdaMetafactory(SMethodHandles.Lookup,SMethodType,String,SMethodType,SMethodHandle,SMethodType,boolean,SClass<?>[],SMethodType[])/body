@@ -1,0 +1,22 @@
+{
+  super(caller,invokedType,samMethodName,samMethodType,implMethod,instantiatedMethodType,isSerializable,markerInterfaces,additionalBridges);
+  implMethodClassName=implDefiningClass.getName().replace('.','/');
+  implMethodName=implInfo.getName();
+  implMethodDesc=implMethodType.toMethodDescriptorString();
+  implMethodReturnClass=(implKind == SMethodHandleInfo.REF_newInvokeSpecial) ? implDefiningClass : implMethodType.returnType();
+  constructorType=invokedType.changeReturnType(SClass.voidClass);
+  lambdaClassName=targetClass.getName().replace('.','/') + "$$Lambda$" + counter.incrementAndGet();
+  cw=new ClassWriter(ClassWriter.COMPUTE_MAXS);
+  int parameterCount=invokedType.parameterCount();
+  if (parameterCount > 0) {
+    argNames=new String[parameterCount];
+    argDescs=new String[parameterCount];
+    for (int i=0; i < parameterCount; i++) {
+      argNames[i]="arg$" + (i + 1);
+      argDescs[i]=BytecodeDescriptor.unparse(invokedType.parameterType(i));
+    }
+  }
+ else {
+    argNames=argDescs=EMPTY_STRING_ARRAY;
+  }
+}

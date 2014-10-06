@@ -1,0 +1,17 @@
+{
+  MethodVisitor ctor=cw.visitMethod(0,NAME_CTOR,constructorType.toMethodDescriptorString(),null,null);
+  ctor.visitCode();
+  ctor.visitVarInsn(ALOAD,0);
+  ctor.visitMethodInsn(INVOKESPECIAL,JAVA_LANG_OBJECT,NAME_CTOR,METHOD_DESCRIPTOR_VOID);
+  int parameterCount=invokedType.parameterCount();
+  for (int i=0, lvIndex=0; i < parameterCount; i++) {
+    ctor.visitVarInsn(ALOAD,0);
+    SClass<?> argType=invokedType.parameterType(i);
+    ctor.visitVarInsn(getLoadOpcode(argType),lvIndex + 1);
+    lvIndex+=getParameterSize(argType);
+    ctor.visitFieldInsn(PUTFIELD,lambdaClassName,argNames[i],argDescs[i]);
+  }
+  ctor.visitInsn(RETURN);
+  ctor.visitMaxs(-1,-1);
+  ctor.visitEnd();
+}

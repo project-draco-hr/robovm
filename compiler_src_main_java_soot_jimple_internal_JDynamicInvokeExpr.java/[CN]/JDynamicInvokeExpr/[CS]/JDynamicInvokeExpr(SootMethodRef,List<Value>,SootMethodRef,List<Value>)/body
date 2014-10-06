@@ -8,7 +8,13 @@
   this.bsmArgBoxes=new ValueBox[bootstrapArgs.size()];
   this.argBoxes=new ValueBox[methodArgs.size()];
   for (int i=0; i < bootstrapArgs.size(); i++) {
-    this.bsmArgBoxes[i]=Jimple.v().newImmediateBox((Value)bootstrapArgs.get(i));
+    Value v=bootstrapArgs.get(i);
+    if (v instanceof InvokeExpr) {
+      this.bsmArgBoxes[i]=Jimple.v().newInvokeExprBox(v);
+    }
+ else {
+      this.bsmArgBoxes[i]=Jimple.v().newImmediateBox(v);
+    }
   }
   for (int i=0; i < methodArgs.size(); i++) {
     this.argBoxes[i]=Jimple.v().newImmediateBox((Value)methodArgs.get(i));

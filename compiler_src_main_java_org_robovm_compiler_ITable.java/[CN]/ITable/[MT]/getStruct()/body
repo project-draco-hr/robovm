@@ -1,7 +1,12 @@
 {
   ArrayConstantBuilder table=new ArrayConstantBuilder(I8_PTR);
-  for (int i=0; i < entries.length; i++) {
-    table.add(new ConstantBitcast(BC_ABSTRACT_METHOD_CALLED,I8_PTR));
+  for (  Entry entry : entries) {
+    if (!Modifier.isAbstract(entry.getModifiers())) {
+      table.add(new ConstantBitcast(entry.getFunctionRef(),I8_PTR));
+    }
+ else {
+      table.add(new ConstantBitcast(BC_ABSTRACT_METHOD_CALLED,I8_PTR));
+    }
   }
   return new StructureConstantBuilder().add(new IntegerConstant((short)entries.length)).add(table.build()).build();
 }
