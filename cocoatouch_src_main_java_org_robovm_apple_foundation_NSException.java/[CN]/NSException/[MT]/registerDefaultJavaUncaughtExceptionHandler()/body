@@ -7,7 +7,13 @@
       pw.flush();
       Foundation.log(sw.toString());
       NSException exception=new NSException(ex.getClass().getName(),sw.toString(),new NSDictionary<>());
-      exception.raise();
+      if (NSThread.getCurrentThread().isMainThread()) {
+        exception.raise();
+      }
+ else {
+        long handler=getUncaughtExceptionHandler();
+        callUncaughtExceptionHandler(handler,exception);
+      }
     }
   }
 );

@@ -1,0 +1,19 @@
+{
+  return NSNotificationCenter.getDefaultCenter().addObserver(DidChangeExternallyNotification(),object,NSOperationQueue.getMainQueue(),new VoidBlock1<NSNotification>(){
+    @Override public void invoke(    NSNotification a){
+      String reason=null;
+      List<String> keys=null;
+      NSDictionary<NSString,NSObject> data=a.getUserInfo();
+      if (data.containsKey(ChangeReasonKey())) {
+        NSString val=(NSString)data.get(ChangeReasonKey());
+        reason=val.toString();
+      }
+      if (data.containsKey(ChangedKeysKey())) {
+        @SuppressWarnings("unchecked") NSArray<NSString> val=(NSArray<NSString>)data.get(ChangedKeysKey());
+        keys=val.asStringList();
+      }
+      block.invoke((NSUbiquitousKeyValueStore)a.getObject(),reason,keys);
+    }
+  }
+);
+}
