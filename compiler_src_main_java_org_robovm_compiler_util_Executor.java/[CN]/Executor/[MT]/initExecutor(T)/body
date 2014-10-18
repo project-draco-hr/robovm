@@ -18,6 +18,12 @@
     if (in != null) {
       pumpIn=in;
     }
+    if (pumpOut == System.out) {
+      pumpOut=new NeverCloseOutputStream(pumpOut);
+    }
+    if (pumpErr == System.err) {
+      pumpErr=new NeverCloseOutputStream(pumpErr);
+    }
     executor.setStreamHandler(new PumpStreamHandler(pumpOut,pumpErr,pumpIn){
       @Override protected Thread createPump(      InputStream is,      OutputStream os,      boolean closeWhenExhausted){
         return super.createPump(is,os,closeOutputStreams ? true : closeWhenExhausted);

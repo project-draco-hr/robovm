@@ -1,0 +1,21 @@
+{
+  for (  LaunchPlugin plugin : config.getLaunchPlugins()) {
+    plugin.beforeLaunch(config,launchParameters);
+    if (inputStream != null && plugin instanceof RequiresInputStream) {
+      ((RequiresInputStream)plugin).setInputStream(inputStream);
+    }
+  }
+  try {
+    Process process=config.getTarget().launch(launchParameters);
+    for (    LaunchPlugin plugin : config.getLaunchPlugins()) {
+      plugin.afterLaunch(config,launchParameters,process);
+    }
+    return process;
+  }
+ catch (  Throwable e) {
+    for (    LaunchPlugin plugin : config.getLaunchPlugins()) {
+      plugin.launchFailed(config,launchParameters);
+    }
+    throw e;
+  }
+}
