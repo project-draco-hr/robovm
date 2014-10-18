@@ -1,0 +1,34 @@
+{
+  File testPropsFile=new File(basedir,"robovm.test.properties");
+  File localPropsFile=new File(basedir,"robovm.local.properties");
+  File propsFile=new File(basedir,"robovm.properties");
+  if (isTest && testPropsFile.exists()) {
+    addProperties(testPropsFile);
+  }
+ else {
+    Properties props=new Properties();
+    if (propsFile.exists()) {
+      try (Reader reader=new InputStreamReader(new FileInputStream(propsFile),"utf-8")){
+        props.load(reader);
+      }
+     }
+    if (localPropsFile.exists()) {
+      try (Reader reader=new InputStreamReader(new FileInputStream(localPropsFile),"utf-8")){
+        props.load(reader);
+      }
+     }
+    if (isTest) {
+      String appId=props.getProperty("app.id");
+      if (appId != null && !appId.endsWith("Test")) {
+        appId=appId + "Test";
+        props.setProperty("app.id",appId);
+      }
+      String appName=props.getProperty("app.name");
+      if (appName != null && !appName.endsWith("Test")) {
+        appName=appName + "Test";
+        props.setProperty("app.name",appName);
+      }
+    }
+    addProperties(props);
+  }
+}
