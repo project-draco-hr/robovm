@@ -102,7 +102,7 @@
         mb.addFunction(fnShort);
         targetFn=fnShort.ref();
       }
-      Function fn=new FunctionBuilder(nc).linkage(_private).attribs(alwaysinline,optsize).build();
+      Function fn=new FunctionBuilder(nc).linkage(_private).attribs(shouldInline(),optsize).build();
       Value result=call(fn,targetFn,fn.getParameterRefs());
       fn.add(new Ret(result));
       mb.addFunction(fn);
@@ -110,7 +110,7 @@
  else {
       Global g=new Global(Symbols.nativeMethodPtrSymbol(nc),new NullConstant(I8_PTR));
       mb.addGlobal(g);
-      Function fn=new FunctionBuilder(nc).linkage(_private).attribs(alwaysinline,optsize).build();
+      Function fn=new FunctionBuilder(nc).linkage(_private).attribs(shouldInline(),optsize).build();
       FunctionRef ldcFn=FunctionBuilder.ldcInternal(nc.getTarget()).ref();
       Value theClass=call(fn,ldcFn,fn.getParameterRef(0));
       Value implI8Ptr=call(fn,BC_RESOLVE_NATIVE,fn.getParameterRef(0),theClass,mb.getString(nc.getMethodName()),mb.getString(nc.getMethodDesc()),mb.getString(mangleNativeMethod(nc.getTarget(),nc.getMethodName())),mb.getString(mangleNativeMethod(nc.getTarget(),nc.getMethodName(),nc.getMethodDesc())),g.ref());
