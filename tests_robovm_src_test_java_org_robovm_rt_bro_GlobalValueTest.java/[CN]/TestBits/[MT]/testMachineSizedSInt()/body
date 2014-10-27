@@ -1,16 +1,34 @@
 {
-  assertEquals(0,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(0));
-  assertEquals(0,machineSizedSIntGetter());
-  machineSizedSIntSetter(-1);
-  assertEquals(-1,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(0));
-  assertEquals(-1,machineSizedSIntGetter());
-  assertEquals(0,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(1));
-  machineSizedSIntSetter(0x80000000);
-  assertEquals(0x80000000,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(0));
-  assertEquals(0xffffffff80000000L,machineSizedSIntGetter());
-  assertEquals(0,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(1));
-  machineSizedSIntSetter(0x1234567880000000L);
-  assertEquals(0x80000000,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(0));
-  assertEquals(0xffffffff80000000L,machineSizedSIntGetter());
-  assertEquals(0,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(1));
+  if (Bro.IS_32BIT) {
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(0));
+    assertEquals(0,machineSizedSIntGetter());
+    machineSizedSIntSetter(-1);
+    assertEquals(-1,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(0));
+    assertEquals(-1,machineSizedSIntGetter());
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(1));
+    machineSizedSIntSetter(0x80000000L);
+    assertEquals(0xffffffff80000000L,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(0));
+    assertEquals(0xffffffff80000000L,machineSizedSIntGetter());
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(1));
+    machineSizedSIntSetter(0x1234567880000000L);
+    assertEquals(0xffffffff80000000L,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(0));
+    assertEquals(0xffffffff80000000L,machineSizedSIntGetter());
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(1));
+  }
+ else {
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asLongBuffer().get(0));
+    assertEquals(0,machineSizedSIntGetter());
+    machineSizedSIntSetter(-1);
+    assertEquals(-1,memory.order(ByteOrder.nativeOrder()).asLongBuffer().get(0));
+    assertEquals(-1,machineSizedSIntGetter());
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asLongBuffer().get(1));
+    machineSizedSIntSetter(0x80000000L);
+    assertEquals(0x80000000L,memory.order(ByteOrder.nativeOrder()).asLongBuffer().get(0));
+    assertEquals(0x80000000L,machineSizedSIntGetter());
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asLongBuffer().get(1));
+    machineSizedSIntSetter(0x1234567880000000L);
+    assertEquals(0x1234567880000000L,memory.order(ByteOrder.nativeOrder()).asLongBuffer().get(0));
+    assertEquals(0x1234567880000000L,machineSizedSIntGetter());
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asLongBuffer().get(1));
+  }
 }

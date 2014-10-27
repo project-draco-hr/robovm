@@ -1,0 +1,35 @@
+{
+  long ldpi=Double.doubleToLongBits(Math.PI);
+  long lfpi=Double.doubleToLongBits(fpi);
+  assertNotEquals(ldpi,lfpi);
+  if (Bro.IS_32BIT) {
+    assertEquals(0f,memory.order(ByteOrder.nativeOrder()).asFloatBuffer().get(0),0f);
+    assertEquals(0.0,machineSizedFloatGetterD(),0);
+    assertEquals(0.0,machineSizedFloatGetterF(),0);
+    machineSizedFloatSetterD(Math.PI);
+    assertEquals(fpi,memory.order(ByteOrder.nativeOrder()).asFloatBuffer().get(0),0f);
+    assertEquals(fpi,machineSizedFloatGetterF(),0);
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(1));
+    assertEquals(lfpi,Double.doubleToLongBits(machineSizedFloatGetterD()));
+    machineSizedFloatSetterF(fpi);
+    assertEquals(fpi,memory.order(ByteOrder.nativeOrder()).asFloatBuffer().get(0),0f);
+    assertEquals(fpi,machineSizedFloatGetterF(),0);
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asIntBuffer().get(1));
+    assertEquals(lfpi,Double.doubleToLongBits(machineSizedFloatGetterD()));
+  }
+ else {
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asDoubleBuffer().get(0),0);
+    assertEquals(0.0,machineSizedFloatGetterD(),0);
+    assertEquals(0.0,machineSizedFloatGetterF(),0);
+    machineSizedFloatSetterD(Math.PI);
+    assertEquals(Math.PI,memory.order(ByteOrder.nativeOrder()).asDoubleBuffer().get(0),0f);
+    assertEquals(fpi,machineSizedFloatGetterF(),0);
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asLongBuffer().get(1));
+    assertEquals(ldpi,Double.doubleToLongBits(machineSizedFloatGetterD()));
+    machineSizedFloatSetterF(fpi);
+    assertEquals((double)fpi,memory.order(ByteOrder.nativeOrder()).asDoubleBuffer().get(0),0f);
+    assertEquals(fpi,machineSizedFloatGetterF(),0);
+    assertEquals(0,memory.order(ByteOrder.nativeOrder()).asLongBuffer().get(1));
+    assertEquals(lfpi,Double.doubleToLongBits(machineSizedFloatGetterD()));
+  }
+}
