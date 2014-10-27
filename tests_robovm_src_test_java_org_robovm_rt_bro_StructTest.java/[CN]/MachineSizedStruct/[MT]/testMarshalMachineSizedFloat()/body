@@ -1,0 +1,20 @@
+{
+  assertEquals(Bro.IS_64BIT ? 8 : 4,MachineSizedStruct.sizeOf());
+  long ldpi=Double.doubleToLongBits(Math.PI);
+  long lfpi=Double.doubleToLongBits(fpi);
+  assertNotEquals(ldpi,lfpi);
+  int ifpi=Float.floatToIntBits(fpi);
+  MachineSizedStruct s=new MachineSizedStruct();
+  assertEquals(0.0,s.machineSizedFloatD(),0);
+  s.machineSizedFloatD(Math.PI);
+  if (Bro.IS_32BIT) {
+    assertEquals("ifpi == VM.getInt(s.getHandle())",ifpi,VM.getInt(s.getHandle()));
+    assertEquals("fpi == s.machineSizedFloatF()",fpi,s.machineSizedFloatF(),0f);
+    assertEquals("lfpi == Double.doubleToLongBits(s.machineSizedFloatD())",lfpi,Double.doubleToLongBits(s.machineSizedFloatD()));
+  }
+ else {
+    assertEquals("ldpi == VM.getLong(s.getHandle())",ldpi,VM.getLong(s.getHandle()));
+    assertEquals("Math.PI == s.machineSizedFloatD()",Math.PI,s.machineSizedFloatD(),0);
+    assertEquals("ifpi == Float.floatToIntBits(s.machineSizedFloatF())",ifpi,Float.floatToIntBits(s.machineSizedFloatF()));
+  }
+}
