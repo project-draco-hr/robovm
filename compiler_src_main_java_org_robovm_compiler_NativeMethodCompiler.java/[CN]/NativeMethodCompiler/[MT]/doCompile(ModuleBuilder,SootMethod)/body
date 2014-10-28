@@ -2,11 +2,6 @@
   Function fn=FunctionBuilder.method(method);
   moduleBuilder.addFunction(fn);
   Value env=fn.getParameterRef(0);
-  String targetClassName=getInternalName(method.getDeclaringClass());
-  String methodName=method.getName();
-  String methodDesc=getDescriptor(method);
-  Trampoline trampoline=new NativeCall(this.className,targetClassName,methodName,methodDesc,method.isStatic());
-  trampolines.add(trampoline);
   ArrayList<Value> args=new ArrayList<Value>(Arrays.asList(fn.getParameterRefs()));
   if (method.isStatic()) {
     FunctionRef ldcFn=FunctionBuilder.ldcInternal(sootMethod.getDeclaringClass()).ref();
@@ -14,7 +9,8 @@
     args.add(1,clazz);
   }
   pushNativeFrame(fn);
-  Value result=call(fn,trampoline.getFunctionRef(),args);
+  FunctionRef targetFn=createNative(moduleBuilder,method);
+  Value result=call(fn,targetFn,args);
   popNativeFrame(fn);
   call(fn,BC_THROW_IF_EXCEPTION_OCCURRED,env);
   fn.add(new Ret(result));
