@@ -1,0 +1,21 @@
+{
+  List<Type> resolvedTypes=new LinkedList<Type>();
+  for (  Type t : parameterizedType.getActualTypeArguments()) {
+    if (t instanceof TypeVariable<?>) {
+      Type resolvedType=typeVariables.get(((TypeVariable<?>)t).getName());
+      if (resolvedType instanceof ParameterizedType) {
+        resolvedType=resolveParameterizedType((ParameterizedType)resolvedType,typeVariables);
+      }
+      resolvedTypes.add(resolvedType != null ? resolvedType : t);
+    }
+ else     if (t instanceof ParameterizedType) {
+      ParameterizedType pType=(ParameterizedType)t;
+      resolvedTypes.add(resolveParameterizedType(pType,typeVariables));
+    }
+ else {
+      resolvedTypes.add(t);
+    }
+  }
+  ListOfTypes types=new ListOfTypes(resolvedTypes.toArray(new Type[resolvedTypes.size()]));
+  return new ImplForType(null,parameterizedType.getRawType().toString(),types);
+}

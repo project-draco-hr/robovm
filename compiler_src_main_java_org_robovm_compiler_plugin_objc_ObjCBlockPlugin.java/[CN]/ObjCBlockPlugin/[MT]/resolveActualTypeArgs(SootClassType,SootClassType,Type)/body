@@ -1,5 +1,5 @@
 {
-  TypeVariable<SootClassType>[] typeParameters=offspring.getTypeParameters();
+  TypeVariable<?>[] typeParameters=offspring.getTypeParameters();
   if (actualArgs.length == 0) {
     actualArgs=typeParameters;
   }
@@ -40,17 +40,8 @@
       if (rawType instanceof SootClassType) {
         SootClassType rawTypeClass=(SootClassType)rawType;
         if (base.isAssignableFrom(rawTypeClass)) {
-          List<Type> resolvedTypes=new LinkedList<Type>();
-          for (          Type t : parameterizedType.getActualTypeArguments()) {
-            if (t instanceof TypeVariable<?>) {
-              Type resolvedType=typeVariables.get(((TypeVariable<?>)t).getName());
-              resolvedTypes.add(resolvedType != null ? resolvedType : t);
-            }
- else {
-              resolvedTypes.add(t);
-            }
-          }
-          Type[] result=resolveActualTypeArgs(rawTypeClass,base,resolvedTypes.toArray(new Type[]{}));
+          parameterizedType=resolveParameterizedType(parameterizedType,typeVariables);
+          Type[] result=resolveActualTypeArgs(rawTypeClass,base,parameterizedType.getActualTypeArguments());
           if (result != null) {
             return result;
           }

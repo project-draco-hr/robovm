@@ -1,0 +1,22 @@
+{
+  StringBuilder sb=new StringBuilder();
+  SootClassType declaringClass=getDeclaringClass();
+  if (declaringClass != null && declaringClass.sootClass.hasTag("SignatureTag")) {
+    sb.append(declaringClass.toSimpleClassTypeSignature());
+    sb.append('.');
+    String innerName=sootClass.getName().substring(declaringClass.sootClass.getName().length() + 1);
+    sb.append(innerName);
+  }
+ else {
+    sb.append(sootClass.getName().replace('.','/'));
+  }
+  TypeVariable<?>[] typeArgs=getTypeParameters();
+  if (typeArgs.length > 0) {
+    sb.append("<");
+    for (    TypeVariable<?> ta : typeArgs) {
+      sb.append(ta.toGenericSignature());
+    }
+    sb.append(">");
+  }
+  return sb.toString();
+}
