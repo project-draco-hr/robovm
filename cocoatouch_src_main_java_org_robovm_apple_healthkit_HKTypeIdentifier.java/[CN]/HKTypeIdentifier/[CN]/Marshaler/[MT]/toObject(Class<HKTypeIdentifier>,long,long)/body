@@ -1,0 +1,18 @@
+{
+  NSString o=(NSString)NSObject.Marshaler.toObject(NSString.class,handle,flags);
+  if (o == null) {
+    return null;
+  }
+  Class<?>[] args=new Class<?>[]{NSString.class};
+  for (  Class<?> clazz : allClasses) {
+    try {
+      java.lang.reflect.Method m=clazz.getMethod("valueOf",args);
+      HKTypeIdentifier type=(HKTypeIdentifier)m.invoke(o);
+      if (type != null)       return type;
+    }
+ catch (    Throwable e) {
+      System.err.println("WARN: Failed to call valueOf() for " + "the HKTypeIdentifier subclass " + cls.getName());
+    }
+  }
+  return null;
+}
