@@ -4,12 +4,12 @@
     arch=Arch.thumbv7;
   }
  else {
-    if (config.getArch() != Arch.x86 && config.getArch() != Arch.thumbv7) {
+    if (!isSimulatorArch(config.getArch()) && !isDeviceArch(config.getArch())) {
       throw new IllegalArgumentException("Arch '" + config.getArch() + "' is unsupported for iOS target");
     }
     arch=config.getArch();
   }
-  if (arch == Arch.thumbv7) {
+  if (isDeviceArch(arch)) {
     if (!config.isIosSkipSigning()) {
       signIdentity=config.getIosSignIdentity();
       if (signIdentity == null) {
@@ -26,7 +26,7 @@
       throw new IllegalArgumentException("Failed to parse Info.plist XML file: " + infoPList,t);
     }
   }
-  if (arch == Arch.thumbv7) {
+  if (isDeviceArch(arch)) {
     if (!config.isIosSkipSigning()) {
       provisioningProfile=config.getIosProvisioningProfile();
       if (provisioningProfile == null) {
@@ -42,7 +42,7 @@
   List<SDK> sdks=getSDKs();
   if (sdkVersion == null) {
     if (sdks.isEmpty()) {
-      throw new IllegalArgumentException("No " + (arch == Arch.thumbv7 ? "device" : "simulator") + " SDKs installed");
+      throw new IllegalArgumentException("No " + (isDeviceArch(arch) ? "device" : "simulator") + " SDKs installed");
     }
     Collections.sort(sdks);
     this.sdk=sdks.get(sdks.size() - 1);

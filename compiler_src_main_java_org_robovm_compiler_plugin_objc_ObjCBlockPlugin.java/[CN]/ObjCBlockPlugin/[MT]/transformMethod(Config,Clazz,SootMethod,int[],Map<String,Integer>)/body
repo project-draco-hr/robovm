@@ -8,19 +8,21 @@
         break;
       }
       SootMethod targetMethod=getBlockTargetMethod(blockMethod,idx);
-      soot.Type[] actualTypes=resolveTargetMethodSignature(blockMethod,targetMethod,genericParameterTypes[idx]);
-      soot.Type[] unboxedTypes=unboxTypes(actualTypes);
+      Type[] actualGenericTypes=resolveTargetMethodSignature(blockMethod,targetMethod,genericParameterTypes[idx]);
+      soot.Type[] actualRawTypes=toRawTypes(actualGenericTypes);
+      soot.Type[] unboxedTypes=unboxTypes(actualRawTypes);
       String[][] targetMethodAnnotations=parseTargetMethodAnnotations(targetMethod,readStringElem(getParameterAnnotation(blockMethod,idx,BLOCK),"value",""));
-      String marshaler=createBlockMarshaler(config,clazz,targetMethod,actualTypes,unboxedTypes,blockTypeIds,targetMethodAnnotations);
+      String marshaler=createBlockMarshaler(config,clazz,targetMethod,actualGenericTypes,actualRawTypes,unboxedTypes,blockTypeIds,targetMethodAnnotations);
       addMarshalerAnnotation(blockMethod,idx,marshaler);
     }
   }
   if (hasAnnotation(blockMethod,BLOCK)) {
     SootMethod targetMethod=getBlockTargetMethod(blockMethod);
-    soot.Type[] actualTypes=resolveTargetMethodSignature(blockMethod,targetMethod,blockMethodType.getGenericReturnType());
-    soot.Type[] unboxedTypes=unboxTypes(actualTypes);
+    Type[] actualGenericTypes=resolveTargetMethodSignature(blockMethod,targetMethod,blockMethodType.getGenericReturnType());
+    soot.Type[] actualRawTypes=toRawTypes(actualGenericTypes);
+    soot.Type[] unboxedTypes=unboxTypes(actualRawTypes);
     String[][] targetMethodAnnotations=parseTargetMethodAnnotations(targetMethod,readStringElem(getAnnotation(blockMethod,BLOCK),"value",""));
-    String marshaler=createBlockMarshaler(config,clazz,targetMethod,actualTypes,unboxedTypes,blockTypeIds,targetMethodAnnotations);
+    String marshaler=createBlockMarshaler(config,clazz,targetMethod,actualGenericTypes,actualRawTypes,unboxedTypes,blockTypeIds,targetMethodAnnotations);
     addMarshalerAnnotation(blockMethod,marshaler);
   }
 }

@@ -1,0 +1,97 @@
+{
+  if (targetMethod.getDeclaringClass().getName().equals("java.lang.Runnable") && targetMethod.getName().equals("run")) {
+    return RUNNABLE_AS_OBJC_BLOCK_MARSHALER;
+  }
+  String targetMethodKey=getTargetMethodKey(targetMethod,actualRawTypes,targetMethodAnnotations);
+  Integer id=blockTypeIds.get(targetMethodKey);
+  if (id != null) {
+    return getBlockMarshalerName(clazz,id);
+  }
+  id=blockTypeIds.size();
+  blockTypeIds.put(targetMethodKey,id);
+  final String blockMarshalerName=getBlockMarshalerName(clazz,id);
+  final String targetInterfaceName=Types.getInternalName(targetMethod.getDeclaringClass());
+  Clazz templateMarshaler=config.getClazzes().load(RUNNABLE_AS_OBJC_BLOCK_MARSHALER);
+  final Set<String> usedBoxMethods=new HashSet<>();
+  final Set<String> usedUnboxMethods=new HashSet<>();
+  ClassWriter cw=new ClassWriter(ClassWriter.COMPUTE_MAXS);
+  generateTargetMethod(blockMarshalerName,targetMethod,actualGenericTypes,actualRawTypes,unboxedTypes,usedBoxMethods,usedUnboxMethods,cw);
+  generateBridgeMethod(actualGenericTypes,unboxedTypes,targetMethodAnnotations,cw);
+  generateCallbackMethod(blockMarshalerName,targetMethod,actualGenericTypes,actualRawTypes,unboxedTypes,usedBoxMethods,usedUnboxMethods,targetMethodAnnotations,cw);
+  ClassReader classReader=new ClassReader(templateMarshaler.getBytes());
+  classReader.accept(new ClassVisitor(ASM4,cw){
+    @Override public void visit(    int version,    int access,    String name,    String signature,    String superName,    String[] interfaces){
+      super.visit(version,access,blockMarshalerName,signature,superName,new String[]{targetInterfaceName});
+    }
+    @Override public void visitInnerClass(    String name,    String outerName,    String innerName,    int access){
+    }
+    @Override public void visitSource(    String source,    String debug){
+    }
+    @Override public MethodVisitor visitMethod(    int access,    String name,    String desc,    String signature,    String[] exceptions){
+switch (name) {
+case "run":
+case "invoke":
+case "invoked":
+        return null;
+case "box":
+      if (!usedBoxMethods.contains(desc)) {
+        return null;
+      }
+    break;
+case "unbox":
+  if (!usedUnboxMethods.contains(desc)) {
+    return null;
+  }
+break;
+}
+desc=desc.replace("java/lang/Runnable",targetInterfaceName);
+signature=null;
+return new MethodVisitor(ASM4,super.visitMethod(access,name,desc,signature,exceptions)){
+@Override public void visitLdcInsn(Object cst){
+if (cst instanceof org.objectweb.asm.Type) {
+  if (((org.objectweb.asm.Type)cst).getSort() == org.objectweb.asm.Type.OBJECT) {
+    String internalName=((org.objectweb.asm.Type)cst).getInternalName();
+    if (RUNNABLE_AS_OBJC_BLOCK_MARSHALER.equals(internalName)) {
+      cst=org.objectweb.asm.Type.getObjectType(blockMarshalerName);
+    }
+  }
+}
+super.visitLdcInsn(cst);
+}
+@Override public void visitTypeInsn(int opcode,String type){
+if (RUNNABLE_AS_OBJC_BLOCK_MARSHALER.equals(type)) {
+  type=blockMarshalerName;
+}
+ else if ("java/lang/Runnable".equals(type)) {
+  type=targetInterfaceName;
+}
+super.visitTypeInsn(opcode,type);
+}
+@Override public void visitFieldInsn(int opcode,String owner,String name,String desc){
+if (RUNNABLE_AS_OBJC_BLOCK_MARSHALER.equals(owner)) {
+  owner=blockMarshalerName;
+}
+super.visitFieldInsn(opcode,owner,name,desc);
+}
+@Override public void visitMethodInsn(int opcode,String owner,String name,String desc){
+if (RUNNABLE_AS_OBJC_BLOCK_MARSHALER.equals(owner)) {
+  owner=blockMarshalerName;
+}
+super.visitMethodInsn(opcode,owner,name,desc);
+}
+@Override public void visitLocalVariable(String name,String desc,String signature,Label start,Label end,int index){
+}
+@Override public void visitLineNumber(int line,Label start){
+}
+}
+;
+}
+}
+,0);
+cw.visitInnerClass(blockMarshalerName,clazz.getInternalName(),blockMarshalerName.substring(clazz.getInternalName().length() + 1),ACC_PUBLIC + ACC_STATIC);
+cw.visitEnd();
+File f=clazz.getPath().getGeneratedClassFile(blockMarshalerName);
+FileUtils.writeByteArrayToFile(f,cw.toByteArray());
+f.setLastModified(clazz.lastModified());
+return blockMarshalerName;
+}

@@ -1,0 +1,20 @@
+{
+  if (t instanceof SootClassType) {
+    return ((SootClassType)t).getSootClass().getType();
+  }
+  if (t instanceof SootTypeType) {
+    return ((SootTypeType)t).getSootType();
+  }
+  if (t instanceof WildcardType) {
+    Type[] upperBounds=((WildcardType)t).getUpperBounds();
+    return toRawType(upperBounds[0]);
+  }
+  if (t instanceof ParameterizedType) {
+    return toRawType(((ParameterizedType)t).getRawType());
+  }
+  if (t instanceof GenericArrayType) {
+    soot.Type componentType=toRawType(((GenericArrayType)t).getGenericComponentType());
+    return componentType.makeArrayType();
+  }
+  throw new CompilerException("Failed to get the raw type from a " + t.getClass().getName() + " ("+ t+ ")");
+}

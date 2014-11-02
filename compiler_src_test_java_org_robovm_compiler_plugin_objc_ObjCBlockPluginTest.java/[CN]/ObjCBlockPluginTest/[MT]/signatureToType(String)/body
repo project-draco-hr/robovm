@@ -1,0 +1,14 @@
+{
+  String rawDesc=desc.replaceAll("<.*>","");
+  String internalName=rawDesc.replaceAll("^\\[*","");
+  int dims=rawDesc.length() - internalName.length();
+  internalName=Types.getInternalNameFromDescriptor(internalName);
+  soot.Type sootType=SootResolver.v().makeClassRef(internalName.replace('/','.')).getType();
+  for (int i=0; i < dims; i++) {
+    sootType=sootType.makeArrayType();
+  }
+  SootMethod m=new SootMethod("foo",Arrays.asList(sootType),VoidType.v());
+  m.addTag(new SignatureTag("(" + desc + ")V"));
+  SootMethodType mType=new SootMethodType(m);
+  return mType.getGenericParameterTypes()[0];
+}

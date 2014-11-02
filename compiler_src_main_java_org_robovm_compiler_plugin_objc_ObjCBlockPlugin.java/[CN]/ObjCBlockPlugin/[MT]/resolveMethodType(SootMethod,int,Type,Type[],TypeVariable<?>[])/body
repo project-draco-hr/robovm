@@ -1,0 +1,38 @@
+{
+  if (t instanceof SootClassType) {
+    return t;
+  }
+  if (t instanceof SootTypeType) {
+    return t;
+  }
+  if (t instanceof TypeVariable) {
+    int idx=indexOf(((TypeVariable<?>)t).getName(),typeParameters);
+    if (idx != -1) {
+      Type u=resolvedArgs[idx];
+      if (u instanceof TypeVariable) {
+        if (((TypeVariable<?>)t).getName().equals(((TypeVariable<?>)u).getName())) {
+          return resolveMethodType(blockMethod,paramIndex,((TypeVariable<?>)t).getBounds()[0],resolvedArgs,typeParameters);
+        }
+      }
+      return resolveMethodType(blockMethod,paramIndex,resolvedArgs[idx],resolvedArgs,typeParameters);
+    }
+    throw new CompilerException("Unresolved type variable " + t + " in "+ (paramIndex == -1 ? "return type" : "parameter " + (paramIndex + 1))+ " of @Block method "+ blockMethod);
+  }
+  if (t instanceof WildcardType) {
+    Type[] upperBounds=((WildcardType)t).getUpperBounds();
+    return resolveMethodType(blockMethod,paramIndex,upperBounds[0],resolvedArgs,typeParameters);
+  }
+  if (t instanceof ParameterizedType) {
+    ImplForType pType=(ImplForType)t;
+    ListOfTypes types=new ListOfTypes(pType.getActualTypeArguments().length);
+    for (    Type arg : pType.getActualTypeArguments()) {
+      types.add(resolveMethodType(blockMethod,paramIndex,arg,resolvedArgs,typeParameters));
+    }
+    return new ImplForType((ImplForType)pType.getOwnerType(),pType.getRawType().getSootClass().getName(),types);
+  }
+  if (t instanceof GenericArrayType) {
+    Type componentType=resolveMethodType(blockMethod,paramIndex,((GenericArrayType)t).getGenericComponentType(),resolvedArgs,typeParameters);
+    return new ImplForArray(componentType);
+  }
+  throw new CompilerException("Unresolved type " + t + " in "+ (paramIndex == -1 ? "return type" : "parameter " + (paramIndex + 1))+ " of @Block method "+ blockMethod);
+}

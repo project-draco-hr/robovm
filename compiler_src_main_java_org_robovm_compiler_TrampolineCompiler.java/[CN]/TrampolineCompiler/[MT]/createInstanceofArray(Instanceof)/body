@@ -1,0 +1,11 @@
+{
+  String fnName=Symbols.arrayinstanceofSymbol(t.getTarget());
+  if (!mb.hasSymbol(fnName)) {
+    Function fn=new FunctionBuilder(t).name(fnName).linkage(weak).build();
+    Value arrayClass=callLdcArray(fn,t.getTarget());
+    Value result=call(fn,BC_INSTANCEOF_ARRAY,fn.getParameterRef(0),arrayClass,fn.getParameterRef(1));
+    fn.add(new Ret(result));
+    mb.addFunction(fn);
+  }
+  return new FunctionRef(fnName,t.getFunctionType());
+}

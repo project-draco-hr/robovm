@@ -1,0 +1,83 @@
+{
+  String targetInterfaceName=Types.getInternalName(targetMethod.getDeclaringClass());
+  List<Type> genericParamTypes=new ArrayList<>();
+  genericParamTypes.add(new SootTypeType(org_robovm_objc_ObjCBlock.getType()));
+  for (int i=1; i < unboxedTypes.length; i++) {
+    Type t=unboxedTypes[i] instanceof PrimType ? new SootTypeType(unboxedTypes[i]) : actualGenericTypes[i];
+    genericParamTypes.add(t);
+  }
+  Type genericReturnType=unboxedTypes[0] instanceof PrimType ? new SootTypeType(unboxedTypes[0]) : actualGenericTypes[0];
+  List<soot.Type> rawParamTypes=new ArrayList<>();
+  rawParamTypes.add(org_robovm_objc_ObjCBlock.getType());
+  rawParamTypes.addAll(Arrays.asList(unboxedTypes).subList(1,unboxedTypes.length));
+  String name="invoked";
+  String signature=getGenericSignature(genericParamTypes,genericReturnType);
+  String desc=getDescriptor(rawParamTypes,unboxedTypes[0]);
+  MethodVisitor mv=cw.visitMethod(ACC_PRIVATE | ACC_STATIC,name,desc,signature,null);
+  mv.visitAnnotation(CALLBACK,true).visitEnd();
+  for (  String s : targetMethodAnnotations[0]) {
+    mv.visitAnnotation(s,true).visitEnd();
+  }
+  for (int i=1; i < targetMethodAnnotations.length; i++) {
+    for (    String s : targetMethodAnnotations[i]) {
+      mv.visitParameterAnnotation(i,s,true).visitEnd();
+    }
+  }
+  mv.visitCode();
+  mv.visitVarInsn(ALOAD,0);
+  mv.visitMethodInsn(INVOKEVIRTUAL,"org/robovm/objc/ObjCBlock","object","()Ljava/lang/Object;");
+  mv.visitTypeInsn(CHECKCAST,targetInterfaceName);
+  for (int i=1, var=1; i < actualRawTypes.length; i++, var++) {
+    soot.Type from=unboxedTypes[i];
+    if (from == LongType.v()) {
+      mv.visitVarInsn(LLOAD,var);
+      var++;
+    }
+ else     if (from == FloatType.v()) {
+      mv.visitVarInsn(FLOAD,var);
+    }
+ else     if (from == DoubleType.v()) {
+      mv.visitVarInsn(DLOAD,var);
+      var++;
+    }
+ else     if (from instanceof PrimType) {
+      mv.visitVarInsn(ILOAD,var);
+    }
+ else {
+      mv.visitVarInsn(ALOAD,var);
+    }
+    soot.Type to=actualRawTypes[i];
+    if (from != to) {
+      String boxDesc=getDescriptor(Collections.singletonList(from),to);
+      usedBoxMethods.add(boxDesc);
+      mv.visitMethodInsn(INVOKESTATIC,owner,"box",boxDesc);
+    }
+  }
+  mv.visitMethodInsn(INVOKEINTERFACE,targetInterfaceName,targetMethod.getName(),getDescriptor(targetMethod));
+  if (unboxedTypes[0] != actualRawTypes[0]) {
+    mv.visitTypeInsn(CHECKCAST,getInternalName(actualRawTypes[0]));
+    String unboxDesc=getDescriptor(Collections.singletonList(actualRawTypes[0]),unboxedTypes[0]);
+    usedUnboxMethods.add(unboxDesc);
+    mv.visitMethodInsn(INVOKESTATIC,owner,"unbox",unboxDesc);
+  }
+  if (unboxedTypes[0] == VoidType.v()) {
+    mv.visitInsn(RETURN);
+  }
+ else   if (unboxedTypes[0] == LongType.v()) {
+    mv.visitInsn(LRETURN);
+  }
+ else   if (unboxedTypes[0] == FloatType.v()) {
+    mv.visitInsn(FRETURN);
+  }
+ else   if (unboxedTypes[0] == DoubleType.v()) {
+    mv.visitInsn(DRETURN);
+  }
+ else   if (unboxedTypes[0] instanceof PrimType) {
+    mv.visitInsn(IRETURN);
+  }
+ else {
+    mv.visitInsn(ARETURN);
+  }
+  mv.visitMaxs(0,0);
+  mv.visitEnd();
+}

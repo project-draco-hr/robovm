@@ -1,14 +1,14 @@
 {
   if (targetMethod.getTag("SignatureTag") == null) {
-    soot.Type[] result=new soot.Type[targetMethod.getParameterCount() + 1];
-    result[0]=targetMethod.getReturnType();
+    Type[] result=new Type[targetMethod.getParameterCount() + 1];
+    result[0]=new SootTypeType(targetMethod.getReturnType());
     for (int i=1; i < result.length; i++) {
-      result[i]=targetMethod.getParameterType(i - 1);
+      result[i]=new SootTypeType(targetMethod.getParameterType(i - 1));
     }
     return result;
   }
   SootClassType base=new SootClassType(targetMethod.getDeclaringClass());
-  TypeVariable<SootClassType>[] typeParameters=base.getTypeParameters();
+  TypeVariable<?>[] typeParameters=base.getTypeParameters();
   SootClassType offspring=null;
   Type[] actualArgs=null;
   if (blockParamType instanceof SootClassType) {
@@ -20,7 +20,7 @@
     actualArgs=((ParameterizedType)blockParamType).getActualTypeArguments();
   }
   Type[] resolvedArgs=resolveActualTypeArgs(offspring,base,actualArgs);
-  soot.Type[] result=new soot.Type[targetMethod.getParameterCount() + 1];
+  Type[] result=new Type[targetMethod.getParameterCount() + 1];
   SootMethodType targetMethodType=new SootMethodType(targetMethod);
   result[0]=resolveMethodType(blockMethod,-1,targetMethodType.getGenericReturnType(),resolvedArgs,typeParameters);
   Type[] genericParameterTypes=targetMethodType.getGenericParameterTypes();
