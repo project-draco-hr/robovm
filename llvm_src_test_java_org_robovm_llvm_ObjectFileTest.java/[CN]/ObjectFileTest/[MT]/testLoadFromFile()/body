@@ -1,0 +1,28 @@
+{
+  try (Context context=new Context()){
+    try (TargetMachine tm=Target.getTarget("x86").createTargetMachine("i386-unknown-macosx")){
+      Module module=Module.parseIR(context,"define external i32 @foo() {\n ret i32 5\n }\n","foo.c");
+      File oFile=File.createTempFile(getClass().getSimpleName(),".o");
+      try (FileOutputStream out=new FileOutputStream(oFile)){
+        tm.emit(module,out,CodeGenFileType.ObjectFile);
+      }
+       try (ObjectFile objectFile=ObjectFile.load(oFile)){
+        List<Symbol> symbols=objectFile.getSymbols();
+        assertEquals(3,symbols.size());
+        assertEquals("EH_frame0",symbols.get(0).getName());
+        assertTrue(symbols.get(0).getAddress() > 0);
+        assertTrue(symbols.get(0).getSize() > 0);
+        assertTrue(symbols.get(0).getFileOffset() > 0);
+        assertEquals("_foo",symbols.get(1).getName());
+        assertTrue(symbols.get(1).getAddress() == 0);
+        assertTrue(symbols.get(1).getSize() > 0);
+        assertTrue(symbols.get(1).getFileOffset() > 0);
+        assertEquals("_foo.eh",symbols.get(2).getName());
+        assertTrue(symbols.get(2).getAddress() > 0);
+        assertTrue(symbols.get(2).getSize() > 0);
+        assertTrue(symbols.get(2).getFileOffset() > 0);
+        System.out.println(symbols);
+      }
+     }
+   }
+ }

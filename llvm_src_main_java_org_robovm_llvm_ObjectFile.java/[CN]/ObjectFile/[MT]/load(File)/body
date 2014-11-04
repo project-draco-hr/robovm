@@ -1,0 +1,13 @@
+{
+  MemoryBufferRefOut memBufOut=new MemoryBufferRefOut();
+  StringOut errorMsgOut=new StringOut();
+  LLVM.CreateMemoryBufferWithContentsOfFile(file.getAbsolutePath(),memBufOut,errorMsgOut);
+  if (memBufOut.getValue() == null) {
+    throw new LlvmException("Failed to create memory buffer from " + file.getAbsolutePath() + (errorMsgOut.getValue() != null ? ":" + errorMsgOut.getValue() : ""));
+  }
+  ObjectFileRef ref=LLVM.CreateObjectFile(memBufOut.getValue());
+  if (ref == null) {
+    throw new LlvmException("Failed to create memory buffer from " + file.getAbsolutePath());
+  }
+  return new ObjectFile(ref);
+}
