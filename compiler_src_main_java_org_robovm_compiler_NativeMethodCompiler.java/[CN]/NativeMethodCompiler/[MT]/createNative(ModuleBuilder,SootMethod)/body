@@ -26,7 +26,7 @@
     Global g=new Global(Symbols.nativeMethodPtrSymbol(targetInternalName,methodName,methodDesc),new NullConstant(I8_PTR));
     mb.addGlobal(g);
     String fnName=Symbols.nativeCallMethodSymbol(targetInternalName,methodName,methodDesc);
-    Function fn=new FunctionBuilder(fnName,nativeFunctionType).linkage(dynamicResolverLinkage()).attribs(shouldInlineDynamicResolver(),optsize).build();
+    Function fn=new FunctionBuilder(fnName,nativeFunctionType).linkage(external).attribs(alwaysinline,optsize).build();
     FunctionRef ldcFn=FunctionBuilder.ldcInternal(targetInternalName).ref();
     Value theClass=call(fn,ldcFn,fn.getParameterRef(0));
     Value implI8Ptr=call(fn,BC_RESOLVE_NATIVE,fn.getParameterRef(0),theClass,mb.getString(methodName),mb.getString(methodDesc),mb.getString(shortName),mb.getString(longName),g.ref());

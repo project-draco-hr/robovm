@@ -104,8 +104,9 @@
     classInfoStruct=new Global(Symbols.infoStructSymbol(clazz.getInternalName()),I8_PTR,true);
   }
   mb.addGlobal(classInfoStruct);
-  Alias infoStructI8Ptr=new Alias(Symbols.infoStructI8PtrSymbol(getInternalName(sootClass)),new ConstantBitcast(classInfoStruct.ref(),I8_PTR_PTR));
-  mb.addAlias(infoStructI8Ptr);
+  Function infoFn=FunctionBuilder.infoStruct(sootClass);
+  infoFn.add(new Ret(new ConstantBitcast(classInfoStruct.ref(),I8_PTR_PTR)));
+  mb.addFunction(infoFn);
   for (  CompilerPlugin compilerPlugin : config.getCompilerPlugins()) {
     compilerPlugin.afterClass(config,clazz,mb);
   }
