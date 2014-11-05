@@ -1,0 +1,34 @@
+{
+  String cc="gcc";
+  String symbolPrefix="";
+  if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+    cc="clang";
+    symbolPrefix="_";
+  }
+  File cFile=File.createTempFile(getClass().getSimpleName(),".c");
+  FileUtils.writeStringToFile(cFile,"int main() {\n" + "  return 0;\n" + "}\n");
+  DefaultExecutor executor=new DefaultExecutor();
+  executor.setWorkingDirectory(cFile.getParentFile());
+  executor.execute(new CommandLine(cc).addArgument("-g").addArgument("-c").addArgument(cFile.getAbsolutePath()));
+  List<LineInfo> mainLineInfos=null;
+  File oFile=new File(cFile.getParentFile(),cFile.getName().substring(0,cFile.getName().lastIndexOf('.')) + ".o");
+  try (ObjectFile objectFile=ObjectFile.load(oFile)){
+    for (    Symbol symbol : objectFile.getSymbols()) {
+      if (symbol.getSize() > 0) {
+        List<LineInfo> lineInfos=objectFile.getLineInfos(symbol);
+        if (!lineInfos.isEmpty() && symbol.getName().equals(symbolPrefix + "main")) {
+          mainLineInfos=lineInfos;
+          break;
+        }
+      }
+    }
+  }
+   assertNotNull(mainLineInfos);
+  Set<Integer> lineNumbers=new HashSet<>();
+  for (  LineInfo lineInfo : mainLineInfos) {
+    lineNumbers.add(lineInfo.getLineNumber());
+  }
+  assertEquals(2,lineNumbers.size());
+  assertTrue(lineNumbers.contains(1));
+  assertTrue(lineNumbers.contains(2));
+}
