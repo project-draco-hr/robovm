@@ -1,8 +1,10 @@
 {
+  Arch arch=config.getArch();
+  OS os=config.getOs();
   Set<Clazz> linkClasses=new TreeSet<Clazz>(classes);
-  config.getLogger().info("Linking %d classes",linkClasses.size());
+  config.getLogger().info("Linking %d classes (%s %s %s)",linkClasses.size(),os,arch,config.isDebug() ? "debug" : "release");
   ModuleBuilder mb=new ModuleBuilder();
-  mb.addInclude(getClass().getClassLoader().getResource(String.format("header-%s-%s.ll",config.getOs().getFamily(),config.getArch())));
+  mb.addInclude(getClass().getClassLoader().getResource(String.format("header-%s-%s.ll",os.getFamily(),arch)));
   mb.addInclude(getClass().getClassLoader().getResource("header.ll"));
   mb.addGlobal(new Global("_bcDynamicJNI",new IntegerConstant(config.isUseDynamicJni() ? (byte)1 : (byte)0)));
   ArrayConstantBuilder staticLibs=new ArrayConstantBuilder(I8_PTR);
@@ -105,35 +107,29 @@
     mb.addFunction(createCheckcast(mb,clazz,typeInfo));
     mb.addFunction(createInstanceof(mb,clazz,typeInfo));
   }
-  Arch arch=config.getArch();
-  OS os=config.getOs();
-  Context context=new Context();
-  Module module=Module.parseIR(context,mb.build().toString(),"linker.ll");
-  PassManager passManager=new PassManager();
-  passManager.addAlwaysInlinerPass();
-  passManager.addPromoteMemoryToRegisterPass();
-  passManager.run(module);
-  passManager.dispose();
-  String triple=arch.getLlvmName() + "-unknown-" + os;
-  Target target=Target.lookupTarget(triple);
-  TargetMachine targetMachine=target.createTargetMachine(triple);
-  targetMachine.setAsmVerbosityDefault(true);
-  targetMachine.setFunctionSections(true);
-  targetMachine.setDataSections(true);
-  targetMachine.getOptions().setNoFramePointerElim(true);
   File linkerO=new File(config.getTmpDir(),"linker.o");
   linkerO.getParentFile().mkdirs();
-  OutputStream outO=null;
-  try {
-    outO=new BufferedOutputStream(new FileOutputStream(linkerO));
-    targetMachine.emit(module,outO,CodeGenFileType.ObjectFile);
-  }
-  finally {
-    IOUtils.closeQuietly(outO);
-  }
-  module.dispose();
-  context.dispose();
-  List<File> objectFiles=new ArrayList<File>();
+  try (Context context=new Context()){
+    try (Module module=Module.parseIR(context,mb.build().toString(),"linker.ll")){
+      try (PassManager passManager=new PassManager()){
+        passManager.addAlwaysInlinerPass();
+        passManager.addPromoteMemoryToRegisterPass();
+        passManager.run(module);
+      }
+       String triple=arch.getLlvmName() + "-unknown-" + os;
+      Target target=Target.lookupTarget(triple);
+      try (TargetMachine targetMachine=target.createTargetMachine(triple)){
+        targetMachine.setAsmVerbosityDefault(true);
+        targetMachine.setFunctionSections(true);
+        targetMachine.setDataSections(true);
+        targetMachine.getOptions().setNoFramePointerElim(true);
+        try (OutputStream outO=new BufferedOutputStream(new FileOutputStream(linkerO))){
+          targetMachine.emit(module,outO,CodeGenFileType.ObjectFile);
+        }
+       }
+     }
+   }
+   List<File> objectFiles=new ArrayList<File>();
   objectFiles.add(linkerO);
   for (  Clazz clazz : linkClasses) {
     objectFiles.add(config.getOFile(clazz));
