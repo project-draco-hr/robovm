@@ -262,6 +262,11 @@
       if (m.isSynchronized()) {
         body.add(new ConstantBitcast(new FunctionRef(Symbols.synchronizedWrapperSymbol(m),getFunctionType(m)),I8_PTR));
       }
+      if ((flags & MI_NATIVE) == 0) {
+        Global linetableGlobal=new Global(Symbols.linetableSymbol(m),Linkage.weak,new IntegerConstant(-1));
+        mb.addGlobal(linetableGlobal);
+        body.add(linetableGlobal.ref());
+      }
     }
     if (hasBridgeAnnotation(m)) {
       if (!readBooleanElem(getAnnotation(m,BRIDGE),"dynamic",false)) {

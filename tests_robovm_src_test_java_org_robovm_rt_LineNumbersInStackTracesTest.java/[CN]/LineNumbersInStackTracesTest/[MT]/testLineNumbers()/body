@@ -1,0 +1,37 @@
+{
+  ArrayList<StackTraceElement> stackTrace=new ArrayList<>();
+  try {
+    LineNumbersInStackTracesTestMethods.m1();
+  }
+ catch (  Error e) {
+    stackTrace.addAll(Arrays.asList(e.getStackTrace()));
+  }
+  assertFalse(stackTrace.isEmpty());
+  for (Iterator<StackTraceElement> it=stackTrace.iterator(); it.hasNext(); ) {
+    StackTraceElement e=it.next();
+    if (!e.getClassName().equals(CLASS_NAME) || !e.getFileName().equals(FILE_NAME)) {
+      it.remove();
+    }
+  }
+  assertEquals(11,stackTrace.size());
+  assertEquals("m1",stackTrace.get(10).getMethodName());
+  assertEquals(M1_OFFSET + 0,stackTrace.get(10).getLineNumber());
+  assertEquals("m2",stackTrace.get(9).getMethodName());
+  assertEquals(M1_OFFSET + 2,stackTrace.get(9).getLineNumber());
+  assertEquals("m3",stackTrace.get(8).getMethodName());
+  assertEquals(M1_OFFSET + 6,stackTrace.get(8).getLineNumber());
+  assertEquals("m4",stackTrace.get(7).getMethodName());
+  assertEquals(M1_OFFSET + 10,stackTrace.get(7).getLineNumber());
+  assertEquals("m5",stackTrace.get(6).getMethodName());
+  assertEquals(M1_OFFSET + 15,stackTrace.get(6).getLineNumber());
+  assertEquals("m6",stackTrace.get(5).getMethodName());
+  assertEquals(M1_OFFSET + 19,stackTrace.get(5).getLineNumber());
+  assertEquals("m7",stackTrace.get(4).getMethodName());
+  assertEquals(M1_OFFSET + 32,stackTrace.get(4).getLineNumber());
+  assertEquals("m8",stackTrace.get(3).getMethodName());
+  assertEquals(M1_OFFSET + 97,stackTrace.get(3).getLineNumber());
+  assertEquals("m9",stackTrace.get(2).getMethodName());
+  assertEquals(M1_OFFSET + 359,stackTrace.get(2).getLineNumber());
+  assertEquals("m10",stackTrace.get(1).getMethodName());
+  assertEquals("m100",stackTrace.get(0).getMethodName());
+}
