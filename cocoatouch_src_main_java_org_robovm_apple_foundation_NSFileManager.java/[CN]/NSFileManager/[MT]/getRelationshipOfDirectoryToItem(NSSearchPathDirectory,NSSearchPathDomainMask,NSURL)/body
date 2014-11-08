@@ -1,8 +1,11 @@
 {
   MachineSizedSIntPtr ptr=new MachineSizedSIntPtr();
-  NSError.NSErrorPtr error=new NSError.NSErrorPtr();
-  if (getRelationshipOfDirectoryToItem(ptr,directory,domainMask,url,error)) {
+  NSError.NSErrorPtr err=new NSError.NSErrorPtr();
+  if (getRelationshipOfDirectoryToItem(ptr,directory,domainMask,url,err)) {
     return NSURLRelationship.valueOf(ptr.get());
+  }
+  if (err.get() != null) {
+    throw new NSErrorException(err.get());
   }
   return null;
 }
