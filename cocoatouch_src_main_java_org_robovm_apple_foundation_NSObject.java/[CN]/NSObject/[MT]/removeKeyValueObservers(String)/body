@@ -2,25 +2,16 @@
   if (keyPath == null) {
     throw new NullPointerException("keyPath");
   }
-  if (observer == null) {
-    throw new NullPointerException("observer");
-  }
   if (keyValueObservers == null) {
     return;
   }
-  KeyValueObserverWrapper wrapper=null;
 synchronized (keyValueObservers) {
-    for (    KeyValueObserverWrapper w : keyValueObservers) {
-      if (w.observer == observer) {
-        wrapper=w;
-        break;
-      }
-    }
-    if (wrapper != null) {
+    for (Iterator<KeyValueObserverWrapper> i=keyValueObservers.iterator(); i.hasNext(); ) {
+      KeyValueObserverWrapper wrapper=i.next();
       if (wrapper.keyPaths.remove(keyPath)) {
         removeObserver$forKeyPath$context$(wrapper,keyPath,null);
         if (wrapper.keyPaths.size() == 0) {
-          keyValueObservers.remove(wrapper);
+          i.remove();
           removeStrongRef(wrapper);
         }
       }

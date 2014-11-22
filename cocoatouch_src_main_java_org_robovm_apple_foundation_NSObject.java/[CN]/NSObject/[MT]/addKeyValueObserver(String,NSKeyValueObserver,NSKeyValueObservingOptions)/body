@@ -1,6 +1,29 @@
 {
-  if (observer.customClass) {
-    updateStrongRef(null,observer);
+  if (keyPath == null) {
+    throw new NullPointerException("keyPath");
   }
-  addObserver$forKeyPath$options$context$(observer,keyPath,options,null);
+  if (observer == null) {
+    throw new NullPointerException("observer");
+  }
+  if (keyValueObservers == null) {
+    keyValueObservers=new HashSet<>();
+  }
+  KeyValueObserverWrapper wrapper=null;
+synchronized (keyValueObservers) {
+    for (    KeyValueObserverWrapper w : keyValueObservers) {
+      if (w.observer == observer) {
+        wrapper=w;
+        break;
+      }
+    }
+    if (wrapper != null) {
+      wrapper.keyPaths.add(keyPath);
+    }
+ else {
+      wrapper=new KeyValueObserverWrapper(observer,keyPath);
+      addStrongRef(wrapper);
+      keyValueObservers.add(wrapper);
+    }
+  }
+  addObserver$forKeyPath$options$context$(wrapper,keyPath,options,null);
 }
