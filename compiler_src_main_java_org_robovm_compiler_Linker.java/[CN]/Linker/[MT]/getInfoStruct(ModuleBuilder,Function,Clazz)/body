@@ -1,3 +1,11 @@
 {
-  return new ConstantBitcast(mb.getGlobalRef(Symbols.infoStructSymbol(clazz.getInternalName())),I8_PTR_PTR);
+  String symbol=Symbols.infoStructSymbol(clazz.getInternalName());
+  if (!mb.hasSymbol(symbol)) {
+    Global info=new Global(symbol,external,I8_PTR,false);
+    mb.addGlobal(info);
+    return info.ref();
+  }
+ else {
+    return new ConstantBitcast(mb.getGlobalRef(symbol),I8_PTR_PTR);
+  }
 }

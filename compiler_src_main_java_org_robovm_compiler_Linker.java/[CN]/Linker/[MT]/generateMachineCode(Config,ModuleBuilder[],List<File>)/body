@@ -1,0 +1,41 @@
+{
+  Executor executor=config.getThreads() <= 1 ? AppCompiler.SAME_THREAD_EXECUTOR : Executors.newFixedThreadPool(config.getThreads());
+  final List<Throwable> errors=Collections.synchronizedList(new ArrayList<Throwable>());
+  for (int i=0; i < mbs.length; i++) {
+    final ModuleBuilder mb=mbs[i];
+    final int num=i;
+    executor.execute(new Runnable(){
+      public void run(){
+        try {
+          File linkerO=generateMachineCode(config,mb,num);
+synchronized (objectFiles) {
+            objectFiles.add(linkerO);
+          }
+        }
+ catch (        Throwable t) {
+          errors.add(t);
+        }
+      }
+    }
+);
+  }
+  if (executor instanceof ExecutorService) {
+    ExecutorService executorService=(ExecutorService)executor;
+    executorService.shutdown();
+    try {
+      executorService.awaitTermination(Long.MAX_VALUE,TimeUnit.DAYS);
+    }
+ catch (    InterruptedException e) {
+    }
+  }
+  if (!errors.isEmpty()) {
+    Throwable t=errors.get(0);
+    if (t instanceof IOException) {
+      throw (IOException)t;
+    }
+    if (t instanceof RuntimeException) {
+      throw (RuntimeException)t;
+    }
+    throw new CompilerException(t);
+  }
+}

@@ -78,8 +78,17 @@
   if (config.getMainClass() != null) {
     mb.addGlobal(new Global("_bcMainClass",mb.getString(config.getMainClass())));
   }
+  ModuleBuilder[] mbs=new ModuleBuilder[config.getThreads() + 1];
+  mbs[0]=mb;
+  for (int i=1; i < mbs.length; i++) {
+    mbs[i]=new ModuleBuilder();
+    mbs[i].addInclude(getClass().getClassLoader().getResource(String.format("header-%s-%s.ll",os.getFamily(),arch)));
+    mbs[i].addInclude(getClass().getClassLoader().getResource("header.ll"));
+  }
+  Random rnd=new Random();
   buildTypeInfos(typeInfos);
   for (  Clazz clazz : linkClasses) {
+    int mbIdx=rnd.nextInt(mbs.length - 1) + 1;
     ClazzInfo ci=clazz.getClazzInfo();
     TypeInfo typeInfo=typeInfos.get(ci);
     if (typeInfo.error) {
@@ -99,38 +108,21 @@
         for (        MethodInfo mi : ci.getMethods()) {
           String name=mi.getName();
           if (!name.equals("<clinit>") && !name.equals("<init>") && !mi.isPrivate()&& !mi.isStatic()&& !mi.isFinal()&& !mi.isAbstract()) {
-            mb.addFunction(createLookup(mb,ci,mi));
+            mbs[mbIdx].addFunction(createLookup(mbs[mbIdx],ci,mi));
           }
         }
       }
     }
-    mb.addFunction(createCheckcast(mb,clazz,typeInfo));
-    mb.addFunction(createInstanceof(mb,clazz,typeInfo));
+    mbs[mbIdx].addFunction(createCheckcast(mbs[mbIdx],clazz,typeInfo));
+    mbs[mbIdx].addFunction(createInstanceof(mbs[mbIdx],clazz,typeInfo));
   }
-  File linkerO=new File(config.getTmpDir(),"linker.o");
-  linkerO.getParentFile().mkdirs();
-  try (Context context=new Context()){
-    try (Module module=Module.parseIR(context,mb.build().toString(),"linker.ll")){
-      try (PassManager passManager=new PassManager()){
-        passManager.addAlwaysInlinerPass();
-        passManager.addPromoteMemoryToRegisterPass();
-        passManager.run(module);
-      }
-       String triple=arch.getLlvmName() + "-unknown-" + os;
-      Target target=Target.lookupTarget(triple);
-      try (TargetMachine targetMachine=target.createTargetMachine(triple)){
-        targetMachine.setAsmVerbosityDefault(true);
-        targetMachine.setFunctionSections(true);
-        targetMachine.setDataSections(true);
-        targetMachine.getOptions().setNoFramePointerElim(true);
-        try (OutputStream outO=new BufferedOutputStream(new FileOutputStream(linkerO))){
-          targetMachine.emit(module,outO,CodeGenFileType.ObjectFile);
-        }
-       }
-     }
-   }
-   List<File> objectFiles=new ArrayList<File>();
-  objectFiles.add(linkerO);
+  List<File> objectFiles=new ArrayList<File>();
+  while (System.currentTimeMillis() > 0) {
+    objectFiles.clear();
+    long start=System.currentTimeMillis();
+    generateMachineCode(config,mbs,objectFiles);
+    System.out.format("%.2f s\n",(System.currentTimeMillis() - start) / 1000.0);
+  }
   for (  Clazz clazz : linkClasses) {
     objectFiles.add(config.getOFile(clazz));
   }
