@@ -10,12 +10,7 @@
       FileUtils.writeStringToFile(linkerLl,ir,"utf-8");
     }
     try (Module module=Module.parseIR(context,ir,"linker" + num + ".ll")){
-      try (PassManager passManager=new PassManager()){
-        passManager.addAlwaysInlinerPass();
-        passManager.addPromoteMemoryToRegisterPass();
-        passManager.run(module);
-      }
-       String triple=arch.getLlvmName() + "-unknown-" + os;
+      String triple=arch.getLlvmName() + "-unknown-" + os;
       Target target=Target.lookupTarget(triple);
       try (TargetMachine targetMachine=target.createTargetMachine(triple)){
         targetMachine.setAsmVerbosityDefault(true);
