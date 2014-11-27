@@ -6,8 +6,10 @@
     String appPath=null;
     try (LockdowndClient lockdowndClient=new LockdowndClient(device,getClass().getSimpleName(),true)){
       appPath=getAppPath(lockdowndClient,appId);
-      if (appPathCallback != null) {
-        appPathCallback.setRemoteAppPath(appPath);
+      String productVersion=lockdowndClient.getValue(null,"ProductVersion").toString();
+      String buildVersion=lockdowndClient.getValue(null,"BuildVersion").toString();
+      if (appLauncherCallback != null) {
+        appLauncherCallback.setAppLaunchInfo(new AppLauncherInfo(appPath,productVersion,buildVersion));
       }
       LockdowndServiceDescriptor debugService=null;
       try {
