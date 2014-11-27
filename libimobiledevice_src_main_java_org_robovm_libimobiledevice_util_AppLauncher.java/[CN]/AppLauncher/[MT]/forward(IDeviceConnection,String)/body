@@ -10,9 +10,10 @@
    try (FileOutputStream fileOut=new FileOutputStream("/tmp/dbgout")){
     final InputStream in=clientSocket.getInputStream();
     final OutputStream out=clientSocket.getOutputStream();
-    byte[] buffer=new byte[4096];
+    byte[] buffer=new byte[10 * 4096];
     GdbRemoteParser lldbParser=new GdbRemoteParser();
     GdbRemoteParser debugServerParser=new GdbRemoteParser();
+    boolean nextPacketIsData=false;
     while (true) {
       try {
         if (in.available() > 0) {
@@ -23,6 +24,12 @@
           }
           List<byte[]> messages=lldbParser.parse(buffer,0,readBytes);
           debugForward(fileOut,"lldb->debugserver: ",messages);
+          for (          byte[] m : messages) {
+            if (m[1] == 'x') {
+              nextPacketIsData=true;
+              break;
+            }
+          }
         }
         if (killed || Thread.currentThread().isInterrupted()) {
           killed=true;
@@ -40,7 +47,12 @@
                 return exitCode;
               }
  else               if (message[1] == 'O') {
-                stdout.write(fromHex(message,2,message.length - 2 - 3));
+                if (!nextPacketIsData) {
+                  stdout.write(fromHex(message,2,message.length - 2 - 3));
+                }
+ else {
+                  nextPacketIsData=false;
+                }
               }
             }
             debugForward(fileOut,"debugserver->lldb: ",messages);

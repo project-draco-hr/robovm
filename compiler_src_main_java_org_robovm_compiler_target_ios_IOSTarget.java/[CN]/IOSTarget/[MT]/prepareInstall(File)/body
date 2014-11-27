@@ -2,7 +2,9 @@
   createInfoPList(installDir);
   generateDsym(installDir,getExecutable());
   if (isDeviceArch(arch)) {
-    strip(installDir,getExecutable());
+    if (!config.isDebug()) {
+      strip(installDir,getExecutable());
+    }
     copyResourcesPList(installDir);
     if (config.isIosSkipSigning()) {
       config.getLogger().warn("Skiping code signing. The resulting app will " + "be unsigned and will not run on unjailbroken devices");

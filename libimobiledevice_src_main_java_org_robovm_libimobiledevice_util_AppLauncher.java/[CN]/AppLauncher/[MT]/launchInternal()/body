@@ -1,39 +1,57 @@
 {
   install();
-  IDeviceConnection conn=null;
-  String appPath=null;
-  try (LockdowndClient lockdowndClient=new LockdowndClient(device,getClass().getSimpleName(),true)){
-    appPath=getAppPath(lockdowndClient,appId);
-    if (appPathCallback != null) {
-      appPathCallback.setRemoteAppPath(appPath);
-    }
-    LockdowndServiceDescriptor debugService=null;
-    try {
-      debugService=lockdowndClient.startService(DEBUG_SERVER_SERVICE_NAME);
-    }
- catch (    LibIMobileDeviceException e) {
-      if (e.getErrorCode() == LibIMobileDeviceConstants.LOCKDOWN_E_INVALID_SERVICE) {
-        mountDeveloperImage(lockdowndClient);
+  int lockedRetriesLeft=launchOnLockedRetries;
+  while (true) {
+    IDeviceConnection conn=null;
+    String appPath=null;
+    try (LockdowndClient lockdowndClient=new LockdowndClient(device,getClass().getSimpleName(),true)){
+      appPath=getAppPath(lockdowndClient,appId);
+      String productVersion=lockdowndClient.getValue(null,"ProductVersion").toString();
+      String buildVersion=lockdowndClient.getValue(null,"BuildVersion").toString();
+      if (appLauncherCallback != null) {
+        appLauncherCallback.setAppLaunchInfo(new AppLauncherInfo(appPath,productVersion,buildVersion));
+      }
+      LockdowndServiceDescriptor debugService=null;
+      try {
         debugService=lockdowndClient.startService(DEBUG_SERVER_SERVICE_NAME);
       }
+ catch (      LibIMobileDeviceException e) {
+        if (e.getErrorCode() == LockdowndError.LOCKDOWN_E_INVALID_SERVICE.swigValue()) {
+          mountDeveloperImage(lockdowndClient);
+          debugService=lockdowndClient.startService(DEBUG_SERVER_SERVICE_NAME);
+        }
  else {
-        throw e;
+          throw e;
+        }
+      }
+      conn=device.connect(debugService.getPort());
+      log("Debug server port: " + debugService.getPort());
+    }
+     if (lockedRetriesLeft == launchOnLockedRetries) {
+      log("Remote app path: " + appPath);
+      log("Launching app...");
+    }
+ else {
+      log("Launching app (retry %d of %d)...",(launchOnLockedRetries - lockedRetriesLeft),launchOnLockedRetries);
+    }
+    try {
+      if (localPort == -1) {
+        return pipeStdOut(conn,appPath);
+      }
+ else {
+        return forward(conn,appPath);
       }
     }
-    conn=device.connect(debugService.getPort());
-    log("Debug server port: " + debugService.getPort());
-  }
-   log("Remote app path: " + appPath);
-  log("Launching app...");
-  try {
-    if (localPort == -1) {
-      return pipeStdOut(conn,appPath);
+ catch (    RuntimeException e) {
+      if (!e.getMessage().contains("Locked") || lockedRetriesLeft == 0) {
+        throw e;
+      }
+      lockedRetriesLeft--;
+      log("Device locked. Retrying launch in %d seconds...",secondsBetweenLaunchOnLockedRetries);
+      Thread.sleep(secondsBetweenLaunchOnLockedRetries * 1000);
     }
- else {
-      return forward(conn,appPath);
+ finally {
+      conn.dispose();
     }
-  }
-  finally {
-    conn.dispose();
   }
 }

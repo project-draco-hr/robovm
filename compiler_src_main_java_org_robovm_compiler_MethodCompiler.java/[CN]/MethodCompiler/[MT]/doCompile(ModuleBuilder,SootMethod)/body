@@ -3,23 +3,20 @@
   moduleBuilder.addFunction(function);
   this.moduleBuilder=moduleBuilder;
   env=function.getParameterRef(0);
-  if (this.className.equals("java/lang/Object") && "<init>".equals(method.getName())) {
-    compileObjectInit();
-    Unit firstUnit=method.getActiveBody().getUnits().getFirst();
-    for (    Instruction in : function.getBasicBlocks().get(0).getInstructions()) {
-      in.attach(firstUnit);
-    }
-    return function;
-  }
   trapsAt=new HashMap<Unit,List<Trap>>();
   Body body=method.retrieveActiveBody();
+  NopStmt prependedNop=null;
   if (method.isStatic() && !body.getUnits().getFirst().getBoxesPointingToThis().isEmpty()) {
-    Unit inserPoint=body.getUnits().getFirst();
-    body.getUnits().getNonPatchingChain().insertBefore(Jimple.v().newNopStmt(),inserPoint);
+    Unit insertionPoint=body.getUnits().getFirst();
+    prependedNop=Jimple.v().newNopStmt();
+    body.getUnits().getNonPatchingChain().insertBefore(prependedNop,insertionPoint);
   }
   PackManager.v().getPack("jtp").apply(body);
   PackManager.v().getPack("jop").apply(body);
   PackManager.v().getPack("jap").apply(body);
+  if (body.getUnits().getFirst() == prependedNop && prependedNop.getBoxesPointingToThis().isEmpty()) {
+    body.getUnits().getNonPatchingChain().removeFirst();
+  }
   PatchingChain<Unit> units=body.getUnits();
   Map<Unit,List<Unit>> branchTargets=getBranchTargets(body);
   Map<Unit,Integer> trapHandlers=getTrapHandlers(body);
@@ -196,6 +193,15 @@
     }
  else {
       throw new IllegalArgumentException("Unknown Unit type: " + unit.getClass());
+    }
+  }
+  if (this.className.equals("java/lang/Object") && "<init>".equals(method.getName())) {
+    for (    BasicBlock bb : function.getBasicBlocks()) {
+      if (bb.last() instanceof Ret) {
+        Call call=new Call(REGISTER_FINALIZABLE,env,function.getParameterRef(1));
+        call.attach(bb.last().getAttachment(Unit.class));
+        bb.insertBefore(bb.last(),call);
+      }
     }
   }
   return function;

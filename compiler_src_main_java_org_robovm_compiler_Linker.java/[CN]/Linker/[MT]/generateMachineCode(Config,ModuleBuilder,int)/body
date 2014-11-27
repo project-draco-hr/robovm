@@ -1,0 +1,32 @@
+{
+  final Arch arch=config.getArch();
+  final OS os=config.getOs();
+  File linkerO=new File(config.getTmpDir(),"linker" + num + ".o");
+  linkerO.getParentFile().mkdirs();
+  try (Context context=new Context()){
+    String ir=mb.build().toString();
+    if (config.isDumpIntermediates()) {
+      File linkerLl=new File(config.getTmpDir(),"linker" + num + ".ll");
+      FileUtils.writeStringToFile(linkerLl,ir,"utf-8");
+    }
+    try (Module module=Module.parseIR(context,ir,"linker" + num + ".ll")){
+      try (PassManager passManager=new PassManager()){
+        passManager.addAlwaysInlinerPass();
+        passManager.addPromoteMemoryToRegisterPass();
+        passManager.run(module);
+      }
+       String triple=arch.getLlvmName() + "-unknown-" + os;
+      Target target=Target.lookupTarget(triple);
+      try (TargetMachine targetMachine=target.createTargetMachine(triple)){
+        targetMachine.setAsmVerbosityDefault(true);
+        targetMachine.setFunctionSections(true);
+        targetMachine.setDataSections(true);
+        targetMachine.getOptions().setNoFramePointerElim(true);
+        try (OutputStream outO=new BufferedOutputStream(new FileOutputStream(linkerO))){
+          targetMachine.emit(module,outO,CodeGenFileType.ObjectFile);
+        }
+       }
+     }
+   }
+   return linkerO;
+}
