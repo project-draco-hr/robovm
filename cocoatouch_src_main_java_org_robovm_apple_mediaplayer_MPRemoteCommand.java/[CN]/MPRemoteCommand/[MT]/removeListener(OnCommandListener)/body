@@ -1,0 +1,19 @@
+{
+  if (listener == null) {
+    throw new NullPointerException("listener");
+  }
+synchronized (listeners) {
+    ListenerWrapper l=null;
+    for (    ListenerWrapper wrapper : listeners) {
+      if (wrapper.listener == listener) {
+        removeTarget(wrapper,handleCommand);
+        l=wrapper;
+        break;
+      }
+    }
+    if (l != null) {
+      listeners.remove(l);
+      removeStrongRef(l);
+    }
+  }
+}
