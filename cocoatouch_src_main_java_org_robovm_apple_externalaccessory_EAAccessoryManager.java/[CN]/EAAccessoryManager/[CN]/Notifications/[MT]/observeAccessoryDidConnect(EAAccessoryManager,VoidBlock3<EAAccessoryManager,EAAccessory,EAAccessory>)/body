@@ -1,0 +1,17 @@
+{
+  return NSNotificationCenter.getDefaultCenter().addObserver(AccessoryDidConnectNotification(),object,NSOperationQueue.getMainQueue(),new VoidBlock1<NSNotification>(){
+    @Override public void invoke(    NSNotification a){
+      NSDictionary<NSString,NSObject> data=a.getUserInfo();
+      EAAccessory accessory=null;
+      EAAccessory selectedAccessory=null;
+      if (data.containsKey(AccessoryKey())) {
+        accessory=(EAAccessory)data.get(AccessoryKey());
+      }
+      if (data.containsKey(AccessorySelectedKey())) {
+        selectedAccessory=(EAAccessory)data.get(AccessorySelectedKey());
+      }
+      block.invoke((EAAccessoryManager)a.getObject(),accessory,selectedAccessory);
+    }
+  }
+);
+}
