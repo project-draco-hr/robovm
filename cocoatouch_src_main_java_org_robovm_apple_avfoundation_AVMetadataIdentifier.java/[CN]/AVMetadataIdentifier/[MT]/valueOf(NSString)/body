@@ -1,0 +1,15 @@
+{
+  Class<?>[] args=new Class<?>[]{NSString.class};
+  for (  Class<? extends AVMetadataIdentifier> cls : allSubClasses) {
+    try {
+      Bro.bind(cls);
+      java.lang.reflect.Method m=cls.getMethod("valueOf",args);
+      AVMetadataIdentifier key=(AVMetadataIdentifier)m.invoke(null);
+      if (key != null)       return key;
+    }
+ catch (    Throwable e) {
+      System.err.println("WARN: Failed to call valueOf() for " + "the AVMetadataIdentifier subclass " + cls.getName());
+    }
+  }
+  throw new IllegalArgumentException("No constant with value " + value + " found in "+ AVMetadataIdentifier.class.getName());
+}
