@@ -1,0 +1,40 @@
+{
+  try {
+    boolean eof=false;
+    byte[] buffer=new byte[bufferSize];
+    int pos=0;
+    while (!eof && !isInterrupted() && !shouldStop()) {
+      int b=in.read();
+      if (b == -1) {
+        eof=true;
+        break;
+      }
+      if (buffer.length <= pos) {
+        byte[] newBuffer=new byte[buffer.length * 2];
+        System.arraycopy(buffer,0,newBuffer,0,buffer.length);
+        buffer=newBuffer;
+      }
+      buffer[pos++]=(byte)b;
+      if (findPattern(buffer,pos,out)) {
+        break;
+      }
+    }
+    while (!eof && !isInterrupted() && !shouldStop()) {
+      int n=in.read(buffer);
+      if (n == -1) {
+        eof=true;
+        break;
+      }
+      if (n > 0) {
+        out.write(buffer,0,n);
+        out.flush();
+      }
+    }
+  }
+ catch (  Throwable t) {
+    handleException(t);
+  }
+ finally {
+    closeStreams();
+  }
+}
