@@ -15,9 +15,13 @@
     callbackFn.setParameterAttributes(0,ParameterAttribute.sret);
   }
  else   if (passByValue) {
-    int size=dataLayout.getAllocSize(callbackFn.getType().getReturnType());
-    Type t=size <= 1 ? I8 : (size <= 2 ? I16 : (size <= 4 ? I32 : I64));
-    callbackFn=callback(method,t);
+    OS os=config.getOs();
+    Arch arch=config.getArch();
+    if (os.returnSmallAggregateAsInteger(arch,dataLayout.getAllocSize(callbackFn.getType().getReturnType()))) {
+      int size=dataLayout.getAllocSize(callbackFn.getType().getReturnType());
+      Type t=size <= 1 ? I8 : (size <= 2 ? I16 : (size <= 4 ? I32 : I64));
+      callbackFn=callback(method,t);
+    }
   }
   moduleBuilder.addFunction(callbackFn);
   moduleBuilder.addAlias(new Alias(Symbols.callbackPtrSymbol(originalMethod),Linkage.linker_private,new ConstantBitcast(callbackFn.ref(),I8_PTR)));
