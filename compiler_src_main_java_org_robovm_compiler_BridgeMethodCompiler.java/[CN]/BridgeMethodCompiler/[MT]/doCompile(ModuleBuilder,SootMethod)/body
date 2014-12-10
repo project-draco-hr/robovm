@@ -90,11 +90,12 @@
         ParameterAttribute[] parameterAttributes=new ParameterAttribute[0];
         if (isPassByValue(method,i) || isStructRet(method,i)) {
           call(fn,CHECK_NULL,env,args.get(argIdx).getValue());
-          parameterAttributes=new ParameterAttribute[1];
           if (isStructRet(method,i)) {
+            parameterAttributes=new ParameterAttribute[1];
             parameterAttributes[0]=sret;
           }
- else {
+ else           if (nativeType instanceof PointerType) {
+            parameterAttributes=new ParameterAttribute[1];
             parameterAttributes[0]=byval;
           }
         }
