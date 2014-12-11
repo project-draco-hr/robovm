@@ -1,0 +1,28 @@
+{
+class TestProxy extends FilteringStreamProxy {
+    int foobar=-1;
+    public TestProxy(    InputStream in,    OutputStream out){
+      super(2,in,out);
+    }
+    protected boolean findPattern(    byte[] b,    int length,    OutputStream out) throws IOException {
+      String s=new String(b,0,length,"utf-8");
+      if (!s.endsWith("\n")) {
+        return false;
+      }
+      int idx=s.lastIndexOf("foobar=");
+      if (idx == -1) {
+        return false;
+      }
+      foobar=Integer.parseInt(s.substring(idx + "foobar=".length()).trim());
+      out.write(b,0,idx);
+      return true;
+    }
+  }
+  ByteArrayInputStream in=new ByteArrayInputStream("line 1\nline 2\nfoobar=12345\nline 4\nline 5\n".getBytes("utf-8"));
+  ByteArrayOutputStream out=new ByteArrayOutputStream();
+  TestProxy proxy=new TestProxy(in,out);
+  proxy.start();
+  proxy.join();
+  assertEquals(12345,proxy.foobar);
+  assertEquals("line 1\nline 2\nline 4\nline 5\n",new String(out.toByteArray(),"utf-8"));
+}
