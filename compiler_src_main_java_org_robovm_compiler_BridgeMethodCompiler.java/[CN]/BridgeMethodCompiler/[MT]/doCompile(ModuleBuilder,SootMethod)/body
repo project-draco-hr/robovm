@@ -14,10 +14,10 @@
   SootMethod originalMethod=method;
   Value structObj=null;
   boolean passByValue=isPassByValue(originalMethod);
+  Arch arch=config.getArch();
+  OS os=config.getOs();
   DataLayout dataLayout=config.getDataLayout();
   if (passByValue) {
-    Arch arch=config.getArch();
-    OS os=config.getOs();
     int size=dataLayout.getAllocSize(getStructType(originalMethod.getReturnType()));
     if (!os.isReturnedInRegisters(arch,size)) {
       method=createFakeStructRetMethod(method);
@@ -33,9 +33,11 @@
   }
   FunctionType targetFnType=getBridgeFunctionType(method,dynamic);
   if (method == originalMethod && passByValue) {
-    int size=dataLayout.getAllocSize(targetFnType.getReturnType());
-    Type t=size <= 1 ? I8 : (size <= 2 ? I16 : (size <= 4 ? I32 : I64));
-    targetFnType=new FunctionType(t,targetFnType.isVarargs(),targetFnType.getParameterTypes());
+    if (os.returnSmallAggregateAsInteger(arch,dataLayout.getAllocSize(targetFnType.getReturnType()))) {
+      int size=dataLayout.getAllocSize(targetFnType.getReturnType());
+      Type t=size <= 1 ? I8 : (size <= 2 ? I16 : (size <= 4 ? I32 : I64));
+      targetFnType=new FunctionType(t,targetFnType.isVarargs(),targetFnType.getParameterTypes());
+    }
   }
   VariableRef env=fn.getParameterRef(0);
   Variable targetFn=fn.newVariable(targetFnType);
@@ -90,11 +92,12 @@
         ParameterAttribute[] parameterAttributes=new ParameterAttribute[0];
         if (isPassByValue(method,i) || isStructRet(method,i)) {
           call(fn,CHECK_NULL,env,args.get(argIdx).getValue());
-          parameterAttributes=new ParameterAttribute[1];
           if (isStructRet(method,i)) {
+            parameterAttributes=new ParameterAttribute[1];
             parameterAttributes[0]=sret;
           }
- else {
+ else           if (nativeType instanceof PointerType) {
+            parameterAttributes=new ParameterAttribute[1];
             parameterAttributes[0]=byval;
           }
         }

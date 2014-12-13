@@ -1,0 +1,36 @@
+{
+  try {
+    boolean eof=false;
+    byte[] buffer=new byte[bufferSize];
+    int pos=0;
+    while (!eof && !isInterrupted() && !shouldStop()) {
+      int b=in.read();
+      if (b == -1) {
+        eof=true;
+        break;
+      }
+      buffer=ensureBufferSize(buffer,pos + 1);
+      buffer[pos++]=(byte)b;
+      if (findPattern(buffer,pos,out)) {
+        break;
+      }
+    }
+    while (!eof && !isInterrupted() && !shouldStop()) {
+      int n=in.read(buffer);
+      if (n == -1) {
+        eof=true;
+        break;
+      }
+      if (n > 0) {
+        out.write(buffer,0,n);
+        out.flush();
+      }
+    }
+  }
+ catch (  Throwable t) {
+    handleException(t);
+  }
+ finally {
+    closeStreams();
+  }
+}
