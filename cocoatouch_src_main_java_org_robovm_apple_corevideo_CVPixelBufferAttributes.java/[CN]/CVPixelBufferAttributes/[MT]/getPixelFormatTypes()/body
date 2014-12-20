@@ -1,0 +1,19 @@
+{
+  if (data.containsKey(PixelFormatTypeKey())) {
+    CFType val=data.get(PixelFormatTypeKey(),CFType.class);
+    List<CVPixelFormatType> list=new ArrayList<>();
+    if (val.getClass() == CFNumber.class || CFNumber.class.isAssignableFrom(val.getClass())) {
+      CFNumber num=(CFNumber)val;
+      list.add(CVPixelFormatType.valueOf(num.longValue()));
+      return list;
+    }
+ else     if (val.getClass() == CFArray.class || CFArray.class.isAssignableFrom(val.getClass())) {
+      CFArray arr=(CFArray)val;
+      for (int i=0; i < arr.size(); i++) {
+        list.add(CVPixelFormatType.valueOf(arr.get(i,CFNumber.class).longValue()));
+      }
+      return list;
+    }
+  }
+  return null;
+}
