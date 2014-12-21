@@ -1,0 +1,15 @@
+{
+  Class<?>[] args=new Class<?>[]{int.class};
+  for (  Class<? extends ABProperty> cls : allSubClasses) {
+    try {
+      Bro.bind(cls);
+      java.lang.reflect.Method m=cls.getMethod("valueOf",args);
+      ABProperty key=(ABProperty)m.invoke(null);
+      if (key != null)       return key;
+    }
+ catch (    Throwable e) {
+      System.err.println("WARN: Failed to call valueOf() for " + "the ABProperty subclass " + cls.getName());
+    }
+  }
+  throw new IllegalArgumentException("No constant with value " + value + " found in "+ ABProperty.class.getName());
+}
