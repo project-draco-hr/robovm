@@ -1,0 +1,37 @@
+{
+  final Set<Thread> threads=Collections.synchronizedSet(new HashSet<Thread>());
+  final CountDownLatch latch=new CountDownLatch(20);
+  DispatchQueue q1=DispatchQueue.create("q1",null);
+  DispatchQueue q2=DispatchQueue.create("q2",null);
+  for (int i=0; i < 20; i++) {
+    ((i & 1) == 0 ? q1 : q2).async(new Runnable(){
+      public void run(){
+        threads.add(Thread.currentThread());
+        latch.countDown();
+        try {
+          Thread.sleep(10);
+        }
+ catch (        InterruptedException e) {
+        }
+      }
+    }
+);
+  }
+  latch.await();
+  assertEquals(2,threads.size());
+  List<Thread> l=new ArrayList<>(threads);
+  Thread t1=l.get(0);
+  Thread t2=l.get(1);
+  assertTrue(t1.isDaemon());
+  assertTrue(t2.isDaemon());
+  assertTrue(t1.isAlive());
+  assertTrue(t2.isAlive());
+  assertEquals(0,t1.getStackTrace().length);
+  assertEquals(0,t2.getStackTrace().length);
+  q1.release();
+  q2.release();
+  t1.join(15000);
+  t2.join(15000);
+  assertFalse(t1.isAlive());
+  assertFalse(t2.isAlive());
+}
