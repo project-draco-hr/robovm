@@ -1,0 +1,13 @@
+{
+  long refcon=refconId.getAndIncrement();
+  CFMachPortContext context=new CFMachPortContext();
+  context.setInfo(refcon);
+  BooleanPtr ptr=new BooleanPtr();
+  CFMachPort result=create(null,new FunctionPtr(cbPort),context,ptr);
+  if (result != null) {
+synchronized (portCallbacks) {
+      portCallbacks.put(refcon,callback);
+    }
+  }
+  return result;
+}

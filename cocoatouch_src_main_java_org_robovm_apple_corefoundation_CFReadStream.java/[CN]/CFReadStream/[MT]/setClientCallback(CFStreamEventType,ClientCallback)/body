@@ -1,0 +1,12 @@
+{
+  localRefconId=refconId.getAndIncrement();
+  CFStreamClientContext context=new CFStreamClientContext();
+  context.setInfo(localRefconId);
+  boolean result=setClient(streamEvents,new FunctionPtr(cbClient),context);
+  if (result) {
+synchronized (clientCallbacks) {
+      clientCallbacks.put(localRefconId,callback);
+    }
+  }
+  return result;
+}
