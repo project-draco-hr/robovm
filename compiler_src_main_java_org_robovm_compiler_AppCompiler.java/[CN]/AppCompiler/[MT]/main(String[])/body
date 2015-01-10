@@ -4,6 +4,7 @@
   boolean verbose=false;
   boolean run=false;
   boolean createIpa=false;
+  List<Arch> ipaArchs=new ArrayList<>();
   String dumpConfigFile=null;
   List<String> runArgs=new ArrayList<String>();
   try {
@@ -195,6 +196,11 @@
  else       if ("-createipa".equals(args[i])) {
         createIpa=true;
       }
+ else       if ("-ipaarchs".equals(args[i])) {
+        for (        String s : args[++i].split(":")) {
+          ipaArchs.add(Arch.valueOf(s));
+        }
+      }
  else       if (args[i].startsWith("-D")) {
       }
  else       if (args[i].startsWith("-X")) {
@@ -243,8 +249,8 @@
       return;
     }
     compiler=new AppCompiler(builder.build());
-    if (createIpa && (!(compiler.config.getTarget() instanceof IOSTarget) || compiler.config.getArch() != Arch.thumbv7 || compiler.config.getOs() != OS.ios)) {
-      throw new IllegalArgumentException("Must build for iOS thumbv7 when creating IPA");
+    if (createIpa && (!(compiler.config.getTarget() instanceof IOSTarget) || !(compiler.config.getArch() == Arch.thumbv7 || compiler.config.getArch() == Arch.arm64) || compiler.config.getOs() != OS.ios)) {
+      throw new IllegalArgumentException("Must build for iOS thumbv7/arm64 when creating IPA");
     }
   }
  catch (  Throwable t) {
@@ -261,27 +267,29 @@
     printUsageAndExit(message,builder != null ? builder.getPlugins() : null);
   }
   try {
-    compiler.compile();
-    if (run) {
-      LaunchParameters launchParameters=compiler.config.getTarget().createLaunchParameters();
-      if (launchParameters instanceof IOSSimulatorLaunchParameters) {
-        IOSSimulatorLaunchParameters simParams=(IOSSimulatorLaunchParameters)launchParameters;
-        DeviceType type=DeviceType.getDeviceType(compiler.config.getHome(),compiler.config.getIosDeviceType());
-        if (type == null) {
-          simParams.setDeviceType(DeviceType.getBestDeviceType(compiler.config.getHome()));
-        }
+    if (createIpa) {
+      compiler.createIpa(ipaArchs);
+    }
  else {
-          simParams.setDeviceType(type);
+      compiler.compile();
+      if (run) {
+        LaunchParameters launchParameters=compiler.config.getTarget().createLaunchParameters();
+        if (launchParameters instanceof IOSSimulatorLaunchParameters) {
+          IOSSimulatorLaunchParameters simParams=(IOSSimulatorLaunchParameters)launchParameters;
+          DeviceType type=DeviceType.getDeviceType(compiler.config.getHome(),compiler.config.getIosDeviceType());
+          if (type == null) {
+            simParams.setDeviceType(DeviceType.getBestDeviceType(compiler.config.getHome()));
+          }
+ else {
+            simParams.setDeviceType(type);
+          }
         }
+        launchParameters.setArguments(runArgs);
+        compiler.launch(launchParameters);
       }
-      launchParameters.setArguments(runArgs);
-      compiler.launch(launchParameters);
-    }
- else     if (createIpa) {
-      ((IOSTarget)compiler.config.getTarget()).createIpa();
-    }
  else {
-      compiler.config.getTarget().install();
+        compiler.config.getTarget().install();
+      }
     }
   }
  catch (  Throwable t) {
