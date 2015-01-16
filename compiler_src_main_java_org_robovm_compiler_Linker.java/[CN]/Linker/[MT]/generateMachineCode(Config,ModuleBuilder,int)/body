@@ -1,6 +1,4 @@
 {
-  final Arch arch=config.getArch();
-  final OS os=config.getOs();
   File linkerO=new File(config.getTmpDir(),"linker" + num + ".o");
   linkerO.getParentFile().mkdirs();
   try (Context context=new Context()){
@@ -15,13 +13,20 @@
         passManager.addPromoteMemoryToRegisterPass();
         passManager.run(module);
       }
-       String triple=arch.getLlvmName() + "-unknown-" + os;
+       String triple=config.getTriple();
       Target target=Target.lookupTarget(triple);
       try (TargetMachine targetMachine=target.createTargetMachine(triple)){
         targetMachine.setAsmVerbosityDefault(true);
         targetMachine.setFunctionSections(true);
         targetMachine.setDataSections(true);
         targetMachine.getOptions().setNoFramePointerElim(true);
+        targetMachine.getOptions().setPositionIndependentExecutable(true);
+        if (config.isDumpIntermediates()) {
+          File linkerS=new File(config.getTmpDir(),"linker" + num + ".s");
+          try (OutputStream outS=new BufferedOutputStream(new FileOutputStream(linkerS))){
+            targetMachine.emit(module,outS,CodeGenFileType.AssemblyFile);
+          }
+         }
         try (OutputStream outO=new BufferedOutputStream(new FileOutputStream(linkerO))){
           targetMachine.emit(module,outO,CodeGenFileType.ObjectFile);
         }

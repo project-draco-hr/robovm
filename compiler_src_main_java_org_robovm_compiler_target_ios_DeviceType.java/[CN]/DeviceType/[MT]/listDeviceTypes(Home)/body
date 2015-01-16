@@ -12,14 +12,27 @@
       String[] tokens=deviceTypeId.split(",");
       tokens[0]=tokens[0].trim();
       tokens[1]=tokens[1].trim();
+      tokens[2]=tokens[2].trim();
       SDK sdk=sdkMap.get(tokens[1]);
       if (sdk != null) {
-        types.add(new DeviceType(tokens[0],sdk));
-      }
-    }
-    return types;
+        Set<Arch> archs=new HashSet<>();
+        for (        String s : tokens[2].replaceAll("[\\(\\)]","").split(" ")) {
+switch (s) {
+case "i386":
+            archs.add(Arch.x86);
+          break;
+case "x86_64":
+        archs.add(Arch.x86_64);
+      break;
   }
- catch (  IOException e) {
-    return Collections.<DeviceType>emptyList();
-  }
+}
+types.add(new DeviceType(tokens[0],sdk,archs));
+}
+}
+Collections.sort(types);
+return types;
+}
+ catch (IOException e) {
+throw new RuntimeException(e);
+}
 }

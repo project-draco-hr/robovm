@@ -1,0 +1,18 @@
+{
+  if (deviceName == null && family == null) {
+    family=DeviceFamily.iPhone;
+  }
+  DeviceType best=null;
+  for (  DeviceType type : filter(listDeviceTypes(home),arch,family,deviceName,sdkVersion)) {
+    if (best == null) {
+      best=type;
+    }
+ else     if (type.getSdk().compareTo(best.getSdk()) > 0) {
+      best=type;
+    }
+  }
+  if (best == null) {
+    throw new IllegalArgumentException("Unable to find a matching device " + "[arch=" + arch + ", family="+ family+ ", name="+ deviceName+ ", sdk="+ sdkVersion+ "]");
+  }
+  return best;
+}
