@@ -14,6 +14,7 @@
   sendGdbPacket(conn,encode("c"));
   boolean wasInterrupted=false;
   try {
+    StringBuilder messages=new StringBuilder();
     while (true) {
       try {
         String response=receiveGdbPacket(conn);
@@ -23,7 +24,25 @@
           return exitCode;
         }
  else         if (payload.charAt(0) == 'O') {
-          stdout.write(fromHex(payload.substring(1)));
+          byte[] msg=fromHex(payload.substring(1));
+          if (appLauncherCallback != null) {
+            try {
+              String str=new String(msg,"UTF-8");
+              messages.append(str);
+              String[] lines=messages.toString().split("\n");
+              for (              String line : lines) {
+                if (line.startsWith("[DEBUG] hooks: debugPort=")) {
+                  if (line == lines[lines.length - 1])                   break;
+                  int debugPort=Integer.parseInt(line.substring("[DEBUG] hooks: debugPort=".length()).trim());
+                  appLauncherCallback.setDebugPort(debugPort);
+                  appLauncherCallback=null;
+                }
+              }
+            }
+ catch (            Throwable t) {
+            }
+          }
+          stdout.write(msg);
         }
  else         if (payload.charAt(0) == 'T') {
           String signal=payload.substring(1,3);
