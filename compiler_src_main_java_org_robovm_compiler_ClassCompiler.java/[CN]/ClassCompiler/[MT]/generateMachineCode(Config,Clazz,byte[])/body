@@ -38,7 +38,10 @@
         try (BufferedOutputStream oOut=new BufferedOutputStream(new FileOutputStream(oFile))){
           targetMachine.assemble(asm,clazz.getClassName(),oOut);
         }
-         String symbolPrefix=config.getOs().getFamily() == OS.Family.darwin ? "_" : "";
+         for (        CompilerPlugin plugin : config.getCompilerPlugins()) {
+          plugin.afterObjectFile(config,clazz,oFile);
+        }
+        String symbolPrefix=config.getOs().getFamily() == OS.Family.darwin ? "_" : "";
         symbolPrefix+=Symbols.EXTERNAL_SYMBOL_PREFIX;
         ModuleBuilder linesMb=null;
         try (ObjectFile objectFile=ObjectFile.load(oFile)){
