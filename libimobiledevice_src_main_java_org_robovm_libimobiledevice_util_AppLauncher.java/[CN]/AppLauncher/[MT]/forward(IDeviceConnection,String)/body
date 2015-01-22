@@ -49,7 +49,11 @@
               }
  else               if (message[1] == 'O') {
                 if (!nextPacketIsData) {
-                  stdout.write(fromHex(message,2,message.length - 2 - 3));
+                  byte[] data=fromHex(message,2,message.length - 2 - 3);
+                  if (appLauncherCallback != null) {
+                    data=appLauncherCallback.filterOutput(data);
+                  }
+                  stdout.write(data);
                 }
  else {
                   nextPacketIsData=false;
