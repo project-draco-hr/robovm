@@ -1,0 +1,20 @@
+{
+  Config clone=new Config();
+  for (  Field f : Config.class.getDeclaredFields()) {
+    if (!Modifier.isTransient(f.getModifiers())) {
+      f.setAccessible(true);
+      try {
+        Object o=f.get(config);
+        if (o instanceof Collection && o instanceof Cloneable) {
+          Method m=o.getClass().getMethod("clone");
+          o=m.invoke(o);
+        }
+        f.set(clone,o);
+      }
+ catch (      Throwable t) {
+        throw new Error(t);
+      }
+    }
+  }
+  return clone;
+}
