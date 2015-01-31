@@ -1,0 +1,12 @@
+{
+  long refconId=CFFileDescriptor.refconId.getAndIncrement();
+  CFFileDescriptorContext context=new CFFileDescriptorContext();
+  context.setInfo(refconId);
+  CFFileDescriptor result=create(allocator,fd,closeOnInvalidate,new FunctionPtr(cbInvoke),context);
+  if (result != null) {
+synchronized (callbacks) {
+      callbacks.put(refconId,callback);
+    }
+  }
+  return result;
+}
