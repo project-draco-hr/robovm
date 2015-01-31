@@ -1,0 +1,12 @@
+{
+  long refconId=CFSocket.refconId.getAndIncrement();
+  CFSocketContext context=new CFSocketContext();
+  context.setInfo(refconId);
+  CFSocket result=createConnectedToSocketSignature(allocator,signature,callBackTypes,new FunctionPtr(cbInvoke),context,timeout);
+  if (result != null) {
+synchronized (callbacks) {
+      callbacks.put(refconId,callback);
+    }
+  }
+  return result;
+}
