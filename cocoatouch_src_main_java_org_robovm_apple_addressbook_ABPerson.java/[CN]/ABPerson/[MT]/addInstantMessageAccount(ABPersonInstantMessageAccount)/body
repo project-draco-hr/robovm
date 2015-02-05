@@ -1,5 +1,14 @@
 {
-  ABMutableMultiValue val=(ABMutableMultiValue)getValue(ABPersonProperty.InstantMessage);
-  if (val != null)   return val.addValueAndLabel(instantMessageAccount.getDictionary(),instantMessageAccount.getLabel0());
-  return -1;
+  if (instantMessageAccount == null)   throw new NullPointerException("instantMessageAccount");
+  ABMultiValue val=getValue(ABPersonProperty.InstantMessage,ABMultiValue.class);
+  ABMutableMultiValue mutable;
+  if (val != null) {
+    mutable=ABMutableMultiValue.create(val);
+  }
+ else {
+    mutable=ABMutableMultiValue.create(ABPropertyType.MultiDictionary);
+  }
+  int result=mutable.addValueAndLabel(instantMessageAccount.getDictionary(),instantMessageAccount.getLabel0());
+  setValue(ABPersonProperty.InstantMessage,mutable);
+  return result;
 }

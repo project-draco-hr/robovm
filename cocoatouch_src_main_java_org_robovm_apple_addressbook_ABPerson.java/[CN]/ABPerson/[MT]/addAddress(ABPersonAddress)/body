@@ -1,5 +1,14 @@
 {
-  ABMutableMultiValue val=(ABMutableMultiValue)getValue(ABPersonProperty.Address);
-  if (val != null)   return val.addValueAndLabel(address.getDictionary(),address.getLabel0());
-  return -1;
+  if (address == null)   throw new NullPointerException("address");
+  ABMultiValue val=getValue(ABPersonProperty.Address,ABMultiValue.class);
+  ABMutableMultiValue mutable;
+  if (val != null) {
+    mutable=ABMutableMultiValue.create(val);
+  }
+ else {
+    mutable=ABMutableMultiValue.create(ABPropertyType.MultiDictionary);
+  }
+  int result=mutable.addValueAndLabel(address.getDictionary(),address.getLabel0());
+  setValue(ABPersonProperty.Address,mutable);
+  return result;
 }
