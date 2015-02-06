@@ -1,4 +1,10 @@
 {
-  ABMutableMultiValue val=(ABMutableMultiValue)getValue(ABPersonProperty.Address);
-  if (val != null)   val.removeValueAndLabel(val.indexOf(id));
+  ABMultiValue val=getValue(ABPersonProperty.Address,ABMultiValue.class);
+  if (val != null) {
+    ABMutableMultiValue mutable=ABMutableMultiValue.create(val);
+    boolean result=mutable.removeValueAndLabel(mutable.indexOf(id));
+    setValue(ABPersonProperty.Address,mutable);
+    return result;
+  }
+  return false;
 }

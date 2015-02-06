@@ -1,5 +1,14 @@
 {
-  ABMutableMultiValue val=(ABMutableMultiValue)getValue(ABPersonProperty.Email);
-  if (val != null)   return val.addValueAndLabel(emailAddress.getAddress0(),emailAddress.getLabel());
-  return -1;
+  if (emailAddress == null)   throw new NullPointerException("emailAddress");
+  ABMultiValue val=getValue(ABPersonProperty.Email,ABMultiValue.class);
+  ABMutableMultiValue mutable;
+  if (val != null) {
+    mutable=ABMutableMultiValue.create(val);
+  }
+ else {
+    mutable=ABMutableMultiValue.create(ABPropertyType.MultiString);
+  }
+  int result=mutable.addValueAndLabel(emailAddress.getAddress0(),emailAddress.getLabel0());
+  setValue(ABPersonProperty.Email,mutable);
+  return result;
 }

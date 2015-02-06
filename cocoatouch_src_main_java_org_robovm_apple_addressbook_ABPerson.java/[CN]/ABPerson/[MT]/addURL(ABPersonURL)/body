@@ -1,5 +1,14 @@
 {
-  ABMutableMultiValue val=(ABMutableMultiValue)getValue(ABPersonProperty.URL);
-  if (val != null)   return val.addValueAndLabel(url.getURL0(),url.getLabel());
-  return -1;
+  if (url == null)   throw new NullPointerException("url");
+  ABMultiValue val=getValue(ABPersonProperty.URL,ABMultiValue.class);
+  ABMutableMultiValue mutable;
+  if (val != null) {
+    mutable=ABMutableMultiValue.create(val);
+  }
+ else {
+    mutable=ABMutableMultiValue.create(ABPropertyType.MultiString);
+  }
+  int result=mutable.addValueAndLabel(url.getURL0(),url.getLabel0());
+  setValue(ABPersonProperty.URL,mutable);
+  return result;
 }

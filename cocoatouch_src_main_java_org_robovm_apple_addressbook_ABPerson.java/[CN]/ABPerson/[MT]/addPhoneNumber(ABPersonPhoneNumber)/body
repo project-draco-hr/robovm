@@ -1,5 +1,14 @@
 {
-  ABMutableMultiValue val=(ABMutableMultiValue)getValue(ABPersonProperty.Phone);
-  if (val != null)   return val.addValueAndLabel(phoneNumber.getNumber0(),phoneNumber.getLabel());
-  return -1;
+  if (phoneNumber == null)   throw new NullPointerException("phoneNumber");
+  ABMultiValue val=getValue(ABPersonProperty.Phone,ABMultiValue.class);
+  ABMutableMultiValue mutable;
+  if (val != null) {
+    mutable=ABMutableMultiValue.create(val);
+  }
+ else {
+    mutable=ABMutableMultiValue.create(ABPropertyType.MultiString);
+  }
+  int result=mutable.addValueAndLabel(phoneNumber.getNumber0(),phoneNumber.getLabel0());
+  setValue(ABPersonProperty.Phone,mutable);
+  return result;
 }
