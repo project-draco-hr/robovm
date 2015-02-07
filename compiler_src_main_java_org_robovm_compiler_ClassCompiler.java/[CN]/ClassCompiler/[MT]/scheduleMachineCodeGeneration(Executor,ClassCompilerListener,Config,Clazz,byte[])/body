@@ -1,18 +1,22 @@
 {
-  try {
-    executor.execute(new Runnable(){
-      @Override public void run(){
-        try {
-          generateMachineCode(config,clazz,llData);
-          listener.success(clazz);
-        }
- catch (        Throwable t) {
-          listener.failure(clazz,t);
-        }
+  Runnable task=new Runnable(){
+    @Override public void run(){
+      try {
+        generateMachineCode(config,clazz,llData);
+        listener.success(clazz);
+      }
+ catch (      Throwable t) {
+        listener.failure(clazz,t);
       }
     }
-);
+  }
+;
+  try {
+    executor.execute(task);
   }
  catch (  RejectedExecutionException e) {
+    if (!(executor instanceof ExecutorService) || !((ExecutorService)executor).isShutdown()) {
+      task.run();
+    }
   }
 }
