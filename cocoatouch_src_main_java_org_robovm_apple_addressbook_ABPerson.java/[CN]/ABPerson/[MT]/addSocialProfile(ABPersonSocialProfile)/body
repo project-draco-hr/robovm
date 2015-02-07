@@ -1,5 +1,14 @@
 {
-  ABMutableMultiValue val=(ABMutableMultiValue)getValue(ABPersonProperty.SocialProfile);
-  if (val != null)   return val.addValueAndLabel(socialProfile.getDictionary(),socialProfile.getLabel0());
-  return -1;
+  if (socialProfile == null)   throw new NullPointerException("socialProfile");
+  ABMultiValue val=getValue(ABPersonProperty.SocialProfile,ABMultiValue.class);
+  ABMutableMultiValue mutable;
+  if (val != null) {
+    mutable=ABMutableMultiValue.create(val);
+  }
+ else {
+    mutable=ABMutableMultiValue.create(ABPropertyType.MultiDictionary);
+  }
+  int result=mutable.addValueAndLabel(socialProfile.getDictionary(),socialProfile.getLabel0());
+  setValue(ABPersonProperty.SocialProfile,mutable);
+  return result;
 }
