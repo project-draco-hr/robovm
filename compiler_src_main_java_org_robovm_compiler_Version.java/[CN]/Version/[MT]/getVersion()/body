@@ -4,7 +4,12 @@
   }
   InputStream is=null;
   try {
-    is=Version.class.getResourceAsStream("/version.properties");
+    Enumeration<URL> resources=Version.class.getClassLoader().getResources("version.properties");
+    for (    URL resource : Collections.list(resources)) {
+      if (resource.getFile().contains("robovm-dist")) {
+        is=resource.openStream();
+      }
+    }
     Properties props=new Properties();
     props.load(is);
     version=props.getProperty("version");
