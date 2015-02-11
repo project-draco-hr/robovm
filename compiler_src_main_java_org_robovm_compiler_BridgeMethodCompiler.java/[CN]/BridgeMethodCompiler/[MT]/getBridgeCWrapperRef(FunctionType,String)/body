@@ -1,0 +1,18 @@
+{
+  Type returnType=functionType.getReturnType();
+  Type wrapperReturnType=returnType instanceof StructureType ? VOID : returnType;
+  List<Type> wrapperParamTypes=new ArrayList<>();
+  wrapperParamTypes.add(I8_PTR);
+  if (returnType instanceof StructureType) {
+    wrapperParamTypes.add(I8_PTR);
+  }
+  for (  Type t : functionType.getParameterTypes()) {
+    if (t instanceof StructureType || t instanceof PointerType) {
+      wrapperParamTypes.add(I8_PTR);
+    }
+ else {
+      wrapperParamTypes.add(t);
+    }
+  }
+  return new FunctionRef(name,new FunctionType(wrapperReturnType,wrapperParamTypes.toArray(new Type[wrapperParamTypes.size()])));
+}
