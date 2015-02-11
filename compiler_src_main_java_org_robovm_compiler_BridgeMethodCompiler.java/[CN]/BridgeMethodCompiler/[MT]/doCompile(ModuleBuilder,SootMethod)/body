@@ -33,7 +33,7 @@
   }
   args.remove(0);
   List<MarshaledArg> marshaledArgs=new ArrayList<MarshaledArg>();
-  FunctionType targetFnType=getBridgeFunctionType(method,dynamic);
+  FunctionType targetFnType=getBridgeFunctionType(method,dynamic,false);
   Type[] targetParameterTypes=targetFnType.getParameterTypes();
   if (!method.isStatic()) {
     MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,MarshalSite.RECEIVER));
@@ -85,8 +85,9 @@
     args.add(1,new Argument(structResult.ref()));
   }
   String wrapperName=Symbols.bridgeCSymbol(method);
-  getCWrapperFunctions().add(createBridgeCWrapper(targetFnType,wrapperName));
-  FunctionRef wrapperFnRef=getBridgeCWrapperRef(targetFnType,wrapperName);
+  FunctionType wrapperFnType=getBridgeFunctionType(method,dynamic,true);
+  getCWrapperFunctions().add(createBridgeCWrapper(targetFnType.getReturnType(),targetFnType.getParameterTypes(),wrapperFnType.getParameterTypes(),wrapperName));
+  FunctionRef wrapperFnRef=getBridgeCWrapperRef(wrapperFnType,wrapperName);
   moduleBuilder.addFunctionDeclaration(new FunctionDeclaration(wrapperFnRef));
   BasicBlockRef bbSuccess=fn.newBasicBlockRef(new Label("success"));
   BasicBlockRef bbFailure=fn.newBasicBlockRef(new Label("failure"));

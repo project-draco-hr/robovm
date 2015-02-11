@@ -1,7 +1,12 @@
 {
   Type returnType=getReturnType(anno,method);
+  boolean varargs=considerVariadic && hasVariadicAnnotation(method);
+  int variadicIndex=varargs ? getVariadicParameterIndex(method) : Integer.MAX_VALUE;
   List<Type> paramTypes=new ArrayList<>();
   for (int i=dynamic ? 1 : 0; i < method.getParameterCount(); i++) {
+    if (i == variadicIndex) {
+      break;
+    }
     paramTypes.add(getParameterType(anno,method,i));
   }
   if (!method.isStatic()) {
@@ -17,5 +22,5 @@
       throw new IllegalArgumentException("Receiver of non static " + anno + " method "+ method+ " must either be a Struct or a NativeObject");
     }
   }
-  return new FunctionType(returnType,paramTypes.toArray(new Type[paramTypes.size()]));
+  return new FunctionType(returnType,varargs,paramTypes.toArray(new Type[paramTypes.size()]));
 }
