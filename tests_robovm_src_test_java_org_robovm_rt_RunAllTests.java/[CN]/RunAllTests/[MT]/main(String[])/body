@@ -1,0 +1,22 @@
+{
+  List<Class<?>> classes=new ArrayList<>();
+  for (  Class<?> cls : VM.listClasses(Object.class,ClassLoader.getSystemClassLoader())) {
+    if (!cls.getName().startsWith("junit.") && !cls.getName().startsWith("org.junit.")) {
+      if (TestCase.class.isAssignableFrom(cls)) {
+        classes.add(cls);
+        continue;
+      }
+      for (      Method m : cls.getMethods()) {
+        if (m.getAnnotation(Test.class) != null) {
+          classes.add(cls);
+          break;
+        }
+      }
+    }
+  }
+  JUnitCore jc=new JUnitCore();
+  jc.addListener(new TextListener(System.out));
+  jc.run(classes.toArray(new Class[classes.size()]));
+  System.out.flush();
+  System.exit(0);
+}

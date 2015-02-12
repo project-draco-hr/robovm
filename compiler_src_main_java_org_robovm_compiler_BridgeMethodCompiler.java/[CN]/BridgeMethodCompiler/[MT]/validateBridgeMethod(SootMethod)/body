@@ -8,4 +8,18 @@
       throw new IllegalArgumentException("Dynamic @Bridge annotated method " + method + " must be static and take a @Pointer long as first parameter");
     }
   }
+  if (hasVariadicAnnotation(method)) {
+    int first=getVariadicParameterIndex(method);
+    if (first < 0) {
+      throw new IllegalArgumentException("Invalid @Variadic index on @Bridge annotated method " + method + ". Index must be 0 or greater.");
+    }
+    if (method.isStatic() && first == 0) {
+      throw new IllegalArgumentException("At least 1 parameter must come " + "before the first va_arg parameter on static @Bridge annotated method " + method);
+    }
+    for (int i=first; i < method.getParameterCount(); i++) {
+      if (isPassByValue(method,i)) {
+        throw new IllegalArgumentException("Parameter " + (i + 1) + " of @Bridge annotated method "+ method+ " cannot be passed @ByVal when part of a va_arg parameter list");
+      }
+    }
+  }
 }

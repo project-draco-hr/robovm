@@ -1,32 +1,33 @@
 {
-  DataLayout dataLayout=config.getDataLayout();
-  SootMethod originalMethod=method;
-  boolean passByValue=isPassByValue(originalMethod);
-  if (passByValue) {
-    Arch arch=config.getArch();
-    OS os=config.getOs();
-    int size=dataLayout.getAllocSize(getStructType(originalMethod.getReturnType()));
-    if (!os.isReturnedInRegisters(arch,size)) {
-      method=createFakeStructRetMethod(method);
+  Function callbackFn=null;
+  FunctionType nativeFnType=null;
+  boolean useCWrapper=requiresCWrapper(method);
+  if (useCWrapper) {
+    FunctionRef callbackCWrapperRef=getCallbackCWrapperRef(method,Symbols.callbackCSymbol(method));
+    getCWrapperFunctions().add(createCallbackCWrapper(callbackCWrapperRef.getType(),callbackCWrapperRef.getName(),Symbols.callbackInnerCSymbol(method)));
+    moduleBuilder.addFunctionDeclaration(new FunctionDeclaration(callbackCWrapperRef));
+    Type callbackRetType=callbackCWrapperRef.getType().getReturnType() instanceof StructureType ? I8_PTR : callbackCWrapperRef.getType().getReturnType();
+    Type[] callbackParamTypes=new Type[callbackCWrapperRef.getType().getParameterTypes().length];
+    for (int i=0; i < callbackParamTypes.length; i++) {
+      Type t=callbackCWrapperRef.getType().getParameterTypes()[i];
+      if (t instanceof StructureType) {
+        t=I8_PTR;
+      }
+      callbackParamTypes[i]=t;
     }
+    moduleBuilder.addAlias(new Alias(Symbols.callbackPtrSymbol(method),Linkage._private,new ConstantBitcast(callbackCWrapperRef,I8_PTR)));
+    callbackFn=new FunctionBuilder(Symbols.callbackInnerCSymbol(method),new FunctionType(callbackRetType,callbackParamTypes)).build();
+    nativeFnType=callbackCWrapperRef.getType();
   }
-  Function callbackFn=callback(method);
-  if (originalMethod != method) {
-    callbackFn.setParameterAttributes(0,ParameterAttribute.sret);
-  }
- else   if (passByValue) {
-    OS os=config.getOs();
-    Arch arch=config.getArch();
-    if (os.returnSmallAggregateAsInteger(arch,dataLayout.getAllocSize(callbackFn.getType().getReturnType()))) {
-      int size=dataLayout.getAllocSize(callbackFn.getType().getReturnType());
-      Type t=size <= 1 ? I8 : (size <= 2 ? I16 : (size <= 4 ? I32 : I64));
-      callbackFn=callback(method,t);
-    }
+ else {
+    FunctionType callbackFnType=getCallbackFunctionType(method,false);
+    callbackFn=FunctionBuilder.callback(method,callbackFnType);
+    moduleBuilder.addAlias(new Alias(Symbols.callbackPtrSymbol(method),Linkage._private,new ConstantBitcast(callbackFn.ref(),I8_PTR)));
+    nativeFnType=callbackFnType;
   }
   moduleBuilder.addFunction(callbackFn);
-  moduleBuilder.addAlias(new Alias(Symbols.callbackPtrSymbol(originalMethod),Linkage._private,new ConstantBitcast(callbackFn.ref(),I8_PTR)));
-  String targetName=originalMethod.isSynchronized() ? Symbols.synchronizedWrapperSymbol(originalMethod) : Symbols.methodSymbol(originalMethod);
-  FunctionRef targetFn=new FunctionRef(targetName,getFunctionType(originalMethod));
+  String targetName=method.isSynchronized() ? Symbols.synchronizedWrapperSymbol(method) : Symbols.methodSymbol(method);
+  FunctionRef targetFn=new FunctionRef(targetName,getFunctionType(method));
   Value env=call(callbackFn,BC_ATTACH_THREAD_FROM_CALLBACK);
   BasicBlockRef bbSuccess=callbackFn.newBasicBlockRef(new Label("success"));
   BasicBlockRef bbFailure=callbackFn.newBasicBlockRef(new Label("failure"));
@@ -36,28 +37,22 @@
   List<MarshaledArg> marshaledArgs=new ArrayList<MarshaledArg>();
   ArrayList<Value> args=new ArrayList<Value>();
   args.add(env);
-  int receiverIdx=-1;
   if (!method.isStatic()) {
     MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,MarshalSite.RECEIVER));
     MarshaledArg marshaledArg=new MarshaledArg();
     marshaledArg.paramIndex=MarshalSite.RECEIVER;
     marshaledArgs.add(marshaledArg);
-    receiverIdx=method == originalMethod ? 0 : 1;
-    Value arg=callbackFn.getParameterRef(receiverIdx);
-    String targetClassName=getInternalName(originalMethod.getDeclaringClass());
+    Value arg=callbackFn.getParameterRef(0);
+    String targetClassName=getInternalName(method.getDeclaringClass());
     arg=marshalNativeToObject(callbackFn,marshalerMethod,marshaledArg,env,targetClassName,arg,MarshalerFlags.CALL_TYPE_CALLBACK);
     args.add(arg);
   }
-  int start=originalMethod == method ? 0 : 1;
-  for (int i=start, argIdx=start; i < method.getParameterCount(); i++, argIdx++) {
-    if (argIdx == receiverIdx) {
+  for (int i=0, argIdx=0; i < method.getParameterCount(); i++, argIdx++) {
+    if (!method.isStatic() && argIdx == 0) {
       argIdx++;
     }
     Value arg=callbackFn.getParameterRef(argIdx);
     soot.Type type=method.getParameterType(i);
-    if (isPassByValue(method,i) && arg.getType() instanceof PointerType) {
-      callbackFn.setParameterAttributes(argIdx,ParameterAttribute.byval);
-    }
     if (needsMarshaler(type)) {
       MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,i));
       String targetClassName=getInternalName(type);
@@ -68,7 +63,15 @@
         MarshaledArg marshaledArg=new MarshaledArg();
         marshaledArg.paramIndex=i;
         marshaledArgs.add(marshaledArg);
-        arg=marshalNativeToObject(callbackFn,marshalerMethod,marshaledArg,env,targetClassName,arg,MarshalerFlags.CALL_TYPE_CALLBACK);
+        Type nativeType=nativeFnType.getParameterTypes()[argIdx];
+        if (nativeType instanceof StructureType) {
+          DataLayout dataLayout=config.getDataLayout();
+          Value heapCopy=call(callbackFn,BC_COPY_STRUCT,env,arg,new IntegerConstant(dataLayout.getAllocSize(nativeType)));
+          arg=marshalNativeToObject(callbackFn,marshalerMethod,marshaledArg,env,targetClassName,heapCopy,MarshalerFlags.CALL_TYPE_CALLBACK);
+        }
+ else {
+          arg=marshalNativeToObject(callbackFn,marshalerMethod,marshaledArg,env,targetClassName,arg,MarshalerFlags.CALL_TYPE_CALLBACK);
+        }
       }
     }
  else {
@@ -81,26 +84,12 @@
   if (needsMarshaler(method.getReturnType())) {
     MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method));
     Type nativeType=callbackFn.getType().getReturnType();
-    if (passByValue) {
-      result=marshalObjectToNative(callbackFn,marshalerMethod,null,nativeType,env,result,MarshalerFlags.CALL_TYPE_CALLBACK,true);
-    }
- else     if (nativeType instanceof PrimitiveType) {
+    if (nativeType instanceof PrimitiveType) {
       result=marshalValueObjectToNative(callbackFn,marshalerMethod,nativeType,env,result,MarshalerFlags.CALL_TYPE_CALLBACK);
     }
  else {
       result=marshalObjectToNative(callbackFn,marshalerMethod,null,nativeType,env,result,MarshalerFlags.CALL_TYPE_CALLBACK);
     }
-  }
- else   if (originalMethod != method) {
-    MarshalerMethod marshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(originalMethod));
-    PointerType nativeType=(PointerType)callbackFn.getType().getParameterTypes()[0];
-    Value addr=marshalObjectToNative(callbackFn,marshalerMethod,null,nativeType,env,result,MarshalerFlags.CALL_TYPE_CALLBACK);
-    Variable src=callbackFn.newVariable(I8_PTR);
-    Variable dest=callbackFn.newVariable(I8_PTR);
-    callbackFn.add(new Bitcast(src,addr,I8_PTR));
-    callbackFn.add(new Bitcast(dest,callbackFn.getParameterRef(0),I8_PTR));
-    call(callbackFn,LLVM_MEMCPY,dest.ref(),src.ref(),sizeof((StructureType)nativeType.getBase()),new IntegerConstant(0),BooleanConstant.FALSE);
-    result=null;
   }
  else {
     result=marshalPrimitiveToNative(callbackFn,method,result);

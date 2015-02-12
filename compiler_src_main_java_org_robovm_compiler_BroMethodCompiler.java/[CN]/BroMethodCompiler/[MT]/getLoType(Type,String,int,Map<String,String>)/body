@@ -1,0 +1,29 @@
+{
+  if (type instanceof StructureType) {
+    StringBuilder sb=new StringBuilder();
+    StructureType st=(StructureType)type;
+    sb.append("{");
+    String name=String.format("%s_%04d",base,index);
+    for (int i=0; i < st.getTypeCount(); i++) {
+      Type t=st.getTypeAt(i);
+      if (i == 0 && t instanceof StructureType) {
+        if (((StructureType)t).getTypeCount() == 0) {
+          continue;
+        }
+      }
+      StringBuilder dims=new StringBuilder();
+      while (t instanceof ArrayType) {
+        ArrayType at=(ArrayType)t;
+        dims.append('[').append(at.getSize()).append(']');
+        t=((ArrayType)t).getElementType();
+      }
+      sb.append(getLoType(t,name,i,structs)).append(" m" + i).append(dims).append(";");
+    }
+    sb.append("}");
+    structs.put(name,sb.toString());
+    return "struct " + name;
+  }
+ else {
+    return getHiType(type);
+  }
+}

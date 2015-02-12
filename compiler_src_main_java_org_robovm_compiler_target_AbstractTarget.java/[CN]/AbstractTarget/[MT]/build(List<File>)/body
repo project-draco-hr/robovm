@@ -38,10 +38,6 @@
     if (config.isSkipInstall()) {
       exportedSymbols.add("catch_exception_raise");
     }
-    if (config.isDebug()) {
-      exportedSymbols.add("*lookup?");
-      exportedSymbols.add("rvmEvalAll");
-    }
     exportedSymbols.addAll(config.getExportedSymbols());
     for (int i=0; i < exportedSymbols.size(); i++) {
       exportedSymbols.set(i,"_" + exportedSymbols.get(i));
@@ -92,6 +88,9 @@
             libs.add("-Wl,--no-whole-archive");
           }
         }
+      }
+ else       if (p.endsWith(".dylib") || p.endsWith(".so")) {
+        libs.add(new File(p).getAbsolutePath());
       }
  else {
         libs.add("-l" + p);

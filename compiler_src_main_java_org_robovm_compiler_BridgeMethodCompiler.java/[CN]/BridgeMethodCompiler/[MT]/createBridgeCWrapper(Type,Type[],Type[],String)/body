@@ -1,0 +1,74 @@
+{
+  if (hiParameterTypes.length != loParameterTypes.length) {
+    if (hiParameterTypes.length < loParameterTypes.length) {
+      throw new IllegalArgumentException("For va_arg functions lo's types parameter types must be a prefix of the hi type's parameters");
+    }
+    if (!Arrays.asList(hiParameterTypes).subList(0,loParameterTypes.length).equals(Arrays.asList(loParameterTypes))) {
+      throw new IllegalArgumentException("For va_arg functions lo's types parameter types must be a prefix of the hi type's parameters");
+    }
+  }
+ else {
+    if (!Arrays.equals(hiParameterTypes,loParameterTypes)) {
+      throw new IllegalArgumentException("hi and lo parameter types must be equal");
+    }
+  }
+  Map<String,String> structs=new TreeMap<String,String>(Collections.reverseOrder());
+  String hiReturnType=returnType instanceof StructureType ? "void" : getHiType(returnType);
+  StringBuilder hiSignature=new StringBuilder();
+  hiSignature.append(hiReturnType).append(' ').append(name).append("(void* target");
+  if (returnType instanceof StructureType) {
+    hiSignature.append(", void* ret");
+  }
+  StringBuilder loSignature=new StringBuilder();
+  String loReturnType=getLoType(returnType,name,0,structs);
+  loSignature.append(loReturnType).append(' ').append("(*)(");
+  StringBuilder body=new StringBuilder(" {\n");
+  StringBuilder args=new StringBuilder();
+  for (int i=0; i < hiParameterTypes.length; i++) {
+    String arg="p" + i;
+    if (i > 0) {
+      args.append(", ");
+    }
+    String hiParamType=getHiType(hiParameterTypes[i]);
+    hiSignature.append(", ");
+    hiSignature.append(hiParamType).append(' ').append(arg);
+    if (i < loParameterTypes.length) {
+      String loParamType=getLoType(hiParameterTypes[i],name,i + 1,structs);
+      if (i > 0) {
+        loSignature.append(", ");
+      }
+      loSignature.append(loParamType);
+      if (hiParameterTypes[i] instanceof StructureType) {
+        args.append("*((").append(loParamType).append("*)").append(arg).append(')');
+      }
+ else {
+        args.append(arg);
+      }
+    }
+ else {
+      args.append(arg);
+    }
+  }
+  hiSignature.append(')');
+  if (loParameterTypes.length == 0) {
+    loSignature.append("void");
+  }
+ else   if (loParameterTypes.length < hiParameterTypes.length) {
+    loSignature.append(", ...");
+  }
+  loSignature.append(')');
+  for (  Entry<String,String> struct : structs.entrySet()) {
+    body.append("    struct " + struct.getKey() + " "+ struct.getValue()+ ";\n");
+  }
+  if (returnType instanceof StructureType) {
+    body.append("    *((" + loReturnType + "*)ret) = (("+ loSignature+ ") target)("+ args+ ");\n");
+  }
+ else   if (returnType != Type.VOID) {
+    body.append("    return ((" + loSignature + ") target)("+ args+ ");\n");
+  }
+ else {
+    body.append("    ((" + loSignature + ") target)("+ args+ ");\n");
+  }
+  body.append("}\n");
+  return hiSignature.toString() + body.toString();
+}

@@ -1,0 +1,183 @@
+{
+  if (config.isDumpIntermediates()) {
+    File llFile=config.getLlFile(clazz);
+    llFile.getParentFile().mkdirs();
+    FileUtils.writeByteArrayToFile(llFile,llData);
+    File cFile=config.getCFile(clazz);
+    if (cCode.isEmpty()) {
+      cFile.delete();
+    }
+ else {
+      FileUtils.writeLines(cFile,"ascii",cCode);
+    }
+  }
+  File oFile=config.getOFile(clazz);
+  try (Context context=new Context()){
+    try (Module module=Module.parseIR(context,llData,clazz.getClassName())){
+      if (!cCode.isEmpty()) {
+        int size=0;
+        for (        String s : cCode) {
+          size+=s.length();
+        }
+        StringBuilder sb=new StringBuilder(size);
+        for (        String s : cCode) {
+          sb.append(s);
+        }
+        try (Module m2=Module.parseClangString(context,sb.toString(),clazz.getClassName() + ".c",config.getClangTriple())){
+          module.link(m2);
+          for (          org.robovm.llvm.Function f1 : m2.getFunctions()) {
+            String name=f1.getName();
+            org.robovm.llvm.Function f2=module.getFunctionByName(name);
+            if (Symbols.isBridgeCSymbol(name) || Symbols.isCallbackCSymbol(name) || Symbols.isCallbackInnerCSymbol(name)) {
+              f2.setLinkage(org.robovm.llvm.binding.Linkage.PrivateLinkage);
+              if (Symbols.isCallbackInnerCSymbol(name)) {
+                f2.removeAttribute(Attribute.NoInlineAttribute);
+                f2.addAttribute(Attribute.AlwaysInlineAttribute);
+              }
+            }
+          }
+        }
+       }
+      try (PassManager passManager=createPassManager(config)){
+        passManager.run(module);
+      }
+       if (config.isDumpIntermediates()) {
+        File bcFile=config.getBcFile(clazz);
+        bcFile.getParentFile().mkdirs();
+        module.writeBitcode(bcFile);
+      }
+      String triple=config.getTriple();
+      Target target=Target.lookupTarget(triple);
+      try (TargetMachine targetMachine=target.createTargetMachine(triple,config.getArch().getLlvmCpu(),null,config.isDebug() ? CodeGenOptLevel.CodeGenLevelNone : null,null,null)){
+        targetMachine.setAsmVerbosityDefault(true);
+        targetMachine.setFunctionSections(true);
+        targetMachine.setDataSections(true);
+        targetMachine.getOptions().setNoFramePointerElim(true);
+        targetMachine.getOptions().setPositionIndependentExecutable(!config.isDebug());
+        ByteArrayOutputStream output=new ByteArrayOutputStream(256 * 1024);
+        targetMachine.emit(module,output,CodeGenFileType.AssemblyFile);
+        byte[] asm=output.toByteArray();
+        output.reset();
+        patchAsmWithFunctionSizes(config,clazz,new ByteArrayInputStream(asm),output);
+        asm=output.toByteArray();
+        if (config.isDumpIntermediates()) {
+          File sFile=config.getSFile(clazz);
+          sFile.getParentFile().mkdirs();
+          FileUtils.writeByteArrayToFile(sFile,asm);
+        }
+        oFile.getParentFile().mkdirs();
+        try (BufferedOutputStream oOut=new BufferedOutputStream(new FileOutputStream(oFile))){
+          targetMachine.assemble(asm,clazz.getClassName(),oOut);
+        }
+         for (        CompilerPlugin plugin : config.getCompilerPlugins()) {
+          plugin.afterObjectFile(config,clazz,oFile);
+        }
+        String symbolPrefix=config.getOs().getFamily() == OS.Family.darwin ? "_" : "";
+        symbolPrefix+=Symbols.EXTERNAL_SYMBOL_PREFIX;
+        ModuleBuilder linesMb=null;
+        try (ObjectFile objectFile=ObjectFile.load(oFile)){
+          for (          Symbol symbol : objectFile.getSymbols()) {
+            if (symbol.getSize() > 0 && symbol.getName().startsWith(symbolPrefix)) {
+              List<LineInfo> lineInfos=objectFile.getLineInfos(symbol);
+              if (!lineInfos.isEmpty()) {
+                Collections.sort(lineInfos,new Comparator<LineInfo>(){
+                  public int compare(                  LineInfo o1,                  LineInfo o2){
+                    return Long.compare(o1.getAddress(),o2.getAddress());
+                  }
+                }
+);
+                long baseAddress=symbol.getAddress();
+                int firstLineNumber=lineInfos.get(0).getLineNumber();
+                long maxAddressOffset=0;
+                long maxLineOffset=0;
+                for (                LineInfo lineInfo : lineInfos) {
+                  maxAddressOffset=Math.max(maxAddressOffset,lineInfo.getAddress() - baseAddress);
+                  maxLineOffset=Math.max(maxLineOffset,lineInfo.getLineNumber() - firstLineNumber);
+                }
+                int addressOffsetSize=(maxAddressOffset & ~0xff) == 0 ? 1 : ((maxAddressOffset & ~0xffff) == 0 ? 2 : 4);
+                int lineOffsetSize=(maxLineOffset & ~0xff) == 0 ? 1 : ((maxLineOffset & ~0xffff) == 0 ? 2 : 4);
+                int addressOffsetTableSize=addressOffsetSize * (lineInfos.size() - 1);
+                int addressOffsetPadding=(lineOffsetSize - (addressOffsetTableSize & (lineOffsetSize - 1))) & (lineOffsetSize - 1);
+                addressOffsetTableSize+=addressOffsetPadding;
+                int flags=0;
+                flags=addressOffsetSize - 1;
+                flags<<=2;
+                flags|=lineOffsetSize - 1;
+                flags<<=28;
+                flags|=(lineInfos.size() - 1) & 0x0fffffff;
+                StructureConstantBuilder builder=new StructureConstantBuilder();
+                builder.add(new IntegerConstant(flags)).add(new IntegerConstant(firstLineNumber));
+                for (                LineInfo lineInfo : lineInfos.subList(1,lineInfos.size())) {
+                  if (addressOffsetSize == 1) {
+                    builder.add(new IntegerConstant((byte)(lineInfo.getAddress() - baseAddress)));
+                  }
+ else                   if (addressOffsetSize == 2) {
+                    builder.add(new IntegerConstant((short)(lineInfo.getAddress() - baseAddress)));
+                  }
+ else {
+                    builder.add(new IntegerConstant((int)(lineInfo.getAddress() - baseAddress)));
+                  }
+                }
+                for (int i=0; i < addressOffsetPadding; i++) {
+                  builder.add(new IntegerConstant((byte)0));
+                }
+                for (                LineInfo lineInfo : lineInfos.subList(1,lineInfos.size())) {
+                  if (lineOffsetSize == 1) {
+                    builder.add(new IntegerConstant((byte)(lineInfo.getLineNumber() - firstLineNumber)));
+                  }
+ else                   if (lineOffsetSize == 2) {
+                    builder.add(new IntegerConstant((short)(lineInfo.getLineNumber() - firstLineNumber)));
+                  }
+ else {
+                    builder.add(new IntegerConstant((int)(lineInfo.getLineNumber() - firstLineNumber)));
+                  }
+                }
+                String methodName=symbol.getName().substring(symbol.getName().lastIndexOf('.') + 1);
+                methodName=methodName.substring(0,methodName.indexOf('('));
+                String methodDesc=symbol.getName().substring(symbol.getName().lastIndexOf('('));
+                String linetableSymbol=Symbols.linetableSymbol(clazz.getInternalName(),methodName,methodDesc);
+                if (linesMb == null) {
+                  linesMb=new ModuleBuilder();
+                }
+                linesMb.addGlobal(new Global(linetableSymbol,builder.build(),true));
+              }
+            }
+          }
+        }
+         if (linesMb != null) {
+          byte[] linesData=linesMb.build().toString().getBytes("UTF-8");
+          if (config.isDumpIntermediates()) {
+            File linesLlFile=config.getLinesLlFile(clazz);
+            linesLlFile.getParentFile().mkdirs();
+            FileUtils.writeByteArrayToFile(linesLlFile,linesData);
+          }
+          try (Module linesModule=Module.parseIR(context,linesData,clazz.getClassName() + ".lines")){
+            File linesOFile=config.getLinesOFile(clazz);
+            targetMachine.emit(linesModule,linesOFile,CodeGenFileType.ObjectFile);
+          }
+         }
+ else {
+          File linesOFile=config.getLinesOFile(clazz);
+          if (linesOFile.exists()) {
+            linesOFile.delete();
+          }
+        }
+      }
+     }
+   }
+ catch (  Throwable t) {
+    if (oFile.exists()) {
+      oFile.delete();
+    }
+    if (t instanceof IOException) {
+      throw (IOException)t;
+    }
+    if (t instanceof RuntimeException) {
+      throw (RuntimeException)t;
+    }
+    if (t instanceof Error) {
+      throw (Error)t;
+    }
+    throw new CompilerException(t);
+  }
+}

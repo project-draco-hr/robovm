@@ -1,6 +1,6 @@
 {
   config.getLogger().debug("Compiling classes using %d threads",config.getThreads());
-  final Executor executor=(config.getThreads() <= 1) ? SAME_THREAD_EXECUTOR : new ThreadPoolExecutor(config.getThreads(),config.getThreads(),0L,TimeUnit.MILLISECONDS,new ArrayBlockingQueue<Runnable>(config.getThreads()));
+  final Executor executor=(config.getThreads() <= 1) ? SAME_THREAD_EXECUTOR : new ThreadPoolExecutor(config.getThreads() - 1,config.getThreads() - 1,0L,TimeUnit.MILLISECONDS,new ArrayBlockingQueue<Runnable>((config.getThreads() - 1) * 20));
 class HandleFailureListener implements ClassCompilerListener {
     volatile Throwable t;
     @Override public void success(    Clazz clazz){
