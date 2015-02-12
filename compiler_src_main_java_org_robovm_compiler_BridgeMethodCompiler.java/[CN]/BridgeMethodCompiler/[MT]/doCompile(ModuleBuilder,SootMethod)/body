@@ -3,6 +3,7 @@
   AnnotationTag bridgeAnnotation=getAnnotation(method,BRIDGE);
   boolean dynamic=readBooleanElem(bridgeAnnotation,"dynamic",false);
   boolean optional=readBooleanElem(bridgeAnnotation,"optional",false);
+  boolean useCWrapper=requiresCWrapper(method);
   Function fn=FunctionBuilder.method(method);
   moduleBuilder.addFunction(fn);
   Type[] parameterTypes=fn.getType().getParameterTypes();
@@ -40,7 +41,8 @@
     MarshaledArg marshaledArg=new MarshaledArg();
     marshaledArg.paramIndex=MarshalSite.RECEIVER;
     marshaledArgs.add(marshaledArg);
-    Value nativeValue=marshalObjectToNative(fn,marshalerMethod,marshaledArg,I8_PTR,env,args.get(0).getValue(),MarshalerFlags.CALL_TYPE_BRIDGE);
+    Type nativeType=targetParameterTypes[0];
+    Value nativeValue=marshalObjectToNative(fn,marshalerMethod,marshaledArg,useCWrapper ? I8_PTR : nativeType,env,args.get(0).getValue(),MarshalerFlags.CALL_TYPE_BRIDGE);
     args.set(0,new Argument(nativeValue));
   }
   for (int i=0, argIdx=0; i < method.getParameterCount(); i++) {
@@ -66,7 +68,7 @@
         MarshaledArg marshaledArg=new MarshaledArg();
         marshaledArg.paramIndex=i;
         marshaledArgs.add(marshaledArg);
-        Value nativeValue=marshalObjectToNative(fn,marshalerMethod,marshaledArg,I8_PTR,env,args.get(argIdx).getValue(),MarshalerFlags.CALL_TYPE_BRIDGE,false);
+        Value nativeValue=marshalObjectToNative(fn,marshalerMethod,marshaledArg,useCWrapper ? I8_PTR : nativeType,env,args.get(argIdx).getValue(),MarshalerFlags.CALL_TYPE_BRIDGE);
         args.set(argIdx,new Argument(nativeValue,parameterAttributes));
       }
     }
@@ -75,26 +77,35 @@
     }
     argIdx++;
   }
-  args.add(0,new Argument(targetFn.ref()));
   Variable structResult=null;
-  if (targetFnType.getReturnType() instanceof StructureType) {
-    Variable tmp=fn.newVariable(new PointerType(targetFnType.getReturnType()));
-    fn.add(new Alloca(tmp,targetFnType.getReturnType()));
-    structResult=fn.newVariable(I8_PTR);
-    fn.add(new Bitcast(structResult,tmp.ref(),I8_PTR));
-    args.add(1,new Argument(structResult.ref()));
+  Value targetFnRef=null;
+  if (useCWrapper) {
+    args.add(0,new Argument(targetFn.ref()));
+    if (targetFnType.getReturnType() instanceof StructureType) {
+      Variable tmp=fn.newVariable(new PointerType(targetFnType.getReturnType()));
+      fn.add(new Alloca(tmp,targetFnType.getReturnType()));
+      structResult=fn.newVariable(I8_PTR);
+      fn.add(new Bitcast(structResult,tmp.ref(),I8_PTR));
+      args.add(1,new Argument(structResult.ref()));
+    }
+    String wrapperName=Symbols.bridgeCSymbol(method);
+    FunctionType wrapperFnType=getBridgeFunctionType(method,dynamic,true);
+    getCWrapperFunctions().add(createBridgeCWrapper(targetFnType.getReturnType(),targetFnType.getParameterTypes(),wrapperFnType.getParameterTypes(),wrapperName));
+    FunctionRef wrapperFnRef=getBridgeCWrapperRef(wrapperFnType,wrapperName);
+    moduleBuilder.addFunctionDeclaration(new FunctionDeclaration(wrapperFnRef));
+    targetFnRef=wrapperFnRef;
   }
-  String wrapperName=Symbols.bridgeCSymbol(method);
-  FunctionType wrapperFnType=getBridgeFunctionType(method,dynamic,true);
-  getCWrapperFunctions().add(createBridgeCWrapper(targetFnType.getReturnType(),targetFnType.getParameterTypes(),wrapperFnType.getParameterTypes(),wrapperName));
-  FunctionRef wrapperFnRef=getBridgeCWrapperRef(wrapperFnType,wrapperName);
-  moduleBuilder.addFunctionDeclaration(new FunctionDeclaration(wrapperFnRef));
+ else {
+    Variable tmp=fn.newVariable(targetFnType);
+    fn.add(new Bitcast(tmp,targetFn.ref(),targetFnType));
+    targetFnRef=tmp.ref();
+  }
   BasicBlockRef bbSuccess=fn.newBasicBlockRef(new Label("success"));
   BasicBlockRef bbFailure=fn.newBasicBlockRef(new Label("failure"));
   pushNativeFrame(fn);
   trycatchAllEnter(fn,env,bbSuccess,bbFailure);
   fn.newBasicBlock(bbSuccess.getLabel());
-  Value result=callWithArguments(fn,wrapperFnRef,args);
+  Value result=callWithArguments(fn,targetFnRef,args);
   trycatchLeave(fn,env);
   popNativeFrame(fn);
   updateObject(method,fn,env,MarshalerFlags.CALL_TYPE_BRIDGE,marshaledArgs);

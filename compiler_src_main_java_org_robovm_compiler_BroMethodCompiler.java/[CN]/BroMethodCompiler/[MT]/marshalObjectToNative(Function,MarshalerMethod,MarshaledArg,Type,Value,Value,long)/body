@@ -1,3 +1,19 @@
 {
-  return marshalObjectToNative(fn,marshalerMethod,marshaledArg,nativeType,env,object,flags,false);
+  Invokestatic invokestatic=marshalerMethod.getInvokeStatic(sootMethod.getDeclaringClass());
+  trampolines.add(invokestatic);
+  Value handle=call(fn,invokestatic.getFunctionRef(),env,object,new IntegerConstant(flags));
+  Variable nativeValue=fn.newVariable(nativeType);
+  if (nativeType instanceof StructureType || nativeType instanceof ArrayType) {
+    Variable tmp=fn.newVariable(new PointerType(nativeType));
+    fn.add(new Inttoptr(tmp,handle,tmp.getType()));
+    fn.add(new Load(nativeValue,tmp.ref()));
+  }
+ else {
+    fn.add(new Inttoptr(nativeValue,handle,nativeType));
+  }
+  if (marshaledArg != null) {
+    marshaledArg.handle=handle;
+    marshaledArg.object=object;
+  }
+  return nativeValue.ref();
 }
