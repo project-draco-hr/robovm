@@ -1,0 +1,12 @@
+{
+  if (refcon == -1) {
+    refcon=CVPixelFormatDescription.refconId.getAndIncrement();
+  }
+  CVFillExtendedPixelsCallBackData data=new CVFillExtendedPixelsCallBackData(1,new FunctionPtr(cbFillExtendedPixels),refcon);
+  NSData val=new NSData(data);
+  set(Keys.FillExtendedPixelsCallback(),val);
+synchronized (callbacks) {
+    callbacks.put(refcon,callback);
+  }
+  return this;
+}
