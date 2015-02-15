@@ -1,3 +1,14 @@
 {
-  new Executor(config.getLogger(),getTextureAtlas()).args(inDir,outDir).exec();
+  List<String> opts=new ArrayList<String>();
+  TextureAtlas atlasConfig=config.getTools().getTextureAtlas();
+  int outputFormat=1;
+  int maxTextureDimension=1;
+  if (atlasConfig != null) {
+    outputFormat=1 + atlasConfig.getOutputFormat().ordinal();
+    maxTextureDimension=1 + atlasConfig.getMaximumTextureDimension().ordinal();
+    if (atlasConfig.usePowerOfTwo()) {
+      opts.add("-p");
+    }
+  }
+  new Executor(config.getLogger(),getTextureAtlas()).args(opts,"-f",outputFormat,"-s",maxTextureDimension,inDir,outDir).exec();
 }
