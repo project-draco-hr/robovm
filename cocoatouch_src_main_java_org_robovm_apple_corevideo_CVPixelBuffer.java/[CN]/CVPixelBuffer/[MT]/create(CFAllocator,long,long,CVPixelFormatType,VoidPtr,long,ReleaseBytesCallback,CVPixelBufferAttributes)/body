@@ -1,0 +1,14 @@
+{
+  long refconId=CVPixelBuffer.refconId.getAndIncrement();
+  CVPixelBufferPtr ptr=new CVPixelBufferPtr();
+  CVReturn err=create(allocator,width,height,pixelFormatType,baseAddress,bytesPerRow,new FunctionPtr(cbReleaseBytes),refconId,pixelBufferAttributes,ptr);
+  if (err == CVReturn.Success) {
+    CVPixelBuffer buffer=ptr.get();
+    buffer.localRefconId=refconId;
+synchronized (releaseBytesCallbacks) {
+      releaseBytesCallbacks.put(refconId,releaseCallback);
+    }
+    return buffer;
+  }
+  return null;
+}
