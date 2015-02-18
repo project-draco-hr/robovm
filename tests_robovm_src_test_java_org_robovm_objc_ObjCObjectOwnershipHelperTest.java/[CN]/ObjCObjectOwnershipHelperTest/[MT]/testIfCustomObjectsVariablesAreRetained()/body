@@ -1,17 +1,10 @@
 {
   final String stringValue="ABC";
   final long longValue=123;
-  CustomNSObject custom=new CustomNSObject(stringValue,longValue);
-  final NSCache cache=new NSCache();
-  cache.put("1",custom);
+  NSCache cache=new NSCache();
+  addNewCustomObjectToCache(cache,"1",stringValue,longValue);
   forceGC();
-  new Thread(new Runnable(){
-    @Override public void run(){
-      forceGC();
-      CustomNSObject custom=(CustomNSObject)cache.get("1");
-      assertEquals(stringValue,custom.stringValue);
-      assertEquals(longValue,custom.longValue);
-    }
-  }
-).start();
+  CustomNSObject custom=(CustomNSObject)cache.get("1");
+  assertEquals(stringValue,custom.stringValue);
+  assertEquals(longValue,custom.longValue);
 }
