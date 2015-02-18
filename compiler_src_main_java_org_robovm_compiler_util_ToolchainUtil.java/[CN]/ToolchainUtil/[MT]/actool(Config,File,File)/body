@@ -33,5 +33,12 @@
  else   if (IOSTarget.isSimulatorArch(config.getArch())) {
     opts.add("iphonesimulator");
   }
-  new Executor(config.getLogger(),getACTool()).args(inDir,opts,"--output-format","human-readable-text","--minimum-deployment-target","6.0","--compile",outDir).exec();
+  String minOSVersion=config.getOs().getMinVersion();
+  if (config.getIosInfoPList() != null) {
+    String v=config.getIosInfoPList().getMinimumOSVersion();
+    if (v != null) {
+      minOSVersion=v;
+    }
+  }
+  new Executor(config.getLogger(),getACTool()).args(inDir,opts,"--output-format","human-readable-text","--minimum-deployment-target",minOSVersion,"--compile",outDir).exec();
 }
