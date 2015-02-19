@@ -17,24 +17,18 @@
       }
     }
   }
-  infoPList=config.getIosInfoPList();
-  if (infoPList != null) {
-    try {
-      infoPListDict=(NSDictionary)parsePropertyList(infoPList,config.getProperties());
-    }
- catch (    Throwable t) {
-      throw new IllegalArgumentException("Failed to parse Info.plist XML file: " + infoPList,t);
-    }
+  if (config.getIosInfoPList() != null) {
+    config.getIosInfoPList().parse(config.getProperties());
   }
   if (isDeviceArch(arch)) {
     if (!config.isIosSkipSigning()) {
       provisioningProfile=config.getIosProvisioningProfile();
       if (provisioningProfile == null) {
-        NSString bundleId=infoPListDict != null ? (NSString)infoPListDict.objectForKey("CFBundleIdentifier") : null;
-        if (bundleId == null) {
-          bundleId=new NSString("*");
+        String bundleId="*";
+        if (config.getIosInfoPList() != null && config.getIosInfoPList().getBundleIdentifier() != null) {
+          bundleId=config.getIosInfoPList().getBundleIdentifier();
         }
-        provisioningProfile=ProvisioningProfile.find(ProvisioningProfile.list(),signIdentity,bundleId.toString());
+        provisioningProfile=ProvisioningProfile.find(ProvisioningProfile.list(),signIdentity,bundleId);
       }
     }
   }
