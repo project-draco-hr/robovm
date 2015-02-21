@@ -1,0 +1,12 @@
+{
+  File f=createDirStructure("src/bar/test1.txt","src/foo/test2.txt","src/woo/test3.txt");
+  Resource res=new Resource(new File(f,"src"),null);
+  TestWalker w=new TestWalker(){
+    @Override public boolean processDir(    Resource resource,    File dir,    File destDir) throws IOException {
+      return !dir.getName().equals("woo");
+    }
+  }
+;
+  res.walk(w,new File("/dest"));
+  assertEquals(Arrays.asList("/dest/bar/test1.txt","/dest/foo/test2.txt"),w.paths);
+}

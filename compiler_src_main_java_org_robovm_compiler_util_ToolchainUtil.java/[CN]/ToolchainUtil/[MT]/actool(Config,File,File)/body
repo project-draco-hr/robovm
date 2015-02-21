@@ -1,0 +1,44 @@
+{
+  List<Object> opts=new ArrayList<>();
+  String appIconSetName=null;
+  String launchImagesName=null;
+  final String appiconset="appiconset";
+  final String launchimage="launchimage";
+  for (  String fileName : inDir.list()) {
+    String ext=FilenameUtils.getExtension(fileName);
+    if (ext.equals(appiconset)) {
+      appIconSetName=FilenameUtils.getBaseName(fileName);
+    }
+ else     if (ext.equals(launchimage)) {
+      launchImagesName=FilenameUtils.getBaseName(fileName);
+    }
+  }
+  if (appIconSetName != null || launchImagesName != null) {
+    if (appIconSetName != null) {
+      opts.add("--app-icon");
+      opts.add(appIconSetName);
+    }
+    if (launchImagesName != null) {
+      opts.add("--launch-image");
+      opts.add(launchImagesName);
+    }
+    File partialInfoPlist=new File(inDir,"assetcatalog-partial-info.plist");
+    opts.add("--output-partial-info-plist");
+    opts.add(partialInfoPlist);
+  }
+  opts.add("--platform");
+  if (IOSTarget.isDeviceArch(config.getArch())) {
+    opts.add("iphoneos");
+  }
+ else   if (IOSTarget.isSimulatorArch(config.getArch())) {
+    opts.add("iphonesimulator");
+  }
+  String minOSVersion=config.getOs().getMinVersion();
+  if (config.getIosInfoPList() != null) {
+    String v=config.getIosInfoPList().getMinimumOSVersion();
+    if (v != null) {
+      minOSVersion=v;
+    }
+  }
+  new Executor(config.getLogger(),getACTool()).args(inDir,opts,"--output-format","human-readable-text","--minimum-deployment-target",minOSVersion,"--compile",outDir).exec();
+}
