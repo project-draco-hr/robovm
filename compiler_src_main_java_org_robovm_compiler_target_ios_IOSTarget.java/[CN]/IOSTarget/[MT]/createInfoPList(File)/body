@@ -43,8 +43,20 @@
     dict.put("MinimumOSVersion","6.0");
   }
   customizeInfoPList(dict);
+  NSDictionary newDict=new NSDictionary();
+  if (dict.objectForKey("CFBundleShortVersionString") != null) {
+    newDict.put("CFBundleShortVersionString",dict.objectForKey("CFBundleShortVersionString"));
+    dict.remove("CFBundleShortVersionString");
+  }
+  if (dict.objectForKey("CFBundleVersion") != null) {
+    newDict.put("CFBundleVersion",dict.objectForKey("CFBundleVersion"));
+    dict.remove("CFBundleVersion");
+  }
+  for (  String key : dict.allKeys()) {
+    newDict.put(key,dict.objectForKey(key));
+  }
   File tmpInfoPlist=new File(config.getTmpDir(),"Info.plist");
-  PropertyListParser.saveAsBinary(dict,tmpInfoPlist);
+  PropertyListParser.saveAsBinary(newDict,tmpInfoPlist);
   config.getLogger().debug("Installing Info.plist to %s",dir);
   FileUtils.copyFile(tmpInfoPlist,new File(dir,tmpInfoPlist.getName()));
 }
