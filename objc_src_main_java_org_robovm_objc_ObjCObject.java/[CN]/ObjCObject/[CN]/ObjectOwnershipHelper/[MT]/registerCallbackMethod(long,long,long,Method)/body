@@ -1,0 +1,8 @@
+{
+  long superMethod=ObjCRuntime.class_getInstanceMethod(cls,selector);
+  long typeEncoding=ObjCRuntime.method_getTypeEncoding(superMethod);
+  if (!ObjCRuntime.class_addMethod(cls,selector,VM.getCallbackMethodImpl(method),typeEncoding)) {
+    throw new Error("Failed to register callback method on the ObjectOwnershipHelper: class_addMethod(...) failed");
+  }
+  ObjCRuntime.class_replaceMethod(cls,newSelector,ObjCRuntime.method_getImplementation(superMethod),typeEncoding);
+}
