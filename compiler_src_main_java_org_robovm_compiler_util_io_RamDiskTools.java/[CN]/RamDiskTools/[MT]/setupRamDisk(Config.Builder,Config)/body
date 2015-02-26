@@ -4,6 +4,16 @@
   }
   File volume=new File(ROBOVM_RAM_DISK_PATH);
   if (!volume.exists()) {
+    try {
+      FileStore store=Files.getFileStore(new File(System.getProperty("user.home"),".robovm/cache").toPath());
+      String plist=new Executor(Logger.NULL_LOGGER,"diskutil").args("info","-plist",store.name()).execCapture();
+      if (!plist.contains("<key>SolidState</key>")) {
+        config.getLogger().warn("RoboVM has detected that you are running on a slow HDD. Please consider mounting a RAM disk.\n" + "To create a 2GB RAM disk, run this in your terminal:\n" + "SIZE=2048 ; diskutil erasevolume HFS+ 'RoboVM RAM Disk' `hdiutil attach -nomount ram://$((SIZE * 2048))`\n"+ "See http://docs.robovm.com/ for more info");
+      }
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
     return;
   }
   File cacheDir=config.getCacheDir();

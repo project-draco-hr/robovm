@@ -23,5 +23,17 @@
     System.setOut(new FoundationLogPrintStream());
     System.out.println("SET System.out to FoundationLogPrintStream");
   }
+  NSNotificationCenter.getDefaultCenter().addObserver(UIWindow.DidBecomeKeyNotification(),null,NSOperationQueue.getMainQueue(),new VoidBlock1<NSNotification>(){
+    @Override public void invoke(    NSNotification a){
+      KEY_WINDOW=(UIWindow)a.getObject();
+    }
+  }
+);
+  NSNotificationCenter.getDefaultCenter().addObserver(UIWindow.DidResignKeyNotification(),null,NSOperationQueue.getMainQueue(),new VoidBlock1<NSNotification>(){
+    @Override public void invoke(    NSNotification a){
+      if (a.getObject() == KEY_WINDOW)       KEY_WINDOW=null;
+    }
+  }
+);
   main(argc,argv,principalClassName,delegateClassName);
 }
