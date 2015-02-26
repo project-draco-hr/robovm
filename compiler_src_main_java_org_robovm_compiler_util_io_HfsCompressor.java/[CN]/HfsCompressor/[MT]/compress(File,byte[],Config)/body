@@ -1,0 +1,17 @@
+{
+  if (OS.getDefaultOS() == OS.macosx && System.getenv("ROBOVM_DISABLE_COMPRESSION") == null) {
+    if (!file.getParentFile().exists()) {
+      if (!file.getParentFile().mkdirs()) {
+        throw new CompilerException("Couldn't create directory for " + file.getAbsolutePath());
+      }
+    }
+    loadLib(config);
+    if (!compressNative(file.getAbsolutePath(),data,data.length)) {
+      config.getLogger().debug("Couldn't compress file %s",file.getAbsolutePath());
+      FileUtils.writeByteArrayToFile(file,data);
+    }
+  }
+ else {
+    FileUtils.writeByteArrayToFile(file,data);
+  }
+}
