@@ -66,10 +66,10 @@
           FileUtils.writeByteArrayToFile(sFile,asm);
         }
         oFile.getParentFile().mkdirs();
-        try (BufferedOutputStream oOut=new BufferedOutputStream(new FileOutputStream(oFile))){
-          targetMachine.assemble(asm,clazz.getClassName(),oOut);
-        }
-         for (        CompilerPlugin plugin : config.getCompilerPlugins()) {
+        ByteArrayOutputStream oFileBytes=new ByteArrayOutputStream();
+        targetMachine.assemble(asm,clazz.getClassName(),oFileBytes);
+        new HfsCompressor().compress(oFile,oFileBytes.toByteArray(),config);
+        for (        CompilerPlugin plugin : config.getCompilerPlugins()) {
           plugin.afterObjectFile(config,clazz,oFile);
         }
         String symbolPrefix=config.getOs().getFamily() == OS.Family.darwin ? "_" : "";
@@ -153,7 +153,9 @@
           }
           try (Module linesModule=Module.parseIR(context,linesData,clazz.getClassName() + ".lines")){
             File linesOFile=config.getLinesOFile(clazz);
-            targetMachine.emit(linesModule,linesOFile,CodeGenFileType.ObjectFile);
+            ByteArrayOutputStream linesOBytes=new ByteArrayOutputStream();
+            targetMachine.emit(linesModule,linesOBytes,CodeGenFileType.ObjectFile);
+            new HfsCompressor().compress(linesOFile,linesOBytes.toByteArray(),config);
           }
          }
  else {

@@ -1,0 +1,50 @@
+{
+  if (OS.getDefaultOS() != OS.macosx) {
+    return;
+  }
+  File volume=new File(ROBOVM_RAM_DISK_PATH);
+  if (!volume.exists()) {
+    try {
+      FileStore store=Files.getFileStore(new File(System.getProperty("user.home")).toPath());
+      String plist=new Executor(Logger.NULL_LOGGER,"diskutil").args("info","-plist",store.name()).execCapture();
+      if (!plist.contains("<key>SolidState</key>")) {
+        config.getLogger().warn("RoboVM has detected that you are running on a slow HDD. Please consider mounting a RAM disk.\n" + "To create a 2GB RAM disk, run this in your terminal:\n" + "SIZE=2048 ; diskutil erasevolume HFS+ 'RoboVM RAM Disk' `hdiutil attach -nomount ram://$((SIZE * 2048))`\n"+ "See http://docs.robovm.com/ for more info");
+      }
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+    return;
+  }
+  File cacheDir=config.getCacheDir();
+  File tmpDir=config.getTmpDir();
+  try {
+    FileStore store=Files.getFileStore(volume.toPath());
+    if (store.getUsableSpace() < MIN_FREE_SPACE) {
+      cleanRamDisk(store,volume,config);
+      if (store.getUsableSpace() < MIN_FREE_SPACE) {
+        config.getLogger().debug("Couldn't free enough space on RAM disk, using hard drive");
+        return;
+      }
+    }
+    File newCacheDir=new File(volume,"cache");
+    if (!newCacheDir.exists() && !newCacheDir.mkdirs()) {
+      config.getLogger().debug("Couldn't create cache directory on RAM disk, using hard drive");
+      return;
+    }
+    File newTmpDir=new File(volume,"tmp");
+    if (!newTmpDir.exists() && !newTmpDir.mkdirs()) {
+      config.getLogger().debug("Couldn't create tmp directory on RAM disk, using hard drive");
+      return;
+    }
+    newTmpDir=new File(newTmpDir,tmpDir.getAbsolutePath());
+    config.getLogger().debug("Using RAM disk at %s for cache and tmp directory",ROBOVM_RAM_DISK_PATH);
+    builder.cacheDir(newCacheDir);
+    builder.tmpDir(newTmpDir);
+  }
+ catch (  Throwable t) {
+    config.getLogger().error("Couldn't setup RAM disk, using hard drive, %s",t.getMessage());
+    builder.cacheDir(cacheDir);
+    builder.tmpDir(tmpDir);
+  }
+}
