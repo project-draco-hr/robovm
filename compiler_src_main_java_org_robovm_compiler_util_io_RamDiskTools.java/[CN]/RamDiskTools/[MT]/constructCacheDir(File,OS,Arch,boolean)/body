@@ -1,0 +1,16 @@
+{
+  File dir=new File(volume,"cache/" + os.toString() + "/"+ arch.toString()+ "/"+ (isDebug ? "debug" : "release"));
+  if (!dir.exists())   return null;
+  List<File> objFiles=new ArrayList<File>((Collection<File>)FileUtils.listFiles(dir,new String[]{"o"},true));
+  objFiles.sort(new Comparator<File>(){
+    @Override public int compare(    File f1,    File f2){
+      return new Date(f2.lastModified()).compareTo(new Date(f1.lastModified()));
+    }
+  }
+);
+  long lastModified=0;
+  for (  File file : objFiles) {
+    lastModified=Math.max(lastModified,file.lastModified());
+  }
+  return new CacheDir(dir,objFiles,lastModified);
+}
