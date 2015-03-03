@@ -4,5 +4,8 @@ synchronized (CUSTOM_OBJECTS) {
       CUSTOM_OBJECTS.remove(self);
     }
   }
-  ObjCRuntime.void_objc_msgSendSuper(new Super(self,NS_OBJECT_CLASS).getHandle(),sel);
+  long cls=ObjCRuntime.object_getClass(self);
+  long nativeSuper=customClassToNativeSuper.get(cls);
+  Super sup=new Super(self,nativeSuper);
+  ObjCRuntime.void_objc_msgSendSuper(sup.getHandle(),sel);
 }
