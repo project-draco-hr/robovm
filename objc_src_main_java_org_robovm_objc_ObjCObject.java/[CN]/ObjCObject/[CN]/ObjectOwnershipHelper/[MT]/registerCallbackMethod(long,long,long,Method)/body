@@ -4,5 +4,20 @@
   if (!ObjCRuntime.class_addMethod(cls,selector,VM.getCallbackMethodImpl(method),typeEncoding)) {
     throw new Error("Failed to register callback method on the ObjectOwnershipHelper: class_addMethod(...) failed");
   }
-  ObjCRuntime.class_replaceMethod(cls,newSelector,ObjCRuntime.method_getImplementation(superMethod),typeEncoding);
+  long superClass=ObjCRuntime.class_getSuperclass(cls);
+  long nativeSuper=0;
+  while (superClass != 0) {
+    ObjCClass objCClass=ObjCClass.toObjCClass(superClass);
+    if (!objCClass.isCustom()) {
+      nativeSuper=superClass;
+      break;
+    }
+    superClass=ObjCRuntime.class_getSuperclass(superClass);
+  }
+  if (nativeSuper == 0) {
+    throw new Error("Couldn't find native super class for " + VM.newStringUTF(ObjCRuntime.class_getName(cls)));
+  }
+synchronized (customClassToNativeSuper) {
+    customClassToNativeSuper.put(cls,nativeSuper);
+  }
 }

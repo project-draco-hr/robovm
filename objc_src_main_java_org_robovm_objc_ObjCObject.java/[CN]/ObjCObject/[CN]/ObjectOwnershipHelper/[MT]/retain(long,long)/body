@@ -1,0 +1,16 @@
+{
+  if (ObjCRuntime.int_objc_msgSend(self,retainCount) <= 1) {
+synchronized (CUSTOM_OBJECTS) {
+      ObjCClass cls=ObjCClass.toObjCClass(ObjCRuntime.object_getClass(self));
+      ObjCObject obj=ObjCObject.toObjCObject(cls.getType(),self,0);
+      CUSTOM_OBJECTS.put(self,obj);
+    }
+  }
+  long cls=ObjCRuntime.object_getClass(self);
+  long nativeSuper=0;
+synchronized (customClassToNativeSuper) {
+    nativeSuper=customClassToNativeSuper.get(cls);
+  }
+  Super sup=new Super(self,nativeSuper);
+  return ObjCRuntime.ptr_objc_msgSendSuper(sup.getHandle(),sel);
+}
