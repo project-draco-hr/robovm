@@ -7,7 +7,10 @@ synchronized (CUSTOM_OBJECTS) {
     }
   }
   long cls=ObjCRuntime.object_getClass(self);
-  long nativeSuper=customClassToNativeSuper.get(cls);
+  long nativeSuper=0;
+synchronized (customClassToNativeSuper) {
+    nativeSuper=customClassToNativeSuper.get(cls);
+  }
   Super sup=new Super(self,nativeSuper);
   return ObjCRuntime.ptr_objc_msgSendSuper(sup.getHandle(),sel);
 }
