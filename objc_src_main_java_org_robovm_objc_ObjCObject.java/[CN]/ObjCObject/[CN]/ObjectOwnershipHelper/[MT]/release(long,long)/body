@@ -1,10 +1,12 @@
 {
-  if (ObjCRuntime.int_objc_msgSend(self,retainCount) == 1) {
+  int count=ObjCRuntime.int_objc_msgSend(self,retainCount);
+  if (count <= 2) {
 synchronized (CUSTOM_OBJECTS) {
       CUSTOM_OBJECTS.remove(self);
     }
   }
   long cls=ObjCRuntime.object_getClass(self);
+  if (logRetainRelease)   logRetainRelease(cls,self,count,false);
   long nativeSuper=0;
 synchronized (customClassToNativeSuper) {
     nativeSuper=customClassToNativeSuper.get(cls);

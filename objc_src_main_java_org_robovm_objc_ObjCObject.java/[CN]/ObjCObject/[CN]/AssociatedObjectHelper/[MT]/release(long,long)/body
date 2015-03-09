@@ -1,9 +1,14 @@
 {
-  if (ObjCRuntime.int_objc_msgSend(self,retainCount.getHandle()) == 1) {
+  int count=ObjCRuntime.int_objc_msgSend(self,retainCount.getHandle());
+  if (count == 1) {
     long owner=VM.getPointer(self + OWNER_IVAR_OFFSET);
 synchronized (ASSOCIATED_OBJECTS) {
       ASSOCIATED_OBJECTS.remove(owner);
     }
+  }
+  if (logRetainRelease) {
+    long cls=ObjCRuntime.object_getClass(self);
+    logRetainRelease(cls,self,count,false);
   }
   ObjCRuntime.void_objc_msgSendSuper(new Super(self,NS_OBJECT_CLASS).getHandle(),sel);
 }
