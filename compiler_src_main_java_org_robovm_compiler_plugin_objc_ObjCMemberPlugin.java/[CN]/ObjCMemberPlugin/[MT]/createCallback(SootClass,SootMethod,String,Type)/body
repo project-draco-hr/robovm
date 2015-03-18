@@ -4,6 +4,15 @@
   sootClass.addMethod(callbackMethod);
   addCallbackAnnotation(callbackMethod);
   addBindSelectorAnnotation(callbackMethod,selectorName);
+  if (!hasAnnotation(method,TYPE_ENCODING) && (isCustomClass(sootClass) || ObjCProtocolProxyPlugin.isObjCProxy(sootClass))) {
+    String encoding=generateTypeEncoding(callbackMethod);
+    try {
+      addTypeEncodingAnnotation(callbackMethod,encoding);
+    }
+ catch (    IllegalArgumentException e) {
+      throw new CompilerException("Failed to determine method type encoding for method " + method + ": "+ e.getMessage());
+    }
+  }
   Body body=j.newBody(callbackMethod);
   callbackMethod.setActiveBody(body);
   PatchingChain<Unit> units=body.getUnits();

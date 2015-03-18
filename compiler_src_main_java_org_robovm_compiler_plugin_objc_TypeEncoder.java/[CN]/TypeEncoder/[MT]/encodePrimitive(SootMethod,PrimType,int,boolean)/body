@@ -1,0 +1,44 @@
+{
+  if (t.equals(soot.BooleanType.v())) {
+    return "c";
+  }
+ else   if (t.equals(soot.ByteType.v())) {
+    return "c";
+  }
+ else   if (t.equals(soot.ShortType.v())) {
+    return "s";
+  }
+ else   if (t.equals(soot.CharType.v())) {
+    return "S";
+  }
+ else   if (t.equals(soot.IntType.v())) {
+    return "i";
+  }
+ else   if (t.equals(soot.LongType.v())) {
+    if (hasAnno(method,idx,POINTER)) {
+      return "^v";
+    }
+    if (hasAnno(method,idx,MACHINE_SIZED_S_INT)) {
+      return is64bit ? "q" : "i";
+    }
+    if (hasAnno(method,idx,MACHINE_SIZED_U_INT)) {
+      return is64bit ? "Q" : "I";
+    }
+    return "q";
+  }
+ else   if (t.equals(soot.FloatType.v())) {
+    if (hasAnno(method,idx,MACHINE_SIZED_FLOAT)) {
+      return is64bit ? "d" : "f";
+    }
+    return "f";
+  }
+ else   if (t.equals(soot.DoubleType.v())) {
+    if (hasAnno(method,idx,MACHINE_SIZED_FLOAT)) {
+      return is64bit ? "d" : "f";
+    }
+    return "d";
+  }
+ else {
+    throw new IllegalArgumentException("Unknown Type: " + t);
+  }
+}

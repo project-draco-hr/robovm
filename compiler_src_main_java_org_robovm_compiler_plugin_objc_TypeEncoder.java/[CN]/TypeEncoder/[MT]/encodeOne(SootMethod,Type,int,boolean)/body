@@ -1,0 +1,15 @@
+{
+  if (t instanceof VoidType) {
+    return encodeVoid((VoidType)t);
+  }
+  if (t instanceof PrimType) {
+    return encodePrimitive(method,(PrimType)t,idx,is64bit);
+  }
+  if (Types.isStruct(method.getDeclaringClass()) && hasAnno(method,idx,ARRAY)) {
+    throw new IllegalArgumentException("Cannot not determine type encoding for @Array annotated method " + method + ". @Array is not yet supported. Use an explicit @TypeEncoding annotation instead.");
+  }
+  if (t instanceof RefType) {
+    return encodeRef(method,(RefType)t,idx,is64bit);
+  }
+  throw new IllegalArgumentException("Unsupported type " + t.getClass().getName() + " "+ t);
+}
