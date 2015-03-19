@@ -6,11 +6,9 @@ synchronized (CUSTOM_OBJECTS) {
     }
   }
   long cls=ObjCRuntime.object_getClass(self);
-  if (logRetainRelease)   logRetainRelease(cls,self,count,false);
-  long nativeSuper=0;
-synchronized (customClassToNativeSuper) {
-    nativeSuper=customClassToNativeSuper.get(cls);
+  if (logRetainRelease) {
+    logRetainRelease(cls,self,count,false);
   }
-  Super sup=new Super(self,nativeSuper);
+  Super sup=new Super(self,getNativeSuper(cls));
   ObjCRuntime.void_objc_msgSendSuper(sup.getHandle(),sel);
 }
