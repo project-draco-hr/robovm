@@ -1,0 +1,11 @@
+{
+  final Path impl1=new MockPath("META-INF/services/java.lang.Number","# first register Integer\n" + "java.lang.Integer\n" + "# then add Long\n"+ "java.lang.Long\n"+ "\n\n\n\n");
+  Clazzes clazzes=createClazzes(impl1);
+  Clazz interfaceClazz=clazzes.load("java/lang/Number");
+  Set<Clazz> compiled=new HashSet<>();
+  Set<Clazz> queue=new LinkedHashSet<>();
+  AppCompiler.addMetaInfImplementations(clazzes,interfaceClazz,compiled,queue);
+  assertEquals("Two items added to queue: " + queue,2,queue.size());
+  assertTrue("Integer in queue" + queue,queue.contains(clazzes.load("java/lang/Integer")));
+  assertTrue("Long in queue" + queue,queue.contains(clazzes.load("java/lang/Long")));
+}
