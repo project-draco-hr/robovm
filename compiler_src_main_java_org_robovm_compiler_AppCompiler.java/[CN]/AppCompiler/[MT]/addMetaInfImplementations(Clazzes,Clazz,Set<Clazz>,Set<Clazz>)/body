@@ -1,5 +1,6 @@
 {
   String metaInfName="META-INF/services/" + clazz.getClassName();
+  IOException throwLater=null;
   for (  InputStream is : clazzes.loadResources(metaInfName)) {
     try (BufferedReader r=new BufferedReader(new InputStreamReader(is))){
       for (; ; ) {
@@ -17,5 +18,11 @@
         }
       }
     }
-   }
+ catch (    IOException ex) {
+      throwLater=ex;
+    }
+  }
+  if (throwLater != null) {
+    throw throwLater;
+  }
 }
