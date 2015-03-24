@@ -1,0 +1,15 @@
+{
+  File jarFile=File.createTempFile(JARURLProtocolTest.class.getSimpleName() + " and spaces",".jar");
+  int i=0;
+  try (ZipOutputStream out=new ZipOutputStream(new FileOutputStream(jarFile))){
+    CharSequence name=entries[i++];
+    CharSequence contents=entries[i++];
+    ZipEntry newEntry=new ZipEntry(name.toString());
+    out.putNextEntry(newEntry);
+    for (int j=0; j < contents.length(); j++) {
+      out.write((byte)(contents.charAt(j) & 0x7f));
+    }
+    out.closeEntry();
+  }
+   return new URL("jar:" + jarFile.toURI() + "!/");
+}
