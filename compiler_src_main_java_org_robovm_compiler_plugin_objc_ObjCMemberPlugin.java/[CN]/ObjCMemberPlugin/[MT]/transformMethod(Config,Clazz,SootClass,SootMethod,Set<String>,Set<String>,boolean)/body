@@ -37,4 +37,15 @@
     transformObjCProperty(annotation,"@IBOutlet",sootClass,method,selectors,overridables,extensions);
     return;
   }
+  annotation=getAnnotation(method,IBOUTLETCOLLECTION);
+  if (annotation != null) {
+    if (method.isStatic()) {
+      throw new CompilerException("Objective-C @IBOutletCollection method " + method + " must not be static.");
+    }
+    if (method.getReturnType() != VoidType.v() && !isNSArray(method.getReturnType()) || method.getReturnType() == VoidType.v() && method.getParameterCount() == 1 && !isNSArray(method.getParameterType(0))) {
+      throw new CompilerException("Objective-C @IBOutletCollection method " + method + " does not have a supported signature. "+ "@IBOutletCollection getter methods must return NSArray. "+ "@IBOutletCollection setter methods must have 1 parameter of type NSArray.");
+    }
+    transformObjCProperty(annotation,"@IBOutletCollection",sootClass,method,selectors,overridables,extensions);
+    return;
+  }
 }
