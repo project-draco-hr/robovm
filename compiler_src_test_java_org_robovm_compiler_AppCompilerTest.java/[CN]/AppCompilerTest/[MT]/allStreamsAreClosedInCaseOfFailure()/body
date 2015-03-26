@@ -1,0 +1,18 @@
+{
+  final MockPath impl1=new MockPath("META-INF/services/java.lang.Number","java.lang.Integer");
+  impl1.toThrow=new IOException();
+  final MockPath impl2=new MockPath("META-INF/services/java.lang.Number","nobody.knows.such.Class");
+  Clazzes clazzes=createClazzes(impl1,impl2);
+  Clazz interfaceClazz=clazzes.load("java/lang/Number");
+  Set<Clazz> compiled=new HashSet<>();
+  Set<Clazz> queue=new LinkedHashSet<>();
+  try {
+    AppCompiler.addMetaInfImplementations(clazzes,interfaceClazz,compiled,queue);
+    fail("Should throw an exception");
+  }
+ catch (  IOException ex) {
+    assertSame("Our exception is thrown",impl1.toThrow,ex);
+  }
+  assertTrue("First stream is closed",impl1.closed);
+  assertTrue("Second stream is closed",impl2.closed);
+}

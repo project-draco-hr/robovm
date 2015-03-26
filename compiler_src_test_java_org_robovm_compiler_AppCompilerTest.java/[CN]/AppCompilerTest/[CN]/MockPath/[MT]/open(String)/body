@@ -1,0 +1,19 @@
+{
+  if (this.file.equals(file)) {
+    ByteArrayInputStream is=new ByteArrayInputStream(this.content.getBytes("UTF-8"));
+    return new FilterInputStream(is){
+      @Override public synchronized int read(      byte[] b,      int off,      int len) throws IOException {
+        if (toThrow != null) {
+          throw toThrow;
+        }
+        return super.read(b,off,len);
+      }
+      @Override public void close() throws IOException {
+        closed=true;
+        super.close();
+      }
+    }
+;
+  }
+  throw new IOException();
+}
