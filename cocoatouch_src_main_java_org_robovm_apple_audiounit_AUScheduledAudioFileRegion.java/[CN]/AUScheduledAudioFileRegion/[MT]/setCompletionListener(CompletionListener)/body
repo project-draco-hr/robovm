@@ -1,0 +1,22 @@
+{
+  long cid=getCompletionProcUserData();
+  if (listener == null) {
+    setCompletionProc(null);
+    setCompletionProcUserData(0);
+    if (cid > 0) {
+synchronized (completionCallbacks) {
+        completionCallbacks.remove(cid);
+      }
+    }
+  }
+ else {
+    if (cid == 0) {
+      cid=callbackId.getAndIncrement();
+      setCompletionProcUserData(cid);
+      setCompletionProc(new FunctionPtr(cbComplete));
+    }
+synchronized (completionCallbacks) {
+      completionCallbacks.put(cid,listener);
+    }
+  }
+}

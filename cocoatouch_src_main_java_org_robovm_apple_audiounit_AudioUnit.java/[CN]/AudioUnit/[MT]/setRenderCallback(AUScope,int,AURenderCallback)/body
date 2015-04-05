@@ -1,0 +1,11 @@
+{
+  long cid=callbackId.getAndIncrement();
+  AURenderCallbackStruct struct=new AURenderCallbackStruct(new FunctionPtr(cbRender),cid);
+  OSStatus result=setProperty(AUGenericProperty.SetRenderCallback,scope,element,struct);
+  if (result.equals(0)) {
+synchronized (renderCallbacks) {
+      renderCallbacks.put(cid,callback);
+    }
+  }
+  return result;
+}
