@@ -1,0 +1,78 @@
+{
+  logger=config.getLogger();
+  preloadClasses=new ArrayList<>();
+  List<String> customClasses=findCustomClassesInIBFiles(config);
+  if (customClasses.isEmpty()) {
+    return;
+  }
+  List<File> classpath=new ArrayList<>();
+  classpath.addAll(config.getBootclasspath());
+  classpath.addAll(config.getClasspath());
+  Map<String,URL> classToUrlMap=buildClassToUrlMap(classpath);
+  Map<String,String> autoNameToJavaName=new HashMap<>();
+  for (  String javaName : classToUrlMap.keySet()) {
+    autoNameToJavaName.put(getAutoName(javaName),javaName);
+  }
+  Map<String,String> result=new HashMap<>();
+  LinkedList<String> unresolved=new LinkedList<>(customClasses);
+  Map<URL,String> customClassValuesCache=new HashMap<>();
+  for (Iterator<String> it=unresolved.iterator(); it.hasNext(); ) {
+    String objCName=it.next();
+    String javaName=autoNameToJavaName.get(objCName);
+    if (javaName != null) {
+      result.put(objCName,javaName);
+      it.remove();
+    }
+  }
+  outer:   for (Iterator<String> it=unresolved.iterator(); it.hasNext(); ) {
+    String objCName=it.next();
+    for (    String javaName : classToUrlMap.keySet()) {
+      if (matchSimpleName(objCName,javaName)) {
+        if (objCName.equals(getCustomClass(classToUrlMap.get(javaName),customClassValuesCache))) {
+          result.put(objCName,javaName);
+          it.remove();
+          continue outer;
+        }
+      }
+    }
+  }
+  if (!unresolved.isEmpty()) {
+    Map<String,String> candidates=new HashMap<>();
+    for (    String javaName : classToUrlMap.keySet()) {
+      if (looksLikeObjCClass(javaName)) {
+        String s=getCustomClass(classToUrlMap.get(javaName),customClassValuesCache);
+        if (s != null) {
+          candidates.put(s,javaName);
+        }
+      }
+    }
+    for (Iterator<String> it=unresolved.iterator(); it.hasNext(); ) {
+      String objCName=it.next();
+      String javaName=candidates.get(objCName);
+      if (javaName != null) {
+        result.put(objCName,javaName);
+        it.remove();
+      }
+    }
+  }
+  if (!unresolved.isEmpty()) {
+    outer:     for (Iterator<String> it=unresolved.iterator(); it.hasNext(); ) {
+      String objCName=it.next();
+      for (      String javaName : classToUrlMap.keySet()) {
+        String s=getCustomClass(classToUrlMap.get(javaName),customClassValuesCache);
+        if (objCName.equals(s)) {
+          result.put(objCName,javaName);
+          it.remove();
+          continue outer;
+        }
+      }
+    }
+  }
+  if (!unresolved.isEmpty()) {
+    logger.warn("Failed to find Java classes for the following Objective-C classes in Storyboard/XIB files: ",unresolved);
+  }
+  for (  Entry<String,String> entry : result.entrySet()) {
+    builder.addForceLinkClass(entry.getValue());
+    preloadClasses.add(entry.getValue());
+  }
+}

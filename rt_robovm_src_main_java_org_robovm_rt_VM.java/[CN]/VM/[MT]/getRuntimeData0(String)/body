@@ -1,0 +1,21 @@
+{
+  if (runtimeData == null) {
+    HashMap<String,byte[]> map=new HashMap<>();
+    byte[] allData=getRuntimeData0();
+    if (allData != null) {
+      ByteBuffer bb=ByteBuffer.wrap(allData).order(ByteOrder.nativeOrder());
+      int pairCount=bb.getInt();
+      for (int i=0; i < pairCount; i++) {
+        int keySize=bb.getInt();
+        String key=new String(allData,bb.position(),keySize,"UTF8");
+        bb.position(bb.position() + keySize);
+        int dataSize=bb.getInt();
+        byte[] data=new byte[dataSize];
+        bb.get(data);
+        map.put(key,data);
+      }
+    }
+    runtimeData=map;
+  }
+  return runtimeData.get(id);
+}

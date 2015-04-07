@@ -1,4 +1,7 @@
 {
+  for (  CompilerPlugin plugin : config.getCompilerPlugins()) {
+    plugin.beforeLinker(config,this,classes);
+  }
   Arch arch=config.getArch();
   OS os=config.getOs();
   Set<Clazz> linkClasses=new TreeSet<Clazz>(classes);
@@ -6,6 +9,7 @@
   ModuleBuilder mb=new ModuleBuilder();
   mb.addInclude(getClass().getClassLoader().getResource(String.format("header-%s-%s.ll",os.getFamily(),arch)));
   mb.addInclude(getClass().getClassLoader().getResource("header.ll"));
+  mb.addGlobal(new Global("_bcRuntimeData",runtimeDataToBytes()));
   mb.addGlobal(new Global("_bcDynamicJNI",new IntegerConstant(config.isUseDynamicJni() ? (byte)1 : (byte)0)));
   ArrayConstantBuilder staticLibs=new ArrayConstantBuilder(I8_PTR);
   if (!config.isUseDynamicJni()) {

@@ -1,0 +1,16 @@
+{
+  byte[] data=VM.getRuntimeData(UIApplication.class.getName() + ".preloadClasses");
+  if (data != null) {
+    String[] customClasses=new String(data,"UTF8").split(",");
+    for (    String customClass : customClasses) {
+      try {
+        @SuppressWarnings("unchecked") Class<? extends ObjCClass> cls=(Class<? extends ObjCClass>)Class.forName(customClass);
+        ObjCClass.registerCustomClass(cls);
+      }
+ catch (      Throwable t) {
+        Foundation.log("Failed to preload class " + customClass + ": "+ t.getMessage());
+        t.printStackTrace();
+      }
+    }
+  }
+}
