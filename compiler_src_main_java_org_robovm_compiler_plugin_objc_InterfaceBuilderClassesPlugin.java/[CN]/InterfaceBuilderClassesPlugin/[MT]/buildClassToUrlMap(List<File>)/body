@@ -1,0 +1,37 @@
+{
+  Collections.reverse(paths);
+  Map<String,URL> classToUrlMap=new HashMap<>();
+  for (  File path : paths) {
+    if (isJarFile(path)) {
+      try (ZipFile zipFile=new ZipFile(path)){
+        for (        ZipEntry entry : Collections.list(zipFile.entries())) {
+          if (!entry.isDirectory()) {
+            if (FilenameUtils.isExtension(entry.getName(),CLASS_EXTENSION)) {
+              String className=FilenameUtils.removeExtension(entry.getName()).replace('/','.');
+              URL url=new URL("jar",null,-1,path.toURI().toString() + "!/" + entry.getName());
+              classToUrlMap.put(className,url);
+            }
+          }
+        }
+      }
+ catch (      IOException e) {
+        logger.warn("Failed to read JAR/ZIP file %s: %s",path.getAbsolutePath(),e.getMessage());
+      }
+    }
+ else     if (path.isDirectory()) {
+      path=path.getAbsoluteFile();
+      for (      File f : FileUtils.listFiles(path,new SuffixFileFilter("." + CLASS_EXTENSION),new PackageNameFilter(path.getAbsolutePath()))) {
+        String className=FilenameUtils.removeExtension(f.getAbsolutePath());
+        className=className.substring(path.getAbsolutePath().length() + 1);
+        className=className.replace(File.separatorChar,'.');
+        try {
+          classToUrlMap.put(className,f.toURI().toURL());
+        }
+ catch (        MalformedURLException e) {
+          throw new Error(e);
+        }
+      }
+    }
+  }
+  return classToUrlMap;
+}

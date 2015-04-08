@@ -1,0 +1,23 @@
+{
+  final List<String> customClasses=new ArrayList<>();
+  for (  Resource res : config.getResources()) {
+    res.walk(new Walker(){
+      @Override public boolean processDir(      Resource resource,      File dir,      File destDir) throws IOException {
+        return true;
+      }
+      @Override public void processFile(      Resource resource,      File file,      File destDir) throws IOException {
+        String filename=file.getName().toLowerCase();
+        if (filename.endsWith(".storyboard") || filename.endsWith(".xib")) {
+          try {
+            customClasses.addAll(findCustomClassesInIBFile(file));
+          }
+ catch (          XMLStreamException|IOException e) {
+            config.getLogger().warn("Failed to read Interface Builder file %s: %s",file.getAbsolutePath(),e.getMessage());
+          }
+        }
+      }
+    }
+);
+  }
+  return customClasses;
+}

@@ -1,0 +1,18 @@
+{
+  LinkedList<byte[]> dataList=new LinkedList<>();
+  int length=4;
+  for (  Entry<String,byte[]> entry : runtimeData.entrySet()) {
+    dataList.add(entry.getKey().getBytes("UTF8"));
+    length+=4 + dataList.getLast().length;
+    dataList.add(entry.getValue());
+    length+=4 + dataList.getLast().length;
+  }
+  ByteBuffer bb=ByteBuffer.wrap(new byte[length + 4]).order(config.getArch().getByteOrder());
+  bb.putInt(length);
+  bb.putInt(runtimeData.size());
+  for (  byte[] b : dataList) {
+    bb.putInt(b.length);
+    bb.put(b);
+  }
+  return new ArrayConstantBuilder(I8).add(bb.array()).build();
+}
