@@ -1,12 +1,17 @@
 {
   String selectorName=readStringElem(annotation,"selector","").trim();
   if (selectorName.length() == 0) {
-    StringBuilder sb=new StringBuilder(method.getName());
     int argCount=method.getParameterCount();
-    for (int i=extensions ? 1 : 0; i < argCount; i++) {
-      sb.append(':');
+    if (IBACTION.equals(annotation.getType()) && argCount == 2) {
+      selectorName=method.getName() + ":withEvent:";
     }
-    selectorName=sb.toString();
+ else {
+      StringBuilder sb=new StringBuilder(method.getName());
+      for (int i=extensions ? 1 : 0; i < argCount; i++) {
+        sb.append(':');
+      }
+      selectorName=sb.toString();
+    }
   }
   if (!extensions && (isCustomClass(sootClass) || (method.getModifiers() & Modifier.FINAL) == 0)) {
     Type receiverType=ObjCProtocolProxyPlugin.isObjCProxy(sootClass) ? sootClass.getInterfaces().getFirst().getType() : sootClass.getType();
