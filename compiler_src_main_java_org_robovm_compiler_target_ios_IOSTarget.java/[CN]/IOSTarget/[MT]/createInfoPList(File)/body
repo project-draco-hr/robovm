@@ -39,6 +39,15 @@
   }
   dict.put("DTPlatformName",sdk.getPlatformName());
   dict.put("DTSDKName",sdk.getCanonicalName());
+  for (  File f : FileUtils.listFiles(partialPListDir,new String[]{"plist"},false)) {
+    try {
+      NSDictionary d=(NSDictionary)PropertyListParser.parse(f);
+      dict.putAll(d);
+    }
+ catch (    Exception e) {
+      throw new CompilerException(e);
+    }
+  }
   if (dict.objectForKey("MinimumOSVersion") == null) {
     dict.put("MinimumOSVersion","6.0");
   }
