@@ -1,0 +1,17 @@
+{
+  String minOSVersion=config.getOs().getMinVersion();
+  if (config.getIosInfoPList() != null) {
+    String v=config.getIosInfoPList().getMinimumOSVersion();
+    if (v != null) {
+      minOSVersion=v;
+    }
+  }
+  Executor executor=new Executor(config.getLogger(),getIBTool()).args("--target-device","iphone","--target-device","ipad","--minimum-deployment-target",minOSVersion,"--output-partial-info-plist",partialInfoPlist,"--auto-activate-custom-fonts","--output-format","human-readable-text");
+  if (outFile.isDirectory()) {
+    executor.args("--compilation-directory",outFile);
+  }
+ else {
+    executor.args("--compile",outFile);
+  }
+  executor.args(inFile).exec();
+}
