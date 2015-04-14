@@ -1,4 +1,11 @@
 {
   prepareLaunch(getAppDir());
-  return super.doLaunch(launchParameters);
+  Process process=super.doLaunch(launchParameters);
+  if (launchParameters instanceof IOSSimulatorLaunchParameters) {
+    File script=File.createTempFile("BISTF",".scpt");
+    FileUtils.copyURLToFile(getClass().getResource("/BringIOSSimulatorToFront.scpt"),script);
+    script.setExecutable(true);
+    new Executor(config.getHome().isDev() ? config.getLogger() : Logger.NULL_LOGGER,script).execAsync();
+  }
+  return process;
 }
