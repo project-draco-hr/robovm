@@ -1,0 +1,20 @@
+{
+  final File dsymDir=new File(dir.getParentFile(),dir.getName() + ".dSYM");
+  final File exePath=new File(dir,executable);
+  FileUtils.deleteDirectory(dsymDir);
+  final Process process=new Executor(config.getLogger(),"xcrun").args("dsymutil","-o",dsymDir,exePath).execAsync();
+  if (copyToIndexedDir) {
+    new Thread(){
+      public void run(){
+        try {
+          process.waitFor();
+        }
+ catch (        InterruptedException e) {
+          return;
+        }
+        copyToIndexedDir(dir,executable,dsymDir,exePath);
+      }
+    }
+.start();
+  }
+}

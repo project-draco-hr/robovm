@@ -1,0 +1,37 @@
+{
+  SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMddHHmmss");
+  final File indexedDir=new File(System.getProperty("user.home"),"Library/Developer/Xcode/DerivedData/RoboVM/Build/Products/" + FilenameUtils.removeExtension(dir.getName()) + "_"+ sdf.format(new Date()));
+  indexedDir.mkdirs();
+  File indexedDSymDir=new File(indexedDir,dsymDir.getName());
+  File indexedAppDir=new File(indexedDir,dir.getName());
+  indexedAppDir.mkdirs();
+  try {
+    FileUtils.copyFile(exePath,new File(indexedAppDir,executable));
+  }
+ catch (  IOException e) {
+    config.getLogger().error("Failed to copy %s to indexed dir %s: %s",exePath.getAbsolutePath(),indexedAppDir.getAbsolutePath(),e.getMessage());
+  }
+  try {
+    FileUtils.copyDirectory(dsymDir,indexedDSymDir);
+  }
+ catch (  IOException e) {
+    config.getLogger().error("Failed to copy %s to indexed dir %s: %s",dsymDir.getAbsolutePath(),indexedDir.getAbsolutePath(),e.getMessage());
+  }
+  List<File> dirs=new ArrayList<>(Arrays.asList(indexedDir.getParentFile().listFiles((FileFilter)new AndFileFilter(new PrefixFileFilter(FilenameUtils.removeExtension(dir.getName())),new RegexFileFilter(".*_\\d{14}")))));
+  Collections.sort(dirs,new Comparator<File>(){
+    public int compare(    File o1,    File o2){
+      return Long.compare(o1.lastModified(),o2.lastModified());
+    }
+  }
+);
+  if (dirs.size() > 3) {
+    for (    File f : dirs.subList(0,dirs.size() - 3)) {
+      try {
+        FileUtils.deleteDirectory(f);
+      }
+ catch (      IOException e) {
+        config.getLogger().error("Failed to delete diretcory %s",f.getAbsolutePath(),e.getMessage());
+      }
+    }
+  }
+}
