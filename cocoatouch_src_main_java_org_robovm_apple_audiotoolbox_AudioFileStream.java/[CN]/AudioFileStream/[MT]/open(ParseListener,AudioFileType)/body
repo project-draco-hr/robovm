@@ -1,0 +1,16 @@
+{
+  if (parseListener == null) {
+    throw new NullPointerException("parseListener");
+  }
+  long cid=callbackId.getAndIncrement();
+  AudioFileStream.AudioFileStreamPtr ptr=new AudioFileStream.AudioFileStreamPtr();
+  OSStatus status=open0(cid,new FunctionPtr(cbParseProperty),new FunctionPtr(cbParsePackets),fileTypeHint,ptr);
+  if (OSStatusException.throwIfNecessary(status)) {
+synchronized (parseListeners) {
+      parseListeners.put(cid,parseListener);
+    }
+  }
+  AudioFileStream result=ptr.get();
+  result.cid=cid;
+  return result;
+}

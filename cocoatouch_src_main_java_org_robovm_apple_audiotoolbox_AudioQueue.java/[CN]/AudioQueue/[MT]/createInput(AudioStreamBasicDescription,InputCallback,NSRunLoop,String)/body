@@ -1,0 +1,15 @@
+{
+  if (callback == null) {
+    throw new NullPointerException("callback");
+  }
+  long cid=callbackId.getAndIncrement();
+  AudioQueue.AudioQueuePtr ptr=new AudioQueue.AudioQueuePtr();
+  OSStatus status=createInput0(format,new FunctionPtr(cbInput),cid,callbackRunLoop,callbackRunLoopMode,0,ptr);
+  if (OSStatusException.throwIfNecessary(status)) {
+synchronized (inputCallbacks) {
+      inputCallbacks.put(cid,callback);
+    }
+    return ptr.get();
+  }
+  return null;
+}

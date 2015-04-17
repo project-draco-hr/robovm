@@ -1,11 +1,10 @@
 {
   long cid=callbackId.getAndIncrement();
   AURenderCallbackStruct struct=new AURenderCallbackStruct(new FunctionPtr(cbRender),cid);
-  OSStatus result=setNodeInputCallback(destNode,destInputNumber,struct);
-  if (result.equals(0)) {
+  OSStatus status=setNodeInputCallback0(destNode,destInputNumber,struct);
+  if (OSStatusException.throwIfNecessary(status)) {
 synchronized (renderCallbacks) {
       renderCallbacks.put(cid,inputCallback);
     }
   }
-  return result;
 }

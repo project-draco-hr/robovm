@@ -1,0 +1,12 @@
+{
+  if (interruptionListener == null) {
+    throw new NullPointerException("interruptionListener");
+  }
+  long cid=callbackId.getAndIncrement();
+  OSStatus status=initialize0(runLoop,runLoopMode,new FunctionPtr(cbInterruption),cid);
+  if (OSStatusException.throwIfNecessary(status)) {
+synchronized (interruptionListeners) {
+      interruptionListeners.put(cid,interruptionListener);
+    }
+  }
+}
