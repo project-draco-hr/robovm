@@ -1,0 +1,20 @@
+{
+  AUOutputMIDICallbacksStruct struct=null;
+  if (callback == null) {
+    struct=getProperty(AUOutputProperty.MIDICallbacks,AUOutputMIDICallbacksStruct.class,scope);
+    if (struct != null) {
+      setProperty(AUOutputProperty.MIDICallbacks,null,scope);
+synchronized (midiCallbacks) {
+        midiCallbacks.remove(struct.getUserData());
+      }
+    }
+  }
+ else {
+    long cid=callbackId.getAndIncrement();
+    struct=new AUOutputMIDICallbacksStruct(cid,new FunctionPtr(cbMIDIEvent),new FunctionPtr(cbMIDISysEx));
+    setProperty(AUOutputProperty.MIDICallbacks,struct,scope);
+synchronized (midiCallbacks) {
+      midiCallbacks.put(cid,callback);
+    }
+  }
+}
