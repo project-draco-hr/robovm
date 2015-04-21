@@ -1,16 +1,16 @@
 {
   AudioQueueProcessingTap.AudioQueueProcessingTapPtr ptr=new AudioQueueProcessingTap.AudioQueueProcessingTapPtr();
   IntPtr maxFramesPtr=new IntPtr();
-  AudioStreamBasicDescription.AudioStreamBasicDescriptionPtr processingFormatPtr=new AudioStreamBasicDescription.AudioStreamBasicDescriptionPtr();
+  AudioStreamBasicDescription processingFormat=new AudioStreamBasicDescription();
   long cid=callbackId.getAndIncrement();
-  OSStatus status=create0(audioQueue,new FunctionPtr(cbProcess),cid,flags,maxFramesPtr,processingFormatPtr,ptr);
+  OSStatus status=create0(audioQueue,new FunctionPtr(cbProcess),cid,flags,maxFramesPtr,processingFormat,ptr);
   if (OSStatusException.throwIfNecessary(status)) {
 synchronized (callbacks) {
       callbacks.put(cid,callback);
     }
     AudioQueueProcessingTap result=ptr.get();
     result.maxProcessingFrames=maxFramesPtr.get();
-    result.processingFormat=processingFormatPtr.get();
+    result.processingFormat=processingFormat;
     return result;
   }
   return null;
