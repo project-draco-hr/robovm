@@ -1,25 +1,16 @@
 {
-  VoidPtr ptr=getDataPointer();
+  long dataPointer=getDataPointer();
   if (bufferType == ByteBuffer.class) {
-    return (T)ptr.as(BytePtr.class).asByteBuffer(getAudioDataByteSize());
-  }
- else   if (bufferType == CharBuffer.class) {
-    return (T)ptr.as(CharPtr.class).asCharBuffer(getAudioDataByteSize());
+    return (T)VM.newDirectByteBuffer(dataPointer,getAudioDataByteSize());
   }
  else   if (bufferType == ShortBuffer.class) {
-    return (T)ptr.as(ShortPtr.class).asShortBuffer(getAudioDataByteSize());
+    return (T)VM.newDirectByteBuffer(dataPointer,getAudioDataByteSize() << 1).order(ByteOrder.nativeOrder()).asShortBuffer();
   }
  else   if (bufferType == IntBuffer.class) {
-    return (T)ptr.as(IntPtr.class).asIntBuffer(getAudioDataByteSize());
-  }
- else   if (bufferType == LongBuffer.class) {
-    return (T)ptr.as(LongPtr.class).asLongBuffer(getAudioDataByteSize());
+    return (T)VM.newDirectByteBuffer(dataPointer,getAudioDataByteSize() << 2).order(ByteOrder.nativeOrder()).asIntBuffer();
   }
  else   if (bufferType == FloatBuffer.class) {
-    return (T)ptr.as(FloatPtr.class).asFloatBuffer(getAudioDataByteSize());
-  }
- else   if (bufferType == DoubleBuffer.class) {
-    return (T)ptr.as(DoublePtr.class).asDoubleBuffer(getAudioDataByteSize());
+    return (T)VM.newDirectByteBuffer(dataPointer,getAudioDataByteSize() << 2).order(ByteOrder.nativeOrder()).asFloatBuffer();
   }
  else {
     throw new UnsupportedOperationException("Buffer type not supported: " + bufferType);
