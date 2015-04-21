@@ -1,0 +1,17 @@
+{
+  if (callback == null) {
+synchronized (userCallbacks) {
+      userCallbacks.remove(cid);
+    }
+    OSStatus status=setUserCallback0(null,cid);
+    OSStatusException.throwIfNecessary(status);
+  }
+ else {
+    OSStatus status=setUserCallback0(new FunctionPtr(cbUser),cid);
+    if (OSStatusException.throwIfNecessary(status)) {
+synchronized (userCallbacks) {
+        userCallbacks.put(cid,callback);
+      }
+    }
+  }
+}

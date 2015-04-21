@@ -1,0 +1,15 @@
+{
+  if (callback == null) {
+    throw new NullPointerException("callbacks");
+  }
+  AudioFile.AudioFilePtr ptr=new AudioFile.AudioFilePtr();
+  long cid=callbackId.getAndIncrement();
+  OSStatus status=open0(cid,new FunctionPtr(cbRead),new FunctionPtr(cbWrite),new FunctionPtr(cbGetSize),new FunctionPtr(cbSetSize),fileTypeHint,ptr);
+  if (OSStatusException.throwIfNecessary(status)) {
+synchronized (callbacks) {
+      callbacks.put(cid,callback);
+    }
+    return ptr.get();
+  }
+  return null;
+}

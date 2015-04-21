@@ -1,10 +1,9 @@
 {
   long cid=callbackId.getAndIncrement();
-  OSStatus result=addRenderNotify(new FunctionPtr(cbRender),cid);
-  if (result.equals(0)) {
+  OSStatus status=addRenderNotify0(new FunctionPtr(cbRender),cid);
+  if (OSStatusException.throwIfNecessary(status)) {
 synchronized (renderCallbacks) {
       renderCallbacks.put(cid,callback);
     }
   }
-  return result;
 }
