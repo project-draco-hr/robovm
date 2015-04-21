@@ -1,0 +1,52 @@
+{
+  if (method.getParameterCount() == 2) {
+    if (isNSObject(method.getParameterType(0)) && isSelector(method.getParameterType(1))) {
+      MarshalerMethod param0MarshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,0));
+      if (isNSObject$Marshaler_toNative(param0MarshalerMethod.getMethod())) {
+        List<Type> paramTypes=Arrays.<Type>asList(org_robovm_apple_foundation_NSObject.getType(),org_robovm_objc_Selector.getType());
+        if (method.getReturnType() == VoidType.v() || method.getReturnType() instanceof PrimType) {
+          String prefix=getPrimitiveReturnTypeModifier(method);
+          return Scene.v().makeMethodRef(org_robovm_objc_$M,prefix + "_objc_msgSend",paramTypes,method.getReturnType(),true);
+        }
+ else         if (isNSObject(method.getReturnType())) {
+          MarshalerMethod retMarshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method));
+          if (isNSObject$Marshaler_toObject(retMarshalerMethod.getMethod())) {
+            return Scene.v().makeMethodRef(org_robovm_objc_$M,"object_objc_msgSend",paramTypes,org_robovm_apple_foundation_NSObject.getType(),true);
+          }
+        }
+ else         if (method.getReturnType().equals(java_lang_String.getType())) {
+          MarshalerMethod retMarshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method));
+          if (isNSString$AsStringMarshaler_toObject(retMarshalerMethod.getMethod())) {
+            return Scene.v().makeMethodRef(org_robovm_objc_$M,"string_objc_msgSend",paramTypes,method.getReturnType(),true);
+          }
+        }
+      }
+    }
+  }
+ else   if (method.getParameterCount() == 3 && method.getReturnType() == VoidType.v()) {
+    if (isNSObject(method.getParameterType(0)) && isSelector(method.getParameterType(1))) {
+      MarshalerMethod param0MarshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,0));
+      if (isNSObject$Marshaler_toNative(param0MarshalerMethod.getMethod())) {
+        List<Type> paramTypes=Arrays.<Type>asList(org_robovm_apple_foundation_NSObject.getType(),org_robovm_objc_Selector.getType(),method.getParameterType(2));
+        if (method.getParameterType(2) instanceof PrimType) {
+          String suffix=getPrimitiveParameterTypeModifier(method,2);
+          return Scene.v().makeMethodRef(org_robovm_objc_$M,"objc_msgSend_" + suffix,paramTypes,method.getReturnType(),true);
+        }
+ else         if (isNSObject(method.getParameterType(2))) {
+          MarshalerMethod param2MarshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,2));
+          if (isNSObject$Marshaler_toNative(param2MarshalerMethod.getMethod())) {
+            paramTypes=Arrays.<Type>asList(org_robovm_apple_foundation_NSObject.getType(),org_robovm_objc_Selector.getType(),org_robovm_apple_foundation_NSObject.getType());
+            return Scene.v().makeMethodRef(org_robovm_objc_$M,"objc_msgSend_object",paramTypes,method.getReturnType(),true);
+          }
+        }
+ else         if (method.getParameterType(2).equals(java_lang_String.getType())) {
+          MarshalerMethod param2MarshalerMethod=config.getMarshalerLookup().findMarshalerMethod(new MarshalSite(method,2));
+          if (isNSString$AsStringMarshaler_toNative(param2MarshalerMethod.getMethod())) {
+            return Scene.v().makeMethodRef(org_robovm_objc_$M,"objc_msgSend_string",paramTypes,method.getReturnType(),true);
+          }
+        }
+      }
+    }
+  }
+  return method.makeRef();
+}

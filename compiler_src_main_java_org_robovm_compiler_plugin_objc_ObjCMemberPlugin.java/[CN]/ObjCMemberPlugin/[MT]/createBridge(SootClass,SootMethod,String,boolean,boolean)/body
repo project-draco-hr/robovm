@@ -1,13 +1,26 @@
 {
   Jimple j=Jimple.v();
+  boolean usingGenericInstanceMethod=false;
   SootMethod msgSendMethod=getMsgSendMethod(selectorName,method,extensions);
   sootClass.addMethod(msgSendMethod);
   addBridgeAnnotation(msgSendMethod);
-  SootMethod msgSendSuperMethod=null;
-  if (!extensions && !method.isStatic()) {
-    msgSendSuperMethod=getMsgSendSuperMethod(selectorName,method);
+  SootMethodRef msgSendMethodRef=getGenericMsgSendReplacementMethod(msgSendMethod);
+  if (!msgSendMethodRef.declaringClass().getType().equals(msgSendMethod.getDeclaringClass().getType())) {
+    sootClass.removeMethod(msgSendMethod);
+    if (!method.isStatic()) {
+      msgSendMethodRef=Scene.v().makeMethodRef(msgSendMethodRef.declaringClass(),msgSendMethodRef.name() + "_instance",msgSendMethodRef.parameterTypes(),msgSendMethodRef.returnType(),true);
+      usingGenericInstanceMethod=true;
+    }
+  }
+  SootMethodRef msgSendSuperMethodRef=null;
+  if (!usingGenericInstanceMethod && !extensions && !method.isStatic()) {
+    SootMethod msgSendSuperMethod=getMsgSendSuperMethod(selectorName,method);
     sootClass.addMethod(msgSendSuperMethod);
     addBridgeAnnotation(msgSendSuperMethod);
+    msgSendSuperMethodRef=getGenericMsgSendSuperReplacementMethod(msgSendSuperMethod);
+    if (!msgSendSuperMethodRef.declaringClass().getType().equals(msgSendSuperMethod.getDeclaringClass().getType())) {
+      sootClass.removeMethod(msgSendSuperMethod);
+    }
   }
   method.setModifiers(method.getModifiers() & ~NATIVE);
   if (isOverridable(method)) {
@@ -62,27 +75,38 @@
   units.add(j.newAssignStmt(sel,j.newStaticFieldRef(Scene.v().makeFieldRef(sootClass,getSelectorFieldName(selectorName),org_robovm_objc_Selector.getType(),true))));
   args.addFirst(sel);
   Local customClass=null;
-  if (!extensions && !Modifier.isFinal(sootClass.getModifiers()) && !method.isStatic()) {
+  if (!usingGenericInstanceMethod && !extensions && !Modifier.isFinal(sootClass.getModifiers())&& !method.isStatic()) {
     customClass=j.newLocal("$customClass",BooleanType.v());
     body.getLocals().add(customClass);
     units.add(j.newAssignStmt(customClass,j.newInstanceFieldRef(thiz,org_robovm_objc_ObjCObject_customClass)));
   }
   Local ret=null;
   if (method.getReturnType() != VoidType.v()) {
-    ret=j.newLocal("$ret",method.getReturnType());
+    ret=j.newLocal("$ret",msgSendMethodRef.returnType());
     body.getLocals().add(ret);
   }
-  StaticInvokeExpr invokeMsgSendExpr=j.newStaticInvokeExpr(msgSendMethod.makeRef(),l(thiz != null ? thiz : objCClass,args));
+  Local castRet=null;
+  if (!msgSendMethodRef.returnType().equals(method.getReturnType())) {
+    castRet=j.newLocal("$castRet",method.getReturnType());
+    body.getLocals().add(castRet);
+  }
+  StaticInvokeExpr invokeMsgSendExpr=j.newStaticInvokeExpr(msgSendMethodRef,l(thiz != null ? thiz : objCClass,args));
   Stmt invokeMsgSendStmt=ret == null ? j.newInvokeStmt(invokeMsgSendExpr) : j.newAssignStmt(ret,invokeMsgSendExpr);
   if (customClass != null) {
     units.add(j.newIfStmt(j.newEqExpr(customClass,IntConstant.v(0)),invokeMsgSendStmt));
     Local zuper=j.newLocal("$super",org_robovm_objc_ObjCSuper.getType());
     body.getLocals().add(zuper);
     units.add(j.newAssignStmt(zuper,j.newVirtualInvokeExpr(body.getThisLocal(),org_robovm_objc_ObjCObject_getSuper)));
-    StaticInvokeExpr invokeMsgSendSuperExpr=j.newStaticInvokeExpr(msgSendSuperMethod.makeRef(),l(zuper,args));
+    StaticInvokeExpr invokeMsgSendSuperExpr=j.newStaticInvokeExpr(msgSendSuperMethodRef,l(zuper,args));
     units.add(ret == null ? j.newInvokeStmt(invokeMsgSendSuperExpr) : j.newAssignStmt(ret,invokeMsgSendSuperExpr));
     if (ret != null) {
-      units.add(j.newReturnStmt(ret));
+      if (castRet != null) {
+        units.add(j.newAssignStmt(castRet,j.newCastExpr(ret,castRet.getType())));
+        units.add(j.newReturnStmt(castRet));
+      }
+ else {
+        units.add(j.newReturnStmt(ret));
+      }
     }
  else {
       units.add(j.newReturnVoidStmt());
@@ -90,7 +114,13 @@
   }
   units.add(invokeMsgSendStmt);
   if (ret != null) {
-    units.add(j.newReturnStmt(ret));
+    if (castRet != null) {
+      units.add(j.newAssignStmt(castRet,j.newCastExpr(ret,castRet.getType())));
+      units.add(j.newReturnStmt(castRet));
+    }
+ else {
+      units.add(j.newReturnStmt(ret));
+    }
   }
  else {
     units.add(j.newReturnVoidStmt());
