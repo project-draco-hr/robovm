@@ -1,25 +1,16 @@
 {
-  VoidPtr ptr=getDataPointer();
+  long dataPointer=getDataPointer();
   if (bufferType == ByteBuffer.class) {
-    return (T)ptr.as(BytePtr.class).asByteBuffer(getDataByteSize());
-  }
- else   if (bufferType == CharBuffer.class) {
-    return (T)ptr.as(CharPtr.class).asCharBuffer(getDataByteSize());
+    return (T)VM.newDirectByteBuffer(dataPointer,getDataByteSize());
   }
  else   if (bufferType == ShortBuffer.class) {
-    return (T)ptr.as(ShortPtr.class).asShortBuffer(getDataByteSize());
+    return (T)VM.newDirectByteBuffer(dataPointer,getDataByteSize() << 1).order(ByteOrder.nativeOrder()).asShortBuffer();
   }
  else   if (bufferType == IntBuffer.class) {
-    return (T)ptr.as(IntPtr.class).asIntBuffer(getDataByteSize());
-  }
- else   if (bufferType == LongBuffer.class) {
-    return (T)ptr.as(LongPtr.class).asLongBuffer(getDataByteSize());
+    return (T)VM.newDirectByteBuffer(dataPointer,getDataByteSize() << 2).order(ByteOrder.nativeOrder()).asIntBuffer();
   }
  else   if (bufferType == FloatBuffer.class) {
-    return (T)ptr.as(FloatPtr.class).asFloatBuffer(getDataByteSize());
-  }
- else   if (bufferType == DoubleBuffer.class) {
-    return (T)ptr.as(DoublePtr.class).asDoubleBuffer(getDataByteSize());
+    return (T)VM.newDirectByteBuffer(dataPointer,getDataByteSize() << 2).order(ByteOrder.nativeOrder()).asFloatBuffer();
   }
  else {
     throw new UnsupportedOperationException("Buffer type not supported: " + bufferType);
