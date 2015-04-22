@@ -13,7 +13,11 @@
         passManager.addPromoteMemoryToRegisterPass();
         passManager.run(module);
       }
-       String triple=config.getTriple();
+       if (config.isDumpIntermediates()) {
+        File linkerBc=new File(config.getTmpDir(),"linker" + num + ".bc");
+        module.writeBitcode(linkerBc);
+      }
+      String triple=config.getTriple();
       Target target=Target.lookupTarget(triple);
       try (TargetMachine targetMachine=target.createTargetMachine(triple)){
         targetMachine.setAsmVerbosityDefault(true);

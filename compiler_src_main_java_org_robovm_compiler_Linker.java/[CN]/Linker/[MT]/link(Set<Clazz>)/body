@@ -91,6 +91,15 @@
   }
   Random rnd=new Random();
   buildTypeInfos(typeInfos);
+  Set<String> checkcasts=new HashSet<>();
+  Set<String> instanceofs=new HashSet<>();
+  Set<String> invokes=new HashSet<>();
+  for (  Clazz clazz : linkClasses) {
+    ClazzInfo ci=clazz.getClazzInfo();
+    checkcasts.addAll(ci.getCheckcasts());
+    instanceofs.addAll(ci.getInstanceofs());
+    invokes.addAll(ci.getInvokes());
+  }
   for (  Clazz clazz : linkClasses) {
     int mbIdx=rnd.nextInt(mbs.length - 1) + 1;
     ClazzInfo ci=clazz.getClazzInfo();
@@ -112,13 +121,19 @@
         for (        MethodInfo mi : ci.getMethods()) {
           String name=mi.getName();
           if (!name.equals("<clinit>") && !name.equals("<init>") && !mi.isPrivate()&& !mi.isStatic()&& !mi.isFinal()&& !mi.isAbstract()) {
-            mbs[mbIdx].addFunction(createLookup(mbs[mbIdx],ci,mi));
+            if (invokes.contains(clazz.getInternalName() + "." + name+ mi.getDesc())) {
+              mbs[mbIdx].addFunction(createLookup(mbs[mbIdx],ci,mi));
+            }
           }
         }
       }
     }
-    mbs[mbIdx].addFunction(createCheckcast(mbs[mbIdx],clazz,typeInfo));
-    mbs[mbIdx].addFunction(createInstanceof(mbs[mbIdx],clazz,typeInfo));
+    if (checkcasts.contains(clazz.getInternalName())) {
+      mbs[mbIdx].addFunction(createCheckcast(mbs[mbIdx],clazz,typeInfo));
+    }
+    if (instanceofs.contains(clazz.getInternalName())) {
+      mbs[mbIdx].addFunction(createInstanceof(mbs[mbIdx],clazz,typeInfo));
+    }
   }
   List<File> objectFiles=new ArrayList<File>();
   generateMachineCode(config,mbs,objectFiles);
