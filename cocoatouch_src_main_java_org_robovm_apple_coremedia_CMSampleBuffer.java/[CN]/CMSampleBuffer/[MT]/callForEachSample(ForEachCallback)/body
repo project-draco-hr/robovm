@@ -1,8 +1,9 @@
 {
   long refconId=localRefconId;
-  OSStatus error=callForEachSample(new FunctionPtr(cbForEach),refconId);
+  OSStatus status=callForEachSample0(new FunctionPtr(cbForEach),refconId);
+  if (OSStatusException.throwIfNecessary(status)) {
 synchronized (forEachCallbacks) {
-    forEachCallbacks.put(refconId,callback);
+      forEachCallbacks.put(refconId,callback);
+    }
   }
-  return error;
 }

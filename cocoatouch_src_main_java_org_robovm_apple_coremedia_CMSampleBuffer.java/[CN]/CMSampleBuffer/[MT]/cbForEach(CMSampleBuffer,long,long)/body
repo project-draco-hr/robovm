@@ -1,7 +1,11 @@
 {
-  ForEachCallback callback=null;
 synchronized (forEachCallbacks) {
-    callback=forEachCallbacks.get(refcon);
+    try {
+      forEachCallbacks.get(refcon).forEach(buffer,index);
+    }
+ catch (    OSStatusException e) {
+      return e.getStatus();
+    }
+    return OSStatus.NO_ERR;
   }
-  callback.forEach(buffer,index);
 }

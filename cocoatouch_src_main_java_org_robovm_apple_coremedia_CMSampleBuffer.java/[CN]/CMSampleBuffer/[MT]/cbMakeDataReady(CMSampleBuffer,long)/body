@@ -1,7 +1,11 @@
 {
-  MakeDataReadyCallback callback=null;
 synchronized (makeDataReadyCallbacks) {
-    callback=makeDataReadyCallbacks.get(refcon);
+    try {
+      makeDataReadyCallbacks.get(refcon).makeDataReady(buffer);
+    }
+ catch (    OSStatusException e) {
+      return e.getStatus();
+    }
+    return OSStatus.NO_ERR;
   }
-  callback.makeDataReady(buffer);
 }

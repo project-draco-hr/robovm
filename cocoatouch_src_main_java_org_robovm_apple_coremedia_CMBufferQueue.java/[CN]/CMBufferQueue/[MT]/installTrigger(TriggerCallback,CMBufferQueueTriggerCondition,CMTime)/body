@@ -1,8 +1,9 @@
 {
   long refconId=CMBufferQueue.triggerId.getAndIncrement();
-  OSStatus error=installTrigger(new FunctionPtr(cbTrigger),refconId,triggerCondition,triggerTime,null);
+  OSStatus status=installTrigger0(new FunctionPtr(cbTrigger),refconId,triggerCondition,triggerTime,null);
+  if (OSStatusException.throwIfNecessary(status)) {
 synchronized (triggerCallbacks) {
-    triggerCallbacks.put(refconId,callback);
+      triggerCallbacks.put(refconId,callback);
+    }
   }
-  return error;
 }
