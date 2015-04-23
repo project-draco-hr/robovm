@@ -1,8 +1,9 @@
 {
   long refconId=CMBufferQueue.refconId.get();
-  OSStatus error=callForEachBuffer(new FunctionPtr(cbReset),refconId);
+  OSStatus status=callForEachBuffer0(new FunctionPtr(cbReset),refconId);
+  if (OSStatusException.throwIfNecessary(status)) {
 synchronized (forEachCallbacks) {
-    forEachCallbacks.put(refconId,callback);
+      forEachCallbacks.put(refconId,callback);
+    }
   }
-  return error;
 }

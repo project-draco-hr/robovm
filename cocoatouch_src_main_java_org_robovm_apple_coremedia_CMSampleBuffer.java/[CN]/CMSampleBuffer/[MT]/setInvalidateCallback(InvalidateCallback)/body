@@ -1,8 +1,9 @@
 {
   long refconId=localRefconId;
-  OSStatus error=setInvalidateCallback(new FunctionPtr(cbInvalidate),refconId);
+  OSStatus status=setInvalidateCallback0(new FunctionPtr(cbInvalidate),refconId);
+  if (OSStatusException.throwIfNecessary(status)) {
 synchronized (invalidateCallbacks) {
-    invalidateCallbacks.put(refconId,callback);
+      invalidateCallbacks.put(refconId,callback);
+    }
   }
-  return error;
 }

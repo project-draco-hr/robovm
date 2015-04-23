@@ -1,8 +1,9 @@
 {
   long refconId=CMBufferQueue.refconId.get();
-  OSStatus error=setValidationCallback(new FunctionPtr(cbValidate),refconId);
+  OSStatus status=setValidationCallback0(new FunctionPtr(cbValidate),refconId);
+  if (OSStatusException.throwIfNecessary(status)) {
 synchronized (validationCallbacks) {
-    validationCallbacks.put(refconId,callback);
+      validationCallbacks.put(refconId,callback);
+    }
   }
-  return error;
 }

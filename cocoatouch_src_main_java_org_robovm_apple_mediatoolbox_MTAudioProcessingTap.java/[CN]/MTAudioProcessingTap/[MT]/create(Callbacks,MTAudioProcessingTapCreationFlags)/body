@@ -1,0 +1,13 @@
+{
+  MTAudioProcessingTap.MTAudioProcessingTapPtr ptr=new MTAudioProcessingTap.MTAudioProcessingTapPtr();
+  long callbackId=MTAudioProcessingTap.callbackId.getAndIncrement();
+  MTAudioProcessingTapCallbacksStruct struct=new MTAudioProcessingTapCallbacksStruct(0,callbackId,new FunctionPtr(cbInit),new FunctionPtr(cbFinalize),new FunctionPtr(cbPrepare),new FunctionPtr(cbUnprepare),new FunctionPtr(cbProcess));
+  OSStatus status=create(null,struct,flags,ptr);
+  if (OSStatusException.throwIfNecessary(status)) {
+synchronized (MTAudioProcessingTap.callbacks) {
+      MTAudioProcessingTap.callbacks.put(callbackId,callbacks);
+    }
+    return ptr.get();
+  }
+  return null;
+}
