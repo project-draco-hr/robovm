@@ -4,8 +4,10 @@
   }
   long typeId=getTypeID(handle);
   Class<? extends CFType> cfTypeClass=allCFTypeClasses.get(typeId);
-  if (cfTypeClass != null) {
-    cls=cfTypeClass;
+  if (cfTypeClass != null && cfTypeClass != cls) {
+    if (cls.isAssignableFrom(cfTypeClass)) {
+      cls=cfTypeClass;
+    }
   }
   CFType o=(CFType)NativeObject.Marshaler.toObject(cls,handle,flags);
   if (retain) {
