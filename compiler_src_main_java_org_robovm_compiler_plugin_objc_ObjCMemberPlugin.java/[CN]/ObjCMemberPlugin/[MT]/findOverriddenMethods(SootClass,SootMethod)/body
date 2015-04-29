@@ -1,0 +1,17 @@
+{
+  SootClass supercls=sootClass.getSuperclass();
+  while (!supercls.getType().equals(org_robovm_objc_ObjCObject.getType())) {
+    try {
+      SootMethod m=supercls.getMethod(method.getName(),method.getParameterTypes(),method.getReturnType());
+      if (overrides(method,m) && !hasAnnotation(m,NOT_IMPLEMENTED)) {
+        return Collections.singletonList(m);
+      }
+    }
+ catch (    RuntimeException e) {
+    }
+    supercls=supercls.getSuperclass();
+  }
+  List<SootMethod> candidates=new ArrayList<>();
+  findOverriddenMethodsOnInterfaces(sootClass,method,candidates);
+  return candidates;
+}

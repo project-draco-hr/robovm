@@ -1,0 +1,22 @@
+{
+  List<Type> paramTypes=new ArrayList<>();
+  if (extensions) {
+    paramTypes.add(method.getParameterType(0));
+  }
+ else   if (method.isStatic()) {
+    paramTypes.add(org_robovm_objc_ObjCClass.getType());
+  }
+ else {
+    paramTypes.add(receiverType == null ? method.getDeclaringClass().getType() : receiverType);
+  }
+  paramTypes.add(org_robovm_objc_Selector.getType());
+  if (extensions) {
+    paramTypes.addAll(method.getParameterTypes().subList(1,method.getParameterTypes().size()));
+  }
+ else {
+    paramTypes.addAll(method.getParameterTypes());
+  }
+  SootMethod m=new SootMethod((isCallback ? "$cb$" : "$m$") + selectorName.replace(':','$'),paramTypes,method.getReturnType(),STATIC | PRIVATE | (isCallback ? 0 : NATIVE));
+  copyAnnotations(annotatedMethod,m,extensions);
+  return m;
+}

@@ -1,0 +1,17 @@
+{
+  String selectorName=readStringElem(annotation,"selector","").trim();
+  if (selectorName.length() == 0) {
+    int argCount=method.getParameterCount();
+    if (IBACTION.equals(annotation.getType()) && argCount == 2) {
+      selectorName=method.getName() + ":withEvent:";
+    }
+ else {
+      StringBuilder sb=new StringBuilder(method.getName());
+      for (int i=extensions ? 1 : 0; i < argCount; i++) {
+        sb.append(':');
+      }
+      selectorName=sb.toString();
+    }
+  }
+  return selectorName;
+}

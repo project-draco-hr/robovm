@@ -1,0 +1,18 @@
+{
+  String selectorName=readStringElem(annotation,"selector","").trim();
+  if (selectorName.length() == 0) {
+    String methodName=method.getName();
+    if (!(isGetter && methodName.startsWith("get") && methodName.length() > 3) && !(isGetter && methodName.startsWith("is") && methodName.length() > 2) && !(!isGetter && methodName.startsWith("set") && methodName.length() > 3)) {
+      throw new CompilerException("Invalid Objective-C " + getAnnotationName(annotation) + " method name "+ method+ ". "+ getAnnotationName(annotation)+ " methods without an explicit selector value "+ "must follow the Java beans property method naming convention.");
+    }
+    selectorName=methodName;
+    if (isGetter) {
+      selectorName=methodName.startsWith("is") ? methodName.substring(2) : methodName.substring(3);
+      selectorName=selectorName.substring(0,1).toLowerCase() + selectorName.substring(1);
+    }
+ else {
+      selectorName+=":";
+    }
+  }
+  return selectorName;
+}

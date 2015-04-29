@@ -1,21 +1,7 @@
 {
-  String selectorName=readStringElem(annotation,"selector","").trim();
-  if (selectorName.length() == 0) {
-    int argCount=method.getParameterCount();
-    if (IBACTION.equals(annotation.getType()) && argCount == 2) {
-      selectorName=method.getName() + ":withEvent:";
-    }
- else {
-      StringBuilder sb=new StringBuilder(method.getName());
-      for (int i=extensions ? 1 : 0; i < argCount; i++) {
-        sb.append(':');
-      }
-      selectorName=sb.toString();
-    }
-  }
-  if (!extensions && (isCustomClass(sootClass) || (method.getModifiers() & Modifier.FINAL) == 0)) {
-    Type receiverType=ObjCProtocolProxyPlugin.isObjCProxy(sootClass) ? sootClass.getInterfaces().getFirst().getType() : sootClass.getType();
-    createCallback(sootClass,method,selectorName,receiverType);
+  String selectorName=getObjCMethodSelectorName(annotation,method,extensions);
+  if (!extensions && isCustomClass(sootClass)) {
+    createCallback(sootClass,method,method,selectorName,getReceiverType(sootClass));
   }
   if (method.isNative()) {
     if (checkOverridable(overridables,selectorName,method)) {

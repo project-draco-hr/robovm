@@ -1,6 +1,6 @@
 {
   if (method.getParameterCount() == 2) {
-    if (method.getParameterType(0).equals(org_robovm_objc_ObjCSuper.getType()) && isSelector(method.getParameterType(1))) {
+    if (method.getParameterType(0).equals(org_robovm_objc_ObjCSuper.getType()) && isSelector(method.getParameterType(1)) && !hasAnnotation(method,MARSHALER)) {
       if (method.getReturnType() == VoidType.v() || method.getReturnType() instanceof PrimType) {
         String prefix=getPrimitiveReturnTypeModifier(method);
         return Scene.v().makeMethodRef(org_robovm_objc_$M,prefix + "_objc_msgSendSuper",method.getParameterTypes(),method.getReturnType(),true);
@@ -20,7 +20,7 @@
     }
   }
  else   if (method.getParameterCount() == 3 && method.getReturnType() == VoidType.v()) {
-    if (method.getParameterType(0).equals(org_robovm_objc_ObjCSuper.getType()) && isSelector(method.getParameterType(1))) {
+    if (method.getParameterType(0).equals(org_robovm_objc_ObjCSuper.getType()) && isSelector(method.getParameterType(1)) && !hasParameterAnnotation(method,1,MARSHALER)) {
       if (method.getParameterType(2) instanceof PrimType) {
         String suffix=getPrimitiveParameterTypeModifier(method,2);
         return Scene.v().makeMethodRef(org_robovm_objc_$M,"objc_msgSendSuper_" + suffix,method.getParameterTypes(),method.getReturnType(),true);

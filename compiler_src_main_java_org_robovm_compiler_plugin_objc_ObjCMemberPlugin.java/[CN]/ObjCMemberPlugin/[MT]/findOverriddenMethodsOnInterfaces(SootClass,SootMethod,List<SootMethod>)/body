@@ -1,0 +1,15 @@
+{
+  if (sootClass.isInterface()) {
+    try {
+      candidates.add(sootClass.getMethod(method.getName(),method.getParameterTypes(),method.getReturnType()));
+    }
+ catch (    RuntimeException e) {
+    }
+  }
+  for (  SootClass interfaze : sootClass.getInterfaces()) {
+    findOverriddenMethodsOnInterfaces(interfaze,method,candidates);
+  }
+  if (!sootClass.isInterface() && sootClass.hasSuperclass() && !sootClass.getSuperclass().getType().equals(org_robovm_objc_ObjCObject.getType())) {
+    findOverriddenMethodsOnInterfaces(sootClass.getSuperclass(),method,candidates);
+  }
+}

@@ -48,4 +48,12 @@
     transformObjCProperty(annotation,"@IBOutletCollection",sootClass,method,selectors,overridables,extensions);
     return;
   }
+  if (!method.isStatic() && !method.isNative() && !method.isAbstract()&& !method.isPrivate()&& isCustomClass(sootClass)&& !hasAnnotation(method,NOT_IMPLEMENTED)) {
+    List<SootMethod> superMethods=findOverriddenMethods(sootClass,method);
+    for (    SootMethod superMethod : superMethods) {
+      if (createCustomClassCallbackIfNeeded(sootClass,method,superMethod)) {
+        break;
+      }
+    }
+  }
 }

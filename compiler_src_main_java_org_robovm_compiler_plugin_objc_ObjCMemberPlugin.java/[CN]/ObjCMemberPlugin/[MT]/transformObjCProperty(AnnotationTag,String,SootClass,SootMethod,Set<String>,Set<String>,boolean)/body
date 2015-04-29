@@ -3,29 +3,14 @@
   int setterParamCount=extensions ? 2 : 1;
   if (method.getReturnType() != VoidType.v() && method.getParameterCount() != getterParamCount || method.getReturnType() == VoidType.v() && method.getParameterCount() != setterParamCount) {
     if (!extensions) {
-      throw new CompilerException("Objective-C " + javaAnnotation + " method "+ method+ " does not have a supported signature. "+ javaAnnotation+ " getter methods"+ " must take 0 arguments and must not return void. "+ javaAnnotation+ " setter methods must take 1 argument and return void.");
+      throw new CompilerException("Objective-C " + getAnnotationName(annotation) + " method "+ method+ " does not have a supported signature. "+ getAnnotationName(annotation)+ " getter methods"+ " must take 0 arguments and must not return void. "+ getAnnotationName(annotation)+ " setter methods must take 1 argument and return void.");
     }
-    throw new CompilerException("Objective-C " + javaAnnotation + " method "+ method+ " in extension class"+ " does not have a supported signature. "+ javaAnnotation+ " getter methods in extension classes"+ " must take 1 argument (the 'this' reference) and must not return void. "+ javaAnnotation+ " setter methods in extension classes must "+ "take 2 arguments (first is the 'this' reference) and return void.");
+    throw new CompilerException("Objective-C " + getAnnotationName(annotation) + " method "+ method+ " in extension class does not have a supported signature. "+ getAnnotationName(annotation)+ " getter methods in extension classes"+ " must take 1 argument (the 'this' reference) and "+ "must not return void. "+ getAnnotationName(annotation)+ " setter methods in extension classes "+ "must take 2 arguments (first is the 'this' reference) and return void.");
   }
   boolean isGetter=method.getReturnType() != VoidType.v();
-  String selectorName=readStringElem(annotation,"selector","").trim();
-  if (selectorName.length() == 0) {
-    String methodName=method.getName();
-    if (!(isGetter && methodName.startsWith("get") && methodName.length() > 3) && !(isGetter && methodName.startsWith("is") && methodName.length() > 2) && !(!isGetter && methodName.startsWith("set") && methodName.length() > 3)) {
-      throw new CompilerException("Invalid Objective-C " + javaAnnotation + " method name "+ method+ ". "+ javaAnnotation+ " methods without an explicit selector value "+ "must follow the Java beans property method naming convention.");
-    }
-    selectorName=methodName;
-    if (isGetter) {
-      selectorName=methodName.startsWith("is") ? methodName.substring(2) : methodName.substring(3);
-      selectorName=selectorName.substring(0,1).toLowerCase() + selectorName.substring(1);
-    }
- else {
-      selectorName+=":";
-    }
-  }
-  if (!extensions && (isCustomClass(sootClass) || (method.getModifiers() & Modifier.FINAL) == 0)) {
-    Type receiverType=ObjCProtocolProxyPlugin.isObjCProxy(sootClass) ? sootClass.getInterfaces().getFirst().getType() : sootClass.getType();
-    createCallback(sootClass,method,selectorName,receiverType);
+  String selectorName=getObjCPropertySelectorName(annotation,method,isGetter);
+  if (!extensions && isCustomClass(sootClass)) {
+    createCallback(sootClass,method,method,selectorName,getReceiverType(sootClass));
   }
   if (method.isNative()) {
     if (checkOverridable(overridables,selectorName,method)) {

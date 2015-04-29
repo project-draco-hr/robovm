@@ -1,22 +1,10 @@
 {
-  ArrayList<Class<?>> classes=new ArrayList<Class<?>>();
-  if (!type.isInterface()) {
-    classes.add(type);
-  }
- else {
-    Class<?> objCProxy=allObjCProxyClasses.get(type.getName());
-    if (objCProxy != null) {
-      classes.add(objCProxy);
-    }
-  }
-  for (  Class<?> c : classes) {
-    for (    Method m : c.getDeclaredMethods()) {
-      if (m.getAnnotation(Callback.class) != null) {
-        BindSelector bindSelector=m.getAnnotation(BindSelector.class);
-        if (bindSelector != null) {
-          if (!result.containsKey(bindSelector.value())) {
-            result.put(bindSelector.value(),m);
-          }
+  for (  Method m : type.getDeclaredMethods()) {
+    if (m.getAnnotation(Callback.class) != null) {
+      BindSelector bindSelector=m.getAnnotation(BindSelector.class);
+      if (bindSelector != null) {
+        if (!result.containsKey(bindSelector.value())) {
+          result.put(bindSelector.value(),m);
         }
       }
     }

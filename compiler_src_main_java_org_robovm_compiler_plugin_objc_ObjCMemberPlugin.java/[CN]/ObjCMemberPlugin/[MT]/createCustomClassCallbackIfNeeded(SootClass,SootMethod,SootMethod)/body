@@ -1,0 +1,16 @@
+{
+  AnnotationTag annotation=getAnnotation(superMethod,METHOD);
+  if (annotation != null) {
+    createCallback(sootClass,method,superMethod,getObjCMethodSelectorName(annotation,superMethod,false),getReceiverType(sootClass));
+    return true;
+  }
+ else {
+    annotation=getAnnotation(superMethod,PROPERTY);
+    if (annotation != null) {
+      boolean isGetter=method.getReturnType() != VoidType.v();
+      createCallback(sootClass,method,superMethod,getObjCPropertySelectorName(annotation,superMethod,isGetter),getReceiverType(sootClass));
+      return true;
+    }
+  }
+  return false;
+}
