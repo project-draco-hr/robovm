@@ -77,7 +77,7 @@
     if (!name.equals("<clinit>") && !name.equals("<init>") && !method.isPrivate()&& !method.isStatic()&& !Modifier.isFinal(method.getModifiers())&& !Modifier.isFinal(sootClass.getModifiers())) {
       createLookupFunction(method);
     }
-    if (needsClassInitWrapper(method)) {
+    if (method.isStatic() && !name.equals("<clinit>")) {
       String fnName=method.isSynchronized() ? Symbols.synchronizedWrapperSymbol(method) : Symbols.methodSymbol(method);
       FunctionRef fn=new FunctionRef(fnName,getFunctionType(method));
       mb.addFunction(createClassInitWrapperFunction(fn));
