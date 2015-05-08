@@ -1,0 +1,11 @@
+{
+  String packagePath=internalName.substring(0,internalName.lastIndexOf('/') + 1);
+  String className=internalName.substring(internalName.lastIndexOf('/') + 1);
+  String suffix=ext.startsWith(".") ? ext : "." + ext;
+  int length=className.length() + suffix.length();
+  if (length > maxFileNameLength) {
+    String sha1=DigestUtil.sha1(className);
+    className=className.substring(0,Math.max(0,maxFileNameLength - suffix.length() - sha1.length())) + sha1;
+  }
+  return packagePath.replace('/',File.separatorChar) + className + suffix;
+}
