@@ -1,35 +1,22 @@
 {
-  File objectsFile=new File(config.getTmpDir(),"objects");
-  if (config.getOs().getFamily() == OS.Family.darwin) {
-    FileUtils.writeLines(objectsFile,objectFiles,"\n");
-  }
- else {
-    BufferedOutputStream objectsOut=null;
-    try {
-      objectsOut=new BufferedOutputStream(new FileOutputStream(objectsFile));
-      for (      File f : objectFiles) {
-        objectsOut.write('"');
-        objectsOut.write(f.getAbsolutePath().getBytes());
-        objectsOut.write('"');
-        objectsOut.write('\n');
-      }
-    }
-  finally {
-      IOUtils.closeQuietly(objectsOut);
-    }
-  }
+  boolean isDarwin=config.getOs().getFamily() == OS.Family.darwin;
+  List<File> objectsFiles=writeObjectsFiles(config,objectFiles,isDarwin ? 0xffff : Integer.MAX_VALUE,!isDarwin);
   List<String> opts=new ArrayList<String>();
   if (config.isDebug()) {
     opts.add("-g");
   }
-  if (config.getOs().getFamily() == OS.Family.darwin) {
+  if (isDarwin) {
     opts.add("-arch");
     opts.add(config.getArch().getClangName());
-    opts.add("-Wl,-filelist," + objectsFile.getAbsolutePath());
+    for (    File objectsFile : objectsFiles) {
+      opts.add("-Wl,-filelist," + objectsFile.getAbsolutePath());
+    }
   }
  else {
     opts.add(config.getArch().is32Bit() ? "-m32" : "-m64");
-    opts.add("@" + objectsFile.getAbsolutePath());
+    for (    File objectsFile : objectsFiles) {
+      opts.add("@" + objectsFile.getAbsolutePath());
+    }
   }
   opts.addAll(args);
   new Executor(config.getLogger(),getCcPath(config)).args("-o",outFile,opts,libs).exec();

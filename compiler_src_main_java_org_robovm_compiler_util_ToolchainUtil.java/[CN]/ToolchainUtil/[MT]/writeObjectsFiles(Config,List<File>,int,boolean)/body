@@ -1,0 +1,14 @@
+{
+  ArrayList<File> files=new ArrayList<>();
+  for (int i=0, start=0; start < objectFiles.size(); i++, start+=maxObjectsPerFile) {
+    List<File> partition=objectFiles.subList(start,Math.min(objectFiles.size(),start + maxObjectsPerFile));
+    List<String> paths=new ArrayList<>();
+    for (    File f : partition) {
+      paths.add((quote ? "\"" : "") + f.getAbsolutePath() + (quote ? "\"" : ""));
+    }
+    File objectsFile=new File(config.getTmpDir(),"objects" + i);
+    FileUtils.writeLines(objectsFile,paths,"\n");
+    files.add(objectsFile);
+  }
+  return files;
+}
