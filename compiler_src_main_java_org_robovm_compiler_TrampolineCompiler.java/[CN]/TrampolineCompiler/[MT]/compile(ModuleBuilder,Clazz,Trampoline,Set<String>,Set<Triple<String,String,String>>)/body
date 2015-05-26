@@ -1,0 +1,109 @@
+{
+  this.mb=mb;
+  addDependencyIfNeeded(dependencies,currentClass,t);
+  Function errorFn=new FunctionBuilder(t).linkage(external).build();
+  if (!checkClassExists(errorFn,t) || !checkClassAccessible(errorFn,t)) {
+    mb.addFunction(errorFn);
+    return;
+  }
+  if (t instanceof New) {
+    SootClass target=config.getClazzes().load(t.getTarget()).getSootClass();
+    if (target.isAbstract() || target.isInterface()) {
+      call(errorFn,BC_THROW_INSTANTIATION_ERROR,errorFn.getParameterRef(0),mb.getString(t.getTarget().replace('/','.')));
+      errorFn.add(new Unreachable());
+      mb.addFunction(errorFn);
+      return;
+    }
+    String fnName=Symbols.clinitWrapperSymbol(Symbols.allocatorSymbol(t.getTarget()));
+    alias(t,fnName);
+  }
+ else   if (t instanceof Instanceof) {
+    if (isArray(t.getTarget())) {
+      FunctionRef fnRef=createInstanceofArray((Instanceof)t);
+      alias(t,fnRef.getName());
+    }
+ else {
+      String fnName=Symbols.instanceofSymbol(t.getTarget());
+      alias(t,fnName);
+    }
+  }
+ else   if (t instanceof Checkcast) {
+    if (isArray(t.getTarget())) {
+      FunctionRef fnRef=createCheckcastArray((Checkcast)t);
+      alias(t,fnRef.getName());
+    }
+ else {
+      String fnName=Symbols.checkcastSymbol(t.getTarget());
+      alias(t,fnName);
+    }
+  }
+ else   if (t instanceof LdcClass) {
+    if (isArray(t.getTarget())) {
+      FunctionRef fnRef=createLdcArray((LdcClass)t);
+      alias(t,fnRef.getName());
+    }
+ else {
+      String fnName=Symbols.ldcExternalSymbol(t.getTarget());
+      alias(t,fnName);
+    }
+  }
+ else   if (t instanceof Anewarray) {
+    FunctionRef fnRef=createAnewarray((Anewarray)t);
+    alias(t,fnRef.getName());
+  }
+ else   if (t instanceof Multianewarray) {
+    FunctionRef fnRef=createMultianewarray((Multianewarray)t);
+    alias(t,fnRef.getName());
+  }
+ else   if (t instanceof FieldAccessor) {
+    SootField field=resolveField(errorFn,(FieldAccessor)t);
+    if (field != null) {
+      dependencies.add(getInternalName(field.getDeclaringClass()));
+    }
+    if (field == null || !checkMemberAccessible(errorFn,t,field)) {
+      mb.addFunction(errorFn);
+      return;
+    }
+    Clazz caller=config.getClazzes().load(t.getCallingClass());
+    Clazz target=config.getClazzes().load(t.getTarget());
+    if (!((FieldAccessor)t).isGetter() && field.isFinal() && caller != target) {
+      throwIllegalAccessError(errorFn,ATTEMPT_TO_WRITE_TO_FINAL_FIELD,target,field.getName(),caller);
+      mb.addFunction(errorFn);
+      return;
+    }
+    if (!field.isStatic()) {
+      createInlinedAccessorForInstanceField((FieldAccessor)t,field);
+    }
+ else {
+      createTrampolineAliasForField((FieldAccessor)t,field);
+    }
+  }
+ else   if (t instanceof Invokeinterface) {
+    SootMethod rm=resolveInterfaceMethod(errorFn,(Invokeinterface)t);
+    if (rm != null) {
+      methodDependencies.add(new ImmutableTriple<String,String,String>(getInternalName(rm.getDeclaringClass()),rm.getName(),getDescriptor(rm)));
+    }
+    if (rm == null || !checkMemberAccessible(errorFn,t,rm)) {
+      mb.addFunction(errorFn);
+      return;
+    }
+    createTrampolineAliasForMethod((Invoke)t,rm);
+  }
+ else   if (t instanceof Invoke) {
+    SootMethod method=resolveMethod(errorFn,(Invoke)t);
+    if (method != null) {
+      methodDependencies.add(new ImmutableTriple<String,String,String>(getInternalName(method.getDeclaringClass()),method.getName(),getDescriptor(method)));
+    }
+    if (method == null || !checkMemberAccessible(errorFn,t,method)) {
+      mb.addFunction(errorFn);
+      return;
+    }
+    if (t instanceof Invokespecial && method.isAbstract()) {
+      call(errorFn,BC_THROW_ABSTRACT_METHOD_ERROR,errorFn.getParameterRef(0),mb.getString(String.format(NO_SUCH_METHOD_ERROR,method.getDeclaringClass(),method.getName(),getDescriptor(method))));
+      errorFn.add(new Unreachable());
+      mb.addFunction(errorFn);
+      return;
+    }
+    createTrampolineAliasForMethod((Invoke)t,method);
+  }
+}

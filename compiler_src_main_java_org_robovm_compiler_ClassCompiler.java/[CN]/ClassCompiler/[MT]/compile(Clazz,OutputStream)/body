@@ -1,5 +1,5 @@
 {
-  methodCompiler.reset(clazz);
+  javaMethodCompiler.reset(clazz);
   bridgeMethodCompiler.reset(clazz);
   callbackMethodCompiler.reset(clazz);
   nativeMethodCompiler.reset(clazz);
@@ -11,7 +11,7 @@
     compilerPlugin.beforeClass(config,clazz,mb);
   }
   sootClass=clazz.getSootClass();
-  trampolines=new HashSet<Trampoline>();
+  trampolines=new HashMap<>();
   catches=new HashSet<String>();
   classFields=getClassFields(config.getOs(),config.getArch(),sootClass);
   instanceFields=getInstanceFields(config.getOs(),config.getArch(),sootClass);
@@ -50,6 +50,7 @@
       }
     }
   }
+  ci.initClassInfo();
   for (  SootMethod method : sootClass.getMethods()) {
     for (    CompilerPlugin compilerPlugin : config.getCompilerPlugins()) {
       compilerPlugin.beforeMethod(config,clazz,method,mb);
@@ -88,10 +89,50 @@
       }
     }
   }
-  Set<String> trampolineDependencies=new HashSet<String>();
-  for (  Trampoline trampoline : trampolines) {
-    trampolineResolver.compile(mb,trampoline);
-    trampolineDependencies.addAll(trampolineResolver.getDependencies());
+  for (  Trampoline trampoline : trampolines.keySet()) {
+    Set<String> deps=new HashSet<String>();
+    Set<Triple<String,String,String>> mDeps=new HashSet<>();
+    trampolineResolver.compile(mb,clazz,trampoline,deps,mDeps);
+    for (    SootMethod m : trampolines.get(trampoline)) {
+      MethodInfo mi=ci.getMethod(m.getName(),getDescriptor(m));
+      mi.addClassDependencies(deps,false);
+      mi.addInvokeMethodDependencies(mDeps,false);
+    }
+  }
+  Map<SootMethod,Set<SootMethod>> overriddenMethods=getOverriddenMethods(this.sootClass);
+  for (  SootMethod from : overriddenMethods.keySet()) {
+    MethodInfo mi=ci.getMethod(from.getName(),getDescriptor(from));
+    for (    SootMethod to : overriddenMethods.get(from)) {
+      mi.addSuperMethodDependency(getInternalName(to.getDeclaringClass()),to.getName(),getDescriptor(to),false);
+    }
+  }
+  if (sootClass.hasSuperclass()) {
+    for (    SootClass interfaze : getImmediateInterfaces(sootClass)) {
+      for (      SootMethod m : interfaze.getMethods()) {
+        if (!m.isStatic()) {
+          try {
+            this.sootClass.getMethod(m.getName(),m.getParameterTypes());
+          }
+ catch (          RuntimeException e) {
+            SootMethod superMethod=null;
+            for (SootClass sc=sootClass.getSuperclass(); sc.hasSuperclass(); sc=sc.getSuperclass()) {
+              try {
+                SootMethod candidate=sc.getMethod(m.getName(),m.getParameterTypes());
+                if (!candidate.isStatic()) {
+                  superMethod=candidate;
+                  break;
+                }
+              }
+ catch (              RuntimeException e2) {
+              }
+            }
+            if (superMethod != null) {
+              ci.addSuperMethodDependency(getInternalName(superMethod.getDeclaringClass()),superMethod.getName(),getDescriptor(superMethod),false);
+            }
+          }
+        }
+      }
+    }
   }
   Global classInfoStruct=null;
   try {
@@ -114,47 +155,27 @@
   mb.build().write(writer);
   writer.flush();
   ci.setCatchNames(catches);
-  ci.setTrampolines(trampolines);
-  ci.addDependency("java/lang/Object");
+  ci.addClassDependency("java/lang/Object",false);
   if (sootClass.hasSuperclass() && !sootClass.isInterface()) {
-    ci.addDependency(getInternalName(sootClass.getSuperclass()));
+    ci.addClassDependency(getInternalName(sootClass.getSuperclass()),false);
   }
   for (  SootClass iface : sootClass.getInterfaces()) {
-    ci.addDependency(getInternalName(iface));
+    ci.addClassDependency(getInternalName(iface),false);
   }
   for (  SootField f : sootClass.getFields()) {
-    addDependencyIfNeeded(clazz,f.getType());
+    addClassDependencyIfNeeded(clazz,f.getType(),false);
   }
   for (  SootMethod m : sootClass.getMethods()) {
-    addDependencyIfNeeded(clazz,m.getReturnType());
+    MethodInfo mi=ci.getMethod(m.getName(),getDescriptor(m));
+    addClassDependencyIfNeeded(clazz,mi,m.getReturnType(),true);
     @SuppressWarnings("unchecked") List<soot.Type> paramTypes=(List<soot.Type>)m.getParameterTypes();
     for (    soot.Type type : paramTypes) {
-      addDependencyIfNeeded(clazz,type);
+      addClassDependencyIfNeeded(clazz,mi,type,true);
     }
   }
-  ci.addDependencies(attributesEncoder.getDependencies());
-  ci.addDependencies(trampolineDependencies);
-  ci.addDependencies(catches);
-  for (  Trampoline t : trampolines) {
-{
-      String desc=t.getTarget();
-      if (desc.charAt(0) == 'L' || desc.charAt(0) == '[') {
-        addDependencyIfNeeded(clazz,desc);
-      }
- else {
-        ci.addDependency(t.getTarget());
-      }
-    }
-    if (t instanceof FieldAccessor) {
-      addDependencyIfNeeded(clazz,((FieldAccessor)t).getFieldDesc());
-    }
- else     if (t instanceof Invoke) {
-      String methodDesc=((Invoke)t).getMethodDesc();
-      addDependencyIfNeeded(clazz,getReturnTypeDescriptor(methodDesc));
-      for (      String desc : getParameterDescriptors(methodDesc)) {
-        addDependencyIfNeeded(clazz,desc);
-      }
-    }
+  ci.addClassDependencies(attributesEncoder.getDependencies(),false);
+  ci.addClassDependencies(catches,false);
+  for (  Trampoline t : trampolines.keySet()) {
     if (t instanceof Checkcast) {
       ci.addCheckcast(t.getTarget());
     }

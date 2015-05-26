@@ -1,0 +1,40 @@
+{
+  reachableNodes.clear();
+  ClassNode classNode=getClassNode(clazz.getInternalName());
+  if (root) {
+    roots.add(classNode);
+  }
+  ClazzInfo ci=clazz.getClazzInfo();
+  for (  Dependency dep : ci.getDependencies()) {
+    if (dep instanceof InvokeMethodDependency) {
+      InvokeMethodDependency mdep=(InvokeMethodDependency)dep;
+      classNode.addStrongEgde(getMethodNode(mdep.getClassName(),mdep.getMethodName(),mdep.getMethodDesc()));
+    }
+ else     if (dep instanceof SuperMethodDependency) {
+      SuperMethodDependency mdep=(SuperMethodDependency)dep;
+      classNode.addStrongEgde(getMethodNode(mdep.getClassName(),mdep.getMethodName(),mdep.getMethodDesc()));
+    }
+ else {
+      classNode.addStrongEgde(getClassNode(dep.getClassName()));
+    }
+  }
+  for (  MethodInfo mi : ci.getMethods()) {
+    boolean strong=root || mi.isCallback() || (!mi.isStatic() && "<init>".equals(mi.getName()))|| (mi.isStatic() && "<clinit>".equals(mi.getName()) && "()V".equals(mi.getDesc()))|| (ci.isEnum() && mi.isStatic() && "values".equals(mi.getName())&& mi.getDesc().equals("()[L" + clazz.getInternalName() + ";"))|| (ci.isStruct() && mi.isStatic() && "sizeOf".equals(mi.getName())&& "()I".equals(mi.getDesc()));
+    MethodNode methodNode=getMethodNode(clazz.getInternalName(),mi.getName(),mi.getDesc());
+    classNode.addEgde(methodNode,!strong);
+    methodNode.addStrongEgde(classNode);
+    for (    Dependency dep : mi.getDependencies()) {
+      if (dep instanceof InvokeMethodDependency) {
+        InvokeMethodDependency mdep=(InvokeMethodDependency)dep;
+        methodNode.addStrongEgde(getMethodNode(mdep.getClassName(),mdep.getMethodName(),mdep.getMethodDesc()));
+      }
+ else       if (dep instanceof SuperMethodDependency) {
+        SuperMethodDependency mdep=(SuperMethodDependency)dep;
+        getMethodNode(mdep.getClassName(),mdep.getMethodName(),mdep.getMethodDesc()).addStrongEgde(methodNode);
+      }
+ else {
+        methodNode.addStrongEgde(getClassNode(dep.getClassName()));
+      }
+    }
+  }
+}

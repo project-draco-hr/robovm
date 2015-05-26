@@ -1,0 +1,25 @@
+{
+  if (sc != childClass) {
+    for (    SootMethod superMethod : sc.getMethods()) {
+      if (superMethod.isStatic() || superMethod.isPrivate() || superMethod.getName().equals("<init>")) {
+        continue;
+      }
+      if (!superMethod.isPublic() && !superMethod.isProtected()) {
+        if (!childClass.getPackageName().equals(sc.getPackageName())) {
+          continue;
+        }
+      }
+      for (      SootMethod childMethod : result.keySet()) {
+        if (childMethod.getName().equals(superMethod.getName()) && childMethod.getParameterTypes().equals(superMethod.getParameterTypes())) {
+          result.get(childMethod).add(superMethod);
+        }
+      }
+    }
+  }
+  for (  SootClass interfaze : sc.getInterfaces()) {
+    findOverriddenSuperMethods(childClass,interfaze,result);
+  }
+  if (sc.hasSuperclass()) {
+    findOverriddenSuperMethods(childClass,sc.getSuperclass(),result);
+  }
+}

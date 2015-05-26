@@ -83,12 +83,23 @@
     mb.addGlobal(new Global("_bcMainClass",mb.getString(config.getMainClass())));
   }
   ModuleBuilder[] mbs=new ModuleBuilder[config.getThreads() + 1];
+  FunctionRef[] stubRefs=new FunctionRef[mbs.length];
+  ArrayConstantBuilder stubRefsArray=new ArrayConstantBuilder(I8_PTR);
   mbs[0]=mb;
   for (int i=1; i < mbs.length; i++) {
     mbs[i]=new ModuleBuilder();
     mbs[i].addInclude(getClass().getClassLoader().getResource(String.format("header-%s-%s.ll",os.getFamily(),arch)));
     mbs[i].addInclude(getClass().getClassLoader().getResource("header.ll"));
+    Function fn=new FunctionBuilder("_stripped_method" + i,new FunctionType(VOID,ENV_PTR)).linkage(external).build();
+    call(fn,BC_THROW_NO_SUCH_METHOD_ERROR,fn.getParameterRef(0),mbs[i].getString("Method has been stripped out of the executable"));
+    fn.add(new Unreachable());
+    mbs[i].addFunction(fn);
+    mb.addFunctionDeclaration(new FunctionDeclaration(fn.ref()));
+    stubRefs[i]=fn.ref();
+    stubRefsArray.add(new ConstantBitcast(fn.ref(),I8_PTR));
   }
+  stubRefsArray.add(new NullConstant(I8_PTR));
+  mb.addGlobal(new Global("_bcStrippedMethodStubs",stubRefsArray.build()));
   Random rnd=new Random();
   buildTypeInfos(typeInfos);
   Set<String> checkcasts=new HashSet<>();
@@ -100,9 +111,26 @@
     instanceofs.addAll(ci.getInstanceofs());
     invokes.addAll(ci.getInvokes());
   }
+  Set<String> reachableMethods=new HashSet<>();
+  for (  Triple<String,String,String> node : config.getDependencyGraph().findReachableMethods(config.getTreeShakerMode())) {
+    reachableMethods.add(node.getLeft() + "." + node.getMiddle()+ node.getRight());
+  }
+  int totalMethodCount=0;
+  int reachableMethodCount=0;
   for (  Clazz clazz : linkClasses) {
     int mbIdx=rnd.nextInt(mbs.length - 1) + 1;
     ClazzInfo ci=clazz.getClazzInfo();
+    for (    MethodInfo mi : ci.getMethods()) {
+      if (!mi.isAbstract()) {
+        totalMethodCount++;
+        if (!reachableMethods.contains(clazz.getInternalName() + "." + mi.getName()+ mi.getDesc())) {
+          createStrippedMethodStub(stubRefs[mbIdx],mbs[mbIdx],clazz,mi);
+        }
+ else {
+          reachableMethodCount++;
+        }
+      }
+    }
     TypeInfo typeInfo=typeInfos.get(ci);
     if (typeInfo.error) {
       mb.addGlobal(new Global(Symbols.typeInfoSymbol(clazz.getInternalName()),new StructureConstantBuilder().add(new IntegerConstant(typeInfo.id)).add(new IntegerConstant(0)).add(new IntegerConstant(-1)).add(new IntegerConstant(0)).add(new IntegerConstant(0)).build()));
@@ -122,7 +150,9 @@
           String name=mi.getName();
           if (!name.equals("<clinit>") && !name.equals("<init>") && !mi.isPrivate()&& !mi.isStatic()&& !mi.isFinal()&& !mi.isAbstract()) {
             if (invokes.contains(clazz.getInternalName() + "." + name+ mi.getDesc())) {
-              mbs[mbIdx].addFunction(createLookup(mbs[mbIdx],ci,mi));
+              if (reachableMethods.contains(clazz.getInternalName() + "." + name+ mi.getDesc())) {
+                mbs[mbIdx].addFunction(createLookup(mbs[mbIdx],ci,mi));
+              }
             }
           }
         }
@@ -135,6 +165,7 @@
       mbs[mbIdx].addFunction(createInstanceof(mbs[mbIdx],clazz,typeInfo));
     }
   }
+  config.getLogger().debug("%d methods out of %d included in the executable",reachableMethodCount,totalMethodCount);
   List<File> objectFiles=new ArrayList<File>();
   generateMachineCode(config,mbs,objectFiles);
   for (  Clazz clazz : linkClasses) {

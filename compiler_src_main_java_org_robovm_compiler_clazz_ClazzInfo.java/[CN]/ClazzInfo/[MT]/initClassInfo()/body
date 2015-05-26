@@ -1,0 +1,19 @@
+{
+  if (isPhantom()) {
+    return;
+  }
+  SootClass sootClass=clazz.getSootClass();
+  isStruct=Types.isStruct(sootClass);
+  isEnum=Types.isEnum(sootClass);
+  if (sootClass.hasSuperclass()) {
+    superclassName=Types.getInternalName(sootClass.getSuperclass());
+  }
+  interfaceNames.clear();
+  for (  SootClass ifs : sootClass.getInterfaces()) {
+    interfaceNames.add(Types.getInternalName(ifs));
+  }
+  methods.clear();
+  for (  SootMethod method : sootClass.getMethods()) {
+    methods.add(new MethodInfo(this,method.getModifiers(),method.getName(),Types.getDescriptor(method),Annotations.hasCallbackAnnotation(method)));
+  }
+}
