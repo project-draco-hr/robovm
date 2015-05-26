@@ -1,0 +1,21 @@
+{
+  if (!visited.contains(node)) {
+    visited.add(node);
+    for (    Node child : node.strongEdges) {
+      visitReachableNodes(child,visited);
+    }
+    if (treeShakerMode == TreeShakerMode.none || treeShakerMode == TreeShakerMode.conservative) {
+      for (      Node child : node.weakEdges) {
+        if (treeShakerMode == TreeShakerMode.conservative && child instanceof MethodNode) {
+          MethodNode mnode=(MethodNode)child;
+          if (!mnode.isWeaklyLinked()) {
+            visitReachableNodes(child,visited);
+          }
+        }
+ else {
+          visitReachableNodes(child,visited);
+        }
+      }
+    }
+  }
+}
