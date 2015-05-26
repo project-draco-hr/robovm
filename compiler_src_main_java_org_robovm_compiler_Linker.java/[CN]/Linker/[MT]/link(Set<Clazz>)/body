@@ -111,8 +111,12 @@
     instanceofs.addAll(ci.getInstanceofs());
     invokes.addAll(ci.getInvokes());
   }
+  TreeShakerMode treeShakerMode=config.getTreeShakerMode();
+  if (treeShakerMode != TreeShakerMode.none && config.getOs().getFamily() == Family.darwin && config.getArch() == Arch.x86) {
+    treeShakerMode=TreeShakerMode.none;
+  }
   Set<String> reachableMethods=new HashSet<>();
-  for (  Triple<String,String,String> node : config.getDependencyGraph().findReachableMethods(config.getTreeShakerMode())) {
+  for (  Triple<String,String,String> node : config.getDependencyGraph().findReachableMethods(treeShakerMode)) {
     reachableMethods.add(node.getLeft() + "." + node.getMiddle()+ node.getRight());
   }
   int totalMethodCount=0;
