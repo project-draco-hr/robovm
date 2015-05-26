@@ -8,32 +8,32 @@
   for (  Dependency dep : ci.getDependencies()) {
     if (dep instanceof InvokeMethodDependency) {
       InvokeMethodDependency mdep=(InvokeMethodDependency)dep;
-      classNode.addStrongEgde(getMethodNode(mdep.getClassName(),mdep.getMethodName(),mdep.getMethodDesc()));
+      classNode.addEgde(getMethodNode(mdep.getClassName(),mdep.getMethodName(),mdep.getMethodDesc()),mdep.isWeak());
     }
  else     if (dep instanceof SuperMethodDependency) {
       SuperMethodDependency mdep=(SuperMethodDependency)dep;
-      classNode.addStrongEgde(getMethodNode(mdep.getClassName(),mdep.getMethodName(),mdep.getMethodDesc()));
+      classNode.addEgde(getMethodNode(mdep.getClassName(),mdep.getMethodName(),mdep.getMethodDesc()),mdep.isWeak());
     }
  else {
-      classNode.addStrongEgde(getClassNode(dep.getClassName()));
+      classNode.addEgde(getClassNode(dep.getClassName()),dep.isWeak());
     }
   }
   for (  MethodInfo mi : ci.getMethods()) {
     boolean strong=root || mi.isCallback() || (!mi.isStatic() && "<init>".equals(mi.getName()))|| (mi.isStatic() && "<clinit>".equals(mi.getName()) && "()V".equals(mi.getDesc()))|| (ci.isEnum() && mi.isStatic() && "values".equals(mi.getName())&& mi.getDesc().equals("()[L" + clazz.getInternalName() + ";"))|| (ci.isStruct() && mi.isStatic() && "sizeOf".equals(mi.getName())&& "()I".equals(mi.getDesc()));
     MethodNode methodNode=getMethodNode(clazz.getInternalName(),mi.getName(),mi.getDesc());
     classNode.addEgde(methodNode,!strong);
-    methodNode.addStrongEgde(classNode);
+    methodNode.addEgde(classNode,false);
     for (    Dependency dep : mi.getDependencies()) {
       if (dep instanceof InvokeMethodDependency) {
         InvokeMethodDependency mdep=(InvokeMethodDependency)dep;
-        methodNode.addStrongEgde(getMethodNode(mdep.getClassName(),mdep.getMethodName(),mdep.getMethodDesc()));
+        methodNode.addEgde(getMethodNode(mdep.getClassName(),mdep.getMethodName(),mdep.getMethodDesc()),mdep.isWeak());
       }
  else       if (dep instanceof SuperMethodDependency) {
         SuperMethodDependency mdep=(SuperMethodDependency)dep;
-        getMethodNode(mdep.getClassName(),mdep.getMethodName(),mdep.getMethodDesc()).addStrongEgde(methodNode);
+        getMethodNode(mdep.getClassName(),mdep.getMethodName(),mdep.getMethodDesc()).addEgde(methodNode,false);
       }
  else {
-        methodNode.addStrongEgde(getClassNode(dep.getClassName()));
+        methodNode.addEgde(getClassNode(dep.getClassName()),dep.isWeak());
       }
     }
   }
