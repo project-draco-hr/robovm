@@ -13,7 +13,11 @@
     interfaceNames.add(Types.getInternalName(ifs));
   }
   methods.clear();
+  boolean classWeaklyLinked=Annotations.hasWeaklyLinkedAnnotation(sootClass);
+  boolean classStronglyLinked=Annotations.hasStronglyLinkedAnnotation(sootClass);
   for (  SootMethod method : sootClass.getMethods()) {
-    methods.add(new MethodInfo(this,method.getModifiers(),method.getName(),Types.getDescriptor(method),Annotations.hasCallbackAnnotation(method),Annotations.hasWeaklyLinkedAnnotation(method)));
+    boolean methodWeaklyLinked=Annotations.hasWeaklyLinkedAnnotation(method);
+    boolean methodStronglyLinked=Annotations.hasStronglyLinkedAnnotation(method);
+    methods.add(new MethodInfo(this,method.getModifiers(),method.getName(),Types.getDescriptor(method),Annotations.hasCallbackAnnotation(method),methodWeaklyLinked || (classWeaklyLinked && !methodStronglyLinked),methodStronglyLinked || (classStronglyLinked && !methodWeaklyLinked)));
   }
 }
