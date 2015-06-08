@@ -2,9 +2,11 @@
   VTable vtable=config.getVTableCache().get(sootClass);
   String name=Symbols.vtableSymbol(getInternalName(sootClass));
   for (  VTable.Entry entry : vtable.getEntries()) {
-    FunctionRef fref=entry.getFunctionRef();
-    if (fref != null && !mb.hasSymbol(fref.getName())) {
-      mb.addFunctionDeclaration(new FunctionDeclaration(fref));
+    if (!entry.getDeclaringClass().equals(sootClass.getName())) {
+      FunctionRef fref=entry.getFunctionRef();
+      if (fref != null && !mb.hasSymbol(fref.getName())) {
+        mb.addFunctionDeclaration(new FunctionDeclaration(fref));
+      }
     }
   }
   Global vtableStruct=new Global(name,Linkage._private,vtable.getStruct(),true);
