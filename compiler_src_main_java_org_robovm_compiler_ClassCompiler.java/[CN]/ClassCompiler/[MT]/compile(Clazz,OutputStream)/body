@@ -51,20 +51,6 @@
     }
   }
   ci.initClassInfo();
-  Global classInfoStruct=null;
-  try {
-    if (!sootClass.isInterface()) {
-      config.getVTableCache().get(sootClass);
-    }
-    classInfoStruct=new Global(Symbols.infoStructSymbol(clazz.getInternalName()),Linkage.weak,createClassInfoStruct());
-  }
- catch (  IllegalArgumentException e) {
-    classInfoStruct=new Global(Symbols.infoStructSymbol(clazz.getInternalName()),I8_PTR,true);
-  }
-  mb.addGlobal(classInfoStruct);
-  Function infoFn=FunctionBuilder.infoStruct(sootClass);
-  infoFn.add(new Ret(new ConstantBitcast(classInfoStruct.ref(),I8_PTR_PTR)));
-  mb.addFunction(infoFn);
   for (  SootMethod method : sootClass.getMethods()) {
     for (    CompilerPlugin compilerPlugin : config.getCompilerPlugins()) {
       compilerPlugin.beforeMethod(config,clazz,method,mb);
@@ -148,6 +134,21 @@
       }
     }
   }
+  Global classInfoStruct=null;
+  try {
+    if (!sootClass.isInterface()) {
+      config.getVTableCache().get(sootClass);
+    }
+    classInfoStruct=new Global(Symbols.infoStructSymbol(clazz.getInternalName()),Linkage.weak,createClassInfoStruct());
+  }
+ catch (  IllegalArgumentException e) {
+    classInfoStruct=new Global(Symbols.infoStructSymbol(clazz.getInternalName()),I8_PTR,true);
+  }
+  mb.addGlobal(classInfoStruct);
+  mb.addAlias(new Alias(classInfoStruct.getName() + "_i8ptr",Linkage._private,new ConstantBitcast(classInfoStruct.ref(),I8_PTR)));
+  Function infoFn=FunctionBuilder.infoStruct(sootClass);
+  infoFn.add(new Ret(new ConstantBitcast(classInfoStruct.ref(),I8_PTR_PTR)));
+  mb.addFunction(infoFn);
   for (  CompilerPlugin compilerPlugin : config.getCompilerPlugins()) {
     compilerPlugin.afterClass(config,clazz,mb);
   }
