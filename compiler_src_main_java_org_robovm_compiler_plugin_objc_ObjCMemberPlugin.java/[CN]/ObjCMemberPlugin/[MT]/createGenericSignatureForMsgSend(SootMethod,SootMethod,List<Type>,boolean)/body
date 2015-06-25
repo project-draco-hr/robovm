@@ -1,23 +1,19 @@
 {
   SignatureTag tag=(SignatureTag)annotatedMethod.getTag(SignatureTag.class.getSimpleName());
   if (tag != null) {
-    String signature=null;
-    if (extensions) {
-      SootMethodType type=new SootMethodType(annotatedMethod);
-      StringBuilder sb=new StringBuilder("(");
-      org.robovm.compiler.util.generic.Type[] genericParameterTypes=type.getGenericParameterTypes();
-      sb.append(genericParameterTypes[0].toGenericSignature());
-      sb.append(Types.getDescriptor(org_robovm_objc_Selector.getType()));
-      for (int i=1; i < genericParameterTypes.length; i++) {
-        sb.append(genericParameterTypes[i].toGenericSignature());
-      }
-      sb.append(")");
-      sb.append(type.getGenericReturnType().toGenericSignature());
-      signature=sb.toString();
+    SootMethodType type=new SootMethodType(annotatedMethod);
+    List<String> genericParameterTypes=new ArrayList<>();
+    for (    org.robovm.compiler.util.generic.Type t : type.getGenericParameterTypes()) {
+      genericParameterTypes.add(t.toGenericSignature());
     }
- else {
-      signature="(" + Types.getDescriptor(paramTypes.get(0)) + Types.getDescriptor(paramTypes.get(1))+ tag.getSignature().substring(1);
+    if (!extensions) {
+      genericParameterTypes.add(0,Types.getDescriptor(paramTypes.get(0)));
     }
-    m.addTag(new SignatureTag(signature));
+    genericParameterTypes.add(1,Types.getDescriptor(paramTypes.get(1)));
+    StringBuilder sb=new StringBuilder("(");
+    sb.append(StringUtils.join(genericParameterTypes,""));
+    sb.append(")");
+    sb.append(type.getGenericReturnType().toGenericSignature());
+    m.addTag(new SignatureTag(sb.toString()));
   }
 }
