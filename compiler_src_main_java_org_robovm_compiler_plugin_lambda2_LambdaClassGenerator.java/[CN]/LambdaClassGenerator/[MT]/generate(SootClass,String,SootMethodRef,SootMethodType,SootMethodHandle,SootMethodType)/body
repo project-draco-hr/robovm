@@ -1,0 +1,11 @@
+{
+  ClassWriter cw=new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+  String packageName=caller.getPackageName().replace('.','/');
+  String lambdaClassName=packageName + "/" + caller.getShortName()+ "$$Lambda$"+ (counter++);
+  String functionalInterface=invokedType.returnType().toString().replace('.','/');
+  cw.visit(CLASS_VERSION,ACC_FINAL + ACC_SUPER + ACC_SYNTHETIC,lambdaClassName,null,"java/lang/Object",new String[]{functionalInterface});
+  createConstructor(cw);
+  createForwardingMethod(cw,invokedType,samMethodType,implMethod,instantiatedMethodType);
+  cw.visitEnd();
+  return new LambdaClass(lambdaClassName,cw.toByteArray(),"<init>",new ArrayList<Type>(),invokedType.returnType());
+}

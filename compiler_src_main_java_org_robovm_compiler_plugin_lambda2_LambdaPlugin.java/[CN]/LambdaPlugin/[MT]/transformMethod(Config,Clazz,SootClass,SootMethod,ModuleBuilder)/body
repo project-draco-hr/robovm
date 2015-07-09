@@ -2,7 +2,6 @@
   if (!method.isConcrete()) {
     return;
   }
-  SClass.setLookup(new SootSClassLookup());
   int tmpCounter=0;
   Body body=method.retrieveActiveBody();
   PatchingChain<Unit> units=body.getUnits();
@@ -11,28 +10,30 @@
       if (((DefinitionStmt)unit).getRightOp() instanceof DynamicInvokeExpr) {
         DynamicInvokeExpr expr=(DynamicInvokeExpr)((DefinitionStmt)unit).getRightOp();
         if (isLambdaBootstrapMethod(expr.getBootstrapMethodRef())) {
+          LambdaClassGenerator generator=null;
+synchronized (generators) {
+            generator=generators.get(sootClass);
+            if (generator == null) {
+              generator=new LambdaClassGenerator();
+              generators.put(sootClass,generator);
+            }
+          }
           List<Value> bsmArgs=expr.getBootstrapArgs();
-          SMethodHandles.Lookup caller=new SMethodHandles.Lookup(SootSClass.forType(sootClass.getType()));
+          SootClass caller=sootClass;
           String invokedName=expr.getMethodRef().name();
-          SMethodType invokedType=toSMethodType(expr.getMethodRef());
-          SMethodType samMethodType=toSMethodType((SootMethodType)bsmArgs.get(0));
-          SMethodHandle implMethod=toSMethodHandle((SootMethodHandle)bsmArgs.get(1));
-          SMethodType instantiatedMethodType=toSMethodType((SootMethodType)bsmArgs.get(2));
+          SootMethodRef invokedType=expr.getMethodRef();
+          SootMethodType samMethodType=(SootMethodType)bsmArgs.get(0);
+          SootMethodHandle implMethod=(SootMethodHandle)bsmArgs.get(1);
+          SootMethodType instantiatedMethodType=(SootMethodType)bsmArgs.get(2);
           try {
-            SCallSite callSite=null;
-            if (expr.getBootstrapMethodRef().name().equals("altMetafactory")) {
-              callSite=altMetafactory(caller,invokedName,invokedType,samMethodType,implMethod,instantiatedMethodType,bsmArgs);
-            }
- else {
-              new LambdaClassGenerator().generate(sootClass,expr.getMethodRef().name(),expr.getMethodRef(),(SootMethodType)bsmArgs.get(0),(SootMethodHandle)bsmArgs.get(1),(SootMethodType)bsmArgs.get(2));
-              callSite=LambdaMetafactory.metafactory(caller,invokedName,invokedType,samMethodType,implMethod,instantiatedMethodType);
-            }
+            LambdaClass callSite=null;
+            callSite=generator.generate(caller,invokedName,invokedType,samMethodType,implMethod,instantiatedMethodType);
             File f=clazz.getPath().getGeneratedClassFile(callSite.getLambdaClassName());
             FileUtils.writeByteArrayToFile(f,callSite.getClassData());
             f.setLastModified(clazz.lastModified());
             SootClass lambdaClass=SootResolver.v().makeClassRef(callSite.getLambdaClassName().replace('/','.'));
             Local l=(Local)((DefinitionStmt)unit).getLeftOp();
-            Type samType=toSootType(callSite.getTargetMethodType().returnType());
+            Type samType=callSite.getTargetMethodReturnType();
             LinkedList<Unit> newUnits=new LinkedList<>();
             if (callSite.getTargetMethodName().equals("<init>")) {
               String fieldName=lambdaClass.getName().substring(lambdaClass.getName().lastIndexOf('.') + 1);
@@ -43,18 +44,17 @@
               Local tmp=Jimple.v().newLocal("$tmp" + (tmpCounter++),lambdaClass.getType());
               body.getLocals().add(tmp);
               newUnits.add(Jimple.v().newAssignStmt(tmp,Jimple.v().newNewExpr(lambdaClass.getType())));
-              newUnits.add(Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(tmp,Scene.v().makeConstructorRef(lambdaClass,Collections.<soot.Type>emptyList()))));
+              newUnits.add(Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(tmp,Scene.v().makeConstructorRef(lambdaClass,Collections.<Type>emptyList()))));
               newUnits.add(Jimple.v().newAssignStmt(Jimple.v().newStaticFieldRef(field.makeRef()),tmp));
               newUnits.add(Jimple.v().newAssignStmt(l,tmp));
             }
  else {
-              newUnits.add(Jimple.v().newAssignStmt(l,Jimple.v().newStaticInvokeExpr(Scene.v().makeMethodRef(lambdaClass,callSite.getTargetMethodName(),toSootTypes(callSite.getTargetMethodType().parameterList()),samType,true),expr.getArgs())));
             }
             units.insertAfter(newUnits,unit);
             units.remove(unit);
             unit=newUnits.getLast();
           }
- catch (          LambdaConversionException e) {
+ catch (          Throwable e) {
             throw new CompilerException(e);
           }
         }
