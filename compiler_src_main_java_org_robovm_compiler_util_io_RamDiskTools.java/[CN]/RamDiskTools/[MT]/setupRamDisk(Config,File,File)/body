@@ -1,4 +1,6 @@
 {
+  this.newCacheDir=cacheDir;
+  this.newTmpDir=tmpDir;
   if (OS.getDefaultOS() != OS.macosx) {
     return;
   }
@@ -18,8 +20,6 @@
     }
     return;
   }
-  File cacheDir=config.getCacheDir();
-  File tmpDir=config.getTmpDir();
   try {
     FileStore store=Files.getFileStore(volume.toPath());
     if (store.getUsableSpace() < MIN_FREE_SPACE) {
@@ -41,12 +41,12 @@
     }
     newTmpDir=new File(newTmpDir,tmpDir.getAbsolutePath());
     config.getLogger().debug("Using RAM disk at %s for cache and tmp directory",ROBOVM_RAM_DISK_PATH);
-    builder.cacheDir(newCacheDir);
-    builder.tmpDir(newTmpDir);
+    this.newCacheDir=newCacheDir;
+    this.newTmpDir=newTmpDir;
   }
  catch (  Throwable t) {
     config.getLogger().error("Couldn't setup RAM disk, using hard drive, %s",t.getMessage());
-    builder.cacheDir(cacheDir);
-    builder.tmpDir(tmpDir);
+    this.newCacheDir=cacheDir;
+    this.newTmpDir=tmpDir;
   }
 }
