@@ -10,19 +10,7 @@
     }
  else {
       copyProvisioningProfile(provisioningProfile,appDir);
-      File frameworksDir=new File(appDir,"Frameworks");
-      if (frameworksDir.exists() && frameworksDir.isDirectory()) {
-        for (        File swiftLib : frameworksDir.listFiles()) {
-          if (swiftLib.getName().endsWith(".dylib")) {
-            codesign(signIdentity,getOrCreateEntitlementsPList(true),swiftLib);
-          }
-        }
-        for (        File framework : frameworksDir.listFiles()) {
-          if (framework.isDirectory() && framework.getName().endsWith(".framework")) {
-            codesign(signIdentity,getOrCreateEntitlementsPList(true),framework);
-          }
-        }
-      }
+      signFrameworks(appDir,true);
       codesign(signIdentity,getOrCreateEntitlementsPList(true),appDir);
     }
   }
