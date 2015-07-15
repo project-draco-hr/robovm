@@ -2,6 +2,14 @@
   if (errorMessage != null) {
     System.err.format("robovm: %s\n",errorMessage);
   }
+  List<String> targets=new ArrayList<>();
+  targets.add(ConsoleTarget.TYPE);
+  targets.add(IOSTarget.TYPE);
+  for (  Plugin plugin : plugins) {
+    if (plugin instanceof TargetPlugin) {
+      targets.add(((TargetPlugin)plugin).getTarget().getType());
+    }
+  }
   System.err.println("Usage: robovm [-options] class [run-args]");
   System.err.println("   or  robovm [-options] -jar jarfile [run-args]");
   System.err.println("Options:");
@@ -21,7 +29,7 @@
   System.err.println("  -os <name>            The name of the OS to build for. Allowed values are \n" + "                        'auto', 'linux', 'macosx' and 'ios'. Default is 'auto' which\n" + "                        means use the LLVM deafult.");
   System.err.println("  -arch <name>          The name of the LLVM arch to compile for. Allowed values\n" + "                        are 'auto', 'x86', 'x86_64', 'thumbv7', 'arm64'. Default is\n" + "                        'auto' which means use the LLVM default.");
   System.err.println("  -cpu <name>           The name of the LLVM cpu to compile for. The LLVM default\n" + "                        is used if not specified. Use llc to determine allowed values.");
-  System.err.println("  -target <name>        The target to build for. Either 'auto', 'console' or 'ios'.\n" + "                        The default is 'auto' which means use -os to decide.");
+  System.err.println("  -target <name>        The target to build for. One of:\n" + "                          'auto', '" + StringUtils.join(targets,"', '") + "'\n"+ "                        The default is 'auto' which means use -os to decide.");
   System.err.println("  -forcelinkclasses <list>\n" + "                        : separated list of class patterns matching\n" + "                        classes that must be linked in even if not referenced\n"+ "                        (directly or indirectly) from the main class. If no main\n"+ "                        class is specified all classes will be linked in unless this\n"+ "                        option has been given. A pattern is an ANT style path pattern,\n"+ "                        e.g. com.foo.**.bar.*.Main. An alternative syntax using # is\n"+ "                        also supported, e.g. com.##.#.Main.");
   System.err.println("  -treeshaker <mode>    The tree shaking algorithm to use. 'none', 'conservative' or\n" + "                        'aggressive'. 'aggressive' will remove all unreachable method\n" + "                        implementations when it's safe to do so. 'conservative' only\n"+ "                        removes unreachable methods marked as @WeaklyLinked. Methods\n"+ "                        in the main class and in force linked classes will never be\n"+ "                        stripped. Default is 'none'.");
   System.err.println("  -threads <n>          The number of threads to use during class compilation. By\n" + "                        default the number returned by Runtime.availableProcessors()\n" + "                        will be used (" + Runtime.getRuntime().availableProcessors() + " on this host).");
