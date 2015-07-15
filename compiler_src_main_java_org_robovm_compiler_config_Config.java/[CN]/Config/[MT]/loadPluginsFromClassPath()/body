@@ -1,26 +1,9 @@
 {
-  try (InputStream in=getClass().getResourceAsStream("/META-INF/robovm/plugins.properties")){
-    if (in != null) {
-      Properties p=new Properties();
-      p.load(in);
-      String value;
-      for (int i=1; (value=p.getProperty("compiler.plugin." + i)) != null; i++) {
-        Class<CompilerPlugin> c=(Class<CompilerPlugin>)getClass().getClassLoader().loadClass(value);
-        plugins.add(c.newInstance());
-      }
-      for (int i=1; (value=p.getProperty("launch.plugin." + i)) != null; i++) {
-        Class<LaunchPlugin> c=(Class<LaunchPlugin>)getClass().getClassLoader().loadClass(value);
-        plugins.add(c.newInstance());
-      }
-    }
-  }
- catch (  ClassNotFoundException e) {
-    throw new CompilerException(e);
-  }
-catch (  InstantiationException e) {
-    throw new CompilerException(e);
-  }
-catch (  IllegalAccessException e) {
-    throw new CompilerException(e);
-  }
+  ClassLoader classLoader=getClass().getClassLoader();
+  ServiceLoader<CompilerPlugin> compilerPluginLoader=ServiceLoader.load(CompilerPlugin.class,classLoader);
+  ServiceLoader<LaunchPlugin> launchPluginLoader=ServiceLoader.load(LaunchPlugin.class,classLoader);
+  ServiceLoader<TargetPlugin> targetPluginLoader=ServiceLoader.load(TargetPlugin.class,classLoader);
+  plugins.addAll(toList(compilerPluginLoader.iterator()));
+  plugins.addAll(toList(launchPluginLoader.iterator()));
+  plugins.addAll(toList(targetPluginLoader.iterator()));
 }

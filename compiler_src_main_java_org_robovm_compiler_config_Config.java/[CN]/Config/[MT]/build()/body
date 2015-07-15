@@ -13,6 +13,9 @@
     mainClass=getMainClass(mainJar);
     classpath.add(mainJar);
   }
+  if (executableName == null && imageName != null) {
+    executableName=imageName;
+  }
   if (!skipLinking && executableName == null && mainClass == null) {
     throw new IllegalArgumentException("No target and no main class specified");
   }
@@ -24,6 +27,9 @@
   }
   if (executableName == null) {
     executableName=mainClass;
+  }
+  if (imageName == null || !imageName.equals(executableName)) {
+    imageName=executableName;
   }
   List<File> realBootclasspath=bootclasspath == null ? new ArrayList<File>() : bootclasspath;
   if (!isSkipRuntimeLib()) {
@@ -39,11 +45,24 @@
     }
     installDir.mkdirs();
   }
-  if (ConsoleTarget.TYPE.equals(targetType)) {
-    target=new ConsoleTarget();
-  }
- else   if (IOSTarget.TYPE.equals(targetType)) {
-    target=new IOSTarget();
+  if (targetType != null) {
+    if (ConsoleTarget.TYPE.equals(targetType)) {
+      target=new ConsoleTarget();
+    }
+ else     if (IOSTarget.TYPE.equals(targetType)) {
+      target=new IOSTarget();
+    }
+ else {
+      for (      TargetPlugin plugin : getTargetPlugins()) {
+        if (plugin.getTarget().getType().equals(targetType)) {
+          target=plugin.getTarget();
+          break;
+        }
+      }
+      if (target == null) {
+        throw new IllegalArgumentException("Unsupported target '" + targetType + "'");
+      }
+    }
   }
  else {
     if (os == OS.ios) {
