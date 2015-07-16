@@ -1,8 +1,10 @@
 {
   File outFile=new File(config.getTmpDir(),config.getExecutableName());
-  config.getLogger().debug("Building executable %s",outFile);
+  config.getLogger().debug("Building %s binary %s",config.getTarget().getType(),outFile);
   LinkedList<String> ccArgs=new LinkedList<String>();
   LinkedList<String> libs=new LinkedList<String>();
+  ccArgs.addAll(getTargetCcArgs());
+  libs.addAll(getTargetLibs());
   String libSuffix=config.isUseDebugLibs() ? "-dbg" : "";
   libs.add("-lrobovm-bc" + libSuffix);
   if (config.getOs().getFamily() == OS.Family.darwin) {
@@ -34,6 +36,7 @@
  else   if (config.getOs().getFamily() == OS.Family.darwin) {
     ccArgs.add("-ObjC");
     List<String> exportedSymbols=new ArrayList<String>();
+    exportedSymbols.addAll(getTargetExportedSymbols());
     if (config.isSkipInstall()) {
       exportedSymbols.add("catch_exception_raise");
     }
