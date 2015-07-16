@@ -1,0 +1,23 @@
+{
+  List<Object> args=new ArrayList<Object>();
+  args.add("-f");
+  args.add("-s");
+  args.add(identity.getFingerprint());
+  if (entitlementsPList != null) {
+    args.add("--entitlements");
+    args.add(entitlementsPList);
+  }
+  if (preserveMetadata) {
+    args.add("--preserve-metadata=identifier,entitlements,resource-rules");
+  }
+  if (verbose) {
+    args.add("--verbose");
+  }
+  args.add(target);
+  Executor executor=new Executor(config.getLogger(),"codesign");
+  if (allocate) {
+    executor.addEnv("CODESIGN_ALLOCATE",ToolchainUtil.findXcodeCommand("codesign_allocate","iphoneos"));
+  }
+  executor.args(args);
+  executor.exec();
+}
