@@ -1,10 +1,6 @@
 {
   ClassWriter cw=new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-  String packageName=caller.getPackageName().replace('.','/');
-  if (!packageName.isEmpty()) {
-    packageName+="/";
-  }
-  String lambdaClassName=packageName + caller.getShortName() + "$$Lambda$"+ (counter++);
+  String lambdaClassName=caller.getName().replace('.','/') + "$$Lambda$" + (counter++);
   String functionalInterface=invokedType.returnType().toString().replace('.','/');
   cw.visit(CLASS_VERSION,ACC_FINAL + ACC_SUPER + ACC_SYNTHETIC,lambdaClassName,null,"java/lang/Object",new String[]{functionalInterface});
   createConstructor(cw);
