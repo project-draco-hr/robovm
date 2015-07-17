@@ -1,0 +1,35 @@
+{
+  String descriptor=Types.getDescriptor(samMethodType.getParameterTypes(),samMethodType.getReturnType());
+  String implClassName=implMethod.getMethodRef().declaringClass().getName().replace('.','/');
+  MethodVisitor mv=cw.visitMethod(ACC_PUBLIC,invokedType.name(),descriptor,null,null);
+  mv.visitCode();
+  pushArguments(lambdaClassName,mv,invokedType,samMethodType,implMethod,instantiatedMethodType);
+  int invokeOpCode=INVOKESTATIC;
+switch (implMethod.getReferenceKind()) {
+case SootMethodHandle.REF_invokeInterface:
+    invokeOpCode=INVOKEINTERFACE;
+  break;
+case SootMethodHandle.REF_invokeSpecial:
+case SootMethodHandle.REF_newInvokeSpecial:
+invokeOpCode=INVOKESPECIAL;
+break;
+case SootMethodHandle.REF_invokeStatic:
+invokeOpCode=INVOKESTATIC;
+break;
+case SootMethodHandle.REF_invokeVirtual:
+invokeOpCode=INVOKEVIRTUAL;
+break;
+default :
+throw new CompilerException("Unknown invoke type: " + implMethod.getReferenceKind());
+}
+String implDescriptor=null;
+List<Type> paramTypes=new ArrayList<Type>(implMethod.getMethodType().getParameterTypes());
+if (invokeOpCode != INVOKESTATIC && !paramTypes.isEmpty()) {
+paramTypes.remove(0);
+}
+implDescriptor=Types.getDescriptor(paramTypes,implMethod.getMethodType().getReturnType());
+mv.visitMethodInsn(invokeOpCode,implClassName,implMethod.getMethodRef().name(),implDescriptor,false);
+createForwardingMethodReturn(mv,samMethodType,implMethod,instantiatedMethodType);
+mv.visitMaxs(-1,-1);
+mv.visitEnd();
+}
