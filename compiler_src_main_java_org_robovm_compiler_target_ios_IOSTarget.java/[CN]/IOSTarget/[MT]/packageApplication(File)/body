@@ -1,0 +1,24 @@
+{
+  File ipaFile=new File(config.getInstallDir(),getExecutable() + ".ipa");
+  config.getLogger().debug("Packaging IPA %s from %s",ipaFile.getName(),appDir.getName());
+  File tmpDir=new File(config.getInstallDir(),"ipabuild");
+  FileUtils.deleteDirectory(tmpDir);
+  tmpDir.mkdirs();
+  File payloadDir=new File(tmpDir,"Payload");
+  payloadDir.mkdir();
+  config.getLogger().debug("Copying %s to %s",appDir.getName(),payloadDir);
+  new Executor(config.getLogger(),"cp").args("-Rp",appDir,payloadDir).exec();
+  File frameworksDir=new File(appDir,"Frameworks");
+  if (frameworksDir.exists()) {
+    String[] swiftLibs=frameworksDir.list(new AndFileFilter(new PrefixFileFilter("libswift"),new SuffixFileFilter(".dylib")));
+    if (swiftLibs.length > 0) {
+      File swiftSupportDir=new File(tmpDir,"SwiftSupport");
+      swiftSupportDir.mkdir();
+      copySwiftLibs(Arrays.asList(swiftLibs),swiftSupportDir);
+    }
+  }
+  config.getLogger().debug("Zipping %s to %s",tmpDir,ipaFile);
+  new Executor(Logger.NULL_LOGGER,"zip").wd(tmpDir).args("--symlinks","--recurse-paths",ipaFile,".").exec();
+  config.getLogger().debug("Deleting temp dir %s",tmpDir);
+  FileUtils.deleteDirectory(tmpDir);
+}
