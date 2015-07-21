@@ -27,7 +27,25 @@ synchronized (generators) {
           SootMethodType instantiatedMethodType=(SootMethodType)bsmArgs.get(2);
           try {
             LambdaClass callSite=null;
-            callSite=generator.generate(caller,invokedName,invokedType,samMethodType,implMethod,instantiatedMethodType);
+            List<Type> markerInterfaces=new ArrayList<>();
+            List<SootMethodType> bridgeMethods=new ArrayList<>();
+            if (expr.getBootstrapMethodRef().name().equals("altMetafactory")) {
+              int flags=((IntConstant)bsmArgs.get(3)).value;
+              int bsmArgsIdx=4;
+              if ((flags & FLAG_MARKERS) > 0) {
+                int count=((IntConstant)bsmArgs.get(bsmArgsIdx++)).value;
+                for (int i=0; i < count; i++) {
+                  markerInterfaces.add((Type)bsmArgs.get(bsmArgsIdx++));
+                }
+              }
+              if ((flags & FLAG_BRIDGES) > 0) {
+                int count=((IntConstant)bsmArgs.get(bsmArgsIdx++)).value;
+                for (int i=0; i < count; i++) {
+                  bridgeMethods.add((SootMethodType)bsmArgs.get(bsmArgsIdx++));
+                }
+              }
+            }
+            callSite=generator.generate(caller,invokedName,invokedType,samMethodType,implMethod,instantiatedMethodType,markerInterfaces,bridgeMethods);
             File f=clazz.getPath().getGeneratedClassFile(callSite.getLambdaClassName());
             FileUtils.writeByteArrayToFile(f,callSite.getClassData());
             f.setLastModified(clazz.lastModified());

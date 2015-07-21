@@ -1,9 +1,9 @@
 {
-  String descriptor=Types.getDescriptor(samMethodType.getParameterTypes(),samMethodType.getReturnType());
+  String descriptor=Types.getDescriptor(parameters,returnType);
   String implClassName=implMethod.getMethodRef().declaringClass().getName().replace('.','/');
-  MethodVisitor mv=cw.visitMethod(ACC_PUBLIC,invokedType.name(),descriptor,null,null);
+  MethodVisitor mv=cw.visitMethod(ACC_PUBLIC | (isBridgeMethod ? ACC_BRIDGE : 0),name,descriptor,null,null);
   mv.visitCode();
-  pushArguments(lambdaClassName,mv,invokedType,samMethodType,implMethod,instantiatedMethodType);
+  pushArguments(lambdaClassName,mv,parameters,invokedParameters,implMethod,instantiatedMethodType);
   int invokeOpCode=INVOKESTATIC;
 switch (implMethod.getReferenceKind()) {
 case SootMethodHandle.REF_invokeInterface:
@@ -29,7 +29,7 @@ paramTypes.remove(0);
 }
 implDescriptor=Types.getDescriptor(paramTypes,implMethod.getMethodType().getReturnType());
 mv.visitMethodInsn(invokeOpCode,implClassName,implMethod.getMethodRef().name(),implDescriptor,false);
-createForwardingMethodReturn(mv,samMethodType,implMethod,instantiatedMethodType);
+createForwardingMethodReturn(mv,returnType,samMethodType,implMethod,instantiatedMethodType);
 mv.visitMaxs(-1,-1);
 mv.visitEnd();
 }
