@@ -1,0 +1,24 @@
+{
+  if (actual.equals(expected)) {
+    return;
+  }
+  if (actual.equals(VoidType.v()) || expected.equals(VoidType.v())) {
+    return;
+  }
+  System.out.println("Need to convert " + actual + " to "+ expected);
+  if ((isPrimitiveType(actual) || isBoxedType(actual)) && ((isPrimitiveType(expected) || isBoxedType(expected)))) {
+    System.out.println("Prim");
+    org.objectweb.asm.Type actualAsmType=getAsmPrimitiveType(actual);
+    org.objectweb.asm.Type expectedAsmType=getAsmPrimitiveType(expected);
+    if (isBoxedType(actual)) {
+      caster.unbox(actualAsmType);
+    }
+    caster.cast(actualAsmType,expectedAsmType);
+    if (isBoxedType(expected)) {
+      caster.box(expectedAsmType);
+    }
+  }
+ else {
+    mv.visitTypeInsn(Opcodes.CHECKCAST,((RefType)expected).getClassName().replace('.','/'));
+  }
+}
