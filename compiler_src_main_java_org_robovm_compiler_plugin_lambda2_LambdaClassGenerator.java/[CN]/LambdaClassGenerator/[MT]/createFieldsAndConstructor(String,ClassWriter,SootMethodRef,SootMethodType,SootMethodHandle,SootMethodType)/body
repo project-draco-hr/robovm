@@ -4,7 +4,7 @@
   for (  Object obj : invokedType.parameterTypes()) {
     Type captureType=(Type)obj;
     String typeDesc=Types.getDescriptor(captureType);
-    cw.visitField(ACC_PRIVATE + ACC_FINAL,"field" + i,typeDesc,null,null);
+    cw.visitField(ACC_PRIVATE + ACC_FINAL,"arg$" + (i + 1),typeDesc,null,null);
     constructorDescriptor.append(typeDesc);
     i++;
   }
@@ -19,7 +19,7 @@
     mv.visitVarInsn(ALOAD,0);
     mv.visitVarInsn(loadOpcodeForType(captureType),localIndex);
     localIndex+=slotsForType(captureType);
-    mv.visitFieldInsn(PUTFIELD,lambdaClassName,"field" + i,Types.getDescriptor(captureType));
+    mv.visitFieldInsn(PUTFIELD,lambdaClassName,"arg$" + (i + 1),Types.getDescriptor(captureType));
     i++;
   }
   mv.visitInsn(RETURN);

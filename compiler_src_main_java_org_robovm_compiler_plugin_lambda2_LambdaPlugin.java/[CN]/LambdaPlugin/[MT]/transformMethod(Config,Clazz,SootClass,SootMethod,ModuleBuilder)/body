@@ -35,7 +35,14 @@ synchronized (generators) {
               if ((flags & FLAG_MARKERS) > 0) {
                 int count=((IntConstant)bsmArgs.get(bsmArgsIdx++)).value;
                 for (int i=0; i < count; i++) {
-                  markerInterfaces.add((Type)bsmArgs.get(bsmArgsIdx++));
+                  Object value=bsmArgs.get(bsmArgsIdx++);
+                  if (value instanceof Type) {
+                    markerInterfaces.add((Type)value);
+                  }
+ else                   if (value instanceof ClassConstant) {
+                    String className=((ClassConstant)value).getValue().replace('/','.');
+                    markerInterfaces.add(SootResolver.v().resolveClass(className,SootClass.HIERARCHY).getType());
+                  }
                 }
               }
               if ((flags & FLAG_BRIDGES) > 0) {
@@ -49,6 +56,7 @@ synchronized (generators) {
             File f=clazz.getPath().getGeneratedClassFile(callSite.getLambdaClassName());
             FileUtils.writeByteArrayToFile(f,callSite.getClassData());
             f.setLastModified(clazz.lastModified());
+            System.out.println("Created lambda " + callSite.getLambdaClassName() + " at line "+ unit.getTag("LineNumberTag"));
             SootClass lambdaClass=SootResolver.v().makeClassRef(callSite.getLambdaClassName().replace('/','.'));
             Local l=(Local)((DefinitionStmt)unit).getLeftOp();
             Type samType=callSite.getTargetMethodReturnType();
