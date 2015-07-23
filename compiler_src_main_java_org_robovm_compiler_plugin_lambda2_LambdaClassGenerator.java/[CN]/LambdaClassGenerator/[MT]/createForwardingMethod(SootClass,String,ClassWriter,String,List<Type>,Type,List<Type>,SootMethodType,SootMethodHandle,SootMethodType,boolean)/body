@@ -1,0 +1,41 @@
+{
+  String descriptor=Types.getDescriptor(parameters,returnType);
+  String implClassName=implMethod.getMethodRef().declaringClass().getName().replace('.','/');
+  int accessFlags=ACC_PUBLIC | (isBridgeMethod ? ACC_BRIDGE : 0);
+  MethodVisitor mv=cw.visitMethod(accessFlags,name,descriptor,null,null);
+  mv.visitCode();
+  int invokeOpCode=INVOKESTATIC;
+  boolean isInstanceMethod=false;
+switch (implMethod.getReferenceKind()) {
+case SootMethodHandle.REF_invokeInterface:
+    invokeOpCode=INVOKEINTERFACE;
+  isInstanceMethod=true;
+break;
+case SootMethodHandle.REF_invokeSpecial:
+invokeOpCode=INVOKESPECIAL;
+isInstanceMethod=true;
+break;
+case SootMethodHandle.REF_newInvokeSpecial:
+invokeOpCode=INVOKESPECIAL;
+break;
+case SootMethodHandle.REF_invokeStatic:
+invokeOpCode=INVOKESTATIC;
+break;
+case SootMethodHandle.REF_invokeVirtual:
+invokeOpCode=INVOKEVIRTUAL;
+isInstanceMethod=true;
+break;
+default :
+throw new CompilerException("Unknown invoke type: " + implMethod.getReferenceKind());
+}
+GeneratorAdapter caster=new GeneratorAdapter(mv,accessFlags,name,descriptor);
+pushArguments(caller,lambdaClassName,mv,caster,parameters,invokedParameters,implMethod,instantiatedMethodType,isInstanceMethod);
+String implDescriptor=null;
+List<Type> paramTypes=new ArrayList<Type>(implMethod.getMethodType().getParameterTypes());
+if (isInstanceMethod) paramTypes.remove(0);
+implDescriptor=Types.getDescriptor(paramTypes,implMethod.getMethodType().getReturnType());
+mv.visitMethodInsn(invokeOpCode,implClassName,implMethod.getMethodRef().name(),implDescriptor,invokeOpCode == INVOKEINTERFACE);
+createForwardingMethodReturn(mv,caster,returnType,samMethodType,implMethod,instantiatedMethodType);
+mv.visitMaxs(-1,-1);
+mv.visitEnd();
+}

@@ -1,0 +1,28 @@
+{
+  StringBuffer constructorDescriptor=new StringBuffer();
+  int i=0;
+  for (  Object obj : invokedType.parameterTypes()) {
+    Type captureType=(Type)obj;
+    String typeDesc=Types.getDescriptor(captureType);
+    cw.visitField(ACC_PRIVATE + ACC_FINAL,"arg$" + (i + 1),typeDesc,null,null);
+    constructorDescriptor.append(typeDesc);
+    i++;
+  }
+  MethodVisitor mv=cw.visitMethod(0,"<init>","(" + constructorDescriptor.toString() + ")V",null,null);
+  mv.visitCode();
+  mv.visitVarInsn(ALOAD,0);
+  mv.visitMethodInsn(INVOKESPECIAL,"java/lang/Object","<init>","()V",false);
+  i=0;
+  int localIndex=1;
+  for (  Object obj : invokedType.parameterTypes()) {
+    Type captureType=(Type)obj;
+    mv.visitVarInsn(ALOAD,0);
+    mv.visitVarInsn(loadOpcodeForType(captureType),localIndex);
+    localIndex+=slotsForType(captureType);
+    mv.visitFieldInsn(PUTFIELD,lambdaClassName,"arg$" + (i + 1),Types.getDescriptor(captureType));
+    i++;
+  }
+  mv.visitInsn(RETURN);
+  mv.visitMaxs(-1,-1);
+  mv.visitEnd();
+}

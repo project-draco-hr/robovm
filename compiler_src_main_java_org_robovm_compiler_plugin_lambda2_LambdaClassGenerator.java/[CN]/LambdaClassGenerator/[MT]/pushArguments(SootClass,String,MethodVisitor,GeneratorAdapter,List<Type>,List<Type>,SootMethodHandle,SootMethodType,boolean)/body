@@ -1,0 +1,28 @@
+{
+  if (implMethod.getReferenceKind() == SootMethodHandle.REF_newInvokeSpecial) {
+    mv.visitTypeInsn(NEW,implMethod.getMethodRef().declaringClass().getName().replace('.','/'));
+    mv.visitInsn(DUP);
+  }
+  for (int i=0; i < invokedParameters.size(); i++) {
+    Object obj=invokedParameters.get(i);
+    Type captureType=(Type)obj;
+    mv.visitVarInsn(ALOAD,0);
+    mv.visitFieldInsn(GETFIELD,lambdaClassName,"arg$" + (i + 1),Types.getDescriptor(captureType));
+  }
+  boolean paramsContainReceiver=isInstanceMethod & !caller.getName().equals(implMethod.getMethodRef().declaringClass().getName());
+  int paramsIndex=0;
+  int localIndex=1;
+  if (paramsContainReceiver && !parameters.isEmpty()) {
+    Type param=parameters.get(0);
+    mv.visitVarInsn(loadOpcodeForType(param),localIndex);
+    localIndex+=slotsForType(param);
+    paramsIndex++;
+  }
+  int samParamsOffset=implMethod.getMethodRef().parameterTypes().size() - parameters.size() + (paramsContainReceiver ? 1 : 0);
+  for (int i=0; paramsIndex < parameters.size(); paramsIndex++, i++) {
+    Type param=parameters.get(paramsIndex);
+    mv.visitVarInsn(loadOpcodeForType(param),localIndex);
+    castOrWiden(mv,caster,param,(Type)implMethod.getMethodRef().parameterTypes().get(samParamsOffset + i));
+    localIndex+=slotsForType(param);
+  }
+}

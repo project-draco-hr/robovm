@@ -1,0 +1,17 @@
+{
+  MethodVisitor mv=cw.visitMethod(ACC_STATIC,"get$Lambda",Types.getDescriptor(invokedType.parameterTypes(),invokedType.returnType()),null,null);
+  mv.visitCode();
+  mv.visitTypeInsn(NEW,lambdaClassName);
+  mv.visitInsn(DUP);
+  int i=0;
+  for (  Object obj : invokedType.parameterTypes()) {
+    Type captureType=(Type)obj;
+    mv.visitVarInsn(loadOpcodeForType(captureType),i);
+    i+=slotsForType(captureType);
+  }
+  mv.visitMethodInsn(INVOKESPECIAL,lambdaClassName,"<init>",Types.getDescriptor(invokedType.parameterTypes(),VoidType.v()),false);
+  mv.visitInsn(ARETURN);
+  mv.visitMaxs(-1,-1);
+  mv.visitEnd();
+  return "get$Lambda";
+}

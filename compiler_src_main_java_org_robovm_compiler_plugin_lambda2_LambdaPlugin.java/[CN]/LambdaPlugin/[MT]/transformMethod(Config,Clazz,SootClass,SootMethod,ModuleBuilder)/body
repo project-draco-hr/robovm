@@ -1,0 +1,90 @@
+{
+  if (!method.isConcrete()) {
+    return;
+  }
+  int tmpCounter=0;
+  Body body=method.retrieveActiveBody();
+  PatchingChain<Unit> units=body.getUnits();
+  for (Unit unit=units.getFirst(); unit != null; unit=body.getUnits().getSuccOf(unit)) {
+    if (unit instanceof DefinitionStmt) {
+      if (((DefinitionStmt)unit).getRightOp() instanceof DynamicInvokeExpr) {
+        DynamicInvokeExpr expr=(DynamicInvokeExpr)((DefinitionStmt)unit).getRightOp();
+        if (isLambdaBootstrapMethod(expr.getBootstrapMethodRef())) {
+          LambdaClassGenerator generator=null;
+synchronized (generators) {
+            generator=generators.get(sootClass);
+            if (generator == null) {
+              generator=new LambdaClassGenerator();
+              generators.put(sootClass,generator);
+            }
+          }
+          List<Value> bsmArgs=expr.getBootstrapArgs();
+          SootClass caller=sootClass;
+          String invokedName=expr.getMethodRef().name();
+          SootMethodRef invokedType=expr.getMethodRef();
+          SootMethodType samMethodType=(SootMethodType)bsmArgs.get(0);
+          SootMethodHandle implMethod=(SootMethodHandle)bsmArgs.get(1);
+          SootMethodType instantiatedMethodType=(SootMethodType)bsmArgs.get(2);
+          try {
+            LambdaClass callSite=null;
+            List<Type> markerInterfaces=new ArrayList<>();
+            List<SootMethodType> bridgeMethods=new ArrayList<>();
+            if (expr.getBootstrapMethodRef().name().equals("altMetafactory")) {
+              int flags=((IntConstant)bsmArgs.get(3)).value;
+              int bsmArgsIdx=4;
+              if ((flags & FLAG_MARKERS) > 0) {
+                int count=((IntConstant)bsmArgs.get(bsmArgsIdx++)).value;
+                for (int i=0; i < count; i++) {
+                  Object value=bsmArgs.get(bsmArgsIdx++);
+                  if (value instanceof Type) {
+                    markerInterfaces.add((Type)value);
+                  }
+ else                   if (value instanceof ClassConstant) {
+                    String className=((ClassConstant)value).getValue().replace('/','.');
+                    markerInterfaces.add(SootResolver.v().resolveClass(className,SootClass.HIERARCHY).getType());
+                  }
+                }
+              }
+              if ((flags & FLAG_BRIDGES) > 0) {
+                int count=((IntConstant)bsmArgs.get(bsmArgsIdx++)).value;
+                for (int i=0; i < count; i++) {
+                  bridgeMethods.add((SootMethodType)bsmArgs.get(bsmArgsIdx++));
+                }
+              }
+            }
+            callSite=generator.generate(caller,invokedName,invokedType,samMethodType,implMethod,instantiatedMethodType,markerInterfaces,bridgeMethods);
+            File f=clazz.getPath().getGeneratedClassFile(callSite.getLambdaClassName());
+            FileUtils.writeByteArrayToFile(f,callSite.getClassData());
+            f.setLastModified(clazz.lastModified());
+            SootClass lambdaClass=SootResolver.v().makeClassRef(callSite.getLambdaClassName().replace('/','.'));
+            Local l=(Local)((DefinitionStmt)unit).getLeftOp();
+            Type samType=callSite.getTargetMethodReturnType();
+            LinkedList<Unit> newUnits=new LinkedList<>();
+            if (callSite.getTargetMethodName().equals("<init>")) {
+              String fieldName=lambdaClass.getName().substring(lambdaClass.getName().lastIndexOf('.') + 1);
+              SootField field=new SootField(fieldName,lambdaClass.getType(),Modifier.STATIC | Modifier.PRIVATE | Modifier.TRANSIENT| 0x1000);
+              method.getDeclaringClass().addField(field);
+              newUnits.add(Jimple.v().newAssignStmt(l,Jimple.v().newStaticFieldRef(field.makeRef())));
+              newUnits.add(Jimple.v().newIfStmt(Jimple.v().newNeExpr(l,NullConstant.v()),units.getSuccOf(unit)));
+              Local tmp=Jimple.v().newLocal("$tmp" + (tmpCounter++),lambdaClass.getType());
+              body.getLocals().add(tmp);
+              newUnits.add(Jimple.v().newAssignStmt(tmp,Jimple.v().newNewExpr(lambdaClass.getType())));
+              newUnits.add(Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(tmp,Scene.v().makeConstructorRef(lambdaClass,Collections.<Type>emptyList()))));
+              newUnits.add(Jimple.v().newAssignStmt(Jimple.v().newStaticFieldRef(field.makeRef()),tmp));
+              newUnits.add(Jimple.v().newAssignStmt(l,tmp));
+            }
+ else {
+              newUnits.add(Jimple.v().newAssignStmt(l,Jimple.v().newStaticInvokeExpr(Scene.v().makeMethodRef(lambdaClass,callSite.getTargetMethodName(),callSite.getTargetMethodParameters(),samType,true),expr.getArgs())));
+            }
+            units.insertAfter(newUnits,unit);
+            units.remove(unit);
+            unit=newUnits.getLast();
+          }
+ catch (          Throwable e) {
+            throw new CompilerException(e);
+          }
+        }
+      }
+    }
+  }
+}

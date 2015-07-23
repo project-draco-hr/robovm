@@ -1,0 +1,22 @@
+{
+  ClassWriter cw=new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+  String lambdaClassName=caller.getName().replace('.','/') + "$$Lambda$" + (counter++);
+  String functionalInterface=invokedType.returnType().toString().replace('.','/');
+  List<String> interfaces=new ArrayList<String>();
+  interfaces.add(functionalInterface);
+  for (  Type markerInterface : markerInterfaces) {
+    interfaces.add(markerInterface.toString().replace('.','/'));
+  }
+  cw.visit(CLASS_VERSION,ACC_FINAL + ACC_SUPER + ACC_SYNTHETIC,lambdaClassName,null,"java/lang/Object",interfaces.toArray(new String[interfaces.size()]));
+  String targetMethod="<init>";
+  createFieldsAndConstructor(lambdaClassName,cw,invokedType,samMethodType,implMethod,instantiatedMethodType);
+  if (!invokedType.parameterTypes().isEmpty()) {
+    targetMethod=createFactory(lambdaClassName,cw,invokedType,samMethodType,implMethod,instantiatedMethodType);
+  }
+  createForwardingMethod(caller,lambdaClassName,cw,invokedName,samMethodType.getParameterTypes(),samMethodType.getReturnType(),invokedType.parameterTypes(),samMethodType,implMethod,instantiatedMethodType,false);
+  for (  SootMethodType bridgeMethod : bridgeMethods) {
+    createForwardingMethod(caller,lambdaClassName,cw,invokedName,bridgeMethod.getParameterTypes(),bridgeMethod.getReturnType(),invokedType.parameterTypes(),samMethodType,implMethod,instantiatedMethodType,true);
+  }
+  cw.visitEnd();
+  return new LambdaClass(lambdaClassName,cw.toByteArray(),targetMethod,invokedType.parameterTypes(),invokedType.returnType());
+}
