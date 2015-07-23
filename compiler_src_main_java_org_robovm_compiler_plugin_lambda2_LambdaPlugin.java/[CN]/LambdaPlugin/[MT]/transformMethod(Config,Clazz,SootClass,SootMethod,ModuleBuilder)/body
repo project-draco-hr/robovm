@@ -52,6 +52,23 @@ synchronized (generators) {
                 }
               }
             }
+            if (bridgeMethods.size() == 0) {
+              SootClass targetType=SootResolver.v().resolveClass(invokedType.returnType().toString().replace('/','.'),SootClass.SIGNATURES);
+              String samDescriptor=Types.getDescriptor(samMethodType.getParameterTypes(),samMethodType.getReturnType());
+              for (              SootMethod targetTypeMethod : targetType.getMethods()) {
+                boolean isBridgeMethod=targetTypeMethod.getName().equals(invokedName);
+                isBridgeMethod&=targetTypeMethod.getName().equals(invokedName);
+                isBridgeMethod&=targetTypeMethod.getParameterCount() == samMethodType.getParameterTypes().size();
+                isBridgeMethod&=((targetTypeMethod.getModifiers() & BRIDGE) != 0);
+                isBridgeMethod&=((targetTypeMethod.getModifiers() & SYNTHETIC) != 0);
+                if (isBridgeMethod) {
+                  String targetTypeMethodDesc=Types.getDescriptor(targetTypeMethod);
+                  if (!targetTypeMethodDesc.equals(samDescriptor)) {
+                    bridgeMethods.add(new BridgeMethodType(targetTypeMethod.getReturnType(),targetTypeMethod.getParameterTypes()));
+                  }
+                }
+              }
+            }
             callSite=generator.generate(caller,invokedName,invokedType,samMethodType,implMethod,instantiatedMethodType,markerInterfaces,bridgeMethods);
             File f=clazz.getPath().getGeneratedClassFile(callSite.getLambdaClassName());
             FileUtils.writeByteArrayToFile(f,callSite.getClassData());
