@@ -1,11 +1,29 @@
 {
-  while (clazz != null) {
-    for (    SootMethod m : clazz.getMethods()) {
-      if (m.getName().equals(name) && desc.equals(Types.getDescriptor(m))) {
-        return new ResolvedEntry(this,m);
+  SootClass c=clazz;
+  if (!c.isInterface()) {
+    while (c != null) {
+      ResolvedEntry e=resolveImmediate(c);
+      if (e != null) {
+        return e;
+      }
+      c=c.hasSuperclass() ? c.getSuperclass() : null;
+    }
+  }
+  c=clazz;
+  while (c != null) {
+    for (    SootClass interfaze : c.getInterfaces()) {
+      ResolvedEntry e=resolveImmediate(interfaze);
+      if (e != null) {
+        return e;
       }
     }
-    clazz=clazz.hasSuperclass() ? clazz.getSuperclass() : null;
+    for (    SootClass interfaze : c.getInterfaces()) {
+      ResolvedEntry e=resolve(interfaze);
+      if (e != null) {
+        return e;
+      }
+    }
+    c=c.hasSuperclass() ? c.getSuperclass() : null;
   }
   return null;
 }

@@ -24,7 +24,13 @@
       table.add(new ConstantBitcast(BC_NON_PUBLIC_METHOD_CALLED,I8_PTR));
     }
  else {
-      table.add(new ConstantBitcast(resolvedEntry.getFunctionRef(),I8_PTR));
+      FunctionRef functionRef=resolvedEntry.getFunctionRef();
+      if (!resolvedEntry.declaringClass.equals(clazz.getName())) {
+        if (!mb.hasSymbol(functionRef.getName())) {
+          mb.addFunctionDeclaration(new FunctionDeclaration(functionRef));
+        }
+      }
+      table.add(new ConstantBitcast(functionRef,I8_PTR));
     }
   }
   return new StructureConstantBuilder().add(new IntegerConstant((short)entries.length)).add(table.build()).build();
