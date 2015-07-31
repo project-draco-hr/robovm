@@ -25,14 +25,14 @@ class HandleFailureListener implements ClassCompilerListener {
   long start=System.currentTimeMillis();
   Set<Clazz> linkClasses=new HashSet<Clazz>();
   int compiledCount=0;
-  while (!compileQueue.isEmpty() && !Thread.currentThread().isInterrupted()) {
+  outer:   while (!compileQueue.isEmpty() && !Thread.currentThread().isInterrupted()) {
     while (!compileQueue.isEmpty() && !Thread.currentThread().isInterrupted()) {
       Clazz clazz=compileQueue.pollFirst();
       if (!linkClasses.contains(clazz)) {
         if (compile(executor,listenerWrapper,clazz,compileQueue,linkClasses)) {
           compiledCount++;
           if (listenerWrapper.t != null) {
-            break;
+            break outer;
           }
         }
         dependencyGraph.add(clazz,rootClasses.contains(clazz));
