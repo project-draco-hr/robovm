@@ -1,0 +1,27 @@
+{
+  List<Arch> archs=this.config.getArchs();
+  if (archs.isEmpty()) {
+    archs=config.getTarget().getDefaultArchs();
+  }
+  if (archs.isEmpty()) {
+    throw new IllegalArgumentException("No archs specified in config");
+  }
+  if (archs.size() == 1 && this.config.getArch().equals(archs.get(0))) {
+    compile();
+  }
+ else {
+    Map<Arch,File> slices=new TreeMap<>();
+    for (    Arch arch : archs) {
+      this.config.getLogger().info("Building %s slice",arch);
+      Config sliceConfig=this.config.builder().arch(arch).tmpDir(new File(this.config.getTmpDir(),arch.toString())).build();
+      new AppCompiler(sliceConfig).compile();
+      slices.put(arch,new File(sliceConfig.getTmpDir(),sliceConfig.getExecutableName()));
+      for (      Path path : sliceConfig.getResourcesPaths()) {
+        if (!this.config.getResourcesPaths().contains(path)) {
+          this.config.addResourcesPath(path);
+        }
+      }
+    }
+    this.config.getTarget().buildFat(slices);
+  }
+}

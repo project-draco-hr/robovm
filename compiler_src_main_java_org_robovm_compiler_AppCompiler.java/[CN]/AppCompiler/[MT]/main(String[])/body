@@ -3,8 +3,8 @@
   Config.Builder builder=null;
   boolean verbose=false;
   boolean run=false;
-  boolean createIpa=false;
-  List<Arch> ipaArchs=new ArrayList<>();
+  boolean archive=false;
+  List<Arch> archs=new ArrayList<>();
   String dumpConfigFile=null;
   List<String> runArgs=new ArrayList<String>();
   try {
@@ -112,7 +112,16 @@
       }
  else       if ("-arch".equals(args[i])) {
         String s=args[++i];
-        builder.arch("auto".equals(s) ? null : Arch.valueOf(s));
+        if (!"auto".equals(s)) {
+          archs.add(Arch.valueOf(s));
+        }
+      }
+ else       if ("-archs".equals(args[i])) {
+        for (        String s : args[++i].split(":")) {
+          if (!"auto".equals(s)) {
+            archs.add(Arch.valueOf(s));
+          }
+        }
       }
  else       if ("-target".equals(args[i])) {
         String s=args[++i];
@@ -202,12 +211,17 @@
  else       if ("-devicetype".equals(args[i])) {
         builder.iosDeviceType(args[++i]);
       }
+ else       if ("-archive".equals(args[i])) {
+        archive=true;
+      }
  else       if ("-createipa".equals(args[i])) {
-        createIpa=true;
+        archive=true;
       }
  else       if ("-ipaarchs".equals(args[i])) {
         for (        String s : args[++i].split(":")) {
-          ipaArchs.add(Arch.valueOf(s));
+          if (!"auto".equals(s)) {
+            archs.add(Arch.valueOf(s));
+          }
         }
       }
  else       if (args[i].startsWith("-D")) {
@@ -236,11 +250,12 @@
       }
       i++;
     }
+    builder.archs(archs.toArray(new Arch[archs.size()]));
     while (i < args.length) {
       runArgs.add(args[i++]);
     }
-    if (createIpa && run) {
-      throw new IllegalArgumentException("Specify either -run or -createipa, not both");
+    if (archive && run) {
+      throw new IllegalArgumentException("Specify either -run or -createipa/-archive, not both");
     }
     builder.logger(new ConsoleLogger(verbose));
     builder.skipInstall(run);
@@ -258,9 +273,6 @@
       return;
     }
     compiler=new AppCompiler(builder.build());
-    if (createIpa && (!(compiler.config.getTarget() instanceof IOSTarget) || !(compiler.config.getArch() == Arch.thumbv7 || compiler.config.getArch() == Arch.arm64) || compiler.config.getOs() != OS.ios)) {
-      throw new IllegalArgumentException("Must build for iOS thumbv7/arm64 when creating IPA");
-    }
   }
  catch (  Throwable t) {
     String message=t.getMessage();
@@ -276,15 +288,16 @@
     printUsageAndExit(message,builder != null ? builder.getPlugins() : null);
   }
   try {
-    if (createIpa) {
-      compiler.createIpa(ipaArchs);
+    if (archive) {
+      compiler.build();
+      compiler.archive();
     }
  else {
       if (run && !compiler.config.getTarget().canLaunch()) {
         throw new IllegalArgumentException("Cannot launch when building " + compiler.config.getTarget().getType() + " binaries");
       }
-      compiler.compile();
       if (run) {
+        compiler.compile();
         LaunchParameters launchParameters=compiler.config.getTarget().createLaunchParameters();
         if (launchParameters instanceof IOSSimulatorLaunchParameters) {
           IOSSimulatorLaunchParameters simParams=(IOSSimulatorLaunchParameters)launchParameters;
@@ -302,6 +315,7 @@
         compiler.launch(launchParameters);
       }
  else {
+        compiler.build();
         compiler.config.getTarget().install();
       }
     }
