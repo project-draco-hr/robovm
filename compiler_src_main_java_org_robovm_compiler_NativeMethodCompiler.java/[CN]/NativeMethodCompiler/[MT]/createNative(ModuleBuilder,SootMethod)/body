@@ -3,57 +3,38 @@
   String methodName=method.getName();
   String methodDesc=getDescriptor(method);
   FunctionType nativeFunctionType=Types.getNativeFunctionType(methodDesc,method.isStatic());
-  Clazz target=config.getClazzes().load(targetInternalName);
   String shortName=mangleNativeMethod(targetInternalName,methodName);
   String longName=mangleNativeMethod(targetInternalName,methodName,methodDesc);
-  if (target.isInBootClasspath() || !config.isUseDynamicJni() || config.getOs() == OS.ios) {
-    Function fnLong=new FunctionBuilder(longName,nativeFunctionType).linkage(weak).build();
-    popNativeFrame(fnLong);
-    call(fnLong,BC_THROW_UNSATISIFED_LINK_ERROR,fnLong.getParameterRef(0),mb.getString(String.format(UNSATISFIED_LINK_ERROR,targetInternalName,methodName,methodDesc)));
-    fnLong.add(new Unreachable());
-    mb.addFunction(fnLong);
-    FunctionRef targetFn=fnLong.ref();
-    if (!isLongNativeFunctionNameRequired(method)) {
-      Function fnShort=new FunctionBuilder(shortName,nativeFunctionType).linkage(weak).build();
-      Value resultInner=call(fnShort,fnLong.ref(),fnShort.getParameterRefs());
-      fnShort.add(new Ret(resultInner));
-      mb.addFunction(fnShort);
-      targetFn=fnShort.ref();
-    }
-    return targetFn;
+  Global g=new Global(Symbols.nativeMethodPtrSymbol(targetInternalName,methodName,methodDesc),new NullConstant(I8_PTR));
+  mb.addGlobal(g);
+  String fnName=Symbols.nativeCallMethodSymbol(targetInternalName,methodName,methodDesc);
+  Function fn=new FunctionBuilder(fnName,nativeFunctionType).linkage(external).attribs(alwaysinline,optsize).build();
+  FunctionRef ldcFn=FunctionBuilder.ldcInternal(targetInternalName).ref();
+  Value theClass=call(fn,ldcFn,fn.getParameterRef(0));
+  Value implI8Ptr=call(fn,BC_RESOLVE_NATIVE,fn.getParameterRef(0),theClass,mb.getString(methodName),mb.getString(methodDesc),mb.getString(shortName),mb.getString(longName),g.ref());
+  Variable nullTest=fn.newVariable(I1);
+  fn.add(new Icmp(nullTest,Condition.ne,implI8Ptr,new NullConstant(I8_PTR)));
+  Label trueLabel=new Label();
+  Label falseLabel=new Label();
+  fn.add(new Br(nullTest.ref(),fn.newBasicBlockRef(trueLabel),fn.newBasicBlockRef(falseLabel)));
+  fn.newBasicBlock(falseLabel);
+  if (fn.getType().getReturnType() instanceof IntegerType) {
+    fn.add(new Ret(new IntegerConstant(0,(IntegerType)fn.getType().getReturnType())));
+  }
+ else   if (fn.getType().getReturnType() instanceof FloatingPointType) {
+    fn.add(new Ret(new FloatingPointConstant(0.0,(FloatingPointType)fn.getType().getReturnType())));
+  }
+ else   if (fn.getType().getReturnType() instanceof PointerType) {
+    fn.add(new Ret(new NullConstant((PointerType)fn.getType().getReturnType())));
   }
  else {
-    Global g=new Global(Symbols.nativeMethodPtrSymbol(targetInternalName,methodName,methodDesc),new NullConstant(I8_PTR));
-    mb.addGlobal(g);
-    String fnName=Symbols.nativeCallMethodSymbol(targetInternalName,methodName,methodDesc);
-    Function fn=new FunctionBuilder(fnName,nativeFunctionType).linkage(external).attribs(alwaysinline,optsize).build();
-    FunctionRef ldcFn=FunctionBuilder.ldcInternal(targetInternalName).ref();
-    Value theClass=call(fn,ldcFn,fn.getParameterRef(0));
-    Value implI8Ptr=call(fn,BC_RESOLVE_NATIVE,fn.getParameterRef(0),theClass,mb.getString(methodName),mb.getString(methodDesc),mb.getString(shortName),mb.getString(longName),g.ref());
-    Variable nullTest=fn.newVariable(I1);
-    fn.add(new Icmp(nullTest,Condition.ne,implI8Ptr,new NullConstant(I8_PTR)));
-    Label trueLabel=new Label();
-    Label falseLabel=new Label();
-    fn.add(new Br(nullTest.ref(),fn.newBasicBlockRef(trueLabel),fn.newBasicBlockRef(falseLabel)));
-    fn.newBasicBlock(falseLabel);
-    if (fn.getType().getReturnType() instanceof IntegerType) {
-      fn.add(new Ret(new IntegerConstant(0,(IntegerType)fn.getType().getReturnType())));
-    }
- else     if (fn.getType().getReturnType() instanceof FloatingPointType) {
-      fn.add(new Ret(new FloatingPointConstant(0.0,(FloatingPointType)fn.getType().getReturnType())));
-    }
- else     if (fn.getType().getReturnType() instanceof PointerType) {
-      fn.add(new Ret(new NullConstant((PointerType)fn.getType().getReturnType())));
-    }
- else {
-      fn.add(new Ret());
-    }
-    fn.newBasicBlock(trueLabel);
-    Variable impl=fn.newVariable(nativeFunctionType);
-    fn.add(new Bitcast(impl,implI8Ptr,impl.getType()));
-    Value result=call(fn,impl.ref(),fn.getParameterRefs());
-    fn.add(new Ret(result));
-    mb.addFunction(fn);
-    return fn.ref();
+    fn.add(new Ret());
   }
+  fn.newBasicBlock(trueLabel);
+  Variable impl=fn.newVariable(nativeFunctionType);
+  fn.add(new Bitcast(impl,implI8Ptr,impl.getType()));
+  Value result=call(fn,impl.ref(),fn.getParameterRefs());
+  fn.add(new Ret(result));
+  mb.addFunction(fn);
+  return fn.ref();
 }
