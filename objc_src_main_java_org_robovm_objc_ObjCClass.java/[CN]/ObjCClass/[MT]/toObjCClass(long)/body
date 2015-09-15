@@ -4,6 +4,15 @@
   if (c == null) {
     c=getByNameNotLoaded(VM.newStringUTF(ObjCRuntime.class_getName(classPtr)));
   }
+  if (c == null) {
+    for (    String protocol : getProtocols(classPtr,false)) {
+      Class<? extends ObjCObject> cls=allNativeProtocolProxies.get(protocol);
+      if (cls != null) {
+        c=getByType(cls);
+        break;
+      }
+    }
+  }
   while (c == null && classPtr != 0L) {
     classPtr=ObjCRuntime.class_getSuperclass(classPtr);
     c=ObjCObject.getPeerObject(classPtr);

@@ -1,0 +1,24 @@
+{
+  StringBuilder sb=new StringBuilder();
+  sb.append("@interface ").append(getName());
+  long superclass=ObjCRuntime.class_getSuperclass(getHandle());
+  if (superclass != 0) {
+    sb.append(" : ").append(VM.newStringUTF(ObjCRuntime.class_getName(superclass)));
+  }
+  IntPtr outCount=new IntPtr();
+  long protocols=ObjCRuntime.class_copyProtocolList(getHandle(),outCount.getHandle());
+  if (outCount.get() > 0) {
+    sb.append(" <");
+    for (int i=0; i < outCount.get(); i++) {
+      if (i > 0) {
+        sb.append(", ");
+      }
+      sb.append(VM.newStringUTF(ObjCRuntime.protocol_getName(VM.getPointer(protocols))));
+      protocols+=(Bro.IS_64BIT ? 8 : 4);
+    }
+    sb.append('>');
+  }
+  sb.append('\n');
+  sb.append("@end");
+  return sb.toString();
+}
