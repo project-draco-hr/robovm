@@ -1,0 +1,16 @@
+{
+  return NSNotificationCenter.getDefaultCenter().addObserver(WasInterruptedNotification(),object,NSOperationQueue.getMainQueue(),new VoidBlock1<NSNotification>(){
+    @Override public void invoke(    NSNotification notification){
+      AVCaptureSessionInterruptionReason reason=AVCaptureSessionInterruptionReason.Unavailable;
+      if (Foundation.getMajorSystemVersion() >= 9) {
+        NSDictionary<?,?> data=notification.getUserInfo();
+        int value=data.getInt(NotificationInterruptionReasonKey(),0);
+        if (value != 0) {
+          reason=AVCaptureSessionInterruptionReason.valueOf(value);
+        }
+      }
+      block.invoke((AVCaptureSession)notification.getObject(),reason);
+    }
+  }
+);
+}
