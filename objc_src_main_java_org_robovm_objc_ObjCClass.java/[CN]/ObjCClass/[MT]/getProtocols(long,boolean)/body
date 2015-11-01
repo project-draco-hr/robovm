@@ -1,0 +1,17 @@
+{
+  final long protocols=isProtocol ? ObjCRuntime.protocol_copyProtocolList(handle,0) : ObjCRuntime.class_copyProtocolList(handle,0);
+  if (protocols == 0) {
+    return (List<String>)Collections.EMPTY_LIST;
+  }
+  ArrayList<String> names=new ArrayList<>();
+  for (long protos=protocols; VM.getPointer(protos) != 0; protos+=Bro.IS_64BIT ? 8 : 4) {
+    long protocol=VM.getPointer(protocols);
+    names.add(VM.newStringUTF(ObjCRuntime.protocol_getName(protocol)));
+  }
+  for (long protos=protocols; VM.getPointer(protos) != 0; protos+=Bro.IS_64BIT ? 8 : 4) {
+    long protocol=VM.getPointer(protocols);
+    names.addAll(getProtocols(protocol,true));
+  }
+  VM.free(protocols);
+  return names;
+}

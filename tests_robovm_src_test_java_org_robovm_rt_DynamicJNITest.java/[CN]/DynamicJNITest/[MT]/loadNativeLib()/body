@@ -1,0 +1,37 @@
+{
+  String lib=null;
+  if (Bro.IS_IOS) {
+    lib="libDynamicJNITest-ios.dylib";
+  }
+ else   if (Bro.IS_MACOSX) {
+    lib="libDynamicJNITest-macosx.dylib";
+  }
+ else   if (Bro.IS_LINUX && Bro.IS_32BIT) {
+    lib="libDynamicJNITest-linux-x86.so";
+  }
+ else   if (Bro.IS_LINUX && Bro.IS_64BIT) {
+    lib="libDynamicJNITest-linux-x86_64.so";
+  }
+  if (lib != null) {
+    File libPath=File.createTempFile(lib.substring(0,lib.lastIndexOf('.')),lib.substring(lib.lastIndexOf('.')));
+    try (InputStream is=DynamicJNITest.class.getResourceAsStream("/" + lib)){
+      try (FileOutputStream os=new FileOutputStream(libPath)){
+        byte[] buf=new byte[8192];
+        int n;
+        while ((n=is.read(buf)) != -1) {
+          os.write(buf,0,n);
+        }
+      }
+     }
+     try {
+      System.load(libPath.getAbsolutePath());
+    }
+ catch (    UnsatisfiedLinkError e) {
+      if (Bro.IS_IOS && Bro.IS_ARM) {
+        if (e.getMessage() != null && e.getMessage().contains("no suitable image found")) {
+          ignoreAllTests=true;
+        }
+      }
+    }
+  }
+}

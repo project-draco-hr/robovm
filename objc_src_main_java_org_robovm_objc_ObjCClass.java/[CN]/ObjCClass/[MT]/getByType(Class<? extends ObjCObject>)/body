@@ -5,22 +5,33 @@
 synchronized (objcBridgeLock) {
     ObjCClass c=typeToClass.get(type);
     if (c == null) {
-      NativeClass nativeClassAnno=type.getAnnotation(NativeClass.class);
       String name=null;
+      NativeClass nativeClassAnno=type.getAnnotation(NativeClass.class);
       if (nativeClassAnno != null) {
         name=nativeClassAnno.value();
         name="".equals(name) ? type.getSimpleName() : name;
+        long classPtr=ObjCRuntime.objc_getClass(VM.getStringUTFChars(name));
+        if (classPtr != 0L) {
+          c=new ObjCClass(classPtr,type,name,false,false);
+        }
       }
  else {
-        name=getCustomClassName(type);
-        c=register(type,name);
+        NativeProtocolProxy nativeProtocolProxyAnno=type.getAnnotation(NativeProtocolProxy.class);
+        if (nativeProtocolProxyAnno != null) {
+          name=nativeProtocolProxyAnno.value();
+          name="".equals(name) ? type.getSimpleName() : name;
+          long protocolPtr=ObjCRuntime.objc_getProtocol(VM.getStringUTFChars(name));
+          if (protocolPtr != 0L) {
+            c=new ObjCClass(protocolPtr,type,name,false,true);
+          }
+        }
+ else {
+          name=getCustomClassName(type);
+          c=register(type,name);
+        }
       }
       if (c == null) {
-        long classPtr=ObjCRuntime.objc_getClass(VM.getStringUTFChars(name));
-        if (classPtr == 0L) {
-          throw new ObjCClassNotFoundException(name);
-        }
-        c=new ObjCClass(classPtr,type,name,false);
+        throw new ObjCClassNotFoundException(name);
       }
       typeToClass.put(type,c);
       nameToClass.put(name,c);
